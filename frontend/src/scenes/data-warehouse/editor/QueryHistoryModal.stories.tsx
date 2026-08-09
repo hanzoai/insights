@@ -70,7 +70,7 @@ const meta: Meta<typeof QueryHistoryModal> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/warehouse_saved_queries/:id/activity': () => [
+                '/v1/environments/:team_id/warehouse_saved_queries/:id/activity': () => [
                     200,
                     { results: [mockActivityItem], count: 1 },
                 ],
@@ -88,7 +88,7 @@ export const Empty: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/warehouse_saved_queries/:id/activity': () => [
+                '/v1/environments/:team_id/warehouse_saved_queries/:id/activity': () => [
                     200,
                     { results: [], count: 0 },
                 ],

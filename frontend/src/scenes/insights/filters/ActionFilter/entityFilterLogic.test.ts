@@ -18,10 +18,10 @@ describe('entityFilterLogic', () => {
         ;(libUtils as any).uuid = jest.fn().mockReturnValue('generated-uuid')
         useMocks({
             get: {
-                '/api/projects/:team/actions/': {
+                '/v1/projects/:team/actions/': {
                     results: filtersJson.actions,
                 },
-                '/api/projects/:team/event_definitions/': eventDefinitionsJson,
+                '/v1/projects/:team/event_definitions/': eventDefinitionsJson,
             },
         })
         initKeaTests()

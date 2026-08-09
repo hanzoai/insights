@@ -221,7 +221,7 @@ export const inviteLogic = kea<inviteLogicType>([
                         payload.forEach((payload) => (payload.message = values.message))
                     }
                     return await api.create<OrganizationInviteType[]>(
-                        `api/organizations/${organizationLogic.values.currentOrganizationId}/invites/bulk/`,
+                        `v1/organizations/${organizationLogic.values.currentOrganizationId}/invites/bulk/`,
                         payload
                     )
                 },
@@ -232,7 +232,7 @@ export const inviteLogic = kea<inviteLogicType>([
             {
                 loadProjectAccessControl: async (projectId: number) => {
                     try {
-                        const accessControls = await api.get(`api/projects/${projectId}/access_controls`)
+                        const accessControls = await api.get(`v1/projects/${projectId}/access_controls`)
                         // Look for project-level access control (resource: "project", organization_member: null, role: null)
                         const projectAccessControl = accessControls.access_controls?.find(
                             (control: any) =>
@@ -259,14 +259,14 @@ export const inviteLogic = kea<inviteLogicType>([
                     return organizationLogic.values.currentOrganization
                         ? (
                               await api.get<PaginatedResponse<OrganizationInviteType>>(
-                                  `api/organizations/${organizationLogic.values.currentOrganizationId}/invites/`
+                                  `v1/organizations/${organizationLogic.values.currentOrganizationId}/invites/`
                               )
                           ).results
                         : []
                 },
                 deleteInvite: async (invite: OrganizationInviteType) => {
                     await api.delete(
-                        `api/organizations/${organizationLogic.values.currentOrganizationId}/invites/${invite.id}/`
+                        `v1/organizations/${organizationLogic.values.currentOrganizationId}/invites/${invite.id}/`
                     )
                     preflightLogic.actions.loadPreflight() // Make sure licensed_users_available is updated
                     toast.success(`Invite for ${invite.target_email} has been canceled`)

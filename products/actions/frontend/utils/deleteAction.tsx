@@ -14,7 +14,7 @@ export async function deleteActionWithWarning(action: ActionType, callback: (und
     let references: ActionReferenceApi[] = []
     try {
         // nosemgrep: prefer-codegen-api
-        references = await api.get(`api/projects/@current/actions/${action.id}/references`)
+        references = await api.get(`v1/projects/@current/actions/${action.id}/references`)
     } catch {
         // If we can't fetch references, proceed with delete anyway
     }

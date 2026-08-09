@@ -82,7 +82,7 @@ class PatternsQueryRunner(AnalyticsQueryRunner[LogsQueryResponse], LogsQueryRunn
 
     def validate_query_runner_access(self, user: "User") -> bool:
         # Defensive: this runner is invoked directly via the logs API, never through the generic
-        # /api/projects/:id/query/ endpoint. Mirror LogsQueryRunner and refuse user-initiated
+        # /v1/projects/:id/query/ endpoint. Mirror LogsQueryRunner and refuse user-initiated
         # generic-query access so it can't silently bypass that gate if ever registered.
         from insights.rbac.user_access_control import UserAccessControlError
 

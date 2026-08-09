@@ -33,7 +33,7 @@ class TestMCPProxyEndpoint(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self.addCleanup(patcher.stop)
 
     def _proxy_url(self, installation_id: str) -> str:
-        return f"/api/environments/{self.team.id}/mcp_server_installations/{installation_id}/proxy/"
+        return f"/v1/environments/{self.team.id}/mcp_server_installations/{installation_id}/proxy/"
 
     def _create_installation(
         self, auth_type="api_key", sensitive_configuration=None, **kwargs
@@ -546,7 +546,7 @@ class TestMCPProxyToolApproval(DatastoreTestMixin, APIBaseTest, QueryMatchingTes
         self.addCleanup(patcher.stop)
 
     def _proxy_url(self, installation_id: str) -> str:
-        return f"/api/environments/{self.team.id}/mcp_server_installations/{installation_id}/proxy/"
+        return f"/v1/environments/{self.team.id}/mcp_server_installations/{installation_id}/proxy/"
 
     def _installation(self) -> MCPServerInstallation:
         return MCPServerInstallation.objects.create(
@@ -859,7 +859,7 @@ class TestMCPProxyAccessControl(DatastoreTestMixin, APIBaseTest, QueryMatchingTe
 
     def _proxy_url(self, installation_id: str, team_id: int | None = None) -> str:
         tid = team_id if team_id is not None else self.team.id
-        return f"/api/environments/{tid}/mcp_server_installations/{installation_id}/proxy/"
+        return f"/v1/environments/{tid}/mcp_server_installations/{installation_id}/proxy/"
 
     def _create_installation(self, team, user, **kwargs) -> MCPServerInstallation:
         defaults = {

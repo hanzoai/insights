@@ -322,7 +322,7 @@ const CallBodyPanel = memo(function CallBodyPanel({
  * response contains only that call's join payload, never reusable Vapi credentials.
  */
 async function fetchStartCallPayload(accessToken: string, body: StartCallBody): Promise<StartCallPayload> {
-    const response = await fetch(`/api/user_interviews/share/${accessToken}/start_call/`, {
+    const response = await fetch(`/v1/user_interviews/share/${accessToken}/start_call/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

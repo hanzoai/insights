@@ -62,13 +62,13 @@ CRAWL_PATTERNS: dict[str, list[str]] = {
         URL_HOME,
     ],
     "monitoring": [
-        f"{SITE_URL}/api/v1/health",
-        f"{SITE_URL}/api/v1/status",
+        f"{SITE_URL}/v1/v1/health",
+        f"{SITE_URL}/v1/v1/status",
         URL_HOME,
     ],
     "http_client": [
-        f"{SITE_URL}/api/v1/files",
-        f"{SITE_URL}/api/v1/users",
+        f"{SITE_URL}/v1/v1/files",
+        f"{SITE_URL}/v1/v1/users",
         URL_HOME,
     ],
     "headless_browser": [

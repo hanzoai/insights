@@ -65,14 +65,14 @@ def _create_user_integration(user: User, **overrides) -> UserIntegration:
 
 class TestUserIntegrationEndpoints(APIBaseTest):
     def test_list_returns_empty_when_no_integrations(self):
-        response = self.client.get("/api/users/@me/integrations/")
+        response = self.client.get("/v1/users/@me/integrations/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(len(results), 0)
 
     def test_list_returns_github_integration(self):
         _create_user_integration(self.user)
-        response = self.client.get("/api/users/@me/integrations/")
+        response = self.client.get("/v1/users/@me/integrations/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(len(results), 1)
@@ -94,7 +94,7 @@ class TestUserIntegrationEndpoints(APIBaseTest):
                 "user_token_refreshed_at": int(time.time()),
             },
         )
-        response = self.client.get("/api/users/@me/integrations/")
+        response = self.client.get("/v1/users/@me/integrations/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(len(results), 2)
@@ -110,7 +110,7 @@ class TestUserIntegrationEndpoints(APIBaseTest):
             config={"account": {"name": "Insights"}},
             sensitive_config={},
         )
-        response = self.client.get("/api/users/@me/integrations/")
+        response = self.client.get("/v1/users/@me/integrations/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertTrue(results[0]["uses_shared_installation"])
@@ -123,20 +123,20 @@ class TestUserIntegrationEndpoints(APIBaseTest):
             config={"account": {"name": "Insights"}},
             sensitive_config={},
         )
-        response = self.client.get("/api/users/@me/integrations/")
+        response = self.client.get("/v1/users/@me/integrations/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 0)
 
     def test_delete_removes_specific_installation(self):
         _create_user_integration(self.user, integration_id="12345")
         _create_user_integration(self.user, integration_id="67890")
-        response = self.client.delete("/api/users/@me/integrations/github/12345/")
+        response = self.client.delete("/v1/users/@me/integrations/github/12345/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(UserIntegration.objects.filter(user=self.user, kind="github", integration_id="12345").exists())
         self.assertTrue(UserIntegration.objects.filter(user=self.user, kind="github", integration_id="67890").exists())
 
     def test_delete_returns_404_when_installation_not_found(self):
-        response = self.client.delete("/api/users/@me/integrations/github/99999/")
+        response = self.client.delete("/v1/users/@me/integrations/github/99999/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     @patch("insights.api.user_integration.UserGitHubIntegration.uninstall_app_installation")
@@ -144,7 +144,7 @@ class TestUserIntegrationEndpoints(APIBaseTest):
         mock_uninstall.return_value = True
         _create_user_integration(self.user, integration_id="12345")
 
-        response = self.client.delete("/api/users/@me/integrations/github/12345/")
+        response = self.client.delete("/v1/users/@me/integrations/github/12345/")
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         mock_uninstall.assert_called_once_with("12345")
@@ -157,7 +157,7 @@ class TestUserIntegrationEndpoints(APIBaseTest):
             team=self.team, kind="github", integration_id="12345", config={}, sensitive_config={}
         )
 
-        response = self.client.delete("/api/users/@me/integrations/github/12345/")
+        response = self.client.delete("/v1/users/@me/integrations/github/12345/")
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         mock_uninstall.assert_not_called()
@@ -169,7 +169,7 @@ class TestUserIntegrationEndpoints(APIBaseTest):
         _create_user_integration(self.user, integration_id="12345")
         _create_user_integration(other_user, integration_id="12345")
 
-        response = self.client.delete("/api/users/@me/integrations/github/12345/")
+        response = self.client.delete("/v1/users/@me/integrations/github/12345/")
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         mock_uninstall.assert_not_called()
@@ -181,7 +181,7 @@ class TestUserIntegrationEndpoints(APIBaseTest):
     def test_delete_still_returns_204_when_uninstall_fails(self, _mock_uninstall):
         _create_user_integration(self.user, integration_id="12345")
 
-        response = self.client.delete("/api/users/@me/integrations/github/12345/")
+        response = self.client.delete("/v1/users/@me/integrations/github/12345/")
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(UserIntegration.objects.filter(integration_id="12345").exists())
@@ -192,7 +192,7 @@ class TestUserIntegrationEndpoints(APIBaseTest):
         return_value={"GITHUB_APP_SLUG": "insights-dev"},
     )
     def test_github_start_returns_install_url_when_no_team_github(self, _mock_settings):
-        response = self.client.post("/api/users/@me/integrations/github/start/")
+        response = self.client.post("/v1/users/@me/integrations/github/start/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertIn("install_url", data)
@@ -204,7 +204,7 @@ class TestUserIntegrationEndpoints(APIBaseTest):
     )
     def test_github_start_returns_oauth_discover_url_for_insights_code_without_team_github(self):
         response = self.client.post(
-            "/api/users/@me/integrations/github/start/",
+            "/v1/users/@me/integrations/github/start/",
             {"team_id": self.team.id, "connect_from": "insights_code"},
             content_type="application/json",
         )
@@ -227,7 +227,7 @@ class TestUserIntegrationEndpoints(APIBaseTest):
             sensitive_config={},
             created_by=self.user,
         )
-        response = self.client.post("/api/users/@me/integrations/github/start/")
+        response = self.client.post("/v1/users/@me/integrations/github/start/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertIn("install_url", data)
@@ -250,7 +250,7 @@ class TestUserIntegrationEndpoints(APIBaseTest):
             created_by=self.user,
         )
         response = self.client.post(
-            "/api/users/@me/integrations/github/start/",
+            "/v1/users/@me/integrations/github/start/",
             {"connect_from": "insights_code"},
             content_type="application/json",
         )
@@ -285,7 +285,7 @@ class TestUserIntegrationEndpoints(APIBaseTest):
             sensitive_config={},
         )
         response = self.client.post(
-            "/api/users/@me/integrations/github/start/",
+            "/v1/users/@me/integrations/github/start/",
             {"connect_from": "insights_code"},
             content_type="application/json",
         )
@@ -308,7 +308,7 @@ class TestUserIntegrationEndpoints(APIBaseTest):
             config={},
             sensitive_config={"user_access_token": "ghu_test"},
         )
-        response = self.client.post("/api/users/@me/integrations/github/start/")
+        response = self.client.post("/v1/users/@me/integrations/github/start/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("already linked", response.json()["detail"])
 
@@ -317,7 +317,7 @@ class TestUserIntegrationEndpoints(APIBaseTest):
             "insights.api.github_callback.types.get_instance_settings",
             return_value={"GITHUB_APP_SLUG": ""},
         ):
-            response = self.client.post("/api/users/@me/integrations/github/start/")
+            response = self.client.post("/v1/users/@me/integrations/github/start/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @override_settings(
@@ -1092,7 +1092,7 @@ class TestUserIntegrationKindParam(APIBaseTest):
         # Mobile + Code SDK call this URL without a query param and rely on
         # receiving GitHub-shaped items. Don't change the default lightly.
         _create_user_integration(self.user)  # github
-        response = self.client.get("/api/users/@me/integrations/")
+        response = self.client.get("/v1/users/@me/integrations/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(len(results), 1)
@@ -1100,24 +1100,24 @@ class TestUserIntegrationKindParam(APIBaseTest):
 
     def test_explicit_github_kind_matches_default(self):
         _create_user_integration(self.user)
-        default_response = self.client.get("/api/users/@me/integrations/")
-        explicit_response = self.client.get("/api/users/@me/integrations/?kind=github")
+        default_response = self.client.get("/v1/users/@me/integrations/")
+        explicit_response = self.client.get("/v1/users/@me/integrations/?kind=github")
         self.assertEqual(default_response.json(), explicit_response.json())
 
     def test_unsupported_kind_returns_400(self):
-        response = self.client.get("/api/users/@me/integrations/?kind=bitbucket")
+        response = self.client.get("/v1/users/@me/integrations/?kind=bitbucket")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class TestUserIntegrationSlackEndpoints(APIBaseTest):
     def test_slack_list_returns_empty_when_no_links(self):
-        response = self.client.get("/api/users/@me/integrations/?kind=slack")
+        response = self.client.get("/v1/users/@me/integrations/?kind=slack")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["results"], [])
 
     def test_slack_list_returns_user_link_with_full_payload(self):
         _create_slack_user_integration(self.user)
-        response = self.client.get("/api/users/@me/integrations/?kind=slack")
+        response = self.client.get("/v1/users/@me/integrations/?kind=slack")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(len(results), 1)
@@ -1131,7 +1131,7 @@ class TestUserIntegrationSlackEndpoints(APIBaseTest):
     def test_slack_list_does_not_include_github_rows(self):
         _create_user_integration(self.user)
         _create_slack_user_integration(self.user)
-        response = self.client.get("/api/users/@me/integrations/?kind=slack")
+        response = self.client.get("/v1/users/@me/integrations/?kind=slack")
         results = response.json()["results"]
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["kind"], "slack")
@@ -1139,12 +1139,12 @@ class TestUserIntegrationSlackEndpoints(APIBaseTest):
     def test_slack_list_scoped_to_requesting_user(self):
         other = User.objects.create(email="other@example.com", distinct_id="other-1")
         _create_slack_user_integration(other, slack_user_id="U-OTHER")
-        response = self.client.get("/api/users/@me/integrations/?kind=slack")
+        response = self.client.get("/v1/users/@me/integrations/?kind=slack")
         self.assertEqual(response.json()["results"], [])
 
     def test_slack_destroy_removes_row(self):
         _create_slack_user_integration(self.user, slack_user_id="U999")
-        response = self.client.delete("/api/users/@me/integrations/slack/U999/")
+        response = self.client.delete("/v1/users/@me/integrations/slack/U999/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(
             UserIntegration.objects.filter(
@@ -1153,7 +1153,7 @@ class TestUserIntegrationSlackEndpoints(APIBaseTest):
         )
 
     def test_slack_destroy_404_when_link_missing(self):
-        response = self.client.delete("/api/users/@me/integrations/slack/U-NOPE/")
+        response = self.client.delete("/v1/users/@me/integrations/slack/U-NOPE/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_slack_destroy_cannot_remove_other_users_link(self):
@@ -1161,7 +1161,7 @@ class TestUserIntegrationSlackEndpoints(APIBaseTest):
         _create_slack_user_integration(other, slack_user_id="U-OTHER")
         # The requesting user has no row with this slack_user_id, so we get 404,
         # not 403 — the route refuses to acknowledge another user's rows.
-        response = self.client.delete("/api/users/@me/integrations/slack/U-OTHER/")
+        response = self.client.delete("/v1/users/@me/integrations/slack/U-OTHER/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertTrue(
             UserIntegration.objects.filter(
@@ -1183,7 +1183,7 @@ class TestUserIntegrationSlackEndpoints(APIBaseTest):
     def test_slack_start_returns_install_url_when_workspace_connected(self):
         self._seed_workspace_integration()
         with self._enable_flag():
-            response = self.client.post("/api/users/@me/integrations/slack/start/", data={}, format="json")
+            response = self.client.post("/v1/users/@me/integrations/slack/start/", data={}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         install_url = response.json()["install_url"]
         # Routes through the same backend authorize entry — settings is just
@@ -1192,7 +1192,7 @@ class TestUserIntegrationSlackEndpoints(APIBaseTest):
 
     def test_slack_start_fails_when_no_workspace_integration(self):
         with self._enable_flag():
-            response = self.client.post("/api/users/@me/integrations/slack/start/", data={}, format="json")
+            response = self.client.post("/v1/users/@me/integrations/slack/start/", data={}, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("no Slack workspace", response.json()["detail"])
 
@@ -1200,26 +1200,26 @@ class TestUserIntegrationSlackEndpoints(APIBaseTest):
         self._seed_workspace_integration()
         _create_slack_user_integration(self.user, slack_team_id="T12345")
         with self._enable_flag():
-            response = self.client.post("/api/users/@me/integrations/slack/start/", data={}, format="json")
+            response = self.client.post("/v1/users/@me/integrations/slack/start/", data={}, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("already linked", response.json()["detail"])
 
     def test_slack_start_403_when_flag_off(self):
         self._seed_workspace_integration()
         with patch("insights.api.user_integration.is_slack_app_oauth_enabled", return_value=False):
-            response = self.client.post("/api/users/@me/integrations/slack/start/", data={}, format="json")
+            response = self.client.post("/v1/users/@me/integrations/slack/start/", data={}, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_slack_linkable_empty_when_no_workspaces_connected(self):
         with self._enable_flag():
-            response = self.client.get("/api/users/@me/integrations/slack/linkable_workspaces/")
+            response = self.client.get("/v1/users/@me/integrations/slack/linkable_workspaces/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["results"], [])
 
     def test_slack_linkable_returns_workspaces_user_can_still_link(self):
         self._seed_workspace_integration()
         with self._enable_flag():
-            response = self.client.get("/api/users/@me/integrations/slack/linkable_workspaces/")
+            response = self.client.get("/v1/users/@me/integrations/slack/linkable_workspaces/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(len(results), 1)
@@ -1230,7 +1230,7 @@ class TestUserIntegrationSlackEndpoints(APIBaseTest):
         self._seed_workspace_integration()
         _create_slack_user_integration(self.user, slack_team_id="T12345")
         with self._enable_flag():
-            response = self.client.get("/api/users/@me/integrations/slack/linkable_workspaces/")
+            response = self.client.get("/v1/users/@me/integrations/slack/linkable_workspaces/")
         # The screenshot bug: user has linked the only workspace, so the
         # picker has nothing to offer. Frontend uses the empty list to hide
         # the "Link another workspace" button instead of letting the user
@@ -1240,7 +1240,7 @@ class TestUserIntegrationSlackEndpoints(APIBaseTest):
     def test_slack_linkable_skips_workspaces_with_flag_off(self):
         self._seed_workspace_integration()
         with patch("insights.api.user_integration.is_slack_app_oauth_enabled", return_value=False):
-            response = self.client.get("/api/users/@me/integrations/slack/linkable_workspaces/")
+            response = self.client.get("/v1/users/@me/integrations/slack/linkable_workspaces/")
         self.assertEqual(response.json()["results"], [])
 
     def test_slack_linkable_excludes_private_project_user_cannot_access(self):
@@ -1252,10 +1252,9 @@ class TestUserIntegrationSlackEndpoints(APIBaseTest):
         # endpoint and enumerate Slack installs (plus project + organization
         # names) for every private project in their orgs.
         from insights.constants import AvailableFeature
+        from insights.models.ee_models import AccessControl
         from insights.models.organization import Organization, OrganizationMembership
         from insights.models.team import Team
-
-        from insights.models.ee_models import AccessControl
 
         ac_org = Organization.objects.create(name="AC Org")
         # ``pre_save`` on Organization resets ``available_product_features`` on
@@ -1283,7 +1282,7 @@ class TestUserIntegrationSlackEndpoints(APIBaseTest):
         )
 
         with self._enable_flag():
-            response = self.client.get("/api/users/@me/integrations/slack/linkable_workspaces/")
+            response = self.client.get("/v1/users/@me/integrations/slack/linkable_workspaces/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
@@ -1293,7 +1292,7 @@ class TestUserIntegrationSlackEndpoints(APIBaseTest):
         self._seed_workspace_integration()
         with self._enable_flag():
             response = self.client.post(
-                "/api/users/@me/integrations/slack/start/",
+                "/v1/users/@me/integrations/slack/start/",
                 data={"team_id": self.team.id, "slack_team_id": "T12345"},
                 format="json",
             )
@@ -1304,7 +1303,7 @@ class TestUserIntegrationSlackEndpoints(APIBaseTest):
         self._seed_workspace_integration()
         with self._enable_flag():
             response = self.client.post(
-                "/api/users/@me/integrations/slack/start/",
+                "/v1/users/@me/integrations/slack/start/",
                 data={"team_id": self.team.id, "slack_team_id": "T-NOPE"},
                 format="json",
             )

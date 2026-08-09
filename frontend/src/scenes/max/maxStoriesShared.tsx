@@ -38,21 +38,21 @@ export const sharedMeta: Meta = {
     decorators: [
         mswDecorator({
             post: {
-                // nosemgrep: no-environments-api-urls-frontend -- MSW mock must match maxThreadLogic's real request path; the conversations API lives on /api/environments/
-                '/api/environments/:team_id/conversations/': () => new HttpResponse(chatResponseChunk),
+                // nosemgrep: no-environments-api-urls-frontend -- MSW mock must match maxThreadLogic's real request path; the conversations API lives on /v1/environments/
+                '/v1/environments/:team_id/conversations/': () => new HttpResponse(chatResponseChunk),
             },
             get: {
-                '/api/organizations/@current/': () => [
+                '/v1/organizations/@current/': () => [
                     200,
                     {
                         ...MOCK_DEFAULT_ORGANIZATION,
                         is_ai_data_processing_approved: true,
                     },
                 ],
-                // nosemgrep: no-environments-api-urls-frontend -- MSW mock must match maxThreadLogic's real request path; the conversations API lives on /api/environments/
-                '/api/environments/:team_id/conversations/': () => [200, conversationList],
-                // nosemgrep: no-environments-api-urls-frontend -- MSW mock must match maxThreadLogic's real request path; the conversations API lives on /api/environments/
-                [`/api/environments/:team_id/conversations/${CONVERSATION_ID}/`]: () => [
+                // nosemgrep: no-environments-api-urls-frontend -- MSW mock must match maxThreadLogic's real request path; the conversations API lives on /v1/environments/
+                '/v1/environments/:team_id/conversations/': () => [200, conversationList],
+                // nosemgrep: no-environments-api-urls-frontend -- MSW mock must match maxThreadLogic's real request path; the conversations API lives on /v1/environments/
+                [`/v1/environments/:team_id/conversations/${CONVERSATION_ID}/`]: () => [
                     200,
                     {
                         id: CONVERSATION_ID,

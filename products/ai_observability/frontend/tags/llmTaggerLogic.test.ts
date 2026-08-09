@@ -76,11 +76,11 @@ describe('llmTaggerLogic', () => {
         uuidCounter = 0
         useMocks({
             get: {
-                '/api/environments/:team_id/llm_analytics/provider_keys/': { results: mockProviderKeys },
-                '/api/environments/:team_id/taggers/:id/': mockTagger,
+                '/v1/environments/:team_id/llm_analytics/provider_keys/': { results: mockProviderKeys },
+                '/v1/environments/:team_id/taggers/:id/': mockTagger,
             },
             post: {
-                '/api/environments/:team_id/query/:kind': { results: [] },
+                '/v1/environments/:team_id/query/:kind': { results: [] },
             },
         })
         initKeaTests()
@@ -510,7 +510,7 @@ describe('llmTaggerLogic', () => {
             // Now override the query mock and reload
             useMocks({
                 post: {
-                    '/api/environments/:team_id/query/:kind': {
+                    '/v1/environments/:team_id/query/:kind': {
                         results: [
                             [
                                 '2024-01-01T12:00:00Z',
@@ -558,10 +558,10 @@ describe('llmTaggerLogic', () => {
             const capturedQueries: { query: string; values?: unknown }[] = []
             useMocks({
                 get: {
-                    [`/api/environments/:team_id/taggers/${taggerId}/`]: mockTagger,
+                    [`/v1/environments/:team_id/taggers/${taggerId}/`]: mockTagger,
                 },
                 post: {
-                    '/api/environments/:team_id/query/:kind': async ({ request }) => {
+                    '/v1/environments/:team_id/query/:kind': async ({ request }) => {
                         const body = (await request.json()) as { query?: { query?: string; values?: unknown } }
                         if (body.query?.query?.includes('$ai_tagger_id')) {
                             capturedQueries.push({

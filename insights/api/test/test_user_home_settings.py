@@ -9,7 +9,7 @@ from insights.models import UserHomeSettings
 
 class TestUserHomeSettingsAPI(APIBaseTest):
     def test_retrieve_empty_settings(self):
-        response = self.client.get("/api/user_home_settings/@me/")
+        response = self.client.get("/v1/user_home_settings/@me/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -45,7 +45,7 @@ class TestUserHomeSettingsAPI(APIBaseTest):
         }
 
         response = self.client.patch(
-            "/api/user_home_settings/@me/",
+            "/v1/user_home_settings/@me/",
             payload,
             format="json",
         )
@@ -88,7 +88,7 @@ class TestUserHomeSettingsAPI(APIBaseTest):
         )
 
         response = self.client.patch(
-            "/api/user_home_settings/@me/",
+            "/v1/user_home_settings/@me/",
             {"homepage": None},
             format="json",
         )

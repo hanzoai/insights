@@ -57,7 +57,7 @@ export const _Billing: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/billing/': {
+                '/v1/billing/': {
                     ...billingJson,
                 },
             },
@@ -71,7 +71,7 @@ export const BillingWithDiscount: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/billing/': {
+                '/v1/billing/': {
                     ...billingJsonWithDiscount,
                 },
             },
@@ -85,7 +85,7 @@ export const BillingWithCredits: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/billing/': {
+                '/v1/billing/': {
                     ...billingJsonWithCredits,
                 },
             },
@@ -99,11 +99,11 @@ export const BillingWithCreditCTA: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/billing/': {
+                '/v1/billing/': {
                     ...billingJson,
                     account_owner: null,
                 },
-                '/api/billing/credits/overview': {
+                '/v1/billing/credits/overview': {
                     status: 'none',
                     eligible: true,
                     estimated_monthly_credit_amount_usd: 1200,
@@ -122,7 +122,7 @@ export const BillingWithLimitAnd100PercentDiscount: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/billing/': {
+                '/v1/billing/': {
                     ...billingJsonWith100PercentDiscount,
                 },
             },
@@ -136,10 +136,10 @@ export const BillingPurchaseCreditsModal: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/billing/': {
+                '/v1/billing/': {
                     ...billingJson,
                 },
-                '/api/billing/credits/overview': {
+                '/v1/billing/credits/overview': {
                     status: 'none',
                     eligible: true,
                     estimated_monthly_credit_amount_usd: 1200,
@@ -164,7 +164,7 @@ export const BillingWithoutIconKeys: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/billing/': {
+                '/v1/billing/': {
                     ...billingJsonWithoutIconKeys,
                 },
             },
@@ -178,7 +178,7 @@ export const BillingUnsubscribeModal: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/billing/': {
+                '/v1/billing/': {
                     ...billingJson,
                 },
             },

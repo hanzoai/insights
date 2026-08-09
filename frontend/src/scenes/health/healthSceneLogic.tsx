@@ -146,7 +146,7 @@ export const healthSceneLogic = kea<healthSceneLogicType>([
                     }
 
                     const queryString = new URLSearchParams(params).toString()
-                    const url = `api/environments/${values.currentTeamIdStrict}/health_issues/?${queryString}`
+                    const url = `v1/environments/${values.currentTeamIdStrict}/health_issues/?${queryString}`
 
                     return await api.get(url)
                 },
@@ -209,7 +209,7 @@ export const healthSceneLogic = kea<healthSceneLogicType>([
     }),
     listeners(({ actions, values }) => ({
         refreshHealthData: async ({ isManual }, breakpoint) => {
-            const url = `api/environments/${values.currentTeamIdStrict}/health_issues/refresh/`
+            const url = `v1/environments/${values.currentTeamIdStrict}/health_issues/refresh/`
             try {
                 const response = await api.create<{
                     scheduled_kinds: string[]
@@ -277,7 +277,7 @@ export const healthSceneLogic = kea<healthSceneLogicType>([
         },
         dismissIssue: async ({ id }) => {
             try {
-                await api.update(`api/environments/${values.currentTeamIdStrict}/health_issues/${id}/`, {
+                await api.update(`v1/environments/${values.currentTeamIdStrict}/health_issues/${id}/`, {
                     dismissed: true,
                 })
                 actions.loadHealthIssues()
@@ -288,7 +288,7 @@ export const healthSceneLogic = kea<healthSceneLogicType>([
         },
         undismissIssue: async ({ id }) => {
             try {
-                await api.update(`api/environments/${values.currentTeamIdStrict}/health_issues/${id}/`, {
+                await api.update(`v1/environments/${values.currentTeamIdStrict}/health_issues/${id}/`, {
                     dismissed: false,
                 })
                 actions.loadHealthIssues()

@@ -53,13 +53,13 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:project_id/event_definitions/:id/': MOCK_EVENT_DEFINITION,
-                '/api/projects/:project_id/event_definitions/:id/metrics/': MOCK_METRICS,
-                '/api/projects/:project_id/event_definitions/primary_properties/': {
+                '/v1/projects/:project_id/event_definitions/:id/': MOCK_EVENT_DEFINITION,
+                '/v1/projects/:project_id/event_definitions/:id/metrics/': MOCK_METRICS,
+                '/v1/projects/:project_id/event_definitions/primary_properties/': {
                     primary_properties: {},
                 },
-                '/api/projects/:project_id/object_media_previews/': [],
-                '/api/projects/:project_id/experiments/': { count: 0, next: null, previous: null, results: [] },
+                '/v1/projects/:project_id/object_media_previews/': [],
+                '/v1/projects/:project_id/experiments/': { count: 0, next: null, previous: null, results: [] },
             },
         }),
     ],

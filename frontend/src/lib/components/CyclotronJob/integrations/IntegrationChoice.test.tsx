@@ -23,7 +23,7 @@ describe('IntegrationChoice', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/integrations': () => [200, { results: [GITHUB_INTEGRATION] }],
+                '/v1/environments/:team_id/integrations': () => [200, { results: [GITHUB_INTEGRATION] }],
             },
         })
         initKeaTests()

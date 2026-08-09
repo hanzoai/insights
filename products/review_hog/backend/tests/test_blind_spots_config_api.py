@@ -21,7 +21,7 @@ class TestReviewBlindSpotsConfigAPI(APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
         sync_canonical_blind_spots(self.team)
-        self.base = f"/api/projects/{self.team.id}/review_hog/blind_spots"
+        self.base = f"/v1/projects/{self.team.id}/review_hog/blind_spots"
 
     def _author_custom(self, name: str = _CUSTOM, created_by: User | None = None) -> None:
         LLMSkill.objects.create(
@@ -117,7 +117,7 @@ class TestReviewBlindSpotsConfigAPI(APIBaseTest):
         # the URL made the canonicalized `for_team` filter and the raw-id create kwarg contradict,
         # so the second select 500ed on the unique constraint.
         env = Team.objects.create(organization=self.organization, parent_team=self.team, name="env")
-        url = f"/api/projects/{env.id}/review_hog/blind_spots/{REVIEW_FN_BLIND_SPOTS_SKILL_NAME}/"
+        url = f"/v1/projects/{env.id}/review_hog/blind_spots/{REVIEW_FN_BLIND_SPOTS_SKILL_NAME}/"
 
         first = self.client.patch(url, {"active": True}, format="json")
         second = self.client.patch(url, {"active": True}, format="json")
@@ -136,7 +136,7 @@ class TestReviewBlindSpotsConfigAPI(APIBaseTest):
         cold = Team.objects.create(organization=self.organization, name="cold")
 
         res = self.client.patch(
-            f"/api/projects/{cold.id}/review_hog/blind_spots/{REVIEW_FN_BLIND_SPOTS_SKILL_NAME}/",
+            f"/v1/projects/{cold.id}/review_hog/blind_spots/{REVIEW_FN_BLIND_SPOTS_SKILL_NAME}/",
             {"active": True},
             format="json",
         )

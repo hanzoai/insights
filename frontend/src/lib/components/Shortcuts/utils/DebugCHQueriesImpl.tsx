@@ -132,7 +132,7 @@ const debugCHQueriesLogic = kea<debugCHQueriesLogicType>([
                     } else if (props.experimentId) {
                         params.append('experiment_id', String(props.experimentId))
                     }
-                    return await api.get(`api/debug_ch_queries/?${params.toString()}`)
+                    return await api.get(`v1/debug_ch_queries/?${params.toString()}`)
                 },
             },
         ],

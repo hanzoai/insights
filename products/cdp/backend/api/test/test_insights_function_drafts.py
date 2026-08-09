@@ -36,7 +36,7 @@ class DraftTestCase(APIBaseTest):
         self.addCleanup(flag.stop)
 
     def _url(self, function_id: str = "", suffix: str = "") -> str:
-        base = f"/api/projects/{self.team.id}/insights_functions/"
+        base = f"/v1/projects/{self.team.id}/insights_functions/"
         return f"{base}{function_id}{suffix}" if function_id else base
 
     def _create(self, **overrides) -> str:
@@ -266,7 +266,9 @@ class TestInsightsFunctionDrafts(DraftTestCase):
         assert function.script == LIVE_HOG
         # The no-op second discard must not add audit noise.
         assert (
-            ActivityLog.objects.filter(scope="InsightsFunction", item_id=function_id, activity="draft_discarded").count()
+            ActivityLog.objects.filter(
+                scope="InsightsFunction", item_id=function_id, activity="draft_discarded"
+            ).count()
             == 1
         )
 

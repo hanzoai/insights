@@ -30,7 +30,7 @@ const meta: Meta<AIObservabilityTraceSceneProps> = {
     render: ({ trace, eventId }) => {
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/query/:kind/': async ({ request }) => {
+                '/v1/environments/:team_id/query/:kind/': async ({ request }) => {
                     const body = (await request.json()) as {
                         query?: { kind?: string; source?: { kind?: string } }
                     }

@@ -62,7 +62,7 @@ class TestMCPAnalyticsAccessControl(_MCPAnalyticsTeamScopedTestMixin, APIBaseTes
     def test_list_feedback_by_access_level(self, access_level: str, expected_status: int) -> None:
         self._login_with_access_level(access_level)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/mcp_analytics/feedback/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/mcp_analytics/feedback/")
 
         assert response.status_code == expected_status
 
@@ -78,7 +78,7 @@ class TestMCPAnalyticsAccessControl(_MCPAnalyticsTeamScopedTestMixin, APIBaseTes
         # controls), and is polled by viewers on page load - it must not require editor access.
         self._login_with_access_level(access_level)
 
-        response = self.client.post(f"/api/environments/{self.team.id}/mcp_analytics/sessions/intent_digest/")
+        response = self.client.post(f"/v1/environments/{self.team.id}/mcp_analytics/sessions/intent_digest/")
 
         assert response.status_code == expected_status
 
@@ -93,7 +93,7 @@ class TestMCPAnalyticsAccessControl(_MCPAnalyticsTeamScopedTestMixin, APIBaseTes
         self._login_with_access_level(access_level)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_analytics/feedback/",
+            f"/v1/environments/{self.team.id}/mcp_analytics/feedback/",
             {"goal": "understand usage", "feedback": "Need clearer results"},
             format="json",
         )

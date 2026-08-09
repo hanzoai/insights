@@ -288,7 +288,7 @@ export const billingUsageLogic = kea<billingUsageLogicType>([
                         ...(interval ? { interval } : {}),
                     }
                     try {
-                        return await api.get(`api/billing/usage/?${toParams(params)}`)
+                        return await api.get(`v1/billing/usage/?${toParams(params)}`)
                     } catch (error) {
                         toast.error('Failed to load billing usage. Please try again or contact support.')
                         throw error

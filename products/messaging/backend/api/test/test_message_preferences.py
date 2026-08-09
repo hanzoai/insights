@@ -464,7 +464,7 @@ class TestMessagePreferencesAPIViewSet(APIBaseTest):
 
     def test_opt_outs_no_category_no_opt_outs(self):
         """Test opt_outs endpoint with no category and no recipients opted out"""
-        response = self.client.get(f"/api/environments/{self.team.id}/messaging_preferences/opt_outs/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/messaging_preferences/opt_outs/")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["count"], 0)
@@ -490,7 +490,7 @@ class TestMessagePreferencesAPIViewSet(APIBaseTest):
             preferences={str(self.category.id): PreferenceStatus.OPTED_OUT.value},
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/messaging_preferences/opt_outs/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/messaging_preferences/opt_outs/")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["count"], 2)
@@ -523,7 +523,7 @@ class TestMessagePreferencesAPIViewSet(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/messaging_preferences/opt_outs/", {"category_key": self.category.key}
+            f"/v1/environments/{self.team.id}/messaging_preferences/opt_outs/", {"category_key": self.category.key}
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -539,7 +539,7 @@ class TestMessagePreferencesAPIViewSet(APIBaseTest):
     def test_opt_outs_with_nonexistent_category(self):
         """Test opt_outs endpoint with a category that doesn't exist"""
         response = self.client.get(
-            f"/api/environments/{self.team.id}/messaging_preferences/opt_outs/",
+            f"/v1/environments/{self.team.id}/messaging_preferences/opt_outs/",
             {"category_key": "nonexistent_category"},
         )
         self.assertEqual(response.status_code, 404)
@@ -554,7 +554,7 @@ class TestMessagePreferencesAPIViewSet(APIBaseTest):
             preferences={ALL_MESSAGE_PREFERENCE_CATEGORY_ID: PreferenceStatus.OPTED_OUT.value},
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/messaging_preferences/opt_outs/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/messaging_preferences/opt_outs/")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["count"], 1)
@@ -589,7 +589,7 @@ class TestMessagePreferencesAPIViewSet(APIBaseTest):
             preferences={ALL_MESSAGE_PREFERENCE_CATEGORY_ID: PreferenceStatus.OPTED_OUT.value},
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/messaging_preferences/opt_outs/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/messaging_preferences/opt_outs/")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["count"], 1)
@@ -598,7 +598,7 @@ class TestMessagePreferencesAPIViewSet(APIBaseTest):
 
     def test_add_opt_out_global(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_preferences/add_opt_out/",
+            f"/v1/environments/{self.team.id}/messaging_preferences/add_opt_out/",
             {"identifier": "new@example.com"},
             content_type="application/json",
         )
@@ -612,7 +612,7 @@ class TestMessagePreferencesAPIViewSet(APIBaseTest):
 
     def test_add_opt_out_specific_category(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_preferences/add_opt_out/",
+            f"/v1/environments/{self.team.id}/messaging_preferences/add_opt_out/",
             {"identifier": "user@example.com", "category_key": self.category.key},
             content_type="application/json",
         )
@@ -623,7 +623,7 @@ class TestMessagePreferencesAPIViewSet(APIBaseTest):
 
     def test_add_opt_out_nonexistent_category(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_preferences/add_opt_out/",
+            f"/v1/environments/{self.team.id}/messaging_preferences/add_opt_out/",
             {"identifier": "user@example.com", "category_key": "does_not_exist"},
             content_type="application/json",
         )
@@ -637,7 +637,7 @@ class TestMessagePreferencesAPIViewSet(APIBaseTest):
             preferences={str(self.category.id): PreferenceStatus.OPTED_IN.value},
         )
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_preferences/add_opt_out/",
+            f"/v1/environments/{self.team.id}/messaging_preferences/add_opt_out/",
             {"identifier": "existing@example.com"},
             content_type="application/json",
         )
@@ -656,7 +656,7 @@ class TestMessagePreferencesAPIViewSet(APIBaseTest):
     )
     def test_add_opt_out_invalid_identifier(self, _name, payload, expected_status):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_preferences/add_opt_out/",
+            f"/v1/environments/{self.team.id}/messaging_preferences/add_opt_out/",
             payload,
             content_type="application/json",
         )
@@ -672,7 +672,7 @@ class TestMessagePreferencesAPIViewSet(APIBaseTest):
     )
     def test_add_opt_out_identifier_normalization(self, _name, raw_identifier, expected_identifier):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_preferences/add_opt_out/",
+            f"/v1/environments/{self.team.id}/messaging_preferences/add_opt_out/",
             {"identifier": raw_identifier},
             content_type="application/json",
         )
@@ -682,7 +682,7 @@ class TestMessagePreferencesAPIViewSet(APIBaseTest):
     def test_add_opt_out_team_isolation(self):
         other_team = self.organization.teams.create(name="Other Team")
         self.client.post(
-            f"/api/environments/{self.team.id}/messaging_preferences/add_opt_out/",
+            f"/v1/environments/{self.team.id}/messaging_preferences/add_opt_out/",
             {"identifier": "isolated@example.com"},
             content_type="application/json",
         )

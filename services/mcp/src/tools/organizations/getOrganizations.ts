@@ -7,7 +7,7 @@ import type { Context, ToolBase } from '@/tools/types'
 const schema = OrganizationGetAllSchema
 
 // Mirror the allowlist the generated `organizations-list` tool applies. The
-// `/api/organizations/` rows are serialized by the full `OrganizationSerializer`
+// `/v1/organizations/` rows are serialized by the full `OrganizationSerializer`
 // (billing `customer_id`, `available_product_features`, 2FA/AI/security
 // settings, nested teams/projects, ...), so returning them verbatim would
 // broaden what workspace clients receive well beyond the id/name/membership

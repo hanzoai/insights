@@ -31,7 +31,7 @@ class TestAlert15MinuteInterval(APIBaseTest):
                 "trendsFilter": {"display": "BoldNumber"},
             },
         }
-        self.insight = self.client.post(f"/api/projects/{self.team.id}/insights", data=self.default_insight_data).json()
+        self.insight = self.client.post(f"/v1/projects/{self.team.id}/insights", data=self.default_insight_data).json()
 
     def _creation_request(self, **overrides: Any) -> dict[str, Any]:
         payload = {
@@ -54,23 +54,23 @@ class TestAlert15MinuteInterval(APIBaseTest):
         self.organization.save()
 
     def test_create_every_15_minutes_rejected_without_billing_entitlement(self) -> None:
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", self._creation_request())
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", self._creation_request())
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Boost, Scale, or Enterprise" in str(response.json())
 
     def test_create_every_15_minutes_succeeds_with_entitlement(self) -> None:
         self._enable_high_frequency_alerts()
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", self._creation_request())
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", self._creation_request())
         assert response.status_code == status.HTTP_201_CREATED, response.content
         assert response.json()["calculation_interval"] == AlertCalculationInterval.EVERY_15_MINUTES
 
     def test_patch_every_15_minutes_succeeds_with_entitlement(self) -> None:
         self._enable_high_frequency_alerts()
-        create_response = self.client.post(f"/api/projects/{self.team.id}/alerts", self._creation_request())
+        create_response = self.client.post(f"/v1/projects/{self.team.id}/alerts", self._creation_request())
         alert_id = create_response.json()["id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{alert_id}",
+            f"/v1/projects/{self.team.id}/alerts/{alert_id}",
             {"name": "updated 15 min alert"},
         )
         assert response.status_code == status.HTTP_200_OK, response.content
@@ -79,14 +79,14 @@ class TestAlert15MinuteInterval(APIBaseTest):
 
     def test_patch_existing_every_15_minutes_rejected_after_entitlement_removed(self) -> None:
         self._enable_high_frequency_alerts()
-        create_response = self.client.post(f"/api/projects/{self.team.id}/alerts", self._creation_request())
+        create_response = self.client.post(f"/v1/projects/{self.team.id}/alerts", self._creation_request())
         alert_id = create_response.json()["id"]
 
         self.organization.available_product_features = []
         self.organization.save()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{alert_id}",
+            f"/v1/projects/{self.team.id}/alerts/{alert_id}",
             {"name": "still 15 min"},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST

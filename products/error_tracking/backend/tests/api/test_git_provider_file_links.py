@@ -37,7 +37,7 @@ class TestGitProviderFileLinksResolveGithub(APIBaseTest):
         self.addCleanup(cache.delete, _PUBLIC_TOKEN_UNAUTHORIZED_COUNT_KEY)
 
     def _url(self) -> str:
-        return f"/api/projects/{self.team.id}/error_tracking/git-provider-file-links/resolve_github/"
+        return f"/v1/projects/{self.team.id}/error_tracking/git-provider-file-links/resolve_github/"
 
     def _query(self) -> dict[str, str]:
         return {"owner": "o", "repository": "r", "code_sample": "print(1)", "file_name": "main.py"}

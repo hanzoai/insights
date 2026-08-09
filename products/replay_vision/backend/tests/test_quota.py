@@ -365,7 +365,7 @@ class TestProjectedMonthlyObservations(_VisionQuotaTestCase):
 class TestVisionQuotaEndpoint(_VisionQuotaTestCase):
     @property
     def quota_url(self) -> str:
-        return f"/api/environments/{self.team.id}/vision/quota/"
+        return f"/v1/environments/{self.team.id}/vision/quota/"
 
     def test_returns_static_quota_and_zero_usage_when_empty(self) -> None:
         resp = self.client.get(self.quota_url)
@@ -409,7 +409,7 @@ class TestVisionQuotaEndpoint(_VisionQuotaTestCase):
 class TestObserveQuotaEnforcement(_VisionQuotaTestCase):
     @property
     def observe_url(self) -> str:
-        return f"/api/environments/{self.team.id}/vision/scanners/{self.scanner.id}/observe/"
+        return f"/v1/environments/{self.team.id}/vision/scanners/{self.scanner.id}/observe/"
 
     def test_returns_402_when_quota_exhausted(
         self, mock_sync_connect: MagicMock, mock_async_to_sync: MagicMock

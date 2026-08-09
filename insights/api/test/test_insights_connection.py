@@ -49,7 +49,7 @@ class TestInsightsConnectionForward:
         )
 
     def _forward_url(self) -> str:
-        return f"/api/environments/{self.team.pk}/insights_connections/{self.integration.id}/forward/"
+        return f"/v1/environments/{self.team.pk}/insights_connections/{self.integration.id}/forward/"
 
     def test_forward_injects_token_and_passes_through(self, client: HttpClient):
         client.force_login(self.user)
@@ -124,7 +124,7 @@ class TestInsightsConnectionForward:
     def test_forward_unknown_connection_is_404(self, client: HttpClient):
         client.force_login(self.user)
         response = client.post(
-            f"/api/environments/{self.team.pk}/insights_connections/nonexistent/forward/",
+            f"/v1/environments/{self.team.pk}/insights_connections/nonexistent/forward/",
             {"method": "GET", "path": "api/projects/2/insights/"},
             content_type="application/json",
         )

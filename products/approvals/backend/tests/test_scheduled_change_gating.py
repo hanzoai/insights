@@ -218,7 +218,7 @@ class TestScheduledChangeGating(APIBaseTest):
         flag = self._disabled_flag()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             {
                 "record_id": str(flag.id),
                 "model_name": "FeatureFlag",
@@ -264,7 +264,7 @@ class TestScheduledChangeGating(APIBaseTest):
         assert scheduled.change_request is None
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/scheduled_changes/{scheduled.id}/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/{scheduled.id}/",
             {"payload": {"operation": "update_status", "value": True}},
             format="json",
         )
@@ -289,7 +289,7 @@ class TestScheduledChangeGating(APIBaseTest):
         assert old_cr is not None and old_cr.state == ChangeRequestState.PENDING
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/scheduled_changes/{scheduled.id}/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/{scheduled.id}/",
             {"payload": {"operation": "update_status", "value": False}},
             format="json",
         )
@@ -317,7 +317,7 @@ class TestScheduledChangeGating(APIBaseTest):
         editor = User.objects.create_and_join(self.organization, "editor@hanzo.ai", None)
         self.client.force_login(editor)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/scheduled_changes/{scheduled.id}/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/{scheduled.id}/",
             {"payload": {"operation": "update_status", "value": True}},
             format="json",
         )
@@ -345,7 +345,7 @@ class TestScheduledChangeGating(APIBaseTest):
         assert original_cr is not None and original_cr.state == ChangeRequestState.PENDING
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/scheduled_changes/{scheduled.id}/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/{scheduled.id}/",
             {"payload": {"operation": "update_status", "value": True}},
             format="json",
         )
@@ -424,7 +424,7 @@ class TestScheduledChangeGating(APIBaseTest):
         assert cr.state == ChangeRequestState.APPROVED
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/scheduled_changes/{scheduled.id}/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/{scheduled.id}/",
             {"scheduled_at": (timezone.now() - timedelta(seconds=30)).isoformat()},
             format="json",
         )
@@ -451,7 +451,7 @@ class TestScheduledChangeGating(APIBaseTest):
         assert cr.state == ChangeRequestState.APPROVED
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             {
                 "record_id": str(flag.id),
                 "model_name": "FeatureFlag",
@@ -483,7 +483,7 @@ class TestScheduledChangeGating(APIBaseTest):
         assert cr is not None and cr.state == ChangeRequestState.PENDING
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             {
                 "record_id": str(flag.id),
                 "model_name": "FeatureFlag",
@@ -597,7 +597,7 @@ class TestScheduledChangeGating(APIBaseTest):
         cr = scheduled.change_request
         assert cr is not None and cr.state == ChangeRequestState.PENDING
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/scheduled_changes/{scheduled.id}/")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/scheduled_changes/{scheduled.id}/")
 
         assert response.status_code == 204, response.content
         cr.refresh_from_db()
@@ -621,7 +621,7 @@ class TestScheduledChangeGating(APIBaseTest):
         # Fail the row insert (super().create) after the gate has minted the pending CR.
         with patch.object(serializers.ModelSerializer, "create", side_effect=IntegrityError("boom")):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/scheduled_changes/",
+                f"/v1/projects/{self.team.id}/scheduled_changes/",
                 {
                     "record_id": str(flag.id),
                     "model_name": "FeatureFlag",
@@ -652,7 +652,7 @@ class TestScheduledChangeGating(APIBaseTest):
         with patch("products.approvals.backend.decorators.send_approval_requested_notification") as mock_notify:
             with patch.object(serializers.ModelSerializer, "create", side_effect=IntegrityError("boom")):
                 response = self.client.post(
-                    f"/api/projects/{self.team.id}/scheduled_changes/",
+                    f"/v1/projects/{self.team.id}/scheduled_changes/",
                     {
                         "record_id": str(flag.id),
                         "model_name": "FeatureFlag",
@@ -676,7 +676,7 @@ class TestScheduledChangeGating(APIBaseTest):
         with patch("products.approvals.backend.decorators.send_approval_requested_notification") as mock_notify:
             with self.captureOnCommitCallbacks(execute=True):
                 response = self.client.post(
-                    f"/api/projects/{self.team.id}/scheduled_changes/",
+                    f"/v1/projects/{self.team.id}/scheduled_changes/",
                     {
                         "record_id": str(flag.id),
                         "model_name": "FeatureFlag",

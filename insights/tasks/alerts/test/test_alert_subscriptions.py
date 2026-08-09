@@ -33,7 +33,7 @@ class TestAlertSubscriptionOrgMembership(APIBaseTest):
         self.other_user = User.objects.create_and_join(self.organization, "other@hanzo.ai", "password")
 
         self.alert = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             data={
                 "name": "alert name",
                 "insight": self.insight["id"],
@@ -98,7 +98,7 @@ class TestGetSubscribedUsersEmails(APIBaseTest):
         self.insight = self.dashboard_api.create_insight(data={"name": "insight", "query": query_dict})[1]
 
         self.alert_response = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             data={
                 "name": "alert name",
                 "insight": self.insight["id"],
@@ -168,7 +168,7 @@ class TestAlertEmailNotifications(APIBaseTest):
         self.insight = self.dashboard_api.create_insight(data={"name": "insight", "query": query_dict})[1]
 
         self.alert = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             data={
                 "name": "alert name",
                 "insight": self.insight["id"],

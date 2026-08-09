@@ -103,10 +103,10 @@ const meta: Meta = {
         grantWarehouseAccess,
         mswDecorator({
             get: {
-                '/api/environments/:team_id/external_data_sources/wizard': () => [200, AVAILABLE_SOURCES],
+                '/v1/environments/:team_id/external_data_sources/wizard': () => [200, AVAILABLE_SOURCES],
             },
             post: {
-                '/api/environments/:team_id/query/:kind': async ({ request }) => {
+                '/v1/environments/:team_id/query/:kind': async ({ request }) => {
                     const body = (await request.json()) as Record<string, any>
                     const kind = body?.query?.kind
                     if (kind === 'DatabaseSchemaQuery') {
@@ -146,11 +146,11 @@ export const ManagedWarehouseConnection: Story = {
         msw: {
             mocks: {
                 get: {
-                    '/api/projects/:team_id/external_data_sources/connections': () => [
+                    '/v1/projects/:team_id/external_data_sources/connections': () => [
                         200,
                         MANAGED_WAREHOUSE_CONNECTIONS,
                     ],
-                    '/api/projects/:team_id/external_data_sources/direct_connection_options': () => [200, []],
+                    '/v1/projects/:team_id/external_data_sources/direct_connection_options': () => [200, []],
                 },
             },
         },

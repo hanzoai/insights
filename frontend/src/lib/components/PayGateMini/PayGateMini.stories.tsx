@@ -28,7 +28,7 @@ const meta: Meta<StoryArgs> = {
                     is_debug: cloud !== undefined ? cloud : true,
                     realm: Realm.Cloud,
                 },
-                '/api/billing/': {
+                '/v1/billing/': {
                     ...billingJson,
                 },
             },
@@ -84,7 +84,7 @@ export const PayGateMiniLimitFeatureOther: Story = {
     render: ({ cloud, ...props }) => {
         useStorybookMocks({
             get: {
-                '/api/users/@me': () => [
+                '/v1/users/@me': () => [
                     200,
                     {
                         ...meCurrent,
@@ -117,7 +117,7 @@ export const PayGateMiniLimitFeatureProjects: Story = {
     render: ({ cloud, ...props }) => {
         useStorybookMocks({
             get: {
-                '/api/users/@me': () => [
+                '/v1/users/@me': () => [
                     200,
                     {
                         ...meCurrent,
@@ -157,7 +157,7 @@ export const PayGateMiniFree: Story = {
                     is_debug: cloud !== undefined ? cloud : true,
                     realm: Realm.Cloud,
                 },
-                '/api/billing/': {
+                '/v1/billing/': {
                     ...billingUnsubscribedJson,
                 },
             },

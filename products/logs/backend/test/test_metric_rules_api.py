@@ -167,7 +167,7 @@ class TestLogsMetricRuleSerializerValidation(SimpleTestCase):
 class TestLogsMetricRulesAPI(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.base_url = f"/api/projects/{self.team.pk}/logs/metric_rules/"
+        self.base_url = f"/v1/projects/{self.team.pk}/logs/metric_rules/"
         self._ff_patcher = patch("hanzo_insights.feature_enabled", return_value=True)
         self._ff_patcher.start()
         self.addCleanup(self._ff_patcher.stop)
@@ -271,7 +271,7 @@ class TestLogsMetricRulesAPI(APIBaseTest):
         # raw-child filter would hide the row and silently skip the version bump the
         # ingestion worker's cache coherency depends on.
         env = Team.objects.create(organization=self.organization, parent_team=self.team, name="env")
-        env_url = f"/api/projects/{env.pk}/logs/metric_rules/"
+        env_url = f"/v1/projects/{env.pk}/logs/metric_rules/"
 
         created = self.client.post(env_url, self._payload(), format="json")
         assert created.status_code == status.HTTP_201_CREATED, created.json()
@@ -298,7 +298,7 @@ class TestLogsMetricRulesAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{env.pk}/logs/metric_rules/",
+            f"/v1/projects/{env.pk}/logs/metric_rules/",
             self._payload(),
             format="json",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
@@ -317,7 +317,7 @@ class TestLogsMetricRulesAPI(APIBaseTest):
             assert r.status_code == status.HTTP_201_CREATED, r.json()
 
         response = self.client.post(
-            f"/api/projects/{env.pk}/logs/metric_rules/",
+            f"/v1/projects/{env.pk}/logs/metric_rules/",
             self._payload(name="overflow", metric_name="log.overflow", enabled=True),
             format="json",
         )

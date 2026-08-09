@@ -367,7 +367,7 @@ export const actionEditLogic = kea<actionEditLogicType>([
                         return []
                     }
                     // nosemgrep: prefer-codegen-api
-                    const response = await api.get(`api/projects/@current/actions/${props.id}/references`)
+                    const response = await api.get(`v1/projects/@current/actions/${props.id}/references`)
                     return response
                 },
             },

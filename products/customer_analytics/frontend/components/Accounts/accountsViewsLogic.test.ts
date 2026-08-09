@@ -61,7 +61,7 @@ describe('accountsViewsLogic', () => {
     })
 
     it('lists views on mount', async () => {
-        useMocks({ get: { '/api/environments/:team_id/column_configurations/': { count: 1, results: [buildView()] } } })
+        useMocks({ get: { '/v1/environments/:team_id/column_configurations/': { count: 1, results: [buildView()] } } })
         mountAll()
         await expectLogic(logic)
             .toDispatchActions(['loadViewsSuccess'])
@@ -71,7 +71,7 @@ describe('accountsViewsLogic', () => {
     })
 
     it('applyView hydrates columns, filters, sort, and tiles', async () => {
-        useMocks({ get: { '/api/environments/:team_id/column_configurations/': { count: 0, results: [] } } })
+        useMocks({ get: { '/v1/environments/:team_id/column_configurations/': { count: 0, results: [] } } })
         mountAll()
         const view = buildView({
             filters: {
@@ -100,7 +100,7 @@ describe('accountsViewsLogic', () => {
     it('isDirty flips when live state diverges from the applied view and clears on re-apply', async () => {
         useMocks({
             get: {
-                '/api/environments/:team_id/column_configurations/': { count: 1, results: [buildView()] },
+                '/v1/environments/:team_id/column_configurations/': { count: 1, results: [buildView()] },
             },
         })
         mountAll()
@@ -118,8 +118,8 @@ describe('accountsViewsLogic', () => {
 
     it('deleteView clears currentViewId when the active view is removed', async () => {
         useMocks({
-            get: { '/api/environments/:team_id/column_configurations/': { count: 1, results: [buildView()] } },
-            delete: { '/api/environments/:team_id/column_configurations/:id/': [204] },
+            get: { '/v1/environments/:team_id/column_configurations/': { count: 1, results: [buildView()] } },
+            delete: { '/v1/environments/:team_id/column_configurations/:id/': [204] },
         })
         mountAll()
         await expectLogic(logic).toDispatchActions(['loadViewsSuccess'])
@@ -132,9 +132,9 @@ describe('accountsViewsLogic', () => {
     it('rename seeds the form with the current name and patches the trimmed name on submit', async () => {
         let patchedBody: any = null
         useMocks({
-            get: { '/api/environments/:team_id/column_configurations/': { count: 1, results: [buildView()] } },
+            get: { '/v1/environments/:team_id/column_configurations/': { count: 1, results: [buildView()] } },
             patch: {
-                '/api/environments/:team_id/column_configurations/:id/': async ({ request }) => {
+                '/v1/environments/:team_id/column_configurations/:id/': async ({ request }) => {
                     patchedBody = await request.json()
                     return [200, buildView({ name: patchedBody.name })]
                 },
@@ -159,13 +159,13 @@ describe('accountsViewsLogic', () => {
         let patchedBody: any = null
         useMocks({
             get: {
-                '/api/environments/:team_id/column_configurations/': {
+                '/v1/environments/:team_id/column_configurations/': {
                     count: 1,
                     results: [buildView({ properties: {} })],
                 },
             },
             patch: {
-                '/api/environments/:team_id/column_configurations/:id/': async ({ request }) => {
+                '/v1/environments/:team_id/column_configurations/:id/': async ({ request }) => {
                     patchedBody = await request.json()
                     return [200, buildView({ properties: patchedBody.properties })]
                 },
@@ -189,7 +189,7 @@ describe('accountsViewsLogic', () => {
     it('does not migrate when localStorage tiles are the defaults', async () => {
         useMocks({
             get: {
-                '/api/environments/:team_id/column_configurations/': {
+                '/v1/environments/:team_id/column_configurations/': {
                     count: 1,
                     results: [buildView({ properties: {} })],
                 },
@@ -209,7 +209,7 @@ describe('accountsViewsLogic', () => {
     it('does not migrate into a row the user did not create', async () => {
         useMocks({
             get: {
-                '/api/environments/:team_id/column_configurations/': {
+                '/v1/environments/:team_id/column_configurations/': {
                     count: 1,
                     results: [buildView({ properties: {}, created_by: 999 })],
                 },
@@ -234,13 +234,13 @@ describe('accountsViewsLogic', () => {
         )
         useMocks({
             get: {
-                '/api/environments/:team_id/column_configurations/': {
+                '/v1/environments/:team_id/column_configurations/': {
                     count: 1,
                     results: [buildView({ properties: {} })],
                 },
             },
             patch: {
-                '/api/environments/:team_id/column_configurations/:id/': async ({ request }) => {
+                '/v1/environments/:team_id/column_configurations/:id/': async ({ request }) => {
                     const body = (await request.json()) as any
                     return [200, buildView({ properties: body.properties })]
                 },

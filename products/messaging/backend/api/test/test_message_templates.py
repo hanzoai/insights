@@ -40,7 +40,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         )
 
     def test_list_message_templates(self):
-        response = self.client.get(f"/api/environments/{self.team.id}/messaging_templates/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/messaging_templates/")
         assert response.status_code == status.HTTP_200_OK
 
         response_data = response.json()
@@ -58,7 +58,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         assert template["type"] == "email"
 
     def test_retrieve_message_template(self):
-        response = self.client.get(f"/api/environments/{self.team.id}/messaging_templates/{self.message_template.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/messaging_templates/{self.message_template.id}/")
         assert response.status_code == status.HTTP_200_OK
 
         template = response.json()
@@ -72,28 +72,28 @@ class TestMessageTemplatesAPI(APIBaseTest):
         assert template["type"] == "email"
 
     def test_cannot_access_other_teams_templates(self):
-        response = self.client.get(f"/api/environments/{self.other_team.id}/messaging_templates/")
+        response = self.client.get(f"/v1/environments/{self.other_team.id}/messaging_templates/")
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/messaging_templates/{self.other_team_template.id}/"
+            f"/v1/environments/{self.team.id}/messaging_templates/{self.other_team_template.id}/"
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_authentication_required(self):
         self.client.logout()
-        response = self.client.get(f"/api/environments/{self.team.id}/messaging_templates/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/messaging_templates/")
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_delete_operation_not_allowed(self):
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/messaging_templates/{self.message_template.id}/"
+            f"/v1/environments/{self.team.id}/messaging_templates/{self.message_template.id}/"
         )
         assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
     def test_create_email_template_without_subject_fails(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_templates/",
+            f"/v1/environments/{self.team.id}/messaging_templates/",
             data={
                 "name": "No Subject Template",
                 "content": {"email": {"html": "<p>Hello</p>"}},
@@ -105,7 +105,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
 
     def test_create_email_template_with_subject_succeeds(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_templates/",
+            f"/v1/environments/{self.team.id}/messaging_templates/",
             data={
                 "name": "Valid Template",
                 "content": {"email": {"subject": "Hello", "html": "<p>Hello</p>"}},
@@ -119,7 +119,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
 
     def test_create_email_template_without_email_content_succeeds(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_templates/",
+            f"/v1/environments/{self.team.id}/messaging_templates/",
             data={
                 "name": "No Email Content",
                 "type": "email",
@@ -132,7 +132,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         """Authored HTML is full of braces (CSS, Liquid) — anything not explicitly
         'liquid' is script-transpiled downstream, where '{' is syntax and compilation fails."""
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_templates/",
+            f"/v1/environments/{self.team.id}/messaging_templates/",
             data={
                 "name": "No templating set",
                 "content": {"email": {"subject": "Hi", "html": "<style>.a{color:red}</style><p>{{ greeting }}</p>"}},
@@ -145,7 +145,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
 
     def test_create_rejects_hog_templating(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/messaging_templates/",
+            f"/v1/environments/{self.team.id}/messaging_templates/",
             data={
                 "name": "Script attempt",
                 "content": {"templating": "script", "email": {"subject": "Hi", "html": "<p>Hi</p>"}},
@@ -161,7 +161,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         mock_render.return_value = "<html><body>Rendered</body></html>"
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/messaging_templates/",
+            f"/v1/projects/{self.team.id}/messaging_templates/",
             data={
                 "name": "Design-first template",
                 "content": {"email": {"subject": "Hi", "design": MINIMAL_DESIGN}},
@@ -181,7 +181,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         """The visual editor exports html from the design client-side and submits both —
         a present html is trusted, not re-rendered."""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/messaging_templates/",
+            f"/v1/projects/{self.team.id}/messaging_templates/",
             data={
                 "name": "Editor-saved template",
                 "content": {"email": {"subject": "Hi", "html": "<p>Editor export</p>", "design": MINIMAL_DESIGN}},
@@ -205,7 +205,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         mock_render.side_effect = side_effect
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/messaging_templates/",
+            f"/v1/projects/{self.team.id}/messaging_templates/",
             data={
                 "name": "Design-first template",
                 "content": {"email": {"subject": "Hi", "design": MINIMAL_DESIGN}},
@@ -222,7 +222,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         mock_render.return_value = "<html><body>Re-rendered</body></html>"
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/messaging_templates/{self.message_template.id}/",
+            f"/v1/projects/{self.team.id}/messaging_templates/{self.message_template.id}/",
             data={"content": {"email": {"subject": "Updated", "design": MINIMAL_DESIGN}}},
             format="json",
         )
@@ -237,7 +237,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         foreign_category = MessageCategory.objects.create(team=self.other_team, key="foreign-key", name="Foreign")
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/messaging_templates/{self.message_template.id}/",
+            f"/v1/environments/{self.team.id}/messaging_templates/{self.message_template.id}/",
             data={"message_category": str(foreign_category.id)},
             format="json",
         )
@@ -264,7 +264,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         self.client.logout()
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {api_key}")
 
-        base_url = f"/api/projects/{self.team.id}/messaging_templates/"
+        base_url = f"/v1/projects/{self.team.id}/messaging_templates/"
         url = f"{base_url}{self.message_template.id}/" if target == "detail" else base_url
         data = (
             {
@@ -288,7 +288,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         self.message_template.save()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/messaging_templates/{self.message_template.id}/",
+            f"/v1/projects/{self.team.id}/messaging_templates/{self.message_template.id}/",
             data={"content": {"email": {"subject": "New", "html": "<p>New</p>"}}},
             format="json",
         )
@@ -302,14 +302,14 @@ class TestMessageTemplatesAPI(APIBaseTest):
         self.client.logout()
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {api_key}")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/messaging_templates/{self.other_team_template.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/messaging_templates/{self.other_team_template.id}/")
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_can_bind_template_to_own_teams_message_category(self):
         own_category = MessageCategory.objects.create(team=self.team, key="own-key", name="Own")
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/messaging_templates/{self.message_template.id}/",
+            f"/v1/environments/{self.team.id}/messaging_templates/{self.message_template.id}/",
             data={"message_category": str(own_category.id)},
             format="json",
         )
@@ -349,7 +349,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         self.message_template.save()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/messaging_templates/{self.message_template.id}/design/",
+            f"/v1/projects/{self.team.id}/messaging_templates/{self.message_template.id}/design/",
             data={"operations": [{"op": "update_content", "id": "txt1", "patch": {"values": {"text": "<p>New</p>"}}}]},
             format="json",
         )
@@ -371,7 +371,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         self.message_template.save()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/messaging_templates/{self.message_template.id}/design/",
+            f"/v1/projects/{self.team.id}/messaging_templates/{self.message_template.id}/design/",
             data={"operations": [{"op": "update_content", "id": "nope", "patch": {"values": {}}}]},
             format="json",
         )
@@ -384,7 +384,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
     def test_design_patch_without_design_returns_400(self):
         # self.message_template has no design in content.email
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/messaging_templates/{self.message_template.id}/design/",
+            f"/v1/projects/{self.team.id}/messaging_templates/{self.message_template.id}/design/",
             data={"operations": [{"op": "update_content", "id": "txt1", "patch": {"values": {}}}]},
             format="json",
         )
@@ -397,7 +397,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         self.message_template.save()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/messaging_templates/{self.message_template.id}/design/",
+            f"/v1/projects/{self.team.id}/messaging_templates/{self.message_template.id}/design/",
             data={"operations": []},
             format="json",
         )
@@ -409,7 +409,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         self.message_template.save()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/messaging_templates/{self.message_template.id}/design/",
+            f"/v1/projects/{self.team.id}/messaging_templates/{self.message_template.id}/design/",
             data={"operations": [{"op": "update_content", "id": "txt1"}]},  # missing patch
             format="json",
         )
@@ -424,7 +424,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {api_key}")
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/messaging_templates/{self.message_template.id}/design/",
+            f"/v1/projects/{self.team.id}/messaging_templates/{self.message_template.id}/design/",
             data={"operations": [{"op": "update_content", "id": "txt1", "patch": {"values": {}}}]},
             format="json",
         )
@@ -443,7 +443,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {api_key}")
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/messaging_templates/{self.message_template.id}/design/",
+            f"/v1/projects/{self.team.id}/messaging_templates/{self.message_template.id}/design/",
             data={"operations": [{"op": "update_content", "id": "txt1", "patch": {"values": {"text": "<p>Hi</p>"}}}]},
             format="json",
         )
@@ -455,7 +455,7 @@ class TestMessageTemplatesAPI(APIBaseTest):
         self.other_team_template.save()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/messaging_templates/{self.other_team_template.id}/design/",
+            f"/v1/projects/{self.team.id}/messaging_templates/{self.other_team_template.id}/design/",
             data={"operations": [{"op": "update_content", "id": "txt1", "patch": {"values": {}}}]},
             format="json",
         )

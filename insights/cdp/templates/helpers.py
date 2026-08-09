@@ -194,7 +194,7 @@ class BaseSiteDestinationFunctionTest(APIBaseTest):
         # Mock the transpile function to avoid Node.js/pnpm dependency
         with patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_functions/",
+                f"/v1/projects/{self.team.id}/insights_functions/",
                 data=payload,
             )
             assert response.status_code in (200, 201)

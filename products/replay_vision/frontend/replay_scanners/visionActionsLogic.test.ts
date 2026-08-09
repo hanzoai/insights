@@ -50,16 +50,16 @@ describe('visionActionsLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/vision/actions/': { results: [action('a'), action('b')], count: 2 },
+                '/v1/projects/:team/vision/actions/': { results: [action('a'), action('b')], count: 2 },
             },
             post: {
-                '/api/projects/:team/vision/actions/': () => [201, action('new')],
+                '/v1/projects/:team/vision/actions/': () => [201, action('new')],
             },
             patch: {
-                '/api/projects/:team/vision/actions/:id/': () => [200, {}],
+                '/v1/projects/:team/vision/actions/:id/': () => [200, {}],
             },
             delete: {
-                '/api/projects/:team/vision/actions/:id/': () => [204, null],
+                '/v1/projects/:team/vision/actions/:id/': () => [204, null],
             },
         })
         initKeaTests()
@@ -86,7 +86,7 @@ describe('visionActionsLogic', () => {
         const digest = { ...action('digest'), is_scanner_digest: true } as VisionActionApi
         useMocks({
             get: {
-                '/api/projects/:team/vision/actions/': { results: [digest, action('a')], count: 2 },
+                '/v1/projects/:team/vision/actions/': { results: [digest, action('a')], count: 2 },
             },
         })
         logic.actions.loadActions()

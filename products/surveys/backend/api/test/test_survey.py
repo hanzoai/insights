@@ -24,6 +24,7 @@ from rest_framework import status
 from insights.api.test.test_personal_api_keys import PersonalAPIKeysBaseTest
 from insights.constants import AvailableFeature
 from insights.models import Team
+from insights.models.ee_models import AccessControl
 from insights.models.organization import Organization, OrganizationMembership
 from insights.test.persons import create_person
 
@@ -39,13 +40,11 @@ from products.surveys.backend.api.survey import (
 )
 from products.surveys.backend.models import MAX_ITERATION_COUNT, Survey, SurveyResponseArchive
 
-from insights.models.ee_models import AccessControl
-
 
 class TestSurvey(APIBaseTest):
     def test_can_create_basic_survey(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -79,7 +78,7 @@ class TestSurvey(APIBaseTest):
 
     def test_can_create_survey_with_translations(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Customer feedback survey",
                 "description": "Help us improve",
@@ -159,7 +158,7 @@ class TestSurvey(APIBaseTest):
         if translation_link is not None:
             translation["link"] = translation_link
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Link survey with translations",
                 "type": "popover",
@@ -191,7 +190,7 @@ class TestSurvey(APIBaseTest):
     def test_translation_language_codes_are_normalized(self) -> None:
         """BCP-47-ish codes are normalized to lowercase + hyphenated on save."""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Customer feedback survey",
                 "description": "Help us improve",
@@ -240,7 +239,7 @@ class TestSurvey(APIBaseTest):
     )
     def test_translation_rejects_invalid_language_codes(self, _name: str, lang_code: str) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey",
                 "type": "popover",
@@ -255,7 +254,7 @@ class TestSurvey(APIBaseTest):
 
     def test_translation_rejects_base_language_collision(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey",
                 "type": "popover",
@@ -271,7 +270,7 @@ class TestSurvey(APIBaseTest):
 
     def test_translation_rejects_base_language_collision_in_question(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey",
                 "type": "popover",
@@ -292,7 +291,7 @@ class TestSurvey(APIBaseTest):
 
     def test_survey_defaults_to_english_base_language(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey",
                 "type": "popover",
@@ -308,7 +307,7 @@ class TestSurvey(APIBaseTest):
 
     def test_can_set_non_english_base_language(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Encuesta",
                 "type": "popover",
@@ -327,7 +326,7 @@ class TestSurvey(APIBaseTest):
 
     def test_base_language_rejects_invalid_value(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey",
                 "type": "popover",
@@ -354,7 +353,7 @@ class TestSurvey(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"name": "Renamed"},
             format="json",
         )
@@ -377,7 +376,7 @@ class TestSurvey(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"translations": {"default": {"name": "Edited text"}}},
             format="json",
         )
@@ -399,7 +398,7 @@ class TestSurvey(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "translations": {
                     "default": {"name": "Old text"},
@@ -424,7 +423,7 @@ class TestSurvey(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "translations": {
                     "EN": {"name": "Legacy uppercase"},
@@ -449,7 +448,7 @@ class TestSurvey(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"base_language": "fr"},
             format="json",
         )
@@ -574,7 +573,7 @@ class TestSurvey(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/generate_translations/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/generate_translations/",
             data={
                 "target_language": "pt-BR",
                 "survey": {"name": "Draft feedback", "linked_flag": None, "questions": survey.questions},
@@ -608,7 +607,7 @@ class TestSurvey(APIBaseTest):
         mock_generate_survey_translation.return_value = ({}, [], [], "trace-2")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/generate_translations/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/generate_translations/",
             data={"target_language": "pt-BR"},
             format="json",
         )
@@ -624,7 +623,7 @@ class TestSurvey(APIBaseTest):
         survey = Survey.objects.create(team=self.team, name="Customer feedback", type="popover", questions=[])
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/generate_translations/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/generate_translations/",
             data={"target_language": "pt-BR"},
             format="json",
         )
@@ -655,7 +654,7 @@ class TestSurvey(APIBaseTest):
 
         self.client.force_login(user2)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/generate_translations/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/generate_translations/",
             data={
                 "target_language": "pt-BR",
                 "survey": {"name": "Draft", "questions": []},
@@ -683,7 +682,7 @@ class TestSurvey(APIBaseTest):
         mock_generate_survey_translation.return_value = ({}, [], [], "trace-id")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/{other_survey.id}/generate_translations/",
+            f"/v1/projects/{self.team.id}/surveys/{other_survey.id}/generate_translations/",
             data={
                 "target_language": "pt-BR",
                 "survey": {"name": "Draft", "questions": []},
@@ -696,7 +695,7 @@ class TestSurvey(APIBaseTest):
 
     def test_can_create_survey_without_translations(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Basic survey",
                 "type": "popover",
@@ -713,7 +712,7 @@ class TestSurvey(APIBaseTest):
 
     def test_can_remove_survey_translations(self):
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Translated survey",
                 "type": "popover",
@@ -725,7 +724,7 @@ class TestSurvey(APIBaseTest):
         survey_id = create_response.json()["id"]
 
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_id}/",
             data={"translations": None},
             format="json",
         )
@@ -737,7 +736,7 @@ class TestSurvey(APIBaseTest):
     def test_choices_array_length_mismatch_rejected(self):
         """Prevent partial translations by ensuring choices array lengths match"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey",
                 "type": "popover",
@@ -765,7 +764,7 @@ class TestSurvey(APIBaseTest):
 
     def test_survey_level_translations_sanitize_html(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey",
                 "type": "popover",
@@ -799,7 +798,7 @@ class TestSurvey(APIBaseTest):
 
     def test_inline_question_translations_sanitize_all_fields(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey",
                 "type": "popover",
@@ -875,7 +874,7 @@ class TestSurvey(APIBaseTest):
 
     def test_question_fields_sanitize_all_top_level_translatable_fields(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey",
                 "type": "popover",
@@ -912,7 +911,7 @@ class TestSurvey(APIBaseTest):
     def test_translated_link_validation(self):
         # Test invalid URL scheme in translated link
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey",
                 "type": "popover",
@@ -936,7 +935,7 @@ class TestSurvey(APIBaseTest):
 
         # Test invalid mailto in translated link
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey",
                 "type": "popover",
@@ -960,7 +959,7 @@ class TestSurvey(APIBaseTest):
 
     def test_choices_translation_on_non_choice_question_silently_removed(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey",
                 "type": "popover",
@@ -987,7 +986,7 @@ class TestSurvey(APIBaseTest):
     @patch("products.feature_flags.backend.api.feature_flag.report_user_action")
     def test_creation_context_is_set_to_surveys(self, mock_report_user_action):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey with targeting",
                 "type": "popover",
@@ -1041,7 +1040,7 @@ class TestSurvey(APIBaseTest):
 
     def test_create_adds_user_interactivity_filters(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -1106,7 +1105,7 @@ class TestSurvey(APIBaseTest):
 
         # launch survey
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "start_date": datetime.now() - timedelta(days=1),
             },
@@ -1118,7 +1117,7 @@ class TestSurvey(APIBaseTest):
     def test_adding_iterations_to_existing_survey_updates_internal_targeting_flag(self):
         # Step 1: Create a survey WITHOUT iterations
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey without iterations initially",
                 "type": "popover",
@@ -1162,7 +1161,7 @@ class TestSurvey(APIBaseTest):
 
         # Step 2: Update the survey to ADD iterations
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "start_date": datetime.now() - timedelta(days=1),
                 "iteration_count": 3,
@@ -1213,7 +1212,7 @@ class TestSurvey(APIBaseTest):
         notebooks_flag = FeatureFlag.objects.create(team=self.team, key="notebooks", created_by=self.user)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks power users survey",
                 "type": "popover",
@@ -1284,7 +1283,7 @@ class TestSurvey(APIBaseTest):
 
     def test_can_create_survey_with_targeting_with_remove_parameter(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks power users survey",
                 "type": "popover",
@@ -1351,7 +1350,7 @@ class TestSurvey(APIBaseTest):
         notebooks_flag = FeatureFlag.objects.create(team=self.team, key=ff_key, created_by=self.user)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks power users survey",
                 "type": "popover",
@@ -1391,7 +1390,7 @@ class TestSurvey(APIBaseTest):
         created_survey1 = response.json()["id"]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks random survey",
                 "type": "popover",
@@ -1416,7 +1415,7 @@ class TestSurvey(APIBaseTest):
 
         # add another random feature flag
         self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             data={
                 "name": f"flag",
                 "key": f"flag_0",
@@ -1426,7 +1425,7 @@ class TestSurvey(APIBaseTest):
         ).json()
 
         with self.assertNumQueries(20):
-            response = self.client.get(f"/api/projects/{self.team.id}/feature_flags")
+            response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             result = response.json()
 
@@ -1439,7 +1438,7 @@ class TestSurvey(APIBaseTest):
 
     def test_updating_survey_with_invalid_iteration_count_is_rejected(self):
         survey_with_targeting = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey with targeting",
                 "type": "popover",
@@ -1487,7 +1486,7 @@ class TestSurvey(APIBaseTest):
             name="cohort2",
         )
         survey_with_targeting = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey with targeting",
                 "type": "popover",
@@ -1522,7 +1521,7 @@ class TestSurvey(APIBaseTest):
 
     def test_updating_survey_with_targeting_creates_or_updates_targeting_flag(self):
         survey_with_targeting = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey with targeting",
                 "type": "popover",
@@ -1548,7 +1547,7 @@ class TestSurvey(APIBaseTest):
         ).json()
 
         survey_without_targeting = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey without targeting",
                 "type": "popover",
@@ -1560,7 +1559,7 @@ class TestSurvey(APIBaseTest):
         assert survey_without_targeting["targeting_flag"] is None
 
         updated_survey_creates_targeting_flag = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_without_targeting['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_without_targeting['id']}/",
             data={
                 "targeting_flag_filters": {
                     "groups": [
@@ -1605,7 +1604,7 @@ class TestSurvey(APIBaseTest):
             "aggregation_group_type_index": None,
         }
         updated_survey_updates_targeting_flag = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
             data={
                 "targeting_flag_filters": {"groups": [{"variant": None, "rollout_percentage": 20, "properties": []}]},
             },
@@ -1620,7 +1619,7 @@ class TestSurvey(APIBaseTest):
 
     def test_updating_survey_to_send_none_targeting_doesnt_delete_targeting_flag(self):
         survey_with_targeting = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey with targeting",
                 "type": "popover",
@@ -1649,7 +1648,7 @@ class TestSurvey(APIBaseTest):
         assert FeatureFlag.objects.filter(id=flagId).exists()
 
         updated_survey_deletes_targeting_flag = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
             data={
                 "name": "other",
                 # "targeting_flag_filters": None, # don't delete these
@@ -1664,7 +1663,7 @@ class TestSurvey(APIBaseTest):
 
     def test_updating_survey_to_remove_targeting_deletes_targeting_flag(self):
         survey_with_targeting = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey with targeting",
                 "type": "popover",
@@ -1693,7 +1692,7 @@ class TestSurvey(APIBaseTest):
         assert FeatureFlag.objects.filter(id=flagId).exists()
 
         updated_survey_deletes_targeting_flag = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
             data={
                 "remove_targeting_flag": True,  # delete targeting flag
             },
@@ -1711,7 +1710,7 @@ class TestSurvey(APIBaseTest):
 
     def test_updating_survey_other_props_doesnt_delete_targeting_flag(self):
         survey_with_targeting = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey with targeting",
                 "type": "popover",
@@ -1740,7 +1739,7 @@ class TestSurvey(APIBaseTest):
         assert FeatureFlag.objects.filter(id=flagId).exists()
 
         updated_survey_does_not_delete_targeting_flag = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
             data={"start_date": "2023-04-01T12:00:10"},
         )
 
@@ -1752,7 +1751,7 @@ class TestSurvey(APIBaseTest):
 
     def test_survey_targeting_flag_validation(self):
         survey_with_targeting = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey with targeting",
                 "type": "popover",
@@ -1781,7 +1780,7 @@ class TestSurvey(APIBaseTest):
         assert FeatureFlag.objects.filter(id=flagId).exists()
 
         updated_survey_deletes_targeting_flag = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
             data={
                 "targeting_flag_filters": {
                     "groups": [
@@ -1801,7 +1800,7 @@ class TestSurvey(APIBaseTest):
         assert updated_survey_deletes_targeting_flag.json()["detail"] == invalid_detail
 
         updated_survey_deletes_targeting_flag = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
             data={
                 "targeting_flag_filters": {
                     "groups": [
@@ -1824,7 +1823,7 @@ class TestSurvey(APIBaseTest):
         assert updated_survey_deletes_targeting_flag.json()["detail"] == invalid_detail
 
         updated_survey_deletes_targeting_flag = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
             data={
                 "targeting_flag_filters": {
                     "groups": [
@@ -1847,7 +1846,7 @@ class TestSurvey(APIBaseTest):
         assert updated_survey_deletes_targeting_flag.json()["detail"] == invalid_detail
 
         updated_survey_deletes_targeting_flag = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
             data={
                 "targeting_flag_filters": {
                     "groups": [
@@ -1871,7 +1870,7 @@ class TestSurvey(APIBaseTest):
     @parameterized.expand([("regex",), ("not_regex",)])
     def test_survey_targeting_flag_rejects_invalid_regex(self, operator):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey with bad regex",
                 "type": "popover",
@@ -1900,7 +1899,7 @@ class TestSurvey(APIBaseTest):
 
     def test_survey_targeting_flag_numeric_validation(self):
         survey_with_targeting = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey with numeric targeting",
                 "type": "popover",
@@ -1930,7 +1929,7 @@ class TestSurvey(APIBaseTest):
         linked_flag = FeatureFlag.objects.create(team=self.team, key="early-access", created_by=self.user)
 
         survey_with_linked_flag = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey with targeting",
                 "type": "popover",
@@ -1944,7 +1943,7 @@ class TestSurvey(APIBaseTest):
         assert FeatureFlag.objects.filter(id=flagId).exists()
 
         updated_survey_removes_linked_flag = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_with_linked_flag['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_with_linked_flag['id']}/",
             data={
                 "linked_flag_id": None,
             },
@@ -1960,7 +1959,7 @@ class TestSurvey(APIBaseTest):
         linked_flag = FeatureFlag.objects.create(team=self.team, key="early-access", created_by=self.user)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Early access survey",
                 "type": "popover",
@@ -1971,7 +1970,7 @@ class TestSurvey(APIBaseTest):
         assert FeatureFlag.objects.filter(id=linked_flag.id).exists()
 
         deleted_survey = self.client.delete(
-            f"/api/projects/{self.team.id}/surveys/{response.json()['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{response.json()['id']}/",
             format="json",
         )
         assert deleted_survey.status_code == status.HTTP_204_NO_CONTENT
@@ -1982,7 +1981,7 @@ class TestSurvey(APIBaseTest):
         other_flag = FeatureFlag.objects.create(team=other_team, key="other-team-flag", created_by=self.user)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Test Survey",
                 "type": "popover",
@@ -1998,7 +1997,7 @@ class TestSurvey(APIBaseTest):
     def test_updating_survey_with_linked_flag_from_different_team_returns_400(self):
         own_flag = FeatureFlag.objects.create(team=self.team, key="own-flag", created_by=self.user)
         survey = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Test Survey",
                 "type": "popover",
@@ -2012,7 +2011,7 @@ class TestSurvey(APIBaseTest):
         other_flag = FeatureFlag.objects.create(team=other_team, key="other-team-flag", created_by=self.user)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey['id']}/",
             data={"linked_flag_id": other_flag.id},
             format="json",
         )
@@ -2025,7 +2024,7 @@ class TestSurvey(APIBaseTest):
         other_flag = FeatureFlag.objects.create(team=other_team, key="other-team-flag", created_by=self.user)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Test Survey",
                 "type": "popover",
@@ -2041,7 +2040,7 @@ class TestSurvey(APIBaseTest):
 
     def test_updating_survey_with_targeting_flag_from_different_team_returns_400(self):
         survey = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Test Survey",
                 "type": "popover",
@@ -2054,7 +2053,7 @@ class TestSurvey(APIBaseTest):
         other_flag = FeatureFlag.objects.create(team=other_team, key="other-team-flag", created_by=self.user)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey['id']}/",
             data={"targeting_flag_id": other_flag.id},
             format="json",
         )
@@ -2065,7 +2064,7 @@ class TestSurvey(APIBaseTest):
 
     def test_creating_survey_with_nonexistent_linked_flag_returns_400(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Test Survey",
                 "type": "popover",
@@ -2083,7 +2082,7 @@ class TestSurvey(APIBaseTest):
         other_insight = Insight.objects.create(team=other_team, name="other-team-insight", created_by=self.user)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Test Survey",
                 "type": "popover",
@@ -2100,7 +2099,7 @@ class TestSurvey(APIBaseTest):
     def test_updating_survey_with_linked_insight_from_different_team_returns_400(self):
         own_insight = Insight.objects.create(team=self.team, name="own-insight", created_by=self.user)
         survey = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Test Survey",
                 "type": "popover",
@@ -2114,7 +2113,7 @@ class TestSurvey(APIBaseTest):
         other_insight = Insight.objects.create(team=other_team, name="other-team-insight", created_by=self.user)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey['id']}/",
             data={"linked_insight_id": other_insight.id},
             format="json",
         )
@@ -2125,7 +2124,7 @@ class TestSurvey(APIBaseTest):
 
     def test_creating_survey_with_nonexistent_linked_insight_returns_400(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Test Survey",
                 "type": "popover",
@@ -2142,7 +2141,7 @@ class TestSurvey(APIBaseTest):
         own_insight = Insight.objects.create(team=self.team, name="own-insight", created_by=self.user)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Test Survey",
                 "type": "popover",
@@ -2157,7 +2156,7 @@ class TestSurvey(APIBaseTest):
 
     def test_deleting_survey_deletes_targeting_flag(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks power users survey",
                 "type": "popover",
@@ -2183,7 +2182,7 @@ class TestSurvey(APIBaseTest):
         assert FeatureFlag.objects.filter(id=response.json()["targeting_flag"]["id"]).exists()
 
         deleted_survey = self.client.delete(
-            f"/api/projects/{self.team.id}/surveys/{response.json()['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{response.json()['id']}/",
             format="json",
         )
         assert deleted_survey.status_code == status.HTTP_204_NO_CONTENT
@@ -2191,7 +2190,7 @@ class TestSurvey(APIBaseTest):
 
     def test_inactive_surveys_disables_targeting_flag(self):
         survey_with_targeting = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey with targeting",
                 "type": "popover",
@@ -2218,7 +2217,7 @@ class TestSurvey(APIBaseTest):
         assert FeatureFlag.objects.filter(id=survey_with_targeting["targeting_flag"]["id"]).get().active is False
         # launch survey
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
             data={
                 "start_date": datetime.now() - timedelta(days=1),
             },
@@ -2226,7 +2225,7 @@ class TestSurvey(APIBaseTest):
         assert FeatureFlag.objects.filter(id=survey_with_targeting["targeting_flag"]["id"]).get().active is True
         # stop the survey
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
             data={
                 "end_date": datetime.now() + timedelta(days=1),
             },
@@ -2234,7 +2233,7 @@ class TestSurvey(APIBaseTest):
         assert FeatureFlag.objects.filter(id=survey_with_targeting["targeting_flag"]["id"]).get().active is False
         # resume survey again
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
             data={
                 "end_date": None,
             },
@@ -2243,7 +2242,7 @@ class TestSurvey(APIBaseTest):
 
     def test_inactive_surveys_disables_internal_targeting_flag(self):
         survey_with_targeting = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey with targeting",
                 "type": "popover",
@@ -2258,7 +2257,7 @@ class TestSurvey(APIBaseTest):
         assert survey.internal_targeting_flag.active is False
         # launch survey
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "start_date": datetime.now() - timedelta(days=1),
             },
@@ -2267,7 +2266,7 @@ class TestSurvey(APIBaseTest):
         assert FeatureFlag.objects.filter(id=survey.internal_targeting_flag.id).get().active is True
         # stop the survey
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "end_date": datetime.now() + timedelta(days=1),
             },
@@ -2277,7 +2276,7 @@ class TestSurvey(APIBaseTest):
 
         # resume survey again
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "end_date": None,
             },
@@ -2286,7 +2285,7 @@ class TestSurvey(APIBaseTest):
 
     def test_archiving_stopped_survey_disables_targeting_flag(self):
         survey_with_targeting = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey with targeting",
                 "type": "popover",
@@ -2318,7 +2317,7 @@ class TestSurvey(APIBaseTest):
 
         # launch survey
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"start_date": datetime.now() - timedelta(days=1)},
         )
         assert FeatureFlag.objects.get(id=targeting_flag_id).active is True
@@ -2326,7 +2325,7 @@ class TestSurvey(APIBaseTest):
 
         # stop survey
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"end_date": datetime.now() + timedelta(days=1)},
         )
         assert FeatureFlag.objects.get(id=targeting_flag_id).active is False
@@ -2334,7 +2333,7 @@ class TestSurvey(APIBaseTest):
 
         # archive the already-stopped survey
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"archived": True},
         )
         assert FeatureFlag.objects.get(id=targeting_flag_id).active is False
@@ -2342,7 +2341,7 @@ class TestSurvey(APIBaseTest):
 
     def test_unrelated_patch_to_stopped_survey_keeps_flags_inactive(self):
         survey_with_targeting = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey with targeting",
                 "type": "popover",
@@ -2374,7 +2373,7 @@ class TestSurvey(APIBaseTest):
 
         # launch survey
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"start_date": datetime.now() - timedelta(days=1)},
         )
         assert FeatureFlag.objects.get(id=targeting_flag_id).active is True
@@ -2382,7 +2381,7 @@ class TestSurvey(APIBaseTest):
 
         # stop survey
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"end_date": datetime.now() + timedelta(days=1)},
         )
         assert FeatureFlag.objects.get(id=targeting_flag_id).active is False
@@ -2390,7 +2389,7 @@ class TestSurvey(APIBaseTest):
 
         # unrelated update — just rename the survey
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"name": "renamed survey"},
         )
         assert FeatureFlag.objects.get(id=targeting_flag_id).active is False
@@ -2398,7 +2397,7 @@ class TestSurvey(APIBaseTest):
 
     def test_archiving_running_survey_disables_targeting_flag(self):
         survey_with_targeting = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey with targeting",
                 "type": "popover",
@@ -2430,7 +2429,7 @@ class TestSurvey(APIBaseTest):
 
         # launch survey
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"start_date": datetime.now() - timedelta(days=1)},
         )
         assert FeatureFlag.objects.get(id=targeting_flag_id).active is True
@@ -2438,7 +2437,7 @@ class TestSurvey(APIBaseTest):
 
         # archive while still running (frontend sends end_date + archived together)
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "archived": True,
                 "end_date": datetime.now().isoformat(),
@@ -2449,7 +2448,7 @@ class TestSurvey(APIBaseTest):
 
     def test_unarchiving_stopped_survey_keeps_flags_inactive(self):
         survey_with_targeting = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey with targeting",
                 "type": "popover",
@@ -2481,7 +2480,7 @@ class TestSurvey(APIBaseTest):
 
         # launch survey
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"start_date": datetime.now() - timedelta(days=1)},
         )
         assert FeatureFlag.objects.get(id=targeting_flag_id).active is True
@@ -2489,7 +2488,7 @@ class TestSurvey(APIBaseTest):
 
         # stop survey
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"end_date": datetime.now() + timedelta(days=1)},
         )
         assert FeatureFlag.objects.get(id=targeting_flag_id).active is False
@@ -2497,7 +2496,7 @@ class TestSurvey(APIBaseTest):
 
         # archive the stopped survey
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"archived": True},
         )
         assert FeatureFlag.objects.get(id=targeting_flag_id).active is False
@@ -2506,7 +2505,7 @@ class TestSurvey(APIBaseTest):
         # unarchive the survey — flags stay inactive because the survey
         # is still stopped (end_date is set)
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"archived": False},
         )
         assert FeatureFlag.objects.get(id=targeting_flag_id).active is False
@@ -2514,7 +2513,7 @@ class TestSurvey(APIBaseTest):
 
     def test_resuming_stopped_survey_reactivates_both_flags(self):
         survey_with_targeting = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey with targeting",
                 "type": "popover",
@@ -2546,7 +2545,7 @@ class TestSurvey(APIBaseTest):
 
         # launch survey
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"start_date": datetime.now() - timedelta(days=1)},
         )
         assert FeatureFlag.objects.get(id=targeting_flag_id).active is True
@@ -2554,7 +2553,7 @@ class TestSurvey(APIBaseTest):
 
         # stop survey
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"end_date": datetime.now() + timedelta(days=1)},
         )
         assert FeatureFlag.objects.get(id=targeting_flag_id).active is False
@@ -2562,7 +2561,7 @@ class TestSurvey(APIBaseTest):
 
         # resume survey by clearing end_date
         self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"end_date": None},
         )
         assert FeatureFlag.objects.get(id=targeting_flag_id).active is True
@@ -2570,7 +2569,7 @@ class TestSurvey(APIBaseTest):
 
     def test_survey_with_wait_period_creates_targeting_flag_with_last_seen_date_check(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey with wait period",
                 "type": "popover",
@@ -2648,7 +2647,7 @@ class TestSurvey(APIBaseTest):
 
     def test_survey_without_wait_period_has_single_group_targeting_flag(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey without wait period",
                 "type": "popover",
@@ -2694,7 +2693,7 @@ class TestSurvey(APIBaseTest):
 
     def test_updating_survey_wait_period_updates_targeting_flag(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey to update",
                 "type": "popover",
@@ -2710,7 +2709,7 @@ class TestSurvey(APIBaseTest):
         assert len(survey.internal_targeting_flag.filters["groups"]) == 1
 
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "conditions": {
                     "seenSurveyWaitPeriodInDays": 14,
@@ -2733,7 +2732,7 @@ class TestSurvey(APIBaseTest):
 
     def test_can_list_surveys(self):
         self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks power users survey",
                 "type": "popover",
@@ -2747,7 +2746,7 @@ class TestSurvey(APIBaseTest):
             },
         )
 
-        list = self.client.get(f"/api/projects/{self.team.id}/surveys/")
+        list = self.client.get(f"/v1/projects/{self.team.id}/surveys/")
         response_data = list.json()
         assert list.status_code == status.HTTP_200_OK, response_data
         survey = Survey.objects.get(team_id=self.team.id)
@@ -2868,7 +2867,7 @@ class TestSurvey(APIBaseTest):
         )
         product_tour.linked_surveys.add(product_tour_survey)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
         assert len(results) == 1
@@ -2876,7 +2875,7 @@ class TestSurvey(APIBaseTest):
 
     def test_updating_survey_name_validates(self):
         survey_with_targeting = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey with targeting",
                 "type": "popover",
@@ -2902,7 +2901,7 @@ class TestSurvey(APIBaseTest):
         ).json()
 
         self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey without targeting",
                 "type": "popover",
@@ -2911,7 +2910,7 @@ class TestSurvey(APIBaseTest):
         ).json()
 
         updated_survey_deletes_targeting_flag = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_with_targeting['id']}/",
             data={
                 "name": "survey without targeting",
             },
@@ -2953,7 +2952,7 @@ class TestSurvey(APIBaseTest):
         }
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_with_flags.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_with_flags.id}/",
             data={"targeting_flag_filters": new_filters},
         )
 
@@ -2989,7 +2988,7 @@ class TestSurvey(APIBaseTest):
     @freeze_time("2023-05-01 12:00:00")
     def test_create_survey_records_activity(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "New Survey",
                 "type": "popover",
@@ -3029,7 +3028,7 @@ class TestSurvey(APIBaseTest):
         assert survey.questions is not None
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "name": "Updated Survey",
                 "questions": [{"type": "open", "question": "Updated question?", "id": str(survey.questions[0]["id"])}],
@@ -3098,7 +3097,7 @@ class TestSurvey(APIBaseTest):
 
         # set the start date / aka launch survey
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"start_date": start_date},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -3126,7 +3125,7 @@ class TestSurvey(APIBaseTest):
 
         # set the end date / aka stop survey
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"end_date": end_date},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -3146,7 +3145,7 @@ class TestSurvey(APIBaseTest):
 
         # remove the end date / aka resume survey
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"end_date": None},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -3172,7 +3171,7 @@ class TestSurvey(APIBaseTest):
             questions=[{"type": "open", "question": "Question?"}],
         )
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/surveys/{survey.id}/")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/surveys/{survey.id}/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         self._assert_survey_activity(
@@ -3195,7 +3194,7 @@ class TestSurvey(APIBaseTest):
         )
 
     def _assert_survey_activity(self, expected):
-        activity = self.client.get(f"/api/projects/{self.team.id}/surveys/activity").json()
+        activity = self.client.get(f"/v1/projects/{self.team.id}/surveys/activity").json()
         results = activity["results"]
         for item in results:
             item.pop("id", None)
@@ -3205,7 +3204,7 @@ class TestSurvey(APIBaseTest):
 
     def test_validate_schedule_on_create(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey with invalid schedule",
                 "type": "popover",
@@ -3232,7 +3231,7 @@ class TestSurvey(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "schedule": "invalid_value",
             },
@@ -3244,7 +3243,7 @@ class TestSurvey(APIBaseTest):
     def test_questions_get_ids_when_creating_survey(self):
         """Test that questions get IDs assigned when creating a survey through the API."""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Question ID Test Survey",
                 "type": "popover",
@@ -3276,7 +3275,7 @@ class TestSurvey(APIBaseTest):
         """Test that question IDs are preserved when updating a survey through the API."""
         # First create a survey
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Question ID Update Test",
                 "type": "popover",
@@ -3305,7 +3304,7 @@ class TestSurvey(APIBaseTest):
         # Update the survey with modified questions, keeping the first question's ID
         # and adding a new question without an ID
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_id}/",
             data={
                 "questions": [
                     {
@@ -3343,7 +3342,7 @@ class TestSurvey(APIBaseTest):
         custom_id_2 = "custom-id-2"
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Custom Question ID Test",
                 "type": "popover",
@@ -3372,7 +3371,7 @@ class TestSurvey(APIBaseTest):
 
     def test_search_survey_by_name(self):
         self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "NPS Survey 2024",
                 "description": "Annual NPS survey",
@@ -3382,7 +3381,7 @@ class TestSurvey(APIBaseTest):
             format="json",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/?search=NPS")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/?search=NPS")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(len(data["results"]), 1)
@@ -3390,7 +3389,7 @@ class TestSurvey(APIBaseTest):
 
     def test_search_survey_by_description(self):
         self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Product Feedback Survey",
                 "description": "product feedback collection",
@@ -3400,14 +3399,14 @@ class TestSurvey(APIBaseTest):
             format="json",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/?search=product")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/?search=product")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(len(data["results"]), 1)
         self.assertEqual(data["results"][0]["name"], "Product Feedback Survey")
 
     def test_search_survey_with_no_results(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/?search=nonexistent")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/?search=nonexistent")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(len(data["results"]), 0)
@@ -3415,7 +3414,7 @@ class TestSurvey(APIBaseTest):
     def test_search_survey_with_pagination(self):
         for i in range(15):
             self.client.post(
-                f"/api/projects/{self.team.id}/surveys/",
+                f"/v1/projects/{self.team.id}/surveys/",
                 data={
                     "name": f"Product Survey {i}",
                     "description": f"Product feedback {i}",
@@ -3426,7 +3425,7 @@ class TestSurvey(APIBaseTest):
                 format="json",
             )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/?search=Product&limit=10")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/?search=Product&limit=10")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(len(data["results"]), 10)  # Should return only 10 results
@@ -3435,7 +3434,7 @@ class TestSurvey(APIBaseTest):
 
     def test_create_survey_in_specific_folder(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             {
                 "name": "Survey with custom folder",
                 "type": "popover",
@@ -3479,10 +3478,10 @@ class TestSurvey(APIBaseTest):
 
         self.client.force_login(user2)
 
-        retrieve_response = self.client.get(f"/api/projects/{self.team.pk}/surveys/{survey.id}/")
+        retrieve_response = self.client.get(f"/v1/projects/{self.team.pk}/surveys/{survey.id}/")
         self.assertEqual(retrieve_response.status_code, status.HTTP_403_FORBIDDEN)
 
-        activity_response = self.client.get(f"/api/projects/{self.team.pk}/surveys/{survey.id}/activity/")
+        activity_response = self.client.get(f"/v1/projects/{self.team.pk}/surveys/{survey.id}/activity/")
         self.assertEqual(activity_response.status_code, status.HTTP_403_FORBIDDEN)
 
     @parameterized.expand(
@@ -3528,7 +3527,7 @@ class TestSurvey(APIBaseTest):
         for name in survey_names:
             Survey.objects.create(team=self.team, name=name, type="popover", questions=[])
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/", {"search": search})
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/", {"search": search})
         assert response.status_code == status.HTTP_200_OK
         result_names = [r["name"] for r in response.json()["results"]]
 
@@ -3548,7 +3547,7 @@ class TestSurvey(APIBaseTest):
         )
         Survey.objects.create(team=self.team, name="Unrelated", type="popover", questions=[])
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/?search=revenue")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/?search=revenue")
         assert response.status_code == status.HTTP_200_OK
         result_ids = [r["id"] for r in response.json()["results"]]
 
@@ -3565,7 +3564,7 @@ class TestSurvey(APIBaseTest):
         a = Survey.objects.create(team=self.team, name="Alpha", type="popover", questions=[])
         b = Survey.objects.create(team=self.team, name="Beta", type="popover", questions=[])
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/", {"search": search})
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/", {"search": search})
         assert response.status_code == status.HTTP_200_OK
         result_ids = {r["id"] for r in response.json()["results"]}
 
@@ -3580,12 +3579,12 @@ class TestSurvey(APIBaseTest):
     def test_list_filter_by_search_pathological_input_does_not_500(self, _name, search):
         Survey.objects.create(team=self.team, name="Survey overview", type="popover", questions=[])
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/", {"search": search})
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/", {"search": search})
         assert response.status_code == status.HTTP_200_OK
 
     def test_list_filter_by_search_nul_bytes_do_not_500(self):
         Survey.objects.create(team=self.team, name="Alpha", type="popover", questions=[])
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/", {"search": "\x00\x00\x00"})
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/", {"search": "\x00\x00\x00"})
         assert response.status_code == status.HTTP_200_OK
 
     @parameterized.expand(
@@ -3596,7 +3595,7 @@ class TestSurvey(APIBaseTest):
         ]
     )
     def test_list_filter_by_search_enforces_length_cap(self, _name, length, expected_status):
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/", {"search": "a" * length})
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/", {"search": "a" * length})
         assert response.status_code == expected_status
 
         if expected_status == status.HTTP_400_BAD_REQUEST:
@@ -3615,7 +3614,7 @@ class TestSurvey(APIBaseTest):
         matching = Survey.objects.create(team=self.team, name=survey_name, type="popover", questions=[])
         Survey.objects.create(team=self.team, name="Totally unrelated", type="popover", questions=[])
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/", {"search": search})
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/", {"search": search})
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
 
@@ -3629,7 +3628,7 @@ class TestSurvey(APIBaseTest):
         for name in ("feedback survey", "survey feedback", "feeback form", "Engineering survey"):
             Survey.objects.create(team=self.team, name=name, type="popover", questions=[])
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/?search=feedback")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/?search=feedback")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
 
@@ -3642,7 +3641,7 @@ class TestSurvey(APIBaseTest):
     def test_list_filter_by_search_match_type_absent_without_search(self):
         Survey.objects.create(team=self.team, name="Alpha", type="popover", questions=[])
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
 
@@ -3653,7 +3652,7 @@ class TestSurvey(APIBaseTest):
 class TestMultipleChoiceQuestions(APIBaseTest):
     def test_create_survey_has_open_choice(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -3683,7 +3682,7 @@ class TestMultipleChoiceQuestions(APIBaseTest):
 
     def test_create_survey_with_shuffle_options(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -3717,7 +3716,7 @@ class TestMultipleChoiceQuestions(APIBaseTest):
 class TestSurveyQuestionValidation(APIBaseTest):
     def test_create_basic_survey_question_validation(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -3773,7 +3772,7 @@ class TestSurveyQuestionValidation(APIBaseTest):
 
     def test_update_basic_survey_question_validation(self):
         basic_survey = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey without targeting",
                 "type": "popover",
@@ -3782,7 +3781,7 @@ class TestSurveyQuestionValidation(APIBaseTest):
         ).json()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{basic_survey['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{basic_survey['id']}/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -3832,7 +3831,7 @@ class TestSurveyQuestionValidation(APIBaseTest):
 
     def test_create_validate_link_url_scheme(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey without targeting",
                 "type": "popover",
@@ -3854,7 +3853,7 @@ class TestSurveyQuestionValidation(APIBaseTest):
 
     def test_create_validate_link_mailto(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey without targeting",
                 "type": "popover",
@@ -3876,7 +3875,7 @@ class TestSurveyQuestionValidation(APIBaseTest):
 
     def test_update_validate_link_https_url(self):
         basic_survey = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "survey without targeting",
                 "type": "popover",
@@ -3885,7 +3884,7 @@ class TestSurveyQuestionValidation(APIBaseTest):
         ).json()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{basic_survey['id']}/",
+            f"/v1/projects/{self.team.id}/surveys/{basic_survey['id']}/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -3907,7 +3906,7 @@ class TestSurveyQuestionValidation(APIBaseTest):
 
     def test_cleaning_empty_questions(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -3932,7 +3931,7 @@ class TestSurveyQuestionValidation(APIBaseTest):
 
     def test_validate_thank_you_with_invalid_type(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -3947,7 +3946,7 @@ class TestSurveyQuestionValidation(APIBaseTest):
 
     def test_validate_question_with_missing_text(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -3962,7 +3961,7 @@ class TestSurveyQuestionValidation(APIBaseTest):
 
     def test_validate_malformed_questions(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -3977,7 +3976,7 @@ class TestSurveyQuestionValidation(APIBaseTest):
 
     def test_validate_malformed_questions_as_string(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -3992,7 +3991,7 @@ class TestSurveyQuestionValidation(APIBaseTest):
 
     def test_validate_malformed_questions_as_array_of_strings(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -4007,7 +4006,7 @@ class TestSurveyQuestionValidation(APIBaseTest):
 
     def test_validate_malformed_question_choices_as_string(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -4028,7 +4027,7 @@ class TestSurveyQuestionValidation(APIBaseTest):
 
     def test_validate_malformed_question_choices_as_array_of_empty_strings(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -4049,7 +4048,7 @@ class TestSurveyQuestionValidation(APIBaseTest):
 
     def test_validate_shuffling_with_branching_on_create(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey with shuffling and branching",
                 "type": "popover",
@@ -4102,7 +4101,7 @@ class TestSurveyQuestionValidation(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "appearance": {
                     "shuffleQuestions": True,
@@ -4132,7 +4131,7 @@ class TestSurveyQuestionValidation(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "questions": [
                     {
@@ -4153,7 +4152,7 @@ class TestSurveyQuestionValidation(APIBaseTest):
 
     def test_shuffling_without_branching_is_allowed(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey with just shuffling",
                 "type": "popover",
@@ -4179,7 +4178,7 @@ class TestSurveyQuestionValidation(APIBaseTest):
 
     def test_branching_without_shuffling_is_allowed(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey with just branching",
                 "type": "popover",
@@ -4211,7 +4210,7 @@ class TestSurveyQuestionValidationWithEnterpriseFeatures(APIBaseTest):
 
     def test_create_survey_with_valid_question_description_content_type(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -4233,7 +4232,7 @@ class TestSurveyQuestionValidationWithEnterpriseFeatures(APIBaseTest):
 
     def test_validate_question_description_content_type(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -4255,7 +4254,7 @@ class TestSurveyQuestionValidationWithEnterpriseFeatures(APIBaseTest):
 
     def test_create_survey_with_valid_validation_rules(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey with validation",
                 "type": "popover",
@@ -4282,7 +4281,7 @@ class TestSurveyQuestionValidationWithEnterpriseFeatures(APIBaseTest):
 
     def test_validate_validation_rules_invalid_type(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey with invalid validation",
                 "type": "popover",
@@ -4302,7 +4301,7 @@ class TestSurveyQuestionValidationWithEnterpriseFeatures(APIBaseTest):
 
     def test_validate_validation_rules_negative_value(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey with negative validation value",
                 "type": "popover",
@@ -4322,7 +4321,7 @@ class TestSurveyQuestionValidationWithEnterpriseFeatures(APIBaseTest):
 
     def test_validate_validation_rules_not_a_list(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey with invalid validation",
                 "type": "popover",
@@ -4342,7 +4341,7 @@ class TestSurveyQuestionValidationWithEnterpriseFeatures(APIBaseTest):
 
     def test_validate_validation_rules_rule_not_object(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey with invalid validation",
                 "type": "popover",
@@ -4362,7 +4361,7 @@ class TestSurveyQuestionValidationWithEnterpriseFeatures(APIBaseTest):
 
     def test_validate_validation_rules_min_greater_than_max(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Survey with invalid validation",
                 "type": "popover",
@@ -4385,7 +4384,7 @@ class TestSurveyQuestionValidationWithEnterpriseFeatures(APIBaseTest):
 
     def test_create_survey_with_valid_thank_you_description_content_type(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -4404,7 +4403,7 @@ class TestSurveyQuestionValidationWithEnterpriseFeatures(APIBaseTest):
 
     def test_validate_thank_you_description_content_type(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -4423,7 +4422,7 @@ class TestSurveyQuestionValidationWithEnterpriseFeatures(APIBaseTest):
 
     def test_create_survey_with_survey_popup_delay(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "type": "popover",
@@ -4439,7 +4438,7 @@ class TestSurveyQuestionValidationWithEnterpriseFeatures(APIBaseTest):
 
     def test_create_survey_with_responses_limit(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "type": "popover",
@@ -4454,7 +4453,7 @@ class TestSurveyQuestionValidationWithEnterpriseFeatures(APIBaseTest):
 
     def test_validate_survey_popup_delay(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "type": "popover",
@@ -4470,7 +4469,7 @@ class TestSurveyQuestionValidationWithEnterpriseFeatures(APIBaseTest):
 
     def test_create_survey_with_valid_question_description_content_type_html(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -4494,7 +4493,7 @@ class TestSurveyQuestionValidationWithEnterpriseFeatures(APIBaseTest):
 
     def test_create_survey_with_valid_thank_you_description_content_type_html(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -4518,7 +4517,7 @@ class TestSurveyQuestionValidationWithEnterpriseFeatures(APIBaseTest):
         self.organization.save()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -4552,7 +4551,7 @@ class TestSurveyWithActions(APIBaseTest):
             ],
         )
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -4631,7 +4630,7 @@ class TestSurveyWithActions(APIBaseTest):
             steps_json=[{"event": "$pageview", "url": "docs", "url_matching": "contains"}],
         )
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -4687,7 +4686,7 @@ class TestSurveyWithActions(APIBaseTest):
         assert survey_with_actions.actions.filter(name="user unsubscribed").exists()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_with_actions.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_with_actions.id}/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -4739,7 +4738,7 @@ class TestSurveyWithActions(APIBaseTest):
         assert survey_with_actions.actions.filter(name="user unsubscribed").exists()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_with_actions.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_with_actions.id}/",
             data={
                 "name": "Notebooks beta release survey",
                 "description": "Get feedback on the new notebooks feature",
@@ -4814,7 +4813,7 @@ class TestSurveyResponseSampling(APIBaseTest):
     ) -> Survey:
         random_id = generate("1234567890abcdef", 10)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": f"Survey with adaptive response collection {random_id}",
                 "description": "Collect survey responses over a period of time",
@@ -4856,7 +4855,7 @@ class TestSurveyResponseSampling(APIBaseTest):
             self.assertEqual(entry["rollout_percentage"], 10 * (day + 1))
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "start_date": datetime.now() - timedelta(days=1),
                 "response_sampling_interval_type": None,
@@ -4885,7 +4884,7 @@ class TestSurveysRecurringIterations(APIBaseTest):
     def _create_recurring_survey(self) -> Survey:
         random_id = generate("1234567890abcdef", 10)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": f"Recurring NPS Survey {random_id}",
                 "description": "Get feedback on the new notebooks feature",
@@ -4910,7 +4909,7 @@ class TestSurveysRecurringIterations(APIBaseTest):
     def _create_non_recurring_survey(self) -> Survey:
         random_id = generate("1234567890abcdef", 10)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": f"Recurring NPS Survey {random_id}",
                 "description": "Get feedback on the new notebooks feature",
@@ -4931,7 +4930,7 @@ class TestSurveysRecurringIterations(APIBaseTest):
     def test_can_create_recurring_survey(self):
         survey = self._create_recurring_survey()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "start_date": datetime.now() - timedelta(days=1),
                 "iteration_count": 2,
@@ -4946,7 +4945,7 @@ class TestSurveysRecurringIterations(APIBaseTest):
     def test_can_create_and_launch_recurring_survey(self):
         survey = self._create_recurring_survey()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "start_date": datetime.now() - timedelta(days=1),
             },
@@ -4959,7 +4958,7 @@ class TestSurveysRecurringIterations(APIBaseTest):
     def test_can_set_internal_targeting_flag(self):
         survey = self._create_recurring_survey()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "start_date": datetime.now() - timedelta(days=1),
                 "iteration_count": 2,
@@ -5004,7 +5003,7 @@ class TestSurveysRecurringIterations(APIBaseTest):
     def test_iterations_always_start_from_start_date(self):
         survey = self._create_recurring_survey()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"start_date": datetime.now(), "iteration_count": 2, "iteration_frequency_days": 30},
         )
         response_data = response.json()
@@ -5014,7 +5013,7 @@ class TestSurveysRecurringIterations(APIBaseTest):
         assert response_data["iteration_start_dates"] == ["2024-05-22T14:40:09Z", "2024-06-21T14:40:09Z"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"iteration_count": 4, "iteration_frequency_days": 30},
         )
         response_data = response.json()
@@ -5029,7 +5028,7 @@ class TestSurveysRecurringIterations(APIBaseTest):
     def test_cannot_reduce_iterations_lt_current_iteration(self):
         survey = self._create_recurring_survey()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "start_date": datetime.now() - timedelta(days=1),
                 "iteration_count": 2,
@@ -5045,7 +5044,7 @@ class TestSurveysRecurringIterations(APIBaseTest):
         survey.current_iteration = 2
         survey.save()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "start_date": datetime.now() - timedelta(days=1),
                 "iteration_count": 1,
@@ -5061,7 +5060,7 @@ class TestSurveysRecurringIterations(APIBaseTest):
         survey.current_iteration = 2
         survey.save()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "start_date": datetime.now() - timedelta(days=1),
             },
@@ -5073,7 +5072,7 @@ class TestSurveysRecurringIterations(APIBaseTest):
         survey.current_iteration = 2
         survey.save()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "start_date": datetime.now() - timedelta(days=1),
             },
@@ -5082,7 +5081,7 @@ class TestSurveysRecurringIterations(APIBaseTest):
         survey.refresh_from_db()
         self.assertIsNotNone(survey.current_iteration)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "start_date": datetime.now() - timedelta(days=1),
                 "iteration_count": 3,
@@ -5094,7 +5093,7 @@ class TestSurveysRecurringIterations(APIBaseTest):
     def test_can_turn_off_recurring_schedule(self):
         survey = self._create_recurring_survey()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "start_date": datetime.now() - timedelta(days=1),
                 "iteration_count": 0,
@@ -5108,7 +5107,7 @@ class TestSurveysRecurringIterations(APIBaseTest):
         # start the survey with a recurring schedule
         survey = self._create_recurring_survey()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "start_date": datetime.now() - timedelta(days=1),
                 "iteration_count": 2,
@@ -5125,7 +5124,7 @@ class TestSurveysRecurringIterations(APIBaseTest):
         # now stop  the survey with a recurring schedule
         survey = self._create_recurring_survey()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "start_date": datetime.now() - timedelta(days=1),
                 "end_date": datetime.now() + timedelta(days=2),
@@ -5167,7 +5166,7 @@ class TestSurveyAPITokens(PersonalAPIKeysBaseTest, APIBaseTest):
                     timestamp=datetime.now() - timedelta(days=count),
                 )
 
-        response = self._do_request(f"/api/projects/{self.team.id}/surveys/responses_count")
+        response = self._do_request(f"/v1/projects/{self.team.id}/surveys/responses_count")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -5198,7 +5197,7 @@ class TestResponsesCount(DatastoreTestMixin, APIBaseTest):
                     timestamp=datetime.now() - timedelta(days=count),
                 )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/responses_count")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/responses_count")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -5232,14 +5231,14 @@ class TestResponsesCount(DatastoreTestMixin, APIBaseTest):
                     timestamp=datetime.now() - timedelta(days=count),
                 )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/responses_count")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/responses_count")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
         self.assertEqual(data, expected_survey_counts)
 
     def test_responses_count_zero_responses(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/responses_count")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/responses_count")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -5328,7 +5327,7 @@ class TestResponsesCount(DatastoreTestMixin, APIBaseTest):
                 properties=event_data["properties"],
             )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/responses_count")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/responses_count")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -5362,7 +5361,7 @@ class TestResponsesCount(DatastoreTestMixin, APIBaseTest):
         )
 
         # Before archiving - should count the response
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/responses_count")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/responses_count")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data[survey_id], 1)
@@ -5371,13 +5370,13 @@ class TestResponsesCount(DatastoreTestMixin, APIBaseTest):
         SurveyResponseArchive.objects.create(team=self.team, survey=survey, response_uuid=response_uuid)
 
         # After archiving, default behavior should still include archived
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/responses_count")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/responses_count")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data[survey_id], 1)
 
         # With exclude_archived=true - should not count
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/responses_count?exclude_archived=true")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/responses_count?exclude_archived=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data.get(survey_id, 0), 0)
@@ -5401,7 +5400,7 @@ class TestResponsesCount(DatastoreTestMixin, APIBaseTest):
                 )
 
         # Without filter - should return all surveys
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/responses_count")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/responses_count")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data[survey_id_1], 5)
@@ -5409,27 +5408,27 @@ class TestResponsesCount(DatastoreTestMixin, APIBaseTest):
         self.assertEqual(data[survey_id_3], 7)
 
         # Filter to single survey
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/responses_count?survey_ids={survey_id_1}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/responses_count?survey_ids={survey_id_1}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data, {survey_id_1: 5})
 
         # Filter to multiple surveys
         response = self.client.get(
-            f"/api/projects/{self.team.id}/surveys/responses_count?survey_ids={survey_id_1},{survey_id_2}"
+            f"/v1/projects/{self.team.id}/surveys/responses_count?survey_ids={survey_id_1},{survey_id_2}"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data, {survey_id_1: 5, survey_id_2: 3})
 
         # Filter with spaces around IDs (should be trimmed)
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/responses_count?survey_ids= {survey_id_3} ")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/responses_count?survey_ids= {survey_id_3} ")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data, {survey_id_3: 7})
 
         # Empty survey_ids should return all
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/responses_count?survey_ids=")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/responses_count?survey_ids=")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(len(data), 3)
@@ -5437,7 +5436,7 @@ class TestResponsesCount(DatastoreTestMixin, APIBaseTest):
 
 class TestSurveyStats(DatastoreTestMixin, APIBaseTest):
     def test_survey_stats_nonexistent_survey(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/12345/stats/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/12345/stats/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_survey_stats_zero_responses(self):
@@ -5448,7 +5447,7 @@ class TestSurveyStats(DatastoreTestMixin, APIBaseTest):
             questions=[{"type": "open", "question": "What's your favorite color?"}],
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/{survey.id}/stats/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/{survey.id}/stats/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -5464,7 +5463,7 @@ class TestSurveyStats(DatastoreTestMixin, APIBaseTest):
         self.assertEqual(rates["dismissal_rate"], 0.0)
 
     def test_global_stats_no_surveys(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/stats/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/stats/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -5514,7 +5513,7 @@ class TestSurveyStats(DatastoreTestMixin, APIBaseTest):
                 properties={"$survey_id": str(survey_id)},
             )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/stats/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/stats/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -5627,7 +5626,7 @@ class TestSurveyStats(DatastoreTestMixin, APIBaseTest):
 
         flush_persons_and_events()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/{survey.id}/stats/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/{survey.id}/stats/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data: dict[str, Any] = response.json()
@@ -5681,7 +5680,7 @@ class TestSurveyStats(DatastoreTestMixin, APIBaseTest):
 
         flush_persons_and_events()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/{survey.id}/stats/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/{survey.id}/stats/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -5711,7 +5710,7 @@ class TestSurveyStats(DatastoreTestMixin, APIBaseTest):
         )
 
         # Before archiving
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/{survey.id}/stats/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/{survey.id}/stats/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data["stats"]["survey sent"]["total_count"], 1)
@@ -5720,13 +5719,13 @@ class TestSurveyStats(DatastoreTestMixin, APIBaseTest):
         SurveyResponseArchive.objects.create(team=self.team, survey=survey, response_uuid=response_uuid)
 
         # After archiving, default behavior should still include archived
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/{survey.id}/stats/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/{survey.id}/stats/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data["stats"]["survey sent"]["total_count"], 1)
 
         # With exclude_archived=true - should not count
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/{survey.id}/stats/?exclude_archived=true")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/{survey.id}/stats/?exclude_archived=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data["stats"]["survey sent"]["total_count"], 0)
@@ -5750,7 +5749,7 @@ class TestSurveyStats(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Variant Survey",
                 "type": "popover",
@@ -5785,7 +5784,7 @@ class TestSurveyStats(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Invalid Variant Survey",
                 "type": "popover",
@@ -5821,7 +5820,7 @@ class TestSurveyStats(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Any Variant Survey",
                 "type": "popover",
@@ -5848,7 +5847,7 @@ class TestSurveyStats(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "No Variants Survey",
                 "type": "popover",
@@ -5869,7 +5868,7 @@ class TestSurveyStats(DatastoreTestMixin, APIBaseTest):
     def test_create_survey_with_linked_flag_variant_without_flag_id(self):
         """Test creating a survey with linkedFlagVariant but no linked_flag_id"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "No Flag ID Survey",
                 "type": "popover",
@@ -5909,7 +5908,7 @@ class TestSurveyStats(DatastoreTestMixin, APIBaseTest):
 
         # Update survey to add feature flag and variant
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"linked_flag_id": flag.id, "conditions": {"linkedFlagVariant": "alpha"}},
             format="json",
         )
@@ -5948,7 +5947,7 @@ class TestSurveyStats(DatastoreTestMixin, APIBaseTest):
 
         # Try to update survey with invalid variant
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={"linked_flag_id": flag.id, "conditions": {"linkedFlagVariant": "invalid_option"}},
             format="json",
         )
@@ -5970,7 +5969,7 @@ class TestSurveyQuestionLabels(APIBaseTest):
 
     def _question_labels(self, team_id: int | None = None):
         team_id = team_id if team_id is not None else self.team.id
-        return self.client.get(f"/api/projects/{team_id}/surveys/question_labels/")
+        return self.client.get(f"/v1/projects/{team_id}/surveys/question_labels/")
 
     def test_returns_question_labels_for_team_surveys(self):
         # Two surveys, three questions across them — covers the iterator + index logic.
@@ -6116,7 +6115,7 @@ class TestExternalSurveyValidation(APIBaseTest):
 
         # Try to update to external survey type with prohibited fields
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
             data={
                 "type": "external_survey",
                 "linked_flag_id": self.test_flag.id,
@@ -6150,7 +6149,7 @@ class TestExternalSurveyValidation(APIBaseTest):
     def test_create_external_survey_with_prohibited_fields_returns_validation_error(self):
         """Test creating external survey with prohibited fields returns validation errors"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "External Survey with Prohibited Fields",
                 "type": "external_survey",
@@ -6186,7 +6185,7 @@ class TestExternalSurveyValidation(APIBaseTest):
     def test_create_external_survey_without_prohibited_fields_succeeds(self):
         """Test creating external survey without prohibited fields succeeds"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Valid External Survey",
                 "type": "external_survey",
@@ -6211,7 +6210,7 @@ class TestExternalSurveyValidation(APIBaseTest):
     def test_external_survey_allows_empty_conditions(self):
         """Test that external surveys allow empty/default conditions"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "External Survey with Empty Conditions",
                 "type": "external_survey",
@@ -6238,7 +6237,7 @@ class TestExternalSurveyValidation(APIBaseTest):
     def test_external_survey_rejects_populated_conditions(self):
         """Test that external surveys reject conditions with actual values"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "External Survey with Populated Conditions",
                 "type": "external_survey",
@@ -6261,7 +6260,7 @@ class TestExternalSurveyValidation(APIBaseTest):
     def test_non_external_survey_preserves_fields(self):
         """Test that non-external surveys preserve all fields normally"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={
                 "name": "Regular Survey Test",
                 "type": "popover",
@@ -6340,7 +6339,7 @@ class TestSurveyBulkDuplication(APIBaseTest):
     def test_bulk_duplicate_to_multiple_projects(self):
         """Test successful bulk duplication to multiple projects"""
         response = self.client.post(
-            f"/api/projects/{self.team.project_id}/surveys/{self.source_survey.id}/duplicate_to_projects/",
+            f"/v1/projects/{self.team.project_id}/surveys/{self.source_survey.id}/duplicate_to_projects/",
             data={"target_team_ids": [self.team2.id, self.team3.id]},
             format="json",
         )
@@ -6379,7 +6378,7 @@ class TestSurveyBulkDuplication(APIBaseTest):
     def test_bulk_duplicate_to_single_project(self):
         """Test bulk duplication works with a single target project"""
         response = self.client.post(
-            f"/api/projects/{self.team.project_id}/surveys/{self.source_survey.id}/duplicate_to_projects/",
+            f"/v1/projects/{self.team.project_id}/surveys/{self.source_survey.id}/duplicate_to_projects/",
             data={"target_team_ids": [self.team2.id]},
             format="json",
         )
@@ -6392,7 +6391,7 @@ class TestSurveyBulkDuplication(APIBaseTest):
     def test_bulk_duplicate_with_empty_team_ids(self):
         """Test that empty target_team_ids returns validation error"""
         response = self.client.post(
-            f"/api/projects/{self.team.project_id}/surveys/{self.source_survey.id}/duplicate_to_projects/",
+            f"/v1/projects/{self.team.project_id}/surveys/{self.source_survey.id}/duplicate_to_projects/",
             data={"target_team_ids": []},
             format="json",
         )
@@ -6403,7 +6402,7 @@ class TestSurveyBulkDuplication(APIBaseTest):
     def test_bulk_duplicate_with_missing_team_ids(self):
         """Test that missing target_team_ids returns validation error"""
         response = self.client.post(
-            f"/api/projects/{self.team.project_id}/surveys/{self.source_survey.id}/duplicate_to_projects/",
+            f"/v1/projects/{self.team.project_id}/surveys/{self.source_survey.id}/duplicate_to_projects/",
             data={},
             format="json",
         )
@@ -6413,7 +6412,7 @@ class TestSurveyBulkDuplication(APIBaseTest):
     def test_bulk_duplicate_with_nonexistent_team(self):
         """Test that nonexistent team IDs return validation error"""
         response = self.client.post(
-            f"/api/projects/{self.team.project_id}/surveys/{self.source_survey.id}/duplicate_to_projects/",
+            f"/v1/projects/{self.team.project_id}/surveys/{self.source_survey.id}/duplicate_to_projects/",
             data={"target_team_ids": [self.team2.id, 99999]},
             format="json",
         )
@@ -6427,7 +6426,7 @@ class TestSurveyBulkDuplication(APIBaseTest):
         other_team = Team.objects.create(organization=other_org, name="Other Team")
 
         response = self.client.post(
-            f"/api/projects/{self.team.project_id}/surveys/{self.source_survey.id}/duplicate_to_projects/",
+            f"/v1/projects/{self.team.project_id}/surveys/{self.source_survey.id}/duplicate_to_projects/",
             data={"target_team_ids": [self.team2.id, other_team.id]},
             format="json",
         )
@@ -6440,7 +6439,7 @@ class TestSurveyBulkDuplication(APIBaseTest):
         with freeze_time("2024-01-01 00:00:00") as frozen_time:
             # Create first duplicate
             response1 = self.client.post(
-                f"/api/projects/{self.team.project_id}/surveys/{self.source_survey.id}/duplicate_to_projects/",
+                f"/v1/projects/{self.team.project_id}/surveys/{self.source_survey.id}/duplicate_to_projects/",
                 data={"target_team_ids": [self.team2.id]},
                 format="json",
             )
@@ -6452,7 +6451,7 @@ class TestSurveyBulkDuplication(APIBaseTest):
 
             # Try to create another duplicate (should succeed because timestamp is different)
             response2 = self.client.post(
-                f"/api/projects/{self.team.project_id}/surveys/{self.source_survey.id}/duplicate_to_projects/",
+                f"/v1/projects/{self.team.project_id}/surveys/{self.source_survey.id}/duplicate_to_projects/",
                 data={"target_team_ids": [self.team2.id]},
                 format="json",
             )
@@ -6494,7 +6493,7 @@ class TestSurveyBulkDuplication(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.project_id}/surveys/{survey_with_specifics.id}/duplicate_to_projects/",
+            f"/v1/projects/{self.team.project_id}/surveys/{survey_with_specifics.id}/duplicate_to_projects/",
             data={"target_team_ids": [self.team2.id]},
             format="json",
         )
@@ -6534,7 +6533,7 @@ class TestSurveyBulkDuplication(APIBaseTest):
         initial_team3_count = Survey.objects.filter(team=self.team3).count()
 
         response = self.client.post(
-            f"/api/projects/{self.team.project_id}/surveys/{self.source_survey.id}/duplicate_to_projects/",
+            f"/v1/projects/{self.team.project_id}/surveys/{self.source_survey.id}/duplicate_to_projects/",
             data={"target_team_ids": [self.team2.id, self.team3.id]},
             format="json",
         )
@@ -6549,7 +6548,7 @@ class TestSurveyBulkDuplication(APIBaseTest):
         """Test that duplicating a nonexistent survey returns 404"""
         fake_uuid = uuid.uuid4()
         response = self.client.post(
-            f"/api/projects/{self.team.project_id}/surveys/{fake_uuid}/duplicate_to_projects/",
+            f"/v1/projects/{self.team.project_id}/surveys/{fake_uuid}/duplicate_to_projects/",
             data={"target_team_ids": [self.team2.id]},
             format="json",
         )
@@ -6559,7 +6558,7 @@ class TestSurveyBulkDuplication(APIBaseTest):
     def test_bulk_duplicate_preserves_question_ids(self):
         """Test that question IDs are reset (set to None) in duplicated surveys"""
         response = self.client.post(
-            f"/api/projects/{self.team.project_id}/surveys/{self.source_survey.id}/duplicate_to_projects/",
+            f"/v1/projects/{self.team.project_id}/surveys/{self.source_survey.id}/duplicate_to_projects/",
             data={"target_team_ids": [self.team2.id]},
             format="json",
         )
@@ -6590,7 +6589,7 @@ class TestSurveyResponseArchive(DatastoreTestMixin, APIBaseTest):
         self.response_uuid = str(uuid.uuid4())
 
     def _assert_survey_activity(self, expected):
-        activity = self.client.get(f"/api/projects/{self.team.id}/surveys/activity").json()
+        activity = self.client.get(f"/v1/projects/{self.team.id}/surveys/activity").json()
         results = activity["results"]
         for item in results:
             item.pop("id", None)
@@ -6601,7 +6600,7 @@ class TestSurveyResponseArchive(DatastoreTestMixin, APIBaseTest):
     @freeze_time("2024-05-01 12:00:00")
     def test_archive_response(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/{self.survey.id}/responses/{self.response_uuid}/archive"
+            f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/responses/{self.response_uuid}/archive"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -6636,7 +6635,7 @@ class TestSurveyResponseArchive(DatastoreTestMixin, APIBaseTest):
     def test_archive_response_idempotent(self):
         # Archive once
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/{self.survey.id}/responses/{self.response_uuid}/archive"
+            f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/responses/{self.response_uuid}/archive"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -6644,7 +6643,7 @@ class TestSurveyResponseArchive(DatastoreTestMixin, APIBaseTest):
 
         # Archive again - should not error
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/{self.survey.id}/responses/{self.response_uuid}/archive"
+            f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/responses/{self.response_uuid}/archive"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -6658,7 +6657,7 @@ class TestSurveyResponseArchive(DatastoreTestMixin, APIBaseTest):
 
         # Then unarchive
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/{self.survey.id}/responses/{self.response_uuid}/unarchive"
+            f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/responses/{self.response_uuid}/unarchive"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -6691,20 +6690,20 @@ class TestSurveyResponseArchive(DatastoreTestMixin, APIBaseTest):
     def test_unarchive_nonexistent_response(self):
         # Unarchive a response that was never archived
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/{self.survey.id}/responses/{self.response_uuid}/unarchive"
+            f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/responses/{self.response_uuid}/unarchive"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_archive_invalid_uuid_format(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/{self.survey.id}/responses/not-a-uuid/archive"
+            f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/responses/not-a-uuid/archive"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()["detail"], "Invalid UUID format")
 
     def test_unarchive_invalid_uuid_format(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/{self.survey.id}/responses/not-a-uuid/unarchive"
+            f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/responses/not-a-uuid/unarchive"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()["detail"], "Invalid UUID format")
@@ -6720,12 +6719,12 @@ class TestSurveyResponseArchive(DatastoreTestMixin, APIBaseTest):
 
         # Try to archive a response for another team's survey
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/{other_survey.id}/responses/{self.response_uuid}/archive"
+            f"/v1/projects/{self.team.id}/surveys/{other_survey.id}/responses/{self.response_uuid}/archive"
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_archived_response_uuids_empty(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/{self.survey.id}/archived-response-uuids")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/archived-response-uuids")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), [])
 
@@ -6744,7 +6743,7 @@ class TestSurveyResponseArchive(DatastoreTestMixin, APIBaseTest):
         )
         SurveyResponseArchive.objects.create(team=self.team, survey=other_survey, response_uuid=uuid3)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/{self.survey.id}/archived-response-uuids")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/archived-response-uuids")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         uuids = response.json()
@@ -6769,7 +6768,7 @@ class TestSurveyResponsesList(DatastoreTestMixin, APIBaseTest):
             ],
             start_date=datetime(2024, 5, 1, tzinfo=UTC),
         )
-        self.url = f"/api/projects/{self.team.id}/surveys/{self.survey.id}/responses/"
+        self.url = f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/responses/"
 
     def _create_response_event(self, distinct_id, timestamp, rating, text, submission_id=None, event_uuid=None):
         properties: dict[str, Any] = {
@@ -6794,7 +6793,7 @@ class TestSurveyResponsesList(DatastoreTestMixin, APIBaseTest):
         _create_event(**kwargs)
 
     def test_nonexistent_survey_returns_404(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/{uuid.uuid4()}/responses/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/{uuid.uuid4()}/responses/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_empty_results_when_no_events(self):
@@ -6915,7 +6914,7 @@ class TestSurveySummarizeDispatchesToHeadline(APIBaseTest):
         self.team.organization.is_ai_data_processing_approved = True
         self.team.organization.save()
 
-        response = self.client.post(f"/api/projects/{self.team.id}/surveys/{self.survey.id}/summarize_responses/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/summarize_responses/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data["headline"], "Users love it")
@@ -6959,7 +6958,7 @@ class TestSurveySummarizeByQuestionId(APIBaseTest):
         # Request a per-question summary by question_id only (no question_index) — the path that
         # previously passed question_index=None into getSurveyResponse() and 500'd.
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/{self.survey.id}/summarize_responses/?question_id={question_id}"
+            f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/summarize_responses/?question_id={question_id}"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -6981,7 +6980,7 @@ class TestSurveyLifecycleActions(APIBaseTest):
 
     def test_launch_sets_start_date(self):
         self.assertIsNone(self.survey.start_date)
-        response = self.client.post(f"/api/projects/{self.team.id}/surveys/{self.survey.id}/launch/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/launch/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.survey.refresh_from_db()
         self.assertIsNotNone(self.survey.start_date)
@@ -6992,7 +6991,7 @@ class TestSurveyLifecycleActions(APIBaseTest):
         original_start = datetime(2024, 1, 1, tzinfo=UTC)
         self.survey.start_date = original_start
         self.survey.save()
-        response = self.client.post(f"/api/projects/{self.team.id}/surveys/{self.survey.id}/launch/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/launch/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.survey.refresh_from_db()
         # start_date should not have moved
@@ -7001,7 +7000,7 @@ class TestSurveyLifecycleActions(APIBaseTest):
     def test_stop_sets_end_date(self):
         self.survey.start_date = datetime(2024, 1, 1, tzinfo=UTC)
         self.survey.save()
-        response = self.client.post(f"/api/projects/{self.team.id}/surveys/{self.survey.id}/stop/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/stop/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.survey.refresh_from_db()
         self.assertIsNotNone(self.survey.end_date)
@@ -7009,20 +7008,20 @@ class TestSurveyLifecycleActions(APIBaseTest):
     def test_launch_rejects_archived_survey(self):
         self.survey.archived = True
         self.survey.save()
-        response = self.client.post(f"/api/projects/{self.team.id}/surveys/{self.survey.id}/launch/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/launch/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_launch_rejects_ended_survey(self):
         self.survey.start_date = datetime(2024, 1, 1, tzinfo=UTC)
         self.survey.end_date = datetime(2024, 2, 1, tzinfo=UTC)
         self.survey.save()
-        response = self.client.post(f"/api/projects/{self.team.id}/surveys/{self.survey.id}/launch/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/launch/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_stop_rejects_archived_survey(self):
         self.survey.archived = True
         self.survey.save()
-        response = self.client.post(f"/api/projects/{self.team.id}/surveys/{self.survey.id}/stop/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/stop/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_stop_is_idempotent_when_already_stopped(self):
@@ -7030,7 +7029,7 @@ class TestSurveyLifecycleActions(APIBaseTest):
         self.survey.start_date = datetime(2023, 12, 1, tzinfo=UTC)
         self.survey.end_date = original_end
         self.survey.save()
-        response = self.client.post(f"/api/projects/{self.team.id}/surveys/{self.survey.id}/stop/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/stop/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.survey.refresh_from_db()
         self.assertEqual(self.survey.end_date, original_end)
@@ -7042,7 +7041,7 @@ class TestSurveyListTypeFilter(APIBaseTest):
         Survey.objects.create(team=self.team, name="widget survey", type="widget", questions=[])
         Survey.objects.create(team=self.team, name="hosted survey", type="external_survey", questions=[])
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/?type=widget")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/?type=widget")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(len(data["results"]), 1)
@@ -7053,7 +7052,7 @@ class TestSurveyListTypeFilter(APIBaseTest):
         second = Survey.objects.create(team=self.team, name="second", type="popover", questions=[])
         Survey.objects.create(team=self.team, name="third", type="popover", questions=[])
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/?ids={first.id},{second.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/?ids={first.id},{second.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual({s["name"] for s in data["results"]}, {"first", "second"})
@@ -7062,7 +7061,7 @@ class TestSurveyListTypeFilter(APIBaseTest):
         survey = Survey.objects.create(team=self.team, name="exists", type="popover", questions=[])
         missing_id = uuid.uuid4()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/?ids={survey.id},{missing_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/?ids={survey.id},{missing_id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(len(data["results"]), 1)
@@ -7094,7 +7093,7 @@ class TestSurveyStatsPerQuestion(DatastoreTestMixin, APIBaseTest):
         )
 
     def test_per_question_stats_excluded_by_default(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/surveys/{self.survey.id}/stats/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/stats/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertNotIn("per_question_stats", response.json())
 
@@ -7125,7 +7124,7 @@ class TestSurveyStatsPerQuestion(DatastoreTestMixin, APIBaseTest):
         flush_persons_and_events()
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/surveys/{self.survey.id}/stats/?include_per_question_stats=true"
+            f"/v1/projects/{self.team.id}/surveys/{self.survey.id}/stats/?include_per_question_stats=true"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         per_q = {q["question_id"]: q for q in response.json()["per_question_stats"]}
@@ -7176,7 +7175,7 @@ class TestSurveyStatsPerQuestion(DatastoreTestMixin, APIBaseTest):
         flush_persons_and_events()
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/stats/?include_per_question_stats=true"
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/stats/?include_per_question_stats=true"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         per_q = {q["question_id"]: q for q in response.json()["per_question_stats"]}
@@ -7215,7 +7214,7 @@ class TestSurveyStatsPerQuestion(DatastoreTestMixin, APIBaseTest):
         flush_persons_and_events()
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/stats/?include_per_question_stats=true"
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/stats/?include_per_question_stats=true"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         per_q = {q["question_id"]: q for q in response.json()["per_question_stats"]}
@@ -7255,7 +7254,7 @@ class TestSurveyStatsPerQuestion(DatastoreTestMixin, APIBaseTest):
         flush_persons_and_events()
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/stats/?include_per_question_stats=true"
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/stats/?include_per_question_stats=true"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         per_q = {q["question_id"]: q for q in response.json()["per_question_stats"]}
@@ -7296,7 +7295,7 @@ class TestSurveyStatsPerQuestion(DatastoreTestMixin, APIBaseTest):
         flush_persons_and_events()
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/surveys/{survey.id}/stats/?include_per_question_stats=true"
+            f"/v1/projects/{self.team.id}/surveys/{survey.id}/stats/?include_per_question_stats=true"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         per_q = {q["question_id"]: q for q in response.json()["per_question_stats"]}
@@ -7329,7 +7328,7 @@ class TestSurveyFeatureFlagScopeWarning(PersonalAPIKeysBaseTest, APIBaseTest):
 
     def _create_survey(self, **extra):
         return self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={**self.SURVEY_PAYLOAD, **extra},
             format="json",
             headers=self.auth_headers,
@@ -7382,7 +7381,7 @@ class TestSurveyFeatureFlagScopeWarning(PersonalAPIKeysBaseTest, APIBaseTest):
 
         with patch("products.feature_flags.backend.api.feature_flag.scope_audit_logger") as mock_logger:
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/surveys/{survey_id}/",
+                f"/v1/projects/{self.team.id}/surveys/{survey_id}/",
                 data={"name": "renamed"},
                 format="json",
                 headers=self.auth_headers,
@@ -7399,7 +7398,7 @@ class TestSurveyFeatureFlagScopeWarning(PersonalAPIKeysBaseTest, APIBaseTest):
 
         with patch("products.feature_flags.backend.api.feature_flag.scope_audit_logger") as mock_logger:
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/surveys/{survey_id}/",
+                f"/v1/projects/{self.team.id}/surveys/{survey_id}/",
                 data={"targeting_flag_filters": {"groups": [{"properties": [], "rollout_percentage": 75}]}},
                 format="json",
                 headers=self.auth_headers,
@@ -7421,7 +7420,7 @@ class TestSurveyFeatureFlagScopeWarning(PersonalAPIKeysBaseTest, APIBaseTest):
 
         with patch("products.feature_flags.backend.api.feature_flag.scope_audit_logger") as mock_logger:
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/surveys/{survey_id}/",
+                f"/v1/projects/{self.team.id}/surveys/{survey_id}/",
                 data={"remove_targeting_flag": True},
                 format="json",
                 headers=self.auth_headers,
@@ -7445,7 +7444,7 @@ class TestSurveyFeatureFlagScopeWarning(PersonalAPIKeysBaseTest, APIBaseTest):
 
         with patch("products.feature_flags.backend.api.feature_flag.scope_audit_logger") as mock_logger:
             response = self.client.delete(
-                f"/api/projects/{self.team.id}/surveys/{survey_id}/",
+                f"/v1/projects/{self.team.id}/surveys/{survey_id}/",
                 headers=self.auth_headers,
             )
         assert response.status_code == status.HTTP_204_NO_CONTENT
@@ -7463,7 +7462,7 @@ class TestSurveyFeatureFlagScopeWarning(PersonalAPIKeysBaseTest, APIBaseTest):
 
         with patch("products.feature_flags.backend.api.feature_flag.scope_audit_logger") as mock_logger:
             response = self.client.delete(
-                f"/api/projects/{self.team.id}/surveys/{survey_id}/",
+                f"/v1/projects/{self.team.id}/surveys/{survey_id}/",
                 headers=self.auth_headers,
             )
         assert response.status_code == status.HTTP_204_NO_CONTENT
@@ -7478,7 +7477,7 @@ class TestSurveyFeatureFlagScopeWarning(PersonalAPIKeysBaseTest, APIBaseTest):
         )
         with patch("products.feature_flags.backend.api.feature_flag.scope_audit_logger") as mock_logger:
             response = self.client.delete(
-                f"/api/projects/{self.team.id}/surveys/{survey.id}/",
+                f"/v1/projects/{self.team.id}/surveys/{survey.id}/",
                 headers=self.auth_headers,
             )
         assert response.status_code == status.HTTP_204_NO_CONTENT
@@ -7488,7 +7487,7 @@ class TestSurveyFeatureFlagScopeWarning(PersonalAPIKeysBaseTest, APIBaseTest):
         self.client.force_login(self.user)
         with patch("products.feature_flags.backend.api.feature_flag.scope_audit_logger") as mock_logger:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/surveys/",
+                f"/v1/projects/{self.team.id}/surveys/",
                 data=self.SURVEY_PAYLOAD,
                 format="json",
             )
@@ -7519,7 +7518,7 @@ class TestSurveyFeatureFlagScopeEnforcement(PersonalAPIKeysBaseTest, APIBaseTest
 
     def _create_survey(self, **extra):
         return self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={**self.SURVEY_PAYLOAD, **extra},
             format="json",
             headers=self.auth_headers,
@@ -7567,7 +7566,7 @@ class TestSurveyFeatureFlagScopeEnforcement(PersonalAPIKeysBaseTest, APIBaseTest
         flag = FeatureFlag.objects.create(team=self.team, key="survey-attach-existing-2", created_by=self.user)
         survey_id = self._create_survey().json()["id"]
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_id}/",
             data={"targeting_flag_id": flag.id},
             format="json",
             headers=self.auth_headers,
@@ -7577,7 +7576,7 @@ class TestSurveyFeatureFlagScopeEnforcement(PersonalAPIKeysBaseTest, APIBaseTest
     def test_update_targeting_flag_filters_is_denied(self):
         survey_id = self._create_survey_with_targeting_flag_as_admin()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_id}/",
             data={"targeting_flag_filters": {"groups": [{"properties": [], "rollout_percentage": 75}]}},
             format="json",
             headers=self.auth_headers,
@@ -7587,7 +7586,7 @@ class TestSurveyFeatureFlagScopeEnforcement(PersonalAPIKeysBaseTest, APIBaseTest
     def test_update_remove_targeting_flag_is_denied(self):
         survey_id = self._create_survey_with_targeting_flag_as_admin()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_id}/",
             data={"remove_targeting_flag": True},
             format="json",
             headers=self.auth_headers,
@@ -7598,7 +7597,7 @@ class TestSurveyFeatureFlagScopeEnforcement(PersonalAPIKeysBaseTest, APIBaseTest
     def test_update_payload_only_is_allowed(self):
         survey_id = self._create_survey_with_targeting_flag_as_admin()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/surveys/{survey_id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_id}/",
             data={"name": "renamed"},
             format="json",
             headers=self.auth_headers,
@@ -7608,7 +7607,7 @@ class TestSurveyFeatureFlagScopeEnforcement(PersonalAPIKeysBaseTest, APIBaseTest
     def test_destroy_with_targeting_flag_is_denied(self):
         survey_id = self._create_survey_with_targeting_flag_as_admin()
         response = self.client.delete(
-            f"/api/projects/{self.team.id}/surveys/{survey_id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_id}/",
             headers=self.auth_headers,
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN, response.json()
@@ -7620,7 +7619,7 @@ class TestSurveyFeatureFlagScopeEnforcement(PersonalAPIKeysBaseTest, APIBaseTest
         assert survey.targeting_flag_id is None
         assert survey.internal_targeting_flag_id is not None
         response = self.client.delete(
-            f"/api/projects/{self.team.id}/surveys/{survey_id}/",
+            f"/v1/projects/{self.team.id}/surveys/{survey_id}/",
             headers=self.auth_headers,
         )
         assert response.status_code == status.HTTP_204_NO_CONTENT
@@ -7628,7 +7627,7 @@ class TestSurveyFeatureFlagScopeEnforcement(PersonalAPIKeysBaseTest, APIBaseTest
     def test_session_auth_is_allowed(self):
         self.client.force_login(self.user)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/surveys/",
+            f"/v1/projects/{self.team.id}/surveys/",
             data={**self.SURVEY_PAYLOAD, "targeting_flag_filters": self.TARGETING_FILTERS},
             format="json",
         )

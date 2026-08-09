@@ -23,8 +23,8 @@ describe('experimentPickerLogic', () => {
         retrieveMock = jest.fn(({ params }) => [200, experiment(Number(params.id), `Experiment ${params.id}`)])
         useMocks({
             get: {
-                '/api/projects/:team_id/experiments/': listMock,
-                '/api/projects/:team_id/experiments/:id/': retrieveMock,
+                '/v1/projects/:team_id/experiments/': listMock,
+                '/v1/projects/:team_id/experiments/:id/': retrieveMock,
             },
         })
         initKeaTests()

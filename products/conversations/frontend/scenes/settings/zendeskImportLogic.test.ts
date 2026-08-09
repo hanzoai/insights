@@ -37,10 +37,10 @@ describe('zendeskImportLogic', () => {
         jest.useFakeTimers()
         useMocks({
             get: {
-                '/api/projects/:team_id/conversations/zendesk_imports/status/': () => [404, {}],
+                '/v1/projects/:team_id/conversations/zendesk_imports/status/': () => [404, {}],
             },
             post: {
-                '/api/projects/:team_id/conversations/zendesk_imports/': () => [201, makeJob('running')],
+                '/v1/projects/:team_id/conversations/zendesk_imports/': () => [201, makeJob('running')],
             },
         })
         initKeaTests()

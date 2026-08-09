@@ -667,7 +667,7 @@ export const sidePanelNotificationsLogic = kea<sidePanelNotificationsLogicType>(
                     try {
                         const [response] = await Promise.all([
                             api.get<ChangesResponse>(
-                                `api/projects/${values.currentProjectId}/my_notifications?` +
+                                `v1/projects/${values.currentProjectId}/my_notifications?` +
                                     toParams({ unread: onlyUnread })
                             ),
                             ensureActivityDescribersLoaded(),
@@ -711,7 +711,7 @@ export const sidePanelNotificationsLogic = kea<sidePanelNotificationsLogicType>(
                         a.created_at.isAfter(b.created_at) ? a : b
                     )
 
-                    await api.create(`api/projects/${values.currentProjectId}/my_notifications/bookmark`, {
+                    await api.create(`v1/projects/${values.currentProjectId}/my_notifications/bookmark`, {
                         bookmark: latestNotification.created_at.toISOString(),
                     })
 
@@ -1003,7 +1003,7 @@ export const sidePanelNotificationsLogic = kea<sidePanelNotificationsLogicType>(
             refreshInAppUnreadCount: async () => {
                 try {
                     const countResp = await api.get<{ count: number }>(
-                        `api/environments/${values.currentProjectId}/notifications/unread_count/`
+                        `v1/environments/${values.currentProjectId}/notifications/unread_count/`
                     )
                     actions.setInAppUnreadCount(countResp.count)
                 } catch {
@@ -1313,7 +1313,7 @@ export const sidePanelNotificationsLogic = kea<sidePanelNotificationsLogicType>(
                 }
                 try {
                     const countResp = await api.get<{ count: number }>(
-                        `api/environments/${values.currentProjectId}/notifications/unread_count/`
+                        `v1/environments/${values.currentProjectId}/notifications/unread_count/`
                     )
                     actions.setInAppUnreadCount(countResp.count)
                 } catch {

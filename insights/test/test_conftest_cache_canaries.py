@@ -110,7 +110,7 @@ def test_url_resolution_cache_matches_unpatched_django():
     # Assumption: URLResolver.resolve is deterministic per (resolver, path), and the
     # __dict__-based ResolverMatch clone reproduces everything consumers read.
     resolver = resolvers.get_resolver()
-    path = "/api/users/@me/"
+    path = "/v1/users/@me/"
     patched = resolver.resolve(path)
     fresh = _unpatched(resolvers.URLResolver.resolve)(resolver, path)
     for attr in (

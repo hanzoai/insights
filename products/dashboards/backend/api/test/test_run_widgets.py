@@ -358,7 +358,7 @@ class TestDashboardRunWidgets(APIBaseTest):
 
     def _run(self, dashboard_id: int, tile_ids: list[int]) -> dict:
         response = self.client.get(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/run_widgets/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/run_widgets/",
             {"tile_ids": ",".join(str(tile_id) for tile_id in tile_ids)},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
@@ -377,7 +377,7 @@ class TestDashboardRunWidgets(APIBaseTest):
         dashboard_id, _ = self.dashboard_api.create_dashboard({"name": "dash"})
         query_params = {} if tile_ids_param is None else {"tile_ids": tile_ids_param}
         response = self.client.get(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/run_widgets/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/run_widgets/",
             query_params,
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -696,7 +696,8 @@ class TestDashboardRunWidgets(APIBaseTest):
         self.assertEqual(count_query.limit, ACTIVITY_EVENTS_MAX_LIMIT)
 
     @patch(
-        "insights.session_recordings.session_recording_api.ListingSustainedRateThrottle.allow_request", return_value=True
+        "insights.session_recordings.session_recording_api.ListingSustainedRateThrottle.allow_request",
+        return_value=True,
     )
     @patch(
         "insights.session_recordings.session_recording_api.ListingBurstRateThrottle.allow_request", return_value=False
@@ -1368,7 +1369,7 @@ class TestDashboardRunWidgets(APIBaseTest):
     def test_disabled_when_feature_flag_off(self, _mock_flag: MagicMock) -> None:
         dashboard_id, _ = self.dashboard_api.create_dashboard({"name": "dash"})
         response = self.client.get(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/run_widgets/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/run_widgets/",
             {"tile_ids": "1"},
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -1408,7 +1409,7 @@ class TestDashboardRunWidgets(APIBaseTest):
         tile_ids = list(range(1, MAX_WIDGETS_BATCH_SIZE + 2))
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/run_widgets/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/run_widgets/",
             {"tile_ids": ",".join(str(tile_id) for tile_id in tile_ids)},
         )
 
@@ -1460,7 +1461,7 @@ class TestDashboardRunWidgets(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/run_widgets/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/run_widgets/",
             {"tile_ids": str(tile_id)},
             HTTP_AUTHORIZATION=f"Bearer {token}",
         )

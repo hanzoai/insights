@@ -2725,7 +2725,7 @@ class TestApprovalComment:
         assert "1 changed, 1 new, 1 removed." in body
         assert "<img" not in body
         assert "<table" not in body
-        assert "/api/visual_review/public/" not in body
+        assert "/v1/visual_review/public/" not in body
 
     def test_build_approval_comment_body_falls_back_to_a_reviewer(self, repo, run_with_snapshots):
         body = logic._build_approval_comment_body(run_with_snapshots, repo, None)

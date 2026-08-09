@@ -2,7 +2,7 @@
 Django REST API endpoint for translating LLM trace message content.
 
 Endpoint:
-- POST /api/environments/:id/llm_analytics/translate/ - Translate text
+- POST /v1/environments/:id/llm_analytics/translate/ - Translate text
 """
 
 import time

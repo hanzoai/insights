@@ -308,7 +308,7 @@ class User(AbstractUser, UUIDTClassicModel, ModelActivityMixin):  # type: ignore
         related_name="delegating_users",
         db_index=False,
     )
-    # Denormalized org id: filled when the delegation invite is created so that `/api/users/@me/`
+    # Denormalized org id: filled when the delegation invite is created so that `/v1/users/@me/`
     # doesn't need an extra DB query per page load just to surface which org the delegation is scoped to.
     # Not a ForeignKey to avoid extra ALTER TABLE lock overhead on insights_user. Dangling rows on
     # Organization deletion are tolerated — frontend compares this against current org.id and

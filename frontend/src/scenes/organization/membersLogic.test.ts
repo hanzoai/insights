@@ -15,7 +15,7 @@ describe('membersLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/organizations/:organization/members/': {
+                '/v1/organizations/:organization/members/': {
                     count: 2,
                     next: null,
                     previous: null,

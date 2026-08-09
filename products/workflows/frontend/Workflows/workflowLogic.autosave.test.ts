@@ -52,11 +52,11 @@ describe('workflowLogic auto-save', () => {
         updateCalls = 0
         useMocks({
             get: {
-                '/api/environments/:team_id/hog_flows/:id/': workflow,
-                '/api/projects/:team_id/insights_function_templates/': { results: [], count: 0 },
+                '/v1/environments/:team_id/hog_flows/:id/': workflow,
+                '/v1/projects/:team_id/insights_function_templates/': { results: [], count: 0 },
             },
             patch: {
-                '/api/environments/:team_id/hog_flows/:id/': () => {
+                '/v1/environments/:team_id/hog_flows/:id/': () => {
                     updateCalls += 1
                     return [200, workflow]
                 },
@@ -181,11 +181,11 @@ describe('workflowLogic auto-save', () => {
             const activeWorkflow = makeWorkflow({ status: 'active' })
             useMocks({
                 get: {
-                    '/api/environments/:team_id/hog_flows/:id/': activeWorkflow,
-                    '/api/projects/:team_id/insights_function_templates/': { results: [], count: 0 },
+                    '/v1/environments/:team_id/hog_flows/:id/': activeWorkflow,
+                    '/v1/projects/:team_id/insights_function_templates/': { results: [], count: 0 },
                 },
                 patch: {
-                    '/api/environments/:team_id/hog_flows/:id/': () => {
+                    '/v1/environments/:team_id/hog_flows/:id/': () => {
                         updateCalls += 1
                         return [200, activeWorkflow]
                     },

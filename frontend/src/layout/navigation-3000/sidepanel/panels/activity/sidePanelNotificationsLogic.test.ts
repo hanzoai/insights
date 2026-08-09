@@ -119,7 +119,7 @@ describe('sidePanelNotificationsLogic.loadGroupChildren', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:tid/notifications/': () => [
+                '/v1/projects/:tid/notifications/': () => [
                     200,
                     {
                         results: [makeNotification({ id: 'child-1' }), makeNotification({ id: 'child-2' })],
@@ -163,8 +163,8 @@ describe('sidePanelNotificationsLogic.toggleGroupRead', () => {
     beforeEach(() => {
         useMocks({
             post: {
-                '/api/projects/:tid/notifications/mark_read_bulk/': () => [200, { updated: 2 }],
-                '/api/projects/:tid/notifications/mark_unread_bulk/': () => [200, { updated: 2 }],
+                '/v1/projects/:tid/notifications/mark_read_bulk/': () => [200, { updated: 2 }],
+                '/v1/projects/:tid/notifications/mark_unread_bulk/': () => [200, { updated: 2 }],
             },
         })
         initKeaTests()
@@ -202,12 +202,12 @@ describe('sidePanelNotificationsLogic.archive', () => {
         useMocks({
             get: {
                 // refreshInAppUnreadCount reconciles against the server after each archive.
-                '/api/environments/:tid/notifications/unread_count/': () => [200, { count: 1 }],
+                '/v1/environments/:tid/notifications/unread_count/': () => [200, { count: 1 }],
             },
             post: {
-                '/api/projects/:tid/notifications/:id/archive/': () => [200, { status: 'ok' }],
-                '/api/projects/:tid/notifications/archive_bulk/': () => [200, { updated: 2 }],
-                '/api/projects/:tid/notifications/archive_all/': () => [200, { updated: 2 }],
+                '/v1/projects/:tid/notifications/:id/archive/': () => [200, { status: 'ok' }],
+                '/v1/projects/:tid/notifications/archive_bulk/': () => [200, { updated: 2 }],
+                '/v1/projects/:tid/notifications/archive_all/': () => [200, { updated: 2 }],
             },
         })
         initKeaTests()
@@ -286,9 +286,9 @@ describe('sidePanelNotificationsLogic.manuallyToggledIds', () => {
     beforeEach(() => {
         useMocks({
             post: {
-                '/api/projects/:tid/notifications/:id/mark_read/': () => [200, { status: 'ok' }],
-                '/api/projects/:tid/notifications/:id/mark_unread/': () => [200, { status: 'ok' }],
-                '/api/projects/:tid/notifications/mark_all_read/': () => [200, { updated: 0 }],
+                '/v1/projects/:tid/notifications/:id/mark_read/': () => [200, { status: 'ok' }],
+                '/v1/projects/:tid/notifications/:id/mark_unread/': () => [200, { status: 'ok' }],
+                '/v1/projects/:tid/notifications/mark_all_read/': () => [200, { updated: 0 }],
             },
         })
         initKeaTests()

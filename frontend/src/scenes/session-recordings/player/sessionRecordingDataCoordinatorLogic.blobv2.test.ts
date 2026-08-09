@@ -44,7 +44,7 @@ describe('sessionRecordingDataCoordinatorLogic blobby v2', () => {
         setupSessionRecordingTest({
             snapshotSources: [BLOB_V2_SOURCE_ZERO, BLOB_V2_SOURCE_ONE],
             getMocks: {
-                '/api/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
                     const url = new URL(request.url)
                     if (url.searchParams.get('source') === 'blob') {
                         throw new Error('not expecting this to be called in this test')

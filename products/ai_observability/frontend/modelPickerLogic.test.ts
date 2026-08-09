@@ -48,13 +48,13 @@ describe('modelPickerLogic', () => {
         it('should load and attach providerKeyId to models from valid keys', async () => {
             useMocks({
                 get: {
-                    '/api/environments/:team_id/llm_analytics/provider_keys/': {
+                    '/v1/environments/:team_id/llm_analytics/provider_keys/': {
                         results: [{ id: 'key-1', provider: 'openai', state: 'ok' }],
                     },
-                    '/api/environments/:team_id/llm_analytics/evaluation_config/': {
+                    '/v1/environments/:team_id/llm_analytics/evaluation_config/': {
                         active_provider_key: null,
                     },
-                    '/api/llm_proxy/models/': ({ request }) => {
+                    '/v1/llm_proxy/models/': ({ request }) => {
                         if (new URL(request.url).searchParams.get('provider_key_id') === 'key-1') {
                             return [200, BYOK_OPENAI_MODELS]
                         }
@@ -82,13 +82,13 @@ describe('modelPickerLogic', () => {
         it('should map is_recommended correctly for both true and false values', async () => {
             useMocks({
                 get: {
-                    '/api/environments/:team_id/llm_analytics/provider_keys/': {
+                    '/v1/environments/:team_id/llm_analytics/provider_keys/': {
                         results: [{ id: 'key-1', provider: 'openai', state: 'ok' }],
                     },
-                    '/api/environments/:team_id/llm_analytics/evaluation_config/': {
+                    '/v1/environments/:team_id/llm_analytics/evaluation_config/': {
                         active_provider_key: null,
                     },
-                    '/api/llm_proxy/models/': ({ request }) => {
+                    '/v1/llm_proxy/models/': ({ request }) => {
                         if (new URL(request.url).searchParams.get('provider_key_id') === 'key-1') {
                             return [200, BYOK_OPENAI_MODELS_MIXED]
                         }
@@ -114,11 +114,11 @@ describe('modelPickerLogic', () => {
         it('should return empty array when no valid keys exist', async () => {
             useMocks({
                 get: {
-                    '/api/llm_proxy/models/': () => [200, []],
-                    '/api/environments/:team_id/llm_analytics/provider_keys/': {
+                    '/v1/llm_proxy/models/': () => [200, []],
+                    '/v1/environments/:team_id/llm_analytics/provider_keys/': {
                         results: [{ id: 'key-1', provider: 'openai', state: 'invalid' }],
                     },
-                    '/api/environments/:team_id/llm_analytics/evaluation_config/': {
+                    '/v1/environments/:team_id/llm_analytics/evaluation_config/': {
                         active_provider_key: null,
                     },
                 },
@@ -134,16 +134,16 @@ describe('modelPickerLogic', () => {
         it('should deduplicate models by providerKeyId and model id', async () => {
             useMocks({
                 get: {
-                    '/api/environments/:team_id/llm_analytics/provider_keys/': {
+                    '/v1/environments/:team_id/llm_analytics/provider_keys/': {
                         results: [
                             { id: 'key-1', provider: 'openai', state: 'ok' },
                             { id: 'key-2', provider: 'anthropic', state: 'ok' },
                         ],
                     },
-                    '/api/environments/:team_id/llm_analytics/evaluation_config/': {
+                    '/v1/environments/:team_id/llm_analytics/evaluation_config/': {
                         active_provider_key: null,
                     },
-                    '/api/llm_proxy/models/': ({ request }) => {
+                    '/v1/llm_proxy/models/': ({ request }) => {
                         const keyId = new URL(request.url).searchParams.get('provider_key_id')
                         if (keyId === 'key-1') {
                             return [200, BYOK_OPENAI_MODELS]
@@ -169,16 +169,16 @@ describe('modelPickerLogic', () => {
         it('should gracefully handle API errors for individual keys', async () => {
             useMocks({
                 get: {
-                    '/api/environments/:team_id/llm_analytics/provider_keys/': {
+                    '/v1/environments/:team_id/llm_analytics/provider_keys/': {
                         results: [
                             { id: 'key-1', provider: 'openai', state: 'ok' },
                             { id: 'key-2', provider: 'anthropic', state: 'ok' },
                         ],
                     },
-                    '/api/environments/:team_id/llm_analytics/evaluation_config/': {
+                    '/v1/environments/:team_id/llm_analytics/evaluation_config/': {
                         active_provider_key: null,
                     },
-                    '/api/llm_proxy/models/': ({ request }) => {
+                    '/v1/llm_proxy/models/': ({ request }) => {
                         const keyId = new URL(request.url).searchParams.get('provider_key_id')
                         if (keyId === 'key-1') {
                             return [500, { error: 'Internal error' }]
@@ -213,16 +213,16 @@ describe('modelPickerLogic', () => {
         it('should return true when at least one key has ok state', async () => {
             useMocks({
                 get: {
-                    '/api/environments/:team_id/llm_analytics/provider_keys/': {
+                    '/v1/environments/:team_id/llm_analytics/provider_keys/': {
                         results: [
                             { id: 'key-1', provider: 'openai', state: 'invalid' },
                             { id: 'key-2', provider: 'anthropic', state: 'ok' },
                         ],
                     },
-                    '/api/environments/:team_id/llm_analytics/evaluation_config/': {
+                    '/v1/environments/:team_id/llm_analytics/evaluation_config/': {
                         active_provider_key: null,
                     },
-                    '/api/llm_proxy/models/': () => [200, []],
+                    '/v1/llm_proxy/models/': () => [200, []],
                 },
             })
 
@@ -236,14 +236,14 @@ describe('modelPickerLogic', () => {
         it('should return false when all keys are non-ok', async () => {
             useMocks({
                 get: {
-                    '/api/llm_proxy/models/': () => [200, []],
-                    '/api/environments/:team_id/llm_analytics/provider_keys/': {
+                    '/v1/llm_proxy/models/': () => [200, []],
+                    '/v1/environments/:team_id/llm_analytics/provider_keys/': {
                         results: [
                             { id: 'key-1', provider: 'openai', state: 'invalid' },
                             { id: 'key-2', provider: 'anthropic', state: 'error' },
                         ],
                     },
-                    '/api/environments/:team_id/llm_analytics/evaluation_config/': {
+                    '/v1/environments/:team_id/llm_analytics/evaluation_config/': {
                         active_provider_key: null,
                     },
                 },
@@ -259,11 +259,11 @@ describe('modelPickerLogic', () => {
         it('should return false when no keys exist', async () => {
             useMocks({
                 get: {
-                    '/api/llm_proxy/models/': () => [200, []],
-                    '/api/environments/:team_id/llm_analytics/provider_keys/': {
+                    '/v1/llm_proxy/models/': () => [200, []],
+                    '/v1/environments/:team_id/llm_analytics/provider_keys/': {
                         results: [],
                     },
-                    '/api/environments/:team_id/llm_analytics/evaluation_config/': {
+                    '/v1/environments/:team_id/llm_analytics/evaluation_config/': {
                         active_provider_key: null,
                     },
                 },
@@ -281,16 +281,16 @@ describe('modelPickerLogic', () => {
         it('should group models by provider key', async () => {
             useMocks({
                 get: {
-                    '/api/environments/:team_id/llm_analytics/provider_keys/': {
+                    '/v1/environments/:team_id/llm_analytics/provider_keys/': {
                         results: [
                             { id: 'key-1', provider: 'openai', name: 'My OpenAI Key', state: 'ok' },
                             { id: 'key-2', provider: 'anthropic', name: 'My Anthropic Key', state: 'ok' },
                         ],
                     },
-                    '/api/environments/:team_id/llm_analytics/evaluation_config/': {
+                    '/v1/environments/:team_id/llm_analytics/evaluation_config/': {
                         active_provider_key: null,
                     },
-                    '/api/llm_proxy/models/': ({ request }) => {
+                    '/v1/llm_proxy/models/': ({ request }) => {
                         const keyId = new URL(request.url).searchParams.get('provider_key_id')
                         if (keyId === 'key-1') {
                             return [200, BYOK_OPENAI_MODELS]
@@ -321,16 +321,16 @@ describe('modelPickerLogic', () => {
         it('should disambiguate labels when multiple keys exist for same provider', async () => {
             useMocks({
                 get: {
-                    '/api/environments/:team_id/llm_analytics/provider_keys/': {
+                    '/v1/environments/:team_id/llm_analytics/provider_keys/': {
                         results: [
                             { id: 'key-1', provider: 'openai', name: 'Production', state: 'ok' },
                             { id: 'key-2', provider: 'openai', name: 'Staging', state: 'ok' },
                         ],
                     },
-                    '/api/environments/:team_id/llm_analytics/evaluation_config/': {
+                    '/v1/environments/:team_id/llm_analytics/evaluation_config/': {
                         active_provider_key: null,
                     },
-                    '/api/llm_proxy/models/': ({ request }) => {
+                    '/v1/llm_proxy/models/': ({ request }) => {
                         const keyId = new URL(request.url).searchParams.get('provider_key_id')
                         if (keyId === 'key-1' || keyId === 'key-2') {
                             return [200, BYOK_OPENAI_MODELS]

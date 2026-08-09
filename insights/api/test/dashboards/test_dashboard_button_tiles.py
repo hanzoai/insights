@@ -72,7 +72,7 @@ class TestDashboardButtonTiles(APIBaseTest):
         tile["button_tile"]["url"] = "https://new-url.com"
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [tile]},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -89,7 +89,7 @@ class TestDashboardButtonTiles(APIBaseTest):
 
         tile = dashboard_json["tiles"][0]
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [{"id": tile["id"], "deleted": True}]},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -116,7 +116,7 @@ class TestDashboardButtonTiles(APIBaseTest):
         dashboard_id, _ = self.dashboard_api.create_dashboard({"name": "dashboard"})
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [{"button_tile": {"url": "https://example.com", "text": ""}}]},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST

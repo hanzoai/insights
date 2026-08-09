@@ -24,7 +24,7 @@ from insights.insightsql.database.models import (
 # `invocation_globals` is intentionally NOT exposed here. The column carries the
 # full rerun payload — for script functions whose trigger is a source webhook, that
 # includes `request.headers` (authorization, x-api-key, etc.). We don't want a
-# tenant to be able to SELECT those via /api/projects/:id/query. The rerun path
+# tenant to be able to SELECT those via /v1/projects/:id/query. The rerun path
 # reads `invocation_globals` via the internal Datastore client (not InsightsQL) and
 # strips `request.headers` for webhook sources at rehydration, so leaving the
 # column off the InsightsQL schema entirely costs nothing for rerun. If the runs UI

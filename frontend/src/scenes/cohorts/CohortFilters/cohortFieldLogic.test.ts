@@ -17,7 +17,7 @@ describe('cohortFieldLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                'api/projects/:team/groups_types': MOCK_GROUP_TYPES,
+                'v1/projects/:team/groups_types': MOCK_GROUP_TYPES,
             },
         })
         initKeaTests()

@@ -65,17 +65,17 @@ describe('signalSourcesLogic', () => {
         warehouseSources = []
         useMocks({
             get: {
-                '/api/environments/:team_id/external_data_sources/': () => [
+                '/v1/environments/:team_id/external_data_sources/': () => [
                     200,
                     { results: warehouseSources, count: warehouseSources.length, next: null, previous: null },
                 ],
-                '/api/projects/:team_id/signals/source_configs/': () => [
+                '/v1/projects/:team_id/signals/source_configs/': () => [
                     200,
                     { results: [], count: 0, next: null, previous: null },
                 ],
             },
             put: {
-                '/api/projects/:team_id/engineering_analytics/ci-signals-config/': () => [
+                '/v1/projects/:team_id/engineering_analytics/ci-signals-config/': () => [
                     200,
                     { configured: true, enabled: true, sync_status: 'completed' },
                 ],

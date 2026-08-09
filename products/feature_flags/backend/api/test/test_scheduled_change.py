@@ -23,7 +23,7 @@ class TestScheduledChange(APIBaseTest):
         payload = {"field": "active", "value": "false"}
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             data={
                 "id": 6,
                 "record_id": str(feature_flag.id),
@@ -59,7 +59,7 @@ class TestScheduledChange(APIBaseTest):
             return_value=False,
         ):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/scheduled_changes/",
+                f"/v1/projects/{self.team.id}/scheduled_changes/",
                 data={
                     "record_id": str(feature_flag.id),
                     "model_name": "FeatureFlag",
@@ -89,7 +89,7 @@ class TestScheduledChange(APIBaseTest):
             return_value=True,
         ):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/scheduled_changes/",
+                f"/v1/projects/{self.team.id}/scheduled_changes/",
                 data={
                     "record_id": str(feature_flag.id),
                     "model_name": "FeatureFlag",
@@ -110,7 +110,7 @@ class TestScheduledChange(APIBaseTest):
         payload = {"operation": "update_status", "value": False}
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             data={
                 "record_id": "999999",  # Non-existent feature flag ID
                 "model_name": "FeatureFlag",
@@ -128,7 +128,7 @@ class TestScheduledChange(APIBaseTest):
     def test_cannot_create_scheduled_change_for_non_numeric_record_id(self):
         """A non-numeric record_id is rejected with a 400, not a 500 from the int cast."""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             data={
                 "record_id": "not-a-number",
                 "model_name": "FeatureFlag",
@@ -149,7 +149,7 @@ class TestScheduledChange(APIBaseTest):
         feature_flag = FeatureFlag.objects.create(team=self.team, created_by=self.user, key="canon", name="Canon")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             data={
                 "record_id": f"000{feature_flag.id}",
                 "model_name": "FeatureFlag",
@@ -178,7 +178,7 @@ class TestScheduledChange(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/scheduled_changes/{change.id}/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/{change.id}/",
             data={"scheduled_at": "2023-12-09T12:00:00Z"},
         )
 
@@ -195,7 +195,7 @@ class TestScheduledChange(APIBaseTest):
         payload = {"operation": "update_status", "value": True}
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             data={
                 "record_id": str(feature_flag.id),
                 "model_name": "FeatureFlag",
@@ -243,7 +243,7 @@ class TestScheduledChange(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             data={
                 "record_id": str(feature_flag.id),
                 "model_name": "FeatureFlag",
@@ -272,7 +272,7 @@ class TestScheduledChange(APIBaseTest):
         payload = {"operation": "update_status", "value": True}
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             data={
                 "record_id": str(feature_flag.id),
                 "model_name": "FeatureFlag",
@@ -308,7 +308,7 @@ class TestScheduledChange(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             data={"model_name": "FeatureFlag", "record_id": str(feature_flag.id)},
         )
 
@@ -339,7 +339,7 @@ class TestScheduledChange(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/scheduled_changes/{scheduled_change.id}/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/{scheduled_change.id}/",
             data={"record_id": str(other_flag.id)},
         )
 
@@ -364,7 +364,7 @@ class TestScheduledChange(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/scheduled_changes/{scheduled_change.id}/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/{scheduled_change.id}/",
             data={"model_name": "SomeOtherModel"},
         )
 
@@ -409,7 +409,7 @@ class TestScheduledChange(APIBaseTest):
         )
 
         response = self.client.put(
-            f"/api/projects/{self.team.id}/scheduled_changes/{scheduled_change.id}/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/{scheduled_change.id}/",
             data={
                 "record_id": str(other_flag.id),
                 "model_name": "FeatureFlag",
@@ -430,7 +430,7 @@ class TestScheduledChange(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             data={
                 "record_id": str(feature_flag.id),
                 "model_name": "FeatureFlag",
@@ -453,7 +453,7 @@ class TestScheduledChange(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             data={
                 "record_id": str(feature_flag.id),
                 "model_name": "FeatureFlag",
@@ -482,7 +482,7 @@ class TestScheduledChange(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             data={
                 "record_id": str(feature_flag.id),
                 "model_name": "FeatureFlag",
@@ -503,7 +503,7 @@ class TestScheduledChange(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             data={
                 "record_id": str(feature_flag.id),
                 "model_name": "FeatureFlag",
@@ -524,7 +524,7 @@ class TestScheduledChange(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/scheduled_changes/",
+            f"/v1/projects/{self.team.id}/scheduled_changes/",
             data={
                 "record_id": str(feature_flag.id),
                 "model_name": "FeatureFlag",
@@ -562,7 +562,7 @@ class TestScheduledChange(APIBaseTest):
             return_value=True,
         ):
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/scheduled_changes/{scheduled_change.id}/",
+                f"/v1/projects/{self.team.id}/scheduled_changes/{scheduled_change.id}/",
                 data={"payload": {"operation": "update_status", "value": True}},
             )
 
@@ -601,7 +601,7 @@ class TestScheduledChange(APIBaseTest):
             return_value=has_permission,
         ):
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/scheduled_changes/{scheduled_change.id}/",
+                f"/v1/projects/{self.team.id}/scheduled_changes/{scheduled_change.id}/",
                 data={"payload": new_payload},
             )
 
@@ -643,7 +643,7 @@ class TestScheduledChange(APIBaseTest):
             return_value=True,
         ):
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/scheduled_changes/{scheduled_change.id}/",
+                f"/v1/projects/{self.team.id}/scheduled_changes/{scheduled_change.id}/",
                 data=patch_body,
             )
 
@@ -684,7 +684,7 @@ class TestScheduledChangePersonalAPIKeyAccess(APIBaseTest):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {key}")
 
     def _write_request(self, action: str):
-        base = f"/api/projects/{self.team.id}/scheduled_changes/"
+        base = f"/v1/projects/{self.team.id}/scheduled_changes/"
         if action == "create":
             return self.client.post(
                 base,
@@ -709,11 +709,11 @@ class TestScheduledChangePersonalAPIKeyAccess(APIBaseTest):
         self._authenticate_with_scopes(["feature_flag:read"])
 
         if action == "list":
-            response = self.client.get(f"/api/projects/{self.team.id}/scheduled_changes/")
+            response = self.client.get(f"/v1/projects/{self.team.id}/scheduled_changes/")
             assert response.status_code == status.HTTP_200_OK, response.json()
             assert self.scheduled_change.id in [row["id"] for row in response.json()["results"]]
         else:
-            response = self.client.get(f"/api/projects/{self.team.id}/scheduled_changes/{self.scheduled_change.id}/")
+            response = self.client.get(f"/v1/projects/{self.team.id}/scheduled_changes/{self.scheduled_change.id}/")
             assert response.status_code == status.HTTP_200_OK, response.json()
             assert response.json()["id"] == self.scheduled_change.id
 
@@ -722,9 +722,9 @@ class TestScheduledChangePersonalAPIKeyAccess(APIBaseTest):
         self._authenticate_with_scopes(["dashboard:read"])
 
         if action == "list":
-            url = f"/api/projects/{self.team.id}/scheduled_changes/"
+            url = f"/v1/projects/{self.team.id}/scheduled_changes/"
         else:
-            url = f"/api/projects/{self.team.id}/scheduled_changes/{self.scheduled_change.id}/"
+            url = f"/v1/projects/{self.team.id}/scheduled_changes/{self.scheduled_change.id}/"
 
         response = self.client.get(url)
 
@@ -777,10 +777,10 @@ class TestScheduledChangePersonalAPIKeyAccess(APIBaseTest):
 
         self._authenticate_with_scopes(["feature_flag:read"])
 
-        list_response = self.client.get(f"/api/projects/{self.team.id}/scheduled_changes/")
+        list_response = self.client.get(f"/v1/projects/{self.team.id}/scheduled_changes/")
         assert list_response.status_code == status.HTTP_200_OK, list_response.json()
         ids = [row["id"] for row in list_response.json()["results"]]
         assert other_change.id not in ids
 
-        retrieve_response = self.client.get(f"/api/projects/{self.team.id}/scheduled_changes/{other_change.id}/")
+        retrieve_response = self.client.get(f"/v1/projects/{self.team.id}/scheduled_changes/{other_change.id}/")
         assert retrieve_response.status_code == status.HTTP_404_NOT_FOUND, retrieve_response.json()

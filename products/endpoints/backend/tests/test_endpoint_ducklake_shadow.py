@@ -41,7 +41,7 @@ class TestShadowDispatch(APIBaseTest):
             "products.endpoints.backend.logic.execution.EndpointExecutionService._execute_inline_endpoint",
             return_value=self._inline_response(),
         ):
-            response = self.client.get(f"/api/environments/{self.team.id}/endpoints/shadow-inline/run/")
+            response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/shadow-inline/run/")
 
         assert response.status_code == status.HTTP_200_OK
         mock_task.delay.assert_called_once()
@@ -72,7 +72,7 @@ class TestShadowDispatch(APIBaseTest):
             "products.endpoints.backend.logic.execution.EndpointExecutionService._execute_inline_endpoint",
             return_value=cached,
         ):
-            response = self.client.get(f"/api/environments/{self.team.id}/endpoints/shadow-cached/run/")
+            response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/shadow-cached/run/")
 
         assert response.status_code == status.HTTP_200_OK
         mock_task.delay.assert_not_called()
@@ -90,7 +90,7 @@ class TestShadowDispatch(APIBaseTest):
             return_value=self._inline_response(),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/shadow-paged/run/",
+                f"/v1/environments/{self.team.id}/endpoints/shadow-paged/run/",
                 data={"limit": 5, "offset": 2},
                 content_type="application/json",
             )
@@ -112,7 +112,7 @@ class TestShadowDispatch(APIBaseTest):
             "products.endpoints.backend.logic.execution.EndpointExecutionService._execute_inline_endpoint",
             return_value=self._inline_response(),
         ):
-            response = self.client.get(f"/api/environments/{self.team.id}/endpoints/shadow-off/run/")
+            response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/shadow-off/run/")
 
         assert response.status_code == status.HTTP_200_OK
         mock_task.delay.assert_not_called()
@@ -135,7 +135,9 @@ class TestShadowComparison(APIBaseTest):
         return captured
 
     def test_emits_comparison_event_with_both_timings(self):
-        endpoint = create_endpoint_with_version(name="cmp-ok", team=self.team, query=INSIGHTSQL_QUERY, created_by=self.user)
+        endpoint = create_endpoint_with_version(
+            name="cmp-ok", team=self.team, query=INSIGHTSQL_QUERY, created_by=self.user
+        )
         version = endpoint.get_version()
         captured = self._capture_events()
 
@@ -174,7 +176,9 @@ class TestShadowComparison(APIBaseTest):
         assert props["execution_type"] == "inline"
 
     def test_emits_event_with_error_when_ducklake_fails(self):
-        endpoint = create_endpoint_with_version(name="cmp-err", team=self.team, query=INSIGHTSQL_QUERY, created_by=self.user)
+        endpoint = create_endpoint_with_version(
+            name="cmp-err", team=self.team, query=INSIGHTSQL_QUERY, created_by=self.user
+        )
         version = endpoint.get_version()
         captured = self._capture_events()
 
@@ -246,7 +250,9 @@ class TestShadowComparison(APIBaseTest):
         assert captured == []
 
     def test_dev_mode_shadows_without_provisioned_server(self):
-        endpoint = create_endpoint_with_version(name="cmp-dev", team=self.team, query=INSIGHTSQL_QUERY, created_by=self.user)
+        endpoint = create_endpoint_with_version(
+            name="cmp-dev", team=self.team, query=INSIGHTSQL_QUERY, created_by=self.user
+        )
         version = endpoint.get_version()
         captured = self._capture_events()
 

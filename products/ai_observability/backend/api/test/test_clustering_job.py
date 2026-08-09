@@ -19,7 +19,7 @@ class TestClusteringJobViewSet(APIBaseTest):
         ClusteringJob.objects.filter(team=self.team).delete()
 
     def _url(self, suffix: str = "") -> str:
-        base = f"/api/environments/{self.team.id}/llm_analytics/clustering_jobs/"
+        base = f"/v1/environments/{self.team.id}/llm_analytics/clustering_jobs/"
         return f"{base}{suffix}" if suffix else base
 
     def _create_job(self, **kwargs) -> ClusteringJob:
@@ -308,7 +308,7 @@ class TestDefaultClusteringJobsOnTeamCreate(APIBaseTest):
 class TestClusteringRunWithJobId(APIBaseTest):
     """Tests for clustering_job_id param on the manual clustering run endpoint."""
 
-    _RUN_URL_TEMPLATE = "/api/environments/{team_id}/llm_analytics/clustering_runs/"
+    _RUN_URL_TEMPLATE = "/v1/environments/{team_id}/llm_analytics/clustering_runs/"
 
     def _run_url(self) -> str:
         return self._RUN_URL_TEMPLATE.format(team_id=self.team.id)

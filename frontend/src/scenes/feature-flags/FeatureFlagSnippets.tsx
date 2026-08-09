@@ -773,7 +773,7 @@ export function APISnippet({ flagKey, groupType, remoteConfiguration }: FeatureF
         return (
             <>
                 <CodeSnippet language={Language.Bash} wrap>
-                    {`curl ${apiHostOrigin()}/api/projects/${currentTeam?.id || ':projectId'}/feature_flags/${
+                    {`curl ${apiHostOrigin()}/v1/projects/${currentTeam?.id || ':projectId'}/feature_flags/${
                         flagKey || ':featureFlagKey'
                     }/remote_config/ \\
 -H 'Content-Type: application/json' \\

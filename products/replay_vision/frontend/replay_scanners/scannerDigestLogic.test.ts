@@ -49,15 +49,15 @@ describe('scannerDigestLogic', () => {
 
     const mocksFor = (actions: VisionActionApi[]): Parameters<typeof useMocks>[0] => ({
         get: {
-            '/api/projects/:team/vision/actions/': { results: actions, count: actions.length },
-            '/api/projects/:team/vision/actions/:action/runs/': { results: RUNS, count: RUNS.length },
-            '/api/projects/:team/vision/actions/:action/runs/:run/': {
+            '/v1/projects/:team/vision/actions/': { results: actions, count: actions.length },
+            '/v1/projects/:team/vision/actions/:action/runs/': { results: RUNS, count: RUNS.length },
+            '/v1/projects/:team/vision/actions/:action/runs/:run/': {
                 ...RUNS[1],
                 synthesized_markdown: '## What happened\nUsers struggled with checkout.',
             },
         },
         post: {
-            '/api/projects/:team/vision/actions/': () => [201, { ...DIGEST, id: 'd-new' }],
+            '/v1/projects/:team/vision/actions/': () => [201, { ...DIGEST, id: 'd-new' }],
         },
     })
 
@@ -98,7 +98,7 @@ describe('scannerDigestLogic', () => {
         let body: any = null
         useMocks({
             post: {
-                '/api/projects/:team/vision/actions/': async ({ request }) => {
+                '/v1/projects/:team/vision/actions/': async ({ request }) => {
                     body = await request.json()
                     return [201, { ...DIGEST, id: 'd-new' }]
                 },
@@ -138,7 +138,7 @@ describe('scannerDigestLogic', () => {
         let body: any = null
         useMocks({
             patch: {
-                '/api/projects/:team/vision/actions/:action/': async ({ request }) => {
+                '/v1/projects/:team/vision/actions/:action/': async ({ request }) => {
                     body = await request.json()
                     return [200, { ...OTHER_SUMMARY, is_scanner_digest: true }]
                 },
@@ -159,7 +159,7 @@ describe('scannerDigestLogic', () => {
         let posted = false
         useMocks({
             post: {
-                '/api/projects/:team/vision/actions/:action/run/': ({ request }: { request: Request }) => {
+                '/v1/projects/:team/vision/actions/:action/run/': ({ request }: { request: Request }) => {
                     // Runs the digest itself (d1), not some other action.
                     expect(request.url).toContain('/vision/actions/d1/run/')
                     posted = true

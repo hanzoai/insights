@@ -20,11 +20,11 @@ const mockUsageEndpoints = (
 ): void => {
     useMocks({
         get: {
-            '/api/billing': () => [
+            '/v1/billing': () => [
                 200,
                 { products: [{ type: 'inbox', display_divisor: CREDITS_PER_PR, current_usage: currentUsage }] },
             ],
-            '/api/projects/:team_id/signals/reports/refund-summary/': () => [
+            '/v1/projects/:team_id/signals/reports/refund-summary/': () => [
                 200,
                 { credited_refund_count: summary.credited_credits / CREDITS_PER_PR, quota_limited: false, ...summary },
             ],
@@ -129,11 +129,11 @@ describe('inboxUsageLogic', () => {
     it('degrades to null when the server returns 404 for the refund summary', async () => {
         useMocks({
             get: {
-                '/api/billing': () => [
+                '/v1/billing': () => [
                     200,
                     { products: [{ type: 'inbox', display_divisor: CREDITS_PER_PR, current_usage: 1500 }] },
                 ],
-                '/api/projects/:team_id/signals/reports/refund-summary/': () => [
+                '/v1/projects/:team_id/signals/reports/refund-summary/': () => [
                     404,
                     { detail: 'PR refunds are not enabled for this organization.' },
                 ],

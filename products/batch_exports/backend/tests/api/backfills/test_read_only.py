@@ -28,7 +28,7 @@ def test_cannot_delete_batch_export_backfill(client: TestClient, organization, t
     )
 
     client.force_login(user)
-    response = client.delete(f"/api/projects/{team.pk}/batch_exports/{batch_export.id}/backfills/{backfill.id}")
+    response = client.delete(f"/v1/projects/{team.pk}/batch_exports/{batch_export.id}/backfills/{backfill.id}")
     assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
@@ -49,7 +49,7 @@ def test_cannot_update_batch_export_backfill(client: TestClient, organization, t
 
     client.force_login(user)
     response = client.patch(
-        f"/api/projects/{team.pk}/batch_exports/{batch_export.id}/backfills/{backfill.id}",
+        f"/v1/projects/{team.pk}/batch_exports/{batch_export.id}/backfills/{backfill.id}",
         {"status": "RUNNING"},
         content_type="application/json",
     )

@@ -41,7 +41,7 @@ class TestMCPGatewayToolPoliciesAPI(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/mcp_gateway/servers/{server.id}/tools/",
+            f"/v1/projects/{self.team.id}/mcp_gateway/servers/{server.id}/tools/",
             {"scope_type": "team"},
         )
 
@@ -72,7 +72,7 @@ class TestMCPGatewayToolPoliciesAPI(APIBaseTest):
 
     def _member_row(self, server: MCPGatewayServer) -> dict:
         response = self.client.get(
-            f"/api/projects/{self.team.id}/mcp_gateway/servers/{server.id}/tools/",
+            f"/v1/projects/{self.team.id}/mcp_gateway/servers/{server.id}/tools/",
             {"scope_type": "member", "scope_user_id": str(self.user.id)},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -96,7 +96,7 @@ class TestMCPGatewayToolPoliciesAPI(APIBaseTest):
         )
 
         team_response = self.client.get(
-            f"/api/projects/{self.team.id}/mcp_gateway/servers/{server.id}/tools/",
+            f"/v1/projects/{self.team.id}/mcp_gateway/servers/{server.id}/tools/",
             {"scope_type": "team"},
         )
         assert team_response.status_code == status.HTTP_200_OK

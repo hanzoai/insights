@@ -37,14 +37,14 @@ describe('Survey event trigger property filters', () => {
         initKeaTests()
         useMocks({
             get: {
-                '/api/projects/:team_id/property_definitions': {
+                '/v1/projects/:team_id/property_definitions': {
                     results: [
                         { name: 'plan', property_type: 'String' },
                         { name: 'payload', property_type: 'StringArray' },
                     ],
                     count: 2,
                 },
-                '/api/projects/:team_id/surveys': { results: [], count: 0 },
+                '/v1/projects/:team_id/surveys': { results: [], count: 0 },
             },
         })
     })

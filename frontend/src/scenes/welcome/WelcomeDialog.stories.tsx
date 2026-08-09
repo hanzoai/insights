@@ -145,7 +145,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/users/@me/': INVITED_USER,
+                '/v1/users/@me/': INVITED_USER,
             },
         }),
     ],
@@ -164,21 +164,21 @@ function Template(): JSX.Element {
 export const Default: StoryFn = () => <Template />
 Default.decorators = [
     mswDecorator({
-        get: { '/api/organizations/@current/welcome/current/': FULL_PAYLOAD },
+        get: { '/v1/organizations/@current/welcome/current/': FULL_PAYLOAD },
     }),
 ]
 
 export const EmptyOrganization: StoryFn = () => <Template />
 EmptyOrganization.decorators = [
     mswDecorator({
-        get: { '/api/organizations/@current/welcome/current/': EMPTY_PAYLOAD },
+        get: { '/v1/organizations/@current/welcome/current/': EMPTY_PAYLOAD },
     }),
 ]
 
 export const NoInviter: StoryFn = () => <Template />
 NoInviter.decorators = [
     mswDecorator({
-        get: { '/api/organizations/@current/welcome/current/': { ...FULL_PAYLOAD, inviter: null } },
+        get: { '/v1/organizations/@current/welcome/current/': { ...FULL_PAYLOAD, inviter: null } },
     }),
 ]
 
@@ -200,8 +200,8 @@ export const Provisioned: StoryFn = () => <ProvisionedTemplate />
 Provisioned.decorators = [
     mswDecorator({
         get: {
-            '/api/users/@me/': PROVISIONED_USER,
-            '/api/organizations/@current/welcome/current/': { ...FULL_PAYLOAD, inviter: null },
+            '/v1/users/@me/': PROVISIONED_USER,
+            '/v1/organizations/@current/welcome/current/': { ...FULL_PAYLOAD, inviter: null },
         },
     }),
 ]

@@ -11,12 +11,12 @@ CAPTURE_PATH = "products.notebooks.backend.presentation.views.notebook.capture_n
 
 class TestNotebookReadEvent(APIBaseTest):
     def _create_notebook(self) -> str:
-        response = self.client.post(f"/api/projects/{self.team.id}/notebooks/", data={}, format="json")
+        response = self.client.post(f"/v1/projects/{self.team.id}/notebooks/", data={}, format="json")
         assert response.status_code == status.HTTP_201_CREATED
         return response.json()["short_id"]
 
     def _url(self, short_id: str) -> str:
-        return f"/api/projects/{self.team.id}/notebooks/{short_id}/"
+        return f"/v1/projects/{self.team.id}/notebooks/{short_id}/"
 
     @patch(CAPTURE_PATH)
     def test_browser_session_read_does_not_emit(self, mock_capture):

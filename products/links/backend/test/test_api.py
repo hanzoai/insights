@@ -20,7 +20,7 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             "description": "Test link",
         }
         response = self.client.post(
-            f"/api/projects/{self.team.id}/links",
+            f"/v1/projects/{self.team.id}/links",
             data=data,
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -35,7 +35,7 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             "description": "Test link",
         }
         response = self.client.post(
-            f"/api/projects/{self.team.id}/links",
+            f"/v1/projects/{self.team.id}/links",
             data=data,
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -55,7 +55,7 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/links")
+        response = self.client.get(f"/v1/projects/{self.team.id}/links")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 1)
         self.assertEqual(response.json()["results"][0]["short_code"], link.short_code)
@@ -70,7 +70,7 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/links/{link.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/links/{link.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["short_code"], link.short_code)
 
@@ -92,7 +92,7 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         }
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/links/{link.id}",
+            f"/v1/projects/{self.team.id}/links/{link.id}",
             data=data,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -108,14 +108,14 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             created_by=self.user,
         )
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/links/{link.id}")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/links/{link.id}")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Link.objects.filter(id=link.id).exists())
 
     def test_unauthorized_access(self):
         # Create a new client without authentication
         client = APIClient()
-        response = client.get(f"/api/projects/{self.team.id}/links")
+        response = client.get(f"/v1/projects/{self.team.id}/links")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_link_team_isolation(self):
@@ -139,14 +139,14 @@ class TestLink(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         # Should only see links from current team
-        response = self.client.get(f"/api/projects/{self.team.id}/links")
+        response = self.client.get(f"/v1/projects/{self.team.id}/links")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 1)
         self.assertEqual(str(response.json()["results"][0]["id"]), str(link1.id))
 
     def test_create_link_in_specific_folder(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/links",
+            f"/v1/projects/{self.team.id}/links",
             data={
                 "redirect_url": "https://example.com",
                 "short_link_domain": "phog.gg",

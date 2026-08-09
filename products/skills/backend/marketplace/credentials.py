@@ -120,7 +120,7 @@ def marketplace_repo_url(team_id: int) -> str:
     Pinned to ``SITE_URL`` via ``absolute_uri`` (not ``request.get_host()``): the host must not be
     steerable by a request Host header, since the install command below embeds a live token.
     """
-    return absolute_uri(f"/api/projects/{team_id}/llm_skills/marketplace.git")
+    return absolute_uri(f"/v1/projects/{team_id}/llm_skills/marketplace.git")
 
 
 def _credentialed_git_url(team_id: int, token: str | None) -> str:

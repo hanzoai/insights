@@ -35,7 +35,7 @@ def test_can_get_test_for_destination(client: HttpClient, destination: str, orga
     client.force_login(user)
 
     response = client.get(
-        f"/api/projects/{team.pk}/batch_exports/test",
+        f"/v1/projects/{team.pk}/batch_exports/test",
         {"destination": destination},
         content_type="application/json",
     )
@@ -119,7 +119,7 @@ def test_can_run_s3_test_step_for_new_destination(
     client.force_login(user)
 
     response = client.post(
-        f"/api/projects/{team.pk}/batch_exports/run_test_step_new",
+        f"/v1/projects/{team.pk}/batch_exports/run_test_step_new",
         {**{"step": 0}, **batch_export_data},
         content_type="application/json",
     )
@@ -162,7 +162,7 @@ def test_can_run_s3_test_step_for_destination(
     )
 
     response = client.post(
-        f"/api/projects/{team.pk}/batch_exports/{batch_export['id']}/run_test_step",
+        f"/v1/projects/{team.pk}/batch_exports/{batch_export['id']}/run_test_step",
         {**{"step": 0}, **batch_export_data},
         content_type="application/json",
     )
@@ -216,7 +216,7 @@ def test_run_test_step_rejects_destination_type_change(client: HttpClient, tempo
         "products.batch_exports.backend.api.batch_export.get_destination_test"
     ) as mock_get_destination_test:
         response = client.post(
-            f"/api/projects/{team.pk}/batch_exports/{batch_export['id']}/run_test_step",
+            f"/v1/projects/{team.pk}/batch_exports/{batch_export['id']}/run_test_step",
             {**{"step": 0}, **malicious_data},
             content_type="application/json",
         )
@@ -324,7 +324,7 @@ def test_can_run_snowflake_test_step_for_partial_config(
         run_step_mocked.return_value = fake_test_step
 
         response = client.post(
-            f"/api/projects/{team.pk}/batch_exports/{batch_export['id']}/run_test_step",
+            f"/v1/projects/{team.pk}/batch_exports/{batch_export['id']}/run_test_step",
             {**{"step": 0}, **batch_export_data},
             content_type="application/json",
         )
@@ -377,7 +377,7 @@ def test_can_run_s3_test_step_with_additional_fields(
     dest.save()
 
     response = client.post(
-        f"/api/projects/{team.pk}/batch_exports/{batch_export['id']}/run_test_step",
+        f"/v1/projects/{team.pk}/batch_exports/{batch_export['id']}/run_test_step",
         {**{"step": 0}, **batch_export_data},
         content_type="application/json",
     )
@@ -454,7 +454,7 @@ def test_can_run_bigquery_test_step_with_castable_type(
         run_step_mocked.return_value = fake_test_step
 
         response = client.post(
-            f"/api/projects/{team.pk}/batch_exports/{batch_export['id']}/run_test_step",
+            f"/v1/projects/{team.pk}/batch_exports/{batch_export['id']}/run_test_step",
             {**{"step": 0}, **batch_export_data},
             content_type="application/json",
         )
@@ -512,7 +512,7 @@ def test_can_run_databricks_test_step_for_new_destination(
         mock_get_destination_test.return_value = mock_databricks_destination_test
 
         response = client.post(
-            f"/api/projects/{team.pk}/batch_exports/run_test_step_new",
+            f"/v1/projects/{team.pk}/batch_exports/run_test_step_new",
             {**{"step": 0}, **batch_export_data},
             content_type="application/json",
         )
@@ -563,7 +563,7 @@ def test_integration_is_required_for_databricks_destination_tests(
     client.force_login(user)
 
     response = client.post(
-        f"/api/projects/{team.pk}/batch_exports/run_test_step_new",
+        f"/v1/projects/{team.pk}/batch_exports/run_test_step_new",
         {**{"step": 0}, **batch_export_data},
         content_type="application/json",
     )

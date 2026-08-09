@@ -49,7 +49,7 @@ class TestLogsAlertAPI(APIBaseTest):
 
     def setUp(self):
         super().setUp()
-        self.base_url = f"/api/projects/{self.team.pk}/logs/alerts/"
+        self.base_url = f"/v1/projects/{self.team.pk}/logs/alerts/"
         self._ff_patcher = patch("hanzo_insights.feature_enabled", return_value=True)
         self._ff_patcher.start()
         self.addCleanup(self._ff_patcher.stop)
@@ -576,7 +576,7 @@ class TestLogsAlertAPI(APIBaseTest):
 
     def test_environments_url(self):
         created = self._create_via_api()
-        env_url = f"/api/environments/{self.team.pk}/logs/alerts/"
+        env_url = f"/v1/environments/{self.team.pk}/logs/alerts/"
 
         response = self.client.get(env_url)
         assert response.status_code == status.HTTP_200_OK
@@ -1710,7 +1710,7 @@ class TestSimulateEvaluatorParity(DatastoreTestMixin, APIBaseTest):
 
     def setUp(self) -> None:
         super().setUp()
-        self.base_url = f"/api/projects/{self.team.pk}/logs/alerts/"
+        self.base_url = f"/v1/projects/{self.team.pk}/logs/alerts/"
         self._ff_patcher = patch("hanzo_insights.feature_enabled", return_value=True)
         self._ff_patcher.start()
         self.addCleanup(self._ff_patcher.stop)
@@ -1784,7 +1784,7 @@ class TestSimulateEvaluatorLifecycleParity(DatastoreTestMixin, APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
         self.service = f"lifecycle_parity_test_{self._testMethodName}"
-        self.base_url = f"/api/projects/{self.team.pk}/logs/alerts/"
+        self.base_url = f"/v1/projects/{self.team.pk}/logs/alerts/"
         self._ff_patcher = patch("hanzo_insights.feature_enabled", return_value=True)
         self._ff_patcher.start()
         self.addCleanup(self._ff_patcher.stop)
@@ -2041,7 +2041,7 @@ class TestLogsAlertAPIPersonalAPIKeyScopes(APIBaseTest):
         self._ff_patcher = patch("hanzo_insights.feature_enabled", return_value=True)
         self._ff_patcher.start()
         self.addCleanup(self._ff_patcher.stop)
-        self.base_url = f"/api/projects/{self.team.pk}/logs/alerts/"
+        self.base_url = f"/v1/projects/{self.team.pk}/logs/alerts/"
 
     def _auth(self, value: str) -> dict:
         return {"HTTP_AUTHORIZATION": f"Bearer {value}"}

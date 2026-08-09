@@ -19,6 +19,7 @@ from insights.api.file_system.deletion import undo_delete
 from insights.api.file_system.file_system import DELETE_PREVIEW_ENTRY_LIMIT
 from insights.models import OrganizationMembership, Project, Team, User
 from insights.models.activity_logging.activity_log import ActivityLog
+from insights.models.ee_models import AccessControl
 from insights.models.file_system.file_system import FileSystem
 from insights.session_recordings.models.session_recording_playlist import SessionRecordingPlaylist
 
@@ -32,8 +33,6 @@ from products.links.backend.models import Link
 from products.notebooks.backend.models import Notebook
 from products.product_analytics.backend.models.insight import Insight
 from products.surveys.backend.models import Survey
-
-from insights.models.ee_models import AccessControl
 
 
 class RestoreTestCase(TypedDict, total=False):
@@ -55,7 +54,7 @@ class TestFileSystemAPI(APIBaseTest):
         """
         When no FileSystem objects exist in the DB for the team, the list should be empty.
         """
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         response_data = response.json()
         self.assertEqual(response_data["count"], 0)
@@ -66,7 +65,7 @@ class TestFileSystemAPI(APIBaseTest):
         Ensure that we can create a FileSystem object for our team.
         """
         response = self.client.post(
-            f"/api/projects/{self.team.id}/file_system/",
+            f"/v1/projects/{self.team.id}/file_system/",
             {"path": "MyFolder/Document.txt", "type": "doc-file", "meta": {"description": "A test file"}},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
@@ -83,7 +82,7 @@ class TestFileSystemAPI(APIBaseTest):
         Ensure that we can create a FileSystem object for our team.
         """
         response = self.client.post(
-            f"/api/projects/{self.team.id}/file_system/",
+            f"/v1/projects/{self.team.id}/file_system/",
             {
                 "path": "MyFolder/Document.txt",
                 "type": "doc-file",
@@ -110,7 +109,7 @@ class TestFileSystemAPI(APIBaseTest):
             type="test-type",
             created_by=self.user,
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/{file_obj.pk}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/{file_obj.pk}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
 
         response_data = response.json()
@@ -127,7 +126,7 @@ class TestFileSystemAPI(APIBaseTest):
         )
 
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/file_system/{file_obj.pk}/",
+            f"/v1/projects/{self.team.id}/file_system/{file_obj.pk}/",
             {"path": "NewPath/file.txt", "type": "new-type"},
         )
         self.assertEqual(update_response.status_code, status.HTTP_200_OK, update_response.json())
@@ -152,7 +151,7 @@ class TestFileSystemAPI(APIBaseTest):
             created_by=self.user,
         )
 
-        delete_response = self.client.delete(f"/api/projects/{self.team.id}/file_system/{file_obj.pk}/")
+        delete_response = self.client.delete(f"/v1/projects/{self.team.id}/file_system/{file_obj.pk}/")
 
         self.assertEqual(delete_response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(FileSystem.objects.filter(pk=file_obj.pk).exists())
@@ -179,7 +178,7 @@ class TestFileSystemAPI(APIBaseTest):
             created_by=self.user,
         )
 
-        delete_response = self.client.delete(f"/api/projects/{self.team.id}/file_system/{folder_obj.pk}/")
+        delete_response = self.client.delete(f"/v1/projects/{self.team.id}/file_system/{folder_obj.pk}/")
 
         self.assertEqual(delete_response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(FileSystem.objects.filter(pk=folder_obj.pk).exists())
@@ -198,7 +197,7 @@ class TestFileSystemAPI(APIBaseTest):
             created_by=self.user,
         )
 
-        delete_response = self.client.delete(f"/api/projects/{self.team.id}/file_system/{file_obj.pk}/")
+        delete_response = self.client.delete(f"/v1/projects/{self.team.id}/file_system/{file_obj.pk}/")
 
         self.assertEqual(delete_response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(delete_response.json()["detail"], "Cannot delete type 'dashboard' without a reference.")
@@ -209,7 +208,7 @@ class TestFileSystemAPI(APIBaseTest):
         If there are no relevant items to create (e.g. no FeatureFlags, Experiments, etc.),
         'unfiled' should return an empty list and create nothing in the DB.
         """
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/unfiled/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/unfiled/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         data = response.json()
         self.assertEqual(data["count"], 0)
@@ -223,14 +222,14 @@ class TestFileSystemAPI(APIBaseTest):
         FeatureFlag.objects.create(team=self.team, key="Beta Feature", created_by=self.user)
         FileSystem.objects.all().delete()
 
-        first_response = self.client.get(f"/api/projects/{self.team.id}/file_system/unfiled/")
+        first_response = self.client.get(f"/v1/projects/{self.team.id}/file_system/unfiled/")
         self.assertEqual(first_response.status_code, status.HTTP_200_OK)
         self.assertEqual(first_response.json()["count"], 1)  # 1 new "leaf" item
         # Check that there's exactly 1 *non-folder* item in DB
         self.assertEqual(FileSystem.objects.exclude(type="folder").count(), 1)
 
         # Second call => no new unfiled items
-        second_response = self.client.get(f"/api/projects/{self.team.id}/file_system/unfiled/")
+        second_response = self.client.get(f"/v1/projects/{self.team.id}/file_system/unfiled/")
         self.assertEqual(second_response.status_code, status.HTTP_200_OK)
         self.assertEqual(second_response.json()["count"], 0)  # No new items
         # Should still have just 1 *non-folder* item
@@ -250,7 +249,7 @@ class TestFileSystemAPI(APIBaseTest):
         Notebook.objects.create(team=self.team, title="Data Exploration", created_by=self.user)
         FileSystem.objects.all().delete()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/unfiled/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/unfiled/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
 
         data = response.json()
@@ -267,7 +266,7 @@ class TestFileSystemAPI(APIBaseTest):
         FileSystem.objects.all().delete()
 
         # Filter for feature_flag only => creates 1 new 'leaf' item
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/unfiled/?type=feature_flag")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/unfiled/?type=feature_flag")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         data = response.json()
         self.assertEqual(data["count"], 1)
@@ -288,7 +287,7 @@ class TestFileSystemAPI(APIBaseTest):
         FileSystem.objects.create(team=self.team, path="Analytics/Report 2", type="report", created_by=self.user)
         FileSystem.objects.create(team=self.team, path="Random/Other File", type="misc", created_by=self.user)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/?search=Analytics")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/?search=Analytics")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         data = response.json()
         self.assertEqual(data["count"], 2)
@@ -296,7 +295,7 @@ class TestFileSystemAPI(APIBaseTest):
         self.assertSetEqual(paths, {"Analytics/Report 1", "Analytics/Report 2"})
 
         # Searching for something else
-        response2 = self.client.get(f"/api/projects/{self.team.id}/file_system/?search=Random")
+        response2 = self.client.get(f"/v1/projects/{self.team.id}/file_system/?search=Random")
         self.assertEqual(response2.status_code, status.HTTP_200_OK, response2.json())
         data2 = response2.json()
         self.assertEqual(data2["count"], 1)
@@ -321,7 +320,7 @@ class TestFileSystemAPI(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/file_system/",
+            f"/v1/projects/{self.team.id}/file_system/",
             {"search": "flag scene tabs"},
         )
 
@@ -343,28 +342,28 @@ class TestFileSystemAPI(APIBaseTest):
         )
         FileSystem.objects.create(team=self.team, path="Random/Other File", type="misc", created_by=self.user)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/?search=type:source")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/?search=type:source")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         data = response.json()
         self.assertEqual(data["count"], 1)
         paths = {item["path"] for item in data["results"]}
         self.assertSetEqual(paths, {"Analytics/Report 1"})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/?search=type:destination")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/?search=type:destination")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         data = response.json()
         self.assertEqual(data["count"], 1)
         paths = {item["path"] for item in data["results"]}
         self.assertSetEqual(paths, {"Analytics/Report 2"})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/?search=type:misc")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/?search=type:misc")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         data = response.json()
         self.assertEqual(data["count"], 1)
         paths = {item["path"] for item in data["results"]}
         self.assertSetEqual(paths, {"Random/Other File"})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/?search=type:insights_function/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/?search=type:insights_function/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         data = response.json()
         self.assertEqual(data["count"], 2)
@@ -376,7 +375,7 @@ class TestFileSystemAPI(APIBaseTest):
         Creating a FileSystem with a single-segment path (like "Documents") should have depth=1.
         """
         response = self.client.post(
-            f"/api/projects/{self.team.id}/file_system/",
+            f"/v1/projects/{self.team.id}/file_system/",
             {"path": "Documents", "type": "feature_flag"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
@@ -394,7 +393,7 @@ class TestFileSystemAPI(APIBaseTest):
         E.g. "Folder/Subfolder/File" => depth=3
         """
         response = self.client.post(
-            f"/api/projects/{self.team.id}/file_system/",
+            f"/v1/projects/{self.team.id}/file_system/",
             {"path": "Folder/Subfolder/File", "type": "feature_flag"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
@@ -418,7 +417,7 @@ class TestFileSystemAPI(APIBaseTest):
 
         # Now update the path to add or remove segments
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/file_system/{file_obj.pk}/",
+            f"/v1/projects/{self.team.id}/file_system/{file_obj.pk}/",
             {"path": "NewPath/Subfolder/file.txt"},
         )
         self.assertEqual(update_response.status_code, status.HTTP_200_OK)
@@ -438,7 +437,7 @@ class TestFileSystemAPI(APIBaseTest):
 
         # Update path to fewer segments
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/file_system/{file_obj.pk}/",
+            f"/v1/projects/{self.team.id}/file_system/{file_obj.pk}/",
             {"path": "SingleSegment"},
         )
         self.assertEqual(update_response.status_code, status.HTTP_200_OK)
@@ -459,7 +458,7 @@ class TestFileSystemAPI(APIBaseTest):
         FileSystem.objects.all().delete()
 
         # Call unfiled - that should create the new FileSystem item
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/unfiled/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/unfiled/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         data = response.json()
         self.assertEqual(data["count"], 1)
@@ -479,7 +478,7 @@ class TestFileSystemAPI(APIBaseTest):
 
         # This becomes "Unfiled/Feature Flags/Flag \/ With Slash"
         # but that is still 3 path segments from the perspective of split_path()
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/unfiled/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/unfiled/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         data = response.json()
         self.assertEqual(data["count"], 1)
@@ -496,14 +495,14 @@ class TestFileSystemAPI(APIBaseTest):
         FileSystem.objects.create(team=self.team, path="Deep/Nested/Path", depth=3, created_by=self.user)
 
         # depth=2
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/?depth=2")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/?depth=2")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data["count"], 1)
         self.assertEqual(data["results"][0]["path"], "Folder/Sub")
 
         # depth=3
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/?depth=3")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/?depth=3")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data["count"], 1)
@@ -519,7 +518,7 @@ class TestFileSystemAPI(APIBaseTest):
         FileSystem.objects.create(team=self.team, path="AnotherFolder/File3", depth=2, created_by=self.user)
 
         # Filter by ?parent=SomeFolder
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/?parent=SomeFolder")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/?parent=SomeFolder")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data["count"], 2, data["results"])
@@ -531,7 +530,7 @@ class TestFileSystemAPI(APIBaseTest):
         self.assertNotIn("AnotherFolder/File3", paths)
 
         # Filter by ?parent=SomeFolder
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/?path=SomeFolder/File1")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/?path=SomeFolder/File1")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data["count"], 1, data["results"])
@@ -547,7 +546,7 @@ class TestFileSystemAPI(APIBaseTest):
             team=self.team, path="SomeFolder/SubFolder/File2", depth=3, created_by=self.user
         )
 
-        url = f"/api/projects/{self.team.id}/file_system/?parent=SomeFolder&depth=2"
+        url = f"/v1/projects/{self.team.id}/file_system/?parent=SomeFolder&depth=2"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -565,7 +564,7 @@ class TestFileSystemAPI(APIBaseTest):
         'a', 'a/b', 'a/b/c', 'a/b/c/d', if they don't already exist.
         """
         response = self.client.post(
-            f"/api/projects/{self.team.id}/file_system/",
+            f"/v1/projects/{self.team.id}/file_system/",
             {
                 "path": "a/b/c/d/e",
                 "type": "doc-file",
@@ -601,7 +600,7 @@ class TestFileSystemAPI(APIBaseTest):
 
         # Move the folder
         response = self.client.post(
-            f"/api/projects/{self.team.id}/file_system/{folder.pk}/move",
+            f"/v1/projects/{self.team.id}/file_system/{folder.pk}/move",
             {"new_path": "NewFolder"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -626,7 +625,7 @@ class TestFileSystemAPI(APIBaseTest):
         FileSystem.objects.create(team=self.team, path="OldFolder/File2", type="feature_flag", created_by=self.user)
 
         # Count the folder by id
-        response = self.client.post(f"/api/projects/{self.team.id}/file_system/{folder.pk}/count")
+        response = self.client.post(f"/v1/projects/{self.team.id}/file_system/{folder.pk}/count")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         data = response.json()
         self.assertEqual(data["count"], 2)
@@ -635,7 +634,7 @@ class TestFileSystemAPI(APIBaseTest):
         self.assertCountEqual([entry["path"] for entry in data["entries"]], ["OldFolder/File1", "OldFolder/File2"])
 
         # Count the folder by path
-        response = self.client.post(f"/api/projects/{self.team.id}/file_system/count_by_path?path=OldFolder")
+        response = self.client.post(f"/v1/projects/{self.team.id}/file_system/count_by_path?path=OldFolder")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         data = response.json()
         self.assertEqual(data["count"], 2)
@@ -652,7 +651,7 @@ class TestFileSystemAPI(APIBaseTest):
                 created_by=self.user,
             )
 
-        response = self.client.post(f"/api/projects/{self.team.id}/file_system/{folder.pk}/count")
+        response = self.client.post(f"/v1/projects/{self.team.id}/file_system/{folder.pk}/count")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         data = response.json()
 
@@ -670,7 +669,7 @@ class TestFileSystemAPI(APIBaseTest):
         FileSystem.objects.create(team=self.team, path="FileC.txt", type="feature_flag", created_by=self.user)
 
         # Filter by type 'doc'
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/?type=feature_flag")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/?type=feature_flag")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         # Expecting 2 items with type 'doc'
@@ -678,14 +677,14 @@ class TestFileSystemAPI(APIBaseTest):
         for item in data["results"]:
             self.assertEqual(item["type"], "feature_flag")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/?type__startswith=f")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/?type__startswith=f")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         # Expecting 2 items with type starting with 'd'
         self.assertEqual(data["count"], 2)
 
         # Filter by type 'doc'
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/?not_type=feature_flag")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/?not_type=feature_flag")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         # Expecting 1 items with type 'img'
@@ -705,7 +704,7 @@ class TestFileSystemAPI(APIBaseTest):
         )
         new_path = "NewFolder/NewFile.txt"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/file_system/{file_obj.pk}/link",
+            f"/v1/projects/{self.team.id}/file_system/{file_obj.pk}/link",
             {"new_path": new_path},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -737,7 +736,7 @@ class TestFileSystemAPI(APIBaseTest):
         )
         new_path = "LinkedFolder"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/file_system/{folder_obj.pk}/link",
+            f"/v1/projects/{self.team.id}/file_system/{folder_obj.pk}/link",
             {"new_path": new_path},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -763,7 +762,7 @@ class TestFileSystemAPI(APIBaseTest):
             created_by=self.user,
         )
         response = self.client.post(
-            f"/api/projects/{self.team.id}/file_system/{folder_obj.pk}/link",
+            f"/v1/projects/{self.team.id}/file_system/{folder_obj.pk}/link",
             {"new_path": "Folder2"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.json())
@@ -813,7 +812,7 @@ class TestFileSystemAPI(APIBaseTest):
         FileSystem.objects.create(team=self.team, path="bFile.txt", type="feature_flag", created_by=self.user, depth=1)
         FileSystem.objects.create(team=self.team, path="Afile.txt", type="feature_flag", created_by=self.user, depth=1)
 
-        url = f"/api/projects/{self.team.id}/file_system/?depth=1"
+        url = f"/v1/projects/{self.team.id}/file_system/?depth=1"
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.json())
 
@@ -833,7 +832,7 @@ class TestFileSystemAPI(APIBaseTest):
         FileSystem.objects.create(team=self.team, path="bFile.txt", type="feature_flag", created_by=self.user, depth=1)
         FileSystem.objects.create(team=self.team, path="Afile.txt", type="feature_flag", created_by=self.user, depth=1)
 
-        resp = self.client.get(f"/api/projects/{self.team.id}/file_system/")
+        resp = self.client.get(f"/v1/projects/{self.team.id}/file_system/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.json())
 
         paths = [item["path"] for item in resp.json()["results"]]
@@ -850,7 +849,7 @@ class TestFileSystemAPI(APIBaseTest):
             file_3 = FileSystem.objects.create(team=self.team, path="File_3", type="feature_flag", created_by=self.user)
 
         # Query with descending order
-        url = f"/api/projects/{self.team.id}/file_system/?order_by=-created_at"
+        url = f"/v1/projects/{self.team.id}/file_system/?order_by=-created_at"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
 
@@ -862,7 +861,7 @@ class TestFileSystemAPI(APIBaseTest):
         self.assertEqual(results[2]["id"], str(file_1.id))
 
         # Query with ascending order
-        url = f"/api/projects/{self.team.id}/file_system/?order_by=created_at"
+        url = f"/v1/projects/{self.team.id}/file_system/?order_by=created_at"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
 
@@ -884,7 +883,7 @@ class TestFileSystemAPI(APIBaseTest):
             team=self.team, path="Analytics/Other/Q2.txt", type="feature_flag", created_by=self.user
         )
 
-        url = f"/api/projects/{self.team.id}/file_system/?search=path:Reports"
+        url = f"/v1/projects/{self.team.id}/file_system/?search=path:Reports"
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.json())
         self.assertEqual(resp.json()["count"], 1)
@@ -901,7 +900,7 @@ class TestFileSystemAPI(APIBaseTest):
             team=self.team, path="Marketing/Plan/Q2-Summary.pdf", type="feature_flag", created_by=self.user
         )
 
-        url = f"/api/projects/{self.team.id}/file_system/?search=name:Overview"
+        url = f"/v1/projects/{self.team.id}/file_system/?search=name:Overview"
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.json())
         self.assertEqual(resp.json()["count"], 1)
@@ -917,7 +916,7 @@ class TestFileSystemAPI(APIBaseTest):
         FileSystem.objects.create(team=self.team, path="Docs/PaulFile.txt", type="feature_flag", created_by=paul)
         FileSystem.objects.create(team=self.team, path="Docs/OtherFile.txt", type="feature_flag", created_by=self.user)
 
-        url = f'/api/projects/{self.team.id}/file_system/?search=user:"Paul Duncan"'
+        url = f'/v1/projects/{self.team.id}/file_system/?search=user:"Paul Duncan"'
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.json())
         self.assertEqual(resp.json()["count"], 1)
@@ -931,7 +930,7 @@ class TestFileSystemAPI(APIBaseTest):
         other = User.objects.create_and_join(self.organization, "someone@ph.com", "pwd")
         FileSystem.objects.create(team=self.team, path="Theirs.txt", type="feature_flag", created_by=other)
 
-        url = f"/api/projects/{self.team.id}/file_system/?search=user:me"
+        url = f"/v1/projects/{self.team.id}/file_system/?search=user:me"
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.json())
         self.assertEqual(resp.json()["count"], 1)
@@ -946,7 +945,7 @@ class TestFileSystemAPI(APIBaseTest):
         )
         FileSystem.objects.create(team=self.team, path="Old/Reports/Old.txt", type="feature_flag", created_by=self.user)
 
-        url = f"/api/projects/{self.team.id}/file_system/?search=path:Reports+-path:Old"
+        url = f"/v1/projects/{self.team.id}/file_system/?search=path:Reports+-path:Old"
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.json())
         self.assertEqual(resp.json()["count"], 1)
@@ -960,7 +959,7 @@ class TestFileSystemAPI(APIBaseTest):
         FileSystem.objects.create(team=self.team, path="Doc2", type="doc/image", created_by=self.user)
         FileSystem.objects.create(team=self.team, path="Img1", type="img", created_by=self.user)
 
-        url = f"/api/projects/{self.team.id}/file_system/?search=type:doc/"
+        url = f"/v1/projects/{self.team.id}/file_system/?search=type:doc/"
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.json())
         paths = {item["path"] for item in resp.json()["results"]}
@@ -1037,7 +1036,7 @@ class TestFileSystemAPI(APIBaseTest):
         FileSystem.objects.all().delete()
 
         # Trigger unfiled sync
-        resp = self.client.get(f"/api/projects/{self.team.id}/file_system/unfiled/")
+        resp = self.client.get(f"/v1/projects/{self.team.id}/file_system/unfiled/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.json())
         self.assertEqual(resp.json()["count"], 1)
 
@@ -1070,7 +1069,7 @@ class TestFileSystemAPI(APIBaseTest):
             created_by=self.user,
         )
 
-        base = f"/api/projects/{self.team.id}/file_system/?search="
+        base = f"/v1/projects/{self.team.id}/file_system/?search="
         for query in ["go/revenue", "banana/go", "banana/go/revenue"]:
             resp = self.client.get(base + query)
             self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.json())
@@ -1089,7 +1088,7 @@ class TestFileSystemAPI(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/file_system/",
+            f"/v1/projects/{self.team.id}/file_system/",
             {"search": "what's home"},
         )
 
@@ -1177,7 +1176,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         self._create_access_control(resource="dashboard", resource_id=self.file_b.ref, access_level="none")
         # The user is not staff, not the creator of file_b => 'none' should exclude it
 
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         data = response.json()
 
@@ -1188,7 +1187,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
 
         # Meanwhile, the other_user is the creator of file_b => they can see it
         self.client.force_login(self.other_user)
-        response2 = self.client.get(f"/api/projects/{self.team.id}/file_system/")
+        response2 = self.client.get(f"/v1/projects/{self.team.id}/file_system/")
         self.assertEqual(response2.status_code, status.HTTP_200_OK, response2.json())
         data2 = response2.json()
         paths2 = {item["path"] for item in data2["results"]}
@@ -1201,12 +1200,12 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         self._create_access_control(resource="dashboard", resource_id=self.file_b.ref, access_level="none")
 
         # Attempt to delete file_b => expect 404 because user doesn't see it
-        url = f"/api/projects/{self.team.id}/file_system/{self.file_b.id}/"
+        url = f"/v1/projects/{self.team.id}/file_system/{self.file_b.id}/"
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         # Confirm we can still delete file_a (which isn't restricted).
-        url_a = f"/api/projects/{self.team.id}/file_system/{self.file_a.id}/"
+        url_a = f"/v1/projects/{self.team.id}/file_system/{self.file_a.id}/"
         resp_a = self.client.delete(url_a)
         self.assertEqual(resp_a.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(FileSystem.objects.filter(pk=self.file_a.pk).exists())
@@ -1214,7 +1213,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
     @patch("hanzo_insights.feature_enabled", return_value=True)
     def test_move_excludes_none_access_objects(self, mock_flag):
         self._create_access_control(resource="dashboard", resource_id=self.file_b.ref, access_level="none")
-        url = f"/api/projects/{self.team.id}/file_system/{self.file_b.id}/move"
+        url = f"/v1/projects/{self.team.id}/file_system/{self.file_b.id}/move"
         resp = self.client.post(url, {"new_path": "NewDocs/FileB"})
         # Because user doesn't see file_b => 404
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
@@ -1224,11 +1223,11 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         self._create_access_control(resource="dashboard", resource_id=self.file_b.ref, access_level="none")
 
         # link
-        link_url = f"/api/projects/{self.team.id}/file_system/{self.file_b.id}/link"
+        link_url = f"/v1/projects/{self.team.id}/file_system/{self.file_b.id}/link"
         resp_link = self.client.post(link_url, {"new_path": "Anywhere/FileBCopy"})
         self.assertEqual(resp_link.status_code, status.HTTP_404_NOT_FOUND)
 
-        count_url = f"/api/projects/{self.team.id}/file_system/{self.folder.id}/count"
+        count_url = f"/v1/projects/{self.team.id}/file_system/{self.folder.id}/count"
         resp = self.client.post(count_url)
         self.assertEqual(resp.json()["count"], 1)
 
@@ -1242,7 +1241,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
             access_level="none",
         )
         # Confirm by default we don't see file_b
-        list_url = f"/api/projects/{self.team.id}/file_system/"
+        list_url = f"/v1/projects/{self.team.id}/file_system/"
         resp = self.client.get(list_url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         paths = {item["path"] for item in resp.json()["results"]}
@@ -1274,7 +1273,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
             resource_id=self.file_b.ref,
             access_level="none",
         )
-        list_url = f"/api/projects/{self.team.id}/file_system/"
+        list_url = f"/v1/projects/{self.team.id}/file_system/"
         resp = self.client.get(list_url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         paths = {item["path"] for item in resp.json()["results"]}
@@ -1298,7 +1297,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         # what tells the UI to grey them out
         self._create_access_control(resource="dashboard", resource_id=None, access_level="none")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         levels = {item["path"]: item["user_access_level"] for item in response.json()["results"]}
@@ -1329,7 +1328,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
             organization_member=membership,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         levels = {item["path"]: item["user_access_level"] for item in response.json()["results"]}
@@ -1358,7 +1357,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
             )
 
         create_entries("1")
-        list_url = f"/api/projects/{self.team.id}/file_system/"
+        list_url = f"/v1/projects/{self.team.id}/file_system/"
         self.client.get(list_url)  # warm up session-dependent queries
 
         # Clear the ref->pk cache before each measurement so both runs exercise the cold path
@@ -1396,7 +1395,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
             access_level="viewer",
             organization_member=membership,
         )
-        list_url = f"/api/projects/{self.team.id}/file_system/"
+        list_url = f"/v1/projects/{self.team.id}/file_system/"
         self.client.get(list_url)  # warm up session-dependent queries
 
         cache.clear()
@@ -1447,7 +1446,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         self._grant_to_user("dashboard", str(dashboard.pk), "viewer")
 
         delete_id = entry.id if target == "the_entry_itself" else self.folder.id
-        response = self.client.delete(f"/api/projects/{self.team.id}/file_system/{delete_id}/")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/file_system/{delete_id}/")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
         dashboard.refresh_from_db()
@@ -1461,12 +1460,12 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         # AccessControl rows are always keyed by pk, while insight entries reference the short_id
         self._create_access_control(resource="insight", resource_id=str(insight.pk), access_level="none")
 
-        list_response = self.client.get(f"/api/projects/{self.team.id}/file_system/")
+        list_response = self.client.get(f"/v1/projects/{self.team.id}/file_system/")
         self.assertEqual(list_response.status_code, status.HTTP_200_OK, list_response.content)
         paths = {item["path"] for item in list_response.json()["results"]}
         self.assertNotIn("Docs/Denied insight", paths)
 
-        delete_response = self.client.delete(f"/api/projects/{self.team.id}/file_system/{entry.id}/")
+        delete_response = self.client.delete(f"/v1/projects/{self.team.id}/file_system/{entry.id}/")
         self.assertEqual(delete_response.status_code, status.HTTP_404_NOT_FOUND, delete_response.content)
 
     def test_undo_delete_refuses_an_object_that_is_not_deleted(self):
@@ -1479,7 +1478,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/file_system/undo_delete/",
+            f"/v1/projects/{self.team.id}/file_system/undo_delete/",
             {"items": [{"type": "feature_flag", "ref": str(flag.pk)}]},
             format="json",
         )
@@ -1496,7 +1495,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         self._grant_to_user("dashboard", str(dashboard.pk), "viewer")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/file_system/undo_delete/",
+            f"/v1/projects/{self.team.id}/file_system/undo_delete/",
             {"items": [{"type": "dashboard", "ref": str(dashboard.pk)}]},
             format="json",
         )
@@ -1514,7 +1513,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         )
         self._grant_to_user("dashboard", str(dashboard.pk), "viewer", team=team2)
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/file_system/{entry.id}/")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/file_system/{entry.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
         dashboard.refresh_from_db()
@@ -1531,12 +1530,12 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         # AccessControl rows are always keyed by pk, while insight entries reference the short_id
         self._create_access_control(resource="insight", resource_id=str(insight.pk), access_level="none", team=team2)
 
-        list_response = self.client.get(f"/api/projects/{self.team.id}/file_system/")
+        list_response = self.client.get(f"/v1/projects/{self.team.id}/file_system/")
         self.assertEqual(list_response.status_code, status.HTTP_200_OK, list_response.content)
         paths = {item["path"] for item in list_response.json()["results"]}
         self.assertNotIn("Docs/Sibling env denied", paths)
 
-        delete_response = self.client.delete(f"/api/projects/{self.team.id}/file_system/{entry.id}/")
+        delete_response = self.client.delete(f"/v1/projects/{self.team.id}/file_system/{entry.id}/")
         self.assertEqual(delete_response.status_code, status.HTTP_404_NOT_FOUND, delete_response.content)
 
     @patch("hanzo_insights.feature_enabled", return_value=True)
@@ -1556,7 +1555,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         )
         folder = FileSystem.objects.create(team=self.team, path="Shared", depth=1, type="folder", created_by=self.user)
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/file_system/{folder.id}/")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/file_system/{folder.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
         dashboard.refresh_from_db()
@@ -1573,7 +1572,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         # Planted in the requester's own team: same short_id, but self.user is its creator here
         Notebook.objects.create(team=self.team, short_id="colliding-id", created_by=self.user)
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/file_system/{victim_entry.id}/")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/file_system/{victim_entry.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
         victim_notebook.refresh_from_db()
@@ -1592,7 +1591,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         folder = FileSystem.objects.create(team=self.team, path="Shared", depth=1, type="folder", created_by=self.user)
 
         with CaptureQueriesContext(connection) as ctx:
-            response = self.client.delete(f"/api/projects/{self.team.id}/file_system/{folder.id}/")
+            response = self.client.delete(f"/v1/projects/{self.team.id}/file_system/{folder.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         dashboard.refresh_from_db()
         self.assertTrue(dashboard.deleted)
@@ -1620,7 +1619,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
     @parameterized.expand([("integer_pk", "dashboard"), ("uuid_pk", "insights_function/destination")])
     def test_undo_delete_refuses_a_ref_the_lookup_field_rejects(self, _name, file_type):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/file_system/undo_delete/",
+            f"/v1/projects/{self.team.id}/file_system/undo_delete/",
             {"items": [{"type": file_type, "ref": "not-a-valid-ref"}]},
             format="json",
         )
@@ -1640,10 +1639,10 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
             created_by=None,
         )
 
-        list_response = self.client.get(f"/api/projects/{self.team.id}/file_system/")
+        list_response = self.client.get(f"/v1/projects/{self.team.id}/file_system/")
         self.assertEqual(list_response.status_code, status.HTTP_200_OK, list_response.content)
 
-        delete_response = self.client.delete(f"/api/projects/{self.team.id}/file_system/{entry.id}/")
+        delete_response = self.client.delete(f"/v1/projects/{self.team.id}/file_system/{entry.id}/")
         self.assertEqual(delete_response.status_code, status.HTTP_200_OK, delete_response.content)
         self.assertFalse(FileSystem.objects.filter(pk=entry.pk).exists())
 
@@ -1661,12 +1660,12 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         dashboard = Dashboard.objects.create(team=team2, name="Denied env", created_by=self.other_user)
         entry = self._sole_entry_for(file_type="dashboard", ref=str(dashboard.pk), path="Docs/Denied env", team=team2)
 
-        list_response = self.client.get(f"/api/projects/{self.team.id}/file_system/")
+        list_response = self.client.get(f"/v1/projects/{self.team.id}/file_system/")
         self.assertEqual(list_response.status_code, status.HTTP_200_OK, list_response.content)
         paths = {item["path"] for item in list_response.json()["results"]}
         self.assertNotIn("Docs/Denied env", paths)
 
-        delete_response = self.client.delete(f"/api/projects/{self.team.id}/file_system/{entry.id}/")
+        delete_response = self.client.delete(f"/v1/projects/{self.team.id}/file_system/{entry.id}/")
         self.assertEqual(delete_response.status_code, status.HTTP_404_NOT_FOUND, delete_response.content)
         dashboard.refresh_from_db()
         self.assertFalse(dashboard.deleted)
@@ -1677,14 +1676,14 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         self._create_access_control(resource="insight", resource_id=str(insight.pk), access_level="none")
 
         with CaptureQueriesContext(connection) as one_environment:
-            self.client.get(f"/api/projects/{self.team.id}/file_system/")
+            self.client.get(f"/v1/projects/{self.team.id}/file_system/")
 
         added_environments = 3
         for _ in range(added_environments):
             self._create_sibling_team()
 
         with CaptureQueriesContext(connection) as several_environments:
-            self.client.get(f"/api/projects/{self.team.id}/file_system/")
+            self.client.get(f"/v1/projects/{self.team.id}/file_system/")
 
         extra = len(several_environments.captured_queries) - len(one_environment.captured_queries)
         # Each added environment costs one access-control preload. Anything beyond that means an
@@ -1705,7 +1704,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
 
         # 1) Filter with ?created_at__gt=2020-01-01T12:00:00Z
         #    => should exclude anything created on or before 2020-01-01T12:00:00Z
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/?created_at__gt=2020-01-01T12:00:00Z")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/?created_at__gt=2020-01-01T12:00:00Z")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         data = response.json()
         paths = [item["path"] for item in data["results"]]
@@ -1717,7 +1716,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
 
         # 2) Filter with ?created_at__lt=2020-01-02T10:00:00Z
         #    => should include only items created before 2020-01-02T10:00:00Z
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/?created_at__lt=2020-01-02T10:00:00Z")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/?created_at__lt=2020-01-02T10:00:00Z")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         data = response.json()
         paths = [item["path"] for item in data["results"]]
@@ -1730,7 +1729,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         # 3) Combine both ?created_at__gt=... & ?created_at__lt=...
         #    => only items between these two timestamps
         response = self.client.get(
-            f"/api/projects/{self.team.id}/file_system/"
+            f"/v1/projects/{self.team.id}/file_system/"
             f"?created_at__gt=2020-01-01T12:00:00Z&created_at__lt=2020-01-03T00:00:00Z"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -1764,7 +1763,7 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
         )
 
         # Request the list
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/file_system/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
 
         response_data = response.json()
@@ -1852,7 +1851,7 @@ class TestFileSystemProjectScoping(APIBaseTest):
 
     # LIST
     def test_list_scopes_correctly(self):
-        resp = self.client.get(f"/api/projects/{self.team.id}/file_system/")
+        resp = self.client.get(f"/v1/projects/{self.team.id}/file_system/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.json())
         paths = {item["path"] for item in resp.json()["results"]}
 
@@ -1869,19 +1868,19 @@ class TestFileSystemProjectScoping(APIBaseTest):
 
     # RETRIEVE
     def test_retrieve_non_insights_function_from_other_team_is_allowed(self):
-        url = f"/api/projects/{self.team.id}/file_system/{self.doc_t2.id}/"
+        url = f"/v1/projects/{self.team.id}/file_system/{self.doc_t2.id}/"
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.json())
         self.assertEqual(resp.json()["path"], "Shared/Doc-T2")
 
     def test_retrieve_insights_function_from_other_team_is_forbidden(self):
-        url = f"/api/projects/{self.team.id}/file_system/{self.hog_t2.id}/"
+        url = f"/v1/projects/{self.team.id}/file_system/{self.hog_t2.id}/"
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     # UPDATE (PATCH)
     def test_update_non_insights_function_from_other_team_is_allowed(self):
-        url = f"/api/projects/{self.team.id}/file_system/{self.doc_t2.id}/"
+        url = f"/v1/projects/{self.team.id}/file_system/{self.doc_t2.id}/"
         resp = self.client.patch(url, {"path": "Shared/Doc-T2-Renamed"})
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.json())
 
@@ -1889,7 +1888,7 @@ class TestFileSystemProjectScoping(APIBaseTest):
         self.assertEqual(self.doc_t2.path, "Shared/Doc-T2-Renamed")
 
     def test_update_insights_function_from_other_team_is_forbidden(self):
-        url = f"/api/projects/{self.team.id}/file_system/{self.hog_t2.id}/"
+        url = f"/v1/projects/{self.team.id}/file_system/{self.hog_t2.id}/"
         resp = self.client.patch(url, {"path": "Functions/Script-T2-Renamed"})
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -1948,7 +1947,7 @@ class TestMoveRepairsLeftoverInsightsFunctions(APIBaseTest):
     #  TEST
     # ------------------------------------------------------------------ #
     def test_move_recreates_folder_for_leftover_items(self):
-        move_url = f"/api/projects/{self.team.id}/file_system/{self.folder_t1.id}/move"
+        move_url = f"/v1/projects/{self.team.id}/file_system/{self.folder_t1.id}/move"
         response = self.client.post(move_url, {"new_path": "SharedRenamed"})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
 
@@ -2027,7 +2026,7 @@ class TestDestroyRepairsLeftoverInsightsFunctions(APIBaseTest):
         )
 
     def test_destroy_folder_repairs_for_leftover_items(self):
-        delete_url = f"/api/projects/{self.team.id}/file_system/{self.folder_t1.id}/"
+        delete_url = f"/v1/projects/{self.team.id}/file_system/{self.folder_t1.id}/"
         resp = self.client.delete(delete_url)
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -2123,7 +2122,7 @@ class TestDestroyRepairsLeftoverInsightsFunctions(APIBaseTest):
                 data = case["factory"]()
                 fs_entry = data["fs_entry"]
 
-                delete_response = self.client.delete(f"/api/projects/{self.team.id}/file_system/{fs_entry.pk}/")
+                delete_response = self.client.delete(f"/v1/projects/{self.team.id}/file_system/{fs_entry.pk}/")
                 self.assertEqual(delete_response.status_code, status.HTTP_200_OK, delete_response.json())
 
                 delete_log = (
@@ -2148,7 +2147,7 @@ class TestDestroyRepairsLeftoverInsightsFunctions(APIBaseTest):
                     }
 
                     undo_response = self.client.post(
-                        f"/api/projects/{self.team.id}/file_system/undo_delete/",
+                        f"/v1/projects/{self.team.id}/file_system/undo_delete/",
                         undo_payload,
                         format="json",
                     )

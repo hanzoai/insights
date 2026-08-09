@@ -38,21 +38,21 @@ export class InsightsClient {
     }
 
     async fetchFeatureFlags(projectId: string): Promise<InsightsFeatureFlag[]> {
-        const path = `/api/projects/${encodeURIComponent(projectId)}/feature_flags/?limit=25&order=-updated_at`
+        const path = `/v1/projects/${encodeURIComponent(projectId)}/feature_flags/?limit=25&order=-updated_at`
         logger.debug('Fetching feature flags', path)
         const body = await this.getJson<ListResponse<InsightsFeatureFlag>>(path)
         return body.results.filter((f: InsightsFeatureFlag) => !f.deleted)
     }
 
     async fetchAllFeatureFlags(projectId: string, onPage: (page: InsightsFeatureFlag[]) => void): Promise<void> {
-        const firstPath = `/api/projects/${encodeURIComponent(projectId)}/feature_flags/?limit=100&order=-updated_at`
+        const firstPath = `/v1/projects/${encodeURIComponent(projectId)}/feature_flags/?limit=100&order=-updated_at`
         await this.streamAllPages<InsightsFeatureFlag>(firstPath, (page) => {
             onPage(page.filter((f) => !f.deleted))
         })
     }
 
     async fetchAllExperiments(projectId: string, onPage: (page: InsightsExperiment[]) => void): Promise<void> {
-        const firstPath = `/api/projects/${encodeURIComponent(projectId)}/experiments/?limit=100&order=-updated_at`
+        const firstPath = `/v1/projects/${encodeURIComponent(projectId)}/experiments/?limit=100&order=-updated_at`
         await this.streamAllPages<InsightsExperiment>(firstPath, (page) => {
             onPage(page.filter((e) => !e.archived))
         })
@@ -77,20 +77,20 @@ export class InsightsClient {
     }
 
     async fetchCustomerJourneys(projectId: string): Promise<InsightsCustomerJourney[]> {
-        const path = `/api/environments/${encodeURIComponent(projectId)}/customer_journeys/`
+        const path = `/v1/environments/${encodeURIComponent(projectId)}/customer_journeys/`
         logger.debug('Fetching customer journeys', path)
         const body = await this.getJson<ListResponse<InsightsCustomerJourney>>(path)
         return body.results
     }
 
     async fetchInsight(projectId: string, insightId: number): Promise<InsightsInsight> {
-        const path = `/api/projects/${encodeURIComponent(projectId)}/insights/${insightId}/`
+        const path = `/v1/projects/${encodeURIComponent(projectId)}/insights/${insightId}/`
         logger.debug('Fetching insight', path)
         return this.getJson<InsightsInsight>(path)
     }
 
     async fetchEventTrends(projectId: string, days: number): Promise<{ date: string; count: number }[]> {
-        const path = `/api/projects/${encodeURIComponent(projectId)}/query/`
+        const path = `/v1/projects/${encodeURIComponent(projectId)}/query/`
         logger.debug('Fetching event trends', path)
 
         const bucket = days > 31 ? 'toStartOfWeek' : 'toStartOfDay'
@@ -108,7 +108,7 @@ export class InsightsClient {
     }
 
     async fetchTopEvents(projectId: string, days: number, limit = 5): Promise<{ event: string; count: number }[]> {
-        const path = `/api/projects/${encodeURIComponent(projectId)}/query/`
+        const path = `/v1/projects/${encodeURIComponent(projectId)}/query/`
         logger.debug('Fetching top events', path)
         const body = await this.postJson<{ results: [number, string][] }>(path, {
             query: {
@@ -126,7 +126,7 @@ export class InsightsClient {
     }
 
     async fetchWebOverview(projectId: string, dateFrom: string): Promise<WebOverviewItem[]> {
-        const path = `/api/projects/${encodeURIComponent(projectId)}/query/`
+        const path = `/v1/projects/${encodeURIComponent(projectId)}/query/`
         logger.debug('Fetching web overview', path)
         const body = await this.postJson<{ results: WebOverviewItem[] }>(path, {
             query: {

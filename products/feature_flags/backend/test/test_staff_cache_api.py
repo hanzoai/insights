@@ -25,11 +25,11 @@ from products.feature_flags.backend.flags_cache import flags_hypercache
 from products.feature_flags.backend.local_evaluation import flag_definitions_hypercache
 from products.feature_flags.backend.models.feature_flag import FeatureFlag
 
-REBUILD_URL = "/api/feature_flags_staff_cache/rebuild/"
-CLEAR_URL = "/api/feature_flags_staff_cache/clear/"
-ENTRY_URL = "/api/feature_flags_staff_cache/entry/"
-WARM_RUN_URL = "/api/feature_flags_staff_cache/warm_run/"
-WARM_RUN_CANCEL_URL = "/api/feature_flags_staff_cache/warm_run/cancel/"
+REBUILD_URL = "/v1/feature_flags_staff_cache/rebuild/"
+CLEAR_URL = "/v1/feature_flags_staff_cache/clear/"
+ENTRY_URL = "/v1/feature_flags_staff_cache/entry/"
+WARM_RUN_URL = "/v1/feature_flags_staff_cache/warm_run/"
+WARM_RUN_CANCEL_URL = "/v1/feature_flags_staff_cache/warm_run/cancel/"
 
 
 def _called_once_with(mock, team_id):
@@ -60,7 +60,7 @@ class TestFeatureFlagsStaffCacheAPI(APIBaseTest):
         self.user.is_staff = False
         self.user.save()
 
-        status_response = self.client.get(f"/api/feature_flags_staff_cache/?team_ids={self.team.id}")
+        status_response = self.client.get(f"/v1/feature_flags_staff_cache/?team_ids={self.team.id}")
         self.assertEqual(status_response.status_code, status.HTTP_403_FORBIDDEN)
 
         rebuild_response = self.client.post(REBUILD_URL, {"team_ids": [self.team.id]}, format="json")
@@ -138,20 +138,20 @@ class TestFeatureFlagsStaffCacheAPI(APIBaseTest):
         )
 
         flags_hypercache.update_cache(self.team)
-        warm = self.client.get(f"/api/feature_flags_staff_cache/?team_ids={self.team.id}")
+        warm = self.client.get(f"/v1/feature_flags_staff_cache/?team_ids={self.team.id}")
         self.assertEqual(warm.status_code, status.HTTP_200_OK)
         evaluation = warm.json()["results"][0]["evaluation"]
         self.assertEqual(evaluation["source"], "redis")
         self.assertEqual(evaluation["flag_count"], 1)
 
         flags_hypercache.clear_cache(self.team)
-        cold = self.client.get(f"/api/feature_flags_staff_cache/?team_ids={self.team.id}")
+        cold = self.client.get(f"/v1/feature_flags_staff_cache/?team_ids={self.team.id}")
         self.assertEqual(cold.json()["results"][0]["evaluation"]["source"], "miss")
 
     def test_status_dedupes_repeated_team_ids(self):
         # A caller passing the same team id twice (e.g. ?team_ids=1&team_ids=1) should get one
         # row back, not a duplicate per repetition.
-        response = self.client.get(f"/api/feature_flags_staff_cache/?team_ids={self.team.id}&team_ids={self.team.id}")
+        response = self.client.get(f"/v1/feature_flags_staff_cache/?team_ids={self.team.id}&team_ids={self.team.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 1)
 
