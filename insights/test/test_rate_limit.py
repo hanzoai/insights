@@ -624,7 +624,7 @@ class TestUserAPI(APIBaseTest):
         mock_request.user = Mock(is_authenticated=True, pk=self.user.pk)
         mock_request.path = f"/v1/environments/{self.team.pk}/llm_prompts/name/my-prompt/"
         mock_view = Mock(team_id=self.team.pk)
-        personal_api_key = "phx_test_personal_api_key"
+        personal_api_key = "sk-test_personal_api_key"
 
         with (
             patch(

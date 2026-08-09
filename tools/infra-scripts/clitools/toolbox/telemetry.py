@@ -73,7 +73,7 @@ def capture_invocation(distinct_id: str, properties: dict) -> None:
     """Fire a single best-effort capture event via the Insights SDK. Never raises."""
     api_key = os.environ.get("TOOLBOX_INSIGHTS_API_KEY", DEFAULT_API_KEY)
     host = os.environ.get("TOOLBOX_INSIGHTS_HOST", DEFAULT_HOST)
-    if not api_key or api_key == "phc_REPLACE_ME":
+    if not api_key or api_key == "pk-REPLACE_ME":
         # No real key configured — stay silent rather than spamming a dead endpoint.
         print("📊 Telemetry skipped: no Insights API key configured.")  # noqa: T201
         return

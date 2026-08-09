@@ -1,9 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import * as chartPng from '@hanzo/brand/hoggies/png/chart'
-import { IconPlus } from '@hanzo/icons'
 import { Skeleton, Tag } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
@@ -27,7 +26,7 @@ import { DASHBOARD_CANNOT_EDIT_MESSAGE } from './DashboardHeader'
 import { dashboardLogic } from './dashboardLogic'
 import { EmptyDashboardAiStarterPrompts } from './emptyDashboardAiStarterPrompts'
 
-const MascotChart = pngHoggie(chartPng)
+const MascotChart = pngHoggie()
 
 const DASHBOARD_DOCS_URL = 'https://hanzo.ai/docs/product-analytics/dashboards'
 

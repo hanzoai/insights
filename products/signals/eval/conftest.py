@@ -19,7 +19,7 @@ load_dotenv(Path(__file__).resolve().parents[3] / ".env")
 
 # Initialize hanzo_insights default_client so the LLM wrapper (which requires it) works
 hanzo_insights.default_client = Insights(  # ty: ignore[invalid-assignment]
-    os.environ.get("INSIGHTS_PROJECT_API_KEY", "phx_unused"),
+    os.environ.get("INSIGHTS_PROJECT_API_KEY", "sk-unused"),
     host=os.environ.get("INSIGHTS_HOST", "http://localhost:8010"),
     disabled=True,
     debug=bool(os.environ.get("INSIGHTS_DEBUG")),
@@ -80,7 +80,7 @@ def insights_client(no_capture, db):
         raise ValueError("INSIGHTS_PROJECT_API_KEY needs to be set (or pass --no-capture).")
     host = os.environ.get("INSIGHTS_HOST", "http://localhost:8010")
     client = Insights(
-        api_key or "phx_unused", host=host, disabled=no_capture, debug=bool(os.environ.get("INSIGHTS_DEBUG"))
+        api_key or "sk-unused", host=host, disabled=no_capture, debug=bool(os.environ.get("INSIGHTS_DEBUG"))
     )
     yield client
     client.shutdown()

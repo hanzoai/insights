@@ -12,7 +12,7 @@
       src.includes("array.js") ||
       id.includes("insights") ||
       text.includes("insights") ||
-      text.includes("phc_") ||
+      text.includes("pk-") ||
       text.includes("ph_init")
     );
   });

@@ -175,7 +175,7 @@ For local Docker sandboxes the localhost URLs are rewritten to `host.docker.inte
 cd services/mcp && cp .env.example .env
 ```
 
-Then fill in the secrets. `INSIGHTS_UI_APPS_TOKEN` and `INSIGHTS_ANALYTICS_API_KEY` are public Insights `phc_*` project keys — for local dev you can paste the same key you use for analytics, or leave them as the placeholder (analytics calls will no-op). Restart the `mcp` phrocs process after changing `.env`.
+Then fill in the secrets. `INSIGHTS_UI_APPS_TOKEN` and `INSIGHTS_ANALYTICS_API_KEY` are public Insights `pk-*` project keys — for local dev you can paste the same key you use for analytics, or leave them as the placeholder (analytics calls will no-op). Restart the `mcp` phrocs process after changing `.env`.
 
 ### Local agent packages
 

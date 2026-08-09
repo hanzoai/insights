@@ -9,7 +9,7 @@ from django.core.management.base import CommandError
 from insights.models.project_secret_api_key import ProjectSecretAPIKey
 from insights.models.utils import hash_key_value
 
-_PHS = "phs_localgatewaye2elocalgatewaye2e0001"
+_PHS = "sk-localgatewaye2elocalgatewaye2e0001"
 _CMD = "setup_local_gateway_credential"
 _LABEL = "local-gateway-e2e"
 # Patch the publish at the point of use so the test needs no Redis.
@@ -47,7 +47,7 @@ class TestSetupLocalGatewayCredentialCommand(BaseTest):
 
     def test_rerun_is_idempotent_and_rotates_in_place(self) -> None:
         self._run("--phs", _PHS, "--team", str(self.team.id))
-        rotated = "phs_rotatedrotatedrotatedrotated01"
+        rotated = "sk-rotatedrotatedrotatedrotated01"
         self._run("--phs", rotated, "--team", str(self.team.id))
 
         keys = ProjectSecretAPIKey.objects.filter(team=self.team, label=_LABEL)

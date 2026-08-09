@@ -78,7 +78,7 @@ mod tests {
         Request::builder()
             .method("POST")
             .uri(CAPTURE_V1_PATH)
-            .header("Authorization", "Bearer phc_test_token")
+            .header("Authorization", "Bearer pk-test_token")
             .header("Content-Type", "application/json")
             .header("X-Forwarded-For", "127.0.0.1")
             .header(INSIGHTS_SDK_INFO, "insights-rs/1.0.0")

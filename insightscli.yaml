@@ -29,7 +29,7 @@ config:
         # Write-only project token for Insights's internal insightscli project.
         # It cannot read data; safe to commit. Standalone insightscli users get a blank
         # default and telemetry stays disabled unless they set their own key.
-        api_key: phc_JYFXrbqdzueOYb0wFUTnCglFKZuC4xRXBW790ewdcvn
+        api_key: pk-JYFXrbqdzueOYb0wFUTnCglFKZuC4xRXBW790ewdcvn
         host: https://us.i.hanzo.ai
 
 metadata:
@@ -1181,7 +1181,7 @@ environment:
         hidden: true
     setup:gateway:e2e:
         bin_script: setup-gateway-e2e
-        description: 'Provision the local ai-gateway e2e: enable the team, mint a phs_, publish the credential blob, fund the ledger'
+        description: 'Provision the local ai-gateway e2e: enable the team, mint a sk-, publish the credential blob, fund the ledger'
         hidden: true
     dev:open:when:ready:
         bin_script: dev-open-when-ready

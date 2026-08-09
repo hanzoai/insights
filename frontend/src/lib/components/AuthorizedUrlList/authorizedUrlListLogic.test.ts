@@ -284,11 +284,11 @@ describe('the authorized urls list logic', () => {
         })
 
         it('sets required action fields', () => {
-            const params = parseHash(directToolbarUrl('https://example.com', { token: 'phc_abc' }))
+            const params = parseHash(directToolbarUrl('https://example.com', { token: 'pk-abc' }))
             expect(params.action).toBe('ph_authorize')
             expect(params.toolbarVersion).toBe('toolbar')
             expect(params.instrument).toBe(true)
-            expect(params.token).toBe('phc_abc')
+            expect(params.token).toBe('pk-abc')
         })
 
         it('includes user identity fields', () => {

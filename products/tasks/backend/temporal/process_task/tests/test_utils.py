@@ -133,7 +133,7 @@ class TestRunStateSnapshotPaths(TestCase):
 
 
 class TestGetSandboxMcpConfigs(TestCase):
-    TOKEN = "phx_test_token"
+    TOKEN = "sk-test_token"
     PROJECT_ID = 42
 
     def _expected_headers(self, *, read_only: bool = True, consumer: str = "insights-code") -> list[dict[str, str]]:
@@ -332,7 +332,7 @@ class TestMcpServerConfigToDict(TestCase):
 
 
 class TestFetchUserMcpServerConfigs(TestCase):
-    TOKEN = "phx_test_token"
+    TOKEN = "sk-test_token"
     TEAM_ID = 42
     USER_ID = 7
     API_BASE = "https://us.hanzo.ai"
@@ -1181,13 +1181,13 @@ class TestBuildSandboxEnvironmentVariables(SimpleTestCase):
     def test_snapshot_resume_env_includes_otel_config_when_configured(self, _api, _jwt) -> None:
         with override_settings(
             SANDBOX_AGENT_OTEL_LOGS_URL="https://us.i.hanzo.ai/i/v1/logs",
-            SANDBOX_AGENT_OTEL_LOGS_TOKEN="phc_telemetry",
+            SANDBOX_AGENT_OTEL_LOGS_TOKEN="pk-telemetry",
             SANDBOX_AGENT_OTEL_TRACES_URL="https://us.i.hanzo.ai/i/v1/traces",
         ):
             env = build_sandbox_environment_variables(None, "access-token", 1, otel_telemetry_enabled=True)
 
         assert env["INSIGHTS_AGENT_OTEL_LOGS_URL"] == "https://us.i.hanzo.ai/i/v1/logs"
-        assert env["INSIGHTS_AGENT_OTEL_LOGS_TOKEN"] == "phc_telemetry"
+        assert env["INSIGHTS_AGENT_OTEL_LOGS_TOKEN"] == "pk-telemetry"
         assert env["INSIGHTS_AGENT_OTEL_TRACES_URL"] == "https://us.i.hanzo.ai/i/v1/traces"
 
     @patch(
@@ -1219,7 +1219,7 @@ class TestBuildSandboxEnvironmentVariables(SimpleTestCase):
     def test_snapshot_resume_env_omits_otel_config_when_flag_disabled(self, _api, _jwt) -> None:
         with override_settings(
             SANDBOX_AGENT_OTEL_LOGS_URL="https://us.i.hanzo.ai/i/v1/logs",
-            SANDBOX_AGENT_OTEL_LOGS_TOKEN="phc_telemetry",
+            SANDBOX_AGENT_OTEL_LOGS_TOKEN="pk-telemetry",
             SANDBOX_AGENT_OTEL_TRACES_URL="https://us.i.hanzo.ai/i/v1/traces",
         ):
             env = build_sandbox_environment_variables(None, "access-token", 1)

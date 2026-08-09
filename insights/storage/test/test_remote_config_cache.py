@@ -94,10 +94,10 @@ class TestCleanupStaleRemoteConfigExpiryTracking(BaseTest):
         mock_redis = MagicMock()
         mock_get_client.return_value = mock_redis
         # One live team (kept) and one stale token (removed).
-        mock_redis.zrange.return_value = [self.team.api_token.encode(), b"phc_does_not_exist"]
+        mock_redis.zrange.return_value = [self.team.api_token.encode(), b"pk-does_not_exist"]
         mock_redis.zrem.return_value = 1
 
         removed = cleanup_stale_expiry_tracking()
 
         assert removed == 1
-        mock_redis.zrem.assert_called_once_with("remote_config_cache_expiry", "phc_does_not_exist")
+        mock_redis.zrem.assert_called_once_with("remote_config_cache_expiry", "pk-does_not_exist")
