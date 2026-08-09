@@ -1,5 +1,5 @@
-import { Replayer } from 'insights-js/rrweb'
-import { CanvasArg } from 'insights-js/rrweb-types'
+import { Replayer } from '@hanzo/insights-rrweb'
+import { CanvasArg } from '@hanzo/insights-rrweb-types'
 
 import { base64ArrayBuffer } from '../utils'
 
