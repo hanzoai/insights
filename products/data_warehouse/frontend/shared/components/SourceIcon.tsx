@@ -1,14 +1,14 @@
 import { useValues } from 'kea'
 import { useMemo } from 'react'
 
-import BlushingHog from '@hanzo/brand/hoggies/png/ipad'
-import { IconWrench } from '@hanzo/icons'
 import { Skeleton } from '@hanzo/elements'
+import { IconWrench } from '@hanzo/icons'
 
 import { Link } from 'lib/elements/Link'
 import { Tooltip } from 'lib/elements/Tooltip'
 
 import IconInsights from 'public/insights-icon.svg'
+import IconUnknown from 'public/plugin-default.svg'
 import IconAwsS3 from 'public/services/aws-s3.png'
 import Iconazure from 'public/services/azure.png'
 import IconCloudflare from 'public/services/cloudflare.png'
@@ -23,12 +23,12 @@ import { getDataWarehouseSourceUrl } from './ManagedSourcesTable'
 
 /**
  * In some cases we don't have the backend telling us what provider we have for blob storage, so we can have some
- * heuristic to guess, then fallback to a shrugging mascot.
+ * heuristic to guess, then fall back to the generic source icon.
  * @param url
  */
 export function mapUrlToProvider(url: string | undefined): string {
     if (!url) {
-        return 'BlushingHog'
+        return 'Unknown'
     }
     if (url.includes('amazonaws.com')) {
         return 'aws'
@@ -39,7 +39,7 @@ export function mapUrlToProvider(url: string | undefined): string {
     } else if (url.includes('.r2.cloudflarestorage.com')) {
         return 'cloudflare-r2'
     }
-    return 'BlushingHog'
+    return 'Unknown'
 }
 
 export function mapUrlToSourceName(url: string): string {
@@ -52,7 +52,7 @@ export function mapUrlToSourceName(url: string): string {
     } else if (url.includes('.r2.cloudflarestorage.com')) {
         return 'Cloudflare'
     }
-    return 'BlushingHog'
+    return 'Unknown'
 }
 
 const SIZE_PX_MAP = {
@@ -80,7 +80,7 @@ function SourceIconImage({ src, alt, sizePx }: { src: string; alt: string; sizeP
                 const img = e.currentTarget
                 if (!img.dataset.fallbackApplied) {
                     img.dataset.fallbackApplied = 'true'
-                    img.src = BlushingHog
+                    img.src = IconUnknown
                 }
             }}
         />
@@ -94,7 +94,7 @@ export const DATA_WAREHOUSE_SOURCE_ICON_MAP: Record<string, string> = {
     azure: Iconazure,
     // File upload has no backend SourceConfig (its `iconPath`), so map its icon here directly.
     FileUpload: IconFileUpload,
-    BlushingHog: BlushingHog, // fallback, we don't know what this is
+    Unknown: IconUnknown, // fallback, we don't know what this is
     Insights: IconInsights,
 }
 

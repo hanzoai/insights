@@ -2,7 +2,6 @@ import { decode } from 'he'
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
 import { Button, Dialog, Table, Tag } from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
@@ -11,7 +10,7 @@ import { humanFriendlyDetailedTime } from 'lib/utils/datetime'
 
 import { connectedAppsLogic, ConnectedApp } from './connectedAppsLogic'
 
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
+const MascotMagnifyingGlass = pngHoggie()
 
 function sortScopesWriteFirst(scopes: string[]): string[] {
     return [...scopes].sort((a, b) => {

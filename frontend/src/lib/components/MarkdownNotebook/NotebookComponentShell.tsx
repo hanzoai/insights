@@ -11,6 +11,7 @@ import {
     useState,
 } from 'react'
 
+import { Button, Menu } from '@hanzo/elements'
 import {
     IconCollapse,
     IconDatabase,
@@ -24,8 +25,7 @@ import {
     IconPeople,
     IconTrash,
 } from '@hanzo/icons'
-import { Button, Menu } from '@hanzo/elements'
-import { PostHogErrorBoundary as InsightsErrorBoundary } from '@hanzo/react'
+import { InsightsErrorBoundary } from '@hanzo/react'
 
 import { ComponentPanelContext } from './componentPanelContext'
 import {

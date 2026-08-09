@@ -1,17 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
+import { Button, Dialog, Switch, Table, TableColumn, TableColumns, Tag, SpinnerOverlay } from '@hanzo/elements'
 import { IconBell, IconEllipsis, IconPlus } from '@hanzo/icons'
-import {
-    Button,
-    Dialog,
-    Switch,
-    Table,
-    TableColumn,
-    TableColumns,
-    Tag,
-    SpinnerOverlay,
-} from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { MemberSelect } from 'lib/components/MemberSelect'
@@ -54,7 +44,7 @@ const DESTINATION_TAGS = [
     { type: NotificationDestinationTypeEnumApi.Teams, label: 'Teams', icon: IconMicrosoftTeams },
 ] as const
 
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
+const MascotMagnifyingGlass = pngHoggie()
 
 function formatThreshold(alert: LogsAlertConfigurationApi): string {
     const operator = alert.threshold_operator === LogsAlertThresholdOperatorEnumApi.Below ? '<' : '>'

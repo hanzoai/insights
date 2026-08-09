@@ -1,8 +1,7 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import * as greekPng from '@hanzo/brand/hoggies/png/greek'
 import { Button, Tabs, Link, Spinner } from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
@@ -16,7 +15,7 @@ import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-genera
 
 import { metricsIngestionLogic } from '../metricsIngestionLogic'
 
-const MascotGreek = pngHoggie(greekPng)
+const MascotGreek = pngHoggie()
 
 const POLLING_INTERVAL_MS = 5000
 

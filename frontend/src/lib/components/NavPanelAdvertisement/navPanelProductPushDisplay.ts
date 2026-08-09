@@ -1,40 +1,24 @@
-import * as chart from '@hanzo/brand/hoggies/png/chart'
-import * as codeBubble from '@hanzo/brand/hoggies/png/code-bubble'
-import * as cursor from '@hanzo/brand/hoggies/png/cursor'
-import * as director from '@hanzo/brand/hoggies/png/director'
-import * as experiment from '@hanzo/brand/hoggies/png/experiment'
-import * as judge from '@hanzo/brand/hoggies/png/judge'
-import * as megaphone from '@hanzo/brand/hoggies/png/megaphone'
-import * as noir from '@hanzo/brand/hoggies/png/noir-1'
-import * as panic from '@hanzo/brand/hoggies/png/panic'
-import * as phoneCall from '@hanzo/brand/hoggies/png/phone-call'
-import * as puzzle from '@hanzo/brand/hoggies/png/puzzle'
-import * as robot from '@hanzo/brand/hoggies/png/robot'
-import * as trafficController from '@hanzo/brand/hoggies/png/traffic-controller'
-import * as wizard from '@hanzo/brand/hoggies/png/wizard-1'
-import * as workflows from '@hanzo/brand/hoggies/png/workflows'
-
 import { pngHoggie } from 'lib/brand/hoggies'
 
 import { ProductKey } from '~/queries/schema/schema-general'
 
 import type { ProductPushDisplay } from './navPanelAdShared'
 
-const MascotChart = pngHoggie(chart)
-const MascotCodeBubble = pngHoggie(codeBubble)
-const MascotCursor = pngHoggie(cursor)
-const MascotDirector = pngHoggie(director)
-const MascotExperiment = pngHoggie(experiment)
-const MascotJudge = pngHoggie(judge)
-const MascotMegaphone = pngHoggie(megaphone)
-const MascotNoir = pngHoggie(noir)
-const MascotPanic = pngHoggie(panic)
-const MascotPhoneCall = pngHoggie(phoneCall)
-const MascotPuzzle = pngHoggie(puzzle)
-const MascotRobot = pngHoggie(robot)
-const MascotTrafficController = pngHoggie(trafficController)
-const MascotWizard = pngHoggie(wizard)
-const MascotWorkflows = pngHoggie(workflows)
+const MascotChart = pngHoggie()
+const MascotCodeBubble = pngHoggie()
+const MascotCursor = pngHoggie()
+const MascotDirector = pngHoggie()
+const MascotExperiment = pngHoggie()
+const MascotJudge = pngHoggie()
+const MascotMegaphone = pngHoggie()
+const MascotNoir = pngHoggie()
+const MascotPanic = pngHoggie()
+const MascotPhoneCall = pngHoggie()
+const MascotPuzzle = pngHoggie()
+const MascotRobot = pngHoggie()
+const MascotTrafficController = pngHoggie()
+const MascotWizard = pngHoggie()
+const MascotWorkflows = pngHoggie()
 
 export const DEFAULT_PRODUCT_PUSH_DISPLAY: ProductPushDisplay = {
     Hoggie: MascotMegaphone,

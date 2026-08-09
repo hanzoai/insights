@@ -6,9 +6,8 @@ import { Field, Form } from 'kea-forms'
 import { router } from 'kea-router'
 import { useEffect } from 'react'
 
-import * as judge from '@hanzo/brand/hoggies/png/judge'
-import { IconDocument } from '@hanzo/icons'
 import { Button, Divider, Input, Link } from '@hanzo/elements'
+import { IconDocument } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { StarHog } from 'lib/components/mascots'
@@ -40,7 +39,7 @@ import { CreditCTAHero } from './CreditCTAHero'
 import { StripePortalButton } from './StripePortalButton'
 import { UnsubscribeCard } from './UnsubscribeCard'
 
-const MascotJudge = pngHoggie(judge)
+const MascotJudge = pngHoggie()
 
 export const scene: SceneExport = {
     component: Billing,
@@ -147,13 +146,7 @@ export function Billing(): JSX.Element {
                             <Input fullWidth autoFocus />
                         </Field>
 
-                        <Button
-                            type="primary"
-                            htmlType="submit"
-                            loading={isActivateLicenseSubmitting}
-                            fullWidth
-                            center
-                        >
+                        <Button type="primary" htmlType="submit" loading={isActivateLicenseSubmitting} fullWidth center>
                             Activate license key
                         </Button>
                     </Form>

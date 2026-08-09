@@ -1,9 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
-import { IconEllipsis } from '@hanzo/icons'
 import { Button, Dialog, Menu, Switch, Link, Tooltip } from '@hanzo/elements'
+import { IconEllipsis } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
@@ -25,7 +24,7 @@ import { alertsLogic } from '../logic/alertsLogic'
 import { AlertType } from '../types'
 import { EditAlertModal } from './EditAlertModal'
 
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
+const MascotMagnifyingGlass = pngHoggie()
 
 interface InsightAlertsProps {
     alertId: AlertType['id'] | null

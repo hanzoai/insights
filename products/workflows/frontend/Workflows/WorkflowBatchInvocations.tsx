@@ -1,9 +1,8 @@
 import { useValues } from 'kea'
 import { type ReactNode, useMemo } from 'react'
 
-import * as greekPng from '@hanzo/brand/hoggies/png/greek'
-import { IconClock } from '@hanzo/icons'
 import { Collapse, Divider, Tag, ProfilePicture, Spinner, Tooltip } from '@hanzo/elements'
+import { IconClock } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import PropertyFiltersDisplay from 'lib/components/PropertyFilters/components/PropertyFiltersDisplay'
@@ -24,7 +23,7 @@ import { InsightsFlowBatchJob } from './insightsflows/types'
 import { renderWorkflowLogMessage } from './logs/log-utils'
 import { workflowLogic } from './workflowLogic'
 
-const MascotGreek = pngHoggie(greekPng)
+const MascotGreek = pngHoggie()
 
 const STATUS_TAG_TYPE: Record<InsightsFlowBatchJob['status'], 'success' | 'danger' | 'warning' | 'default'> = {
     completed: 'success',

@@ -1,8 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import * as reporterPng from '@hanzo/brand/hoggies/png/reporter'
-import { IconPencil } from '@hanzo/icons'
 import { Select, Link } from '@hanzo/elements'
+import { IconPencil } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { TextContent } from 'lib/components/Cards/TextCard/TextCard'
@@ -11,10 +10,10 @@ import { Shortcut } from 'lib/components/Shortcuts/Shortcut'
 import { keyBinds } from 'lib/components/Shortcuts/shortcuts'
 import { TZLabel } from 'lib/components/TZLabel'
 import { Button } from 'lib/elements/Button'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
 import { createdAtColumn } from 'lib/elements/Table/columnUtils'
 import { Tag } from 'lib/elements/Tag/Tag'
-import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { Tooltip } from 'lib/elements/Tooltip'
 import { cn } from 'lib/utils/css-classes'
 import { organizationLogic } from 'scenes/organizationLogic'
@@ -33,7 +32,7 @@ import { AnnotationModal } from './AnnotationModal'
 import { annotationModalLogic, annotationScopeToLevel, annotationScopeToName } from './annotationModalLogic'
 import { annotationScopesMenuOptions, annotationsLogic } from './annotationsLogic'
 
-const MascotReporter = pngHoggie(reporterPng)
+const MascotReporter = pngHoggie()
 
 export const scene: SceneExport = {
     component: Annotations,

@@ -3,7 +3,6 @@ import './Cohorts.scss'
 import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
-import * as greekPng from '@hanzo/brand/hoggies/png/greek'
 import { Banner, Dialog, Input, Select } from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
@@ -16,10 +15,10 @@ import { dayjs } from 'lib/dayjs'
 import { Button } from 'lib/elements/Button'
 import { More } from 'lib/elements/Button/More'
 import { Divider } from 'lib/elements/Divider'
+import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
 import { createdAtColumn, createdByColumn } from 'lib/elements/Table/columnUtils'
 import { TableLink } from 'lib/elements/Table/TableLink'
-import { Spinner } from 'lib/elements/Spinner/Spinner'
 import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 import { cohortsSceneLogic } from 'scenes/cohorts/cohortsSceneLogic'
 import { PersonsManagementSceneTabs } from 'scenes/persons-management/PersonsManagementSceneTabs'
@@ -39,7 +38,7 @@ import {
     PropertyOperator,
 } from '~/types'
 
-const MascotGreek = pngHoggie(greekPng)
+const MascotGreek = pngHoggie()
 
 export const scene: SceneExport = {
     component: Cohorts,

@@ -2,7 +2,6 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useEffect } from 'react'
 
-import * as greekPng from '@hanzo/brand/hoggies/png/greek'
 import { Collapse, Input, Table, ProfilePicture, Spinner } from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
@@ -15,7 +14,7 @@ import { MessageAsset } from './messageAssetsApi'
 import { workflowAssetsLogic } from './workflowAssetsLogic'
 import { WorkflowLogicProps, workflowLogic } from './workflowLogic'
 
-const MascotGreek = pngHoggie(greekPng)
+const MascotGreek = pngHoggie()
 
 function EmptyAssets(): JSX.Element {
     return (
