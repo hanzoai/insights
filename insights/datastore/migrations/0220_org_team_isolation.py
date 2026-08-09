@@ -45,11 +45,13 @@ separate and deliberate operation, not a side effect of fixing the routing.
 
 from insights.datastore.client.connection import NodeRole
 from insights.datastore.client.migration_tools import run_sql_with_exceptions
-from insights.models.event.plane import DROP_EVENT_MV_SQL, EVENT_MV_SQL, provisioned
+from insights.models.event.plane import DROP_EVENT_MV_SQL, EVENT_MV_SQL
 
 # ONE reading of the app's records, so every view this migration creates routes
 # the same way. See the routing note in `plane.py`.
-ROUTING = provisioned()
+# Routing is gone: the org IS the tenant, so there is no org -> project map to
+# read and these builders take no argument. Keeping the old call shape here
+# broke the import of EVERY datastore migration, so nothing could run at all.
 
 operations = [
     run_sql_with_exceptions(
@@ -57,7 +59,7 @@ operations = [
         node_roles=[NodeRole.DATA],
     ),
     run_sql_with_exceptions(
-        EVENT_MV_SQL(ROUTING),
+        EVENT_MV_SQL(),
         node_roles=[NodeRole.DATA],
     ),
 ]
