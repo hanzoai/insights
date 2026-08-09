@@ -11,17 +11,17 @@ import { SceneContent } from '~/layout/scenes/components/SceneContent'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 
 import { ReviewModeEnumApi, type StampRepoConfigApi } from '../../generated/api.schemas'
-import { stampSceneLogic } from './stampSceneLogic'
+import { stamphogSceneLogic } from './stamphogSceneLogic'
 
 export const scene: SceneExport = {
     component: StampScene,
-    logic: stampSceneLogic,
+    logic: stamphogSceneLogic,
 }
 
 function ConnectRepositoryButton(): JSX.Element {
     // Authorize-first: the connect button opens the OAuth authorize URL. An already-installed user gets a
     // silent instant redirect back, so it never dead-ends on GitHub's "update installation" screen.
-    const { authorizeUrl, installInfoLoading } = useValues(stampSceneLogic)
+    const { authorizeUrl, installInfoLoading } = useValues(stamphogSceneLogic)
     return (
         <Button
             type="primary"
@@ -43,8 +43,8 @@ function ConnectRepositoryButton(): JSX.Element {
 
 function SyncedBanner(): JSX.Element | null {
     const { syncedRepos, skippedRepos, appNotInstalled, installUrl, discoveredInstallations } =
-        useValues(stampSceneLogic)
-    const { connectInstallation } = useActions(stampSceneLogic)
+        useValues(stamphogSceneLogic)
+    const { connectInstallation } = useActions(stamphogSceneLogic)
 
     // Discovery found several installations and bound nothing: the user picks which one this team
     // connects. The pick rides sessionStorage through one more (silent) authorize hop, and the
@@ -117,7 +117,7 @@ function SyncedBanner(): JSX.Element | null {
 }
 
 function ReviewModeCell({ repo, updating }: { repo: StampRepoConfigApi; updating: boolean }): JSX.Element {
-    const { setReviewMode, setTriggerLabel } = useActions(stampSceneLogic)
+    const { setReviewMode, setTriggerLabel } = useActions(stamphogSceneLogic)
 
     const saveTriggerLabel = (value: string): void => {
         const trimmed = value.trim()
@@ -160,8 +160,8 @@ function ReviewModeCell({ repo, updating }: { repo: StampRepoConfigApi; updating
 
 function RepoConfigsTable(): JSX.Element {
     const { filteredRepoConfigs, repoConfigs, repoConfigsLoading, updatingRepoIds, repoSearch } =
-        useValues(stampSceneLogic)
-    const { setRepoEnabled, setDigestEnabled, setRepoSearch } = useActions(stampSceneLogic)
+        useValues(stamphogSceneLogic)
+    const { setRepoEnabled, setDigestEnabled, setRepoSearch } = useActions(stamphogSceneLogic)
 
     const columns: TableColumns<StampRepoConfigApi> = [
         {
