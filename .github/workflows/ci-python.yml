@@ -71,8 +71,8 @@ jobs:
                         # Dev tools with dedicated pytest steps below
                         - 'tools/pr-approval-agent/**'
                         - 'tools/query-performance-ai/**'
-                        # Stamphog policy files validated by the pr-approval-agent suite
-                        - '.stamphog/**'
+                        # Stamp policy files validated by the pr-approval-agent suite
+                        - '.stamp/**'
                         - '**/AGENT_APPROVALS.md'
 
     code-quality:
@@ -214,7 +214,7 @@ jobs:
               run: |
                   pytest tools/query-performance-ai/query_performance_ai -v --junitxml=junit-query-performance-ai.xml
 
-            - name: Run pr-approval-agent (stamphog) tests
+            - name: Run pr-approval-agent (stamp) tests
               shell: bash
               run: |
                   pytest tools/pr-approval-agent -v --junitxml=junit-pr-approval-agent.xml

@@ -11,11 +11,11 @@ import json
 from urllib.parse import urlparse
 
 # aio_ matches the other cutovers; no $ai_ prefix (gateway strips those).
-AI_PRODUCT = "aio_stamphog"
+AI_PRODUCT = "aio_stamp"
 
 
 def analytics_extra_properties() -> dict[str, object]:
-    """Extra analytics properties the hosted stamphog server injects, or {}.
+    """Extra analytics properties the hosted stamp server injects, or {}.
 
     The hosted server sets STAMPFN_EXTRA_PROPERTIES (a JSON object with runtime/team/run-id
     context) in the sandbox env so hosted events and LLM traces carry its context. The Action

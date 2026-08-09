@@ -1,12 +1,12 @@
 """Declarative merge-gate policy: loader, resolver, and prompt sanitizer.
 
-The engine's deny/allow/size/tier/dismiss data lives in `.stamphog/policy.yml`
+The engine's deny/allow/size/tier/dismiss data lives in `.stamp/policy.yml`
 (global, trusted) and optional per-folder `AGENT_APPROVALS.md` overrides
 (untrusted, positive allow-list). This module loads and validates the global
 policy, resolves the effective policy for a given set of changed files, and
 owns the untrusted-text sanitizer shared with the reviewer prompt.
 
-Security posture (see .stamphog/README.md):
+Security posture (see .stamp/README.md):
 - All files are read from the checked-out working tree - the repo root is
   resolved from this module's own location, never from cwd. In CI the workflow
   checks out `ref: master`, so the working tree IS the trusted ref.
@@ -70,21 +70,21 @@ def repo_root() -> Path:
     """
     here = Path(__file__).resolve().parent
     for parent in [here, *here.parents]:
-        if (parent / ".stamphog").is_dir() or (parent / ".git").exists():
+        if (parent / ".stamp").is_dir() or (parent / ".git").exists():
             return parent
-    raise RuntimeError("Cannot locate repo root (no .stamphog/ or .git found above policy.py)")
+    raise RuntimeError("Cannot locate repo root (no .stamp/ or .git found above policy.py)")
 
 
 def default_policy_path() -> Path:
-    return repo_root() / ".stamphog" / "policy.yml"
+    return repo_root() / ".stamp" / "policy.yml"
 
 
 def review_guidance_path() -> Path:
-    return repo_root() / ".stamphog" / "review-guidance.md"
+    return repo_root() / ".stamp" / "review-guidance.md"
 
 
 def steering_path() -> Path:
-    return repo_root() / ".stamphog" / "steering.md"
+    return repo_root() / ".stamp" / "steering.md"
 
 
 # ── Policy data structures ───────────────────────────────────────
@@ -228,7 +228,7 @@ class PolicyError(ValueError):
 # ── Global policy loading + validation ───────────────────────────
 
 _TOP_LEVEL_KEYS = {"version", "deny", "allow", "size_gate", "tiers", "dismiss", "overrides", "familiarity", "ownership"}
-# Keys the hosted server owns and parses itself (products/stamphog/backend/logic/digest_config.py),
+# Keys the hosted server owns and parses itself (products/stamp/backend/logic/digest_config.py),
 # not the engine. Allowed at the top level so a repo declaring one doesn't hard-fail every review, but
 # never required and never read here — the engine ignores their contents.
 _SERVER_ONLY_TOP_LEVEL_KEYS = {"digest"}
@@ -240,8 +240,8 @@ _BREADTH_RULES = {"single-area", "not-cross-cutting"}
 _DELEGABLE_KEYS = {"size_gate.max_files"}
 
 # Invariant 7: self-governance deny must cover these path families so a future
-# policy edit cannot silently drop stamphog's protection of its own files.
-_SELF_GOVERNANCE_REQUIRED = (".stamphog/", "AGENT_APPROVALS", "tools/pr-approval-agent/")
+# policy edit cannot silently drop stamp's protection of its own files.
+_SELF_GOVERNANCE_REQUIRED = (".stamp/", "AGENT_APPROVALS", "tools/pr-approval-agent/")
 
 
 def _require(condition: bool, message: str) -> None:
@@ -304,10 +304,10 @@ def _parse_deny(raw: Any, lockfile_names: Iterable[str]) -> dict[str, DenyCatego
 
 
 def _assert_self_governance(deny: dict[str, DenyCategory]) -> None:
-    _require("stamphog_policy" in deny, "deny: missing required 'stamphog_policy' self-governance category")
-    paths = " ".join(deny["stamphog_policy"].match.get("paths", ()))
+    _require("stamp_policy" in deny, "deny: missing required 'stamp_policy' self-governance category")
+    paths = " ".join(deny["stamp_policy"].match.get("paths", ()))
     for token in _SELF_GOVERNANCE_REQUIRED:
-        _require(token in paths, f"deny.stamphog_policy: self-governance must cover {token!r}")
+        _require(token in paths, f"deny.stamp_policy: self-governance must cover {token!r}")
 
 
 def _parse_allow(raw: Any) -> tuple[tuple[str, ...], frozenset[str]]:
@@ -477,7 +477,7 @@ def _parse_ownership(raw: Any, known_formats: Mapping[str, str]) -> tuple[Owners
 def load_policy(
     policy_path: Path | None = None, *, lockfile_names: Iterable[str], ownership_formats: Mapping[str, str]
 ) -> Policy:
-    """Parse and validate `.stamphog/policy.yml`, splicing code-derived data.
+    """Parse and validate `.stamp/policy.yml`, splicing code-derived data.
 
     `lockfile_names` are the deps_toolchain lockfile filenames owned by
     gates.py's DEPENDENCY_ECOSYSTEMS table; the loader re.escapes them and
@@ -579,7 +579,7 @@ def _sanitize_folder_prose(raw: str) -> str:
 def _parse_folder_policy(path: Path, contract: dict[str, OverrideContract]) -> _FolderOverride:
     """Positive allow-list parse of a folder AGENT_APPROVALS.md.
 
-    Reads ONLY the delegated keys from the `stamphog:` frontmatter block within
+    Reads ONLY the delegated keys from the `stamp:` frontmatter block within
     contract ceilings; any bad frontmatter, undelegated key, or out-of-bounds
     value invalidates the whole file (frontmatter AND prose), never crashing.
     """
@@ -601,27 +601,27 @@ def _parse_folder_policy(path: Path, contract: dict[str, OverrideContract]) -> _
 
     prose = _sanitize_folder_prose(frontmatter_match.group(2))
 
-    stamphog = frontmatter.get("stamphog")
-    if stamphog is None:
+    stamp = frontmatter.get("stamp")
+    if stamp is None:
         # Advisory-only file: no delegated override, prose still applies.
         return _FolderOverride(max_files=None, prose=prose or None)
-    if not isinstance(stamphog, dict):
+    if not isinstance(stamp, dict):
         return _FolderOverride(invalid=True)
 
     # Positive allow-list: the only delegated path is size_gate.max_files.
-    max_files = _read_delegated_max_files(stamphog, contract)
+    max_files = _read_delegated_max_files(stamp, contract)
     if max_files is None:
         return _FolderOverride(invalid=True)
     return _FolderOverride(max_files=max_files, prose=prose or None)
 
 
-def _read_delegated_max_files(stamphog: dict[str, Any], contract: dict[str, OverrideContract]) -> int | None:
+def _read_delegated_max_files(stamp: dict[str, Any], contract: dict[str, OverrideContract]) -> int | None:
     """Return the delegated max_files if valid and within ceiling, else None (invalid)."""
     if "size_gate.max_files" not in contract:
         return None
-    if set(stamphog) - {"size_gate"}:
+    if set(stamp) - {"size_gate"}:
         return None
-    size_gate = stamphog.get("size_gate")
+    size_gate = stamp.get("size_gate")
     if not isinstance(size_gate, dict) or set(size_gate) - {"max_files"}:
         return None
     value = size_gate.get("max_files")
