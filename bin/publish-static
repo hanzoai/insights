@@ -1,0 +1,160 @@
+#!/usr/bin/env python3
+"""Mirror a built STATIC_ROOT into the shared object origin.
+
+A content-hashed filename is a claim about bytes: `index-W7FGYMJN.js` names one
+byte sequence and only ever that one. An asset making that claim has no business
+living inside a pod, because then it dies when the pod does -- which is what
+happens here today. Roughly half of a browser's chunk requests land on a pod
+running a different build during a rollout, and a rollout is nearly always in
+flight, so the shell loads from one build and its chunks 404 from another.
+
+So the tree is mirrored into one origin that outlives every deploy, and the
+ingress serves /static/* from there (universe: infra/k8s/ingress/routes.yaml).
+
+Two populations, two rules, and the difference is the whole design:
+
+  HASHED   `name.<12 hex>.ext`   Django's ManifestStaticFilesStorage
+           `name-<8 base32>.ext` esbuild's [hash]
+           Written ONCE. Same name means same bytes, so a second write is a
+           no-op by definition and re-uploading is wasted bandwidth. Builds
+           cannot collide here; that is what makes a flat, shared prefix correct
+           and what makes retaining every past build nearly free.
+
+  MUTABLE  everything else -- array.js, toolbar.js, recorder.js, surveys.js,
+           staticfiles.json, the Django admin tree.
+           Overwritten every build. These MUST stay mutable: customers load
+           `/static/array.js` from a snippet baked into their own pages, so the
+           SDK loader has to be updatable in place. Same semantics they have
+           today, minus the per-pod divergence.
+
+`.gz`/`.br` siblings are skipped. The origin's reader is the ingress staticFiles
+middleware, which does no content negotiation and would never open them; the
+ingress `compress` middleware encodes on the way out instead. Publishing them
+would be 238MB of bytes nothing can read.
+
+Each run also writes .builds/<version>.txt, the exact key list this build
+references. That list is what makes retention exact -- see bin/prune-static.
+Pruning on object age would be actively wrong: a chunk unchanged across two
+hundred builds is never rewritten, so its LastModified is oldest precisely when
+it is most load-bearing.
+"""
+
+from __future__ import annotations
+
+import concurrent.futures
+import mimetypes
+import os
+import re
+import sys
+from pathlib import Path
+
+import boto3
+from botocore.config import Config
+from botocore.exceptions import ClientError
+
+# Django's ManifestStaticFilesStorage appends a 12-hex md5 before the extension;
+# esbuild emits `-<hash>` in base32 (uppercase alnum, no hyphens) per
+# common/esbuilder/utils.mjs. Either one makes the name a claim about content.
+HASHED = re.compile(r"(\.[0-9a-f]{12}\.[A-Za-z0-9]+|-[A-Z0-9]{8}\.[A-Za-z0-9]+)(\.map)?$")
+
+SKIP_SUFFIX = (".gz", ".br")
+
+
+def is_hashed(rel: str) -> bool:
+    return HASHED.search(rel) is not None
+
+
+def walk(root: Path) -> list[str]:
+    out = []
+    for dirpath, _, names in os.walk(root):
+        for name in names:
+            if name.endswith(SKIP_SUFFIX):
+                continue
+            out.append(str(Path(dirpath, name).relative_to(root)))
+    return out
+
+
+def main() -> int:
+    if len(sys.argv) != 2:
+        print("usage: publish-static <staticfiles-dir>", file=sys.stderr)
+        return 2
+
+    root = Path(sys.argv[1]).resolve()
+    if not root.is_dir():
+        print(f"not a directory: {root}", file=sys.stderr)
+        return 2
+
+    endpoint = os.environ["S3_ENDPOINT"]
+    bucket = os.environ.get("S3_BUCKET", "cdn")
+    # The ingress middleware appends the whole request path to its own root, so
+    # a request for /static/x resolves to <prefix>/static/x. Keep them agreeing.
+    prefix = os.environ.get("S3_PREFIX", "insights").strip("/")
+    version = os.environ.get("VERSION", "").strip()
+    if not version:
+        print("VERSION is required -- it names the build manifest", file=sys.stderr)
+        return 2
+
+    s3 = boto3.client(
+        "s3",
+        endpoint_url=endpoint,
+        region_name=os.environ.get("S3_REGION", "us-east-1"),
+        # SeaweedFS serves path-style only, and so does the ingress reader.
+        config=Config(s3={"addressing_style": "path"}, max_pool_connections=64,
+                      retries={"max_attempts": 5, "mode": "standard"}),
+    )
+
+    files = walk(root)
+    if not files:
+        print(f"nothing to publish under {root}", file=sys.stderr)
+        return 1
+
+    hashed = [f for f in files if is_hashed(f)]
+    mutable = [f for f in files if not is_hashed(f)]
+    print(f"{len(files)} files: {len(hashed)} hashed (write-once), {len(mutable)} mutable (overwrite)")
+
+    counts = {"put": 0, "skip": 0}
+
+    def publish(rel: str) -> tuple[str, int]:
+        key = f"{prefix}/static/{rel}"
+        path = root / rel
+        size = path.stat().st_size
+
+        if is_hashed(rel):
+            try:
+                head = s3.head_object(Bucket=bucket, Key=key)
+                # Same name AND same length: the name already promised the bytes,
+                # and the length agrees, so there is nothing to say.
+                if head["ContentLength"] == size:
+                    return "skip", 0
+            except ClientError as err:
+                if err.response["Error"]["Code"] not in ("404", "NoSuchKey", "NotFound"):
+                    raise
+
+        ctype = mimetypes.guess_type(rel)[0] or "application/octet-stream"
+        with path.open("rb") as fh:
+            s3.put_object(Bucket=bucket, Key=key, Body=fh, ContentType=ctype)
+        return "put", size
+
+    uploaded = 0
+    with concurrent.futures.ThreadPoolExecutor(max_workers=32) as pool:
+        for action, size in pool.map(publish, files):
+            counts[action] += 1
+            uploaded += size
+
+    # The manifest is what a prune reads to know this build is still referenced.
+    # Written last, so a run that dies half way never claims keys it did not put.
+    s3.put_object(
+        Bucket=bucket,
+        Key=f"{prefix}/.builds/{version}.txt",
+        Body="\n".join(sorted(files)).encode(),
+        ContentType="text/plain",
+    )
+
+    print(f"published {counts['put']} ({uploaded / 1048576:.1f} MB), "
+          f"skipped {counts['skip']} already-published -> s3://{bucket}/{prefix}/static/")
+    print(f"build manifest: s3://{bucket}/{prefix}/.builds/{version}.txt")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
