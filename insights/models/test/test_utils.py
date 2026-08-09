@@ -135,21 +135,35 @@ class TestKeyMarks:
 
 
 class TestIngestKeyIsNotMintedHere:
-    """Cloud is the one authority that mints an ingest key, so this is a refusal.
+    """Cloud is the one authority that mints an ingest key.
 
     A `pk-` invented here resolves to no project, and the ingest door answers
-    `ingest_key_unknown` -- a team that looks configured and drops every event.
+    `ingest_key_unknown` -- a team that looks configured and drops every event. So
+    the mint refuses outright, and `Team.api_token`'s default stands in something
+    that is not a key at all rather than a weaker one.
     """
 
     def test_minting_a_publishable_key_refuses(self):
         with pytest.raises(RuntimeError, match="POST /v1/projects"):
             mint(KeyKind.PUBLISHABLE)
 
-    def test_the_field_default_refuses_too(self):
-        # `Team.api_token` still points at this name because a migration records
-        # it. It is reached whenever a team is created without cloud's key.
-        with pytest.raises(RuntimeError, match="POST /v1/projects"):
-            generate_random_token_project()
+    def test_the_field_default_is_not_a_key(self):
+        # `key_kind` is the one predicate every reader routes on, so a placeholder
+        # it read as a kind would be a credential to somebody. Reading as nothing
+        # is what a team cloud has not named a project for actually has.
+        assert key_kind(generate_random_token_project()) is None
+
+    def test_two_placeholders_never_collide(self):
+        # `Team.api_token` is unique, so a constant placeholder would leave the
+        # second team unsaveable.
+        assert len({generate_random_token_project() for _ in range(1000)}) == 1000
+
+    def test_the_placeholder_fits_through_the_edge(self):
+        # `rust/capture/src/token.rs` refuses anything over 64 characters as
+        # `TooLong` before it looks at what the value is. A placeholder that grew
+        # past that would be refused for its length rather than for naming no
+        # project, which is a different answer to the same question.
+        assert len(generate_random_token_project()) <= 64
 
     def test_the_mark_survives_so_a_cloud_key_stays_readable(self):
         # Only the minting goes. `pk-` is how a cloud key is recognized.

@@ -252,17 +252,30 @@ def mint(kind: KeyKind) -> str:
     return KEY_MARKS[kind] + generate_random_token(KEY_BYTES[kind])
 
 
+# A team that no cloud project has been created for yet holds this instead of a
+# key. It deliberately carries none of the marks above, so `key_kind` reads it as
+# nothing and no reader can mistake it for a credential; it is an absence the
+# column can store, not a weaker key. The door refuses it with
+# `ingest_key_unknown`, which is the true answer -- it names no project.
+UNBOUND_MARK = "unbound-"
+
+
 # Django migrations record the import path of a field's default, so these keep the
 # names already written into migration files. Each is `mint` under a pinned name.
 def generate_random_token_project() -> str:
-    """Refuses, because `Team.api_token` is the ingest key and cloud mints those.
+    """`Team.api_token` before cloud has named a project for it.
 
-    The name stays because `insights/migrations/0001_initial.py` records it as the
-    field's default; `CreateModel` never calls a default, so a fresh database still
-    migrates. What it does catch is a team created without cloud's key, which is
-    the failure this raises rather than stores.
+    Not a key, and not a mint: cloud mints the ingest key at `POST /v1/projects`
+    and the three doors that create a team (the IAM login pipeline, and the team
+    and project serializers) put it here at birth. What reaches this is a team
+    born outside all three -- a fixture, or a local bootstrap -- and the honest
+    value for one of those is that it has no key, spelled so that nothing reads it
+    as having one.
+
+    It stays random because the column is unique. The name stays because
+    `insights/migrations/0001_initial.py` records it as the field's default.
     """
-    return mint(KeyKind.PUBLISHABLE)
+    return UNBOUND_MARK + generate_random_token(16)
 
 
 def generate_random_token_personal() -> str:
