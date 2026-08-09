@@ -183,7 +183,7 @@ class TestLLMGatewayPolicySignals(BaseTest):
         mock_transaction.on_commit.side_effect = lambda fn: fn()
 
         old_token = self.team.api_token
-        self.team.api_token = "phc_rotated_token_value"
+        self.team.api_token = "pk-rotated_token_value"
         self.team.save()
 
         mock_delay.assert_called_with(self.team.id)
@@ -272,14 +272,14 @@ class TestLLMGatewayPolicySignals(BaseTest):
 
         token_a = self.team.api_token
 
-        self.team.api_token = "phc_rotated_b"
+        self.team.api_token = "pk-rotated_b"
         self.team.save()
 
-        self.team.api_token = "phc_rotated_c"
+        self.team.api_token = "pk-rotated_c"
         self.team.save()
 
         cleared = [call.args[0] for call in mock_clear.call_args_list]
-        self.assertEqual(cleared, [token_a, "phc_rotated_b"])
+        self.assertEqual(cleared, [token_a, "pk-rotated_b"])
 
     @patch("insights.storage.team_llm_gateway_policy_signal_handlers.transaction")
     @patch("insights.storage.team_llm_gateway_policy_signal_handlers.settings")
@@ -300,7 +300,7 @@ class TestLLMGatewayPolicySignals(BaseTest):
 
         old_token = self.team.api_token
         partial = Team.objects.only("id", "name").get(pk=self.team.pk)
-        partial.api_token = "phc_rotated_deferred"
+        partial.api_token = "pk-rotated_deferred"
         partial.save()
 
         mock_delay.assert_called_with(self.team.id)

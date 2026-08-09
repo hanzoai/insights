@@ -1192,7 +1192,7 @@ ELEMENT_STATS_DEFAULT_LIMIT = get_from_env("ELEMENT_STATS_DEFAULT_LIMIT", 50_000
 AI_GATEWAY_INTERNAL_URL = get_from_env("AI_GATEWAY_INTERNAL_URL", "")
 AI_GATEWAY_INTERNAL_TOKEN = get_from_env("AI_GATEWAY_INTERNAL_TOKEN", "")
 
-# AI gateway inference endpoint: OpenAI-compatible URL (include /v1) + phs_ project
+# AI gateway inference endpoint: OpenAI-compatible URL (include /v1) + sk- project
 # secret for routing LLM calls through the gateway. Unset = direct to the provider.
 AI_GATEWAY_URL = get_from_env("AI_GATEWAY_URL", "")
 AI_GATEWAY_API_KEY = get_from_env("AI_GATEWAY_API_KEY", "")

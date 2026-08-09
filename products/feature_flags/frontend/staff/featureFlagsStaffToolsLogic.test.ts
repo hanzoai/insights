@@ -15,7 +15,7 @@ jest.mock('lib/elements/Toast/Toast', () => ({
 const TEAM: StaffTeamResult = {
     id: 5,
     name: 'Acme',
-    api_token: 'phc_acme',
+    api_token: 'pk-acme',
     organization_id: 'org-uuid',
     organization_name: 'Acme Org',
     project_id: 5,

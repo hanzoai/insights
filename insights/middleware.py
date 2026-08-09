@@ -50,7 +50,7 @@ from insights.models.activity_logging.utils import (
     ACTIVITY_LOG_CLIENT_MAX_LENGTH,
     activity_storage,
 )
-from insights.models.utils import generate_random_token
+from insights.models.utils import KeyKind, generate_random_token, key_kind
 from insights.mount import canonical
 from insights.rbac.user_access_control import UserAccessControl
 from insights.settings import PROJECT_SWITCHING_TOKEN_ALLOWLIST, SITE_URL
@@ -245,7 +245,7 @@ class AutoProjectMiddleware:
             if (
                 len(path_parts) >= 2
                 and path_parts[0] == "project"
-                and (path_parts[1].startswith("phc_") or path_parts[1] in self.token_allowlist)
+                and (key_kind(path_parts[1]) is KeyKind.PUBLISHABLE or path_parts[1] in self.token_allowlist)
             ):
 
                 def do_redirect():

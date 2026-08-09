@@ -505,7 +505,7 @@ class ExternalAccountListView(APIView):
     to accounts with at least one active relationship assignment, which is what
     the billing service's ownership sync consumes.
 
-    Authenticated via a project secret API key (Bearer ``phs_...``) carrying the
+    Authenticated via a project secret API key (Bearer ``sk-...``) carrying the
     ``account:read`` scope, not the team secret_api_token the sibling views
     accept. The team token is readable by any project member, so it must not
     grant this team-wide export; a PSAK is a service credential minted with an

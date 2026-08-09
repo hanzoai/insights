@@ -7,7 +7,7 @@
 // legacy results keep their exact pre-stateless wire shape (no `resultType`,
 // no `_meta` server identity leaking across dialects).
 //
-// Usage: INSIGHTS_PERSONAL_API_KEY=phx_... MCP_URL=http://localhost:8787/mcp \
+// Usage: INSIGHTS_PERSONAL_API_KEY=sk-... MCP_URL=http://localhost:8787/mcp \
 //        ../../node_modules/.bin/tsx legacy-smoke.mts
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'

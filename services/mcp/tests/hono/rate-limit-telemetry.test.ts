@@ -61,7 +61,7 @@ describe('recordRateLimitBlock', () => {
         const get = vi.fn()
         await recordRateLimitBlock(
             { get } as never,
-            makeProps({ projectId: '123', apiToken: 'phx_secrettoken9876' }),
+            makeProps({ projectId: '123', apiToken: 'sk-secrettoken9876' }),
             blocked('mcp_burst')
         )
         expect(warn).toHaveBeenCalledWith(

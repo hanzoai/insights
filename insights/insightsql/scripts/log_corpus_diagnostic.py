@@ -96,8 +96,8 @@ _REDACTION_PASSES: list[tuple[str, str]] = [
         r"[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}",
         "<uuid>",
     ),
-    # Insights API tokens: phc_/phx_/phs_ today, any future ph?_ prefix.
-    (r"\bph[a-z]_[A-Za-z0-9]{10,}", "<ph_token>"),
+    # Insights API tokens: pk-/sk-/sk- today, any future ph?_ prefix.
+    (r"\b(?:pk-|sk-|at-|rt-|vt-)[A-Za-z0-9]{10,}", "<key>"),
     # Credential shapes below ~never appear in InsightsQL text — kept as
     # defence-in-depth against a stray paste reaching the dump.
     (r"\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]+", "<jwt>"),

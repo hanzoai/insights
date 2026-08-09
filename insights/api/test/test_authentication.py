@@ -34,7 +34,7 @@ from insights.auth import (
     ProjectSecretAPIKeyUser,
     TeamSecretTokenAuthentication,
     TeamSecretTokenUser,
-    _extract_phs_token,
+    _extract_secret_key,
 )
 from insights.datastore.query_tagging import AccessMethod
 from insights.helpers.user_devices import (
@@ -51,7 +51,7 @@ from insights.models.organization import Organization, OrganizationMembership
 from insights.models.personal_api_key import PersonalAPIKey
 from insights.models.project_secret_api_key import ProjectSecretAPIKey
 from insights.models.team.team import Team
-from insights.models.utils import generate_random_token_personal, hash_key_value
+from insights.models.utils import KeyKind, generate_random_token_personal, hash_key_value, mint
 
 from products.feature_flags.backend.models.feature_flag import FeatureFlag
 
@@ -346,7 +346,7 @@ class TestTimeSensitivePermissions(APIBaseTest):
 class TestTeamSecretTokenAuthentication(APIBaseTest):
     def setUp(self):
         super().setUp()  # Call the setup from APIBaseTest
-        self.team.secret_api_token = "phs_JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
+        self.team.secret_api_token = "sk-JVRb8fNi0XyIKGgUCyi29ZJUOXEr6NF2dKBy5Ws8XVeF11C"
         self.team.save()
         self.factory = APIRequestFactory()  # Use APIRequestFactory instead of RequestFactory
 
@@ -408,7 +408,7 @@ class TestTeamSecretTokenAuthentication(APIBaseTest):
 
     def test_authenticate_with_invalid_secret_api_key(self):
         # Simulate a request with an invalid team secret token
-        wsgi_request = self.factory.get("/", HTTP_AUTHORIZATION="Bearer phs_NOT_A_VALID_KEY")
+        wsgi_request = self.factory.get("/", HTTP_AUTHORIZATION="Bearer sk-NOT_A_VALID_KEY")
         request = Request(wsgi_request)  # Wrap the WSGIRequest in a DRF Request
 
         authenticator = TeamSecretTokenAuthentication()
@@ -513,17 +513,30 @@ class TestSyntheticUser(SimpleTestCase):
         self.assertEqual(b.user_permissions, [])
 
 
-class TestExtractPhsToken(SimpleTestCase):
+class TestExtractSecretKey(SimpleTestCase):
     def setUp(self):
         self.factory = APIRequestFactory()
 
+    def test_only_a_secret_marked_key_is_extracted(self):
+        # The mint and the resolver are the two ends of one contract, so the keys
+        # here are minted rather than spelled. Only a secret belongs to a secret
+        # backend; every other kind is left for the authenticator that owns it.
+        for kind in KeyKind:
+            key = mint(kind)
+            wsgi_request = self.factory.get("/", HTTP_AUTHORIZATION=f"Bearer {key}")
+            extracted = _extract_secret_key(Request(wsgi_request))
+            if kind is KeyKind.SECRET:
+                self.assertEqual(extracted, key)
+            else:
+                self.assertIsNone(extracted, f"{kind.value} key reached the secret resolver")
+
     def test_valid_token_in_header_returned(self):
-        token = "phs_" + "x" * 35
+        token = "sk-" + "x" * 35
         wsgi_request = self.factory.get("/", HTTP_AUTHORIZATION=f"Bearer {token}")
-        self.assertEqual(_extract_phs_token(Request(wsgi_request)), token)
+        self.assertEqual(_extract_secret_key(Request(wsgi_request)), token)
 
     def test_body_token_ignored(self):
-        token = "phs_" + "y" * 35
+        token = "sk-" + "y" * 35
         wsgi_request = self.factory.post(
             "/",
             data=json.dumps({"secret_api_key": token}),
@@ -531,22 +544,22 @@ class TestExtractPhsToken(SimpleTestCase):
         )
         request = Request(wsgi_request)
         request.parsers = [JSONParser()]
-        self.assertIsNone(_extract_phs_token(request))
+        self.assertIsNone(_extract_secret_key(request))
 
     def test_no_token_anywhere_returns_none(self):
         wsgi_request = self.factory.get("/")
-        self.assertIsNone(_extract_phs_token(Request(wsgi_request)))
+        self.assertIsNone(_extract_secret_key(Request(wsgi_request)))
 
 
 class TestProjectSecretAPIKeyAuthentication(APIBaseTest):
     def setUp(self):
         super().setUp()
         self.factory = APIRequestFactory()
-        self.token = "phs_" + "a" * 35
+        self.token = "sk-" + "a" * 35
         self.psak = ProjectSecretAPIKey.objects.create(
             team=self.team,
             label="psak-test",
-            mask_value="phs_...aaaa",
+            mask_value="sk-...aaaa",
             secure_value=hash_key_value(self.token),
             scopes=["endpoint:read"],
         )
@@ -594,14 +607,14 @@ class TestProjectSecretAPIKeyAuthentication(APIBaseTest):
         self.assertIsNone(result)
 
     def test_authenticate_with_unknown_token_returns_none(self):
-        unknown_token = "phs_" + "z" * 35
+        unknown_token = "sk-" + "z" * 35
         authenticator = ProjectSecretAPIKeyAuthentication()
         result = authenticator.authenticate(self._request_with_header(unknown_token))
         self.assertIsNone(result)
 
     def test_does_not_fall_back_to_team_secret_api_token(self):
         # Set Team.secret_api_token to a legacy token; PSAK auth should ignore it.
-        legacy_token = "phs_" + "b" * 35
+        legacy_token = "sk-" + "b" * 35
         self.team.secret_api_token = legacy_token
         self.team.save()
 
@@ -617,7 +630,7 @@ class TestProjectSecretAPIKeyAuthentication(APIBaseTest):
 
     @parameterized.expand(
         [
-            ("public_token", "phc_test_public_token"),
+            ("public_token", "pk-test_public_token"),
             ("unprefixed", "some_random_token"),
             ("empty", ""),
         ]
@@ -679,7 +692,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         self.access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=self.oauth_app,
-            token="pha_test_access_token_123",
+            token="at-test_access_token_123",
             expires=timezone.now() + timedelta(hours=1),
             scope="openid profile",
         )
@@ -703,7 +716,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
     def test_authenticate_with_invalid_oauth_token(self):
         wsgi_request = self.factory.get(
             "/",
-            headers={"AUTHORIZATION": "Bearer pha_invalid_token_123"},
+            headers={"AUTHORIZATION": "Bearer at-invalid_token_123"},
         )
         request = Request(wsgi_request)
 
@@ -718,7 +731,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         expired_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=self.oauth_app,
-            token="pha_expired_token_123",
+            token="at-expired_token_123",
             expires=timezone.now() - timedelta(hours=1),
             scope="openid profile",
         )
@@ -812,7 +825,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         invalid_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=None,  # This will cause a validation error
-            token="pha_invalid_app_token_123",
+            token="at-invalid_app_token_123",
             expires=timezone.now() + timedelta(hours=1),
             scope="openid profile",
         )
@@ -837,7 +850,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         token_without_user = OAuthAccessToken.objects.create(
             user=None,
             application=self.oauth_app,
-            token="pha_no_user_token_123",
+            token="at-no_user_token_123",
             expires=timezone.now() + timedelta(hours=1),
             scope="openid profile",
         )
@@ -891,7 +904,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
             )
 
     def test_authenticate_without_pha_prefix_returns_none(self):
-        """Test that tokens without the pha_ prefix are skipped by OAuth authentication,
+        """Test that tokens without the at- prefix are skipped by OAuth authentication,
         allowing PersonalAPIKeyAuthentication to handle them."""
         wsgi_request = self.factory.get(
             "/",

@@ -24,7 +24,7 @@ BEDROCK_REGION = (
     or os.environ.get("AWS_REGION")
     or os.environ.get("AWS_DEFAULT_REGION")
 )
-TEST_INSIGHTS_API_KEY = "phx_fake_personal_api_key"
+TEST_INSIGHTS_API_KEY = "sk-fake_personal_api_key"
 
 # Cloudflare Workers AI runs serverless and is slow + high-variance (cold starts on a large model
 # can push a single completion past 3 minutes). Bound each CF call and disable SDK-level retries so

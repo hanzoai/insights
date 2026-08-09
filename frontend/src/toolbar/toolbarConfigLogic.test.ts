@@ -83,8 +83,8 @@ describe('toolbar toolbarConfigLogic', () => {
     it('is authenticated with accessToken', () => {
         const logic = toolbarConfigLogic.build({
             apiURL: 'http://localhost',
-            accessToken: 'pha_oauth_token',
-            refreshToken: 'phr_refresh',
+            accessToken: 'at-oauth_token',
+            refreshToken: 'rt-refresh',
             clientId: 'client-id',
         })
         logic.mount()
@@ -96,10 +96,10 @@ describe('toolbar toolbarConfigLogic', () => {
         logic.mount()
 
         expectLogic(logic, () => {
-            logic.actions.setOAuthTokens('pha_new', 'phr_new', 'client-123')
+            logic.actions.setOAuthTokens('at-new', 'rt-new', 'client-123')
         }).toMatchValues({
-            accessToken: 'pha_new',
-            refreshToken: 'phr_new',
+            accessToken: 'at-new',
+            refreshToken: 'rt-new',
             clientId: 'client-123',
             isAuthenticated: true,
         })
@@ -338,8 +338,8 @@ describe('toolbar toolbarConfigLogic', () => {
         it('skips the HEAD check when already authenticated and no pending code exchange', () => {
             const logic = toolbarConfigLogic.build({
                 uiHost: 'https://selfhosted.example.com',
-                accessToken: 'pha_existing',
-                refreshToken: 'phr_existing',
+                accessToken: 'at-existing',
+                refreshToken: 'rt-existing',
                 clientId: 'client',
             } as any)
             logic.mount()
@@ -364,8 +364,8 @@ describe('toolbar toolbarConfigLogic', () => {
             window.history.pushState({}, '', '/#__insights_toolbar=code:abc,client_id:xyz')
             const logic = toolbarConfigLogic.build({
                 uiHost: 'https://selfhosted.example.com',
-                accessToken: 'pha_existing',
-                refreshToken: 'phr_existing',
+                accessToken: 'at-existing',
+                refreshToken: 'rt-existing',
                 clientId: 'client',
             } as any)
             logic.mount()
@@ -623,7 +623,7 @@ describe('toolbar toolbarConfigLogic', () => {
             )
             const logic = toolbarConfigLogic.build({
                 apiURL: 'http://localhost',
-                token: 'phc_test',
+                token: 'pk-test',
                 // No accessToken — simulates insights-js overwrite
             })
             logic.mount()
@@ -1484,8 +1484,8 @@ describe('toolbar toolbarConfigLogic', () => {
             const logic = toolbarConfigLogic.build({
                 uiHost: 'https://us.hanzo.ai',
                 apiURL: 'https://evil.example.com',
-                accessToken: 'pha_secret',
-                refreshToken: 'phr_secret',
+                accessToken: 'at-secret',
+                refreshToken: 'rt-secret',
                 clientId: 'client',
             } as any)
             logic.mount()
@@ -1555,10 +1555,10 @@ describe('toolbar toolbarConfigLogic', () => {
         it('accepts string accessToken', () => {
             const logic = toolbarConfigLogic.build({
                 uiHost: 'https://us.hanzo.ai',
-                accessToken: 'pha_real',
+                accessToken: 'at-real',
             } as any)
             logic.mount()
-            expectLogic(logic).toMatchValues({ accessToken: 'pha_real', isAuthenticated: true })
+            expectLogic(logic).toMatchValues({ accessToken: 'at-real', isAuthenticated: true })
         })
 
         it.each([
@@ -1594,8 +1594,8 @@ describe('toolbar toolbarConfigLogic', () => {
             const logic = toolbarConfigLogic.build({
                 uiHost: 'https://us.hanzo.ai',
                 apiURL: 'https://us.hanzo.ai',
-                accessToken: 'pha_token',
-                refreshToken: 'phr_token',
+                accessToken: 'at-token',
+                refreshToken: 'rt-token',
                 clientId: 'client',
             } as any)
             logic.mount()

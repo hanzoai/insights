@@ -34,7 +34,7 @@ logging.getLogger("kafka").setLevel(logging.ERROR)  # Hide kafka-python's logspa
 
 # Deterministic project token for the locally seeded demo team, so SDKs/tools can target it without
 # looking up the random token. Only used for the freshly created demo account (not existing projects).
-DEMO_PROJECT_API_TOKEN = "phc_localinsightsprojecttoken"
+DEMO_PROJECT_API_TOKEN = "pk-localinsightsprojecttoken"
 
 
 class Command(BaseCommand):

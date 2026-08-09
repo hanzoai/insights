@@ -58,7 +58,7 @@ class TestPersonalAPIKeysAPI(APIBaseTest):
             "value": data["value"],
             "mask_value": data["mask_value"],
         }
-        assert data["value"].startswith("phx_")  # Personal API key prefix
+        assert data["value"].startswith("sk-")  # Personal API key prefix
 
     def test_create_personal_api_key_normalizes_blank_description_to_null(self):
         response = self.client.post(
@@ -340,7 +340,7 @@ class TestPersonalAPIKeysAPI(APIBaseTest):
 
         # changed fields
         assert data["value"] != original_value
-        assert data["value"].startswith("phx_")  # Personal API key prefix
+        assert data["value"].startswith("sk-")  # Personal API key prefix
         assert data["last_rolled_at"] is not None
         assert data["mask_value"] != original_key.mask_value
 
@@ -400,7 +400,7 @@ class TestPersonalAPIKeysAPIAuthentication(PersonalAPIKeysBaseTest):
             secure_value=hash_key_value(self.value_390000, "pbkdf2", LEGACY_PERSONAL_API_KEY_SALT, iterations=390000),
             scopes=["*"],
         )
-        self.value_hardcoded = "phx_0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p"
+        self.value_hardcoded = "sk-0a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p"
         self.key_hardcoded = PersonalAPIKey.objects.create(
             label="Test",
             user=self.user,
@@ -537,7 +537,7 @@ class TestPersonalAPIKeysAPIAuthentication(PersonalAPIKeysBaseTest):
         oauth_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=oauth_app,
-            token="pha_test_oauth_token",
+            token="at-test_oauth_token",
             expires=timezone.now() + timedelta(hours=1),
             scope="*",
         )

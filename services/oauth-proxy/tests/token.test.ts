@@ -33,7 +33,7 @@ describe('handleToken', () => {
             vi.fn().mockResolvedValue(
                 new Response(
                     JSON.stringify({
-                        access_token: 'pha_test_token',
+                        access_token: 'at-test_token',
                         token_type: 'bearer',
                     }),
                     { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -51,7 +51,7 @@ describe('handleToken', () => {
         const data = (await response.json()) as Record<string, unknown>
 
         expect(response.status).toBe(200)
-        expect(data.access_token).toBe('pha_test_token')
+        expect(data.access_token).toBe('at-test_token')
 
         const fetchCall = vi.mocked(fetch).mock.calls[0]!
         expect(String(fetchCall[0])).toMatch(/^https:\/\/us\.insights\.com/)
@@ -79,7 +79,7 @@ describe('handleToken', () => {
         vi.stubGlobal(
             'fetch',
             vi.fn().mockResolvedValue(
-                new Response(JSON.stringify({ access_token: 'pha_eu_token', token_type: 'bearer' }), {
+                new Response(JSON.stringify({ access_token: 'at-eu_token', token_type: 'bearer' }), {
                     status: 200,
                     headers: { 'Content-Type': 'application/json' },
                 })
@@ -129,7 +129,7 @@ describe('handleToken', () => {
         vi.stubGlobal(
             'fetch',
             vi.fn().mockResolvedValue(
-                new Response(JSON.stringify({ access_token: 'pha_eu_token', token_type: 'bearer' }), {
+                new Response(JSON.stringify({ access_token: 'at-eu_token', token_type: 'bearer' }), {
                     status: 200,
                     headers: { 'Content-Type': 'application/json' },
                 })
@@ -198,7 +198,7 @@ describe('handleToken', () => {
                 .mockResolvedValueOnce(
                     new Response(
                         JSON.stringify({
-                            access_token: 'pha_eu_refreshed',
+                            access_token: 'at-eu_refreshed',
                             token_type: 'bearer',
                         }),
                         { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -215,7 +215,7 @@ describe('handleToken', () => {
         const response = await handleToken(request, mockKV)
         const data = (await response.json()) as Record<string, unknown>
 
-        expect(data.access_token).toBe('pha_eu_refreshed')
+        expect(data.access_token).toBe('at-eu_refreshed')
         expect(vi.mocked(fetch)).toHaveBeenCalledTimes(2)
     })
 
@@ -254,7 +254,7 @@ describe('handleToken', () => {
                 .mockResolvedValueOnce(
                     new Response(
                         JSON.stringify({
-                            access_token: 'pha_eu_refreshed',
+                            access_token: 'at-eu_refreshed',
                             token_type: 'bearer',
                         }),
                         { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -272,7 +272,7 @@ describe('handleToken', () => {
         const data = (await response.json()) as Record<string, unknown>
 
         expect(response.status).toBe(200)
-        expect(data.access_token).toBe('pha_eu_refreshed')
+        expect(data.access_token).toBe('at-eu_refreshed')
 
         // Verify US attempt used the US client_id (which is the proxy client_id)
         const usCall = vi.mocked(fetch).mock.calls[0]!
@@ -311,7 +311,7 @@ describe('handleToken', () => {
         vi.stubGlobal(
             'fetch',
             vi.fn().mockResolvedValueOnce(
-                new Response(JSON.stringify({ access_token: 'pha_us_refreshed', token_type: 'bearer' }), {
+                new Response(JSON.stringify({ access_token: 'at-us_refreshed', token_type: 'bearer' }), {
                     status: 200,
                     headers: { 'Content-Type': 'application/json' },
                 })
@@ -328,7 +328,7 @@ describe('handleToken', () => {
         const data = (await response.json()) as Record<string, unknown>
 
         expect(response.status).toBe(200)
-        expect(data.access_token).toBe('pha_us_refreshed')
+        expect(data.access_token).toBe('at-us_refreshed')
         // Only one fetch call — did not try EU
         expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1)
 
@@ -452,7 +452,7 @@ describe('handleToken', () => {
                     })
                 )
                 .mockResolvedValueOnce(
-                    new Response(JSON.stringify({ access_token: 'pha_eu_json', token_type: 'bearer' }), {
+                    new Response(JSON.stringify({ access_token: 'at-eu_json', token_type: 'bearer' }), {
                         status: 200,
                         headers: { 'Content-Type': 'application/json' },
                     })
@@ -473,7 +473,7 @@ describe('handleToken', () => {
         const data = (await response.json()) as Record<string, unknown>
 
         expect(response.status).toBe(200)
-        expect(data.access_token).toBe('pha_eu_json')
+        expect(data.access_token).toBe('at-eu_json')
 
         // Verify EU attempt rewrote the client_id in JSON body
         const euCall = vi.mocked(fetch).mock.calls[1]!
@@ -500,7 +500,7 @@ describe('handleToken', () => {
         vi.stubGlobal(
             'fetch',
             vi.fn().mockResolvedValueOnce(
-                new Response(JSON.stringify({ access_token: 'pha_us_only', token_type: 'bearer' }), {
+                new Response(JSON.stringify({ access_token: 'at-us_only', token_type: 'bearer' }), {
                     status: 200,
                     headers: { 'Content-Type': 'application/json' },
                 })
@@ -517,7 +517,7 @@ describe('handleToken', () => {
         const data = (await response.json()) as Record<string, unknown>
 
         expect(response.status).toBe(200)
-        expect(data.access_token).toBe('pha_us_only')
+        expect(data.access_token).toBe('at-us_only')
         // Only US was tried — EU was skipped because eu_client_id is null
         expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1)
         const usCall = vi.mocked(fetch).mock.calls[0]!
@@ -544,7 +544,7 @@ describe('handleToken', () => {
         vi.stubGlobal(
             'fetch',
             vi.fn().mockResolvedValueOnce(
-                new Response(JSON.stringify({ access_token: 'pha_eu_only', token_type: 'bearer' }), {
+                new Response(JSON.stringify({ access_token: 'at-eu_only', token_type: 'bearer' }), {
                     status: 200,
                     headers: { 'Content-Type': 'application/json' },
                 })
@@ -561,7 +561,7 @@ describe('handleToken', () => {
         const data = (await response.json()) as Record<string, unknown>
 
         expect(response.status).toBe(200)
-        expect(data.access_token).toBe('pha_eu_only')
+        expect(data.access_token).toBe('at-eu_only')
         // Only EU was tried — US was skipped because us_client_id is null
         expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1)
         const euCall = vi.mocked(fetch).mock.calls[0]!

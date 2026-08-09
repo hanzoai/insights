@@ -438,7 +438,7 @@ export const llmSkillsLogic = kea<llmSkillsLogicType>([
                 setConnectModalOpen: (_, { open }) => open,
             },
         ],
-        // The full server response (status, command, command_template, token, mask). The live phs_
+        // The full server response (status, command, command_template, token, mask). The live sk-
         // token only ever lives here and only on create/rotate; clear it when the modal closes.
         marketplaceState: [
             null as LLMSkillMarketplaceCommandApi | null,

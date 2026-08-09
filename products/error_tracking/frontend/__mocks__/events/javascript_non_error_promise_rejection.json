@@ -147,7 +147,7 @@
         },
         "$group_1": "0195b934-6b5a-0000-a2cb-44f1514aaedc",
         "email_service_available": false,
-        "token": "phc_ngf62dtzXeNsSZNWJ8eB5Je1l7FQoSybCZHEOggcXv7",
+        "token": "pk-ngf62dtzXeNsSZNWJ8eB5Je1l7FQoSybCZHEOggcXv7",
         "$feature/settings-session-table-version": true,
         "distinct_id": "GwcdJMUX1sAvdedyOy4AWu3DFPn5mshjtbIaeaBS5E3",
         "$feature/messaging": true,

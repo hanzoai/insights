@@ -29,6 +29,7 @@ import re
 import subprocess
 import sys
 import tomllib
+from collections.abc import Iterable
 
 # --- content rules ------------------------------------------------------
 #
@@ -145,7 +146,11 @@ CONTENT_RULES: list[tuple[str, str]] = [
 # because the two names have to stay one letter apart or the compiler and the
 # runner stop agreeing about what they hand each other.
 CONTENT_REGEX: list[tuple[re.Pattern[str], str]] = [
-    (re.compile(r"\bLemon(?=[A-Z][A-Za-z0-9]*)"), ""),
+    # `Lemon` names our design system, but it also opens `LemonSqueezy` -- a
+    # payments vendor whose warehouse source we import. Stripping the prefix off
+    # a name we do not own renames someone else's product to `Squeezy`, so the
+    # third parties are named here and the rule declines them.
+    (re.compile(r"\bLemon(?!Squeezy)(?=[A-Z][A-Za-z0-9]*)"), ""),
     # The query language and the VM. Only the prefix is ours -- `QL` is SQL's
     # and `VM` is a virtual machine's -- so the rule renames the prefix and
     # leaves the suffix's casing exactly as the author wrote it. One rule per
@@ -611,26 +616,44 @@ def prune_manifests(root: str, dry: bool) -> int:
     return len(dangling)
 
 
-def rewrite_text(s: str, path: str = "") -> str:
-    s = SELF_URL.sub(SELF_URL_TO, s)
-    if os.path.basename(path) not in MANIFESTS:
-        for old, new in CONTENT_RULES:
-            s = s.replace(old, new)
-        for pat, rep in CONTENT_REGEX:
-            s = pat.sub(rep, s)
-        return s
-    return _rewrite_manifest(s)
+# A name that identifies something outside this tree is not ours to spell. A
+# Postgres table, a Datastore table and a route a client calls are all read back
+# by something that was not rebuilt from this checkout, so renaming one to match
+# a file move is a data incident rather than a refactor. The `hog_flow` rules
+# would do exactly that on the next run, so those identities are held out of the
+# rewrite and put back verbatim.
+#
+# Each is anchored on what makes it an identity and not a label: the table's
+# `db_table`, the Datastore table's dotted id, the column's `_id`, and -- for the
+# route -- the trailing slash, which is what separates `/hog_flows/` on the wire
+# from the `hog_flows.py` module that PATH_RULES may rename freely.
+PRESERVE_IDENT: list[re.Pattern[str]] = [
+    re.compile(r"insights_hogflow[a-z]*"),
+    re.compile(r"system\.hog_flows"),
+    re.compile(r"\bhog_flow_id\b"),
+    re.compile(r"/hog_flows/"),
+]
 
 
-def _rewrite_manifest(s: str) -> str:
+def _hold(s: str, pats: Iterable[re.Pattern[str]]) -> tuple[str, list[str]]:
     held: list[str] = []
 
-    def hold(mm: re.Match[str]) -> str:
+    def take(mm: re.Match[str]) -> str:
         held.append(mm.group(0))
         return f"\0{len(held) - 1}\0"
 
-    for pat in PRESERVE:
-        s = pat.sub(hold, s)
+    for pat in pats:
+        s = pat.sub(take, s)
+    return s, held
+
+
+def rewrite_text(s: str, path: str = "") -> str:
+    s = SELF_URL.sub(SELF_URL_TO, s)
+    # Manifests additionally hold the package identities they have to resolve.
+    holds = [*PRESERVE_IDENT]
+    if os.path.basename(path) in MANIFESTS:
+        holds += PRESERVE
+    s, held = _hold(s, holds)
     for old, new in CONTENT_RULES:
         s = s.replace(old, new)
     for pat, rep in CONTENT_REGEX:
@@ -1153,13 +1176,28 @@ RETIRED: tuple[tuple[re.Pattern[str], str], ...] = (
     # named it after the SQL dialect instead. Refused so the language cannot go
     # back to having two names.
     (re.compile(r"\.iqle?(?![A-Za-z0-9])"), ".script and .scriptc"),
+    # The credential marks. `phc_ phx_ phs_ pha_ phr_ phvt_` all opened with the
+    # upstream's initials, and they were the one piece of its brand a customer
+    # read back to us in every SDK snippet -- unreachable by any word rule,
+    # because `ph` is not a word. A key now opens with what it may touch: `pk-`
+    # if it is safe in a browser, `sk-` if it is not. Refused as a shape rather
+    # than as six strings, so a seventh cannot be coined.
+    #
+    # Declined, and why each is not a credential: `php_` and `phf_` open a
+    # third-party package name (PHP events, the `phf` crate), and `pha_client`
+    # is the analytics client handle.
+    (
+        re.compile(r"(?<![A-Za-z0-9_])ph(?!p_)(?!f_)(?!a_client)[a-z]{1,2}_[A-Za-z0-9]"),
+        "a pk-/sk- mark, minted by insights.models.utils.mint "
+        "(at-/rt-/vt- carry the protocol tokens)",
+    ),
 )
 
 # Coarse enough for POSIX ERE, which has no word boundary. `git grep` narrows
 # 35k tracked files to the few hundred worth opening; RETIRED then says which
 # token matched and where, because a guard that only says "this file is dirty"
 # makes the next person grep for the answer themselves.
-RETIRED_GREP = "hog|HOG|Hog|[.]iql"
+RETIRED_GREP = "hog|HOG|Hog|[.]iql|ph[a-z][a-z]?_"
 
 
 def is_manifest(p: str) -> bool:

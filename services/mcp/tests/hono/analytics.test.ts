@@ -386,7 +386,7 @@ describe('Hono MCP analytics contexts', () => {
                 durationMs: 100,
                 isError: false,
                 input: { first_name: 'Ada', password: 'hunter2', payload: { client_secret: 'oauth-secret' } },
-                output: { id: 1, api_key: 'phx_live_123' },
+                output: { id: 1, api_key: 'sk-live_123' },
             })
 
             const { $ai_input_state, $ai_output_state } = mockCapture.mock.calls[0]![0].properties

@@ -80,7 +80,7 @@ describe('outbound 429 handling', () => {
             return mockFetch
         }
 
-        const buildClient = (): ApiClient => new ApiClient({ apiToken: 'phx_test', baseUrl: 'https://us.hanzo.ai' })
+        const buildClient = (): ApiClient => new ApiClient({ apiToken: 'sk-test', baseUrl: 'https://us.hanzo.ai' })
 
         const expectRateLimitFailure = (result: Result<unknown>): InsightsRateLimitError => {
             expect(result.success).toBe(false)

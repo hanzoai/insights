@@ -108,7 +108,7 @@ class TestRunnerCallsCapturer:
 class TestInsightsDenialCapturer:
     @pytest.fixture
     def capturer(self) -> InsightsDenialCapturer:
-        return InsightsDenialCapturer(api_key="phc_test", host="https://us.i.hanzo.ai")
+        return InsightsDenialCapturer(api_key="pk-test", host="https://us.i.hanzo.ai")
 
     @pytest.mark.parametrize(
         (
