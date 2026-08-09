@@ -1,4 +1,4 @@
-import { DatastoreClient, createClient as createDatastoreClient } from '@datastore/client'
+import { ClickHouseClient as DatastoreClient, createClient as createDatastoreClient } from '@datastore/client'
 import https from 'https'
 import { Counter } from 'prom-client'
 
