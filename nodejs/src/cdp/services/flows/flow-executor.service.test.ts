@@ -168,7 +168,7 @@ describe('Hogflow Executor', () => {
         let flow: Flow
 
         beforeEach(async () => {
-            hogFlow = new FixtureFlowBuilder()
+            flow = new FixtureFlowBuilder()
                 .withWorkflow({
                     actions: {
                         trigger: {
@@ -218,7 +218,7 @@ describe('Hogflow Executor', () => {
             // sits AFTER function_id_1 (which does a fetch), so replay must resume at
             // exit and must NOT re-run that fetch — otherwise a recovered flow re-sends
             // an email/webhook that already went out.
-            const invocation = createExampleFlowInvocation(hogFlow, {
+            const invocation = createExampleFlowInvocation(flow, {
                 event: {
                     ...createHogExecutionGlobals().event,
                     properties: {
@@ -246,7 +246,7 @@ describe('Hogflow Executor', () => {
             // recorded its globals and the resume-point action was deleted, ensureCurrentAction
             // can't find the id. The safe outcome is a finished, errored result — never a
             // restart from the trigger (which would re-send) and never a hang.
-            const invocation = createExampleFlowInvocation(hogFlow, {
+            const invocation = createExampleFlowInvocation(flow, {
                 event: {
                     ...createHogExecutionGlobals().event,
                     properties: {
@@ -269,7 +269,7 @@ describe('Hogflow Executor', () => {
         })
 
         it('can execute a simple hogflow', async () => {
-            const invocation = createExampleFlowInvocation(hogFlow, {
+            const invocation = createExampleFlowInvocation(flow, {
                 event: {
                     ...createHogExecutionGlobals().event,
                     properties: {
@@ -370,31 +370,31 @@ describe('Hogflow Executor', () => {
                 ],
                 metrics: [
                     {
-                        team_id: hogFlow.team_id,
-                        app_source_id: hogFlow.id,
+                        team_id: flow.team_id,
+                        app_source_id: flow.id,
                         metric_kind: 'other',
                         metric_name: 'fetch',
                         count: 1,
                     },
                     {
-                        team_id: hogFlow.team_id,
-                        app_source_id: hogFlow.id,
+                        team_id: flow.team_id,
+                        app_source_id: flow.id,
                         instance_id: 'function_id_1',
                         metric_kind: 'fetch',
                         metric_name: 'billable_invocation',
                         count: 1,
                     },
                     {
-                        team_id: hogFlow.team_id,
-                        app_source_id: hogFlow.id,
+                        team_id: flow.team_id,
+                        app_source_id: flow.id,
                         instance_id: 'function_id_1',
                         metric_kind: 'success',
                         metric_name: 'succeeded',
                         count: 1,
                     },
                     {
-                        team_id: hogFlow.team_id,
-                        app_source_id: hogFlow.id,
+                        team_id: flow.team_id,
+                        app_source_id: flow.id,
                         instance_id: 'exit',
                         metric_kind: 'success',
                         metric_name: 'succeeded',
@@ -405,10 +405,10 @@ describe('Hogflow Executor', () => {
         })
 
         it('can execute a hogflow with async function delays', async () => {
-            const action = hogFlow.actions.find((action) => action.id === 'function_id_1')!
+            const action = flow.actions.find((action) => action.id === 'function_id_1')!
             ;(action.config as any).template_id = 'template-test-hogflow-executor-async'
 
-            const invocation = createExampleFlowInvocation(hogFlow, {
+            const invocation = createExampleFlowInvocation(flow, {
                 event: {
                     ...createHogExecutionGlobals().event,
                     properties: {
@@ -465,12 +465,12 @@ describe('Hogflow Executor', () => {
 
         describe('action filtering', () => {
             beforeEach(() => {
-                const action = hogFlow.actions.find((action) => action.id === 'function_id_1')!
+                const action = flow.actions.find((action) => action.id === 'function_id_1')!
                 action.filters = INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters
             })
 
             it('should only run the action if the provided filters match', async () => {
-                const invocation = createExampleFlowInvocation(hogFlow, {
+                const invocation = createExampleFlowInvocation(flow, {
                     event: {
                         ...createHogExecutionGlobals().event,
                         event: '$pageview',
@@ -495,7 +495,7 @@ describe('Hogflow Executor', () => {
             })
 
             it('should skip the action if the filters do not match', async () => {
-                const invocation = createExampleFlowInvocation(hogFlow, {
+                const invocation = createExampleFlowInvocation(flow, {
                     event: {
                         ...createHogExecutionGlobals().event,
                         event: 'not-a-pageview',
@@ -520,7 +520,7 @@ describe('Hogflow Executor', () => {
 
         describe('executeTest', () => {
             it('executes only a single step at a time', async () => {
-                const invocation = createExampleFlowInvocation(hogFlow, {
+                const invocation = createExampleFlowInvocation(flow, {
                     event: {
                         ...createHogExecutionGlobals().event,
                         properties: {
@@ -563,7 +563,7 @@ describe('Hogflow Executor', () => {
             })
 
             it('surfaces the matcher wake event in the resume log', async () => {
-                const invocation = createExampleFlowInvocation(hogFlow, {
+                const invocation = createExampleFlowInvocation(flow, {
                     event: {
                         ...createHogExecutionGlobals().event,
                         properties: { name: 'Debug User' },
@@ -634,26 +634,26 @@ describe('Hogflow Executor', () => {
                 [
                     'the current action was deleted',
                     (flow: Flow) => {
-                        hogFlow.actions = hogFlow.actions.filter((action) => action.id !== 'delay')
+                        flow.actions = flow.actions.filter((action) => action.id !== 'delay')
                     },
                 ],
                 [
                     'the current action no longer has a continue edge',
                     (flow: Flow) => {
-                        hogFlow.edges = hogFlow.edges.filter((edge) => edge.from !== 'delay')
+                        flow.edges = flow.edges.filter((edge) => edge.from !== 'delay')
                     },
                 ],
             ])('exits gracefully when %s', async (_desc, mutateFlow) => {
-                const hogFlow = buildFlow()
-                const invocation = createExampleFlowInvocation(hogFlow)
+                const flow = buildFlow()
+                const invocation = createExampleFlowInvocation(flow)
                 // Parked on the delay long enough that it has elapsed, so the handler advances
                 invocation.state.currentAction = {
                     id: 'delay',
                     startedAtTimestamp: DateTime.now().minus({ hours: 3 }).toMillis(),
                 }
-                mutateFlow(hogFlow)
+                mutateFlow(flow)
                 // The flow was edited after the run arrived at the step - the live-edit case
-                hogFlow.updated_at = DateTime.now().toMillis()
+                flow.updated_at = DateTime.now().toMillis()
 
                 const result = await executor.execute(invocation)
 
@@ -667,15 +667,15 @@ describe('Hogflow Executor', () => {
             })
 
             it('still fails the run when the graph was malformed all along (no edit since the step started)', async () => {
-                const hogFlow = buildFlow()
-                const invocation = createExampleFlowInvocation(hogFlow)
+                const flow = buildFlow()
+                const invocation = createExampleFlowInvocation(flow)
                 invocation.state.currentAction = {
                     id: 'delay',
                     startedAtTimestamp: DateTime.now().minus({ hours: 3 }).toMillis(),
                 }
-                hogFlow.edges = hogFlow.edges.filter((edge) => edge.from !== 'delay')
+                flow.edges = flow.edges.filter((edge) => edge.from !== 'delay')
                 // No edit since the run arrived: the missing edge is a bad definition, not a live edit
-                hogFlow.updated_at = DateTime.now().minus({ hours: 4 }).toMillis()
+                flow.updated_at = DateTime.now().minus({ hours: 4 }).toMillis()
 
                 const result = await executor.execute(invocation)
 
@@ -690,13 +690,13 @@ describe('Hogflow Executor', () => {
                     flow: Flow,
                     actionId = 'delay'
                 ): ReturnType<typeof createExampleFlowInvocation> => {
-                    const invocation = createExampleFlowInvocation(hogFlow)
+                    const invocation = createExampleFlowInvocation(flow)
                     invocation.state.currentAction = {
                         id: actionId,
                         startedAtTimestamp: DateTime.now().minus({ hours: 3 }).toMillis(),
                     }
-                    hogFlow.actions = hogFlow.actions.filter((action) => action.id !== actionId)
-                    hogFlow.updated_at = DateTime.now().toMillis()
+                    flow.actions = flow.actions.filter((action) => action.id !== actionId)
+                    flow.updated_at = DateTime.now().toMillis()
                     return invocation
                 }
 
@@ -725,15 +725,15 @@ describe('Hogflow Executor', () => {
                 ] as const)(
                     'continues at the surviving successor instead of exiting (parked on %s)',
                     async (_parkType, parkedAction) => {
-                        const hogFlow = createFlow({
+                        const flow = createFlow({
                             actions: { parked: parkedAction as any },
                             edges: [
                                 { from: 'trigger', to: 'parked', type: 'continue' },
                                 { from: 'parked', to: 'exit', type: 'continue' },
                             ],
                         })
-                        const invocation = parkOnDeleted(hogFlow, 'parked')
-                        hogFlow.action_redirects = { parked: 'exit' }
+                        const invocation = parkOnDeleted(flow, 'parked')
+                        flow.action_redirects = { parked: 'exit' }
 
                         const result = await executor.execute(invocation)
 
@@ -752,7 +752,7 @@ describe('Hogflow Executor', () => {
                 it('enters the redirect target fresh, so a delay there parks from redirect time', async () => {
                     // The run spent 3h on the deleted step; the 2h delay it redirects into must still
                     // park for its full 2h rather than treating the old step entry time as its own
-                    const hogFlow = createFlow({
+                    const flow = createFlow({
                         actions: { delay_2: { type: 'delay', config: { delay_duration: '2h' } } },
                         edges: [
                             { from: 'trigger', to: 'delay', type: 'continue' },
@@ -760,8 +760,8 @@ describe('Hogflow Executor', () => {
                             { from: 'delay_2', to: 'exit', type: 'continue' },
                         ],
                     })
-                    const invocation = parkOnDeleted(hogFlow)
-                    hogFlow.action_redirects = { delay: 'delay_2' }
+                    const invocation = parkOnDeleted(flow)
+                    flow.action_redirects = { delay: 'delay_2' }
 
                     const result = await executor.execute(invocation)
 
@@ -775,26 +775,26 @@ describe('Hogflow Executor', () => {
                     [
                         'the dead position has no map entry',
                         (flow: Flow) => {
-                            hogFlow.actions = hogFlow.actions.filter((action) => action.id !== 'delay')
+                            flow.actions = flow.actions.filter((action) => action.id !== 'delay')
                         },
                     ],
                     [
                         'the surviving position lost its edge (map keys are deleted steps only)',
                         (flow: Flow) => {
-                            hogFlow.edges = hogFlow.edges.filter((edge) => edge.from !== 'delay')
+                            flow.edges = flow.edges.filter((edge) => edge.from !== 'delay')
                         },
                     ],
                 ])('still exits gracefully when %s', async (_desc, mutateFlow) => {
-                    const hogFlow = buildFlow()
-                    const invocation = createExampleFlowInvocation(hogFlow)
+                    const flow = buildFlow()
+                    const invocation = createExampleFlowInvocation(flow)
                     invocation.state.currentAction = {
                         id: 'delay',
                         startedAtTimestamp: DateTime.now().minus({ hours: 3 }).toMillis(),
                     }
-                    mutateFlow(hogFlow)
-                    hogFlow.updated_at = DateTime.now().toMillis()
+                    mutateFlow(flow)
+                    flow.updated_at = DateTime.now().toMillis()
                     // An entry for an unrelated deleted step must not capture this run
-                    hogFlow.action_redirects = { some_other_step: 'exit' }
+                    flow.action_redirects = { some_other_step: 'exit' }
 
                     const result = await executor.execute(invocation)
 
@@ -805,16 +805,16 @@ describe('Hogflow Executor', () => {
                 })
 
                 it('never redirects a graph that was malformed all along, even with a map entry', async () => {
-                    const hogFlow = buildFlow()
-                    const invocation = createExampleFlowInvocation(hogFlow)
+                    const flow = buildFlow()
+                    const invocation = createExampleFlowInvocation(flow)
                     invocation.state.currentAction = {
                         id: 'delay',
                         startedAtTimestamp: DateTime.now().minus({ hours: 3 }).toMillis(),
                     }
-                    hogFlow.actions = hogFlow.actions.filter((action) => action.id !== 'delay')
-                    hogFlow.action_redirects = { delay: 'exit' }
+                    flow.actions = flow.actions.filter((action) => action.id !== 'delay')
+                    flow.action_redirects = { delay: 'exit' }
                     // No edit since the run arrived: the timestamp guard must run before any redirect
-                    hogFlow.updated_at = DateTime.now().minus({ hours: 4 }).toMillis()
+                    flow.updated_at = DateTime.now().minus({ hours: 4 }).toMillis()
 
                     const result = await executor.execute(invocation)
 
@@ -832,7 +832,7 @@ describe('Hogflow Executor', () => {
                     // longer classifies as a live edit - it must surface as a plain failure. Uses a
                     // trigger target so the dead end throws synchronously on entry (a delay would
                     // park first and only fail on the next wake, which one execute() can't observe).
-                    const hogFlow = createFlow({
+                    const flow = createFlow({
                         actions: { hop: { type: 'trigger', config: { type: 'schedule' } } },
                         edges: [
                             { from: 'trigger', to: 'delay', type: 'continue' },
@@ -840,9 +840,9 @@ describe('Hogflow Executor', () => {
                             { from: 'hop', to: 'exit', type: 'continue' },
                         ],
                     })
-                    const invocation = parkOnDeleted(hogFlow)
-                    hogFlow.edges = hogFlow.edges.filter((edge) => edge.from !== 'hop')
-                    hogFlow.action_redirects = { delay: 'hop' }
+                    const invocation = parkOnDeleted(flow)
+                    flow.edges = flow.edges.filter((edge) => edge.from !== 'hop')
+                    flow.action_redirects = { delay: 'hop' }
 
                     const result = await executor.execute(invocation)
 
@@ -865,7 +865,7 @@ describe('Hogflow Executor', () => {
                 actionId: string,
                 agoMs: number
             ): ReturnType<typeof createExampleFlowInvocation> => {
-                const invocation = createExampleFlowInvocation(hogFlow)
+                const invocation = createExampleFlowInvocation(flow)
                 invocation.state.currentAction = {
                     id: actionId,
 
@@ -874,9 +874,9 @@ describe('Hogflow Executor', () => {
                 return invocation
             }
 
-            const editFlow = (flow: Flow, mutate: (flow: Flow) => void): void => {
-                mutate(hogFlow)
-                hogFlow.updated_at = DateTime.now().toMillis()
+            const editFlow = (flow: Flow, mutate: (draft: Flow) => void): void => {
+                mutate(flow)
+                flow.updated_at = DateTime.now().toMillis()
             }
 
             describe('delay duration edits', () => {
@@ -914,10 +914,10 @@ describe('Hogflow Executor', () => {
                         expectedParkOffsetMs: 7 * 24 * 60 * 60 * 1000,
                     },
                 ])('$name', async ({ initial, edited, parkedAgo, expectedParkOffsetMs }) => {
-                    const hogFlow = buildDelayFlow(initial)
-                    const invocation = parkAt(hogFlow, 'delay', Duration.fromObject(parkedAgo).toMillis())
-                    editFlow(hogFlow, (flow) => {
-                        const delayAction = flow.actions.find((a) => a.id === 'delay')!
+                    const flow = buildDelayFlow(initial)
+                    const invocation = parkAt(flow, 'delay', Duration.fromObject(parkedAgo).toMillis())
+                    editFlow(flow, (draft) => {
+                        const delayAction = draft.actions.find((a) => a.id === 'delay')!
                         ;(delayAction.config as any).delay_duration = edited
                     })
 
@@ -963,10 +963,10 @@ describe('Hogflow Executor', () => {
                     },
                 ])('$name', async ({ edited, expectedParkIso }) => {
                     // Parked on a window that is closed at the fixed test time
-                    const hogFlow = buildWindowFlow({ time: ['10:00', '11:00'], day: 'any', timezone: 'UTC' })
-                    const invocation = parkAt(hogFlow, 'window', 60 * 60 * 1000)
-                    editFlow(hogFlow, (flow) => {
-                        const windowAction = flow.actions.find((a) => a.id === 'window')!
+                    const flow = buildWindowFlow({ time: ['10:00', '11:00'], day: 'any', timezone: 'UTC' })
+                    const invocation = parkAt(flow, 'window', 60 * 60 * 1000)
+                    editFlow(flow, (draft) => {
+                        const windowAction = draft.actions.find((a) => a.id === 'window')!
                         windowAction.config = edited as any
                     })
 
@@ -995,7 +995,7 @@ describe('Hogflow Executor', () => {
                     })
 
                 const addDelayAction = (flow: Flow, id: string): void => {
-                    hogFlow.actions.push({
+                    flow.actions.push({
                         id,
                         name: id,
                         description: id,
@@ -1008,12 +1008,12 @@ describe('Hogflow Executor', () => {
                 }
 
                 it('a step inserted after the run position executes when reached (live edges are followed)', async () => {
-                    const hogFlow = buildFlow()
+                    const flow = buildFlow()
                     // Parked on the (2h) delay long enough that it advances on wake
-                    const invocation = parkAt(hogFlow, 'delay', 3 * 60 * 60 * 1000)
-                    editFlow(hogFlow, (flow) => {
-                        addDelayAction(flow, 'delay_b')
-                        flow.edges = [
+                    const invocation = parkAt(flow, 'delay', 3 * 60 * 60 * 1000)
+                    editFlow(flow, (draft) => {
+                        addDelayAction(draft, 'delay_b')
+                        draft.edges = [
                             { from: 'trigger', to: 'delay', type: 'continue' },
                             { from: 'delay', to: 'delay_b', type: 'continue' },
                             { from: 'delay_b', to: 'exit', type: 'continue' },
@@ -1031,11 +1031,11 @@ describe('Hogflow Executor', () => {
                 })
 
                 it('a step inserted behind the run position never executes for it (the past does not re-run)', async () => {
-                    const hogFlow = buildFlow()
-                    const invocation = parkAt(hogFlow, 'delay', 3 * 60 * 60 * 1000)
-                    editFlow(hogFlow, (flow) => {
-                        addDelayAction(flow, 'delay_early')
-                        flow.edges = [
+                    const flow = buildFlow()
+                    const invocation = parkAt(flow, 'delay', 3 * 60 * 60 * 1000)
+                    editFlow(flow, (draft) => {
+                        addDelayAction(draft, 'delay_early')
+                        draft.edges = [
                             { from: 'trigger', to: 'delay_early', type: 'continue' },
                             { from: 'delay_early', to: 'delay', type: 'continue' },
                             { from: 'delay', to: 'exit', type: 'continue' },
@@ -1065,7 +1065,7 @@ describe('Hogflow Executor', () => {
                     inputs_schema: [{ key: 'name', type: 'string', required: true }],
                 })
 
-                const hogFlow = createFlow({
+                const flow = createFlow({
                     actions: {
                         function_1: {
                             type: 'function',
@@ -1083,7 +1083,7 @@ describe('Hogflow Executor', () => {
                     ],
                 })
 
-                const invocation = createExampleFlowInvocation(hogFlow)
+                const invocation = createExampleFlowInvocation(flow)
 
                 // First execution renders the inputs and pauses inside the function at the fetch
                 const pausedResult = await executor.execute(invocation)
@@ -1092,11 +1092,11 @@ describe('Hogflow Executor', () => {
                 expect(pausedResult.logs.map((l) => l.message).join('\n')).toContain('Rendered as, Original')
 
                 // Edit the input while the run is paused inside the step
-                editFlow(hogFlow, (flow) => {
-                    const action = flow.actions.find((a) => a.id === 'function_1')!
+                editFlow(flow, (draft) => {
+                    const action = draft.actions.find((a) => a.id === 'function_1')!
                     ;(action.config as any).inputs.name.value = 'Edited'
                 })
-                ;(hogFlow.actions.find((a) => a.id === 'function_1')!.config as any).inputs.name.bytecode =
+                ;(flow.actions.find((a) => a.id === 'function_1')!.config as any).inputs.name.bytecode =
                     await compileHog(`return 'Edited'`)
 
                 // The continuation completes as prepared: inputs were rendered at step entry
@@ -1116,14 +1116,14 @@ describe('Hogflow Executor', () => {
             // only safe while these hold.
             describe('early wakes (reschedule sweep contract)', () => {
                 it('a delay woken early with unchanged config re-parks at its original target', async () => {
-                    const hogFlow = createFlow({
+                    const flow = createFlow({
                         actions: { delay: { type: 'delay', config: { delay_duration: '7d' } } },
                         edges: [
                             { from: 'trigger', to: 'delay', type: 'continue' },
                             { from: 'delay', to: 'exit', type: 'continue' },
                         ],
                     })
-                    const invocation = parkAt(hogFlow, 'delay', Duration.fromObject({ days: 2 }).toMillis())
+                    const invocation = parkAt(flow, 'delay', Duration.fromObject({ days: 2 }).toMillis())
 
                     const result = await executor.execute(invocation)
 
@@ -1136,7 +1136,7 @@ describe('Hogflow Executor', () => {
 
                 it('a time window woken early with unchanged config re-parks at the original window start', async () => {
                     // The window is closed at the fixed test time (2025-01-01T00:00:00Z)
-                    const hogFlow = createFlow({
+                    const flow = createFlow({
                         actions: {
                             window: {
                                 type: 'wait_until_time_window',
@@ -1148,7 +1148,7 @@ describe('Hogflow Executor', () => {
                             { from: 'window', to: 'exit', type: 'continue' },
                         ],
                     })
-                    const invocation = parkAt(hogFlow, 'window', 60 * 60 * 1000)
+                    const invocation = parkAt(flow, 'window', 60 * 60 * 1000)
 
                     const result = await executor.execute(invocation)
 
@@ -1158,16 +1158,16 @@ describe('Hogflow Executor', () => {
                 })
 
                 it("a step whose type changed while a run was parked on it runs the new type's handler on wake", async () => {
-                    const hogFlow = createFlow({
+                    const flow = createFlow({
                         actions: { delay: { type: 'delay', config: { delay_duration: '7d' } } },
                         edges: [
                             { from: 'trigger', to: 'delay', type: 'continue' },
                             { from: 'delay', to: 'exit', type: 'continue' },
                         ],
                     })
-                    const invocation = parkAt(hogFlow, 'delay', Duration.fromObject({ days: 2 }).toMillis())
-                    editFlow(hogFlow, (flow) => {
-                        const action = flow.actions.find((a) => a.id === 'delay')!
+                    const invocation = parkAt(flow, 'delay', Duration.fromObject({ days: 2 }).toMillis())
+                    editFlow(flow, (draft) => {
+                        const action = draft.actions.find((a) => a.id === 'delay')!
                         action.type = 'wait_until_time_window'
                         action.config = { time: 'any', day: 'any', timezone: 'UTC' } as any
                     })
@@ -1187,7 +1187,7 @@ describe('Hogflow Executor', () => {
 
             beforeEach(async () => {
                 // Setup: exit if person no longer matches trigger filters
-                hogFlow = new FixtureFlowBuilder()
+                flow = new FixtureFlowBuilder()
                     .withExitCondition('exit_only_at_end')
                     .withWorkflow({
                         actions: {
@@ -1224,7 +1224,7 @@ describe('Hogflow Executor', () => {
             })
 
             it('should not exit early if exit condition is exit_only_at_end', async () => {
-                const invocation = createExampleFlowInvocation(hogFlow, {
+                const invocation = createExampleFlowInvocation(flow, {
                     event: {
                         ...createHogExecutionGlobals().event,
                         event: '$pageview',
@@ -1243,7 +1243,7 @@ describe('Hogflow Executor', () => {
                     'succeeded',
                 ])
 
-                const invocation2 = createExampleFlowInvocation(hogFlow, {
+                const invocation2 = createExampleFlowInvocation(flow, {
                     event: {
                         ...createHogExecutionGlobals().event,
                         event: 'not-a-pageview',
@@ -1264,8 +1264,8 @@ describe('Hogflow Executor', () => {
             })
 
             it('should exit early if exit condition is exit_on_conversion', async () => {
-                hogFlow.exit_condition = 'exit_on_conversion'
-                hogFlow.conversion = {
+                flow.exit_condition = 'exit_on_conversion'
+                flow.conversion = {
                     filters: [
                         {
                             key: '$browser',
@@ -1280,7 +1280,7 @@ describe('Hogflow Executor', () => {
 
                 // Person does not match conversion filters yet
                 const invocation = createExampleFlowInvocation(
-                    hogFlow,
+                    flow,
                     {
                         event: {
                             ...createHogExecutionGlobals().event,
@@ -1306,7 +1306,7 @@ describe('Hogflow Executor', () => {
                 ])
 
                 const invocation2 = createExampleFlowInvocation(
-                    hogFlow,
+                    flow,
                     {
                         event: {
                             ...createHogExecutionGlobals().event,
@@ -1332,13 +1332,13 @@ describe('Hogflow Executor', () => {
             })
 
             it('should exit early if exit condition is exit_on_trigger_not_matched', async () => {
-                hogFlow.exit_condition = 'exit_on_trigger_not_matched'
-                hogFlow.trigger = {
+                flow.exit_condition = 'exit_on_trigger_not_matched'
+                flow.trigger = {
                     type: 'event',
                     filters: INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters ?? {},
                 }
 
-                const invocation1 = createExampleFlowInvocation(hogFlow, {
+                const invocation1 = createExampleFlowInvocation(flow, {
                     event: {
                         ...createHogExecutionGlobals().event,
                         event: '$pageview',
@@ -1355,7 +1355,7 @@ describe('Hogflow Executor', () => {
                     'succeeded',
                 ])
 
-                const invocation2 = createExampleFlowInvocation(hogFlow, {
+                const invocation2 = createExampleFlowInvocation(flow, {
                     event: {
                         ...createHogExecutionGlobals().event,
                         event: '$not-a-pageview',
@@ -1375,12 +1375,12 @@ describe('Hogflow Executor', () => {
 
             it('should exit early if exit condition is exit_on_trigger_not_matched_or_conversion', async () => {
                 // Setup: exit if person no longer matches trigger filters or person matches conversion filters
-                hogFlow.exit_condition = 'exit_on_trigger_not_matched_or_conversion'
-                hogFlow.trigger = {
+                flow.exit_condition = 'exit_on_trigger_not_matched_or_conversion'
+                flow.trigger = {
                     type: 'event',
                     filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters ?? {},
                 }
-                hogFlow.conversion = {
+                flow.conversion = {
                     filters: [
                         {
                             key: '$browser',
@@ -1395,7 +1395,7 @@ describe('Hogflow Executor', () => {
 
                 // Person does not match conversion filters yet
                 const invocation = createExampleFlowInvocation(
-                    hogFlow,
+                    flow,
                     {
                         event: {
                             ...createHogExecutionGlobals().event,
@@ -1421,7 +1421,7 @@ describe('Hogflow Executor', () => {
                 ])
 
                 const invocation2 = createExampleFlowInvocation(
-                    hogFlow,
+                    flow,
                     {
                         event: {
                             ...createHogExecutionGlobals().event,
@@ -1448,15 +1448,15 @@ describe('Hogflow Executor', () => {
             })
 
             it('counts a property-based conversion without exiting when exit condition is exit_only_at_end', async () => {
-                hogFlow.exit_condition = 'exit_only_at_end'
-                hogFlow.conversion = {
+                flow.exit_condition = 'exit_only_at_end'
+                flow.conversion = {
                     filters: [{ key: '$browser', type: 'person', value: ['Chrome'], operator: 'exact' }],
                     bytecode: ['_H', 1, 32, 'Chrome', 32, '$browser', 32, 'properties', 32, 'person', 1, 3, 11],
                     window_minutes: null,
                 }
 
                 const invocation = createExampleFlowInvocation(
-                    hogFlow,
+                    flow,
                     {
                         event: {
                             ...createHogExecutionGlobals().event,
@@ -1485,23 +1485,23 @@ describe('Hogflow Executor', () => {
                 expect(conversionEvents[0]).toMatchObject({
                     distinct_id: 'distinct_id',
                     properties: {
-                        $workflow_id: hogFlow.id,
-                        $workflow_version: hogFlow.version,
+                        $workflow_id: flow.id,
+                        $workflow_version: flow.version,
                         $workflow_conversion_type: 'property',
                     },
                 })
             })
 
             it('does not re-count a property-based conversion on a resume that already counted', async () => {
-                hogFlow.exit_condition = 'exit_only_at_end'
-                hogFlow.conversion = {
+                flow.exit_condition = 'exit_only_at_end'
+                flow.conversion = {
                     filters: [{ key: '$browser', type: 'person', value: ['Chrome'], operator: 'exact' }],
                     bytecode: ['_H', 1, 32, 'Chrome', 32, '$browser', 32, 'properties', 32, 'person', 1, 3, 11],
                     window_minutes: null,
                 }
 
                 const invocation = createExampleFlowInvocation(
-                    hogFlow,
+                    flow,
                     {
                         event: {
                             ...createHogExecutionGlobals().event,
@@ -1520,17 +1520,17 @@ describe('Hogflow Executor', () => {
             })
 
             it('does not count event-based conversions in the executor (counted by the matcher)', async () => {
-                hogFlow.exit_condition = 'exit_only_at_end'
+                flow.exit_condition = 'exit_only_at_end'
                 // Event-based conversion goal: no property filters/bytecode, so the executor's
                 // property path never matches. The matcher flags the run via conversionMatched.
-                hogFlow.conversion = {
+                flow.conversion = {
                     filters: [],
                     bytecode: [],
                     window_minutes: null,
                     events: [{ filters: { bytecode: ['_H', 1, 29] } }],
                 }
 
-                const invocation = createExampleFlowInvocation(hogFlow, {
+                const invocation = createExampleFlowInvocation(flow, {
                     event: {
                         ...createHogExecutionGlobals().event,
                         event: '$pageview',
@@ -1550,7 +1550,7 @@ describe('Hogflow Executor', () => {
             describe('on_error handling', () => {
                 let flow: Flow
                 beforeEach(async () => {
-                    hogFlow = new FixtureFlowBuilder()
+                    flow = new FixtureFlowBuilder()
                         .withWorkflow({
                             actions: {
                                 trigger: {
@@ -1598,7 +1598,7 @@ describe('Hogflow Executor', () => {
 
                 describe('execute error handling when error is returned, not thrown', () => {
                     it('continues to next action when on_error is continue', async () => {
-                        const action = hogFlow.actions.find((a) => a.id === 'function_id_1')!
+                        const action = flow.actions.find((a) => a.id === 'function_id_1')!
                         action.on_error = 'continue'
 
                         // Mock the handler to return an error in the result
@@ -1607,7 +1607,7 @@ describe('Hogflow Executor', () => {
                             error: new Error('Mocked handler error'),
                         })
 
-                        const invocation = createExampleFlowInvocation(hogFlow, {
+                        const invocation = createExampleFlowInvocation(flow, {
                             event: {
                                 ...createHogExecutionGlobals().event,
                                 properties: { name: 'Test User' },
@@ -1634,7 +1634,7 @@ describe('Hogflow Executor', () => {
                     })
 
                     it('does NOT continue to next action when on_error is abort', async () => {
-                        const action = hogFlow.actions.find((a) => a.id === 'function_id_1')!
+                        const action = flow.actions.find((a) => a.id === 'function_id_1')!
                         action.on_error = 'abort'
 
                         // Mock the handler to return an error in the result
@@ -1643,7 +1643,7 @@ describe('Hogflow Executor', () => {
                             error: new Error('Mocked handler error'),
                         })
 
-                        const invocation = createExampleFlowInvocation(hogFlow, {
+                        const invocation = createExampleFlowInvocation(flow, {
                             event: {
                                 ...createHogExecutionGlobals().event,
                                 properties: { name: 'Test User' },
@@ -1677,7 +1677,7 @@ describe('Hogflow Executor', () => {
                         expect(loggerErrorSpy).toHaveBeenCalledWith(
                             '🦔',
                             expect.stringContaining(
-                                `[FlowExecutor] Error executing script flow ${hogFlow.id} - ${hogFlow.name}. Event: '`
+                                `[FlowExecutor] Error executing script flow ${flow.id} - ${flow.name}. Event: '`
                             ),
                             expect.any(Error)
                         )
@@ -1853,8 +1853,8 @@ describe('Hogflow Executor', () => {
             it.each(cases)(
                 'should run %s action',
                 async (actionId, simpleFlow, { nextActionId, finished, scheduledAt }) => {
-                    const hogFlow = createFlow(simpleFlow)
-                    const invocation = createExampleFlowInvocation(hogFlow, {
+                    const flow = createFlow(simpleFlow)
+                    const invocation = createExampleFlowInvocation(flow, {
                         event: {
                             ...createHogExecutionGlobals().event,
                             event: '$pageview',
@@ -1883,7 +1883,7 @@ describe('Hogflow Executor', () => {
 
         describe('capturedInsightsEvents', () => {
             it('should collect capturedInsightsEvents from script function actions', async () => {
-                const hogFlow = createFlow({
+                const flow = createFlow({
                     actions: {
                         capture_function: {
                             type: 'function',
@@ -1920,7 +1920,7 @@ describe('Hogflow Executor', () => {
                     ],
                 })
 
-                const invocation = createExampleFlowInvocation(hogFlow, {
+                const invocation = createExampleFlowInvocation(flow, {
                     event: {
                         ...createHogExecutionGlobals().event,
                         properties: { user_name: 'Test User', value: 'test-value-123' },
@@ -1946,7 +1946,7 @@ describe('Hogflow Executor', () => {
             })
 
             it('should collect capturedInsightsEvents from multiple script function actions', async () => {
-                const hogFlow = createFlow({
+                const flow = createFlow({
                     actions: {
                         capture_function_1: {
                             type: 'function',
@@ -1994,7 +1994,7 @@ describe('Hogflow Executor', () => {
                     ],
                 })
 
-                const invocation = createExampleFlowInvocation(hogFlow)
+                const invocation = createExampleFlowInvocation(flow)
 
                 const result = await executor.execute(invocation)
 
@@ -2020,7 +2020,7 @@ describe('Hogflow Executor', () => {
         let flow: Flow
 
         beforeEach(async () => {
-            hogFlow = new FixtureFlowBuilder()
+            flow = new FixtureFlowBuilder()
                 .withWorkflow({
                     actions: {
                         trigger: {
@@ -2090,7 +2090,7 @@ describe('Hogflow Executor', () => {
                 },
             })
 
-            const result = await executor.buildFlowInvocations([hogFlow], globals)
+            const result = await executor.buildFlowInvocations([flow], globals)
 
             // Should not match because email contains @hanzo.ai
             expect(result.invocations).toHaveLength(0)
@@ -2100,7 +2100,7 @@ describe('Hogflow Executor', () => {
             expect(result.metrics).toEqual([
                 expect.objectContaining({
                     metric_name: 'filtered',
-                    app_source_version: { id: hogFlow.id, version: hogFlow.version },
+                    app_source_version: { id: flow.id, version: flow.version },
                 }),
             ])
         })
@@ -2129,11 +2129,11 @@ describe('Hogflow Executor', () => {
                 },
             })
 
-            const result = await executor.buildFlowInvocations([hogFlow], globals)
+            const result = await executor.buildFlowInvocations([flow], globals)
 
             // Should match because email doesn't contain @hanzo.ai
             expect(result.invocations).toHaveLength(1)
-            expect(result.invocations[0].flow.id).toBe(hogFlow.id)
+            expect(result.invocations[0].flow.id).toBe(flow.id)
         })
     })
 
@@ -2143,7 +2143,7 @@ describe('Hogflow Executor', () => {
         // assert that when a warehouse-trigger flow with always-true filters is handed to the
         // executor with warehouse-row globals, an invocation is produced.
         it('builds an invocation when filter bytecode evaluates true for warehouse-row globals', async () => {
-            const hogFlow = new FixtureFlowBuilder()
+            const flow = new FixtureFlowBuilder()
                 .withSimpleWorkflow({
                     trigger: {
                         type: 'data-warehouse-table',
@@ -2165,10 +2165,10 @@ describe('Hogflow Executor', () => {
                 },
             })
 
-            const result = await executor.buildFlowInvocations([hogFlow], globals)
+            const result = await executor.buildFlowInvocations([flow], globals)
 
             expect(result.invocations).toHaveLength(1)
-            expect(result.invocations[0].flow.id).toBe(hogFlow.id)
+            expect(result.invocations[0].flow.id).toBe(flow.id)
         })
     })
 
@@ -2195,7 +2195,7 @@ describe('Hogflow Executor', () => {
                 .build()
 
             // Set variables directly with required fields
-            hogFlow.variables = [
+            flow.variables = [
                 { key: 'foo', default: 'bar', type: 'string', label: 'foo' },
                 { key: 'baz', default: 123, type: 'number', label: 'baz' },
                 { key: 'overrideMe', default: 'defaultValue', type: 'string', label: 'overrideMe' },
@@ -2218,7 +2218,7 @@ describe('Hogflow Executor', () => {
                     extra: 'shouldBeIncluded',
                 },
             }
-            const invocation = createFlowInvocation(globals, hogFlow, {} as any)
+            const invocation = createFlowInvocation(globals, flow, {} as any)
             expect(invocation.state.variables).toEqual({
                 foo: 'bar',
                 baz: 123,
@@ -2264,7 +2264,7 @@ describe('Hogflow Executor', () => {
                 groups,
             }
 
-            const invocation = createFlowInvocation(globals, hogFlow, {} as any)
+            const invocation = createFlowInvocation(globals, flow, {} as any)
 
             expect(invocation.groups).toEqual(groups)
         })
@@ -2316,7 +2316,7 @@ describe('Hogflow Executor', () => {
         })
 
         const executeToCompletion = async (flow: Flow) => {
-            const invocation = createExampleFlowInvocation(hogFlow, {
+            const invocation = createExampleFlowInvocation(flow, {
                 event: {
                     ...createHogExecutionGlobals().event,
                     properties: { name: 'Test' },
@@ -2330,63 +2330,63 @@ describe('Hogflow Executor', () => {
         }
 
         it('stores full result in variable with single object output_variable', async () => {
-            const hogFlow = await flowBuilder({ key: 'response', result_path: null })
-            const result = await executeToCompletion(hogFlow)
+            const flow = await flowBuilder({ key: 'response', result_path: null })
+            const result = await executeToCompletion(flow)
 
             expect(result.invocation.state.variables?.response).toBeDefined()
             expect(result.invocation.state.variables?.response).toHaveProperty('status', 200)
         })
 
         it('stores extracted value via result_path', async () => {
-            const hogFlow = await flowBuilder({ key: 'http_status', result_path: 'status' })
-            const result = await executeToCompletion(hogFlow)
+            const flow = await flowBuilder({ key: 'http_status', result_path: 'status' })
+            const result = await executeToCompletion(flow)
 
             expect(result.invocation.state.variables).toEqual({ http_status: 200 })
         })
 
         it('stores multiple variables from array output_variable', async () => {
-            const hogFlow = await flowBuilder([
+            const flow = await flowBuilder([
                 { key: 'http_status', result_path: 'status' },
                 { key: 'response_body', result_path: 'body' },
             ])
-            const result = await executeToCompletion(hogFlow)
+            const result = await executeToCompletion(flow)
 
             expect(result.invocation.state.variables?.http_status).toBe(200)
             expect(result.invocation.state.variables?.response_body).toBeDefined()
         })
 
         it('spreads object result into prefixed variables', async () => {
-            const hogFlow = await flowBuilder({ key: 'resp', result_path: 'body', spread: true })
-            const result = await executeToCompletion(hogFlow)
+            const flow = await flowBuilder({ key: 'resp', result_path: 'body', spread: true })
+            const result = await executeToCompletion(flow)
 
             // body is { status: 200 } so spread should create resp_status
             expect(result.invocation.state.variables?.resp_status).toBe(200)
         })
 
         it('skips entries with empty key in array form', async () => {
-            const hogFlow = await flowBuilder([
+            const flow = await flowBuilder([
                 { key: '', result_path: 'status' },
                 { key: 'http_status', result_path: 'status' },
             ])
-            const result = await executeToCompletion(hogFlow)
+            const result = await executeToCompletion(flow)
 
             expect(result.invocation.state.variables).toEqual({ http_status: 200 })
         })
 
         it('does nothing when output_variable is undefined', async () => {
-            const hogFlow = await flowBuilder(undefined)
-            const result = await executeToCompletion(hogFlow)
+            const flow = await flowBuilder(undefined)
+            const result = await executeToCompletion(flow)
 
             expect(result.invocation.state.variables).toBeUndefined()
         })
 
         it('errors and exits when total variable size exceeds 5KB with on_error=abort', async () => {
-            const hogFlow = await flowBuilder({ key: 'response', result_path: null })
+            const flow = await flowBuilder({ key: 'response', result_path: null })
             // Set action to abort on error
-            const action = hogFlow.actions.find((a) => a.id === 'action_1')!
+            const action = flow.actions.find((a) => a.id === 'action_1')!
             action.on_error = 'abort'
 
-            const invocation = createExampleFlowInvocation(hogFlow, {
+            const invocation = createExampleFlowInvocation(flow, {
                 event: {
                     ...createHogExecutionGlobals().event,
                     properties: { name: 'Test' },
@@ -2405,8 +2405,8 @@ describe('Hogflow Executor', () => {
         })
 
         it('errors but continues when total variable size exceeds 5KB with on_error=continue', async () => {
-            const hogFlow = await flowBuilder({ key: 'response', result_path: null })
-            const invocation = createExampleFlowInvocation(hogFlow, {
+            const flow = await flowBuilder({ key: 'response', result_path: null })
+            const invocation = createExampleFlowInvocation(flow, {
                 event: {
                     ...createHogExecutionGlobals().event,
                     properties: { name: 'Test' },
@@ -2435,7 +2435,7 @@ describe('Hogflow Executor', () => {
                 inputs_schema: [],
             })
 
-            const hogFlow = new FixtureFlowBuilder()
+            const flow = new FixtureFlowBuilder()
                 .withWorkflow({
                     actions: {
                         trigger: {
@@ -2465,7 +2465,7 @@ describe('Hogflow Executor', () => {
                 })
                 .build()
 
-            const result = await executeToCompletion(hogFlow)
+            const result = await executeToCompletion(flow)
 
             // No variables should be set since no result was produced
             expect(result.invocation.state.variables).toBeUndefined()
@@ -2542,7 +2542,7 @@ describe('Hogflow Executor', () => {
             })
 
             // Create a workflow with 2 regular script function actions and 2 email actions
-            const hogFlow = createFlow({
+            const flow = createFlow({
                 actions: {
                     function_1: {
                         type: 'function',
@@ -2616,7 +2616,7 @@ describe('Hogflow Executor', () => {
                 ],
             })
 
-            const invocation = createExampleFlowInvocation(hogFlow, {
+            const invocation = createExampleFlowInvocation(flow, {
                 event: {
                     ...createHogExecutionGlobals().event,
                     event: '$pageview',
@@ -2692,7 +2692,7 @@ describe('Hogflow Executor', () => {
                 ],
             })
 
-            const hogFlow = new FixtureFlowBuilder()
+            const flow = new FixtureFlowBuilder()
                 .withTeamId(team.id)
                 .withExitCondition('exit_only_at_end')
                 .withWorkflow({
@@ -2729,7 +2729,7 @@ describe('Hogflow Executor', () => {
                 })
                 .build()
 
-            const invocation = createExampleFlowInvocation(hogFlow, {
+            const invocation = createExampleFlowInvocation(flow, {
                 event: {
                     ...createHogExecutionGlobals().event,
                     event: '$pageview',
@@ -2786,7 +2786,7 @@ describe('Hogflow Executor', () => {
                 ],
             })
 
-            const hogFlow = new FixtureFlowBuilder()
+            const flow = new FixtureFlowBuilder()
                 .withTeamId(team.id)
                 .withExitCondition('exit_only_at_end')
                 .withWorkflow({
@@ -2827,7 +2827,7 @@ describe('Hogflow Executor', () => {
                 })
                 .build()
 
-            const invocation = createExampleFlowInvocation(hogFlow, {
+            const invocation = createExampleFlowInvocation(flow, {
                 event: {
                     ...createHogExecutionGlobals().event,
                     event: '$pageview',
@@ -2835,13 +2835,13 @@ describe('Hogflow Executor', () => {
             })
 
             // Step 1: Hogflow worker executes (queue !== 'email') — should route to email queue
-            const hogflowResult = await executor.execute(invocation)
-            expect(hogflowResult.finished).toBe(false)
-            expect(hogflowResult.invocation.queue).toBe('email')
-            expect(hogflowResult.invocation.queueParameters?.type).toBe('email')
+            const flowResult = await executor.execute(invocation)
+            expect(flowResult.finished).toBe(false)
+            expect(flowResult.invocation.queue).toBe('email')
+            expect(flowResult.invocation.queueParameters?.type).toBe('email')
 
             // Step 2: Email worker picks up the job (queue === 'email') — should send inline and continue
-            let emailResult = await executor.execute(hogflowResult.invocation)
+            let emailResult = await executor.execute(flowResult.invocation)
             while (!emailResult.finished) {
                 emailResult = await executor.execute(emailResult.invocation)
             }
