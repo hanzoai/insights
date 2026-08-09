@@ -5,9 +5,13 @@ import { Logomark } from 'lib/brand'
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 
 /**
- * Shown when Insights AI (Max) is rendered on a self-hosted instance with no LLM provider key
- * configured. Max runs on Anthropic, so without ANTHROPIC_API_KEY it would otherwise fail at
- * call time — here we tell the user how to enable it instead.
+ * Shown when Insights AI is rendered on an instance that has nowhere to send a request.
+ *
+ * It asked for a vendor key, which is not how this is deployed: the client prefers our own
+ * gateway (see build_async_anthropic_client) and falls back to a direct provider only if one
+ * is set. Pointing people at a vendor sent them to buy a second bill for capacity the
+ * platform already has, so the instructions name the gateway and keep the key as the escape
+ * hatch it is.
  */
 export function MaxNotConfigured(): JSX.Element {
     return (
@@ -21,16 +25,17 @@ export function MaxNotConfigured(): JSX.Element {
                     Insights AI isn't set up yet
                 </h2>
                 <p className="text-sm text-tertiary text-pretty mb-0">
-                    Insights AI runs on your own LLM provider key. Set <code>ANTHROPIC_API_KEY</code> for this instance
-                    and restart Insights to start chatting.
+                    Insights AI needs somewhere to send a request. Point this instance at the Hanzo AI gateway and
+                    restart Insights to start chatting.
                 </p>
             </div>
             <CodeSnippet language={Language.Bash} className="w-full text-left">
-                ANTHROPIC_API_KEY=sk-ant-...
+                {'AI_GATEWAY_URL=https://api.hanzo.ai/v1\nAI_GATEWAY_API_KEY=hk-...'}
             </CodeSnippet>
             <p className="text-sm text-tertiary text-pretty mb-0">
-                On a hobby deploy, add the key to your <code>.env</code> file and run <code>./bin/upgrade-hobby</code>,
-                or set it during install.{' '}
+                A direct provider key (<code>ANTHROPIC_API_KEY</code>) also works and is used when no gateway is set. On
+                a hobby deploy, add either to your <code>.env</code> and run <code>./bin/upgrade-hobby</code>, or set it
+                during install.{' '}
                 <Link
                     to="https://hanzo.ai/docs/self-host/configure/environment-variables?utm_medium=in-product&utm_campaign=max-not-configured"
                     target="_blank"

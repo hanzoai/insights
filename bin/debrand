@@ -94,6 +94,15 @@ CONTENT_RULES: list[tuple[str, str]] = [
     # INSIGHTS_SKIP_MIGRATION_CHECKS, read by bin/migrate-check on the container
     # entrypoint, so getting this wrong stops the container rather than a feature.
     ("POSTHOG", "INSIGHTS"),
+    # The mascot's name shouts too, and for the same two reasons the brand's
+    # does. Left out, `HEDGEHOG` was rewritten by nothing and reached the tree
+    # four times -- an installer message, a stale generated enum member, and
+    # the banner constant in three report scripts whose own comment already
+    # said "mascot". Placed here rather than beside the other spellings below
+    # because `HOG_` overlaps its right edge exactly as it overlaps the
+    # brand's: run second, `HEDGEHOG_MODE` becomes `HEDGEINSIGHTS_MODE`, a
+    # name nothing defines. Same failure, same remedy, same position.
+    ("HEDGEHOG", "MASCOT"),
     # HOG_ names the script engine's constants. Measured against the shipped
     # tree: every HOG_ name that has a counterpart there is spelled INSIGHTS_
     # (HOG_QL -> INSIGHTS_QL, HOG_FUNCTION_TEMPLATES -> INSIGHTS_FUNCTION_TEMPLATES,
@@ -225,6 +234,7 @@ PATH_RULES: list[tuple[str, str]] = [
     ("hogflow", "insightsflow"),
     ("PosthogStories", "InsightsStories"),
     ("personhog", "personinsights"),
+    ("HEDGEHOG", "MASCOT"),
     ("Hedgehog", "Mascot"),
     ("HedgeHog", "Mascot"),
     ("hedgehog", "mascot"),
