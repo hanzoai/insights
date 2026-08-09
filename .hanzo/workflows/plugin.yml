@@ -60,6 +60,8 @@ on:
             - 'common/insights-node/**'
             - 'common/plugin-scaffold/**'
             - 'common/plugin_transpiler/**'
+            - 'common/replay-headless/**'
+            - 'common/replay-shared/**'
             - 'common/scriptvm/typescript/**'
             - 'common/siphash/**'
             - 'Dockerfile.node'

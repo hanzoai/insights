@@ -306,7 +306,7 @@ describe('Hogflow Executor', () => {
                     },
                     id: expect.any(String),
                     teamId: 1,
-                    hogFlow: invocation.hogFlow,
+                    flow: invocation.flow,
                     person: {
                         id: 'person_id',
                         name: 'John Doe',
@@ -316,7 +316,7 @@ describe('Hogflow Executor', () => {
                         url: '',
                     },
                     filterGlobals: expect.any(Object),
-                    functionId: invocation.hogFlow.id,
+                    functionId: invocation.flow.id,
                     queue: 'hogflow',
                     queueMetadata: undefined,
                     queueScheduledAt: undefined,
@@ -2133,7 +2133,7 @@ describe('Hogflow Executor', () => {
 
             // Should match because email doesn't contain @hanzo.ai
             expect(result.invocations).toHaveLength(1)
-            expect(result.invocations[0].hogFlow.id).toBe(hogFlow.id)
+            expect(result.invocations[0].flow.id).toBe(hogFlow.id)
         })
     })
 
@@ -2168,7 +2168,7 @@ describe('Hogflow Executor', () => {
             const result = await executor.buildFlowInvocations([hogFlow], globals)
 
             expect(result.invocations).toHaveLength(1)
-            expect(result.invocations[0].hogFlow.id).toBe(hogFlow.id)
+            expect(result.invocations[0].flow.id).toBe(hogFlow.id)
         })
     })
 

@@ -1,5 +1,5 @@
 import { S3Client, S3ClientConfig } from '@aws-sdk/client-s3'
-import { DatastoreClient, createClient as createDatastoreClient } from '@datastore/client'
+import { ClickHouseClient as DatastoreClient, createClient as createDatastoreClient } from '@datastore/client'
 import https from 'https'
 import express from 'ultimate-express'
 
