@@ -31,8 +31,10 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 # Refresh this far before expiry, so a token never goes stale mid-flight on a
-# call that has already been dispatched.
-_REFRESH_MARGIN_SECONDS = 300
+# call that has already been dispatched. `insights.ingest` decides the same thing
+# about a user's token, and one margin means one answer to "is this worth
+# sending" wherever it is asked.
+REFRESH_MARGIN_SECONDS = 300
 
 # IAM is the identity authority for every request behind this, so a slow IAM must
 # surface as a failed call rather than a stuck worker.
@@ -98,7 +100,7 @@ def service_token(force_refresh: bool = False) -> str:
     global _token, _expires_at
 
     with _lock:
-        if not force_refresh and _token and time.monotonic() < _expires_at - _REFRESH_MARGIN_SECONDS:
+        if not force_refresh and _token and time.monotonic() < _expires_at - REFRESH_MARGIN_SECONDS:
             return _token
         _token, _expires_at = _mint()
         logger.info("iam.service_token_minted")
