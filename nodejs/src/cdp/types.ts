@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import { VMState } from '@hanzo/scriptvm'
 
 import { CyclotronInputType, CyclotronInvocationQueueParametersType } from '~/cdp/schema/cyclotron'
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { Flow } from '~/cdp/schema/flow'
 
 import {
     DatastoreTimestamp,
@@ -112,7 +112,7 @@ export type InsightsFunctionInvocationGlobals = {
     unsubscribe_url_one_click?: string // For email actions, the one-click unsubscribe URL to use
 
     actions?: InsightsFunctionInvocationActionVariables
-    variables?: Record<string, any> // For InsightsFlows, workflow-level variables
+    variables?: Record<string, any> // For Flows, workflow-level variables
 }
 
 /**
@@ -183,7 +183,7 @@ export type InsightsFunctionFilterGlobals = {
         properties: Record<string, any>
     }
 
-    variables: Record<string, any> | undefined // For InsightsFlows, workflow-level variables
+    variables: Record<string, any> | undefined // For Flows, workflow-level variables
 }
 
 export type MetricLogSource = 'insights_function' | 'hog_flow' | 'legacy_plugin'
@@ -254,7 +254,7 @@ export type MinimalAppMetric = {
         | 'exited_workflow_changed'
         | 'redirected_workflow_changed'
     count: number
-    // Key parts for the mirrored version-scoped row: the flow and the `version` of the InsightsFlow row that
+    // Key parts for the mirrored version-scoped row: the flow and the `version` of the Flow row that
     // actually executed the step. Not columns on `app_metrics2` — the monitoring service consumes these
     // to key a row under the `hog_flow_version` app source, and never forwards them to Kafka. Absent
     // means this metric only lands in the version-agnostic series.
@@ -342,15 +342,15 @@ export type CyclotronJobInvocationInsightsFunction = CyclotronJobInvocation & {
     insightsFunction: InsightsFunctionType
 }
 
-export type CyclotronJobInvocationInsightsFlow = CyclotronJobInvocation & {
-    state?: InsightsFlowInvocationContext
-    hogFlow: InsightsFlow
+export type CyclotronJobInvocationFlow = CyclotronJobInvocation & {
+    state?: FlowInvocationContext
+    flow: Flow
     person?: CyclotronPerson
     groups?: InsightsFunctionInvocationGlobals['groups']
     filterGlobals: InsightsFunctionFilterGlobals
 }
 
-export type InsightsFlowInvocationContext = {
+export type FlowInvocationContext = {
     event: InsightsFunctionInvocationGlobals['event']
     personId?: string // Persisted person UUID, used when distinct_id is not available (e.g. batch workflows, manual person triggers)
     // Stamped at enqueue for account-audience batch children: event.distinct_id is the account's
