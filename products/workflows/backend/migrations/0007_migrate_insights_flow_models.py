@@ -100,7 +100,9 @@ class Migration(migrations.Migration):
                 migrations.AlterField(
                     model_name="insightsflowbatchjob",
                     name="insights_flow",
-                    field=models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to="workflows.insightsflow"),
+                    field=models.ForeignKey(
+                        on_delete=django.db.models.deletion.DO_NOTHING, to="workflows.insightsflow"
+                    ),
                 ),
                 migrations.AlterField(
                     model_name="insightsflowschedule",
@@ -211,6 +213,34 @@ class Migration(migrations.Migration):
                     index=models.Index(fields=["team"], name="hogflow_tem_team_id_cb8b2b_idx"),
                 ),
             ],
-            database_operations=[],
+            database_operations=[
+                # This move adopts InsightsFlow declaring `db_table = "insights_hogflow"`,
+                # but it is state-only, so nothing renames the table -- while the squashed
+                # `insights.0001_initial` still creates `insights_flow` on a fresh install.
+                # Building `insights_hogflow` beside it is not an option: index and
+                # constraint names are schema-wide in Postgres, and the old table holds the
+                # ones this model asks for, down to `unique_version_per_flow`.
+                #
+                # Renaming carries those indexes across and lands on the shape production
+                # has -- `insights_hogflow` and no `insights_flow`. It also has to happen
+                # here rather than later, because `0009` through `0012` alter this table and
+                # run for real on a fresh install. The columns they add are exactly the ones
+                # the squashed table lacks.
+                #
+                # Guarded both ways, so it is a no-op once the rename has happened and on
+                # any database that already has the table.
+                migrations.RunSQL(
+                    sql="""
+                    DO $$
+                    BEGIN
+                        IF to_regclass('public.insights_hogflow') IS NULL
+                           AND to_regclass('public.insights_flow') IS NOT NULL THEN
+                            ALTER TABLE insights_flow RENAME TO insights_hogflow;
+                        END IF;
+                    END $$;
+                    """,
+                    reverse_sql=migrations.RunSQL.noop,
+                ),
+            ],
         ),
     ]

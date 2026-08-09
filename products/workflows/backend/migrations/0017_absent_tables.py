@@ -77,6 +77,14 @@ class Migration(migrations.Migration):
                 CreateTableIfNotExists(model_name="insightsflow"),
                 CreateTableIfNotExists(model_name="insightsflowschedule"),
                 CreateTableIfNotExists(model_name="insightsflowrevision"),
+                # `hogflow_templates` is the fourth: `0007` adopts InsightsFlowTemplate
+                # state-only under that name while the squashed `insights.0001_initial`
+                # creates `customflow_templates`, so a fresh install gets neither. Unlike
+                # `insights_hogflow` above it can simply be built -- its indexes are named
+                # for the new table, so the old one is holding nothing it needs -- and
+                # production shows the same, carrying both tables side by side. Nothing
+                # between `0007` and here touches it.
+                CreateTableIfNotExists(model_name="insightsflowtemplate"),
                 # The renamed table arrives with the shape the baseline gave it, which
                 # predates five columns later migrations added — those migrations are
                 # recorded as applied, so nothing will add them now. Skipped where the
