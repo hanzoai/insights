@@ -243,23 +243,6 @@ ALTER TABLE public.insights_personoverridemapping ALTER COLUMN id ADD GENERATED 
     NO MAXVALUE
     CACHE 1
 );
-CREATE TABLE public.insights_task_progress (
-    id uuid NOT NULL,
-    status character varying(20) NOT NULL,
-    current_step character varying(255) NOT NULL,
-    total_steps integer NOT NULL,
-    completed_steps integer NOT NULL,
-    output_log text NOT NULL,
-    error_message text NOT NULL,
-    workflow_id character varying(255) NOT NULL,
-    workflow_run_id character varying(255) NOT NULL,
-    activity_id character varying(255) NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    completed_at timestamp with time zone,
-    task_id uuid NOT NULL,
-    team_id integer NOT NULL
-);
 CREATE TABLE public.insights_task_workflow (
     id uuid NOT NULL,
     name character varying(255) NOT NULL,
@@ -322,8 +305,6 @@ ALTER TABLE ONLY public.insights_personoverride
     ADD CONSTRAINT insights_personoverride_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY public.insights_personoverridemapping
     ADD CONSTRAINT insights_personoverridemapping_pkey PRIMARY KEY (id);
-ALTER TABLE ONLY public.insights_task_progress
-    ADD CONSTRAINT insights_task_progress_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY public.insights_task_workflow
     ADD CONSTRAINT insights_task_workflow_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY public.insights_task_workflow
@@ -367,8 +348,6 @@ CREATE INDEX insights_persondistinctid_person_id_71923cce ON public.insights_per
 CREATE INDEX insights_personoverride_old_person_id_ca0516f1 ON public.insights_personoverride USING btree (old_person_id);
 CREATE INDEX insights_personoverride_override_person_id_ceccd1ef ON public.insights_personoverride USING btree (override_person_id);
 CREATE INDEX insights_personoverride_team_id_cf1a22c0 ON public.insights_personoverride USING btree (team_id);
-CREATE INDEX insights_task_progress_task_id_5b036e8d ON public.insights_task_progress USING btree (task_id);
-CREATE INDEX insights_task_progress_team_id_7c4bed45 ON public.insights_task_progress USING btree (team_id);
 CREATE INDEX insights_task_workflow_team_id_b0074670 ON public.insights_task_workflow USING btree (team_id);
 CREATE INDEX insights_workflow_stage_fallback_stage_id_504d1e08 ON public.insights_workflow_stage USING btree (fallback_stage_id);
 CREATE INDEX insights_workflow_stage_workflow_id_b5825ecf ON public.insights_workflow_stage USING btree (workflow_id);
@@ -424,10 +403,6 @@ ALTER TABLE ONLY public.insights_personoverride
     ADD CONSTRAINT insights_personoverr_old_person_id_ca0516f1_fk_insights_ FOREIGN KEY (old_person_id) REFERENCES public.insights_personoverridemapping(id) DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY public.insights_personoverride
     ADD CONSTRAINT insights_personoverr_override_person_id_ceccd1ef_fk_insights_ FOREIGN KEY (override_person_id) REFERENCES public.insights_personoverridemapping(id) DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE ONLY public.insights_task_progress
-    ADD CONSTRAINT insights_task_progress_task_id_5b036e8d_fk_insights_task_id FOREIGN KEY (task_id) REFERENCES public.insights_task(id) DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE ONLY public.insights_task_progress
-    ADD CONSTRAINT insights_task_progress_team_id_7c4bed45_fk_insights_team_id FOREIGN KEY (team_id) REFERENCES public.insights_team(id) DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY public.insights_task_workflow
     ADD CONSTRAINT insights_task_workflow_team_id_b0074670_fk_insights_team_id FOREIGN KEY (team_id) REFERENCES public.insights_team(id) DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY public.insights_workflow_stage
@@ -452,7 +427,6 @@ DROP TABLE IF EXISTS "insights_persondistinctid" CASCADE;
 DROP TABLE IF EXISTS "insights_personlessdistinctid" CASCADE;
 DROP TABLE IF EXISTS "insights_personoverride" CASCADE;
 DROP TABLE IF EXISTS "insights_personoverridemapping" CASCADE;
-DROP TABLE IF EXISTS "insights_task_progress" CASCADE;
 DROP TABLE IF EXISTS "insights_task_workflow" CASCADE;
 DROP TABLE IF EXISTS "insights_workflow_stage" CASCADE;
 """,
