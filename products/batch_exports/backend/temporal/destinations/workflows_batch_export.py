@@ -48,7 +48,7 @@ NON_RETRYABLE_ERROR_TYPES: list[str] = [
     "BadRequestErrorGroup",
     "InsightsFunctionErrorThresholdExceeded",
 ]
-INSIGHTS_FUNCTION_API_PATH = "/api/projects/{team_id}/insights_functions/{insights_function_id}/batch_export_invocations"
+INSIGHTS_FUNCTION_API_PATH = "/v1/projects/{team_id}/insights_functions/{insights_function_id}/batch_export_invocations"
 
 
 def workflows_default_fields(batch_export_id: str) -> list[BatchExportField]:

@@ -55,7 +55,7 @@ class TestExecuteBridgeQuery(BaseTest):
 
 class TestStreamlitBridgeView(_StreamlitAppsFlagMixin, APIBaseTest):
     def _url(self):
-        return "/api/streamlit_bridge/query/"
+        return "/v1/streamlit_bridge/query/"
 
     def _streamlit_token(self) -> str:
         """Mint a bridge-scoped token. Iframe-scoped tokens are refused by the

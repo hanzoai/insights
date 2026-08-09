@@ -166,12 +166,12 @@ export const groupsModel = kea<groupsModelType>([
                     if (!values.currentProjectId) {
                         return []
                     }
-                    return await api.get(`api/projects/${values.currentProjectId}/groups_types`)
+                    return await api.get(`v1/projects/${values.currentProjectId}/groups_types`)
                 },
                 updateGroupTypesMetadata: async (payload: Array<GroupType>) => {
                     if (values.groupsEnabled) {
                         return await api.update(
-                            `/api/projects/${values.currentProjectId}/groups_types/update_metadata`,
+                            `/v1/projects/${values.currentProjectId}/groups_types/update_metadata`,
                             payload
                         )
                     }
@@ -179,13 +179,13 @@ export const groupsModel = kea<groupsModelType>([
                 },
                 deleteGroupType: async (groupTypeIndex: number) => {
                     if (values.groupsEnabled) {
-                        await api.delete(`/api/projects/${values.currentProjectId}/groups_types/${groupTypeIndex}`)
+                        await api.delete(`/v1/projects/${values.currentProjectId}/groups_types/${groupTypeIndex}`)
                     }
                     return []
                 },
                 createDetailDashboard: async (groupTypeIndex: number) => {
                     const groupType = await api.put(
-                        `/api/projects/${values.currentProjectId}/groups_types/create_detail_dashboard`,
+                        `/v1/projects/${values.currentProjectId}/groups_types/create_detail_dashboard`,
                         { group_type_index: groupTypeIndex }
                     )
                     return values.groupTypesRaw.map((gt) => (gt.group_type_index === groupTypeIndex ? groupType : gt))
@@ -209,7 +209,7 @@ export const groupsModel = kea<groupsModelType>([
                     defaultColumns: string[]
                 }) => {
                     const groupType = await api.put(
-                        `/api/projects/${values.currentProjectId}/groups_types/set_default_columns`,
+                        `/v1/projects/${values.currentProjectId}/groups_types/set_default_columns`,
                         { group_type_index: groupTypeIndex, default_columns: defaultColumns }
                     )
                     return values.groupTypesRaw.map((gt) => (gt.group_type_index === groupTypeIndex ? groupType : gt))

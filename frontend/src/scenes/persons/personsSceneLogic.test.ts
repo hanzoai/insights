@@ -19,7 +19,7 @@ describe('personsSceneLogic', () => {
     beforeEach(() => {
         useMocks({
             post: {
-                '/api/environments/:team_id/persons/reset_person_distinct_id/': [200, {}],
+                '/v1/environments/:team_id/persons/reset_person_distinct_id/': [200, {}],
             },
         })
         initKeaTests()
@@ -105,7 +105,7 @@ describe('personsSceneLogic', () => {
             const spy: MockSignature = jest.fn(() => [200, {}])
             useMocks({
                 post: {
-                    '/api/environments/:team_id/persons/reset_person_distinct_id/': spy,
+                    '/v1/environments/:team_id/persons/reset_person_distinct_id/': spy,
                 },
             })
 

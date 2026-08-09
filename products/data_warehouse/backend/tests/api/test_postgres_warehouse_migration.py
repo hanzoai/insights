@@ -77,7 +77,7 @@ class TestPostgresWarehouseMigration(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -139,7 +139,7 @@ class TestPostgresWarehouseMigration(APIBaseTest):
 
         for _ in range(2):
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
             )
             assert response.status_code == status.HTTP_200_OK
 
@@ -194,7 +194,7 @@ class TestPostgresWarehouseMigration(APIBaseTest):
             ),
         ]
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -210,7 +210,7 @@ class TestPostgresWarehouseMigration(APIBaseTest):
             ),
         ]
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -274,7 +274,7 @@ class TestPostgresWarehouseMigration(APIBaseTest):
             ),
         ]
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
         assert response.status_code == status.HTTP_200_OK, response.content
 
@@ -357,7 +357,7 @@ class TestPostgresWarehouseMigration(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     "host": "db.example.com",
@@ -457,7 +457,7 @@ class TestPostgresWarehouseMigration(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     "host": "h",
@@ -518,7 +518,7 @@ class TestPostgresWarehouseMigration(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
         assert response.status_code == status.HTTP_200_OK, response.content
 
@@ -563,7 +563,7 @@ class TestPostgresWarehouseMigration(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
         assert response.status_code == status.HTTP_200_OK, response.content
 

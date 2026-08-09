@@ -242,7 +242,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             post: {
-                '/api/environments/:team_id/query/:kind': mcpEventsResponse,
+                '/v1/environments/:team_id/query/:kind': mcpEventsResponse,
             },
         }),
     ],

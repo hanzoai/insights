@@ -32,8 +32,8 @@ describe('useTaxonomicFilter', () => {
         localStorage.clear()
         ;(performQuery as jest.Mock).mockResolvedValue({ tables: {}, joins: [] })
         useMocks({
-            get: { '/api/projects/:team/event_definitions': { results: [], count: 0 } },
-            post: { '/api/environments/:team/query': { results: [] } },
+            get: { '/v1/projects/:team/event_definitions': { results: [], count: 0 } },
+            post: { '/v1/environments/:team/query': { results: [] } },
         })
         initKeaTests()
         actionsModel.mount()

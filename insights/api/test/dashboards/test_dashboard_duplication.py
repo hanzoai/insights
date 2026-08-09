@@ -47,7 +47,7 @@ class TestDashboardDuplication(APIBaseTest, QueryMatchingTest):
 
     def test_duplicating_dashboard_while_duplicating_tiles(self) -> None:
         duplicated_dashboard = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/",
+            f"/v1/projects/{self.team.id}/dashboards/",
             {
                 "duplicate_tiles": True,
                 "use_dashboard": self.starting_dashboard["id"],
@@ -76,7 +76,7 @@ class TestDashboardDuplication(APIBaseTest, QueryMatchingTest):
 
     def test_duplicating_dashboard_without_duplicating_tiles(self) -> None:
         duplicated_dashboard = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/",
+            f"/v1/projects/{self.team.id}/dashboards/",
             {
                 "duplicate_tiles": False,
                 "use_dashboard": self.starting_dashboard["id"],
@@ -117,7 +117,7 @@ class TestDashboardDuplication(APIBaseTest, QueryMatchingTest):
         self.dashboard_api.update_dashboard(dashboard_id, {"tiles": [insight_tile]})
 
         duplicated = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/",
+            f"/v1/projects/{self.team.id}/dashboards/",
             {"duplicate_tiles": True, "use_dashboard": dashboard_id, "name": "dup"},
         ).json()
 
@@ -170,7 +170,7 @@ class TestDashboardDuplicationAccessControl(APIBaseTest):
 
     def _duplicate(self) -> int:
         return self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/",
+            f"/v1/projects/{self.team.id}/dashboards/",
             {"name": "copy", "use_dashboard": self.dashboard_id, "duplicate_tiles": True},
         ).status_code
 
@@ -193,7 +193,7 @@ class TestDashboardDuplicationAccessControl(APIBaseTest):
         self._set_access("dashboard", self.dashboard_id, "none")
         self.client.force_login(self.member)
 
-        retrieve_status = self.client.get(f"/api/projects/{self.team.id}/dashboards/{self.dashboard_id}/").status_code
+        retrieve_status = self.client.get(f"/v1/projects/{self.team.id}/dashboards/{self.dashboard_id}/").status_code
         assert retrieve_status == status.HTTP_403_FORBIDDEN
 
     def test_duplication_requires_viewer_access_to_each_insight(self) -> None:

@@ -171,7 +171,7 @@ class MCPGatewayAgentViewSet(viewsets.ViewSet):
                     "name": server.name,
                     "url": server.url,
                     "description": server.description,
-                    "proxy_path": f"/api/mcp_store/gateway/servers/{server.id}/proxy/",
+                    "proxy_path": f"/v1/mcp_store/gateway/servers/{server.id}/proxy/",
                     "tools": tools,
                 }
             )

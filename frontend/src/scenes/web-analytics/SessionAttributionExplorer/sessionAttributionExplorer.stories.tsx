@@ -21,13 +21,13 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/query/:id/': () => {
+                '/v1/environments/:team_id/query/:id/': () => {
                     // eslint-disable-next-line @typescript-eslint/no-var-requires
                     return [200, __sessionAttributionQueryStatus as any]
                 },
             },
             post: {
-                '/api/environments/:team_id/query/:kind/': () => {
+                '/v1/environments/:team_id/query/:kind/': () => {
                     // eslint-disable-next-line @typescript-eslint/no-var-requires
                     return [200, __sessionAttributionQuery as any]
                 },

@@ -26,7 +26,7 @@ class TestWebVitalsAPI(DatastoreTestMixin, APIBaseTest):
                 self.assertEqual(result["data"][-1], expected_values["FCP"])
 
     def test_web_vitals_missing_pathname(self):
-        response = self.client.get(f"/api/environments/{self.team.pk}/web_vitals/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/web_vitals/")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -149,7 +149,7 @@ class TestWebVitalsAPI(DatastoreTestMixin, APIBaseTest):
             # Flush the events to Datastore
             flush_persons_and_events()
 
-            response = self.client.get(f"/api/environments/{self.team.pk}/web_vitals/?pathname=/test-path")
+            response = self.client.get(f"/v1/environments/{self.team.pk}/web_vitals/?pathname=/test-path")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
             data = response.json()
@@ -161,7 +161,7 @@ class TestWebVitalsAPI(DatastoreTestMixin, APIBaseTest):
             self.assert_values(data["results"], expected_values)
 
     def test_web_vitals_no_data(self):
-        response = self.client.get(f"/api/environments/{self.team.pk}/web_vitals/?pathname=/test-path")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/web_vitals/?pathname=/test-path")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

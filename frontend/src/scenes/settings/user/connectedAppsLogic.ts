@@ -74,10 +74,10 @@ export const connectedAppsLogic = kea<connectedAppsLogicType>([
             [] as ConnectedApp[],
             {
                 loadConnectedApps: async () => {
-                    return await api.get('api/oauth/connected-apps/')
+                    return await api.get('v1/oauth/connected-apps/')
                 },
                 revokeApp: async ({ id }) => {
-                    await api.create(`api/oauth/connected-apps/${id}/revoke/`)
+                    await api.create(`v1/oauth/connected-apps/${id}/revoke/`)
                     toast.success('App access revoked')
                     return values.connectedApps.filter((app) => app.id !== id)
                 },

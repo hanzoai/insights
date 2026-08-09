@@ -38,16 +38,16 @@ describe('UniversalFilters recent selections', () => {
     function useSetupMocks(overrides: Record<string, unknown> = {}): void {
         useMocks({
             get: {
-                '/api/projects/:team/event_definitions': mockGetEventDefinitions,
-                '/api/projects/:team/property_definitions': mockGetPropertyDefinitions,
-                '/api/projects/:team/actions': { results: [mockActionDefinition] },
-                '/api/environments/:team/persons/properties': [],
-                '/api/environments/:team/events/values': [],
-                '/api/environments/:team/persons/values': [],
+                '/v1/projects/:team/event_definitions': mockGetEventDefinitions,
+                '/v1/projects/:team/property_definitions': mockGetPropertyDefinitions,
+                '/v1/projects/:team/actions': { results: [mockActionDefinition] },
+                '/v1/environments/:team/persons/properties': [],
+                '/v1/environments/:team/events/values': [],
+                '/v1/environments/:team/persons/values': [],
                 ...overrides,
             },
             post: {
-                '/api/environments/:team/query': { results: [] },
+                '/v1/environments/:team/query': { results: [] },
             },
         })
     }
@@ -111,7 +111,7 @@ describe('UniversalFilters recent selections', () => {
             description: 'pageview URL',
             taxonomicGroupTypes: [TaxonomicFilterGroupType.PageviewUrls, TaxonomicFilterGroupType.EventProperties],
             mockOverrides: {
-                '/api/environments/:team/events/values': [{ name: 'https://example.com/pricing' }],
+                '/v1/environments/:team/events/values': [{ name: 'https://example.com/pricing' }],
             },
             tabTestId: 'taxonomic-tab-pageview_urls',
             searchQuery: 'example',
@@ -122,7 +122,7 @@ describe('UniversalFilters recent selections', () => {
             description: 'screen name',
             taxonomicGroupTypes: [TaxonomicFilterGroupType.Screens, TaxonomicFilterGroupType.EventProperties],
             mockOverrides: {
-                '/api/environments/:team/events/values': [{ name: 'HomeScreen' }],
+                '/v1/environments/:team/events/values': [{ name: 'HomeScreen' }],
             },
             tabTestId: 'taxonomic-tab-screens',
             searchQuery: 'Home',
@@ -133,7 +133,7 @@ describe('UniversalFilters recent selections', () => {
             description: 'email address',
             taxonomicGroupTypes: [TaxonomicFilterGroupType.EmailAddresses, TaxonomicFilterGroupType.PersonProperties],
             mockOverrides: {
-                '/api/environments/:team/persons/values': [{ name: 'alice@example.com' }],
+                '/v1/environments/:team/persons/values': [{ name: 'alice@example.com' }],
             },
             tabTestId: 'taxonomic-tab-email_addresses',
             searchQuery: 'alice',

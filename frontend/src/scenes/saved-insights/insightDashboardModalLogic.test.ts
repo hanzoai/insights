@@ -34,7 +34,7 @@ describe('insightDashboardModalLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/': () => {
+                '/v1/environments/:team_id/insights/': () => {
                     return [200, { count: 0, results: [] }]
                 },
             },

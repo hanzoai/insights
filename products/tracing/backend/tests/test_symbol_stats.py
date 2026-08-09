@@ -164,7 +164,7 @@ class TestTraceSpansSymbolStats(_TraceSpansTestBase):
         if symbols is not None:
             query["symbols"] = symbols
         response = self.client.post(
-            f"/api/projects/{self.team.id}/tracing/spans/symbol-stats/",
+            f"/v1/projects/{self.team.id}/tracing/spans/symbol-stats/",
             {"query": query},
             format="json",
         )
@@ -395,7 +395,7 @@ class TestTraceSpansSymbolStats(_TraceSpansTestBase):
 
     def test_missing_file_path_returns_400(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/tracing/spans/symbol-stats/",
+            f"/v1/projects/{self.team.id}/tracing/spans/symbol-stats/",
             {"query": {"symbols": FM_SYMBOLS, "dateRange": {"date_from": DATE_FROM, "date_to": DATE_TO}}},
             format="json",
         )
@@ -411,7 +411,7 @@ class TestTraceSpansSymbolStats(_TraceSpansTestBase):
     )
     def test_invalid_symbols_return_400(self, _name, symbols):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/tracing/spans/symbol-stats/",
+            f"/v1/projects/{self.team.id}/tracing/spans/symbol-stats/",
             {
                 "query": {
                     "filePath": "src/flags/flag_matching.rs",

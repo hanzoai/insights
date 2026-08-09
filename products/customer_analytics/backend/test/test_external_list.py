@@ -27,7 +27,7 @@ class TestExternalAccountListAPI(APIBaseTest):
         self.psak_token = self._create_psak_token(scopes=["account:read"])
         # Fresh client so requests are unauthenticated unless they carry the Bearer token.
         self.client = APIClient()
-        self.url = "/api/customer_analytics/external/accounts"
+        self.url = "/v1/customer_analytics/external/accounts"
         self.csm_definition = self._create_definition("CSM")
         csp_enabled = patch(
             "products.customer_analytics.backend.presentation.views.external._customer_analytics_enabled",

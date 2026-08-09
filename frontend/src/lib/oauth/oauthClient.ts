@@ -103,7 +103,7 @@ export function clearSession(): void {
     window.localStorage.removeItem(SESSION_KEY)
     document.cookie = `${OAUTH_MODE_COOKIE}=; path=/; Max-Age=0; SameSite=Lax`
     // Drop the bootstrap ids with the session so a later login in the same tab can't read the
-    // previous account's ids before its own /api/users/@me/ resolves.
+    // previous account's ids before its own /v1/users/@me/ resolves.
     oauthContextIds = null
 }
 

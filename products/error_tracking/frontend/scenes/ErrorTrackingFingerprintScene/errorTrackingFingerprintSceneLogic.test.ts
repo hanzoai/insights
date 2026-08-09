@@ -12,7 +12,7 @@ describe('errorTrackingFingerprintSceneLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team_id/error_tracking/fingerprints/resolve/': {
+                '/v1/projects/:team_id/error_tracking/fingerprints/resolve/': {
                     id: 'fp-record-1',
                     fingerprint: 'fp-1',
                     issue_id: 'issue-1',

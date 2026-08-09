@@ -33,7 +33,7 @@ class TestAlertEvaluation(APIBaseTest, DatastoreDestroyTablesMixin):
         self.insight = self.dashboard_api.create_insight(data={"name": "insight", "query": query_dict})[1]
 
         self.alert = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             data={
                 "name": "alert name",
                 "insight": self.insight["id"],
@@ -47,7 +47,7 @@ class TestAlertEvaluation(APIBaseTest, DatastoreDestroyTablesMixin):
 
     def set_thresholds(self, lower: Optional[int] = None, upper: Optional[int] = None) -> None:
         self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{self.alert['id']}",
+            f"/v1/projects/{self.team.id}/alerts/{self.alert['id']}",
             data={"threshold": {"configuration": {"type": "absolute", "bounds": {"lower": lower, "upper": upper}}}},
         )
 
@@ -57,7 +57,7 @@ class TestAlertEvaluation(APIBaseTest, DatastoreDestroyTablesMixin):
     def _create_formula_alert(self, query_dict: dict, series_index: int = 0) -> dict:
         insight = self.dashboard_api.create_insight(data={"name": "formula insight", "query": query_dict})[1]
         return self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             data={
                 "name": "formula alert",
                 "insight": insight["id"],
@@ -93,7 +93,7 @@ class TestAlertEvaluation(APIBaseTest, DatastoreDestroyTablesMixin):
             data={"name": "insight", "filters": {"events": [{"id": "$pageview"}], "display": "BoldNumber"}}
         )[1]
 
-        self.client.patch(f"/api/projects/{self.team.id}/alerts/{self.alert['id']}", data={"insight": insight["id"]})
+        self.client.patch(f"/v1/projects/{self.team.id}/alerts/{self.alert['id']}", data={"insight": insight["id"]})
         self.set_thresholds(lower=1)
 
         run_alert_check(self.alert["id"])

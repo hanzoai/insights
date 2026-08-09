@@ -22,7 +22,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             post: {
-                'api/environments/:team_id/error_tracking/stack_frames/batch_get/': { results: batchGetResults },
+                'v1/environments/:team_id/error_tracking/stack_frames/batch_get/': { results: batchGetResults },
             },
         }),
         (Story) => (
@@ -463,11 +463,11 @@ function sessionTimelineParameters(event: ErrorEventType): Record<string, unknow
         msw: {
             mocks: {
                 post: {
-                    'api/environments/:team_id/query': queryHandler,
-                    '/api/environments/:team_id/query': queryHandler,
-                    '/api/environments/:team_id/query/': queryHandler,
-                    '/api/environments/:team_id/query/:query_kind': queryHandler,
-                    '/api/environments/:team_id/query/:query_kind/': queryHandler,
+                    'v1/environments/:team_id/query': queryHandler,
+                    '/v1/environments/:team_id/query': queryHandler,
+                    '/v1/environments/:team_id/query/': queryHandler,
+                    '/v1/environments/:team_id/query/:query_kind': queryHandler,
+                    '/v1/environments/:team_id/query/:query_kind/': queryHandler,
                 },
             },
         },

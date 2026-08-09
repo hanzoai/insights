@@ -103,16 +103,16 @@ const meta: Meta = {
                 '/_preflight': { ...preflightJson, cloud: true, realm: 'cloud' },
                 '/stats': {},
                 '/events': {},
-                '/api/billing/': { ...billingJson },
-                '/api/environments/:team_id/integrations/:id/github_repos': githubReposResponse,
+                '/v1/billing/': { ...billingJson },
+                '/v1/environments/:team_id/integrations/:id/github_repos': githubReposResponse,
             },
             post: {
                 // Accepting the kickoff lets the live (non-snapshot) story walk all the way to the
                 // queued state by clicking the button.
-                '/api/wizard/cloud_run': () => [201, { task_id: 'task-1', run_id: 'run-1', status: 'queued' }],
+                '/v1/wizard/cloud_run': () => [201, { task_id: 'task-1', run_id: 'run-1', status: 'queued' }],
             },
             patch: {
-                '/api/environments/:team_id/add_product_intent/': {},
+                '/v1/environments/:team_id/add_product_intent/': {},
             },
         }),
     ],
@@ -153,7 +153,7 @@ function cloudRunStory({
 
             useStorybookMocks({
                 get: {
-                    '/api/environments/:team_id/integrations': { results: integrations },
+                    '/v1/environments/:team_id/integrations': { results: integrations },
                 },
             })
 
@@ -226,7 +226,7 @@ export const PullRequestQueued: Story = {
 
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/integrations': { results: [githubIntegration] },
+                '/v1/environments/:team_id/integrations': { results: [githubIntegration] },
             },
         })
 
@@ -256,7 +256,7 @@ export const RunItYourself: Story = {
 
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/integrations': { results: [] },
+                '/v1/environments/:team_id/integrations': { results: [] },
             },
         })
 
@@ -299,7 +299,7 @@ function CloudRunPlayground({ githubConnected, repository, pullRequestQueued }: 
 
     useStorybookMocks({
         get: {
-            '/api/environments/:team_id/integrations': {
+            '/v1/environments/:team_id/integrations': {
                 results: githubConnected ? [githubIntegration] : [],
             },
         },

@@ -55,7 +55,7 @@ describe('ApiClient.requestSSE', () => {
         const onEvent = vi.fn()
         const promise = client.requestSSE({
             method: 'GET',
-            path: '/api/stream',
+            path: '/v1/stream',
             onEvent,
         })
         await vi.runAllTimersAsync()
@@ -84,7 +84,7 @@ describe('ApiClient.requestSSE', () => {
         const onEvent = vi.fn()
         const promise = client.requestSSE({
             method: 'GET',
-            path: '/api/stream',
+            path: '/v1/stream',
             onEvent,
         })
         await vi.runAllTimersAsync()
@@ -111,7 +111,7 @@ describe('ApiClient.requestSSE', () => {
         const onEvent = vi.fn()
         const promise = client.requestSSE({
             method: 'GET',
-            path: '/api/stream',
+            path: '/v1/stream',
             onEvent,
         })
         await vi.runAllTimersAsync()
@@ -135,7 +135,7 @@ describe('ApiClient.requestSSE', () => {
         vi.stubGlobal('fetch', makeMockFetch(mockResponse))
 
         const err = await client
-            .requestSSE({ method: 'POST', path: '/api/stream', onEvent: vi.fn() })
+            .requestSSE({ method: 'POST', path: '/v1/stream', onEvent: vi.fn() })
             .catch((e: unknown) => e)
         expect(err).toBeInstanceOf(InsightsValidationError)
         expect((err as InsightsValidationError).detail).toBe('session_ids must not be empty')
@@ -149,7 +149,7 @@ describe('ApiClient.requestSSE', () => {
         vi.stubGlobal('fetch', makeMockFetch(mockResponse))
 
         const err = await client
-            .requestSSE({ method: 'GET', path: '/api/stream', onEvent: vi.fn() })
+            .requestSSE({ method: 'GET', path: '/v1/stream', onEvent: vi.fn() })
             .catch((e: unknown) => e)
         expect(err).toBeInstanceOf(InsightsApiError)
         expect((err as InsightsApiError).status).toBe(500)
@@ -165,7 +165,7 @@ describe('ApiClient.requestSSE', () => {
         await expect(
             client.requestSSE({
                 method: 'GET',
-                path: '/api/stream',
+                path: '/v1/stream',
                 onEvent: vi.fn(),
             })
         ).rejects.toThrow('SSE response has no body')
@@ -194,7 +194,7 @@ describe('ApiClient.requestSSE', () => {
         await expect(
             client.requestSSE({
                 method: 'GET',
-                path: '/api/stream',
+                path: '/v1/stream',
                 onEvent: vi.fn(),
             })
         ).rejects.toThrow('SSE read timed out')
@@ -236,7 +236,7 @@ describe('ApiClient.requestSSE', () => {
 
         const promise = client.requestSSE({
             method: 'GET',
-            path: '/api/stream',
+            path: '/v1/stream',
             onEvent: vi.fn(),
             timeoutMs: shortTimeoutMs,
         })
@@ -261,7 +261,7 @@ describe('ApiClient.requestSSE', () => {
         const onEvent = vi.fn()
         const promise = client.requestSSE({
             method: 'GET',
-            path: '/api/stream',
+            path: '/v1/stream',
             onEvent,
         })
         await vi.runAllTimersAsync()
@@ -282,7 +282,7 @@ describe('ApiClient.requestSSE', () => {
 
         const promise = client.requestSSE({
             method: 'POST',
-            path: '/api/stream',
+            path: '/v1/stream',
             body: { session_id: 'abc' },
             onEvent: vi.fn(),
         })
@@ -307,7 +307,7 @@ describe('ApiClient.requestSSE', () => {
         const onEvent = vi.fn()
         const promise = client.requestSSE({
             method: 'GET',
-            path: '/api/stream',
+            path: '/v1/stream',
             onEvent,
         })
         await vi.runAllTimersAsync()

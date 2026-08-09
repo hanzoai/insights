@@ -28,13 +28,13 @@ class TestAsyncMigration(APIBaseTest):
         return super().setUp()
 
     def test_get_async_migrations_without_staff_status(self):
-        response = self.client.get(f"/api/async_migrations/").json()
+        response = self.client.get(f"/v1/async_migrations/").json()
         self.assertEqual(response["count"], 0)
 
         self.user.is_staff = False
         self.user.save()
 
-        response = self.client.get(f"/api/async_migrations/").json()
+        response = self.client.get(f"/v1/async_migrations/").json()
 
         self.assertEqual(response["code"], "permission_denied")
         self.assertEqual(response["detail"], "You are not a staff user, contact your instance admin.")
@@ -43,7 +43,7 @@ class TestAsyncMigration(APIBaseTest):
         create_async_migration(name="0002_events_sample_by")
         create_async_migration(name="0003_fill_person_distinct_id2")
 
-        response = self.client.get(f"/api/async_migrations/").json()
+        response = self.client.get(f"/v1/async_migrations/").json()
 
         self.assertEqual(len(response["results"]), 2)
         self.assertEqual(response["results"][0]["name"], "0002_events_sample_by")
@@ -54,7 +54,7 @@ class TestAsyncMigration(APIBaseTest):
         sm1 = create_async_migration()
 
         response = self.client.post(
-            f"/api/async_migrations/{sm1.id}/trigger",
+            f"/v1/async_migrations/{sm1.id}/trigger",
             {"parameters": {"SOME_KEY": 1234}},
         ).json()
         sm1.refresh_from_db()
@@ -69,7 +69,7 @@ class TestAsyncMigration(APIBaseTest):
         sm1 = create_async_migration()
         create_async_migration(name="test2", status=MigrationStatus.Running)
 
-        response = self.client.post(f"/api/async_migrations/{sm1.id}/trigger").json()
+        response = self.client.post(f"/v1/async_migrations/{sm1.id}/trigger").json()
         mock_run_async_migration.assert_not_called()
         self.assertEqual(response["success"], False)
         self.assertEqual(response["error"], "No more than 1 async migration can run at once.")
@@ -78,7 +78,7 @@ class TestAsyncMigration(APIBaseTest):
     def test_force_stop_endpoint(self, mock_run_async_migration):
         sm1 = create_async_migration(status=MigrationStatus.Running)
 
-        response = self.client.post(f"/api/async_migrations/{sm1.id}/force_stop_without_rollback").json()
+        response = self.client.post(f"/v1/async_migrations/{sm1.id}/force_stop_without_rollback").json()
         sm1.refresh_from_db()
 
         mock_run_async_migration.assert_called_once()
@@ -92,7 +92,7 @@ class TestAsyncMigration(APIBaseTest):
     def test_force_stop_endpoint_non_running_migration(self, mock_run_async_migration):
         sm1 = create_async_migration(status=MigrationStatus.RolledBack)
 
-        response = self.client.post(f"/api/async_migrations/{sm1.id}/force_stop").json()
+        response = self.client.post(f"/v1/async_migrations/{sm1.id}/force_stop").json()
         sm1.refresh_from_db()
 
         mock_run_async_migration.assert_not_called()
@@ -107,7 +107,7 @@ class TestAsyncMigration(APIBaseTest):
         mock_get_migration_definition.return_value = AsyncMigrationDefinition(name="foo")
         sm1 = create_async_migration(status=MigrationStatus.CompletedSuccessfully)
 
-        response = self.client.post(f"/api/async_migrations/{sm1.id}/force_rollback").json()
+        response = self.client.post(f"/v1/async_migrations/{sm1.id}/force_rollback").json()
 
         mock_get_migration_definition.assert_called_once()
         self.assertEqual(response["success"], True)
@@ -115,7 +115,7 @@ class TestAsyncMigration(APIBaseTest):
     def test_force_rollback_endpoint_migration_not_complete(self):
         sm1 = create_async_migration(status=MigrationStatus.Running)
 
-        response = self.client.post(f"/api/async_migrations/{sm1.id}/force_rollback").json()
+        response = self.client.post(f"/v1/async_migrations/{sm1.id}/force_rollback").json()
 
         self.assertEqual(response["success"], False)
         self.assertEqual(

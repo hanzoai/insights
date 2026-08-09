@@ -38,7 +38,7 @@ class TestTracePagination(_TraceSpansTestBase):
     def _fetch_page(self, offset: int = 0) -> dict:
         trace_hex = (1).to_bytes(16, "big").hex()
         response = self.client.post(
-            f"/api/projects/{self.team.id}/tracing/spans/trace/{trace_hex}/",
+            f"/v1/projects/{self.team.id}/tracing/spans/trace/{trace_hex}/",
             {
                 "dateRange": {"date_from": "2026-06-02T07:00:00Z", "date_to": "2026-06-02T09:00:00Z"},
                 "offset": offset,

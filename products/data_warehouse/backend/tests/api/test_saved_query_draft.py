@@ -8,7 +8,7 @@ from products.data_modeling.backend.facade.models import DataWarehouseSavedQuery
 class TestDataWarehouseSavedQueryDraft(APIBaseTest):
     def test_create_draft(self):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/warehouse_saved_query_drafts/",
+            f"/v1/environments/{self.team.pk}/warehouse_saved_query_drafts/",
             {
                 "query": {
                     "kind": "InsightsQLQuery",
@@ -39,7 +39,7 @@ class TestDataWarehouseSavedQueryDraft(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/warehouse_saved_query_drafts/{draft.id}/",
+            f"/v1/environments/{self.team.pk}/warehouse_saved_query_drafts/{draft.id}/",
             {
                 "query": {
                     "kind": "InsightsQLQuery",
@@ -72,7 +72,7 @@ class TestDataWarehouseSavedQueryDraft(APIBaseTest):
         )
 
         response = self.client.delete(
-            f"/api/environments/{self.team.pk}/warehouse_saved_query_drafts/{draft.id}/",
+            f"/v1/environments/{self.team.pk}/warehouse_saved_query_drafts/{draft.id}/",
         )
 
         self.assertEqual(response.status_code, 204, response.content)
@@ -108,7 +108,7 @@ class TestDataWarehouseSavedQueryDraft(APIBaseTest):
             },
             name="test_draft_2",
         )
-        response = self.client.get(f"/api/environments/{self.team.pk}/warehouse_saved_query_drafts/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/warehouse_saved_query_drafts/")
 
         self.assertEqual(response.status_code, 200, response.content)
         response_data = response.json()
@@ -139,7 +139,7 @@ class TestDataWarehouseSavedQueryDraft(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/warehouse_saved_query_drafts/",
+            f"/v1/environments/{self.team.pk}/warehouse_saved_query_drafts/",
             {
                 "query": {
                     "kind": "InsightsQLQuery",
@@ -170,7 +170,7 @@ class TestDataWarehouseSavedQueryDraft(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/warehouse_saved_query_drafts/",
+            f"/v1/environments/{self.team.pk}/warehouse_saved_query_drafts/",
             {
                 "query": {"kind": "InsightsQLQuery", "query": "select 2"},
                 "saved_query_id": str(foreign_saved_query.id),

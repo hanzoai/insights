@@ -8,7 +8,7 @@
 // UI) and does NOT re-derive any metric from the GitHub API — the product owns
 // the numbers, this owns the cadence + the Slack relay.
 //
-//   GHA cron ──> GET /api/projects/:id/engineering_analytics/repo_overview/ ──> Slack
+//   GHA cron ──> GET /v1/projects/:id/engineering_analytics/repo_overview/ ──> Slack
 //
 // One native-table message (Block Kit `table`), five rows, each with its WoW delta:
 //   - CI minutes: billable (self-hosted) compute minutes across the whole bill,
@@ -45,7 +45,7 @@ const GITHUB_REF_NAME = process.env.GITHUB_REF_NAME || 'master'
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000
 
 async function api(action, params = {}) {
-    const url = new URL(`${HOST}/api/projects/${PROJECT_ID}/engineering_analytics/${action}/`)
+    const url = new URL(`${HOST}/v1/projects/${PROJECT_ID}/engineering_analytics/${action}/`)
     for (const [k, v] of Object.entries(params)) {
         if (v !== undefined && v !== null && v !== '') {
             url.searchParams.set(k, v)

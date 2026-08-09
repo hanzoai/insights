@@ -105,7 +105,7 @@ export const userGithubIntegrationLogic = kea<userGithubIntegrationLogicType>([
         loadRepositoriesPage: async ({ offset }, breakpoint) => {
             try {
                 const response = await api.get(
-                    `api/users/@me/integrations/github/${logicProps.installationId}/repos/?limit=${PAGE_SIZE}&offset=${offset}`
+                    `v1/users/@me/integrations/github/${logicProps.installationId}/repos/?limit=${PAGE_SIZE}&offset=${offset}`
                 )
                 await breakpoint()
                 actions.loadRepositoriesPageSuccess(response.repositories, response.has_more)

@@ -637,7 +637,7 @@ export function OverviewTab({
                                             try {
                                                 const { limit, offset, ...filters } = paramsFromFilters
                                                 const response = (await api.get(
-                                                    `api/projects/${currentProjectId}/feature_flags/matching_ids/?${toParams(filters)}`
+                                                    `v1/projects/${currentProjectId}/feature_flags/matching_ids/?${toParams(filters)}`
                                                 )) as { ids: number[]; total: number }
                                                 setMatchingFlagIds(response.ids)
                                                 ctx.setSelectedKeys(response.ids)

@@ -20,7 +20,7 @@ The batch import support API and MCP tools require:
 - Postgres migrations applied (Datastore not required)
 
 Why both scopes: the backend accepts `batch_import_support:read` alone,
-but MCP tool discovery verifies staffness via `/api/users/@me/` and hides the tools (fail-closed) when the key cannot make that call.
+but MCP tool discovery verifies staffness via `/v1/users/@me/` and hides the tools (fail-closed) when the key cannot make that call.
 A `*` wildcard does **not** substitute for either — the discovery gate requires the hidden scope explicitly, and the backend's `INTERNAL` scope handling rejects wildcard keys outright.
 For the production setup flow, see [docs/support-mcp-tools.md](../../docs/support-mcp-tools.md).
 
@@ -181,7 +181,7 @@ Use the Hono server on port 3001 (see step 7), or set `MCP_HONO_URL=http://local
 Check, in order:
 
 1. The key carries `batch_import_support:read` **explicitly** — `*` does not match hidden scopes.
-2. The key also carries `user:read` (or `*`) — the discovery staff check reads `/api/users/@me/` and fails closed.
+2. The key also carries `user:read` (or `*`) — the discovery staff check reads `/v1/users/@me/` and fails closed.
 3. The key's user has `is_staff = True`.
 4. The key was minted with those scopes from the start — the MCP server caches scopes per token, so mint a fresh key instead of editing an existing one.
 
@@ -214,5 +214,5 @@ Stop the worker or seed with non-`RUNNING` statuses to prevent this.
 
 A request passes through two independent layers:
 
-1. **MCP discovery** (presentation): a tool requiring an OAuth-hidden scope surfaces only when the key explicitly carries the scope AND `/api/users/@me/` confirms `is_staff` — otherwise it is hidden, fail-closed (`services/mcp/src/lib/staff-only-tools.ts`).
+1. **MCP discovery** (presentation): a tool requiring an OAuth-hidden scope surfaces only when the key explicitly carries the scope AND `/v1/users/@me/` confirms `is_staff` — otherwise it is hidden, fail-closed (`services/mcp/src/lib/staff-only-tools.ts`).
 2. **Django enforcement** (the security boundary): `IsAuthenticated` + `IsStaffUser` + `APIScopePermission` with `scope_object = "INTERNAL"` and `batch_import_support:read`. Sessions need staffness only; PATs need staffness plus the explicit scope; `*`-only keys always 403.

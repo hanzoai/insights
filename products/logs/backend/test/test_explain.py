@@ -223,7 +223,7 @@ class TestLogExplainAPI(DatastoreTestMixin, APIBaseTest):
     def test_requires_authentication(self):
         self.client.logout()
         response = self.client.post(
-            f"/api/environments/{self.team.id}/logs/explainLogWithAI/",
+            f"/v1/environments/{self.team.id}/logs/explainLogWithAI/",
             {"uuid": "test-uuid", "timestamp": "2025-12-16T09:01:22Z"},
         )
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -233,7 +233,7 @@ class TestLogExplainAPI(DatastoreTestMixin, APIBaseTest):
         self.organization.save()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/logs/explainLogWithAI/",
+            f"/v1/environments/{self.team.id}/logs/explainLogWithAI/",
             {"uuid": "test-uuid", "timestamp": "2025-12-16T09:01:22Z"},
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -244,7 +244,7 @@ class TestLogExplainAPI(DatastoreTestMixin, APIBaseTest):
         self.organization.save()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/logs/explainLogWithAI/",
+            f"/v1/environments/{self.team.id}/logs/explainLogWithAI/",
             {"uuid": "nonexistent-uuid", "timestamp": "2025-12-16T09:01:22Z"},
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -254,7 +254,7 @@ class TestLogExplainAPI(DatastoreTestMixin, APIBaseTest):
         self.organization.save()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/logs/explainLogWithAI/",
+            f"/v1/environments/{self.team.id}/logs/explainLogWithAI/",
             {},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -284,7 +284,7 @@ class TestLogExplainAPI(DatastoreTestMixin, APIBaseTest):
             mock_client.chat.completions.create = AsyncMock(return_value=mock_response)
 
             response = self.client.post(
-                f"/api/environments/{self.team.id}/logs/explainLogWithAI/",
+                f"/v1/environments/{self.team.id}/logs/explainLogWithAI/",
                 {"uuid": log_item["uuid"], "timestamp": log_item["timestamp"]},
             )
 
@@ -325,7 +325,7 @@ class TestLogExplainAPI(DatastoreTestMixin, APIBaseTest):
 
             # First request
             response1 = self.client.post(
-                f"/api/environments/{self.team.id}/logs/explainLogWithAI/",
+                f"/v1/environments/{self.team.id}/logs/explainLogWithAI/",
                 {"uuid": log_item["uuid"], "timestamp": log_item["timestamp"]},
             )
             assert response1.status_code == status.HTTP_200_OK
@@ -336,7 +336,7 @@ class TestLogExplainAPI(DatastoreTestMixin, APIBaseTest):
 
             # Second request should use cache
             response2 = self.client.post(
-                f"/api/environments/{self.team.id}/logs/explainLogWithAI/",
+                f"/v1/environments/{self.team.id}/logs/explainLogWithAI/",
                 {"uuid": log_item["uuid"], "timestamp": log_item["timestamp"]},
             )
             assert response2.status_code == status.HTTP_200_OK
@@ -370,14 +370,14 @@ class TestLogExplainAPI(DatastoreTestMixin, APIBaseTest):
 
             # First request
             response1 = self.client.post(
-                f"/api/environments/{self.team.id}/logs/explainLogWithAI/",
+                f"/v1/environments/{self.team.id}/logs/explainLogWithAI/",
                 {"uuid": log_item["uuid"], "timestamp": log_item["timestamp"]},
             )
             assert response1.status_code == status.HTTP_200_OK
 
             # Second request with force_refresh
             response2 = self.client.post(
-                f"/api/environments/{self.team.id}/logs/explainLogWithAI/",
+                f"/v1/environments/{self.team.id}/logs/explainLogWithAI/",
                 {"uuid": log_item["uuid"], "timestamp": log_item["timestamp"], "force_refresh": True},
             )
             assert response2.status_code == status.HTTP_200_OK

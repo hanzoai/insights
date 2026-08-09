@@ -13,7 +13,7 @@ from products.wizard.backend.presentation.views import _wizard_sync_killswitch_e
 
 class TestWizardSessionViewSet(APIBaseTest):
     def _url(self, suffix: str = "") -> str:
-        return f"/api/projects/{self.team.id}/wizard/sessions/{suffix}"
+        return f"/v1/projects/{self.team.id}/wizard/sessions/{suffix}"
 
     def _payload(self, **overrides) -> dict:
         payload = {
@@ -343,7 +343,7 @@ class TestWizardSessionViewSet(APIBaseTest):
         other_org = Organization.objects.create(name="Other Org")
         other_team = self.create_team_with_organization(other_org)
 
-        response = self.client.get(f"/api/projects/{other_team.id}/wizard/sessions/")
+        response = self.client.get(f"/v1/projects/{other_team.id}/wizard/sessions/")
         self.assertIn(response.status_code, (status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND))
 
     def test_latest_other_team_cannot_see_sessions(self):
@@ -355,7 +355,7 @@ class TestWizardSessionViewSet(APIBaseTest):
         other_org = Organization.objects.create(name="Other Org")
         other_team = self.create_team_with_organization(other_org)
 
-        response = self.client.get(f"/api/projects/{other_team.id}/wizard/sessions/latest/?workflow_id=onboarding")
+        response = self.client.get(f"/v1/projects/{other_team.id}/wizard/sessions/latest/?workflow_id=onboarding")
         self.assertIn(response.status_code, (status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND))
 
     def test_event_plan_and_error_persisted(self):

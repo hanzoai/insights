@@ -18,7 +18,7 @@ from products.feature_flags.backend.models.feature_flag import FeatureFlag
 class TestFeatureFlagDefaultEnvironments(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.feature_flag_url = "/api/projects/@current/feature_flags/"
+        self.feature_flag_url = "/v1/projects/@current/feature_flags/"
 
         self.feature_flag_patcher = patch("hanzo_insights.feature_enabled")
         self.mock_feature_enabled = self.feature_flag_patcher.start()
@@ -147,7 +147,7 @@ class TestFeatureFlagDefaultEnvironments(APIBaseTest):
         self._create_default_context("production")
 
         response = self.client.patch(
-            f"/api/projects/@current/feature_flags/{flag.id}/",
+            f"/v1/projects/@current/feature_flags/{flag.id}/",
             {"name": "Updated Name"},
             format="json",
         )
@@ -220,8 +220,8 @@ class TestEvaluationContextSuggestions(APIBaseTest):
         super().setUp()
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
-        self.url = "/api/environments/@current/evaluation_context_suggestions/"
-        self.get_url = "/api/environments/@current/default_evaluation_contexts/"
+        self.url = "/v1/environments/@current/evaluation_context_suggestions/"
+        self.get_url = "/v1/environments/@current/default_evaluation_contexts/"
 
     def _create_context(self, name: str) -> EvaluationContext:
         ctx, _ = EvaluationContext.objects.get_or_create(name=name, team=self.team)
@@ -379,8 +379,8 @@ class TestEvaluationContextRootTeamScoping(APIBaseTest):
             parent_team=self.team,
             name="child-env",
         )
-        self.get_url = f"/api/environments/{self.child_env.id}/default_evaluation_contexts/"
-        self.suggestions_url = f"/api/environments/{self.child_env.id}/evaluation_context_suggestions/"
+        self.get_url = f"/v1/environments/{self.child_env.id}/default_evaluation_contexts/"
+        self.suggestions_url = f"/v1/environments/{self.child_env.id}/evaluation_context_suggestions/"
 
     @parameterized.expand(
         [

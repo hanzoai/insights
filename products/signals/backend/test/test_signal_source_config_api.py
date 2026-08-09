@@ -16,7 +16,7 @@ class TestSignalSourceConfigAPI(APIBaseTest):
         self.organization.save(update_fields=["is_ai_data_processing_approved"])
 
     def _url(self, config_id: str | None = None) -> str:
-        base = f"/api/projects/{self.team.id}/signals/source_configs/"
+        base = f"/v1/projects/{self.team.id}/signals/source_configs/"
         if config_id:
             return f"{base}{config_id}/"
         return base
@@ -379,7 +379,7 @@ class TestScoutSourceCanonicalization(APIBaseTest):
         )
 
     def _child_url(self, config_id: str | None = None) -> str:
-        base = f"/api/projects/{self.child_team.id}/signals/source_configs/"
+        base = f"/v1/projects/{self.child_team.id}/signals/source_configs/"
         return f"{base}{config_id}/" if config_id else base
 
     def test_create_from_child_env_writes_canonical_team(self):

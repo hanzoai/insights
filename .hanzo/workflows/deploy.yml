@@ -379,10 +379,10 @@ jobs:
                   WANT=$(printf '%s' "${GITHUB_SHA}" | cut -c1-10)
                   JAR=$(mktemp)
                   for attempt in $(seq 1 60); do
-                    curl -fsS -c "$JAR" -o /dev/null -X POST "${LIVE_URL}/api/login" \
+                    curl -fsS -c "$JAR" -o /dev/null -X POST "${LIVE_URL}/v1/login" \
                       -H 'Content-Type: application/json' \
                       -d "$(jq -n --arg p "$PW" '{email:"e2e@hanzo.ai",password:$p}')" || true
-                    GOT=$(curl -fsS -b "$JAR" "${LIVE_URL}/api/instance_status" 2>/dev/null \
+                    GOT=$(curl -fsS -b "$JAR" "${LIVE_URL}/v1/instance_status" 2>/dev/null \
                       | jq -r '.results.overview[]? | select(.key=="insights_git_sha") | .value' || true)
                     if [ "$GOT" = "$WANT" ]; then
                       echo "serving ${GOT} after ~$((attempt * 20))s"; exit 0

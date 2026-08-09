@@ -30,7 +30,7 @@ describe('Notebooks', { concurrent: false }, () => {
             try {
                 await context.api.request({
                     method: 'PATCH',
-                    path: `/api/projects/${projectId}/notebooks/${shortId}/`,
+                    path: `/v1/projects/${projectId}/notebooks/${shortId}/`,
                     body: { deleted: true },
                 })
             } catch (error) {

@@ -24,11 +24,11 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                'api/projects/:team_id/error_tracking/issue/:id': () => [200, errorTrackingTypeIssue],
+                'v1/projects/:team_id/error_tracking/issue/:id': () => [200, errorTrackingTypeIssue],
             },
             post: {
-                '/api/environments/:team_id/query/ErrorTrackingQuery': () => [200, errorTrackingQueryResponse],
-                '/api/environments/:team_id/query/EventsQuery': () => [200, errorTrackingEventsQueryResponse],
+                '/v1/environments/:team_id/query/ErrorTrackingQuery': () => [200, errorTrackingQueryResponse],
+                '/v1/environments/:team_id/query/EventsQuery': () => [200, errorTrackingEventsQueryResponse],
             },
         }),
     ],

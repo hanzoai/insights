@@ -39,7 +39,7 @@ class TestGetActiveInstallations(BaseTest):
             ActiveInstallationInfo(
                 id=str(installation.id),
                 name="Linear",
-                proxy_path=f"/api/environments/{self.team.id}/mcp_server_installations/{installation.id}/proxy/",
+                proxy_path=f"/v1/environments/{self.team.id}/mcp_server_installations/{installation.id}/proxy/",
                 scope="personal",
             )
         ]
@@ -296,7 +296,7 @@ class TestGetInstallationsForSandbox(BaseTest):
         )
 
         assert [result.id for result in results] == [str(personal.id)]
-        assert results[0].proxy_path == f"/api/mcp_store/gateway/servers/{granted_server.id}/proxy/"
+        assert results[0].proxy_path == f"/v1/mcp_store/gateway/servers/{granted_server.id}/proxy/"
         assert results[0].proxy_token is not None
         assert results[0].proxy_token.startswith("mcp_gw_")
 

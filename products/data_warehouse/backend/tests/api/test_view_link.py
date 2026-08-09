@@ -26,7 +26,7 @@ VIEW_LINK_PATH = "products.data_warehouse.backend.presentation.views.view_link"
 class TestViewLinkQuery(APIBaseTest):
     def test_create(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/",
             {
                 "source_table_name": "events",
                 "joining_table_name": "persons",
@@ -71,7 +71,9 @@ class TestViewLinkQuery(APIBaseTest):
             external_data_source_id=source.id,
             credential=credentials,
             url_pattern="https://bucket.s3/data/*",
-            columns={"id": {"insightsql": "StringDatabaseField", "datastore": "Nullable(String)", "schema_valid": True}},
+            columns={
+                "id": {"insightsql": "StringDatabaseField", "datastore": "Nullable(String)", "schema_valid": True}
+            },
         )
         ExternalDataSchema.objects.create(
             team=self.team,
@@ -92,7 +94,7 @@ class TestViewLinkQuery(APIBaseTest):
             configuration=None,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/warehouse_view_links/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/warehouse_view_links/")
         assert response.status_code == 200
 
         view_links = response.json()
@@ -107,7 +109,7 @@ class TestViewLinkQuery(APIBaseTest):
 
     def test_create_with_configuration(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/",
             {
                 "source_table_name": "events",
                 "joining_table_name": "persons",
@@ -137,7 +139,7 @@ class TestViewLinkQuery(APIBaseTest):
 
     def test_create_key_error(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/",
             {
                 "source_table_name": "eventssss",
                 "joining_table_name": "persons",
@@ -150,7 +152,7 @@ class TestViewLinkQuery(APIBaseTest):
 
     def test_field_name_periods(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/",
             {
                 "source_table_name": "events",
                 "joining_table_name": "persons",
@@ -164,7 +166,7 @@ class TestViewLinkQuery(APIBaseTest):
 
     def test_create_saved_query_key_error(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/",
             {
                 "source_table_name": "eventssss",
                 "joining_table_name": "persons",
@@ -177,7 +179,7 @@ class TestViewLinkQuery(APIBaseTest):
 
     def test_create_saved_query_join_key_function(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/",
             {
                 "source_table_name": "events",
                 "joining_table_name": "persons",
@@ -201,7 +203,7 @@ class TestViewLinkQuery(APIBaseTest):
         join.save()
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/warehouse_view_links/{join.id}/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/{join.id}/",
             {"configuration": {"experiments_optimized": True, "experiments_timestamp_key": "timestamp"}},
         )
         self.assertEqual(response.status_code, 200, response.content)
@@ -226,7 +228,7 @@ class TestViewLinkQuery(APIBaseTest):
 
     def test_delete(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/",
             {
                 "source_table_name": "events",
                 "joining_table_name": "persons",
@@ -238,7 +240,7 @@ class TestViewLinkQuery(APIBaseTest):
         self.assertEqual(response.status_code, 201, response.content)
         view_link = response.json()
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/warehouse_view_links/{view_link['id']}")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/warehouse_view_links/{view_link['id']}")
         self.assertEqual(response.status_code, 204, response.content)
 
         self.assertEqual(DataWarehouseJoin.objects.all().count(), 0)
@@ -247,7 +249,7 @@ class TestViewLinkQuery(APIBaseTest):
         # An empty list must not eagerly build the full InsightsQL database, which is a heavy
         # chain of serial Postgres queries that previously ran on every single request.
         with patch(f"{VIEW_LINK_PATH}.Database.create_for", wraps=Database.create_for) as mock_create_for:
-            response = self.client.get(f"/api/environments/{self.team.id}/warehouse_view_links/")
+            response = self.client.get(f"/v1/environments/{self.team.id}/warehouse_view_links/")
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["results"], [])
@@ -265,7 +267,7 @@ class TestViewLinkQuery(APIBaseTest):
         )
 
         with patch(f"{VIEW_LINK_PATH}.Database.create_for", wraps=Database.create_for) as mock_create_for:
-            response = self.client.delete(f"/api/environments/{self.team.id}/warehouse_view_links/{join.id}/")
+            response = self.client.delete(f"/v1/environments/{self.team.id}/warehouse_view_links/{join.id}/")
 
         self.assertEqual(response.status_code, 204, response.content)
         mock_create_for.assert_not_called()
@@ -285,7 +287,7 @@ class TestViewLinkQuery(APIBaseTest):
         # A populated list resolves each row's table names against the database, but it must
         # build the database once for the whole response — not once per serialized row.
         with patch(f"{VIEW_LINK_PATH}.Database.create_for", wraps=Database.create_for) as mock_create_for:
-            response = self.client.get(f"/api/environments/{self.team.id}/warehouse_view_links/")
+            response = self.client.get(f"/v1/environments/{self.team.id}/warehouse_view_links/")
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()["results"]), 3)
@@ -327,7 +329,7 @@ class TestViewLinkQuery(APIBaseTest):
         with self.assertNumQueries(
             FuzzyInt(18, 19)
         ):  # depends when team revenue analytisc config cache is hit in a test
-            response = self.client.get(f"/api/environments/{self.team.id}/warehouse_view_links/")
+            response = self.client.get(f"/v1/environments/{self.team.id}/warehouse_view_links/")
 
         self.assertEqual(response.status_code, 200)
 
@@ -446,7 +448,7 @@ class TestViewLinkValidation(APIBaseTest):
         ]
         for msg, payload in payloads:
             with self.subTest(msg=msg):
-                response = self.client.post(f"/api/environments/{self.team.id}/warehouse_view_links/validate/", payload)
+                response = self.client.post(f"/v1/environments/{self.team.id}/warehouse_view_links/validate/", payload)
 
                 self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
                 data = response.json()
@@ -460,7 +462,7 @@ class TestViewLinkValidation(APIBaseTest):
     @patch(f"{PATH}.execute_insightsql_query", side_effect=_mock_execute_insightsql_with_stats_side_effect)
     def test_validate_returns_columns_and_match_stats(self, _):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/validate/",
             {
                 "source_table_name": "events",
                 "source_table_key": "uuid",
@@ -481,7 +483,7 @@ class TestViewLinkValidation(APIBaseTest):
     @patch(f"{PATH}.execute_insightsql_query", side_effect=_mock_execute_insightsql_stats_error_side_effect)
     def test_validate_stats_failure_does_not_break_validation(self, _):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/validate/",
             {
                 "source_table_name": "events",
                 "source_table_key": "uuid",
@@ -500,7 +502,7 @@ class TestViewLinkValidation(APIBaseTest):
     @patch(f"{PATH}.execute_insightsql_query", side_effect=_mock_execute_insightsql_side_effect)
     def test_system_table_success(self, _):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/validate/",
             {
                 "source_table_name": "groups",
                 "source_table_key": "index",
@@ -523,7 +525,7 @@ class TestViewLinkValidation(APIBaseTest):
         self._create_external_source_table(prefix="foo", table_name="bar")
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/validate/",
             {
                 "source_table_name": "postgres.foo.bar",
                 "source_table_key": "id",
@@ -544,7 +546,7 @@ class TestViewLinkValidation(APIBaseTest):
     @patch(f"{PATH}.execute_insightsql_query", side_effect=_mock_execute_insightsql_side_effect)
     def test_insightsql_expression_keys(self, _):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/validate/",
             {
                 "source_table_name": "events",
                 "source_table_key": "upper(distinct_id)",
@@ -565,7 +567,7 @@ class TestViewLinkValidation(APIBaseTest):
     @patch(f"{PATH}.execute_insightsql_query", side_effect=_mock_execute_insightsql_side_effect)
     def test_complex_expression(self, _):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/validate/",
             {
                 "source_table_name": "events",
                 "source_table_key": "toString(distinct_id)",
@@ -586,7 +588,7 @@ class TestViewLinkValidation(APIBaseTest):
     @patch(f"{PATH}.execute_insightsql_query", side_effect=_mock_execute_insightsql_side_effect)
     def test_nested_complex_expression(self, _):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/validate/",
             {
                 "source_table_name": "events",
                 "source_table_key": "toString(ifNull(distinct_id, ''))",
@@ -606,7 +608,7 @@ class TestViewLinkValidation(APIBaseTest):
 
     def test_nonexistent_field(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/validate/",
             {
                 "source_table_name": "events",
                 "source_table_key": "nonexistent_field",
@@ -628,7 +630,7 @@ class TestViewLinkValidation(APIBaseTest):
 
     def test_invalid_source_table(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/validate/",
             {
                 "source_table_name": "nonexistent_table_xyz",
                 "source_table_key": "id",
@@ -646,7 +648,7 @@ class TestViewLinkValidation(APIBaseTest):
 
     def test_invalid_joining_table(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/validate/",
             {
                 "source_table_name": "events",
                 "source_table_key": "distinct_id",
@@ -664,7 +666,7 @@ class TestViewLinkValidation(APIBaseTest):
 
     def test_invalid_expression(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/validate/",
             {
                 "source_table_name": "events",
                 "source_table_key": "invalid syntax here !!@#",
@@ -683,7 +685,7 @@ class TestViewLinkValidation(APIBaseTest):
 
     def test_missing_source_table_name(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/validate/",
             {
                 "source_table_key": "distinct_id",
                 "joining_table_name": "persons",
@@ -700,7 +702,7 @@ class TestViewLinkValidation(APIBaseTest):
 
     def test_missing_source_table_key(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/validate/",
             {
                 "source_table_name": "events",
                 "joining_table_name": "persons",
@@ -717,7 +719,7 @@ class TestViewLinkValidation(APIBaseTest):
 
     def test_missing_joining_table_name(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/validate/",
             {
                 "source_table_name": "events",
                 "source_table_key": "distinct_id",
@@ -734,7 +736,7 @@ class TestViewLinkValidation(APIBaseTest):
 
     def test_missing_joining_table_key(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/validate/",
             {
                 "source_table_name": "events",
                 "source_table_key": "distinct_id",
@@ -751,7 +753,7 @@ class TestViewLinkValidation(APIBaseTest):
 
     def test_with_join_key_type_error(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/validate/",
             {
                 "source_table_name": "events",
                 "source_table_key": "timestamp",  # DateTime field
@@ -776,7 +778,7 @@ class TestViewLinkValidation(APIBaseTest):
         self._create_external_source_table(prefix="test", table_name="bar")
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/validate/",
             {
                 "source_table_name": "postgres.test.foo",
                 "source_table_key": "email",
@@ -798,7 +800,7 @@ class TestViewLinkValidation(APIBaseTest):
     def test_expression_with_dot_notation_table(self, _):
         self._create_external_source_table(prefix="test", table_name="user")
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
+            f"/v1/environments/{self.team.id}/warehouse_view_links/validate/",
             {
                 "source_table_name": "postgres.test.user",
                 "source_table_key": "lower(email)",

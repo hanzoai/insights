@@ -30,7 +30,7 @@ Suggested entry format:
 
 ## 2026-07-02: GROUP BY elements_chain is scan-bound; URL filters prune by granule-spread, not row-selectivity; OFFSET re-runs the whole aggregation
 
-**Context.** The toolbar clickmap endpoint (`/api/element/stats/`, `GET_ELEMENTS` in `insights/models/element/sql.py`): raw single-team SQL grouping `events.elements_chain` by chain and event type over a team + date range + `$current_url` filter, ordered by count. Production p50 is fine (~250ms) but wide date ranges on pages whose URL is dense in the team's own traffic read hundreds of GiB and take seconds; the toolbar also paginates this with LIMIT/OFFSET.
+**Context.** The toolbar clickmap endpoint (`/v1/element/stats/`, `GET_ELEMENTS` in `insights/models/element/sql.py`): raw single-team SQL grouping `events.elements_chain` by chain and event type over a team + date range + `$current_url` filter, ordered by count. Production p50 is fine (~250ms) but wide date ranges on pages whose URL is dense in the team's own traffic read hundreds of GiB and take seconds; the toolbar also paginates this with LIMIT/OFFSET.
 
 **Question.** Can the wide-range tail be fixed per-query — PREWHERE, cheaper GROUP BY keys, memory bounds, or pagination — or is the scan irreducible?
 

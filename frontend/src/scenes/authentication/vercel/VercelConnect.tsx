@@ -59,7 +59,7 @@ export function VercelConnect(): JSX.Element {
             return
         }
 
-        fetch(`/api/vercel/connect/session?session=${encodeURIComponent(sessionKey)}`)
+        fetch(`/v1/vercel/connect/session?session=${encodeURIComponent(sessionKey)}`)
             .then((res) => {
                 if (!res.ok) {
                     throw new Error('Session expired or invalid')
@@ -101,7 +101,7 @@ export function VercelConnect(): JSX.Element {
         setLinking(true)
         setError(null)
 
-        fetch('/api/vercel/connect/complete', {
+        fetch('/v1/vercel/connect/complete', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

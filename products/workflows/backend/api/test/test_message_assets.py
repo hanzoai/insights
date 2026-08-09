@@ -62,7 +62,7 @@ class TestMessageAssets(DatastoreTestMixin, APIBaseTest):
         self.insights_flow = InsightsFlow.objects.create(team=self.team, name="Test Flow")
 
     def _base(self) -> str:
-        return f"/api/projects/{self.team.id}/insights_flows/{self.insights_flow.id}"
+        return f"/v1/projects/{self.team.id}/insights_flows/{self.insights_flow.id}"
 
     def _list(self, params=None):
         return self.client.get(f"{self._base()}/assets/", params)
@@ -223,7 +223,7 @@ class TestPersonEmails(DatastoreTestMixin, APIBaseTest):
         self.insights_flow = InsightsFlow.objects.create(team=self.team, name="Welcome flow")
 
     def _emails(self, params=None):
-        return self.client.get(f"/api/projects/{self.team.id}/persons/{self.person.uuid}/emails/", params)
+        return self.client.get(f"/v1/projects/{self.team.id}/persons/{self.person.uuid}/emails/", params)
 
     def _seed(self, invocation_id: str, *, person_id: Optional[str] = None, **kwargs):
         create_message_asset(
@@ -323,7 +323,7 @@ class TestPersonEmails(DatastoreTestMixin, APIBaseTest):
             scopes=["insights_flow:read"],
         )
         res = self.client.get(
-            f"/api/projects/{self.team.id}/persons/{self.person.uuid}/emails/",
+            f"/v1/projects/{self.team.id}/persons/{self.person.uuid}/emails/",
             headers={"authorization": f"Bearer {key}"},
         )
         assert res.status_code == 403, res.json()

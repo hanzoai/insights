@@ -16,7 +16,7 @@ class TestReviewUserSettingsAPI(APIBaseTest):
 
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/api/projects/{self.team.id}/review_hog/settings/"
+        self.url = f"/v1/projects/{self.team.id}/review_hog/settings/"
 
     def test_get_creates_the_row_with_defaults(self) -> None:
         # First read auto-creates the singleton with the model defaults, so the UI never special-cases
@@ -105,7 +105,7 @@ class TestReviewUserSettingsAPI(APIBaseTest):
         # raw-id create kwarg used to contradict each other: the row landed on the parent, the get
         # never matched, and every call after the first 500ed on the unique constraint.
         env = Team.objects.create(organization=self.organization, parent_team=self.team, name="env")
-        url = f"/api/projects/{env.id}/review_hog/settings/"
+        url = f"/v1/projects/{env.id}/review_hog/settings/"
 
         first = self.client.get(url)
         second = self.client.patch(url, {"urgency_threshold": "must_fix"}, format="json")

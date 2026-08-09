@@ -32,7 +32,7 @@ async function ensureIdpConfigId(organizationId: string, domain: OrganizationDom
     }
     const config = await identityProviderConfigsCreate(organizationId, { name: domain.domain })
     try {
-        await api.update(`api/organizations/${organizationId}/domains/${domain.id}`, {
+        await api.update(`v1/organizations/${organizationId}/domains/${domain.id}`, {
             identity_provider_config: config.id,
         })
     } catch (error) {
@@ -59,7 +59,7 @@ async function refreshDomain(
     domainId: string,
     replaceDomain: (domain: OrganizationDomainType) => void
 ): Promise<OrganizationDomainType> {
-    const domain = await api.get<OrganizationDomainType>(`api/organizations/${organizationId}/domains/${domainId}`)
+    const domain = await api.get<OrganizationDomainType>(`v1/organizations/${organizationId}/domains/${domainId}`)
     replaceDomain(domain)
     return domain
 }
@@ -719,11 +719,11 @@ export const verifiedDomainsLogic = kea<verifiedDomainsLogicType>([
             [] as OrganizationDomainType[],
             {
                 loadVerifiedDomains: async () =>
-                    (await api.get(`api/organizations/${values.currentOrganizationId}/domains`))
+                    (await api.get(`v1/organizations/${values.currentOrganizationId}/domains`))
                         .results as OrganizationDomainType[],
                 addVerifiedDomain: async (domain: string) => {
                     const response = await api.create<OrganizationDomainType>(
-                        `api/organizations/${values.currentOrganizationId}/domains`,
+                        `v1/organizations/${values.currentOrganizationId}/domains`,
                         {
                             domain,
                         }
@@ -731,7 +731,7 @@ export const verifiedDomainsLogic = kea<verifiedDomainsLogicType>([
                     return [...values.verifiedDomains, response]
                 },
                 deleteVerifiedDomain: async (id: string) => {
-                    await api.delete(`api/organizations/${values.currentOrganizationId}/domains/${id}`)
+                    await api.delete(`v1/organizations/${values.currentOrganizationId}/domains/${id}`)
                     return values.verifiedDomains.filter((domain) => domain.id !== id)
                 },
             },
@@ -741,7 +741,7 @@ export const verifiedDomainsLogic = kea<verifiedDomainsLogicType>([
             {
                 updateDomain: async (payload: OrganizationDomainUpdatePayload) => {
                     const response = await api.update<OrganizationDomainType>(
-                        `api/organizations/${values.currentOrganizationId}/domains/${payload.id}`,
+                        `v1/organizations/${values.currentOrganizationId}/domains/${payload.id}`,
                         { ...payload, id: undefined }
                     )
                     toast.success('Domain updated successfully! Changes will take effect immediately.')
@@ -750,7 +750,7 @@ export const verifiedDomainsLogic = kea<verifiedDomainsLogicType>([
                 },
                 verifyDomain: async () => {
                     const response = await api.create<OrganizationDomainType>(
-                        `api/organizations/${values.currentOrganizationId}/domains/${values.verifyModal}/verify`
+                        `v1/organizations/${values.currentOrganizationId}/domains/${values.verifyModal}/verify`
                     )
                     if (response.is_verified) {
                         toast.success('Domain verified successfully.')
@@ -856,7 +856,7 @@ export const verifiedDomainsLogic = kea<verifiedDomainsLogicType>([
                         params.page = String(page)
                     }
                     const queryString = new URLSearchParams(params).toString()
-                    const url = `api/organizations/${values.currentOrganizationId}/domains/${domainId}/scim/logs${queryString ? `?${queryString}` : ''}`
+                    const url = `v1/organizations/${values.currentOrganizationId}/domains/${domainId}/scim/logs${queryString ? `?${queryString}` : ''}`
                     const response = await api.get(url)
                     await breakpoint()
                     return response

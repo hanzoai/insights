@@ -161,7 +161,7 @@ export function appEditorUrl(
     // are passed. `appUrl` is an extra `redirect_to_site` param.
     params['appUrl'] = appUrl
     params['generateOnly'] = options?.generateOnly
-    return '/api/user/redirect_to_site/' + encodeParams(params, '?')
+    return '/v1/user/redirect_to_site/' + encodeParams(params, '?')
 }
 
 /**

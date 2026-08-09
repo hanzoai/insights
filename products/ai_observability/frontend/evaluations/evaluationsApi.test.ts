@@ -48,14 +48,14 @@ describe('evaluationsApi', () => {
         jest.mocked(evaluationsList)
             .mockResolvedValueOnce({
                 count: 2,
-                next: '/api/projects/1/evaluations/?limit=100&offset=1',
+                next: '/v1/projects/1/evaluations/?limit=100&offset=1',
                 previous: null,
                 results: [evaluationApi('1')],
             })
             .mockResolvedValueOnce({
                 count: 2,
                 next: null,
-                previous: '/api/projects/1/evaluations/?limit=100',
+                previous: '/v1/projects/1/evaluations/?limit=100',
                 results: [evaluationApi('2')],
             })
 

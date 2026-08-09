@@ -15,7 +15,7 @@ import { initKeaTests } from '~/test/init'
 import { BillingType } from '~/types'
 
 const seedBilling = async (billing: Partial<BillingType> | null): Promise<void> => {
-    useMocks({ get: { '/api/billing': () => [200, billing ?? {}] } })
+    useMocks({ get: { '/v1/billing': () => [200, billing ?? {}] } })
     billingLogic.mount()
     await expectLogic(billingLogic, () => billingLogic.actions.loadBilling()).toFinishAllListeners()
 }
@@ -40,7 +40,7 @@ describe('paymentEntryLogic', () => {
         })
 
         const setupActivate = (activate: [number] | [number, unknown]): void => {
-            useMocks({ post: { '/api/billing/activate': () => activate } })
+            useMocks({ post: { '/v1/billing/activate': () => activate } })
             logic = paymentEntryLogic()
             logic.mount()
         }
@@ -107,7 +107,7 @@ describe('paymentEntryLogic', () => {
         it('opens the payment entry modal without calling activate', async () => {
             await seedBilling({ subscription_level: 'free' })
             const activate = jest.fn(() => [200, { success: true }] as [number, Record<string, unknown>])
-            useMocks({ post: { '/api/billing/activate': activate } })
+            useMocks({ post: { '/v1/billing/activate': activate } })
             logic = paymentEntryLogic()
             logic.mount()
 

@@ -31,7 +31,7 @@ class TestDraftCustomManifest(APIBaseTest):
         self.addCleanup(flag_patcher.stop)
 
     def _url(self, team_id: int | None = None) -> str:
-        return f"/api/environments/{team_id or self.team.pk}/external_data_sources/draft_custom_manifest/"
+        return f"/v1/environments/{team_id or self.team.pk}/external_data_sources/draft_custom_manifest/"
 
     def _approve_ai(self) -> None:
         self.organization.is_ai_data_processing_approved = True

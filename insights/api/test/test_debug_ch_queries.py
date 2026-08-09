@@ -21,17 +21,17 @@ class TestDebugCHQuery(APIBaseTest):
 
     def test_denied(self):
         with patch("insights.api.debug_ch_queries.DEBUG", True):
-            resp = self.client.get("/api/debug_ch_queries/")
+            resp = self.client.get("/v1/debug_ch_queries/")
             self.assertEqual(resp.status_code, HTTP_200_OK)
 
         with patch("insights.api.debug_ch_queries.DEBUG", False):
-            resp = self.client.get("/api/debug_ch_queries/")
+            resp = self.client.get("/v1/debug_ch_queries/")
             self.assertEqual(resp.status_code, HTTP_403_FORBIDDEN)
 
             self.user.is_staff = True
             self.user.save()
 
-            resp = self.client.get("/api/debug_ch_queries/")
+            resp = self.client.get("/v1/debug_ch_queries/")
             self.assertEqual(resp.status_code, HTTP_200_OK)
 
     def test_non_staff_denied_off_cloud(self):
@@ -40,7 +40,7 @@ class TestDebugCHQuery(APIBaseTest):
         self.assertFalse(self.user.is_staff)
 
         with self.is_cloud(False), patch("insights.api.debug_ch_queries.DEBUG", False):
-            resp = self.client.get("/api/debug_ch_queries/?insight_id=1")
+            resp = self.client.get("/v1/debug_ch_queries/?insight_id=1")
 
         self.assertEqual(resp.status_code, HTTP_403_FORBIDDEN, resp.content)
 
@@ -55,7 +55,7 @@ class TestDebugCHQuery(APIBaseTest):
         self.user.is_staff = True
         self.user.save()
 
-        resp = self.client.get("/api/debug_ch_queries/?insight_id=1")
+        resp = self.client.get("/v1/debug_ch_queries/?insight_id=1")
 
         self.assertEqual(resp.status_code, HTTP_200_OK, resp.content)
         self.assertTrue(mock_sync_execute.call_args_list)
@@ -71,7 +71,7 @@ class TestDebugCHQuery(APIBaseTest):
         )
         self.client.force_login(new_user)
 
-        resp = self.client.get("/api/debug_ch_queries/?insight_id=1")
+        resp = self.client.get("/v1/debug_ch_queries/?insight_id=1")
 
         self.assertEqual(resp.status_code, HTTP_403_FORBIDDEN, resp.content)
 
@@ -93,7 +93,7 @@ class TestDebugCHQuery(APIBaseTest):
         self.client.logout()
 
         resp = self.client.get(
-            "/api/debug_ch_queries/slowest_queries/?hours=1",
+            "/v1/debug_ch_queries/slowest_queries/?hours=1",
             headers={"authorization": f"Bearer {token}"},
         )
         self.assertEqual(resp.status_code, HTTP_403_FORBIDDEN)
@@ -108,7 +108,7 @@ class TestDebugCHQuery(APIBaseTest):
         self.client.logout()
 
         resp = self.client.get(
-            "/api/debug_ch_queries/slowest_queries/?hours=1",
+            "/v1/debug_ch_queries/slowest_queries/?hours=1",
             headers={"authorization": f"Bearer {token}"},
         )
         self.assertEqual(resp.status_code, HTTP_403_FORBIDDEN, resp.content)
@@ -120,7 +120,7 @@ class TestDebugCHQuery(APIBaseTest):
         self.client.logout()
 
         resp = self.client.get(
-            "/api/debug_ch_queries/slowest_queries/?hours=1",
+            "/v1/debug_ch_queries/slowest_queries/?hours=1",
             headers={"authorization": f"Bearer {token}"},
         )
         self.assertEqual(resp.status_code, HTTP_403_FORBIDDEN)
@@ -137,7 +137,7 @@ class TestDebugCHQuery(APIBaseTest):
             "insights.api.debug_ch_queries.sync_execute",
             return_value=[(bucket, "exposures", 10, 100)],
         ):
-            resp = self.client.get("/api/debug_ch_queries/cache_growth/?hours=336")
+            resp = self.client.get("/v1/debug_ch_queries/cache_growth/?hours=336")
 
         self.assertEqual(resp.status_code, HTTP_200_OK, resp.content)
         data = resp.json()
@@ -156,7 +156,7 @@ class TestDebugCHQuery(APIBaseTest):
         self.client.logout()
 
         resp = self.client.get(
-            "/api/debug_ch_queries/slowest_queries/?hours=1",
+            "/v1/debug_ch_queries/slowest_queries/?hours=1",
             headers={"authorization": f"Bearer {token}"},
         )
         self.assertEqual(resp.status_code, HTTP_200_OK, resp.content)

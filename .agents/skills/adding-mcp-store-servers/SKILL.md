@@ -39,7 +39,7 @@ Adding a server is a small PR to that file.
    - `name` — the vendor's own casing ("PagerDuty", not "Pagerduty").
    - `description` — one sentence, sentence case, verb-first, matching the existing entries ("Manage Linear issues, projects, and team workflows."). No marketing copy.
    - `category` — the closest of `business` / `data` / `design` / `dev` / `infra` / `productivity`.
-   - `icon_domain` — the vendor's primary brand domain (`linear.app`, not `mcp.linear.app`). Verify logo.dev has it: `GET /api/projects/@current/insights_functions/icons/?query=<vendor>` from a dev session, or check `https://img.logo.dev/<domain>` renders a real logo.
+   - `icon_domain` — the vendor's primary brand domain (`linear.app`, not `mcp.linear.app`). Verify logo.dev has it: `GET /v1/projects/@current/insights_functions/icons/?query=<vendor>` from a dev session, or check `https://img.logo.dev/<domain>` renders a real logo.
    - `docs_url` — the vendor's MCP docs page when they have one.
 
 4. **Verify end-to-end when you can (Gate B).**

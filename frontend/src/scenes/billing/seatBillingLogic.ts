@@ -125,7 +125,7 @@ export const seatBillingLogic = kea<seatBillingLogicType>([
             {
                 loadOrgSeats: async (): Promise<SeatData[]> => {
                     try {
-                        const response = await api.get(`api/seats/?product_key=${CODE_PRODUCT_KEY}`)
+                        const response = await api.get(`v1/seats/?product_key=${CODE_PRODUCT_KEY}`)
                         return Array.isArray(response) ? response : (response?.seats ?? [])
                     } catch (e) {
                         if (e instanceof ApiError && e.status === 403) {
@@ -191,7 +191,7 @@ export const seatBillingLogic = kea<seatBillingLogicType>([
     listeners(({ actions }) => ({
         adminCancelSeat: async ({ userDistinctId }) => {
             try {
-                await api.delete(`api/seats/${userDistinctId}/?product_key=${CODE_PRODUCT_KEY}`)
+                await api.delete(`v1/seats/${userDistinctId}/?product_key=${CODE_PRODUCT_KEY}`)
                 toast.success('Seat canceled')
                 actions.loadOrgSeats()
             } catch (e) {

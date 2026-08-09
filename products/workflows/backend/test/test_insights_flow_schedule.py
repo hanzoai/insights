@@ -39,15 +39,15 @@ class TestInsightsFlowScheduleAPI(APIBaseTest):
                 }
             ],
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows", payload)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", payload)
         assert response.status_code == status.HTTP_201_CREATED, response.json()
         return response.json()
 
     def _schedules_url(self, workflow_id):
-        return f"/api/projects/{self.team.id}/insights_flows/{workflow_id}/schedules/"
+        return f"/v1/projects/{self.team.id}/insights_flows/{workflow_id}/schedules/"
 
     def _schedule_detail_url(self, workflow_id, schedule_id):
-        return f"/api/projects/{self.team.id}/insights_flows/{workflow_id}/schedules/{schedule_id}/"
+        return f"/v1/projects/{self.team.id}/insights_flows/{workflow_id}/schedules/{schedule_id}/"
 
     def test_create_schedule(self):
         workflow = self._create_batch_workflow()
@@ -150,7 +150,7 @@ class TestInsightsFlowScheduleAPI(APIBaseTest):
         workflow = self._create_batch_workflow()
         self.client.post(self._schedules_url(workflow["id"]), SCHEDULE_DATA)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{workflow['id']}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_flows/{workflow['id']}/")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert "schedules" in data
@@ -161,7 +161,7 @@ class TestInsightsFlowScheduleAPI(APIBaseTest):
     def test_workflow_get_includes_empty_schedules_when_none(self):
         workflow = self._create_batch_workflow()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{workflow['id']}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_flows/{workflow['id']}/")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["schedules"] == []
 
@@ -243,7 +243,7 @@ class TestInsightsFlowScheduleAPI(APIBaseTest):
     "products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job.create_batch_insights_flow_job_invocation"
 )
 class TestProcessDueSchedules(APIBaseTest):
-    INTERNAL_URL = "/api/internal/insights_flows/process_due_schedules"
+    INTERNAL_URL = "/v1/internal/insights_flows/process_due_schedules"
 
     def _create_workflow_with_schedule(self, next_run_at=None, rrule="FREQ=HOURLY;INTERVAL=1", starts_at=None):
         insights_flow = InsightsFlow.objects.create(
@@ -411,7 +411,7 @@ class TestProcessDueSchedules(APIBaseTest):
 @override_settings(INTERNAL_API_SECRET="test-secret")
 @unittest.mock.patch("products.workflows.backend.api.insights_flow.create_insights_flow_scheduled_invocation")
 class TestProcessDueScheduleTriggers(APIBaseTest):
-    INTERNAL_URL = "/api/internal/insights_flows/process_due_schedules"
+    INTERNAL_URL = "/v1/internal/insights_flows/process_due_schedules"
 
     def _create_workflow_with_schedule(self, next_run_at=None, rrule="FREQ=HOURLY;INTERVAL=1"):
         insights_flow = InsightsFlow.objects.create(

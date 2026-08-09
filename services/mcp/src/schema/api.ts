@@ -14,7 +14,7 @@ export interface ApiUser {
     is_staff?: boolean
     organizations: Array<{ id: string; name: string }>
     // `team` and `organization` mirror the Django User's nullable `current_team`
-    // / `current_organization` FKs — the `/api/users/@me/` serializer returns
+    // / `current_organization` FKs — the `/v1/users/@me/` serializer returns
     // `null` when the user has no current selection (e.g. newly provisioned
     // accounts or users who left their last org). Callers must null-check.
     team: {
@@ -26,11 +26,11 @@ export interface ApiUser {
     organization: {
         id: string
         name: string
-        // `/api/users/@me/` embeds the full OrganizationSerializer for the
+        // `/v1/users/@me/` embeds the full OrganizationSerializer for the
         // current org, so the consent flag is always present on the wire; it is
         // optional here because some tests construct partial users.
         is_ai_data_processing_approved?: boolean | null
-        // `/api/users/@me/` embeds the full OrganizationSerializer, so the org's
+        // `/v1/users/@me/` embeds the full OrganizationSerializer, so the org's
         // plan entitlements ride along too; used by the fallback path when a
         // team-scoped token can't fetch the org directly.
         available_product_features?: Array<{ key: string }> | null

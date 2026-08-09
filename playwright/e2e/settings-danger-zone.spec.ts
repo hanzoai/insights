@@ -34,7 +34,7 @@ test.describe('Project danger zone', () => {
             // Deletion is async: the API marks is_pending_deletion and the app
             // hard-navigates to the lockout screen.
             await page.waitForURL(/\/project-pending-deletion/, { timeout: 20_000 })
-            const resp = await page.request.get(`/api/projects/${workspace.team_id}/`)
+            const resp = await page.request.get(`/v1/projects/${workspace.team_id}/`)
             expect((await resp.json()).is_pending_deletion).toBe(true)
         })
     })

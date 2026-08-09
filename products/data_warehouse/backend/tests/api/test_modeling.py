@@ -28,7 +28,7 @@ class TestDag(APIBaseTest):
         DataWarehouseModelPath.objects.create_from_saved_query(child_saved_query)
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/warehouse_dag",
+            f"/v1/projects/{self.team.id}/warehouse_dag",
         )
         self.assertEqual(response.status_code, 200, response.content)
         dag = response.json()

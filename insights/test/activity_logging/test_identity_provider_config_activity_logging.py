@@ -14,7 +14,7 @@ class TestIdentityProviderConfigActivityLogging(APIBaseTest):
 
     def _create_config(self, name="Okta production"):
         response = self.client.post(
-            "/api/organizations/@current/identity_provider_configs/",
+            "/v1/organizations/@current/identity_provider_configs/",
             {"name": name},
         )
         self.assertEqual(response.status_code, 201)
@@ -50,7 +50,7 @@ class TestIdentityProviderConfigActivityLogging(APIBaseTest):
         config = self._create_config(f"{name_prefix} config")
 
         response = self.client.patch(
-            f"/api/organizations/@current/identity_provider_configs/{config.id}/",
+            f"/v1/organizations/@current/identity_provider_configs/{config.id}/",
             {field: value},
         )
         self.assertEqual(response.status_code, 200)

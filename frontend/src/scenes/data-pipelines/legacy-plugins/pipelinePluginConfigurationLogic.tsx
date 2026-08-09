@@ -230,7 +230,7 @@ export const pipelinePluginConfigurationLogic = kea<pipelinePluginConfigurationL
 
                     return (
                         plugins[props.pluginId] ||
-                        api.get(`api/organizations/${values.currentOrganizationId}/plugins/${props.pluginId}`)
+                        api.get(`v1/organizations/${values.currentOrganizationId}/plugins/${props.pluginId}`)
                     )
                 },
             },

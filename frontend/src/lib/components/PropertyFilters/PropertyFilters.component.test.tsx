@@ -41,24 +41,24 @@ describe('PropertyFilters recent selections', () => {
     function useSetupMocks(overrides: Record<string, unknown> = {}): void {
         useMocks({
             get: {
-                '/api/projects/:team/event_definitions': mockGetEventDefinitions,
-                '/api/projects/:team/property_definitions': mockGetPropertyDefinitions,
-                '/api/projects/:team/actions': { results: [mockActionDefinition] },
-                '/api/environments/:team/persons/properties': [],
-                '/api/environments/:team/events/values': {
+                '/v1/projects/:team/event_definitions': mockGetEventDefinitions,
+                '/v1/projects/:team/property_definitions': mockGetPropertyDefinitions,
+                '/v1/projects/:team/actions': { results: [mockActionDefinition] },
+                '/v1/environments/:team/persons/properties': [],
+                '/v1/environments/:team/events/values': {
                     results: [{ name: 'Chrome' }, { name: 'Firefox' }, { name: 'Safari' }],
                     refreshing: false,
                 },
-                '/api/event/values/': {
+                '/v1/event/values/': {
                     results: [{ name: 'Chrome' }, { name: 'Firefox' }, { name: 'Safari' }],
                     refreshing: false,
                 },
-                '/api/environments/:team/persons/values': [{ name: 'alice@example.com' }, { name: 'bob@example.com' }],
-                '/api/environments/:team_id/quick_filters/': { results: [] },
+                '/v1/environments/:team/persons/values': [{ name: 'alice@example.com' }, { name: 'bob@example.com' }],
+                '/v1/environments/:team_id/quick_filters/': { results: [] },
                 ...overrides,
             },
             post: {
-                '/api/environments/:team/query': { results: [] },
+                '/v1/environments/:team/query': { results: [] },
             },
         })
     }
@@ -187,7 +187,7 @@ describe('PropertyFilters recent selections', () => {
             description: 'pageview URL',
             taxonomicGroupTypes: [TaxonomicFilterGroupType.PageviewUrls, TaxonomicFilterGroupType.EventProperties],
             mockOverrides: {
-                '/api/environments/:team/events/values': [
+                '/v1/environments/:team/events/values': [
                     { name: 'https://example.com/pricing' },
                     { name: 'https://example.com/blog' },
                 ],
@@ -204,7 +204,7 @@ describe('PropertyFilters recent selections', () => {
             description: 'screen name',
             taxonomicGroupTypes: [TaxonomicFilterGroupType.Screens, TaxonomicFilterGroupType.EventProperties],
             mockOverrides: {
-                '/api/environments/:team/events/values': [{ name: 'HomeScreen' }, { name: 'SettingsScreen' }],
+                '/v1/environments/:team/events/values': [{ name: 'HomeScreen' }, { name: 'SettingsScreen' }],
             },
             tabTestId: 'taxonomic-tab-screens',
             searchQuery: 'Home',
@@ -216,7 +216,7 @@ describe('PropertyFilters recent selections', () => {
             description: 'email address',
             taxonomicGroupTypes: [TaxonomicFilterGroupType.EmailAddresses, TaxonomicFilterGroupType.PersonProperties],
             mockOverrides: {
-                '/api/environments/:team/persons/values': [{ name: 'alice@example.com' }, { name: 'bob@example.com' }],
+                '/v1/environments/:team/persons/values': [{ name: 'alice@example.com' }, { name: 'bob@example.com' }],
             },
             tabTestId: 'taxonomic-tab-email_addresses',
             searchQuery: 'alice',
@@ -281,7 +281,7 @@ describe('PropertyFilters recent selections', () => {
 
     it('recents show at top of suggested filters before search', async () => {
         useSetupMocks({
-            '/api/environments/:team/events/values': [
+            '/v1/environments/:team/events/values': [
                 { name: 'https://example.com/first' },
                 { name: 'https://example.com/second' },
             ],
@@ -311,7 +311,7 @@ describe('PropertyFilters recent selections', () => {
 
     it('search hint shows alongside recents', async () => {
         useSetupMocks({
-            '/api/environments/:team/events/values': [{ name: 'https://example.com/pricing' }],
+            '/v1/environments/:team/events/values': [{ name: 'https://example.com/pricing' }],
         })
         const { onChange } = renderFilters({
             taxonomicGroupTypes: [TaxonomicFilterGroupType.PageviewUrls, TaxonomicFilterGroupType.EventProperties],
@@ -338,7 +338,7 @@ describe('PropertyFilters recent selections', () => {
 
     it('recents prefix disappears when searching', async () => {
         useSetupMocks({
-            '/api/environments/:team/events/values': [{ name: 'https://example.com/pricing' }],
+            '/v1/environments/:team/events/values': [{ name: 'https://example.com/pricing' }],
         })
         const { onChange } = renderFilters({
             taxonomicGroupTypes: [TaxonomicFilterGroupType.PageviewUrls, TaxonomicFilterGroupType.EventProperties],
@@ -404,7 +404,7 @@ describe('PropertyFilters recent selections', () => {
         for (const query of searches) {
             cleanup()
             useSetupMocks({
-                '/api/environments/:team/events/values': [{ name: `https://${query}/page` }],
+                '/v1/environments/:team/events/values': [{ name: `https://${query}/page` }],
             })
             const { onChange } = renderFilters({ taxonomicGroupTypes: groupTypes })
 
@@ -439,7 +439,7 @@ describe('PropertyFilters recent selections', () => {
 
     it('searching in recents matches by property filter value', async () => {
         useSetupMocks({
-            '/api/environments/:team/events/values': [{ name: 'https://example.com/pricing' }],
+            '/v1/environments/:team/events/values': [{ name: 'https://example.com/pricing' }],
         })
         const { onChange } = renderFilters({
             taxonomicGroupTypes: [TaxonomicFilterGroupType.PageviewUrls, TaxonomicFilterGroupType.EventProperties],
