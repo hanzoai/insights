@@ -18,16 +18,16 @@ import { waitForHogInvocationResultsMvReady } from '~/tests/helpers/script-invoc
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { Hub, Team } from '../../types'
-import { FixtureInsightsFlowBuilder } from '../_tests/builders/insightsflow.builder'
+import { FixtureFlowBuilder } from '../_tests/builders/flow.builder'
 import { INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
     insertInsightsFunction as _insertInsightsFunction,
     createHogExecutionGlobals,
     insertInsightsFunctionTemplate,
 } from '../_tests/fixtures'
-import { insertInsightsFlow } from '../_tests/fixtures-insightsflows'
+import { insertFlow } from '../_tests/fixtures-flows'
 import { CdpConsumerBaseDeps } from '../consumers/cdp-base.consumer'
-import { CdpCyclotronWorkerInsightsFlow } from '../consumers/cdp-cyclotron-worker-insightsflow.consumer'
+import { CdpCyclotronWorkerFlow } from '../consumers/cdp-cyclotron-worker-flow.consumer'
 import { CdpCyclotronWorker } from '../consumers/cdp-cyclotron-worker.consumer'
 import { CdpEventsConsumer } from '../consumers/cdp-events.consumer'
 import { CdpRerunWorkerConsumer } from '../consumers/cdp-rerun-worker.consumer'
@@ -81,7 +81,7 @@ describe('CDP script invocation rerun e2e', () => {
     let mockProducerObserver: KafkaProducerObserver
     let eventsConsumer: CdpEventsConsumer
     let cyclotronWorker: CdpCyclotronWorker
-    let hogflowWorker: CdpCyclotronWorkerInsightsFlow
+    let hogflowWorker: CdpCyclotronWorkerFlow
     let rerunManager: RerunJobManager
     let rerunWorker: CdpRerunWorkerConsumer
     let kafkaQueue: CyclotronJobQueueKafka
@@ -515,7 +515,7 @@ describe('CDP script invocation rerun e2e', () => {
             ],
         })
 
-        const flow = new FixtureInsightsFlowBuilder()
+        const flow = new FixtureFlowBuilder()
             .withTeamId(team.id)
             .withStatus('active')
             .withWorkflow({
@@ -539,11 +539,11 @@ describe('CDP script invocation rerun e2e', () => {
                 ],
             })
             .build()
-        await insertInsightsFlow(hub.postgres, flow)
+        await insertFlow(hub.postgres, flow)
 
         // The script-flow worker polls the same postgres-v2 backend the events consumer
         // routes flows to (hogflowQueue in beforeEach).
-        hogflowWorker = new CdpCyclotronWorkerInsightsFlow(hub, cdpDeps, postgresV2Queue)
+        hogflowWorker = new CdpCyclotronWorkerFlow(hub, cdpDeps, postgresV2Queue)
         await hogflowWorker.start()
 
         // ── 1. Original flow runs to completion — fetch fires exactly once ──────────

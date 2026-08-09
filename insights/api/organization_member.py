@@ -3,7 +3,6 @@ from typing import Any, cast
 from django.db.models import F, Model, Prefetch, QuerySet
 from django.shortcuts import get_object_or_404
 
-from django_otp.plugins.otp_totp.models import TOTPDevice
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from opentelemetry import trace
@@ -36,7 +35,6 @@ from insights.helpers.trigram_search import (
 )
 from insights.models import OrganizationMembership
 from insights.models.user import User
-from insights.models.webauthn_credential import WebauthnCredential
 from insights.permissions import TimeSensitiveActionPermission, extract_organization
 from insights.rbac.user_access_control import get_project_scoped_visible_membership_ids
 from insights.utils import hanzo_insights
@@ -86,7 +84,6 @@ class OrganizationMemberObjectPermissions(BasePermission):
 
 class OrganizationMemberSerializer(SearchMatchTypeSerializerMixin, serializers.ModelSerializer):
     user = UserBasicSerializer(read_only=True)
-    is_2fa_enabled = serializers.SerializerMethodField()
     has_social_auth = serializers.SerializerMethodField()
     last_login = serializers.DateTimeField(read_only=True)
 
@@ -98,19 +95,11 @@ class OrganizationMemberSerializer(SearchMatchTypeSerializerMixin, serializers.M
             "level",
             "joined_at",
             "updated_at",
-            "is_2fa_enabled",
             "has_social_auth",
             "last_login",
             "search_match_type",
         ]
         read_only_fields = ["id", "joined_at", "updated_at"]
-
-    def get_is_2fa_enabled(self, instance: OrganizationMembership) -> bool:
-        # Uses prefetched relations to avoid N+1 queries
-        user = instance.user
-        has_totp = len(user.totpdevice_set.all()) > 0  # type: ignore[attr-defined]
-        has_passkeys_for_2fa = bool(user.passkeys_enabled_for_2fa) and len(user.webauthn_credentials.all()) > 0
-        return has_totp or has_passkeys_for_2fa
 
     def get_has_social_auth(self, instance: OrganizationMembership) -> bool:
         return len(instance.user.social_auth.all()) > 0
@@ -175,15 +164,7 @@ class OrganizationMemberViewSet(
     queryset = (
         organization_members_base_queryset()
         .prefetch_related(
-            Prefetch(
-                "user__totpdevice_set",
-                queryset=TOTPDevice.objects.filter(confirmed=True),
-            ),
             Prefetch("user__social_auth", queryset=UserSocialAuth.objects.all()),
-            Prefetch(
-                "user__webauthn_credentials",
-                queryset=WebauthnCredential.objects.filter(verified=True),
-            ),
         )
         .annotate(last_login=F("user__last_login"))
     )

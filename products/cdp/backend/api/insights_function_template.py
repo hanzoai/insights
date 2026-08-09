@@ -125,7 +125,7 @@ class PublicInsightsFunctionTemplateViewSet(
         # The dedicated public catalog endpoint is intentionally anonymous. The project-nested
         # mount is part of the authenticated app and must not expose templates (including hidden
         # ones) to anonymous callers.
-        if self.request.path.startswith("/api/public_insights_function_templates"):
+        if self.request.path.startswith("/v1/public_insights_function_templates"):
             return [permissions.AllowAny()]
         # IsAuthenticated blocks anonymous callers; APIScopePermission enforces the `insights_function`
         # scope (and team/org scoping) for personal API key / OAuth tokens. IsAuthenticated must stay
@@ -151,7 +151,7 @@ class PublicInsightsFunctionTemplateViewSet(
             # email, twilio, webhook) are internal building blocks. The workflow editor needs them on
             # the authenticated project mount to render action configuration; the frontend hides them
             # from the destinations chooser separately. Only strip them from the anonymous catalog.
-            if self.request.path.startswith("/api/public_insights_function_templates"):
+            if self.request.path.startswith("/v1/public_insights_function_templates"):
                 queryset = queryset.exclude(status="hidden")
 
         return queryset

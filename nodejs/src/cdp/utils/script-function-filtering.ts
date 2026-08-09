@@ -2,7 +2,8 @@ import { ExecResult } from '@hanzo/scriptvm'
 import { DateTime } from 'luxon'
 import { Counter, Histogram } from 'prom-client'
 
-import { InsightsFlow } from '~/cdp/schema/insightsflow'
+
+import { Flow } from '~/cdp/schema/flow'
 import { parseJSON } from '~/common/utils/json-parse'
 import { logger } from '~/common/utils/logger'
 import { createTrackedRE2 } from '~/common/utils/tracked-re2'
@@ -350,14 +351,14 @@ function preFilterResult(
  * Used by both the HogExecutorService (for destinations) and HogTransformerService (for transformations).
  */
 export async function filterFunctionInstrumented(options: {
-    fn: InsightsFunctionType | InsightsFlow
+    fn: InsightsFunctionType | Flow
     filterGlobals: InsightsFunctionFilterGlobals
     /** Optional filters to use instead of those on the function */
     filters: InsightsFunctionType['filters']
 }): Promise<HogFilterResult> {
     const { fn, filters, filterGlobals } = options
     const type = 'type' in fn ? fn.type : 'hogflow'
-    const fnKind = 'type' in fn ? 'InsightsFunction' : 'InsightsFlow'
+    const fnKind = 'type' in fn ? 'InsightsFunction' : 'Flow'
     const logs: LogEntry[] = []
     const metrics: MinimalAppMetric[] = []
 

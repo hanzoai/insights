@@ -26,11 +26,11 @@ import { CdpConsumerBaseDeps } from './cdp/consumers/cdp-base.consumer'
 import { CdpCohortMembershipConsumer } from './cdp/consumers/cdp-cohort-membership.consumer'
 import { CdpCyclotronWorkerBatchResolve } from './cdp/consumers/cdp-cyclotron-worker-batch-resolve.consumer'
 import { CdpCyclotronWorkerEmail } from './cdp/consumers/cdp-cyclotron-worker-email.consumer'
-import { CdpCyclotronWorkerInsightsFlow } from './cdp/consumers/cdp-cyclotron-worker-insightsflow.consumer'
+import { CdpCyclotronWorkerFlow } from './cdp/consumers/cdp-cyclotron-worker-flow.consumer'
 import { CdpCyclotronWorker } from './cdp/consumers/cdp-cyclotron-worker.consumer'
 import { CdpDatawarehouseEventsConsumer } from './cdp/consumers/cdp-data-warehouse-events.consumer'
 import { CdpEventsConsumer } from './cdp/consumers/cdp-events.consumer'
-import { CdpHogflowSubscriptionMatcherConsumer } from './cdp/consumers/cdp-insightsflow-subscription-matcher.consumer'
+import { CdpHogflowSubscriptionMatcherConsumer } from './cdp/consumers/cdp-flow-subscription-matcher.consumer'
 import { CdpInternalEventsConsumer } from './cdp/consumers/cdp-internal-event.consumer'
 import { CdpLegacyEventsConsumer } from './cdp/consumers/cdp-legacy-event.consumer'
 import { CdpPersonUpdatesConsumer } from './cdp/consumers/cdp-person-updates-consumer'
@@ -40,9 +40,9 @@ import { createCdpProducerRegistry } from './cdp/outputs/producer-registry'
 import { CdpProducerName } from './cdp/outputs/producers'
 import { createCdpOutputsRegistry } from './cdp/outputs/registry'
 import { CyclotronV2JanitorService, CyclotronV2Manager, CyclotronV2Worker } from './cdp/services/cyclotron-v2'
-import { InsightsFlowScheduleService } from './cdp/services/insightsflow-schedule/insightsflow-schedule.service'
-import { HOGFLOW_BATCH_RESOLVE_QUEUE } from './cdp/services/insightsflows/batch-resolver.types'
-import { InsightsFlowBatchPersonQueryService } from './cdp/services/insightsflows/insightsflow-batch-person-query.service'
+import { FlowScheduleService } from './cdp/services/flow-schedule/flow-schedule.service'
+import { FLOW_BATCH_RESOLVE_QUEUE } from './cdp/services/flows/batch-resolver.types'
+import { FlowBatchPersonQueryService } from './cdp/services/flows/flow-batch-person-query.service'
 import { CyclotronJobQueueKafka } from './cdp/services/job-queue/job-queue-kafka'
 import { CyclotronJobQueuePostgres } from './cdp/services/job-queue/job-queue-postgres'
 import { CyclotronJobQueuePostgresV2 } from './cdp/services/job-queue/job-queue-postgres-v2'
@@ -99,8 +99,8 @@ export class PluginServer implements NodeServer {
             capabilities.cdpLegacyOnEvent ||
             capabilities.cdpApi ||
             capabilities.cdpCyclotronWorker ||
-            capabilities.cdpCyclotronWorkerInsightsFlow ||
-            capabilities.cdpCyclotronWorkerInsightsFlowLegacyPg ||
+            capabilities.cdpCyclotronWorkerFlow ||
+            capabilities.cdpCyclotronWorkerFlowLegacyPg ||
             capabilities.cdpCyclotronWorkerEmail ||
             capabilities.cdpCyclotronWorkerEmailLegacyPg ||
             capabilities.cdpPrecalculatedFilters ||
@@ -290,7 +290,7 @@ export class PluginServer implements NodeServer {
             })
         }
 
-        if (capabilities.cdpCyclotronWorkerInsightsFlow) {
+        if (capabilities.cdpCyclotronWorkerFlow) {
             serviceLoaders.push(async () => {
                 // Dedicated queue instance per consumer worker — sharing one
                 // CyclotronJobQueuePostgresV2 across two consumers (hogflow + email)
@@ -299,7 +299,7 @@ export class PluginServer implements NodeServer {
                 // instances naturally; locally we'd silently double-process when
                 // both capabilities are enabled in the same process.
                 const queue = new CyclotronJobQueuePostgresV2(this.config.CONSUMER_BATCH_SIZE, this.config)
-                const worker = new CdpCyclotronWorkerInsightsFlow(
+                const worker = new CdpCyclotronWorkerFlow(
                     this.config,
                     this.withEmailValidationValkey(cdpDeps!),
                     queue
@@ -320,11 +320,11 @@ export class PluginServer implements NodeServer {
             })
         }
 
-        // Legacy postgres v1 drain for hogflow jobs — delete once cdp-cyclotron-worker-insightsflows-pg-legacy is shut down
-        if (capabilities.cdpCyclotronWorkerInsightsFlowLegacyPg) {
+        // Legacy postgres v1 drain for hogflow jobs — delete once cdp-cyclotron-worker-flows-pg-legacy is shut down
+        if (capabilities.cdpCyclotronWorkerFlowLegacyPg) {
             serviceLoaders.push(async () => {
                 const legacyQueue = new CyclotronJobQueuePostgres(this.config.CONSUMER_BATCH_SIZE, this.config)
-                const worker = new CdpCyclotronWorkerInsightsFlow(
+                const worker = new CdpCyclotronWorkerFlow(
                     this.config,
                     this.withEmailValidationValkey(cdpDeps!),
                     legacyQueue
@@ -362,7 +362,7 @@ export class PluginServer implements NodeServer {
 
         if (capabilities.cdpCyclotronWorkerEmail) {
             serviceLoaders.push(async () => {
-                // Dedicated queue instance — see note on cdpCyclotronWorkerInsightsFlow above.
+                // Dedicated queue instance — see note on cdpCyclotronWorkerFlow above.
                 // When the SES rate-limiter Valkey is configured, use the rate-limited
                 // variant so dequeue is gated by a Valkey-backed token bucket. Without
                 // the env var (typical for local dev outside k8s) we fall back to the
@@ -389,7 +389,7 @@ export class PluginServer implements NodeServer {
 
         if (capabilities.cdpHogflowScheduler) {
             serviceLoaders.push(() => {
-                const scheduler = new InsightsFlowScheduleService(this.config)
+                const scheduler = new FlowScheduleService(this.config)
                 scheduler.start()
                 return Promise.resolve(scheduler.service)
             })
@@ -436,19 +436,19 @@ export class PluginServer implements NodeServer {
                         dbUrl: this.config.CYCLOTRON_NODE_DATABASE_URL,
                         maxConnections: 10,
                     },
-                    queueName: HOGFLOW_BATCH_RESOLVE_QUEUE,
+                    queueName: FLOW_BATCH_RESOLVE_QUEUE,
                     pollDelayMs: 100,
                 })
                 const internalFetchService = new InternalFetchService(
                     this.config.INTERNAL_API_BASE_URL,
                     this.config.INTERNAL_API_SECRET
                 )
-                const hogFlowBatchPersonQueryService = new InsightsFlowBatchPersonQueryService(internalFetchService)
+                const flowBatchPersonQueryService = new FlowBatchPersonQueryService(internalFetchService)
                 const consumer = new CdpCyclotronWorkerBatchResolve(
                     this.config,
                     cdpDeps!,
                     cyclotronWorker,
-                    hogFlowBatchPersonQueryService,
+                    flowBatchPersonQueryService,
                     internalFetchService
                 )
                 await consumer.start()
