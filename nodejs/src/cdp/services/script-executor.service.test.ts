@@ -1966,7 +1966,7 @@ describe('Script Executor', () => {
 
             const invocation: CyclotronJobInvocationInsightsFunction = {
                 ...createExampleInvocation(insightsFunction),
-                queue: 'hogflow',
+                queue: 'flow',
                 queueParameters: {
                     type: 'email',
                     to: { email: 'user@example.com' },
@@ -1982,7 +1982,7 @@ describe('Script Executor', () => {
 
             expect(result.finished).toBe(false)
             expect(result.invocation.queue).toBe('email')
-            expect(result.invocation.queueMetadata?.originQueue).toBe('hogflow')
+            expect(result.invocation.queueMetadata?.originQueue).toBe('flow')
             expect(result.metrics).toContainEqual(
                 expect.objectContaining({
                     metric_name: 'email_queued',

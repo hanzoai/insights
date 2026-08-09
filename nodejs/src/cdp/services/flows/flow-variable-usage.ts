@@ -11,13 +11,13 @@ import { actionIdForLogging } from './flow-utils'
 // sizes the publish-time lint work); which flow/step/variable missed is in the warn log, where
 // unbounded cardinality belongs.
 const counterMissingVariableReference = new Counter({
-    name: 'cdp_hogflow_missing_variable_reference',
+    name: 'cdp_flow_missing_variable_reference',
     help: 'A workflow step referenced a variable that is not set for the run, so it renders empty',
 })
 
 // The scan runs on every fresh entry into a function step, so its cost has to stay observable.
 const histogramVariableScanDuration = new Histogram({
-    name: 'cdp_hogflow_variable_scan_duration_seconds',
+    name: 'cdp_flow_variable_scan_duration_seconds',
     help: 'Time spent scanning a step config for workflow variable references',
     buckets: [0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5],
 })

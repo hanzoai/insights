@@ -22,7 +22,7 @@ import {
 } from './types'
 import {
     calculateCost,
-    convertHogToJS,
+    convertScriptToJS,
     convertJSToHog,
     getNestedValue,
     ScriptVMException,
@@ -243,11 +243,11 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
     function getVMState(): VMState {
         return {
             bytecodes: bytecodes,
-            stack: stack.map((v) => convertHogToJS(v)),
-            upvalues: sortedUpValues.map((v) => ({ ...v, value: convertHogToJS(v.value) })),
+            stack: stack.map((v) => convertScriptToJS(v)),
+            upvalues: sortedUpValues.map((v) => ({ ...v, value: convertScriptToJS(v.value) })),
             callStack: callStack.map((v) => ({
                 ...v,
-                closure: convertHogToJS(v.closure),
+                closure: convertScriptToJS(v.closure),
             })),
             throwStack,
             declaredFunctions,
@@ -778,7 +778,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                                           .fill(null)
                                           .map(() => popStack())
                                     : stackKeepFirstElements(stack.length - temp)
-                            pushStack(convertJSToHog(options.functions[name](...args.map((v) => convertHogToJS(v)))))
+                            pushStack(convertJSToHog(options.functions[name](...args.map((v) => convertScriptToJS(v)))))
                         } else if (
                             name !== 'toString' &&
                             ((options?.asyncFunctions &&
@@ -803,7 +803,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                                 result: undefined,
                                 finished: false,
                                 asyncFunctionName: name,
-                                asyncFunctionArgs: args.map((v) => convertHogToJS(v)),
+                                asyncFunctionArgs: args.map((v) => convertScriptToJS(v)),
                                 state: {
                                     ...getVMState(),
                                     asyncSteps: asyncSteps + 1,
@@ -930,7 +930,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                             result: undefined,
                             finished: false,
                             asyncFunctionName: closure.callable.name,
-                            asyncFunctionArgs: args.map((v) => convertHogToJS(v)),
+                            asyncFunctionArgs: args.map((v) => convertScriptToJS(v)),
                             state: { ...getVMState(), asyncSteps: asyncSteps + 1 },
                         } satisfies ExecResult
                     } else {

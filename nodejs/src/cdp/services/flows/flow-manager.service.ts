@@ -15,7 +15,7 @@ import { EncryptedFields } from '../../utils/encryption-utils'
 // between Django and the workers, or a corrupt blob). The flow still runs, but its secret-input steps
 // run without their credentials, so this is worth alerting on.
 const counterEncryptedInputsDecryptFailed = new Counter({
-    name: 'cdp_hogflow_encrypted_inputs_decrypt_failed',
+    name: 'cdp_flow_encrypted_inputs_decrypt_failed',
     help: 'A script flow encrypted_inputs blob could not be decrypted; the flow runs without its secrets',
 })
 
@@ -68,13 +68,13 @@ export class FlowManagerService {
         }
 
         this.lazyLoaderByTeam = new LazyLoader({
-            name: 'hog_flow_manager_by_team',
+            name: 'flow_manager_by_team',
             ...cacheOptions,
             loader: async (teamIds) => await this.fetchTeamFlows(teamIds),
         })
 
         this.lazyLoader = new LazyLoader({
-            name: 'hog_flow_manager',
+            name: 'flow_manager',
             ...cacheOptions,
             loader: async (ids) => await this.fetchFlows(ids),
         })

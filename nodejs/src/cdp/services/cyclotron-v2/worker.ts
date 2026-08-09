@@ -44,7 +44,7 @@ export function sleep(ms: number): Promise<void> {
  *
  * Intentionally narrower than manager.bulkCreateJobs: no `overwriteExisting`
  * path, no email-queue `dequeue_seq` computation (the resolver enqueues
- * children onto 'hogflow', not 'email'). Email re-routing happens later via
+ * children onto 'flow', not 'email'). Email re-routing happens later via
  * the worker's reschedule path which already handles dequeue_seq assignment.
  */
 async function insertNewJobsInTx(client: PoolClient, newJobs: CyclotronV2JobInit[]): Promise<string[]> {

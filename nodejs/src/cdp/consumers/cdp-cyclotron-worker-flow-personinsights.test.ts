@@ -67,7 +67,7 @@ describe('CdpCyclotronWorkerFlow with PersonFn', () => {
             state: { ...context },
             teamId: hf.team_id,
             functionId: hf.id,
-            queue: 'hogflow',
+            queue: 'flow',
             queuePriority: 0,
         }
     }

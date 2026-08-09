@@ -102,7 +102,7 @@ describe('CdpCyclotronWorkerFlow', () => {
             },
             teamId: flow.team_id,
             functionId: flow.id,
-            queue: 'hogflow',
+            queue: 'flow',
             queuePriority: 0,
         }
     }

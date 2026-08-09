@@ -20,7 +20,7 @@ const buildMockJobQueues = (): RerunJobQueues => {
             stopProducer: jest.fn().mockResolvedValue(undefined),
             queueInvocations: jest.fn().mockResolvedValue(undefined),
         }) as any
-    return { insights_function: stub(), hog_flow: stub() }
+    return { insights_function: stub(), flow: stub() }
 }
 
 jest.setTimeout(20000)

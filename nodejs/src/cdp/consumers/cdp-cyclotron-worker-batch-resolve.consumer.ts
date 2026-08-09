@@ -30,19 +30,19 @@ import { counterBatchFlowTriggerFailed } from './metrics'
 const RETRY_BACKOFF_MS = 5_000
 
 const counterBatchFlowAudienceTruncated = new Counter({
-    name: 'cdp_batch_hog_flow_audience_truncated',
+    name: 'cdp_batch_flow_audience_truncated',
     help: 'A batch script flow run hit the per-team maxAudienceSize cap before finishing the audience',
-    labelNames: ['hog_flow_id'],
+    labelNames: ['flow_id'],
 })
 
 const counterBatchFlowResolverPagesProcessed = new Counter({
-    name: 'cdp_batch_hog_flow_resolver_pages_processed',
+    name: 'cdp_batch_flow_resolver_pages_processed',
     help: 'Total pages processed by the cyclotron-based batch resolver',
     labelNames: ['outcome'], // success | fetch_failure | terminal_write_failure | invalid_state
 })
 
 const counterBatchFlowResolverJobs = new Counter({
-    name: 'cdp_batch_hog_flow_resolver_jobs',
+    name: 'cdp_batch_flow_resolver_jobs',
     help: 'Batch script flow resolver jobs by lifecycle outcome',
     labelNames: ['outcome'], // started | completed | failed
 })
@@ -332,13 +332,13 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
             [
                 {
                     team_id: state.teamId,
-                    log_source: 'hog_flow',
+                    log_source: 'flow',
                     log_source_id: state.batchJobId,
                     instance_id: state.batchJobId,
                     ...logEntry('warn', message),
                 },
             ],
-            'hog_flow'
+            'flow'
         )
     }
 
@@ -361,13 +361,13 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
             [
                 {
                     team_id: state.teamId,
-                    log_source: 'hog_flow',
+                    log_source: 'flow',
                     log_source_id: state.batchJobId,
                     instance_id: state.batchJobId,
                     ...logEntry('error', `Batch resolver failed: ${reasonMessage}`),
                 },
             ],
-            'hog_flow'
+            'flow'
         )
 
         const newState: BatchResolverState = {
@@ -503,7 +503,7 @@ export function buildAccountFlowInvocation(params: {
         functionId: params.flowId,
         parentRunId: params.parentRunId,
         filterGlobals,
-        queue: 'hogflow' as const,
+        queue: 'flow' as const,
         queuePriority: 1,
         queueScheduledAt: DateTime.now(),
     } as CyclotronJobInvocation
@@ -544,7 +544,7 @@ function buildFlowInvocation(params: {
         parentRunId: params.parentRunId,
         person: invocationGlobals.person as any,
         filterGlobals,
-        queue: 'hogflow' as const,
+        queue: 'flow' as const,
         queuePriority: 1,
         queueScheduledAt: DateTime.now(),
     } as CyclotronJobInvocation

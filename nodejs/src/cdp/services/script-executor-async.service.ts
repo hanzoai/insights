@@ -125,7 +125,7 @@ export class ScriptExecutorAsyncService {
                     if (invocation.queue === 'email') {
                         result = this.routeToQueue(
                             nextInvocation,
-                            nextInvocation.queueMetadata?.originQueue ?? 'hogflow'
+                            nextInvocation.queueMetadata?.originQueue ?? 'flow'
                         )
                     } else {
                         result = await this.executeFetch(nextInvocation, options)

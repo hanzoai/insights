@@ -92,7 +92,7 @@ describe('sanitizeInvocationForPersistence', () => {
             id: 'test-id',
             teamId: 1,
             functionId: 'func-1',
-            queue: 'hogflow' as const,
+            queue: 'flow' as const,
             queuePriority: 0,
             state: {
                 event: {

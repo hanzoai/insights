@@ -247,7 +247,7 @@ describe('Flow Quota Limiting', () => {
                     count: 1,
                     app_source_version: { id: expect.any(String), version: 4 },
                 },
-                'hog_flow'
+                'flow'
             )
         })
 

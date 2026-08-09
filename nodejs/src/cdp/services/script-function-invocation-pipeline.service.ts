@@ -179,7 +179,7 @@ export class InsightsFunctionInvocationPipeline {
                 if (state === ScriptWatcherState.degraded) {
                     item.queuePriority = 2
                     if (this.config.CDP_OVERFLOW_QUEUE_ENABLED) {
-                        item.queue = 'hogoverflow'
+                        item.queue = 'overflow'
                     }
                 }
 

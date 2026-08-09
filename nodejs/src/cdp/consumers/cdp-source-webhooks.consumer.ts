@@ -217,13 +217,13 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<PluginsServerConf
                 [
                     {
                         team_id: flow.team_id,
-                        log_source: 'hog_flow',
+                        log_source: 'flow',
                         log_source_id: flow.id,
                         instance_id: invocationId,
                         ...logEntry(level, `${actionIdForLogging({ id: triggerActionId })} ${message}`),
                     },
                 ],
-                'hog_flow'
+                'flow'
             )
         }
 
@@ -234,7 +234,7 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<PluginsServerConf
                     app_source_id: flow.id,
                     ...metric,
                 },
-                'hog_flow'
+                'flow'
             )
         }
 
@@ -364,7 +364,7 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<PluginsServerConf
 
             if (insightsFunctionState?.state === ScriptWatcherState.degraded) {
                 // Degraded functions are not executed immediately
-                invocation.queue = 'hogoverflow'
+                invocation.queue = 'overflow'
                 await this.scriptQueue.queueInvocations([invocation])
 
                 result = createInvocationResult<CyclotronJobInvocationInsightsFunction>(
@@ -469,7 +469,7 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<PluginsServerConf
                     metric_name: 'disabled_permanently',
                     count: 1,
                 },
-                flow ? 'hog_flow' : 'insights_function'
+                flow ? 'flow' : 'insights_function'
             )
             throw new SourceWebhookError(429, 'Disabled')
         }

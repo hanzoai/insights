@@ -1,5 +1,5 @@
 import { toHogDate, toHogDateTime } from '../stl/date'
-import { calculateCost, convertHogToJS, convertJSToHog, getNestedValue, unifyComparisonTypes } from '../utils'
+import { calculateCost, convertScriptToJS, convertJSToHog, getNestedValue, unifyComparisonTypes } from '../utils'
 
 const PTR_COST = 8
 
@@ -92,7 +92,7 @@ describe('scriptvm utils', () => {
     test('convertHogToJs preserves circular references', () => {
         const obj: any = { a: null, b: true }
         obj.a = obj
-        const js = convertHogToJS(obj)
+        const js = convertScriptToJS(obj)
         expect(js.a === js).toBe(true)
 
         const map: any = new Map([
@@ -100,7 +100,7 @@ describe('scriptvm utils', () => {
             ['b', true],
         ])
         map.set('a', map)
-        const js2 = convertHogToJS(map)
+        const js2 = convertScriptToJS(map)
         expect(js2.a === js2).toBe(true)
     })
 
