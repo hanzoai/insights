@@ -466,7 +466,7 @@ class Migration(AsyncMigrationDefinition):
                     created_at DateTime
                 )
                 PRIMARY KEY team_id, id
-                SOURCE(DATASTORE(TABLE {TEMPORARY_PERSONS_TABLE_NAME} {self._dictionary_connection_string()}))
+                SOURCE(CLICKHOUSE(TABLE {TEMPORARY_PERSONS_TABLE_NAME} {self._dictionary_connection_string()}))
                 LAYOUT(complex_key_cache(size_in_cells %(cache_size)s max_threads_for_updates 6 allow_read_expired_keys 1))
                 Lifetime(60000)
             """,
@@ -485,7 +485,7 @@ class Migration(AsyncMigrationDefinition):
                     person_id UUID
                 )
                 PRIMARY KEY team_id, distinct_id
-                SOURCE(DATASTORE(TABLE {TEMPORARY_PDI2_TABLE_NAME} {self._dictionary_connection_string()}))
+                SOURCE(CLICKHOUSE(TABLE {TEMPORARY_PDI2_TABLE_NAME} {self._dictionary_connection_string()}))
                 LAYOUT(complex_key_cache(size_in_cells %(cache_size)s max_threads_for_updates 6 allow_read_expired_keys 1))
                 Lifetime(60000)
             """,
@@ -505,7 +505,7 @@ class Migration(AsyncMigrationDefinition):
                     created_at DateTime
                 )
                 PRIMARY KEY team_id, group_type_index, group_key
-                SOURCE(DATASTORE(TABLE {TEMPORARY_GROUPS_TABLE_NAME} {self._dictionary_connection_string()}))
+                SOURCE(CLICKHOUSE(TABLE {TEMPORARY_GROUPS_TABLE_NAME} {self._dictionary_connection_string()}))
                 LAYOUT(complex_key_cache(size_in_cells %(cache_size)s max_threads_for_updates 6 allow_read_expired_keys 1))
                 Lifetime(60000)
             """,

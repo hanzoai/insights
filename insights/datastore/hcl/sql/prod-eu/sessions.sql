@@ -833,5 +833,5 @@ CREATE VIEW insights.custom_metrics_test AS SELECT
   1 AS value,
   'Test to check that the metric endpoint is working' AS help,
   'gauge' AS type;
-CREATE OR REPLACE DICTIONARY insights.channel_definition_dict (`domain` String, `kind` String, `domain_type` Nullable(String), `type_if_paid` Nullable(String), `type_if_organic` Nullable(String)) PRIMARY KEY domain, kind SOURCE(DATASTORE(USER 'dict_reader' TABLE 'channel_definition')) LAYOUT(COMPLEX_KEY_HASHED()) LIFETIME(MIN 3000 MAX 3600);
-CREATE OR REPLACE DICTIONARY insights.web_pre_aggregated_teams_dict (`team_id` UInt64) PRIMARY KEY team_id SOURCE(DATASTORE(USER 'dict_reader' QUERY 'SELECT     team_id FROM     `web_pre_aggregated_teams` FINAL WHERE version > 0')) LAYOUT(HASHED()) LIFETIME(MIN 3000 MAX 3600);
+CREATE OR REPLACE DICTIONARY insights.channel_definition_dict (`domain` String, `kind` String, `domain_type` Nullable(String), `type_if_paid` Nullable(String), `type_if_organic` Nullable(String)) PRIMARY KEY domain, kind SOURCE(CLICKHOUSE(USER 'dict_reader' TABLE 'channel_definition')) LAYOUT(COMPLEX_KEY_HASHED()) LIFETIME(MIN 3000 MAX 3600);
+CREATE OR REPLACE DICTIONARY insights.web_pre_aggregated_teams_dict (`team_id` UInt64) PRIMARY KEY team_id SOURCE(CLICKHOUSE(USER 'dict_reader' QUERY 'SELECT     team_id FROM     `web_pre_aggregated_teams` FINAL WHERE version > 0')) LAYOUT(HASHED()) LIFETIME(MIN 3000 MAX 3600);
