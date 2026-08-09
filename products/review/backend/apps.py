@@ -4,15 +4,17 @@ from django.apps import AppConfig
 class ReviewConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "products.review.backend"
-    # The module path is ours and moves with the rename; the label is not. All 25
-    # migrations in this app depend on ("review_hog", "NNNN_..."), and a dependency
-    # names an app by its LABEL -- so under "review" every one of them points at an
-    # app that does not exist and the graph raises NodeNotFoundError. That is an
-    # import-time failure, not a migrate-time one: it takes the backend test suite
-    # with it. Finishing the rename means rewriting those 25 dependencies AND
-    # renaming the rows already in django_migrations, which no migration can do
-    # from inside the graph it is part of; it is a deploy step someone has to run.
-    label = "review_hog"
+    # A dependency names an app by its LABEL, so the label and the 25 dependencies
+    # that spell it have to move together — half of that rename reaches production
+    # as NodeNotFoundError at import time, which takes the health endpoint and the
+    # backend test suite with it. They move together now.
+    #
+    # The rows already in django_migrations, and the tables they describe, were
+    # named for the old label too, and no migration can rename them from inside the
+    # graph it belongs to. Both apps were empty — nine tables, zero rows — so the
+    # deploy step was to drop them and let the graph build itself under the name it
+    # actually has, rather than to carry the old one forward.
+    label = "review"
 
     def ready(self) -> None:
         # Deferred import: models aren't loadable at module import time, and ready() must stay light.

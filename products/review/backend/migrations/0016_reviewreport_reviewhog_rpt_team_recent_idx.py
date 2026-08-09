@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     atomic = False  # Required for concurrent index creation
 
     dependencies = [
-        ("review_hog", "0015_reviewreport_status_comment_edited_at_and_more"),
+        ("review", "0015_reviewreport_status_comment_edited_at_and_more"),
     ]
 
     operations = [
