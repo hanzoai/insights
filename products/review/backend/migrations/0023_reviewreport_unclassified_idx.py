@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("review_hog", "0022_reviewreport_outcomes_emitted_at"),
+        ("review", "0022_reviewreport_outcomes_emitted_at"),
     ]
 
     operations = [

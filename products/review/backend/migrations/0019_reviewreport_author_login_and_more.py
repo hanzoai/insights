@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("review_hog", "0018_backfill_urgency_threshold_to_consider"),
+        ("review", "0018_backfill_urgency_threshold_to_consider"),
     ]
 
     operations = [

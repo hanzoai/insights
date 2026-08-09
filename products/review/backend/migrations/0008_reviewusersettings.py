@@ -10,7 +10,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         ("insights", "0001_initial"),
-        ("review_hog", "0007_alter_reviewreportartefact_type"),
+        ("review", "0007_alter_reviewreportartefact_type"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

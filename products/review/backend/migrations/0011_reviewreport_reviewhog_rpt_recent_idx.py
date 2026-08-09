@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("insights", "0001_initial"),
-        ("review_hog", "0010_remove_reviewreport_unique_review_report_per_pr_and_more"),
+        ("review", "0010_remove_reviewreport_unique_review_report_per_pr_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
