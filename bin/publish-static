@@ -146,12 +146,19 @@ def main() -> int:
     # Written last, so a run that dies half way never claims keys it did not put.
     #
     # Keyed by version AND by a digest of the list, because a version alone is not
-    # a unique name for a tree. Measured on 1.52.116: the tag resolved to
-    # sha256:81c09eaf in the registry while the pin and the running pods were on
-    # sha256:2453b673 -- two images, one version string. Under a version-only key
-    # the second publish would erase the first one's list, and every file only the
-    # first tree had would look unreferenced and be pruned while it was still
-    # being served. Two trees now simply write two manifests, both retained.
+    # a unique name for a tree. Both forge mirrors (hanzo/insights and
+    # hanzoai/insights) run this workflow on every push to main, and the
+    # concurrency group is per-repo, so two builds routinely compute the same
+    # "next patch" against the same registry probe and push that tag minutes
+    # apart with different digests. Measured on 1.52.116: 2453b673 ran while the
+    # registry resolved the tag to 81c09eaf. universe records the same for the
+    # plugin image, which is why its pin carries a digest and not just a tag.
+    #
+    # Under a version-only key the second publish erases the first one's list,
+    # and every file only the first tree had then looks unreferenced -- pruned
+    # while it is still being served. Two trees now simply write two manifests
+    # and both are retained, which is the same property that makes the asset
+    # keys safe. Both racing builds publish, so the origin ends up holding both.
     body = "\n".join(sorted(files)).encode()
     key = f"{prefix}/.builds/{version}-{hashlib.sha256(body).hexdigest()[:12]}.txt"
     s3.put_object(Bucket=bucket, Key=key, Body=body, ContentType="text/plain")
