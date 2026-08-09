@@ -24,7 +24,7 @@ from oauth2_provider.settings import oauth2_settings
 from oauth2_provider.validators import AllowedURIValidator
 
 from insights.models.activity_logging.model_activity import ModelActivityMixin
-from insights.models.utils import UUIDT, generate_random_token, hash_key_value, mask_key_value
+from insights.models.utils import UUIDT, KeyKind, hash_key_value, key_kind, mask_key_value, mint
 
 if TYPE_CHECKING:
     from insights.models import Organization, User
@@ -716,7 +716,7 @@ def revoke_application_sessions(application: "OAuthApplication") -> None:
 
 
 def generate_random_token_cimd_verification() -> str:
-    return "phvt_" + generate_random_token()
+    return mint(KeyKind.VERIFICATION)
 
 
 class CIMDVerificationToken(models.Model):
@@ -747,7 +747,7 @@ class CIMDVerificationToken(models.Model):
 
 
 def find_cimd_verification_token(token: str) -> "CIMDVerificationToken | None":
-    if not token or not token.startswith("phvt_"):
+    if key_kind(token) is not KeyKind.VERIFICATION:
         return None
     secure_value = hash_key_value(token)
     try:

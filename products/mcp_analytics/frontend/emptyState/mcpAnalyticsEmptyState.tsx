@@ -1,4 +1,3 @@
-import * as robotPng from '@hanzo/brand/hoggies/png/robot'
 import { IconPlug as IconMCP } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
@@ -11,7 +10,7 @@ import { mcpAnalyticsOnboardingLogic } from '../mcpAnalyticsOnboardingLogic'
 import { MCP_ANALYTICS_DOCS_URL, MCPListeningIndicator } from '../onboarding/MCPAnalyticsInstall'
 import { MCPToolCallPreview } from './MCPToolCallPreview'
 
-const MascotRobot = pngHoggie(robotPng)
+const MascotRobot = pngHoggie()
 
 export const mcpAnalyticsEmptyState: SceneProductEmptyState = {
     statusLogic: mcpAnalyticsOnboardingLogic,

@@ -83,8 +83,8 @@ def _get_otel_logs_config(callback_url: str) -> tuple[str, str]:
             return f"{PH_EU_HOST}/i/v1/logs", PH_EU_API_KEY
         return f"{PH_US_HOST}/i/v1/logs", PH_US_API_KEY
 
-    # phc_local is the dev token that maps to team_id=1 in capture-logs.
-    return f"{callback_url.rstrip('/')}/i/v1/logs", "phc_local"
+    # pk-local is the dev token that maps to team_id=1 in capture-logs.
+    return f"{callback_url.rstrip('/')}/i/v1/logs", "pk-local"
 
 
 def _outbound_allowlist(*urls: str) -> list[str] | None:

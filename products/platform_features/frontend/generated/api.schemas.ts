@@ -380,7 +380,7 @@ export interface OrganizationPersonalAPIKeyAccessScopeApi {
 export interface OrganizationPersonalAPIKeyApi {
     /** The organization member who owns this key. */
     readonly owner: OrganizationPersonalAPIKeyOwnerApi
-    /** Masked, display-safe hint of the key value (e.g. 'phx_***1234'). Not the secret. The owner sees the same masked value in their own settings, so it can be used to identify a key. */
+    /** Masked, display-safe hint of the key value (e.g. 'sk-***1234'). Not the secret. The owner sees the same masked value in their own settings, so it can be used to identify a key. */
     readonly mask_value: string
     /** API scopes granted to the key, e.g. 'insight:read'. A single '*' means full access. */
     readonly scopes: readonly string[]

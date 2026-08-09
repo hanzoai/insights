@@ -30,8 +30,8 @@ test.describe('Personal API keys', () => {
             const dialog = page.locator('.Modal').filter({ hasText: 'Personal API key ready' })
             await expect(dialog).toBeVisible()
             const snippet = (await dialog.locator('code').textContent()) ?? ''
-            apiKey = snippet.match(/phx_\w+/)?.[0] ?? ''
-            expect(apiKey).toMatch(/^phx_/)
+            apiKey = snippet.match(/sk-\w+/)?.[0] ?? ''
+            expect(apiKey).toMatch(/^sk-/)
             await page.keyboard.press('Escape')
             await expect(dialog).not.toBeVisible()
         })

@@ -1,7 +1,6 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import * as phoneCall from '@hanzo/brand/hoggies/png/phone-call'
 import { Skeleton } from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
@@ -9,7 +8,7 @@ import { pngHoggie } from 'lib/brand/hoggies'
 import { CommentWithReplies } from './Comment'
 import { CommentsLogicProps, commentsLogic } from './commentsLogic'
 
-const MascotPhoneCall = pngHoggie(phoneCall)
+const MascotPhoneCall = pngHoggie()
 
 export interface CommentsListProps extends CommentsLogicProps {
     noun?: string

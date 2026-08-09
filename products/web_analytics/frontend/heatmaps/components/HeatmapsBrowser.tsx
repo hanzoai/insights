@@ -1,9 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useRef } from 'react'
 
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
-import { IconDownload, IconGear, IconRevert } from '@hanzo/icons'
 import { Banner, Button, Divider, Input, Label, Skeleton } from '@hanzo/elements'
+import { IconDownload, IconGear, IconRevert } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
@@ -11,8 +10,8 @@ import { AuthorizedUrlListType, appEditorUrl } from 'lib/components/AuthorizedUr
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
 import { heatmapDataLogic, MAX_HEATMAP_HEIGHT } from 'lib/components/heatmaps/heatmapDataLogic'
 import { dayjs } from 'lib/dayjs'
-import { useResizeObserver } from 'lib/hooks/useResizeObserver'
 import { IconOpenInNew } from 'lib/elements/icons'
+import { useResizeObserver } from 'lib/hooks/useResizeObserver'
 import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
@@ -27,7 +26,7 @@ import { heatmapsBrowserLogic } from './heatmapsBrowserLogic'
 import { IframeHeatmapBrowser } from './IframeHeatmapBrowser'
 import { recordingClickmapLogic } from './recordingClickmapLogic'
 
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
+const MascotMagnifyingGlass = pngHoggie()
 
 function ExportButton({
     iframeRef,

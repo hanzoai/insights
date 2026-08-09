@@ -88,7 +88,7 @@ class TestPlanResolver:
         with patch("llm_gateway.services.plan_resolver.get_settings") as mock_settings:
             mock_settings.return_value.insights_api_base_url = ""
             mock_settings.return_value.plan_cache_ttl = 300
-            result = await resolver.get_plan(user_id=1, auth_header="Bearer phx_test")
+            result = await resolver.get_plan(user_id=1, auth_header="Bearer sk-test")
         assert result.plan_key is None
         assert result.seat_missing is False
 
@@ -98,7 +98,7 @@ class TestPlanResolver:
         cached = json.dumps({"plan_key": "insights-code-200-20260301", "created_at": None})
         assert resolver_with_redis._redis is not None
         resolver_with_redis._redis.get = AsyncMock(return_value=cached.encode())  # type: ignore[method-assign]  # ty: ignore[invalid-assignment]
-        result = await resolver_with_redis.get_plan(user_id=1, auth_header="Bearer phx_test")
+        result = await resolver_with_redis.get_plan(user_id=1, auth_header="Bearer sk-test")
         assert result.plan_key == "insights-code-200-20260301"
 
     async def test_cached_null_plan_returns_none_plan_key(self, resolver_with_redis: PlanResolver) -> None:
@@ -107,7 +107,7 @@ class TestPlanResolver:
         cached = json.dumps({"plan_key": None, "created_at": None})
         assert resolver_with_redis._redis is not None
         resolver_with_redis._redis.get = AsyncMock(return_value=cached.encode())  # type: ignore[method-assign]  # ty: ignore[invalid-assignment]
-        result = await resolver_with_redis.get_plan(user_id=1, auth_header="Bearer phx_test")
+        result = await resolver_with_redis.get_plan(user_id=1, auth_header="Bearer sk-test")
         assert result.plan_key is None
         # Entries cached before seat_missing existed must fail loose.
         assert result.seat_missing is False
@@ -119,7 +119,7 @@ class TestPlanResolver:
         cached = json.dumps({"plan_key": "insights-code-free-20260301", "created_at": old_date})
         assert resolver_with_redis._redis is not None
         resolver_with_redis._redis.get = AsyncMock(return_value=cached.encode())  # type: ignore[method-assign]  # ty: ignore[invalid-assignment]
-        result = await resolver_with_redis.get_plan(user_id=1, auth_header="Bearer phx_test")
+        result = await resolver_with_redis.get_plan(user_id=1, auth_header="Bearer sk-test")
         assert result.plan_key == "insights-code-free-20260301"
         assert result.seat_created_at == old_date
 
@@ -142,7 +142,7 @@ class TestPlanResolver:
         with patch("llm_gateway.services.plan_resolver.get_settings") as mock_settings:
             mock_settings.return_value.insights_api_base_url = "https://app.hanzo.ai"
             mock_settings.return_value.plan_cache_ttl = 300
-            result = await resolver_with_redis.get_plan(user_id=1, auth_header="Bearer phx_test")
+            result = await resolver_with_redis.get_plan(user_id=1, auth_header="Bearer sk-test")
 
         assert result.plan_key == "insights-code-pro-200-20260301"
         assert result.billing_period is not None
@@ -154,7 +154,7 @@ class TestPlanResolver:
         resolver_with_redis._http.get.assert_called_once_with(
             "https://app.hanzo.ai/api/seats/me/",
             params={"product_key": "insights_code", "best": "true"},
-            headers={"Authorization": "Bearer phx_test"},
+            headers={"Authorization": "Bearer sk-test"},
             timeout=2.0,
         )
 
@@ -168,7 +168,7 @@ class TestPlanResolver:
         with patch("llm_gateway.services.plan_resolver.get_settings") as mock_settings:
             mock_settings.return_value.insights_api_base_url = "https://app.hanzo.ai"
             mock_settings.return_value.plan_cache_ttl = 300
-            result = await resolver_with_redis.get_plan(user_id=1, auth_header="Bearer phx_test")
+            result = await resolver_with_redis.get_plan(user_id=1, auth_header="Bearer sk-test")
 
         assert result.plan_key == "insights-code-200-20260301"
         assert result.billing_period is None
@@ -183,11 +183,11 @@ class TestPlanResolver:
         with patch("llm_gateway.services.plan_resolver.get_settings") as mock_settings:
             mock_settings.return_value.insights_api_base_url = "https://app.hanzo.ai"
             mock_settings.return_value.plan_cache_ttl = 300
-            await resolver.get_plan(user_id=1, auth_header="Bearer phx_mysecretkey")
+            await resolver.get_plan(user_id=1, auth_header="Bearer sk-mysecretkey")
 
         resolver._http.get.assert_called_once()
         call_kwargs = resolver._http.get.call_args
-        assert call_kwargs.kwargs["headers"]["Authorization"] == "Bearer phx_mysecretkey"
+        assert call_kwargs.kwargs["headers"]["Authorization"] == "Bearer sk-mysecretkey"
 
     async def test_404_returns_none_plan(self, resolver: PlanResolver) -> None:
         mock_resp = MagicMock()
@@ -197,7 +197,7 @@ class TestPlanResolver:
         with patch("llm_gateway.services.plan_resolver.get_settings") as mock_settings:
             mock_settings.return_value.insights_api_base_url = "https://app.hanzo.ai"
             mock_settings.return_value.plan_cache_ttl = 300
-            result = await resolver.get_plan(user_id=1, auth_header="Bearer phx_test")
+            result = await resolver.get_plan(user_id=1, auth_header="Bearer sk-test")
 
         assert result.plan_key is None
         assert result.seat_missing is True
@@ -212,12 +212,12 @@ class TestPlanResolver:
         with patch("llm_gateway.services.plan_resolver.get_settings") as mock_settings:
             mock_settings.return_value.insights_api_base_url = "https://app.hanzo.ai"
             mock_settings.return_value.plan_cache_ttl = 300
-            await resolver_with_redis.get_plan(user_id=1, auth_header="Bearer phx_test")
+            await resolver_with_redis.get_plan(user_id=1, auth_header="Bearer sk-test")
 
         assert resolver_with_redis._redis is not None
         cached_payload = resolver_with_redis._redis.set.call_args.args[1]  # type: ignore[attr-defined]
         resolver_with_redis._redis.get = AsyncMock(return_value=cached_payload.encode())  # type: ignore[method-assign]  # ty: ignore[invalid-assignment]
-        cached_result = await resolver_with_redis.get_plan(user_id=1, auth_header="Bearer phx_test")
+        cached_result = await resolver_with_redis.get_plan(user_id=1, auth_header="Bearer sk-test")
         assert json.loads(cached_payload)["seat_missing"] is True
         assert cached_result.seat_missing is True
 
@@ -227,7 +227,7 @@ class TestPlanResolver:
         with patch("llm_gateway.services.plan_resolver.get_settings") as mock_settings:
             mock_settings.return_value.insights_api_base_url = "https://app.hanzo.ai"
             mock_settings.return_value.plan_cache_ttl = 300
-            result = await resolver.get_plan(user_id=1, auth_header="Bearer phx_test")
+            result = await resolver.get_plan(user_id=1, auth_header="Bearer sk-test")
 
         assert result.plan_key is None
         assert result.seat_missing is False
@@ -253,7 +253,7 @@ class TestPlanResolver:
         )
         assert resolver_with_redis._redis is not None
         resolver_with_redis._redis.get = AsyncMock(return_value=cached.encode())  # type: ignore[method-assign]  # ty: ignore[invalid-assignment]
-        result = await resolver_with_redis.get_plan(user_id=1, auth_header="Bearer phx_test")
+        result = await resolver_with_redis.get_plan(user_id=1, auth_header="Bearer sk-test")
         assert result.billing_period is not None
         assert result.billing_period.current_period_start == "2026-04-01T00:00:00+00:00"
         assert result.billing_period.interval == "month"
@@ -264,7 +264,7 @@ class TestPlanResolver:
         cached = json.dumps({"plan_key": "insights-code-200-20260301", "created_at": None})
         assert resolver_with_redis._redis is not None
         resolver_with_redis._redis.get = AsyncMock(return_value=cached.encode())  # type: ignore[method-assign]  # ty: ignore[invalid-assignment]
-        result = await resolver_with_redis.get_plan(user_id=1, auth_header="Bearer phx_test")
+        result = await resolver_with_redis.get_plan(user_id=1, auth_header="Bearer sk-test")
         assert result.billing_period is None
 
     async def test_api_error_not_cached(self, resolver_with_redis: PlanResolver) -> None:
@@ -273,7 +273,7 @@ class TestPlanResolver:
         with patch("llm_gateway.services.plan_resolver.get_settings") as mock_settings:
             mock_settings.return_value.insights_api_base_url = "https://app.hanzo.ai"
             mock_settings.return_value.plan_cache_ttl = 300
-            result = await resolver_with_redis.get_plan(user_id=1, auth_header="Bearer phx_test")
+            result = await resolver_with_redis.get_plan(user_id=1, auth_header="Bearer sk-test")
 
         assert result.plan_key is None
         assert resolver_with_redis._redis is not None
@@ -301,22 +301,22 @@ class TestResolvePlanInfoCredentialForwarding:
 
     @pytest.mark.asyncio
     async def test_forwards_authorization_header(self) -> None:
-        request = self._make_request({"Authorization": "Bearer phx_test"})
+        request = self._make_request({"Authorization": "Bearer sk-test"})
         result = await resolve_plan_info(request, user_id=1, product="insights_code")
         assert result.plan_key == "insights-code-pro-200-20260301"
-        assert request.app.state.plan_resolver.get_plan.await_args.kwargs["auth_header"] == "Bearer phx_test"
+        assert request.app.state.plan_resolver.get_plan.await_args.kwargs["auth_header"] == "Bearer sk-test"
 
     @pytest.mark.asyncio
     async def test_forwards_x_api_key_as_bearer(self) -> None:
-        request = self._make_request({"x-api-key": " phx_test "})
+        request = self._make_request({"x-api-key": " sk-test "})
         result = await resolve_plan_info(request, user_id=1, product="insights_code")
         assert result.plan_key == "insights-code-pro-200-20260301"
-        assert request.app.state.plan_resolver.get_plan.await_args.kwargs["auth_header"] == "Bearer phx_test"
+        assert request.app.state.plan_resolver.get_plan.await_args.kwargs["auth_header"] == "Bearer sk-test"
 
     @pytest.mark.asyncio
     async def test_x_api_key_takes_precedence_over_authorization(self) -> None:
         # Matches extract_token — the token that authenticated the request is
         # the one whose plan gets resolved.
-        request = self._make_request({"x-api-key": "phx_from_api_key", "Authorization": "Bearer phx_from_auth"})
+        request = self._make_request({"x-api-key": "sk-from_api_key", "Authorization": "Bearer sk-from_auth"})
         await resolve_plan_info(request, user_id=1, product="insights_code")
-        assert request.app.state.plan_resolver.get_plan.await_args.kwargs["auth_header"] == "Bearer phx_from_api_key"
+        assert request.app.state.plan_resolver.get_plan.await_args.kwargs["auth_header"] == "Bearer sk-from_api_key"

@@ -1,21 +1,20 @@
 import './SessionRecordingPlayer.scss'
 
 import clsx from 'clsx'
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import * as construction2Png from '@hanzo/brand/hoggies/png/construction-2'
 import { Banner, Button } from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { WarningHog } from 'lib/components/mascots'
+import { Link } from 'lib/elements/Link'
 import { FloatingContainerContext } from 'lib/hooks/useFloatingContainerContext'
 import useIsHovering from 'lib/hooks/useIsHovering'
 import { HotkeysInterface, useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
 import { usePageVisibilityCb } from 'lib/hooks/usePageVisibility'
 import { useResizeBreakpoints } from 'lib/hooks/useResizeObserver'
-import { Link } from 'lib/elements/Link'
 import { humanFriendlyDuration } from 'lib/utils/durations'
 import { useNotebookDrag } from 'scenes/notebooks/AddToNotebook/DraggableToNotebook'
 import { PlayerFrameCommentOverlay } from 'scenes/session-recordings/player/commenting/PlayerFrameCommentOverlay'
@@ -39,7 +38,7 @@ import {
 } from './sessionRecordingPlayerLogic'
 import { SessionRecordingPlayerExplorer } from './view-explorer/SessionRecordingPlayerExplorer'
 
-const MascotConstruction2 = pngHoggie(construction2Png)
+const MascotConstruction2 = pngHoggie()
 
 export interface PurePlayerProps {
     noMeta?: boolean
@@ -355,10 +354,7 @@ export function PurePlayer({ noMeta = false, noBorder = false }: PurePlayerProps
                             <div className="flex w-full h-full">
                                 <div className="flex flex-col flex-1 w-full relative">
                                     {hasLateFullSnapshot && !hidePlayerElements ? (
-                                        <Banner
-                                            type="warning"
-                                            dismissKey={`late-full-snapshot-${sessionRecordingId}`}
-                                        >
+                                        <Banner type="warning" dismissKey={`late-full-snapshot-${sessionRecordingId}`}>
                                             The first{' '}
                                             {humanFriendlyDuration(leadingUnplayableMs / 1000, { maxUnits: 2 })} of this
                                             recording can't be shown — the initial snapshot of the screen arrived late,

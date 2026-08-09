@@ -11,6 +11,8 @@ from parameterized import parameterized
 from insights.models.utils import (
     AMBIGUOUS_CHARS,
     BASE57,
+    KEY_MARKS,
+    KeyKind,
     convert_legacy_metric,
     convert_legacy_metrics,
     generate_random_oauth_access_token,
@@ -20,7 +22,9 @@ from insights.models.utils import (
     generate_random_token_project,
     generate_random_token_secret,
     int_to_base,
+    key_kind,
     mask_key_value,
+    mint,
     uuid7,
     validate_rate_limit,
 )
@@ -58,13 +62,46 @@ class TestValidateRateLimit(BaseTest):
 
 
 def test_mask_key_value():
-    assert mask_key_value("phx_1234567891011121314151617181920") == "phx_...1920"  # Normal case
-    assert mask_key_value("phx_shortenedAB") == "********"  # String shorter than 16 chars
-    assert mask_key_value("phx_00000000ABCD") == "phx_...ABCD"  # Exactly 8 chars
+    assert mask_key_value("sk-1234567891011121314151617181920") == "sk-...1920"  # Normal case
+    assert mask_key_value("sk-shortenedAB") == "********"  # String shorter than 16 chars
+    assert mask_key_value("sk-00000000ABCD") == "sk-...ABCD"  # Exactly 8 chars
     assert mask_key_value("") == "********"  # Empty string
 
 
 BASE57_SET = set(BASE57)
+
+
+class TestKeyMarks:
+    """The mint and the reader are one pair, so what one writes the other reads."""
+
+    @parameterized.expand([(kind.value, kind) for kind in KeyKind])
+    def test_minted_key_reads_back_as_its_own_kind(self, _name, kind):
+        for _ in range(20):
+            assert key_kind(mint(kind)) is kind
+
+    def test_every_kind_has_its_own_mark(self):
+        assert len(set(KEY_MARKS.values())) == len(KeyKind)
+
+    @parameterized.expand(
+        [
+            # A legacy personal key, minted before the marks existed. Unmarked is
+            # not malformed -- the store decides on these, not the shape.
+            ("unmarked_legacy", "F2bC9xLq4vTn8dRw"),
+            ("empty", ""),
+            # A mark and nothing behind it is not a key.
+            ("mark_only", "sk-"),
+            # A mark has to open the string, not merely appear in it.
+            ("mark_not_leading", "Bearer sk-F2bC9xLq"),
+            # Anchored at the end too, so a third party's key -- OpenAI and
+            # Anthropic also open with `sk-` -- is not read as one of ours.
+            ("foreign_key_shape", "sk-ant-api03-F2bC9xLq"),
+            ("trailing_space", "sk-F2bC9xLq "),
+            ("unknown_mark", "zz-F2bC9xLq"),
+            ("none", None),
+        ]
+    )
+    def test_a_value_that_is_not_a_key_reads_as_none(self, _name, value):
+        assert key_kind(value) is None
 
 
 class TestTokenGeneration:
@@ -76,11 +113,11 @@ class TestTokenGeneration:
     @parameterized.expand(
         [
             ("bare", generate_random_token, "", 32),
-            ("project", generate_random_token_project, "phc_", 32),
-            ("personal", generate_random_token_personal, "phx_", 35),
-            ("secret", generate_random_token_secret, "phs_", 35),
-            ("oauth_access", lambda: generate_random_oauth_access_token(None), "pha_", 32),
-            ("oauth_refresh", lambda: generate_random_oauth_refresh_token(None), "phr_", 32),
+            ("project", generate_random_token_project, "pk-", 32),
+            ("personal", generate_random_token_personal, "sk-", 35),
+            ("secret", generate_random_token_secret, "sk-", 35),
+            ("oauth_access", lambda: generate_random_oauth_access_token(None), "at-", 32),
+            ("oauth_refresh", lambda: generate_random_oauth_refresh_token(None), "rt-", 32),
         ]
     )
     def test_uses_base57_alphabet(self, _name, generator, prefix, _entropy_bytes):
@@ -96,11 +133,11 @@ class TestTokenGeneration:
     @parameterized.expand(
         [
             ("bare_32B", generate_random_token, "", 32),
-            ("project_32B", generate_random_token_project, "phc_", 32),
-            ("personal_35B", generate_random_token_personal, "phx_", 35),
-            ("secret_35B", generate_random_token_secret, "phs_", 35),
-            ("oauth_access_32B", lambda: generate_random_oauth_access_token(None), "pha_", 32),
-            ("oauth_refresh_32B", lambda: generate_random_oauth_refresh_token(None), "phr_", 32),
+            ("project_32B", generate_random_token_project, "pk-", 32),
+            ("personal_35B", generate_random_token_personal, "sk-", 35),
+            ("secret_35B", generate_random_token_secret, "sk-", 35),
+            ("oauth_access_32B", lambda: generate_random_oauth_access_token(None), "at-", 32),
+            ("oauth_refresh_32B", lambda: generate_random_oauth_refresh_token(None), "rt-", 32),
         ]
     )
     def test_exact_length(self, _name, generator, prefix, entropy_bytes):

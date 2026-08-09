@@ -1,7 +1,6 @@
 import Vapi from '@vapi-ai/web'
 import { memo, type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import * as robotPng from '@hanzo/brand/hoggies/png/robot'
 import { Button, Input } from '@hanzo/elements'
 
 import { Logo } from 'lib/brand'
@@ -12,7 +11,7 @@ import { fromParams } from 'lib/utils/url'
 
 import { InterviewExportPayload } from '../types'
 
-const MascotRobot = pngHoggie(robotPng)
+const MascotRobot = pngHoggie()
 
 // Fields a shared-link respondent sends to /start_call/. Empty {} for personalised links.
 interface StartCallBody {

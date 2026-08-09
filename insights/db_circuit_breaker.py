@@ -8,9 +8,9 @@ from functools import lru_cache
 from django.conf import settings
 
 import redis
-from statshog.defaults.django import statsd
 
 from insights.redis import get_client
+from insights.statsd import statsd
 
 logger = logging.getLogger(__name__)
 

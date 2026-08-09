@@ -1,15 +1,13 @@
 import * as motion from 'motion/react-client'
 import { ComponentType } from 'react'
 
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
-import * as shockedPng from '@hanzo/brand/hoggies/png/shocked'
 import { Button } from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { WavingHog } from 'lib/components/mascots'
 
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
-const MascotShocked = pngHoggie(shockedPng)
+const MascotMagnifyingGlass = pngHoggie()
+const MascotShocked = pngHoggie()
 
 interface Props {
     type: 'question' | 'survey'

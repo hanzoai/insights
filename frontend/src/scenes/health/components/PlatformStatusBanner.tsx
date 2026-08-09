@@ -1,15 +1,14 @@
 import { useValues } from 'kea'
 
-import * as drivingHogzillaPng from '@hanzo/brand/hoggies/png/driving-hogzilla'
 import { Banner } from '@hanzo/elements'
 import type { BannerProps } from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
-import { HeartHog, WarningHog } from 'lib/components/mascots'
 import { insightsStatusLogic } from 'lib/components/HelpMenu/insightsStatusLogic'
 import type { InsightsStatusBadgeStatus, InsightsStatusType } from 'lib/components/HelpMenu/insightsStatusLogic'
+import { HeartHog, WarningHog } from 'lib/components/mascots'
 
-const MascotDrivingHogzilla = pngHoggie(drivingHogzillaPng)
+const MascotDrivingHogzilla = pngHoggie()
 
 const STATUS_CONFIG: Record<
     InsightsStatusBadgeStatus,
