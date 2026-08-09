@@ -468,7 +468,7 @@ class TestActivityLogBearerAuthAttribution(APIBaseTest):
         return OAuthAccessToken.objects.create(
             user=self.user,
             application=application,
-            token="pha_activity_attribution_token",
+            token="at-activity_attribution_token",
             expires=timezone.now() + timedelta(hours=1),
             scope="experiment:write feature_flag:write",
             impersonated_by=impersonated_by,

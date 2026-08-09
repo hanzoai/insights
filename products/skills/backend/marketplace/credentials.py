@@ -36,7 +36,7 @@ _LABEL_PREFIX = "Skill store · team "
 @dataclass(frozen=True)
 class IssuedMarketplaceCredential:
     key: PersonalAPIKey
-    # The raw ``phx_`` token, available only when we just minted or rotated. None when the
+    # The raw ``sk-`` token, available only when we just minted or rotated. None when the
     # existing key was returned untouched (its token is unrecoverable).
     token: str | None
     status: str  # "created" | "rotated" | "exists"

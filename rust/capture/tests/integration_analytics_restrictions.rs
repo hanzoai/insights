@@ -217,7 +217,7 @@ fn assert_event(event: &ProcessedEvent, expected: &ExpectedEvent) {
 
 #[tokio::test]
 async fn test_analytics_drop_event_restriction() {
-    let restricted_token = "phc_restricted_drop_token";
+    let restricted_token = "pk-restricted_drop_token";
     let (router, sink) = setup_analytics_router_with_restriction(
         RestrictionType::DropEvent,
         Pipeline::Analytics,
@@ -254,7 +254,7 @@ async fn test_analytics_drop_event_restriction() {
 
 #[tokio::test]
 async fn test_analytics_redirect_to_dlq_restriction() {
-    let restricted_token = "phc_restricted_dlq_token";
+    let restricted_token = "pk-restricted_dlq_token";
     let (router, sink) = setup_analytics_router_with_restriction(
         RestrictionType::RedirectToDlq,
         Pipeline::Analytics,
@@ -301,7 +301,7 @@ async fn test_analytics_redirect_to_dlq_restriction() {
 
 #[tokio::test]
 async fn test_analytics_force_overflow_restriction() {
-    let restricted_token = "phc_restricted_overflow_token";
+    let restricted_token = "pk-restricted_overflow_token";
     let (router, sink) = setup_analytics_router_with_restriction(
         RestrictionType::ForceOverflow,
         Pipeline::Analytics,
@@ -358,7 +358,7 @@ async fn test_analytics_force_overflow_restriction_applies_to_diverted_ai_event(
     // to the AI overflow topic, never the analytics one). Catches the
     // restriction pipeline or the router dropping restrictions for diverted
     // events, which the process-level tests can't see end-to-end.
-    let restricted_token = "phc_restricted_overflow_ai_token";
+    let restricted_token = "pk-restricted_overflow_ai_token";
     let (router, sink) = setup_analytics_router_with_restriction(
         RestrictionType::ForceOverflow,
         Pipeline::Ai,
@@ -409,7 +409,7 @@ async fn test_analytics_force_overflow_restriction_applies_to_diverted_ai_event(
 
 #[tokio::test]
 async fn test_analytics_skip_person_processing_restriction() {
-    let restricted_token = "phc_restricted_skip_person_token";
+    let restricted_token = "pk-restricted_skip_person_token";
     let (router, sink) = setup_analytics_router_with_restriction(
         RestrictionType::SkipPersonProcessing,
         Pipeline::Analytics,
@@ -456,7 +456,7 @@ async fn test_analytics_skip_person_processing_restriction() {
 
 #[tokio::test]
 async fn test_analytics_restriction_does_not_apply_to_other_tokens() {
-    let restricted_token = "phc_restricted_token";
+    let restricted_token = "pk-restricted_token";
     let (router, sink) = setup_analytics_router_with_restriction(
         RestrictionType::DropEvent,
         Pipeline::Analytics,
@@ -468,7 +468,7 @@ async fn test_analytics_restriction_does_not_apply_to_other_tokens() {
     let test_client = TestClient::new(router);
 
     let payload = json!({
-        "token": "phc_not_restricted_token",
+        "token": "pk-not_restricted_token",
         "event": "$pageview",
         "distinct_id": "test_user"
     });
@@ -492,7 +492,7 @@ async fn test_analytics_restriction_does_not_apply_to_other_tokens() {
     assert_event(
         &events[0],
         &ExpectedEvent {
-            token: "phc_not_restricted_token",
+            token: "pk-not_restricted_token",
             distinct_id: "test_user",
             event_name: "$pageview",
             data_type: DataType::AnalyticsMain,
@@ -580,7 +580,7 @@ async fn setup_analytics_router_with_redirect_to_topic(
 
 #[tokio::test]
 async fn test_analytics_redirect_to_topic_restriction() {
-    let restricted_token = "phc_restricted_redirect_topic_token";
+    let restricted_token = "pk-restricted_redirect_topic_token";
     let target_topic = "custom_events_topic";
     let (router, sink) =
         setup_analytics_router_with_redirect_to_topic(restricted_token, target_topic).await;

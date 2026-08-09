@@ -1417,7 +1417,7 @@ mod tests {
 
     fn serialize_ctx() -> crate::v1::context::RequestContext {
         let mut ctx = test_utils::test_context();
-        ctx.api_token = "phc_project_abc123".to_string();
+        ctx.api_token = "pk-project_abc123".to_string();
         ctx.client_ip = IpAddr::V4(Ipv4Addr::new(203, 0, 113, 42));
         ctx.client_timestamp = dt("2026-03-19T14:30:01.500Z");
         ctx.server_received_at = dt("2026-03-19T14:30:00.000Z");
@@ -1491,7 +1491,7 @@ mod tests {
         assert_eq!(captured.uuid, wrapped.uuid);
         assert_eq!(captured.distinct_id, "user-42");
         assert_eq!(captured.ip, "203.0.113.42");
-        assert_eq!(captured.token, "phc_project_abc123");
+        assert_eq!(captured.token, "pk-project_abc123");
         assert_eq!(captured.event, "$pageview");
         assert_eq!(captured.timestamp, wrapped.adjusted_timestamp.unwrap());
         assert!(!captured.is_cookieless_mode);

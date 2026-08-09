@@ -41,7 +41,7 @@ class Authenticator(ABC):
 
 
 class PersonalApiKeyAuthenticator(Authenticator):
-    """Authenticator for personal API keys (phx_ prefix)."""
+    """Authenticator for personal API keys (sk- prefix)."""
 
     @property
     def auth_type(self) -> str:
@@ -52,7 +52,7 @@ class PersonalApiKeyAuthenticator(Authenticator):
         return get_settings().auth_cache_ttl
 
     def matches(self, token: str) -> bool:
-        return token.startswith("phx_")
+        return token.startswith("sk-")
 
     def hash_token(self, token: str) -> str:
         hashed = hashlib.sha256(token.encode()).hexdigest()
@@ -88,7 +88,7 @@ class PersonalApiKeyAuthenticator(Authenticator):
 
 
 class OAuthAccessTokenAuthenticator(Authenticator):
-    """Authenticator for OAuth access tokens (pha_ prefix)."""
+    """Authenticator for OAuth access tokens (at- prefix)."""
 
     @property
     def auth_type(self) -> str:
@@ -99,7 +99,7 @@ class OAuthAccessTokenAuthenticator(Authenticator):
         return get_settings().auth_cache_ttl_oauth
 
     def matches(self, token: str) -> bool:
-        return token.startswith("pha_")
+        return token.startswith("at-")
 
     def hash_token(self, token: str) -> str:
         return hashlib.sha256(token.encode("utf-8")).hexdigest()

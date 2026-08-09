@@ -12,7 +12,7 @@
 #
 # Usage:
 #   OTEL_LOGS_HTTP=http://localhost:4318/v1/logs ./sampling-seed-services-curl.sh
-#   OTEL_LOGS_TOKEN=phc_... ./sampling-seed-services-curl.sh   # direct to capture-logs / proxy without collector-injected auth
+#   OTEL_LOGS_TOKEN=pk-... ./sampling-seed-services-curl.sh   # direct to capture-logs / proxy without collector-injected auth
 #   SAMPLING_SEED_PRINT_ONLY=1 ./sampling-seed-services-curl.sh  # print JSON only
 #
 # Logs UI filter: body contains "sampling seed dev" OR ph.probe.suite = sampling_services_seed

@@ -219,7 +219,7 @@ Insights will not receive any data until these two are set:
 
 | Name                        | Value                      |
 | --------------------------- | -------------------------- |
-| `NEXT_PUBLIC_INSIGHTS_TOKEN` | `phc_abc123def456`         |
+| `NEXT_PUBLIC_INSIGHTS_TOKEN` | `pk-abc123def456`         |
 | `NEXT_PUBLIC_INSIGHTS_HOST`  | `https://us.i.hanzo.ai` |
 
 To set them:
@@ -247,7 +247,7 @@ commands locally instead of using the dashboard. For Vercel the commands look li
 is piped in; `production` is the target environment):
 
 ```bash
-echo "phc_abc123def456" | npx vercel env add NEXT_PUBLIC_INSIGHTS_TOKEN production
+echo "pk-abc123def456" | npx vercel env add NEXT_PUBLIC_INSIGHTS_TOKEN production
 echo "https://us.i.hanzo.ai" | npx vercel env add NEXT_PUBLIC_INSIGHTS_HOST production
 ```
 
@@ -261,7 +261,7 @@ committed), so these must be set in your deployment environment:
 
 | Name            | Value                      |
 | --------------- | -------------------------- |
-| `INSIGHTS_TOKEN` | `phc_abc123def456`         |
+| `INSIGHTS_TOKEN` | `pk-abc123def456`         |
 | `INSIGHTS_HOST`  | `https://us.i.hanzo.ai` |
 
 Add them wherever you inject runtime config for this service (compose file, task definition,

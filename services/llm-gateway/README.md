@@ -16,7 +16,7 @@ uv run uvicorn llm_gateway.main:app --reload
 
 ```bash
 curl -X POST http://localhost:8080/v1/chat/completions \
-  -H "Authorization: Bearer phx_dev_local_test_api_key_1234567890abcdef" \
+  -H "Authorization: Bearer sk-dev_local_test_api_key_1234567890abcdef" \
   -H "Content-Type: application/json" \
   -d '{
     "model": "gpt-4.1-mini",
@@ -31,8 +31,8 @@ The gateway supports two authentication methods:
 
 | Method             | Token Prefix | Header                                                  |
 | ------------------ | ------------ | ------------------------------------------------------- |
-| Personal API Key   | `phx_`       | `Authorization: Bearer phx_...` or `x-api-key: phx_...` |
-| OAuth Access Token | `pha_`       | `Authorization: Bearer pha_...`                         |
+| Personal API Key   | `sk-`       | `Authorization: Bearer sk-...` or `x-api-key: sk-...` |
+| OAuth Access Token | `at-`       | `Authorization: Bearer at-...`                         |
 
 **Required Scope**: `llm_gateway:read`
 
@@ -42,7 +42,7 @@ When running via phrocs, a personal API key with the `llm_gateway:read` scope is
 The key is deterministic and survives database resets:
 
 ```text
-phx_dev_local_test_api_key_1234567890abcdef
+sk-dev_local_test_api_key_1234567890abcdef
 ```
 
 You can use this key directly to make requests to the gateway locally.
@@ -73,7 +73,7 @@ from openai import OpenAI
 
 client = OpenAI(
     base_url="https://gateway.us.hanzo.ai/v1",
-    api_key="phx_your_api_key",
+    api_key="sk-your_api_key",
 )
 
 response = client.chat.completions.create(
@@ -90,7 +90,7 @@ import OpenAI from 'openai'
 
 const client = new OpenAI({
   baseURL: 'https://gateway.us.hanzo.ai/v1',
-  apiKey: 'phx_your_api_key',
+  apiKey: 'sk-your_api_key',
 })
 
 const response = await client.chat.completions.create({
@@ -107,7 +107,7 @@ import anthropic
 
 client = anthropic.Anthropic(
     base_url="https://gateway.us.hanzo.ai/v1",
-    api_key="phx_your_api_key",
+    api_key="sk-your_api_key",
 )
 
 response = client.messages.create(

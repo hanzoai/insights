@@ -8,7 +8,7 @@ from insights.temporal.ingestion_acceptance_test.config import DEFAULT_LANE, con
 
 FLAT_ENV = {
     "INGESTION_ACCEPTANCE_TEST_API_HOST": "https://flat.example.com",
-    "INGESTION_ACCEPTANCE_TEST_PROJECT_API_KEY": "phc_flat",
+    "INGESTION_ACCEPTANCE_TEST_PROJECT_API_KEY": "pk-flat",
     "INGESTION_ACCEPTANCE_TEST_TEAM_ID": "111",
 }
 
@@ -30,25 +30,25 @@ class TestLoadConfig:
         config = load_config()
 
         assert config.api_host == "https://flat.example.com"
-        assert config.project_api_key == "phc_flat"
+        assert config.project_api_key == "pk-flat"
         assert config.team_id == 111
         assert config.lane == DEFAULT_LANE  # flat runs report as the "main" lane
 
     def test_lane_config_reads_per_lane_env(self, clean_env: pytest.MonkeyPatch) -> None:
         clean_env.setenv("INGESTION_ACCEPTANCE_TEST_LANE_TURBO_API_HOST", "https://turbo.example.com/")
-        clean_env.setenv("INGESTION_ACCEPTANCE_TEST_LANE_TURBO_PROJECT_API_KEY", "phc_turbo")
+        clean_env.setenv("INGESTION_ACCEPTANCE_TEST_LANE_TURBO_PROJECT_API_KEY", "pk-turbo")
         clean_env.setenv("INGESTION_ACCEPTANCE_TEST_LANE_TURBO_TEAM_ID", "222")
 
         config = load_config("turbo")
 
         assert config.lane == "turbo"
         assert config.api_host == "https://turbo.example.com"  # trailing slash stripped
-        assert config.project_api_key == "phc_turbo"
+        assert config.project_api_key == "pk-turbo"
         assert config.team_id == 222
 
     def test_lane_name_normalized_to_env_segment(self, clean_env: pytest.MonkeyPatch) -> None:
         clean_env.setenv("INGESTION_ACCEPTANCE_TEST_LANE_FAST_LANE_API_HOST", "https://fast.example.com")
-        clean_env.setenv("INGESTION_ACCEPTANCE_TEST_LANE_FAST_LANE_PROJECT_API_KEY", "phc_fast")
+        clean_env.setenv("INGESTION_ACCEPTANCE_TEST_LANE_FAST_LANE_PROJECT_API_KEY", "pk-fast")
         clean_env.setenv("INGESTION_ACCEPTANCE_TEST_LANE_FAST_LANE_TEAM_ID", "333")
 
         config = load_config("fast-lane")
@@ -62,7 +62,7 @@ class TestLoadConfig:
 
     def test_non_integer_team_id_raises_descriptive_error(self, clean_env: pytest.MonkeyPatch) -> None:
         clean_env.setenv("INGESTION_ACCEPTANCE_TEST_LANE_TURBO_API_HOST", "https://turbo.example.com")
-        clean_env.setenv("INGESTION_ACCEPTANCE_TEST_LANE_TURBO_PROJECT_API_KEY", "phc_turbo")
+        clean_env.setenv("INGESTION_ACCEPTANCE_TEST_LANE_TURBO_PROJECT_API_KEY", "pk-turbo")
         clean_env.setenv("INGESTION_ACCEPTANCE_TEST_LANE_TURBO_TEAM_ID", "not-a-number")
 
         with pytest.raises(ValueError, match="TEAM_ID must be an integer"):
@@ -70,7 +70,7 @@ class TestLoadConfig:
 
     def test_shared_settings_come_from_flat_env_for_lane(self, clean_env: pytest.MonkeyPatch) -> None:
         clean_env.setenv("INGESTION_ACCEPTANCE_TEST_LANE_MAIN_API_HOST", "https://main.example.com")
-        clean_env.setenv("INGESTION_ACCEPTANCE_TEST_LANE_MAIN_PROJECT_API_KEY", "phc_main")
+        clean_env.setenv("INGESTION_ACCEPTANCE_TEST_LANE_MAIN_PROJECT_API_KEY", "pk-main")
         clean_env.setenv("INGESTION_ACCEPTANCE_TEST_LANE_MAIN_TEAM_ID", "444")
         clean_env.setenv("INGESTION_ACCEPTANCE_TEST_POLL_INTERVAL_SECONDS", "2.5")
 

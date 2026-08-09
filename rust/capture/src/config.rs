@@ -847,7 +847,7 @@ mod tests {
         // reshuffles which teams sit under a given percentage mid-rollout,
         // flipping already-migrated teams back and forth between destinations.
         // These pin the exact SHA-256-derived buckets for fixed tokens.
-        let buckets = [("tok_a", 27), ("tok_b", 40), ("phc_other", 29)];
+        let buckets = [("tok_a", 27), ("tok_b", 40), ("pk-other", 29)];
         for (token, expected) in buckets {
             assert_eq!(
                 super::token_percentage_bucket(token),

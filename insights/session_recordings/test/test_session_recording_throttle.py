@@ -32,7 +32,7 @@ from insights.session_recordings.session_recording_api import (
 
 
 def _fake_personal_api_key_request():
-    req = type("FakeRequest", (), {"META": {}, "auth": "phx_fake"})()
+    req = type("FakeRequest", (), {"META": {}, "auth": "sk-fake"})()
     req.successful_authenticator = PersonalAPIKeyAuthentication()
     return req
 
