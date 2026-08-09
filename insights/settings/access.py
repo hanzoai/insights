@@ -192,4 +192,4 @@ FORCE_URL_VALIDATION: bool = get_from_env("INSIGHTS_FORCE_URL_VALIDATION", False
 # A fixed literal so `setup_local_api_key` is idempotent: the command hashes this into
 # PersonalAPIKey, so a value that moved would mint a second key on every run. Local development
 # only -- it is a well-known string, never a credential for a deployed instance.
-DEV_API_KEY = "phx_dev_local_test_api_key_1234567890abcdef"
+DEV_API_KEY = "sk-dev_local_test_api_key_1234567890abcdef"

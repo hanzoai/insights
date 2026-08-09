@@ -99,7 +99,7 @@ All configuration is loaded from environment variables with the `INGESTION_ACCEP
 ```bash
 # Set required environment variables
 export INGESTION_ACCEPTANCE_TEST_API_HOST="https://us.hanzo.ai"
-export INGESTION_ACCEPTANCE_TEST_PROJECT_API_KEY="phc_xxx"
+export INGESTION_ACCEPTANCE_TEST_PROJECT_API_KEY="pk-xxx"
 export INGESTION_ACCEPTANCE_TEST_TEAM_ID="12345"
 
 # Run directly (requires Datastore connection via Django settings)

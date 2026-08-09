@@ -233,12 +233,12 @@ describe('Hono App Routes', () => {
             expect(await res.text()).toContain('Invalid token')
         })
 
-        it('should pass auth check for phx_ tokens (may fail later at init)', async () => {
+        it('should pass auth check for sk- tokens (may fail later at init)', async () => {
             const { app } = createApp(mockRedis)
             const res = await app.request('/mcp', {
                 method: 'POST',
                 headers: {
-                    Authorization: 'Bearer phx_test_token',
+                    Authorization: 'Bearer sk-test_token',
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
@@ -257,12 +257,12 @@ describe('Hono App Routes', () => {
             expect(body).not.toContain('Invalid token')
         })
 
-        it('should pass auth check for pha_ tokens (may fail later at init)', async () => {
+        it('should pass auth check for at- tokens (may fail later at init)', async () => {
             const { app } = createApp(mockRedis)
             const res = await app.request('/mcp', {
                 method: 'POST',
                 headers: {
-                    Authorization: 'Bearer pha_test_token',
+                    Authorization: 'Bearer at-test_token',
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
@@ -384,7 +384,7 @@ describe('Hono App Routes', () => {
             const { app } = createApp(mockRedis)
             const res = await app.request('/mcp', {
                 method: 'PUT',
-                headers: { Authorization: 'Bearer phx_test' },
+                headers: { Authorization: 'Bearer sk-test' },
             })
             expect(res.status).toBe(405)
         })
@@ -394,7 +394,7 @@ describe('Hono App Routes', () => {
             const res = await app.request('/mcp', {
                 method: 'DELETE',
                 headers: {
-                    Authorization: 'Bearer phx_test',
+                    Authorization: 'Bearer sk-test',
                     'mcp-session-id': 'non-existent',
                 },
             })

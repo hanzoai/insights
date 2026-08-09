@@ -239,7 +239,7 @@ class TestRateLimitResponseHeaders:
 
         with TestClient(app) as client:
             body = {"model": "gpt-4", "messages": [{"role": "user", "content": "Hi"}]}
-            headers = {"Authorization": "Bearer phx_test_key"}
+            headers = {"Authorization": "Bearer sk-test_key"}
             response = client.post("/v1/chat/completions", json=body, headers=headers)
 
             assert response.status_code == 429

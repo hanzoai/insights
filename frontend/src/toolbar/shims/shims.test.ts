@@ -65,7 +65,7 @@ describe('toolbar shims', () => {
             [null, false],
             [undefined, false],
             [{}, false],
-            [{ api_token: 'phc_abc123' }, true],
+            [{ api_token: 'pk-abc123' }, true],
         ])('isAuthenticatedTeam(%j) returns %s', (input, expected) => {
             expect(isAuthenticatedTeam(input)).toBe(expected)
         })

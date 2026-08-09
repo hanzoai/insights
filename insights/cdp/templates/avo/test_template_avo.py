@@ -33,7 +33,7 @@ class TestTemplateAvo(BaseInsightsFunctionTemplateTest):
                     "event": "sign up",
                     "properties": {
                         "distinct_id": "66e614bd-d9f2-491e-9e2c-eeab3090f72f",
-                        "token": "phc_ex7Mnvi4DqeB6xSQoXU1UVPzAmUIpicMFKELQXGGTYQO",
+                        "token": "pk-ex7Mnvi4DqeB6xSQoXU1UVPzAmUIpicMFKELQXGGTYQO",
                         "bob": {"name": "bob"},
                         "age": 99,
                         "name": "bob",

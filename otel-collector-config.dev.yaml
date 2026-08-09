@@ -96,7 +96,7 @@ exporters:
             insecure: true # For local communication to Jaeger
         headers:
             # special "local" token is automatically mapped to team_id 1 in dev environments
-            authorization: Bearer phc_local
+            authorization: Bearer pk-local
         # Give up in 30s (vs the 5 min default) when capture-logs is down.
         retry_on_failure:
             max_elapsed_time: 30s
@@ -107,7 +107,7 @@ exporters:
             insecure: true
         headers:
             # special "local" token is automatically mapped to team_id 1 in dev environments
-            authorization: Bearer phc_local
+            authorization: Bearer pk-local
         retry_on_failure:
             max_elapsed_time: 30s
     otlphttp/metrics:
@@ -116,7 +116,7 @@ exporters:
         tls:
             insecure: true
         headers:
-            authorization: Bearer phc_local
+            authorization: Bearer pk-local
         retry_on_failure:
             max_elapsed_time: 30s
 

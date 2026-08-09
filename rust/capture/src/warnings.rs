@@ -226,7 +226,7 @@ mod tests {
     #[test]
     fn first_refusal_emits_then_throttles_per_key() {
         let w = warnings();
-        let fp = fingerprint("phc_a");
+        let fp = fingerprint("pk-a");
 
         assert_eq!(w.check(&fp, WarningType::IngestKeyUnknown), "emitted");
         assert_eq!(w.check(&fp, WarningType::IngestKeyUnknown), "throttled");
@@ -235,7 +235,7 @@ mod tests {
         // so one noisy caller cannot mask another.
         assert_eq!(w.check(&fp, WarningType::IngestKeyRequired), "emitted");
         assert_eq!(
-            w.check(&fingerprint("phc_b"), WarningType::IngestKeyUnknown),
+            w.check(&fingerprint("pk-b"), WarningType::IngestKeyUnknown),
             "emitted"
         );
     }
@@ -254,14 +254,14 @@ mod tests {
 
     #[test]
     fn fingerprint_hides_the_credential() {
-        let secret = "phx_personal_key_that_must_not_be_logged";
+        let secret = "sk-personal_key_that_must_not_be_logged";
         let fp = fingerprint(secret);
 
         assert_eq!(fp.len(), 12);
         assert!(!secret.contains(&fp), "fingerprint must not be a substring");
         assert!(fp.chars().all(|c| c.is_ascii_hexdigit()));
         assert_eq!(fp, fingerprint(secret), "must be stable for correlation");
-        assert_ne!(fp, fingerprint("phc_other"));
+        assert_ne!(fp, fingerprint("pk-other"));
     }
 
     #[test]

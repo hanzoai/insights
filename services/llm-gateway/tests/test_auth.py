@@ -61,8 +61,8 @@ class TestExtractToken:
     @pytest.mark.parametrize(
         "api_key,expected",
         [
-            pytest.param("phx_test_key", "phx_test_key", id="personal_api_key"),
-            pytest.param("pha_oauth_token", "pha_oauth_token", id="oauth_token"),
+            pytest.param("sk-test_key", "sk-test_key", id="personal_api_key"),
+            pytest.param("at-oauth_token", "at-oauth_token", id="oauth_token"),
             pytest.param("  spaced_key  ", "spaced_key", id="whitespace_trimmed"),
         ],
     )
@@ -94,7 +94,7 @@ class TestAuthService:
     @pytest.mark.asyncio
     async def test_routes_oauth_token_to_oauth_validator(self, auth_service: AuthService, mock_pool: MagicMock) -> None:
         request = MagicMock(spec=Request)
-        request.headers = {"authorization": "Bearer pha_valid_token"}
+        request.headers = {"authorization": "Bearer at-valid_token"}
 
         conn = mock_pool.acquire.return_value
         conn.fetchrow = AsyncMock(
@@ -122,7 +122,7 @@ class TestAuthService:
         self, auth_service: AuthService, mock_pool: MagicMock
     ) -> None:
         request = MagicMock(spec=Request)
-        request.headers = {"x-api-key": "phx_valid_key"}
+        request.headers = {"x-api-key": "sk-valid_key"}
 
         conn = mock_pool.acquire.return_value
         conn.fetchrow = AsyncMock(
@@ -146,7 +146,7 @@ class TestAuthService:
     @pytest.mark.asyncio
     async def test_invalid_token_returns_none(self, auth_service: AuthService, mock_pool: MagicMock) -> None:
         request = MagicMock(spec=Request)
-        request.headers = {"authorization": "Bearer phx_unknown_key"}
+        request.headers = {"authorization": "Bearer sk-unknown_key"}
 
         conn = mock_pool.acquire.return_value
         conn.fetchrow = AsyncMock(return_value=None)
@@ -192,8 +192,8 @@ class TestPersonalApiKeyAuthenticator:
         assert authenticator.hash_token(key1) != authenticator.hash_token(key2)
 
     def test_matches_phx_prefix(self, authenticator: PersonalApiKeyAuthenticator) -> None:
-        assert authenticator.matches("phx_test_key") is True
-        assert authenticator.matches("pha_oauth_token") is False
+        assert authenticator.matches("sk-test_key") is True
+        assert authenticator.matches("at-oauth_token") is False
         assert authenticator.matches("random_token") is False
 
     @pytest.mark.asyncio
@@ -212,7 +212,7 @@ class TestPersonalApiKeyAuthenticator:
             }
         )
 
-        token_hash = authenticator.hash_token("phx_test_key")
+        token_hash = authenticator.hash_token("sk-test_key")
         result = await authenticator.authenticate(token_hash, mock_pool)
 
         assert result is not None
@@ -250,7 +250,7 @@ class TestPersonalApiKeyAuthenticator:
         conn = mock_pool.acquire.return_value
         conn.fetchrow = AsyncMock(return_value=db_result)
 
-        token_hash = authenticator.hash_token("phx_invalid_key")
+        token_hash = authenticator.hash_token("sk-invalid_key")
         result = await authenticator.authenticate(token_hash, mock_pool)
         assert result is None
 
@@ -261,8 +261,8 @@ class TestOAuthAccessTokenAuthenticator:
         return OAuthAccessTokenAuthenticator()
 
     def test_matches_pha_prefix(self, authenticator: OAuthAccessTokenAuthenticator) -> None:
-        assert authenticator.matches("pha_oauth_token") is True
-        assert authenticator.matches("phx_personal_key") is False
+        assert authenticator.matches("at-oauth_token") is True
+        assert authenticator.matches("sk-personal_key") is False
         assert authenticator.matches("random_token") is False
 
     @pytest.mark.asyncio
@@ -272,7 +272,7 @@ class TestOAuthAccessTokenAuthenticator:
         conn = mock_pool.acquire.return_value
         conn.fetchrow = AsyncMock(return_value=None)
 
-        token_hash = authenticator.hash_token("pha_unknown_token")
+        token_hash = authenticator.hash_token("at-unknown_token")
         result = await authenticator.authenticate(token_hash, mock_pool)
         assert result is None
 
@@ -293,7 +293,7 @@ class TestOAuthAccessTokenAuthenticator:
             }
         )
 
-        token_hash = authenticator.hash_token("pha_expired_token")
+        token_hash = authenticator.hash_token("at-expired_token")
         result = await authenticator.authenticate(token_hash, mock_pool)
         assert result is None
 
@@ -315,7 +315,7 @@ class TestOAuthAccessTokenAuthenticator:
             }
         )
 
-        token_hash = authenticator.hash_token("pha_no_expiry")
+        token_hash = authenticator.hash_token("at-no_expiry")
         result = await authenticator.authenticate(token_hash, mock_pool)
 
         assert result is not None
@@ -338,7 +338,7 @@ class TestOAuthAccessTokenAuthenticator:
             }
         )
 
-        token_hash = authenticator.hash_token("pha_no_app_id")
+        token_hash = authenticator.hash_token("at-no_app_id")
         result = await authenticator.authenticate(token_hash, mock_pool)
         assert result is None
 
@@ -368,7 +368,7 @@ class TestOAuthAccessTokenAuthenticator:
             }
         )
 
-        token_hash = authenticator.hash_token("pha_wrong_scope")
+        token_hash = authenticator.hash_token("at-wrong_scope")
         result = await authenticator.authenticate(token_hash, mock_pool)
         assert result is None
 
@@ -401,7 +401,7 @@ class TestOAuthAccessTokenAuthenticator:
             }
         )
 
-        token_hash = authenticator.hash_token("pha_valid_token")
+        token_hash = authenticator.hash_token("at-valid_token")
         result = await authenticator.authenticate(token_hash, mock_pool)
 
         assert result is not None
@@ -425,7 +425,7 @@ class TestOAuthAccessTokenAuthenticator:
             }
         )
 
-        token_hash = authenticator.hash_token("pha_valid_token")
+        token_hash = authenticator.hash_token("at-valid_token")
         result = await authenticator.authenticate(token_hash, mock_pool)
 
         assert result is not None
@@ -453,7 +453,7 @@ class TestOAuthAccessTokenAuthenticator:
             }
         )
 
-        token_hash = authenticator.hash_token("pha_valid_token")
+        token_hash = authenticator.hash_token("at-valid_token")
         result = await authenticator.authenticate(token_hash, mock_pool)
 
         assert result is not None

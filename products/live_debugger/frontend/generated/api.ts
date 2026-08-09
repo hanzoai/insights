@@ -186,7 +186,7 @@ export const getLiveDebuggerBreakpointsActiveRetrieveUrl = (
 /**
  * External API endpoint for client applications to fetch active breakpoints using Project API key. This endpoint allows external client applications (like Python scripts, Node.js apps, etc.) to fetch the list of active breakpoints so they can instrument their code accordingly.
  *
- * Authentication: Requires a Project API Key in the Authorization header: `Authorization: Bearer phs_<your-project-api-key>`. You can find your Project API Key in Insights at: Settings → Project → Project API Key
+ * Authentication: Requires a Project API Key in the Authorization header: `Authorization: Bearer sk-<your-project-api-key>`. You can find your Project API Key in Insights at: Settings → Project → Project API Key
  * @summary Get active breakpoints (External API)
  */
 export const liveDebuggerBreakpointsActiveRetrieve = async (

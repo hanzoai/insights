@@ -4,17 +4,17 @@
 #
 # Usage:
 #   # Local dev (default — same path logs scripts use):
-#   TOKEN=phc_yourtoken bin/send-dev-metrics.sh
-#   TOKEN=phc_yourtoken bin/send-dev-metrics.sh loop   # send every 5s
+#   TOKEN=pk-yourtoken bin/send-dev-metrics.sh
+#   TOKEN=pk-yourtoken bin/send-dev-metrics.sh loop   # send every 5s
 #
 #   # Cloud dev via kubectl port-forward (capture-logs Service inside the cluster):
 #   aws login
 #   kubectl port-forward -n insights svc/capture-logs 4320:4318
-#   ENDPOINT=http://localhost:4320/v1/metrics TOKEN=phc_yourtoken bin/send-dev-metrics.sh
+#   ENDPOINT=http://localhost:4320/v1/metrics TOKEN=pk-yourtoken bin/send-dev-metrics.sh
 #
 #   # Prod (once the public ingress is live):
-#   ENDPOINT=https://us.i.hanzo.ai/i/v1/metrics TOKEN=phc_yourtoken bin/send-dev-metrics.sh
-#   ENDPOINT=https://eu.i.hanzo.ai/i/v1/metrics TOKEN=phc_yourtoken bin/send-dev-metrics.sh
+#   ENDPOINT=https://us.i.hanzo.ai/i/v1/metrics TOKEN=pk-yourtoken bin/send-dev-metrics.sh
+#   ENDPOINT=https://eu.i.hanzo.ai/i/v1/metrics TOKEN=pk-yourtoken bin/send-dev-metrics.sh
 set -euo pipefail
 
 # Default to the same local-OTel-collector endpoint the logs seed scripts use.
@@ -23,7 +23,7 @@ ENDPOINT="${ENDPOINT:-http://localhost:4318/v1/metrics}"
 TOKEN="${TOKEN:-}"
 
 if [ -z "$TOKEN" ]; then
-    echo "Set TOKEN=phc_... (project API token — for local dev, any phc_... from your local project works)" >&2
+    echo "Set TOKEN=pk-... (project API token — for local dev, any pk-... from your local project works)" >&2
     exit 1
 fi
 
@@ -155,7 +155,7 @@ SQL
         done
         ;;
     *)
-        echo "Usage: TOKEN=phc_... $0 [once|loop]" >&2
+        echo "Usage: TOKEN=pk-... $0 [once|loop]" >&2
         exit 2
         ;;
 esac

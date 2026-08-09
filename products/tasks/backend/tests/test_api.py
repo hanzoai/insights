@@ -252,7 +252,7 @@ class TestBuiltInAgentTaskAccess(BaseTaskAPITest):
         access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=application,
-            token=f"pha_task_agent_{uuid.uuid4().hex}",
+            token=f"at-task_agent_{uuid.uuid4().hex}",
             expires=django_timezone.now() + timedelta(hours=1),
             scope=f"task:read task:write {MCP_BUILT_IN_AGENT_SCOPE}",
             scoped_teams=[self.team.id],
@@ -1026,7 +1026,7 @@ class TestTaskAPI(BaseTaskAPITest):
         access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=application,
-            token=f"pha_task_{uuid.uuid4().hex}",
+            token=f"at-task_{uuid.uuid4().hex}",
             expires=django_timezone.now() + timedelta(hours=1),
             scope=scope,
             scoped_teams=[self.team.id],
@@ -1034,7 +1034,7 @@ class TestTaskAPI(BaseTaskAPITest):
         OAuthRefreshToken.objects.create(
             user=self.user,
             application=application,
-            token=f"phr_task_{uuid.uuid4().hex}",
+            token=f"rt-task_{uuid.uuid4().hex}",
             access_token=access_token,
         )
         client = APIClient()

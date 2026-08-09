@@ -35,7 +35,7 @@ class _RemoteConfigBase(BaseTest):
             name="Test project",
         )
         self.team = team
-        self.team.api_token = "phc_12345"  # Easier to test against
+        self.team.api_token = "pk-12345"  # Easier to test against
         self.team.recording_domains = ["https://*.example.com"]
         self.team.session_recording_opt_in = True
         self.team.surveys_opt_in = True
@@ -585,10 +585,10 @@ class TestRemoteConfigCaching(_RemoteConfigBase):
                 headers={"Authorization": "Bearer MY_TOKEN"},
                 json={
                     "files": [
-                        {"url": "https://cdn.hanzo.ai/array/phc_12345/config"},
-                        {"url": "https://cdn.hanzo.ai/array/phc_12345/config.js"},
-                        {"url": "https://cdn2.hanzo.ai/array/phc_12345/config"},
-                        {"url": "https://cdn2.hanzo.ai/array/phc_12345/config.js"},
+                        {"url": "https://cdn.hanzo.ai/array/pk-12345/config"},
+                        {"url": "https://cdn.hanzo.ai/array/pk-12345/config.js"},
+                        {"url": "https://cdn2.hanzo.ai/array/pk-12345/config"},
+                        {"url": "https://cdn2.hanzo.ai/array/pk-12345/config.js"},
                     ]
                 },
                 timeout=10,

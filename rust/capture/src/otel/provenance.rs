@@ -90,7 +90,7 @@ mod tests {
     use serde_json::json;
 
     const SECRET: &str = "test-signing-secret";
-    const TOKEN: &str = "phc_test";
+    const TOKEN: &str = "pk-test";
     const SIGNED_AT: &str = "2026-07-16T12:34:56.12Z";
     const REQUEST_ID: &str = "req-123";
     const SIGNATURE: &str = "158b5ca0acb887eafbcfce9c871bfb6c11b0ccd58837f9f3346b88dd952ead89";

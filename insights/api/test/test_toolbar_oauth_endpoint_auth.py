@@ -64,9 +64,9 @@ class TestToolbarEndpointOAuthAuth(APIBaseTest):
         self.oauth_app = _make_oauth_app(self.organization, self.user)
 
         toolbar_scopes = " ".join(settings.TOOLBAR_OAUTH_SCOPES)
-        self.toolbar_token = _make_token(self.user, self.oauth_app, "pha_toolbar_full", scope=toolbar_scopes)
+        self.toolbar_token = _make_token(self.user, self.oauth_app, "at-toolbar_full", scope=toolbar_scopes)
         self.expired_token = _make_token(
-            self.user, self.oauth_app, "pha_toolbar_expired", scope=toolbar_scopes, delta_hours=-1
+            self.user, self.oauth_app, "at-toolbar_expired", scope=toolbar_scopes, delta_hours=-1
         )
 
     # (label, url_template, http_method, scope_object)
@@ -114,7 +114,7 @@ class TestToolbarEndpointOAuthAuth(APIBaseTest):
         token = _make_token(
             self.user,
             self.oauth_app,
-            f"pha_scoped_{scope_object}",
+            f"at-scoped_{scope_object}",
             scope=f"{scope_object}:read",
         )
         self.client.logout()
@@ -134,7 +134,7 @@ class TestToolbarEndpointOAuthAuth(APIBaseTest):
         token = _make_token(
             self.user,
             self.oauth_app,
-            f"pha_wrong_{_scope}",
+            f"at-wrong_{_scope}",
             scope="some_unrelated_scope:read",
         )
         self.client.logout()
@@ -165,7 +165,7 @@ class TestToolbarEndpointOAuthAuth(APIBaseTest):
         response = self._request(
             method,
             self._url(url_template),
-            HTTP_AUTHORIZATION="Bearer pha_does_not_exist",
+            HTTP_AUTHORIZATION="Bearer at-does_not_exist",
         )
         assert response.status_code == 401
 
@@ -205,7 +205,7 @@ class TestToolbarOAuthBypassesPersonalApiKeyRestriction(APIBaseTest):
 
         self.oauth_app = _make_oauth_app(self.organization, self.user)
         toolbar_scopes = " ".join(settings.TOOLBAR_OAUTH_SCOPES)
-        self.toolbar_token = _make_token(self.user, self.oauth_app, "pha_bypass_test", scope=toolbar_scopes)
+        self.toolbar_token = _make_token(self.user, self.oauth_app, "at-bypass_test", scope=toolbar_scopes)
 
     @parameterized.expand(TestToolbarEndpointOAuthAuth.TOOLBAR_ENDPOINTS)
     def test_member_with_oauth_token_not_blocked_by_personal_api_key_restriction(
@@ -250,10 +250,10 @@ class TestUploadedMediaOAuthAuth(APIBaseTest):
     def setUp(self):
         super().setUp()
         self.oauth_app = _make_oauth_app(self.organization, self.user)
-        self.write_token = _make_token(self.user, self.oauth_app, "pha_media_write", scope="uploaded_media:write")
-        self.read_token = _make_token(self.user, self.oauth_app, "pha_media_read", scope="uploaded_media:read")
+        self.write_token = _make_token(self.user, self.oauth_app, "at-media_write", scope="uploaded_media:write")
+        self.read_token = _make_token(self.user, self.oauth_app, "at-media_read", scope="uploaded_media:read")
         self.expired_token = _make_token(
-            self.user, self.oauth_app, "pha_media_exp", scope="uploaded_media:write", delta_hours=-1
+            self.user, self.oauth_app, "at-media_exp", scope="uploaded_media:write", delta_hours=-1
         )
 
     def _url(self):
@@ -301,13 +301,13 @@ class TestMascotConfigOAuthAuth(APIBaseTest):
         return f"/v1/users/@me/mascot_config/"
 
     def test_read_token_grants_get_access(self):
-        token = _make_token(self.user, self.oauth_app, "pha_hh_read", scope="user:read")
+        token = _make_token(self.user, self.oauth_app, "at-hh_read", scope="user:read")
         self.client.logout()
         response = self.client.get(self._url(), HTTP_AUTHORIZATION=f"Bearer {token.token}")
         assert response.status_code == 200
 
     def test_read_token_rejected_for_patch(self):
-        token = _make_token(self.user, self.oauth_app, "pha_hh_read_patch", scope="user:read")
+        token = _make_token(self.user, self.oauth_app, "at-hh_read_patch", scope="user:read")
         self.client.logout()
         response = self.client.patch(
             self._url(),
@@ -318,7 +318,7 @@ class TestMascotConfigOAuthAuth(APIBaseTest):
         assert response.status_code == 403
 
     def test_write_token_grants_patch_access(self):
-        token = _make_token(self.user, self.oauth_app, "pha_hh_write", scope="user:write")
+        token = _make_token(self.user, self.oauth_app, "at-hh_write", scope="user:write")
         self.client.logout()
         response = self.client.patch(
             self._url(),
@@ -329,7 +329,7 @@ class TestMascotConfigOAuthAuth(APIBaseTest):
         assert response.status_code == 200
 
     def test_expired_token_is_rejected(self):
-        token = _make_token(self.user, self.oauth_app, "pha_hh_exp", scope="user:read", delta_hours=-1)
+        token = _make_token(self.user, self.oauth_app, "at-hh_exp", scope="user:read", delta_hours=-1)
         self.client.logout()
         response = self.client.get(self._url(), HTTP_AUTHORIZATION=f"Bearer {token.token}")
         assert response.status_code == 401
@@ -383,7 +383,7 @@ class TestToolbarAccessTokenRevocation(APIBaseTest):
         self.token = _make_token(
             self.user,
             self.toolbar_app,
-            "pha_toolbar_revocation",
+            "at-toolbar_revocation",
             scope=" ".join(settings.TOOLBAR_OAUTH_SCOPES),
         )
         self.token.scoped_teams = [self.team.id]
@@ -432,7 +432,7 @@ class TestToolbarAccessTokenRevocation(APIBaseTest):
         toolbar app - it must not affect tokens minted by any other OAuth client."""
         self._deny_toolbar_access()
         other_app = _make_oauth_app(self.organization, self.user, name="Some other app")
-        other_token = _make_token(self.user, other_app, "pha_other_app", scope="action:read")
+        other_token = _make_token(self.user, other_app, "at-other_app", scope="action:read")
 
         self.client.logout()
         response = self.client.get(

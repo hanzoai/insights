@@ -466,7 +466,7 @@ class TestOrganizationAPI(APIBaseTest):
         access_token = OAuthAccessToken.objects.create(
             application=oauth_app,
             user=self.user,
-            token=f"pha_test_first_party_token_{field}",
+            token=f"at-test_first_party_token_{field}",
             scope="organization:write",
             expires=timezone.now() + timedelta(hours=1),
             scoped_organizations=[str(self.organization.id)],
