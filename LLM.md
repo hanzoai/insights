@@ -844,3 +844,68 @@ STILL BROKEN, and it is a different defect from all of the above:
 creates, so the `tasks` FKs pointing at them cannot resolve. They want a
 CreateModel, not a rename. Until that lands, `migrate` still cannot run and
 login stays down.
+
+## Schema, migrations, and the checks that lie (2026-08-09)
+
+**`migrate --check` answers the wrong question.** It compares the migration ledger to the
+migration tree, so it passes whenever every migration is *recorded* applied — including ones
+whose rows were faked past a failure. Production ran with **eleven absent model tables** while
+`migrate` reported nothing to do, `migrate --check` exited 0, and `showmigrations` listed them
+all applied. All three read `django_migrations`; none read the schema.
+
+Use `python manage.py schema_drift` — it compares every managed model's table and columns
+against `information_schema` and exits non-zero with the list. Measured on the same database in
+the same minute: `migrate --check` exit 0, `schema_drift` exit 1 naming all eleven.
+
+**Repair with the adopting operations, never `--fake`.** `insights/migration_helpers/absent.py`
+provides `CreateTableIfNotExists` / `AddColumnIfNotExists`. They take no field definition — the
+shape comes from migration state, so a repair cannot drift from what a fresh install gets — and
+they skip what is already present, which makes them correct in BOTH directions. `--fake` is
+wrong in one (it also skips a database that genuinely lacks the column); a plain
+`CreateModel`/`AddField` is wrong in the other (it fails where the table already exists).
+
+**A fresh database is a first-class test.** It was unbuildable for a long time, which is why the
+test-database builder failed and no backend test could run (`insights/conftest.py` builds the
+test DB by running migrations). Two defect classes did it: raw SQL in `insights/0002_managed_tables`
+re-creating tables that a product app's own migration owns, and ~45 state-only product moves
+(`*_migrate_*_models.py`) that adopt tables pre-squash history used to create — true on
+production, false on empty. Rebuild from empty after touching migrations:
+
+    U=$(python -c 'import os,re;u=os.environ["DATABASE_URL"];print(re.sub(r"/[^/?]+(\?|$)", r"/freshtest\1", u))')
+    DATABASE_URL="$U" python manage.py migrate --noinput
+
+**Do not run a bare `migrate` against production without classifying first.** The squash carries
+no `replaces`, so the ledger holds pre-squash names the tree does not contain. Classify the plan
+with `sqlmigrate` into ADDITIVE (CREATE TABLE / ADD COLUMN — cannot lose data) vs DESTRUCTIVE, and
+note that `RunPython` data migrations emit no SQL at all, so a grep over `sqlmigrate` is blind to
+them. `makemigrations` is the wrong tool here: it offers dozens of `DeleteModel`/`RemoveField`
+that would drop live tables.
+
+## Three remotes, and CD reads the forge
+
+`main` lives at `https://git.hanzo.ai/hanzo/insights` (CD reads this), `https://git.hanzo.ai/hanzoai/insights`
+(a second forge repo other lanes sync), and `ssh://github.com/hanzoai/insights`. The local `origin`
+has ONE fetch URL and TWO push URLs, so a push can succeed on one and be rejected on the other and
+split them silently. Verify every push with `git ls-remote <url> refs/heads/main` on all three and
+compare shas. Reconcile divergence with a MERGE — both sides then fast-forward and nothing is
+discarded. Never force-push. The sha in a pod's `/code/commit.txt` is often a sync merge commit that
+is an ancestor of both mains but the tip of neither; that is normal here.
+
+## Worktree limits (do not burn hours on these)
+
+The frontend build and `tsgo` DO NOT work in a `git worktree`: `copy-scripts` fails on a missing
+`node_modules/insights-js/dist/`, and tsgo reports ~111k phantom "cannot find module" errors because
+the borrowed `node_modules` does not resolve. Jest is absent too. `python` is not on PATH — prepend
+`.venv/bin`. NEVER run `bin/insightscli lint:python:fix` with no arguments: it goes repo-wide (it
+rewrote 422 files once). `bin/insightscli` borrows the venv from the main clone, so a module edited
+in a worktree may not be the one that executes — verify which file actually runs before trusting a
+result.
+
+## Static assets outlive the pod
+
+`/static/*` is served from a shared immutable origin through `hanzoai/ingress`, not from the pods.
+Before that, each pod served its own build's content-hashed filenames, so during a rollout the same
+URL answered 200 or 404 depending which pod took it (measured 200x7 / 404x8), and a page loaded
+before a deploy broke afterwards. A missing asset now answers an honest 404 rather than falling
+through to the SPA catch-all, which is `login_required` and 302'd to the IdP — that is what made
+the browser report "Expected a JavaScript module but the server responded with MIME type text/html".
