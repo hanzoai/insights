@@ -272,19 +272,27 @@ jobs:
                     "${KMS_CURL[@]}" "${KMS_ENDPOINT}/v1/kms/secrets/storage/$1?env=${KMS_SECRET_ENV}" \
                       -H "Authorization: Bearer ${KMS_TOKEN}" | jq -r '.value // empty'
                   }
-                  S3_KEY=$(kms S3_ROOT_USER)
-                  S3_SECRET=$(kms S3_ROOT_PASSWORD)
-                  [ -n "$S3_KEY" ] && [ -n "$S3_SECRET" ] || {
+                  export AWS_ACCESS_KEY_ID=$(kms S3_ROOT_USER)
+                  export AWS_SECRET_ACCESS_KEY=$(kms S3_ROOT_PASSWORD)
+                  [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ] || {
                     echo "::error::S3 credentials missing in KMS at storage/ (env ${KMS_SECRET_ENV})"; exit 1; }
-                  echo "::add-mask::${S3_SECRET}"
+                  # Both halves. Masking only the secret leaves the key id in the
+                  # log, and a credential is the pair.
+                  echo "::add-mask::${AWS_ACCESS_KEY_ID}"
+                  echo "::add-mask::${AWS_SECRET_ACCESS_KEY}"
 
+                  # `-e NAME` with no value passes the variable through from this
+                  # shell. `-e NAME=value` would put the credential on the docker
+                  # client's command line, where it is readable from any other
+                  # process on the runner and from `docker inspect` on the dind
+                  # sidecar for as long as the container lives.
                   docker run --rm -i \
                     -e S3_ENDPOINT=https://s3.hanzo.ai \
                     -e S3_BUCKET=cdn \
                     -e S3_PREFIX=insights \
                     -e VERSION="$VERSION" \
-                    -e AWS_ACCESS_KEY_ID="$S3_KEY" \
-                    -e AWS_SECRET_ACCESS_KEY="$S3_SECRET" \
+                    -e AWS_ACCESS_KEY_ID \
+                    -e AWS_SECRET_ACCESS_KEY \
                     "$IMAGE" python - /code/staticfiles < bin/publish-static
 
             # THE DEPLOY. Everything above this PUBLISHES an image; this is the step
