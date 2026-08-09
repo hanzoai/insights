@@ -77,7 +77,7 @@ CREATE DICTIONARY IF NOT EXISTS {dictionary_name} {on_cluster_clause} (
     property_name String
 )
 PRIMARY KEY team_id, column_index
-SOURCE(DATASTORE(QUERY '{query}' USER '{datastore_user}' PASSWORD '{datastore_password}'))
+SOURCE(CLICKHOUSE(QUERY '{query}' USER '{datastore_user}' PASSWORD '{datastore_password}'))
 LIFETIME(MIN 600 MAX 1200)
 LAYOUT(COMPLEX_KEY_HASHED())""".format(
         dictionary_name=f"`{DMAT_SLOT_ASSIGNMENTS_DICTIONARY_NAME}`",

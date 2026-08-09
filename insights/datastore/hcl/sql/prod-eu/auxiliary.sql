@@ -973,7 +973,7 @@ CREATE VIEW insights.custom_metrics_test AS SELECT
   1 AS value,
   'Test to check that the metric endpoint is working' AS help,
   'gauge' AS type;
-CREATE OR REPLACE DICTIONARY insights.web_bot_definition_dict (`regexp` String, `name` String, `category` String, `traffic_type` String, `operator` String) PRIMARY KEY regexp SOURCE(DATASTORE(USER 'default' DB 'insights' TABLE 'web_bot_definition')) LAYOUT(REGEXP_TREE()) LIFETIME(MIN 3000 MAX 3600);
+CREATE OR REPLACE DICTIONARY insights.web_bot_definition_dict (`regexp` String, `name` String, `category` String, `traffic_type` String, `operator` String) PRIMARY KEY regexp SOURCE(CLICKHOUSE(USER 'default' DB 'insights' TABLE 'web_bot_definition')) LAYOUT(REGEXP_TREE()) LIFETIME(MIN 3000 MAX 3600);
 CREATE TABLE insights.conversion_goal_attributed_preaggregated (
   team_id Int64,
   job_id UUID,
