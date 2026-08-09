@@ -8,7 +8,7 @@ import { captureException } from '~/common/utils/insights'
 import { logger } from '~/common/utils/logger'
 
 import {
-    CyclotronJobInvocationInsightsFlow,
+    CyclotronJobInvocationFlow,
     CyclotronJobInvocationInsightsFunction,
     CyclotronJobInvocationResult,
     LogEntry,
@@ -57,10 +57,10 @@ export const isInsightsFunctionResult = (
     return 'insightsFunction' in result.invocation
 }
 
-export const isInsightsFlowResult = (
+export const isFlowResult = (
     result: CyclotronJobInvocationResult
-): result is CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFlow> => {
-    return 'hogFlow' in result.invocation
+): result is CyclotronJobInvocationResult<CyclotronJobInvocationFlow> => {
+    return 'flow' in result.invocation
 }
 
 export class InsightsFunctionMonitoringService {
@@ -161,8 +161,8 @@ export class InsightsFunctionMonitoringService {
             // (executor, action handlers, billing). The workflow is re-read from the manager on every
             // dequeue, so this is the version that actually executed the step — a run started on v2
             // that reaches its email step after v3 is published attributes that step to v3.
-            const appSourceVersion = isInsightsFlowResult(result)
-                ? { id: result.invocation.hogFlow.id, version: result.invocation.hogFlow.version }
+            const appSourceVersion = isFlowResult(result)
+                ? { id: result.invocation.flow.id, version: result.invocation.flow.version }
                 : undefined
 
             this.queueLogs(

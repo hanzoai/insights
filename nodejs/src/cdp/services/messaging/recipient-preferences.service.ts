@@ -1,4 +1,4 @@
-import { InsightsFlowAction } from '~/cdp/schema/insightsflow'
+import { FlowAction } from '~/cdp/schema/flow'
 import { logger } from '~/common/utils/logger'
 
 import { CyclotronJobInvocationInsightsFunction } from '../../types'
@@ -7,7 +7,7 @@ import { EmailSuppressionService } from './email-suppression.service'
 
 type MessageFunctionActionType = 'function_email' | 'function_sms' | 'function_push'
 
-type MessageAction = Extract<InsightsFlowAction, { type: MessageFunctionActionType }>
+type MessageAction = Extract<FlowAction, { type: MessageFunctionActionType }>
 
 // Why the send was skipped, so callers can render a user-facing log/metric that names the actual
 // reason instead of collapsing suppression and opt-out into a single "opted out" message.
@@ -37,7 +37,7 @@ export class RecipientPreferencesService {
 
     public async shouldSkipAction(
         invocation: CyclotronJobInvocationInsightsFunction,
-        action: InsightsFlowAction
+        action: FlowAction
     ): Promise<RecipientSkipReason | null> {
         if (!this.isSubjectToRecipientPreferences(action)) {
             return null
@@ -94,7 +94,7 @@ export class RecipientPreferencesService {
         }
     }
 
-    private isSubjectToRecipientPreferences(action: InsightsFlowAction): action is MessageAction {
+    private isSubjectToRecipientPreferences(action: FlowAction): action is MessageAction {
         return ['function_email', 'function_sms', 'function_push'].includes(action.type)
     }
 

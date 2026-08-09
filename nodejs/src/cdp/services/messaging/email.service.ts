@@ -5,7 +5,7 @@ import { Counter } from 'prom-client'
 
 import { CyclotronInvocationQueueParametersEmailType } from '~/cdp/schema/cyclotron'
 import {
-    CyclotronJobInvocationInsightsFlow,
+    CyclotronJobInvocationFlow,
     CyclotronJobInvocationInsightsFunction,
     CyclotronJobInvocationResult,
     IntegrationType,
@@ -514,10 +514,10 @@ export class EmailService {
         // carrier (no distinct_id/isTest) goes in the SES EmailTag, guaranteed under the 256-char
         // tag-value limit. The webhook reads the header first and only falls back to the tag.
         // A flow's email runs as a script function invocation built by spreading the flow invocation, so
-        // `hogFlow` is present at runtime even though the type is the narrower script function shape.
+        // `flow` is present at runtime even though the type is the narrower script function shape.
         const workflowVersion =
-            'hogFlow' in result.invocation
-                ? (result.invocation as unknown as CyclotronJobInvocationInsightsFlow).hogFlow.version
+            'flow' in result.invocation
+                ? (result.invocation as unknown as CyclotronJobInvocationFlow).flow.version
                 : undefined
         const trackingCode = this.trackingCodeSigner.generate(
             { ...result.invocation, distinctId, workflowVersion },

@@ -92,7 +92,9 @@ class EndpointsUsageQueryRunner(AnalyticsQueryRunner[EAR], ABC):
                 name="match",
                 args=[
                     ast.Field(chain=["query_log", "endpoint"]),
-                    ast.Constant(value=r"^/api/(environments|projects)/[0-9]+/endpoints/[^/]+/run/?$"),
+                    # Rows written before the mount moved still say /api/, and usage
+                    # reporting has to keep counting them.
+                    ast.Constant(value=r"^/(api|v1)/(environments|projects)/[0-9]+/endpoints/[^/]+/run/?$"),
                 ],
             )
         )

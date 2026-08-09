@@ -21,9 +21,22 @@ members = [
     "cyclotron-node",
     "deltalite/core",
     "deltalite/python",
-    "insightsql/parser",
     "replay-anonymizer",
     "replay-anonymizer-node",
+]
+
+# `insightsql/parser` declares its OWN `[workspace]` (see its Cargo.toml: it is
+# built standalone, by a python stage that copies only that directory, so cargo
+# must stop searching upward). A crate cannot be both a member here and a
+# workspace root there — cargo refuses the whole tree with "multiple workspace
+# roots found in the same workspace" and names the two paths, which stops every
+# build in this workspace, cyclotron-node included, not just the parser's.
+#
+# Excluding it keeps both halves true. Nothing here depends on it: deltalite/
+# python's only path dependency is `../core`, and its mentions of the parser are
+# comments pinning the pyo3 major the two must share.
+exclude = [
+    "insightsql/parser",
 ]
 
 # NOTE: cargo allows only one crate with `links = "python"` (i.e. one pyo3 version) per
@@ -234,3 +247,4 @@ sha2 = "0.10"
 sha1 = "0.10"
 hmac = "0.12"
 testcontainers = "0.27.2"
+
