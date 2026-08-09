@@ -106,7 +106,7 @@ export const TECHNOLOGY = {
         'IconChip',
         'IconCdCase',
         'IconDatabase',
-        'IconDeskScript',
+        'IconDeskHog',
         'IconLaptop',
         'IconMemory',
         'IconMicrophone',
