@@ -1,8 +1,7 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import * as xRayPng from '@hanzo/brand/hoggies/png/x-ray'
 import { Button, Link, Spinner } from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
@@ -18,7 +17,7 @@ import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-genera
 
 import { tracingIngestionLogic } from './tracingIngestionLogic'
 
-const MascotXRay = pngHoggie(xRayPng)
+const MascotXRay = pngHoggie()
 
 const FRAMEWORK_LINKS: { name: string; image?: string; docsLink: string }[] = [
     { name: 'Node.js', image: nodejsImage, docsLink: 'https://opentelemetry.io/docs/languages/js/' },

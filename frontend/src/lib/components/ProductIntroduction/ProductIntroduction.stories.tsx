@@ -1,14 +1,12 @@
 import { Meta } from '@storybook/react'
 
-import * as chartPng from '@hanzo/brand/hoggies/png/chart'
-
 import { pngHoggie } from 'lib/brand/hoggies'
 
 import { ProductKey } from '~/queries/schema/schema-general'
 
 import { ProductIntroduction, ProductIntroductionProps } from './ProductIntroduction'
 
-const MascotChart = pngHoggie(chartPng)
+const MascotChart = pngHoggie()
 
 const meta: Meta<ProductIntroductionProps> = {
     title: 'Components/Product Empty State',
