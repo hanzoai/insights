@@ -4,52 +4,52 @@
 #
 # To enable a tool, set enabled: true and add required scopes + annotations.
 # All other fields (title, description, enrich_url, etc.) are yours to configure.
-category: ReviewHog
-feature: review_hog
+category: Review
+feature: review
 url_prefix: /code-review
 ui_apps: {}
 tools:
     review-script-blind-spots-list:
-        operation: review_hog_blind_spots_list
+        operation: review_blind_spots_list
         enabled: false
     review-script-blind-spots-partial-update:
-        operation: review_hog_blind_spots_partial_update
+        operation: review_blind_spots_partial_update
         enabled: false
     review-script-perspectives-list:
-        operation: review_hog_perspectives_list
+        operation: review_perspectives_list
         enabled: false
     review-script-perspectives-partial-update:
-        operation: review_hog_perspectives_partial_update
+        operation: review_perspectives_partial_update
         enabled: false
     review-script-reviews-get:
-        operation: review_hog_reviews_retrieve
+        operation: review_reviews_retrieve
         enabled: true
         scopes:
-            - review_hog:read
+            - review:read
         annotations:
             readOnly: true
             destructive: false
             idempotent: true
-        title: Get a ReviewHog review
+        title: Get a Review review
         description: >
-            Fetch one completed ReviewHog review by `id` (from `review-script-reviews-list`), including the latest turn's
+            Fetch one completed Review review by `id` (from `review-script-reviews-list`), including the latest turn's
             validated `findings` (each with file, line ranges, priority, and the suggested fix), the
             `dismissed_findings` the validator dropped and why, and the `report_markdown` published to the PR. A first
             review still in flight has no detail yet — poll `review-script-reviews-list` until it completes.
         feature_flag: review-script
     review-script-reviews-list:
-        operation: review_hog_reviews_list
+        operation: review_reviews_list
         enabled: true
         scopes:
-            - review_hog:read
+            - review:read
         annotations:
             readOnly: true
             destructive: false
             idempotent: true
         list: true
-        title: List ReviewHog reviews
+        title: List Review reviews
         description: >
-            List recent ReviewHog reviews on this project — use it to poll a review's status. Running reviews come
+            List recent Review reviews on this project — use it to poll a review's status. Running reviews come
             first, each with `in_progress: true` and a `progress` object (the in-flight turn's `review_stage` plus
             `done`/`total` counters); completed reviews follow, newest first, with their finding counts by priority
             (`must_fix_count`, `should_fix_count`, `consider_count`) and whether they were `published`. Each row's `id`
@@ -57,20 +57,20 @@ tools:
             `scope=everyone` for every review on the project, and `limit` to widen the page.
         feature_flag: review-script
     review-script-reviews-perspective-stats-retrieve:
-        operation: review_hog_reviews_perspective_stats_retrieve
+        operation: review_reviews_perspective_stats_retrieve
         enabled: false
     review-script-reviews-trigger:
-        operation: review_hog_reviews_trigger_create
+        operation: review_reviews_trigger_create
         enabled: true
         scopes:
-            - review_hog:write
+            - review:write
         annotations:
             readOnly: false
             destructive: false
             idempotent: false
-        title: Trigger a ReviewHog review
+        title: Trigger a Review review
         description: >
-            Start a ReviewHog review of a pull request and publish it back to the PR. Pass the PR as `pr_url` (e.g.
+            Start a Review review of a pull request and publish it back to the PR. Pass the PR as `pr_url` (e.g.
             `https://github.com/Insights/insights/pull/123`); the repository must be accessible to the project's GitHub
             App installation. Non-blocking: returns a `workflow_id` and `status` of `started` while the review runs. If
             the PR's current commit already has a published review it returns `already_reviewed` without starting a run,
@@ -78,14 +78,14 @@ tools:
             `review-script-reviews-list` and read the finished findings with `review-script-reviews-get`.
         feature_flag: review-script
     review-script-settings-partial-update:
-        operation: review_hog_settings_partial_update
+        operation: review_settings_partial_update
         enabled: false
     review-script-settings-retrieve:
-        operation: review_hog_settings_retrieve
+        operation: review_settings_retrieve
         enabled: false
     review-script-validators-list:
-        operation: review_hog_validators_list
+        operation: review_validators_list
         enabled: false
     review-script-validators-partial-update:
-        operation: review_hog_validators_partial_update
+        operation: review_validators_partial_update
         enabled: false

@@ -1,8 +1,8 @@
 """Deterministic gate logic for PR approval classification.
 
 Handles deny-lists, allow-lists, multi-source ownership (declared in
-`.stamphog/policy.yml`), tier assignment, and file classification. Policy data
-loads from .stamphog/policy.yml at import via policy.py, which needs PyYAML:
+`.stamp/policy.yml`), tier assignment, and file classification. Policy data
+loads from .stamp/policy.yml at import via policy.py, which needs PyYAML:
 any uv-run script that imports this module must declare pyyaml in its PEP 723
 dependencies block. Ownership goes through the shared insightscli resolver rather
 than a private parser — one semantics, many consumers.
@@ -26,8 +26,8 @@ if TYPE_CHECKING:
 # not installed in this script's uv env, so it is put on the path and imported as
 # a library (it needs only pyyaml, which review_pr.py declares). The import is
 # deferred to _build_insightscli_resolver: downstream repos vendor this directory
-# (plus .stamphog/) without tools/owners, and a module-level import would
-# disable their stamphog copy before any gate runs — the package is only
+# (plus .stamp/) without tools/owners, and a module-level import would
+# disable their stamp copy before any gate runs — the package is only
 # required once a policy actually declares a insightscli-resolver ownership source.
 _OWNERS_PKG = Path(__file__).resolve().parents[1] / "owners"
 
@@ -51,7 +51,7 @@ class Ecosystem:
     manifests: frozenset[str]
     lockfiles: frozenset[str]
     # Whether this ecosystem's lockfiles are trivially trusted at dismiss
-    # time (a lockfile-only push retains a prior stamphog approval without
+    # time (a lockfile-only push retains a prior stamp approval without
     # LLM re-review). Defaults to NOT trusted so a newly added ecosystem
     # narrows trust rather than silently widening it — dismiss-time trust
     # is an explicit decision made here, not inherited from the deny list.
@@ -152,7 +152,7 @@ def _ecosystem_for_manifest(name: str) -> str | None:
 # ── Ownership sources ────────────────────────────────────────────
 #
 # Ownership is advisory reviewer context, not a hard gate. The sources are
-# declared in `.stamphog/policy.yml` (`ownership:`) and compiled here into
+# declared in `.stamp/policy.yml` (`ownership:`) and compiled here into
 # resolvers; each resolver answers "which teams own this file?" and the
 # per-file result is the union across sources. One format ships today:
 # `insightscli-resolver`, which delegates to the shared insightscli `OwnersResolver` over
@@ -209,7 +209,7 @@ def _build_insightscli_resolver(repo_root: Path, source: OwnershipSource) -> _Ho
         raise RuntimeError(
             "ownership format 'insightscli-resolver' requires the insights-owners package: "
             "vendor tools/owners alongside tools/pr-approval-agent, or drop the "
-            "insightscli-resolver source from .stamphog/policy.yml"
+            "insightscli-resolver source from .stamp/policy.yml"
         ) from exc
     assert source.path is not None  # validated by the loader (insightscli-resolver uses `path`)
     return _HogliResolver(OwnersResolver(repo_root=repo_root / source.path))
@@ -278,7 +278,7 @@ def detect_ownership(files: list[str], resolvers: list[OwnershipResolver]) -> di
 
 # ── Policy-sourced data ──────────────────────────────────────────
 #
-# The deny/allow/size/tier/dismiss data lives in .stamphog/policy.yml and is
+# The deny/allow/size/tier/dismiss data lives in .stamp/policy.yml and is
 # loaded here at import time, keeping the existing module-level constant names
 # populated so importers and tests are unchanged. DEPENDENCY_ECOSYSTEMS (and
 # DISMISS_TIME_LOCKFILES below) stay code-derived; the loader splices the
@@ -340,10 +340,10 @@ def _compile_patterns(
 
 DENY_PATTERNS = _compile_patterns(_DENY_PATTERN_DEFS)
 
-# Compiled path patterns for stamphog's own policy/engine files. A dismiss-time
+# Compiled path patterns for stamp's own policy/engine files. A dismiss-time
 # guard consults these so a retained approval can't silently absorb a policy
 # edit - .md is otherwise blanket-trivial and AGENT_APPROVALS.md would slip in.
-_STAMPFN_POLICY_PATH_PATTERNS = DENY_PATTERNS["stamphog_policy"]["paths"]
+_STAMPFN_POLICY_PATH_PATTERNS = DENY_PATTERNS["stamp_policy"]["paths"]
 
 ALLOW_ONLY_EXTENSIONS = set(POLICY.allow_extensions)
 
@@ -352,7 +352,7 @@ ALLOW_PATH_PATTERNS = list(POLICY.allow_path_patterns)
 # ── Dismiss-time allow-list ──────────────────────────────────────
 #
 # Stricter than ALLOW_PATH_PATTERNS / ALLOW_ONLY_EXTENSIONS. Used by
-# dismiss_check.py to decide whether to retain Stamphog's prior approval
+# dismiss_check.py to decide whether to retain Stamp's prior approval
 # after new commits land on a PR. At approve time the LLM also reviews;
 # at dismiss time the path alone is the only signal, so this list excludes
 # anything that could carry executable code into CI, prod, or the build
@@ -385,7 +385,7 @@ def is_trivial_at_dismiss_time(path: str) -> bool:
     bare `*.yaml`/`*.json` configs, `Dockerfile*`, `*.sh`, `Makefile`, and
     anything else that can execute or alter build/CI behavior.
     """
-    # Stamphog's own policy/engine files are never trivial at dismiss time -
+    # Stamp's own policy/engine files are never trivial at dismiss time -
     # otherwise a retained approval would let a post-approval policy edit land
     # unreviewed (AGENT_APPROVALS.md is .md, which is blanket-trivial below).
     if any(rx.search(path) for rx in _STAMPFN_POLICY_PATH_PATTERNS):
