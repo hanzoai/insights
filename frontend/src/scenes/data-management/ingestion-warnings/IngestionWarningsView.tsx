@@ -1,16 +1,15 @@
 import { useActions, useValues } from 'kea'
 
-import * as readingIsMagicPng from '@hanzo/brand/hoggies/png/reading-is-magic'
-import { IconOpenSidebar } from '@hanzo/icons'
 import { Button, Input } from '@hanzo/elements'
+import { IconOpenSidebar } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { Sparkline } from 'lib/components/Sparkline'
 import { TZLabel } from 'lib/components/TZLabel'
 import ViewRecordingButton from 'lib/components/ViewRecordingButton/ViewRecordingButton'
-import { Table } from 'lib/elements/Table'
 import { Link } from 'lib/elements/Link'
+import { Table } from 'lib/elements/Table'
 import { sceneConfigurations } from 'scenes/scenes'
 import { Scene } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
@@ -22,7 +21,7 @@ import { ProductKey } from '~/queries/schema/schema-general'
 
 import { IngestionWarning, IngestionWarningSummary, ingestionWarningsLogic } from './ingestionWarningsLogic'
 
-const MascotReadingIsMagic = pngHoggie(readingIsMagicPng)
+const MascotReadingIsMagic = pngHoggie()
 
 export const WARNING_TYPE_TO_DESCRIPTION: Record<string, string> = {
     cannot_merge_already_identified: 'Refused to merge an already identified user',

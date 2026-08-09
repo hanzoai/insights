@@ -3,7 +3,6 @@ import './MessageTemplatesGrid.scss'
 import { useActions, useMountedLogic, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import * as readingIsMagicPng from '@hanzo/brand/hoggies/png/reading-is-magic'
 import { IconTrash } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
@@ -19,7 +18,7 @@ import { urls } from 'scenes/urls'
 import { MessageTemplateCard } from './MessageTemplateCard'
 import { messageTemplatesLogic } from './messageTemplatesLogic'
 
-const MascotReadingIsMagic = pngHoggie(readingIsMagicPng)
+const MascotReadingIsMagic = pngHoggie()
 
 export function MessageTemplatesTable(): JSX.Element {
     useMountedLogic(messageTemplatesLogic)

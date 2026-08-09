@@ -1,6 +1,5 @@
 import { useActions, useValues } from 'kea'
 
-import * as chartPng from '@hanzo/brand/hoggies/png/chart'
 import { Button } from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
@@ -30,7 +29,7 @@ import { DashboardsContent } from 'products/dashboards/frontend/components/Dashb
 
 import { FeaturedTemplatesChooser } from './templates/FeaturedTemplatesChooser'
 
-const MascotChart = pngHoggie(chartPng)
+const MascotChart = pngHoggie()
 
 const DASHBOARD_DOCS_URL = 'https://hanzo.ai/docs/product-analytics/dashboards'
 
@@ -99,12 +98,7 @@ export function Dashboards(): JSX.Element {
                     </>
                 }
             />
-            <Tabs
-                activeKey={currentTab}
-                onChange={(newKey) => setCurrentTab(newKey)}
-                tabs={enabledTabs}
-                sceneInset
-            />
+            <Tabs activeKey={currentTab} onChange={(newKey) => setCurrentTab(newKey)} tabs={enabledTabs} sceneInset />
 
             <div>
                 {currentTab === DashboardsTab.Templates ? (

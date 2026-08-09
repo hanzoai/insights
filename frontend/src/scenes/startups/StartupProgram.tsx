@@ -1,17 +1,16 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import * as hogpatchPng from '@hanzo/brand/hoggies/png/hogpatch'
-import { IconArrowRight, IconCheck, IconUpload, IconX } from '@hanzo/icons'
 import { Button, FileInput, Input, Select, Link, Spinner, toast } from '@hanzo/elements'
+import { IconArrowRight, IconCheck, IconUpload, IconX } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { BillingUpgradeCTA } from 'lib/components/BillingUpgradeCTA'
 import { ClimberHog1, ClimberHog2 } from 'lib/components/mascots'
-import { useUploadFiles } from 'lib/hooks/useUploadFiles'
 import { Banner } from 'lib/elements/Banner'
 import { CalendarSelectInput } from 'lib/elements/Calendar/CalendarSelect'
 import { Field } from 'lib/elements/Field'
+import { useUploadFiles } from 'lib/hooks/useUploadFiles'
 import { billingLogic } from 'scenes/billing/billingLogic'
 import { billingProductLogic } from 'scenes/billing/billingProductLogic'
 import { paymentEntryLogic } from 'scenes/billing/paymentEntryLogic'
@@ -24,7 +23,7 @@ import { BillingProductV2Type, StartupProgramLabel } from '~/types'
 import { RAISED_OPTIONS } from './constants'
 import { StartupProgramLogicProps, startupProgramLogic } from './startupProgramLogic'
 
-const MascotHogpatch = pngHoggie(hogpatchPng)
+const MascotHogpatch = pngHoggie()
 
 const YC_DEAL_BOOKFACE = 'https://bookface.ycombinator.com/deals/687'
 
@@ -311,8 +310,8 @@ export function StartupProgram(): JSX.Element {
                                 </div>
                                 <div className="flex gap-1">
                                     <span className="text-xxs align-super">2</span>
-                                    Boring international customs reasons mean users outside US/Canada get a $150 Insights
-                                    merch voucher instead.
+                                    Boring international customs reasons mean users outside US/Canada get a $150
+                                    Insights merch voucher instead.
                                 </div>
                             </div>
                         </div>

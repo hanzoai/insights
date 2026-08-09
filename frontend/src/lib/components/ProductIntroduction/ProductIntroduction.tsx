@@ -1,7 +1,5 @@
 import { useActions, useValues } from 'kea'
 
-import * as construction2 from '@hanzo/brand/hoggies/png/construction-2'
-import * as magnifyingGlass from '@hanzo/brand/hoggies/png/magnifying-glass-1'
 import { IconOpenSidebar, IconPlus, IconX } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
@@ -14,8 +12,8 @@ import { ProductKey } from '~/queries/schema/schema-general'
 import { MCPUseCaseCard } from '../MCPHint/MCPUseCaseCard'
 import type { SurfaceKey } from '../MCPHint/prompts'
 
-const MascotConstruction2 = pngHoggie(construction2)
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlass)
+const MascotConstruction2 = pngHoggie()
+const MascotMagnifyingGlass = pngHoggie()
 
 /**
  * A component to introduce new users to a product, and to show something

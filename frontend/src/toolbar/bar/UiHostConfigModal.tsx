@@ -33,7 +33,7 @@ export function UiHostConfigModal({ visible, onClose }: UiHostConfigModalProps):
                     <IconX />
                 </button>
                 <div className="UiHostConfigModal__branding">
-                    <Logomark variant="mono" />
+                    <Logomark />
                 </div>
                 <div className="UiHostConfigModal__header">
                     <strong>Insights could not be reached</strong>

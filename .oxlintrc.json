@@ -119,23 +119,14 @@
                         "message": "Import CodeEditor from lib/monaco/CodeEditor instead — the lazy facade keeps monaco out of your chunk."
                     },
                     {
-                        "name": "@hanzo/brand/hoggies",
-                        "message": "Inline-SVG hoggies bundle up to ~1 MB of JS each. Use the PNG export instead: import * as name from '@hanzo/brand/hoggies/png/<name>' and wrap with pngHoggie from lib/brand/hoggies. If you truly need vector output, add an oxlint-disable comment stating why.",
-                        "allowTypeImports": true
-                    },
-                    {
-                        "name": "@hanzo/brand/hoggies/svg",
-                        "message": "Inline-SVG hoggies bundle up to ~1 MB of JS each. Use the PNG export instead: import * as name from '@hanzo/brand/hoggies/png/<name>' and wrap with pngHoggie from lib/brand/hoggies. If you truly need vector output, add an oxlint-disable comment stating why."
-                    },
-                    {
-                        "name": "@hanzo/brand/hoggies/png",
-                        "message": "Import the per-asset stub instead: import * as name from '@hanzo/brand/hoggies/png/<name>'. The barrel pulls every hoggie's stub into the graph."
+                        "name": "@hanzo/brand",
+                        "message": "This product does not depend on upstream's brand package. Its illustrations are their trademarks under a licence that permits neither commercial use nor redistribution. The logo lives in lib/brand; illustration slots render nothing (lib/brand/hoggies)."
                     }
                 ],
                 "patterns": [
                     {
-                        "group": ["@hanzo/brand/hoggies/svg/*"],
-                        "message": "Inline-SVG hoggies bundle up to ~1 MB of JS each. Use the PNG export instead: import * as name from '@hanzo/brand/hoggies/png/<name>' and wrap with pngHoggie from lib/brand/hoggies. If you truly need vector output, add an oxlint-disable comment stating why."
+                        "group": ["@hanzo/brand/*"],
+                        "message": "This product does not depend on upstream's brand package. Its illustrations are their trademarks under a licence that permits neither commercial use nor redistribution. The logo lives in lib/brand; illustration slots render nothing (lib/brand/hoggies)."
                     }
                 ]
             }

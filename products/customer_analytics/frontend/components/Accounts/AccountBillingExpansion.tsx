@@ -1,6 +1,5 @@
 import { useActions, useValues } from 'kea'
 
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
 import { Skeleton } from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
@@ -12,7 +11,7 @@ import { Query } from '~/queries/Query/Query'
 import { AccountBillingChart, canRenderBillingChart } from './AccountBillingChart'
 import { AccountBillingKind, accountBillingLogic } from './accountBillingLogic'
 
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
+const MascotMagnifyingGlass = pngHoggie()
 
 function BillingInsightNotFound({ kind }: { kind: AccountBillingKind }): JSX.Element {
     const Script = kind === 'spend' ? BurningMoneyHog : MascotMagnifyingGlass
