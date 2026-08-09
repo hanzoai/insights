@@ -85,7 +85,7 @@ describe('AppMetricsAggregator', () => {
 
     it.each([
         ['team_id', { team_id: 2 }],
-        ['app_source', { app_source: 'hog_flow' }],
+        ['app_source', { app_source: 'flow' }],
         ['app_source_id', { app_source_id: 'fn-2' }],
         ['instance_id', { instance_id: 'inst-2' }],
         ['metric_kind', { metric_kind: 'failure' }],

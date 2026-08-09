@@ -45,13 +45,13 @@ describe('InsightsFunctionMonitoringService', () => {
     }
 
     it('mirrors a versioned script flow metric under hog_flow_version, keyed by version', async () => {
-        service.queueAppMetric(metric({ app_source_version: { id: 'flow-1', version: 3 } }), 'hog_flow')
+        service.queueAppMetric(metric({ app_source_version: { id: 'flow-1', version: 3 } }), 'flow')
 
         const rows = await flushedRows()
         expect(rows).toEqual([
-            expect.objectContaining({ app_source: 'hog_flow', app_source_id: 'flow-1', instance_id: 'action-1' }),
+            expect.objectContaining({ app_source: 'flow', app_source_id: 'flow-1', instance_id: 'action-1' }),
             expect.objectContaining({
-                app_source: 'hog_flow_version',
+                app_source: 'flow_version',
                 app_source_id: 'flow-1/3',
                 instance_id: 'action-1',
             }),
@@ -61,12 +61,12 @@ describe('InsightsFunctionMonitoringService', () => {
     })
 
     const unmirroredCases: { name: string; source: MetricLogSource; overrides: Partial<MinimalAppMetric> }[] = [
-        { name: 'no version', source: 'hog_flow', overrides: {} },
-        { name: 'an undefined version', source: 'hog_flow', overrides: { app_source_version: undefined } },
+        { name: 'no version', source: 'flow', overrides: {} },
+        { name: 'an undefined version', source: 'flow', overrides: { app_source_version: undefined } },
         {
             // A flow loaded without its `version` column: the id is there but the version isn't.
             name: 'a version-less flow',
-            source: 'hog_flow',
+            source: 'flow',
             overrides: { app_source_version: { id: 'flow-1', version: undefined as unknown as number } },
         },
         {
@@ -85,14 +85,14 @@ describe('InsightsFunctionMonitoringService', () => {
     })
 
     it('keeps versions apart when the same metric is counted on either side of a publish', async () => {
-        service.queueAppMetric(metric({ app_source_version: { id: 'flow-1', version: 2 }, count: 5 }), 'hog_flow')
-        service.queueAppMetric(metric({ app_source_version: { id: 'flow-1', version: 3 }, count: 2 }), 'hog_flow')
+        service.queueAppMetric(metric({ app_source_version: { id: 'flow-1', version: 2 }, count: 5 }), 'flow')
+        service.queueAppMetric(metric({ app_source_version: { id: 'flow-1', version: 3 }, count: 2 }), 'flow')
 
         const rows = await flushedRows()
         const byId = Object.fromEntries(rows.map((row) => [`${row.app_source}:${row.app_source_id}`, row.count]))
         // The version-agnostic row aggregates both, so per-version reads and total reads agree.
         expect(byId).toEqual({
-            'hog_flow:flow-1': 7,
+            'flow:flow-1': 7,
             'hog_flow_version:flow-1/2': 5,
             'hog_flow_version:flow-1/3': 2,
         })
@@ -103,15 +103,15 @@ describe('InsightsFunctionMonitoringService', () => {
         // never aggregate across its runs and the documented `<flow id>/<version>` read would miss them.
         service.queueAppMetric(
             metric({ app_source_id: 'batch-run-1', app_source_version: { id: 'flow-1', version: 3 } }),
-            'hog_flow'
+            'flow'
         )
         service.queueAppMetric(
             metric({ app_source_id: 'batch-run-2', app_source_version: { id: 'flow-1', version: 3 } }),
-            'hog_flow'
+            'flow'
         )
 
         const rows = await flushedRows()
-        expect(rows.filter((row) => row.app_source === 'hog_flow_version')).toEqual([
+        expect(rows.filter((row) => row.app_source === 'flow_version')).toEqual([
             expect.objectContaining({ app_source_id: 'flow-1/3', count: 2 }),
         ])
     })

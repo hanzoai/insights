@@ -330,7 +330,7 @@ describe('EmailTrackingService', () => {
                     .send(JSON.stringify(envelope))
             }
 
-            it('writes a hog_flow log entry for a bounce that resolves to a flow', async () => {
+            it('writes a flow log entry for a bounce that resolves to a flow', async () => {
                 const flow = await insertFlow(
                     hub.postgres,
                     new FixtureFlowBuilder().withTeamId(team.id).build()
@@ -344,7 +344,7 @@ describe('EmailTrackingService', () => {
                     expect(logs).toHaveLength(1)
                     expect(logs[0].value).toMatchObject({
                         team_id: team.id,
-                        log_source: 'hog_flow',
+                        log_source: 'flow',
                         log_source_id: flow.id,
                         instance_id: invocationId,
                         level: 'error',
@@ -394,13 +394,13 @@ describe('EmailTrackingService', () => {
 
                 await waitForExpect(() => {
                     const metrics = mockProducerObserver.getProducedKafkaMessagesForTopic(KAFKA_APP_METRICS_2)
-                    const versioned = metrics.filter((m) => m.value.app_source === 'hog_flow_version')
+                    const versioned = metrics.filter((m) => m.value.app_source === 'flow_version')
                     // Permanent bounces emit the rollup plus the hard-only sub-metric, so both mirror.
                     expect(versioned.map((m) => m.value.app_source_id)).toEqual([`${flow.id}/2`, `${flow.id}/2`])
                     // Mirrored, not moved — the version-agnostic series every existing reader uses
                     // still carries the same two rows.
                     expect(
-                        metrics.filter((m) => m.value.app_source === 'hog_flow').map((m) => m.value.metric_name)
+                        metrics.filter((m) => m.value.app_source === 'flow').map((m) => m.value.metric_name)
                     ).toEqual(['email_bounced', 'email_bounced_hard'])
                 })
             })
@@ -419,7 +419,7 @@ describe('EmailTrackingService', () => {
                     const logs = mockProducerObserver.getProducedKafkaMessagesForTopic(KAFKA_LOG_ENTRIES)
                     expect(logs).toHaveLength(1)
                     expect(logs[0].value).toMatchObject({
-                        log_source: 'hog_flow',
+                        log_source: 'flow',
                         log_source_id: parentRunId,
                         instance_id: invocationId,
                     })

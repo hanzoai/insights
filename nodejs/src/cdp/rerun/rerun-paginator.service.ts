@@ -28,19 +28,19 @@ import { convertToInsightsFunctionFilterGlobal } from '../utils/script-function-
 import { RERUN_PAGE_SIZE, RerunFunctionKind, RerunJobProgress, RerunJobState } from './rerun-job.types'
 
 const counterRerunPageProcessed = new Counter({
-    name: 'cdp_hog_invocation_rerun_pages_processed_total',
+    name: 'cdp_invocation_rerun_pages_processed_total',
     help: 'Rerun paginator pages processed, by function kind and outcome.',
     labelNames: ['function_kind', 'outcome'],
 })
 
 const counterRerunInvocationsQueued = new Counter({
-    name: 'cdp_hog_invocation_rerun_queued_total',
+    name: 'cdp_invocation_rerun_queued_total',
     help: 'Reruned invocations queued onto cyclotron, by function kind.',
     labelNames: ['function_kind'],
 })
 
 const counterRerunInvocationsSkipped = new Counter({
-    name: 'cdp_hog_invocation_rerun_skipped_total',
+    name: 'cdp_invocation_rerun_skipped_total',
     help: 'Invocations matched by rerun filters but skipped (over max_attempts, missing function, malformed payload).',
     labelNames: ['function_kind', 'reason'],
 })
@@ -86,7 +86,7 @@ export interface PageOutcome {
  */
 export interface RerunJobQueues {
     insights_function: JobQueue
-    hog_flow: CyclotronJobQueuePostgresV2
+    flow: CyclotronJobQueuePostgresV2
 }
 
 /**
@@ -140,17 +140,17 @@ export class RerunPaginatorService {
             if (queuedInvocations.length > 0) {
                 // Rerun re-uses the original invocation_id. A rerun job is
                 // scoped to a single function kind, so the whole page routes to
-                // one backend — script → kafka, hog_flow → postgres-v2, the same
+                // one backend — script → kafka, flow → postgres-v2, the same
                 // split cdp-events-consumer uses.
                 let invocationsToEnqueue = queuedInvocations
-                if (function_kind === 'hog_flow') {
+                if (function_kind === 'flow') {
                     // postgres-v2. `overwriteExisting` upserts ONLY when the
                     // existing cyclotron row is in a terminal state. If a row
                     // is still active, the v2 manager raises
                     // CyclotronJobConflictError listing the conflicting ids —
                     // skip those, still queue the rest.
                     try {
-                        await this.jobQueues.hog_flow.queueInvocations(invocationsToEnqueue, {
+                        await this.jobQueues.flow.queueInvocations(invocationsToEnqueue, {
                             overwriteExisting: true,
                         })
                     } catch (e) {
@@ -196,7 +196,7 @@ export class RerunPaginatorService {
                         })
                         conflictSkipped = runningIds.size
                         for (let i = 0; i < conflictSkipped; i++) {
-                            counterRerunInvocationsSkipped.labels(function_kind, 'still_in_flight_hog').inc()
+                            counterRerunInvocationsSkipped.labels(function_kind, 'still_in_flight').inc()
                         }
                         invocationsToEnqueue = queuedInvocations.filter((i) => !runningIds.has(i.id))
                         this.invocationResultsRowsService.dropQueuedRowsFor(Array.from(runningIds))
@@ -405,7 +405,7 @@ export class RerunPaginatorService {
             return new Set()
         }
         const result = await this.datastore.query({
-            query: `/* team_id:${teamId} query_type:hog_invocation_rerun_inflight */
+            query: `/* team_id:${teamId} query_type:invocation_rerun_inflight */
                 SELECT invocation_id
                 FROM hog_invocation_results
                 WHERE team_id = {team_id:Int64}
@@ -463,7 +463,7 @@ export class RerunPaginatorService {
             : ''
 
         const result = await this.datastore.query({
-            query: `/* team_id:${teamId} query_type:hog_invocation_rerun_page */
+            query: `/* team_id:${teamId} query_type:invocation_rerun_page */
                 SELECT
                     invocation_id,
                     argMax(parent_run_id, version)         AS parent_run_id,
@@ -653,7 +653,7 @@ export class RerunPaginatorService {
             return invocation
         }
 
-        if (functionKind === 'hog_flow') {
+        if (functionKind === 'flow') {
             const flow = await this.flowManager.getFlow(functionId)
             if (!flow || flow.team_id !== teamId) {
                 return null

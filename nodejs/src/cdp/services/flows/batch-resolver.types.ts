@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { parseJSON } from '~/common/utils/json-parse'
 
 // Plain FIFO; resolver self-requeues per page so concurrent batches rotate naturally.
-export const FLOW_BATCH_RESOLVE_QUEUE = 'hogflow_batch_resolve' as const
+export const FLOW_BATCH_RESOLVE_QUEUE = 'flow_batch_resolve' as const
 
 // Caps how many times a single resolver job may retry a transient failure
 // (audience fetch or terminal status PUT). Once exhausted in the fetch path

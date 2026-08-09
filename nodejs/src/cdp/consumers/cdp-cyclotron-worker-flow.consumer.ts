@@ -12,7 +12,7 @@ export class CdpCyclotronWorkerFlow extends CdpCyclotronWorker {
     protected override name = 'CdpCyclotronWorkerFlow'
 
     constructor(config: PluginsServerConfig, deps: CdpConsumerBaseDeps, jobQueue: JobQueue) {
-        super(config, deps, jobQueue, 'hogflow')
+        super(config, deps, jobQueue, 'flow')
     }
 
     @instrumented('cdpConsumer.handleEachBatch.executeInvocations')

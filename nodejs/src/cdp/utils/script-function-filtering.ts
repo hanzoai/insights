@@ -460,7 +460,7 @@ export async function filterFunctionInstrumented(options: {
 
         logs.push({
             team_id: fn.team_id,
-            log_source: fnKind === 'InsightsFunction' ? 'insights_function' : 'hog_flow',
+            log_source: fnKind === 'InsightsFunction' ? 'insights_function' : 'flow',
             log_source_id: fn.id,
             instance_id: new UUIDT().toString(),
             timestamp: DateTime.now(),

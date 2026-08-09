@@ -105,7 +105,7 @@ export function createEventSubpipeline<TInput extends EventSubpipelineInput & Wi
                     (result) => (isDropResult(result) ? 1 : 0)
                 ),
             ]),
-            { retry: { tries: 5, sleepMs: 100, name: 'hog_transform_event' } }
+            { retry: { tries: 5, sleepMs: 100, name: 'transform_event' } }
         )
         .pipe(createNormalizeEventStep())
         .pipe(

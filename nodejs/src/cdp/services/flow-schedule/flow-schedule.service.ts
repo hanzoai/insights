@@ -13,29 +13,29 @@ import {
 } from '~/types'
 
 const schedulerPollCounter = new Counter({
-    name: 'cdp_hogflow_scheduler_polls',
+    name: 'cdp_flow_scheduler_polls',
     help: 'Number of scheduler poll cycles completed',
     labelNames: ['status'],
 })
 
 const schedulerProcessedCounter = new Counter({
-    name: 'cdp_hogflow_scheduler_processed',
+    name: 'cdp_flow_scheduler_processed',
     help: 'Number of due schedules processed (batch jobs created by Django)',
 })
 
 const schedulerInitializedCounter = new Counter({
-    name: 'cdp_hogflow_scheduler_initialized',
+    name: 'cdp_flow_scheduler_initialized',
     help: 'Number of schedules initialized with next_run_at',
 })
 
 const schedulerFailedCounter = new Counter({
-    name: 'cdp_hogflow_scheduler_failed',
+    name: 'cdp_flow_scheduler_failed',
     help: 'Number of schedule processing failures',
     labelNames: ['stage'],
 })
 
 const schedulerPollDurationGauge = new Gauge({
-    name: 'cdp_hogflow_scheduler_poll_duration_ms',
+    name: 'cdp_flow_scheduler_poll_duration_ms',
     help: 'Duration of the last poll cycle in milliseconds',
 })
 

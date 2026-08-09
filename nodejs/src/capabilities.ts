@@ -124,11 +124,11 @@ export function getPluginServerCapabilities(
             return {
                 cdpCyclotronWorker: true,
             }
-        case PluginServerMode.cdp_cyclotron_worker_hogflow:
+        case PluginServerMode.cdp_cyclotron_worker_flow:
             return {
                 cdpCyclotronWorkerFlow: true,
             }
-        case PluginServerMode.cdp_cyclotron_worker_hogflow_legacy_pg:
+        case PluginServerMode.cdp_cyclotron_worker_flow_legacy_pg:
             return {
                 cdpCyclotronWorkerFlowLegacyPg: true,
             }
@@ -144,7 +144,7 @@ export function getPluginServerCapabilities(
             return {
                 cdpPrecalculatedFilters: true,
             }
-        case PluginServerMode.cdp_hogflow_subscription_matcher:
+        case PluginServerMode.cdp_flow_subscription_matcher:
             return {
                 cdpScriptflowSubscriptionMatcher: true,
             }
@@ -195,7 +195,7 @@ export function getPluginServerCapabilities(
             throw new Error(`Mode ${mode} is handled by IngestionGeneralServer, not PluginServer`)
         case PluginServerMode.ingestion_api:
             throw new Error(`Mode ${mode} is handled by IngestionApiServer, not PluginServer`)
-        case PluginServerMode.cdp_hogflow_scheduler:
+        case PluginServerMode.cdp_flow_scheduler:
             return {
                 cdpScriptflowScheduler: true,
             }

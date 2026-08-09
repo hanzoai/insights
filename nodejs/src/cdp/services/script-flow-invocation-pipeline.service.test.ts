@@ -24,7 +24,7 @@ function makeFlowInvocation(flowId = 'flow-1', overrides: { billable_action_type
         id: `inv-${flowId}`,
         teamId: 1,
         functionId: flowId,
-        queue: 'hogflow',
+        queue: 'flow',
         queuePriority: 0,
         flow: {
             id: flowId,
@@ -116,7 +116,7 @@ describe('FlowInvocationPipeline', () => {
                     app_source_version: { id: expect.any(String), version: 5 },
                 }),
             ]),
-            'hog_flow'
+            'flow'
         )
     })
 
@@ -131,7 +131,7 @@ describe('FlowInvocationPipeline', () => {
         expect(result).toEqual([])
         expect(insightsFunctionMonitoringService.queueAppMetric).toHaveBeenCalledWith(
             expect.objectContaining({ metric_name: 'rate_limited' }),
-            'hog_flow'
+            'flow'
         )
         expect(insightsFunctionMonitoringService.queueLogs).toHaveBeenCalled()
     })
@@ -161,7 +161,7 @@ describe('FlowInvocationPipeline', () => {
         expect(result).toEqual([])
         expect(insightsFunctionMonitoringService.queueAppMetric).toHaveBeenCalledWith(
             expect.objectContaining({ metric_name: 'disabled_permanently' }),
-            'hog_flow'
+            'flow'
         )
     })
 
@@ -177,7 +177,7 @@ describe('FlowInvocationPipeline', () => {
 
         expect(result).toHaveLength(1)
         expect(result[0].queuePriority).toBe(2)
-        expect(result[0].queue).toBe('hogflow')
+        expect(result[0].queue).toBe('flow')
     })
 
     it('drops masked invocations', async () => {
@@ -192,7 +192,7 @@ describe('FlowInvocationPipeline', () => {
         expect(result).toEqual([])
         expect(insightsFunctionMonitoringService.queueAppMetrics).toHaveBeenCalledWith(
             expect.arrayContaining([expect.objectContaining({ metric_name: 'masked' })]),
-            'hog_flow'
+            'flow'
         )
     })
 })

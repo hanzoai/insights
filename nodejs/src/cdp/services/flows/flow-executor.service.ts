@@ -48,13 +48,13 @@ export const MAX_ACTION_STEPS_HARD_LIMIT = 1000
 // Deliberately unlabelled: fleet-wide volume is the signal; which flow/step redirected where is in
 // the run's log line, where unbounded cardinality belongs.
 const counterRedirectApplied = new Counter({
-    name: 'cdp_hogflow_redirect_applied',
+    name: 'cdp_flow_redirect_applied',
     help: 'A run parked on a deleted step was redirected to its surviving successor',
 })
 // The API guarantees redirect targets exist in the same flow row; nonzero means that invariant broke
 // (the affected runs still exit gracefully rather than follow the bad entry).
 const counterRedirectTargetMissing = new Counter({
-    name: 'cdp_hogflow_redirect_target_missing',
+    name: 'cdp_flow_redirect_target_missing',
     help: 'A redirect map entry pointed at an action missing from the live graph',
 })
 
@@ -98,7 +98,7 @@ export function createFlowInvocation(
         person: globals.person, // This is outside of state as we don't persist it
         groups: globals.groups, // Same as person: in-memory only (test path); real execution re-resolves on dequeue
         filterGlobals,
-        queue: 'hogflow',
+        queue: 'flow',
         queuePriority: 1,
     }
 }
