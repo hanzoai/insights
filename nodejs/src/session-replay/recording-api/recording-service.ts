@@ -1,5 +1,5 @@
 import { GetObjectCommand, NoSuchKey, S3Client } from '@aws-sdk/client-s3'
-import { DatastoreClient } from '@datastore/client'
+import { ClickHouseClient as DatastoreClient } from '@datastore/client'
 import snappy from 'snappy'
 
 import { PostgresRouter, PostgresUse } from '~/common/utils/db/postgres'
@@ -196,7 +196,7 @@ export class RecordingService {
                     session_id: sessionId,
                 },
                 format: 'JSONEachRow',
-                datastore_settings: {
+                clickhouse_settings: {
                     date_time_output_format: 'iso',
                     log_comment: JSON.stringify({
                         team_id: teamId,
