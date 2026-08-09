@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 import insights.models.utils
 import insights.helpers.encrypted_fields
-from insights.migration_helpers import CreateTableIfNotExists
+from insights.migration_helpers import AddColumnIfNotExists, CreateTableIfNotExists
 
 
 class Migration(migrations.Migration):
@@ -1263,6 +1263,13 @@ class Migration(migrations.Migration):
                 CreateTableIfNotExists(model_name="batchexportondemand"),
                 CreateTableIfNotExists(model_name="batchexportrun"),
                 CreateTableIfNotExists(model_name="batchexportfiledownload"),
+                # The table came from `insights.0001_initial`, whose shape predates these
+                # fields: the move declares them but nothing ever adds the columns, so a
+                # fresh install is left without them. No-ops where the table was built above.
+                AddColumnIfNotExists(model_name="batchexportbackfill", name="adjusted_start_at"),
+                AddColumnIfNotExists(model_name="batchexportbackfill", name="total_records_count"),
+                AddColumnIfNotExists(model_name="batchexportrun", name="batch_export_on_demand"),
+                AddColumnIfNotExists(model_name="batchexportrun", name="records_failed"),
             ],
         ),
     ]

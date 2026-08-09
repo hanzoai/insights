@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db import migrations, models
 
 import insights.models.utils
-from insights.migration_helpers import CreateTableIfNotExists
+from insights.migration_helpers import AddColumnIfNotExists, CreateTableIfNotExists
 
 import products.exports.backend.models.exported_asset
 
@@ -325,6 +325,14 @@ class Migration(migrations.Migration):
                 CreateTableIfNotExists(model_name="exportedasset"),
                 CreateTableIfNotExists(model_name="subscription"),
                 CreateTableIfNotExists(model_name="subscriptiondelivery"),
+                # The table came from `insights.0001_initial`, whose shape predates these
+                # fields: the move declares them but nothing ever adds the columns, so a
+                # fresh install is left without them. No-ops where the table was built above.
+                AddColumnIfNotExists(model_name="exportedasset", name="is_system"),
+                AddColumnIfNotExists(model_name="subscription", name="enabled"),
+                AddColumnIfNotExists(model_name="subscription", name="integration"),
+                AddColumnIfNotExists(model_name="subscription", name="summary_enabled"),
+                AddColumnIfNotExists(model_name="subscription", name="summary_prompt_guide"),
             ],
         ),
     ]
