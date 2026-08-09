@@ -278,7 +278,7 @@ PATH_DIR_RULES: list[tuple[str, str]] = [
 # path AND right for a file's bytes. `\bLemon(?=[A-Z])` and nothing looser,
 # because `lemon_squeezy` is Lemon Squeezy, a payments vendor whose warehouse
 # source we import, and a rule matching a bare `lemon` would rename someone
-# else's product. `\bhog\b` cannot reach `hedgehog`, `tophog`, `stamphog`,
+# else's product. `\bhog\b` cannot reach `hedgehog`, `tophog`, `stamp`,
 # `hog_invocation_results` or `hogfunction` -- each of those is either handled
 # above by name or is a physical name we do not own.
 PATH_REGEX = CONTENT_REGEX
@@ -322,7 +322,7 @@ DROP_DIRS: list[tuple[str, str]] = [
     ("products/visual_review", "visual regression review"),
     ("products/business_knowledge", "knowledge base product"),
     ("products/data_catalog", "catalog product"),
-    ("products/stamphog", "upstream stamp/rewards toy"),
+    ("products/stamp", "upstream stamp/rewards toy"),
     (
         "products/games",
         "two mascot easter-egg games (368 hedgehogs, flappy hedgehog). The last "
@@ -1160,7 +1160,7 @@ def check_marks(root: str) -> int:
 # and a refusal happens on every commit.
 #
 # Deliberately NOT the whole of `hog`. `tophog` is seven Datastore tables and a
-# Kafka topic, `stamphog` and `review_hog` are two live Django apps with rows in
+# Kafka topic, `stamp` and `review_hog` are two live Django apps with rows in
 # `django_migrations`, `hog_invocation_results` is a table, `hogland` is someone
 # else's service and `@hanzo/brand/hoggies` is a subpath of a package we do not
 # publish. Those are named below as outstanding, never as exempt -- an exemption
@@ -1399,7 +1399,7 @@ def _npm_dep_strings(root: str, rel: str) -> list[tuple[str, str, str]]:
             for key, spec in (doc.get(section) or {}).items():
                 # `workspace:*` resolves inside this tree, so no registry serves
                 # it and no upstream name is involved -- which is the whole
-                # subject here. Our own `@hanzo/products-stamphog` is the case
+                # subject here. Our own `@hanzo/products-stamp` is the case
                 # that proves it: the app keeps a name it cannot be renamed out
                 # of, and it is ours.
                 if isinstance(spec, str) and spec.startswith("workspace:"):

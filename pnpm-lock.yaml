@@ -777,7 +777,7 @@ importers:
         version: link:../products/revenue_analytics
       '@hanzo/products-review-script':
         specifier: workspace:*
-        version: link:../products/review_hog
+        version: link:../products/review
       '@hanzo/products-session-replay':
         specifier: workspace:*
         version: link:../products/session_replay
@@ -790,9 +790,9 @@ importers:
       '@hanzo/products-skills':
         specifier: workspace:*
         version: link:../products/skills
-      '@hanzo/products-stamphog':
+      '@hanzo/products-stamp':
         specifier: workspace:*
-        version: link:../products/stamphog
+        version: link:../products/stamp
       '@hanzo/products-streamlit-apps':
         specifier: workspace:*
         version: link:../products/streamlit_apps
@@ -3943,7 +3943,7 @@ importers:
         specifier: 18.3.1
         version: 18.3.1
 
-  products/review_hog:
+  products/review:
     dependencies:
       '@hanzo/icons':
         specifier: npm:@hanzo/insights-icons@0.36.7
@@ -4042,7 +4042,7 @@ importers:
 
   products/slack_app: {}
 
-  products/stamphog:
+  products/stamp:
     dependencies:
       '@hanzo/icons':
         specifier: npm:@hanzo/insights-icons@0.36.7

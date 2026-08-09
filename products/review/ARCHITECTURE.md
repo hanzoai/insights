@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Review** (`products/review_hog`) is an automated GitHub PR code reviewer. It is a Django app
+**Review** (`products/review`) is an automated GitHub PR code reviewer. It is a Django app
 (`backend/apps.py`, label `review`, module `products.review.backend`). A run fetches a PR from
 GitHub, splits it into logically reviewable **chunks**, picks which perspectives each chunk actually needs
 (**perspective selection**, a cheap one-shot), runs the selected **perspective reviews in parallel** on each
