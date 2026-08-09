@@ -19,9 +19,9 @@ describe('Invocation utils', () => {
 
         it('injects the invoked function as the globals source', async () => {
             const fn = createInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
             const globals = createHogExecutionGlobals({ groups: {} })
@@ -38,9 +38,9 @@ describe('Invocation utils', () => {
 
         it('builds an invocation only when the filters match, counting a filtered metric otherwise', async () => {
             const fn = createInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
             })
 
             const notMatched = await buildInsightsFunctionInvocations(
@@ -62,7 +62,7 @@ describe('Invocation utils', () => {
         const elementsChainCases = [
             {
                 shape: 'text',
-                filters: FN_FILTERS_EXAMPLES.elements_text_filter,
+                filters: INSIGHTS_FILTERS_EXAMPLES.elements_text_filter,
                 notMatching: 'Not our text',
                 matching: 'Reload',
                 chain: (buttonText: string) =>
@@ -70,7 +70,7 @@ describe('Invocation utils', () => {
             },
             {
                 shape: 'href',
-                filters: FN_FILTERS_EXAMPLES.elements_href_filter,
+                filters: INSIGHTS_FILTERS_EXAMPLES.elements_href_filter,
                 notMatching: '/project/1/not-a-link',
                 matching: '/project/1/activity/explore',
                 chain: (link: string) =>
@@ -78,7 +78,7 @@ describe('Invocation utils', () => {
             },
             {
                 shape: 'tag and id',
-                filters: FN_FILTERS_EXAMPLES.elements_tag_and_id_filter,
+                filters: INSIGHTS_FILTERS_EXAMPLES.elements_tag_and_id_filter,
                 notMatching: 'notfound',
                 matching: 'homelink',
                 chain: (id: string) =>
@@ -90,8 +90,8 @@ describe('Invocation utils', () => {
             'gates invocation building on an elements-chain $shape filter',
             async ({ filters, chain, notMatching, matching }) => {
                 const fn = createInsightsFunction({
-                    ...FN_EXAMPLES.simple_fetch,
-                    ...FN_INPUTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
                     ...filters,
                 })
 
@@ -130,13 +130,13 @@ describe('Invocation utils', () => {
         describe('mappings', () => {
             const mappingFunction = () =>
                 createInsightsFunction({
-                    ...FN_EXAMPLES.simple_fetch,
-                    ...FN_INPUTS_EXAMPLES.simple_fetch,
-                    ...FN_FILTERS_EXAMPLES.no_filters,
+                    ...INSIGHTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                     mappings: [
                         {
                             // Filters for pageview or autocapture, and overrides the url input
-                            ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                            ...INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                             inputs: {
                                 url: {
                                     order: 0,
@@ -160,9 +160,9 @@ describe('Invocation utils', () => {
                             },
                         },
                         // No filters so should match all events
-                        { ...FN_FILTERS_EXAMPLES.no_filters },
+                        { ...INSIGHTS_FILTERS_EXAMPLES.no_filters },
                         // Broken filters so shouldn't match
-                        { ...FN_FILTERS_EXAMPLES.broken_filters },
+                        { ...INSIGHTS_FILTERS_EXAMPLES.broken_filters },
                     ],
                 })
 
@@ -212,9 +212,9 @@ describe('Invocation utils', () => {
             // A destination saved with no mappings is silently a no-op rather than an unmapped send.
             it('builds nothing for a function with an empty mappings array', async () => {
                 const fn = createInsightsFunction({
-                    ...FN_EXAMPLES.simple_fetch,
-                    ...FN_INPUTS_EXAMPLES.simple_fetch,
-                    ...FN_FILTERS_EXAMPLES.no_filters,
+                    ...INSIGHTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                     mappings: [],
                 })
 
@@ -227,16 +227,16 @@ describe('Invocation utils', () => {
 
         it('reports a function whose inputs fail to build without dropping the rest of the batch', async () => {
             const broken = createInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                 inputs_schema: [{ key: 'url', type: 'string', label: 'Webhook URL', required: true }],
                 // Truncated bytecode - resolving this input throws
                 inputs: { url: { order: 0, value: 'https://example.com', bytecode: ['_H', 1, 2] } },
             })
             const healthy = createInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
             const results = await buildInsightsFunctionInvocations(hogInputsService, [broken, healthy], pageviewGlobals())
