@@ -22,7 +22,6 @@ function member(id: string, user: UserBasicType, level: number): OrganizationMem
         level,
         joined_at: '2020-09-24T15:05:26Z',
         updated_at: '2020-09-24T15:05:26Z',
-        is_2fa_enabled: false,
         has_social_auth: false,
         last_login: null,
     }
