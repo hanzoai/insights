@@ -9,8 +9,6 @@ process.env.TZ = process.env.TZ || 'UTC'
 
 const esmModules = [
     'query-selector-shadow-dom',
-    // @hanzo/brand is ESM-only (ships .mjs); let Sucrase transpile it so its import/export parses.
-    '@hanzo/brand',
     // @shadcn/react ships ESM-only; @hanzo/quill-primitives chat components re-export its
     // message-scroller, pulling it into frontend test module graphs via the quill barrel.
     '@shadcn/react',
@@ -179,10 +177,6 @@ const config: Config = {
     // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
     moduleNameMapper: {
         '^.+\\.(css|less|scss|svg|png)$': '<rootDir>/src/test/mocks/styleMock.js',
-        // @hanzo/brand PNG subpaths resolve to .mjs modules that build a URL via
-        // `new URL("./x.png", import.meta.url)` — import.meta is unavailable under Sucrase/CJS,
-        // so mock them to the styleMock string instead of executing them.
-        '^@hanzo/brand/.*/png/.*$': '<rootDir>/src/test/mocks/styleMock.js',
         // devHmrStreamAbort subscribes to Vite HMR events via import.meta, which Sucrase passes
         // through into CJS and Jest then cannot compile ("Cannot use 'import.meta' outside a module").
         // It is dev-server-only behavior, so stub it out rather than transform it.

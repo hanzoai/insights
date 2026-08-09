@@ -4,7 +4,6 @@ import { useActions, useValues } from 'kea'
 import { CSSProperties, useCallback, useEffect, useMemo, useRef } from 'react'
 import { List, getScrollbarSize, useDynamicRowHeight, useListRef } from 'react-window'
 
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
 import { Button, Link } from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
@@ -31,7 +30,7 @@ import { VirtualizedTableColumn } from 'products/logs/frontend/components/Virtua
 import { virtualizedLogsListLogic } from 'products/logs/frontend/components/VirtualizedLogsList/virtualizedLogsListLogic'
 import { LogsOrderBy, ParsedLogMessage } from 'products/logs/frontend/types'
 
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
+const MascotMagnifyingGlass = pngHoggie()
 
 const DEFAULT_ROW_HEIGHT = 32
 

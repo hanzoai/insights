@@ -1,6 +1,5 @@
 import { useActions, useValues } from 'kea'
 
-import * as reporterPng from '@hanzo/brand/hoggies/png/reporter'
 import { Skeleton } from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
@@ -12,7 +11,7 @@ import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 
 import { ChannelSetupModal } from './ChannelSetupModal'
 
-const MascotReporter = pngHoggie(reporterPng)
+const MascotReporter = pngHoggie()
 
 const MESSAGING_CHANNEL_TYPES = ['email', 'slack', 'twilio', 'firebase', 'apns'] as const
 export type ChannelType = (typeof MESSAGING_CHANNEL_TYPES)[number]
