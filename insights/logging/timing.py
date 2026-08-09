@@ -3,7 +3,8 @@ from time import time
 from typing import Any, Optional
 
 import structlog
-from statshog.defaults.django import statsd
+
+from insights.statsd import statsd
 
 logger = structlog.get_logger(__name__)
 
