@@ -5,22 +5,21 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 import { TextMorph } from 'torph/react'
 
-import * as construction2Png from '@hanzo/brand/hoggies/png/construction-2'
-import { IconArchive, IconFunnels, IconInfo, IconPlusSmall, IconRefresh, IconWarning } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconArchive, IconFunnels, IconInfo, IconPlusSmall, IconRefresh, IconWarning } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { MCPUseCaseCard } from 'lib/components/MCPHint/MCPUseCaseCard'
 import { supportLogic } from 'lib/components/Support/supportLogic'
 import { dayjs } from 'lib/dayjs'
+import { IconChristmasOrnament, IconErrorOutline, IconOpenInNew } from 'lib/elements/icons'
+import { Link } from 'lib/elements/Link'
+import { LoadingBar } from 'lib/elements/LoadingBar'
+import { MenuOverlay } from 'lib/elements/Menu/Menu'
 import { holidaysMatcher, isChristmas } from 'lib/holidays'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
-import { IconChristmasOrnament, IconErrorOutline, IconOpenInNew } from 'lib/elements/icons'
-import { MenuOverlay } from 'lib/elements/Menu/Menu'
-import { Link } from 'lib/elements/Link'
-import { LoadingBar } from 'lib/elements/LoadingBar'
 import insights from 'lib/insights-typed'
 import { inStorybook, inStorybookTestRunner } from 'lib/utils/dom'
 import { humanFriendlyNumber, humanizeBytes } from 'lib/utils/numbers'
@@ -55,7 +54,7 @@ import { insightVizDataLogic } from '../insightVizDataLogic'
 import { SampleDataState, SampleDataVariant } from './SampleDataState'
 import { sampleDataStateLogic } from './sampleDataStateLogic'
 
-const MascotConstruction2 = pngHoggie(construction2Png)
+const MascotConstruction2 = pngHoggie()
 
 // Matches DatastoreQueryMemoryLimitExceeded.default_code on the backend. Keep the two in sync.
 const DATASTORE_MEMORY_LIMIT_ERROR_CODE = 'datastore_memory_limit_exceeded'
@@ -636,11 +635,7 @@ export function InsightValidationError({
             {isMemoryLimitError && !cta ? (
                 <div className="flex items-center gap-2">
                     <AIConsentPopoverWrapper onApprove={debugWithAI}>
-                        <Button
-                            type="primary"
-                            onClick={debugWithAI}
-                            data-attr="insight-memory-limit-debug-with-ai"
-                        >
+                        <Button type="primary" onClick={debugWithAI} data-attr="insight-memory-limit-debug-with-ai">
                             Debug with Insights AI
                         </Button>
                     </AIConsentPopoverWrapper>

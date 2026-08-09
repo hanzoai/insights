@@ -2,9 +2,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useEffect, useRef, useState } from 'react'
 
-import * as reporterPng from '@hanzo/brand/hoggies/png/reporter'
-import { IconArrowRight, IconSparkles } from '@hanzo/icons'
 import { Button, TextArea } from '@hanzo/elements'
+import { IconArrowRight, IconSparkles } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { MCPUseCaseCard } from 'lib/components/MCPHint/MCPUseCaseCard'
@@ -29,7 +28,7 @@ import {
 } from '../../constants'
 import { surveysLogic } from '../../surveysLogic'
 
-const MascotReporter = pngHoggie(reporterPng)
+const MascotReporter = pngHoggie()
 
 const TEMPLATE_TYPES = [SurveyTemplateType.NPS, SurveyTemplateType.CSAT, SurveyTemplateType.PMF]
 

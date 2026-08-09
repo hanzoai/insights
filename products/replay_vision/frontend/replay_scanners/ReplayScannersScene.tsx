@@ -2,27 +2,16 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import * as xRayPng from '@hanzo/brand/hoggies/png/x-ray'
+import { Banner, Button, Input, Switch, Table, Tabs, Link, Spinner, SpinnerOverlay } from '@hanzo/elements'
 import { IconPencil, IconPlus, IconRefresh, IconSearch, IconTrash } from '@hanzo/icons'
-import {
-    Banner,
-    Button,
-    Input,
-    Switch,
-    Table,
-    Tabs,
-    Link,
-    Spinner,
-    SpinnerOverlay,
-} from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { NotFound } from 'lib/components/NotFound'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { Dialog } from 'lib/elements/Dialog'
-import { TableColumns } from 'lib/elements/Table'
 import { ProfilePicture } from 'lib/elements/ProfilePicture'
+import { TableColumns } from 'lib/elements/Table'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { appLogic } from 'scenes/appLogic'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -46,7 +35,7 @@ import { VisionUsageTab } from './components/VisionUsageTab'
 import { type ScannersSorting, SCANNERS_PAGE_SIZE, replayScannersLogic } from './replayScannersLogic'
 import { ENABLED_OPTIONS, EnabledFilter, SCANNER_TYPE_OPTIONS, ScannerType, ReplayScanner } from './types'
 
-const MascotXRay = pngHoggie(xRayPng)
+const MascotXRay = pngHoggie()
 
 const TYPE_OPTIONS: { value: ScannerType; label: string }[] = SCANNER_TYPE_OPTIONS.map(({ value, label }) => ({
     value,

@@ -1,16 +1,15 @@
 import { useActions, useValues } from 'kea'
 import React from 'react'
 
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
-import { IconChevronLeft, IconChevronRight } from '@hanzo/icons'
 import { Button, Checkbox, Skeleton, Link } from '@hanzo/elements'
-import { PostHogCaptureOnViewed as InsightsCaptureOnViewed } from '@hanzo/react'
+import { IconChevronLeft, IconChevronRight } from '@hanzo/icons'
+import { InsightsCaptureOnViewed } from '@hanzo/react'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { KeyboardShortcut } from 'lib/components/KeyboardShortcut/KeyboardShortcut'
-import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
 import { Banner } from 'lib/elements/Banner'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
 import { SceneExport } from 'scenes/sceneTypes'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
@@ -23,7 +22,7 @@ import { VisualReviewTabs } from '../components/VisualReviewTabs'
 import type { SnapshotApi } from '../generated/api.schemas'
 import { VisualReviewRunSceneLogicProps, visualReviewRunSceneLogic } from './visualReviewRunSceneLogic'
 
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
+const MascotMagnifyingGlass = pngHoggie()
 
 export const scene: SceneExport = {
     component: VisualReviewRunScene,

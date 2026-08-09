@@ -1,7 +1,5 @@
 import { useActions, useValues } from 'kea'
 
-import * as shockedPng from '@hanzo/brand/hoggies/png/shocked'
-
 import { pngHoggie } from 'lib/brand/hoggies'
 import { HeartHog } from 'lib/components/mascots'
 import { Button } from 'lib/elements/Button'
@@ -11,7 +9,7 @@ import { SceneExport } from 'scenes/sceneTypes'
 
 import { wizardLogic } from './wizardLogic'
 
-const MascotShocked = pngHoggie(shockedPng)
+const MascotShocked = pngHoggie()
 
 export const scene: SceneExport = {
     component: Wizard,

@@ -2,7 +2,6 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { ComponentType } from 'react'
 
-import * as robotPng from '@hanzo/brand/hoggies/png/robot'
 import { SegmentedButton, Tabs } from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
@@ -26,7 +25,7 @@ import { aiGatewayLogic, EndpointProvider, EndpointTab } from './aiGatewayLogic'
 import { GatewayBalanceCard, GatewayTopUpModal } from './GatewayTopUp'
 import { ModelBreakdownTable, SpendChart, UsageMetrics } from './gatewayUsage'
 
-const MascotRobot = pngHoggie(robotPng)
+const MascotRobot = pngHoggie()
 
 const AI_GATEWAY_DESCRIPTION =
     'One endpoint for every major LLM, billed at cost — no markup on tokens. Point your app at the gateway and ' +

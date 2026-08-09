@@ -1,9 +1,8 @@
 import { useActions, useValues } from 'kea'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import * as director from '@hanzo/brand/hoggies/png/director'
-import { IconPencil, IconUndo } from '@hanzo/icons'
 import { Button, ColorPicker, Input, Modal, Select } from '@hanzo/elements'
+import { IconPencil, IconUndo } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { getSeriesColorPalette } from 'lib/colors'
@@ -18,7 +17,7 @@ import {
     takeScreenshotLogic,
 } from './takeScreenshotLogic'
 
-const MascotDirector = pngHoggie(director)
+const MascotDirector = pngHoggie()
 
 export function ScreenShotEditor({ screenshotKey }: { screenshotKey: string }): JSX.Element {
     const {

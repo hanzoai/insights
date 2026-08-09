@@ -60,7 +60,7 @@ export interface ProductEmptyStateConfig {
     accentColor: string
     /** Dark-mode accent override; falls back to `accentColor` */
     accentColorDark?: string
-    /** A `pngHoggie(...)`-wrapped mascot, rendered above the product name */
+    /** A `pngHoggie()` illustration slot, rendered above the product name */
     mascot?: ComponentType<{ className?: string; style?: CSSProperties }>
     text: ProductEmptyStateTextByMode
     /** Install-command CTA. Omit for creation-first products (use `primaryAction`) or self-hosted-only flows */

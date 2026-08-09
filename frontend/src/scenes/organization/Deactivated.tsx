@@ -1,6 +1,5 @@
 import { useValues } from 'kea'
 
-import * as stopPng from '@hanzo/brand/hoggies/png/stop'
 import { Card } from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
@@ -8,7 +7,7 @@ import { SupportModalButton } from 'scenes/authentication/shared/SupportModalBut
 import { organizationLogic } from 'scenes/organizationLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 
-const MascotStop = pngHoggie(stopPng)
+const MascotStop = pngHoggie()
 
 export const scene: SceneExport = {
     component: OrganizationDeactivated,

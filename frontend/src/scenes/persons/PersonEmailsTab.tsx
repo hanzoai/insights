@@ -1,7 +1,6 @@
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import * as greekPng from '@hanzo/brand/hoggies/png/greek'
 import { Table, Link } from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
@@ -13,7 +12,7 @@ import { MessageAsset } from 'products/workflows/frontend/Workflows/messageAsset
 
 import { personEmailsLogic } from './personEmailsLogic'
 
-const MascotGreek = pngHoggie(greekPng)
+const MascotGreek = pngHoggie()
 
 interface PersonEmailsTabProps {
     teamId: number

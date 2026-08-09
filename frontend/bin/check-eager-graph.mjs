@@ -40,46 +40,15 @@ const ROOTS = [
         // 2026-07-01: 3.75 MiB eager output (2.73 MiB JS + 1.02 MiB eager CSS, 21 chunks).
         // ~20% headroom so routine churn doesn't trip the warn; ratchet down on a split win.
         budgetBytes: 4_725_000,
-        forbidden: [
-            'node_modules/monaco-editor/',
-            'src/lib/components/ActivityLog/describers',
-            // Inlined hoggie SVGs are huge (up to ~1 MiB each), and one static barrel import
-            // from eager code drags every hoggie used anywhere in the app onto the eager
-            // path. All app code uses pngHoggie (lib/brand/hoggies) instead - the package's
-            // `hoggies/png/*` URL stubs are allowed (a few bytes each, the image bytes stay
-            // out of the JS bundle entirely). Nothing imports the SVG modules today (oxlint
-            // no-restricted-imports bans them), so these are tripwires: verifyPrefix checks
-            // the package is still laid out as expected via the PNG stubs that DO ship.
-            {
-                pattern: 'node_modules/@hanzo/brand/dist/generated/hoggies/svg/',
-                verifyPrefix: 'node_modules/@hanzo/brand/dist/generated/hoggies/',
-            },
-            {
-                pattern: 'node_modules/@hanzo/brand/dist/generated/hoggies/components/',
-                verifyPrefix: 'node_modules/@hanzo/brand/dist/generated/hoggies/',
-            },
-        ],
+        forbidden: ['node_modules/monaco-editor/', 'src/lib/components/ActivityLog/describers'],
     },
     {
         root: 'src/scenes/AuthenticatedShell.tsx',
         label: 'authenticated shell (every logged-in page)',
-        // 2026-07-07: 8.02 MiB eager output after moving all @hanzo/brand/hoggies usage in
-        // eager code to PNG stubs (lib/brand/hoggies) — the inline-SVG modules are now a
-        // forbidden module below. ~21% headroom so routine churn doesn't trip the warn.
+        // 8.02 MiB eager output measured once the illustration artwork stopped shipping.
+        // ~21% headroom so routine churn doesn't trip the warn.
         budgetBytes: 10_185_000,
-        forbidden: [
-            'node_modules/monaco-editor/',
-            'src/lib/components/ActivityLog/describers',
-            // See the entry root's note: inline-SVG hoggies must stay off the eager path.
-            {
-                pattern: 'node_modules/@hanzo/brand/dist/generated/hoggies/svg/',
-                verifyPrefix: 'node_modules/@hanzo/brand/dist/generated/hoggies/',
-            },
-            {
-                pattern: 'node_modules/@hanzo/brand/dist/generated/hoggies/components/',
-                verifyPrefix: 'node_modules/@hanzo/brand/dist/generated/hoggies/',
-            },
-        ],
+        forbidden: ['node_modules/monaco-editor/', 'src/lib/components/ActivityLog/describers'],
     },
 ]
 

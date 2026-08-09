@@ -1,8 +1,7 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import * as judgePng from '@hanzo/brand/hoggies/png/judge'
 import { Banner } from '@hanzo/elements'
 
 import { approvalsGateLogic } from 'lib/approvals/approvalsGateLogic'
@@ -15,7 +14,7 @@ import { userLogic } from 'scenes/userLogic'
 
 import { AvailableFeature } from '~/types'
 
-const MascotJudge = pngHoggie(judgePng)
+const MascotJudge = pngHoggie()
 
 const DISMISS_KEY = 'feature-flags-approvals-promo'
 
