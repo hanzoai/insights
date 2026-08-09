@@ -1,6 +1,6 @@
 """Curated query: pull requests merged since a cutoff, with their branch-tip head SHA.
 
-The discovery seam behind ReviewHog telemetry — "which PRs merged recently, and the commit at each
+The discovery seam behind Review telemetry — "which PRs merged recently, and the commit at each
 branch tip". Embeds the curated pull-requests source (see ``logic.views.pull_requests``) as a
 subquery and keeps only PRs that have merged (``merged_at`` is non-null exactly when a PR actually
 merged — the same condition the source derives ``state = 'merged'`` from) at or after ``since``,
@@ -66,7 +66,7 @@ def query_merged_pull_requests(
         "repo_name": ast.Constant(value=repo_name.lower()),
     }
     # An explicit number list is already a precise, self-bounding ask, so `since` could only drop
-    # rows the caller named. A caller waiting on a specific PR (a ReviewHog report still awaiting
+    # rows the caller named. A caller waiting on a specific PR (a Review report still awaiting
     # outcome classification) cannot tell that loss apart from "no such merge", and because its
     # discovery set carries no time bound the report would be re-asked for and re-dropped on every
     # sweep forever. Applying one filter or the other keeps a by-number ask answerable for a PR of

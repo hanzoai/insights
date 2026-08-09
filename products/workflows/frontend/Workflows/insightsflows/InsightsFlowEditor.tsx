@@ -19,7 +19,7 @@ import { IconInfo } from '@hanzo/icons'
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
 
 import { workflowLogic } from '../workflowLogic'
-import { hogFlowEditorLogic } from './hogFlowEditorLogic'
+import { flowEditorLogic } from './flowEditorLogic'
 import { InsightsFlowEditorPanel } from './panel/InsightsFlowEditorPanel'
 import { REACT_FLOW_EDGE_TYPES } from './react_flow_utils/SmartEdge'
 import { REACT_FLOW_NODE_TYPES } from './steps/Nodes'
@@ -29,7 +29,7 @@ import { InsightsFlowActionEdge, InsightsFlowActionNode } from './types'
 function InsightsFlowEditorContent(): JSX.Element {
     const { isDarkModeOn } = useValues(themeLogic)
 
-    const { nodes, edges, dropzoneNodes, isMovingNode, isCopyingNode } = useValues(hogFlowEditorLogic)
+    const { nodes, edges, dropzoneNodes, isMovingNode, isCopyingNode } = useValues(flowEditorLogic)
     const {
         onEdgesChange,
         onNodesChange,
@@ -41,7 +41,7 @@ function InsightsFlowEditorContent(): JSX.Element {
         onDrop,
         setReactFlowWrapper,
         handlePaneClick,
-    } = useActions(hogFlowEditorLogic)
+    } = useActions(flowEditorLogic)
 
     const reactFlowWrapper = useRef<HTMLDivElement>(null)
     const reactFlowInstance = useReactFlow()
@@ -106,7 +106,7 @@ export function InsightsFlowEditor(): JSX.Element {
     const { logicProps } = useValues(workflowLogic)
     return (
         <ReactFlowProvider>
-            <BindLogic logic={hogFlowEditorLogic} props={logicProps}>
+            <BindLogic logic={flowEditorLogic} props={logicProps}>
                 <InsightsFlowEditorContent />
             </BindLogic>
         </ReactFlowProvider>

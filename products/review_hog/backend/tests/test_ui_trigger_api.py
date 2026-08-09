@@ -24,13 +24,13 @@ def _pr_meta(**overrides: object) -> MagicMock:
     return meta
 
 
-class TestReviewHogUiTriggerApi(APIBaseTest):
-    # The settings GET below resolves stamphog_connected off the stamphog product DB.
-    databases = {"default", "stamphog_db_writer", "stamphog_db_reader"}
+class TestReviewUiTriggerApi(APIBaseTest):
+    # The settings GET below resolves stamp_connected off the stamp product DB.
+    databases = {"default", "stamp_db_writer", "stamp_db_reader"}
 
     def _trigger(self, pr_url: str):
         return self.client.post(
-            f"/v1/projects/{self.team.id}/review_hog/reviews/trigger/", {"pr_url": pr_url}, format="json"
+            f"/v1/projects/{self.team.id}/review/reviews/trigger/", {"pr_url": pr_url}, format="json"
         )
 
     @patch(_META, return_value=_pr_meta())
@@ -62,7 +62,7 @@ class TestReviewHogUiTriggerApi(APIBaseTest):
         ]
     )
     @patch(_START)
-    def test_rejected_unless_the_project_is_the_reviewhog_team(self, _name, team_setting, mock_start):
+    def test_rejected_unless_the_project_is_the_review_team(self, _name, team_setting, mock_start):
         with override_settings(REVIEWFN_TEAM_ID=team_setting):
             resp = self._trigger("https://github.com/Insights/insights/pull/1")
 
@@ -166,13 +166,13 @@ class TestReviewHogUiTriggerApi(APIBaseTest):
 
     @parameterized.expand(
         [
-            ("reviewhog_team", True),
+            ("review_team", True),
             ("other_team", False),
         ]
     )
-    def test_settings_expose_whether_reviews_can_be_triggered_here(self, _name, is_reviewhog_team):
-        with override_settings(REVIEWFN_TEAM_ID=self.team.id if is_reviewhog_team else self.team.id + 1):
-            resp = self.client.get(f"/v1/projects/{self.team.id}/review_hog/settings/")
+    def test_settings_expose_whether_reviews_can_be_triggered_here(self, _name, is_review_team):
+        with override_settings(REVIEWFN_TEAM_ID=self.team.id if is_review_team else self.team.id + 1):
+            resp = self.client.get(f"/v1/projects/{self.team.id}/review/settings/")
 
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(resp.json()["can_trigger_reviews"], is_reviewhog_team)
+        self.assertEqual(resp.json()["can_trigger_reviews"], is_review_team)

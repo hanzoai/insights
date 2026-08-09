@@ -132,12 +132,12 @@ def _review_marker(report_id: str, head_sha: str) -> str:
     Posting isn't atomic with saving the `published_head_sha` watermark; if we crash between them, the
     marker lets the retry spot its own already-posted review and skip.
     """
-    return f"<!-- reviewhog:published:{report_id}:{head_sha} -->"
+    return f"<!-- review:published:{report_id}:{head_sha} -->"
 
 
 def _promo_marker(report_id: str) -> str:
     """A hidden marker (HTML comment) embedded in the promo comment — posted once per report."""
-    return f"<!-- reviewhog:promo:{report_id} -->"
+    return f"<!-- review:promo:{report_id} -->"
 
 
 def publish_review(
@@ -161,7 +161,7 @@ def publish_review(
     from this turn's valid finding/verdict rows (`run_index`-scoped, so a prior turn's findings are
     never replayed), positioned against the PR's diff. `token` is the team's GitHub App installation
     token; `head_sha` pins the review to the exact reviewed commit so a force-push between review and
-    post can't misattribute comments. `post_promo` posts the one-time "ReviewHog Alpha" feedback
+    post can't misattribute comments. `post_promo` posts the one-time "Review Alpha" feedback
     comment (the caller passes it only on the first publish for the report, so it isn't re-posted
     every turn). Reads the DB, so callers run it off the event loop.
 
@@ -441,7 +441,7 @@ def _post_github_review(
             installation_id=installation_id,
             endpoint="/repos/{owner}/{repo}/issues/{issue_number}/comments",
             json={
-                "body": "ReviewHog Alpha \U0001f994 "
+                "body": "Review Alpha \U0001f994 "
                 "If you find any issues helpful - "
                 'please reply "valid", "invalid", etc., '
                 f"for evaluation purposes \U0001f64f\n\n{promo_marker}"

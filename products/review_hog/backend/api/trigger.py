@@ -18,11 +18,11 @@ from products.review_hog.backend.temporal.types import TRIGGER_LABEL
 
 logger = logging.getLogger(__name__)
 
-# v1 scope: ReviewHog only runs against the main Insights monorepo. Matched case-insensitively.
+# v1 scope: Review only runs against the main Insights monorepo. Matched case-insensitively.
 ALLOWED_REPOS = {"insights/insights"}
 
 
-class ReviewHogTriggerRequestSerializer(serializers.Serializer):
+class ReviewTriggerRequestSerializer(serializers.Serializer):
     repo = serializers.CharField(
         help_text="GitHub repository to review, in 'owner/name' form; must be on the allowlist (e.g. 'Insights/insights').",
     )
@@ -37,12 +37,12 @@ class ReviewHogTriggerRequestSerializer(serializers.Serializer):
     )
 
 
-class ReviewHogTriggerResponseSerializer(serializers.Serializer):
+class ReviewTriggerResponseSerializer(serializers.Serializer):
     workflow_id = serializers.CharField(help_text="Temporal workflow id for the started review run.")
     status = serializers.CharField(help_text="Run lifecycle marker; 'started' when the review was queued.")
 
 
-class ReviewHogTriggerErrorSerializer(serializers.Serializer):
+class ReviewTriggerErrorSerializer(serializers.Serializer):
     error = serializers.CharField(help_text="Human-readable explanation of why the trigger was rejected.")
 
 
@@ -72,7 +72,7 @@ def _resolve_run_user_id(team_id: int) -> int | None:
         if creator_is_active:
             return integration.created_by_id
         logger.warning(
-            "ReviewHog run-user fallback: integration creator %s is not an active org member",
+            "Review run-user fallback: integration creator %s is not an active org member",
             integration.created_by_id,
         )
     membership = (
@@ -84,12 +84,12 @@ def _resolve_run_user_id(team_id: int) -> int | None:
     return membership.user_id if membership else None
 
 
-class ReviewHogTriggerViewSet(viewsets.ViewSet):
-    """Shared-secret-gated trigger that starts a ReviewHog review for a PR.
+class ReviewTriggerViewSet(viewsets.ViewSet):
+    """Shared-secret-gated trigger that starts a Review review for a PR.
 
     Unscoped (no team in the URL): the team and run user are resolved server-side from settings, and CI
     authenticates with the `REVIEWFN_TRIGGER_TOKEN` shared secret — no session or API key. The first
-    client is the `reviewhog` label GitHub Action, but the endpoint is the durable reusable interface.
+    client is the `review` label GitHub Action, but the endpoint is the durable reusable interface.
     """
 
     authentication_classes = ()
@@ -103,7 +103,7 @@ class ReviewHogTriggerViewSet(viewsets.ViewSet):
             if settings.DEBUG or settings.TEST:
                 return None
             return Response(
-                {"error": "ReviewHog trigger token is not configured"},
+                {"error": "Review trigger token is not configured"},
                 status=status.HTTP_403_FORBIDDEN,
             )
         if not hmac.compare_digest(_bearer_token(request), expected):
@@ -111,20 +111,20 @@ class ReviewHogTriggerViewSet(viewsets.ViewSet):
         return None
 
     @extend_schema(
-        request=ReviewHogTriggerRequestSerializer,
+        request=ReviewTriggerRequestSerializer,
         responses={
-            202: OpenApiResponse(response=ReviewHogTriggerResponseSerializer, description="Review run started"),
+            202: OpenApiResponse(response=ReviewTriggerResponseSerializer, description="Review run started"),
             400: OpenApiResponse(
-                response=ReviewHogTriggerErrorSerializer, description="Invalid body or unresolved run user"
+                response=ReviewTriggerErrorSerializer, description="Invalid body or unresolved run user"
             ),
             403: OpenApiResponse(
-                response=ReviewHogTriggerErrorSerializer, description="Missing/invalid token or disallowed repo"
+                response=ReviewTriggerErrorSerializer, description="Missing/invalid token or disallowed repo"
             ),
-            503: OpenApiResponse(response=ReviewHogTriggerErrorSerializer, description="Trigger team not configured"),
+            503: OpenApiResponse(response=ReviewTriggerErrorSerializer, description="Trigger team not configured"),
         },
-        summary="Trigger a ReviewHog PR review",
+        summary="Trigger a Review PR review",
         description=(
-            "Start a single-turn ReviewHog review for a pull request and (by default) publish it back to "
+            "Start a single-turn Review review for a pull request and (by default) publish it back to "
             "the PR. Authenticated with the REVIEWFN_TRIGGER_TOKEN shared secret in the Authorization "
             "header. Non-blocking: returns the Temporal workflow id immediately while the review runs in "
             "the worker."
@@ -136,7 +136,7 @@ class ReviewHogTriggerViewSet(viewsets.ViewSet):
         if auth_error is not None:
             return auth_error
 
-        serializer = ReviewHogTriggerRequestSerializer(data=request.data)
+        serializer = ReviewTriggerRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         repo: str = serializer.validated_data["repo"]
         pr_number: int = serializer.validated_data["pr_number"]
@@ -147,7 +147,7 @@ class ReviewHogTriggerViewSet(viewsets.ViewSet):
 
         team_id = settings.REVIEWFN_TEAM_ID
         if not team_id:
-            return Response({"error": "ReviewHog team is not configured"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            return Response({"error": "Review team is not configured"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
         user_id = settings.REVIEWFN_RUN_USER_ID or _resolve_run_user_id(team_id)
         if not user_id:
@@ -164,7 +164,7 @@ class ReviewHogTriggerViewSet(viewsets.ViewSet):
         ).exists()
         if not run_user_is_authorized:
             # The Action echoes error bodies into public CI logs, so the id stays server-side.
-            logger.warning("ReviewHog trigger: run user %s is not an active member of the team's organization", user_id)
+            logger.warning("Review trigger: run user %s is not an active member of the team's organization", user_id)
             return Response(
                 {"error": "Configured run user is not an active member of the team's organization"},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -176,8 +176,8 @@ class ReviewHogTriggerViewSet(viewsets.ViewSet):
         workflow_id = start_review_pr_workflow(
             pr_url=pr_url, team_id=team_id, user_id=user_id, publish=publish, trigger_source=TRIGGER_LABEL
         )
-        logger.info(f"ReviewHog trigger started workflow {workflow_id} for {repo}#{pr_number} (publish={publish})")
+        logger.info(f"Review trigger started workflow {workflow_id} for {repo}#{pr_number} (publish={publish})")
         return Response(
-            ReviewHogTriggerResponseSerializer({"workflow_id": workflow_id, "status": "started"}).data,
+            ReviewTriggerResponseSerializer({"workflow_id": workflow_id, "status": "started"}).data,
             status=status.HTTP_202_ACCEPTED,
         )

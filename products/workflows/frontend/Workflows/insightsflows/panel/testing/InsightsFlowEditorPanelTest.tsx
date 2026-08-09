@@ -28,8 +28,8 @@ import { urls } from 'scenes/urls'
 
 import { renderWorkflowLogMessage } from '../../../logs/log-utils'
 import { TRIGGER_NODE_ID, workflowLogic } from '../../../workflowLogic'
-import { hogFlowEditorLogic } from '../../hogFlowEditorLogic'
-import { hogFlowEditorTestLogic } from './hogFlowEditorTestLogic'
+import { flowEditorLogic } from '../../flowEditorLogic'
+import { flowEditorTestLogic } from './flowEditorTestLogic'
 
 export function InsightsFlowTestPanelNonSelected(): JSX.Element {
     return (
@@ -42,8 +42,8 @@ export function InsightsFlowTestPanelNonSelected(): JSX.Element {
 }
 
 export function InsightsFlowEditorPanelTest(): JSX.Element | null {
-    const { workflow, selectedNode } = useValues(hogFlowEditorLogic)
-    const { setSelectedNodeId } = useActions(hogFlowEditorLogic)
+    const { workflow, selectedNode } = useValues(flowEditorLogic)
+    const { setSelectedNodeId } = useActions(flowEditorLogic)
     const { logicProps } = useValues(workflowLogic)
 
     const {
@@ -59,7 +59,7 @@ export function InsightsFlowEditorPanelTest(): JSX.Element | null {
         eventPanelOpen,
         eventSelectorOpen,
         lastSearchedEventName,
-    } = useValues(hogFlowEditorTestLogic(logicProps))
+    } = useValues(flowEditorTestLogic(logicProps))
     const {
         submitTestInvocation,
         setTestResult,
@@ -68,7 +68,7 @@ export function InsightsFlowEditorPanelTest(): JSX.Element | null {
         setSampleGlobals,
         setEventPanelOpen,
         setEventSelectorOpen,
-    } = useActions(hogFlowEditorTestLogic(logicProps))
+    } = useActions(flowEditorTestLogic(logicProps))
 
     const display = asDisplay(sampleGlobals?.person)
     const url = urls.personByDistinctId(sampleGlobals?.event?.distinct_id || '')
@@ -96,7 +96,7 @@ export function InsightsFlowEditorPanelTest(): JSX.Element | null {
 
     return (
         <Form
-            logic={hogFlowEditorTestLogic}
+            logic={flowEditorTestLogic}
             props={logicProps}
             formKey="testInvocation"
             enableFormOnSubmit

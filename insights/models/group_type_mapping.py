@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from insights.models.project import Project
     from insights.models.team.team import Team
-    from insights.personinsights_client.client import PersonHogClient
+    from insights.personinsights_client.client import PersonClient
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
@@ -180,7 +180,7 @@ def invalidate_group_types_cache(project_id: int) -> None:
     safe_cache_delete(f"{GROUP_TYPES_CONFIRMED_EMPTY_CACHE_KEY_PREFIX}{project_id}")
 
 
-def _fetch_group_types_via_personinsights(client: PersonHogClient, project_id: int) -> list[dict[str, Any]]:
+def _fetch_group_types_via_personinsights(client: PersonClient, project_id: int) -> list[dict[str, Any]]:
     from insights.personinsights_client.converters import proto_group_type_mapping_to_dict
     from insights.personinsights_client.proto import GetGroupTypeMappingsByProjectIdRequest
 
@@ -252,7 +252,7 @@ def get_group_types_for_project(project_id: int, *, caller_tag: str | None = Non
     return result
 
 
-def _fetch_group_types_for_team_via_personinsights(client: PersonHogClient, team_id: int) -> list[dict[str, Any]]:
+def _fetch_group_types_for_team_via_personinsights(client: PersonClient, team_id: int) -> list[dict[str, Any]]:
     from insights.personinsights_client.converters import proto_group_type_mapping_to_dict
     from insights.personinsights_client.proto import GetGroupTypeMappingsByTeamIdRequest
 
@@ -288,7 +288,7 @@ def get_group_types_for_team(team_id: int, *, caller_tag: str | None = None) -> 
 
 
 def _fetch_group_types_for_projects_via_personinsights(
-    client: PersonHogClient, project_ids: list[int], *, consistency: ReadConsistency = "eventual"
+    client: PersonClient, project_ids: list[int], *, consistency: ReadConsistency = "eventual"
 ) -> dict[int, list[dict[str, Any]]]:
     from insights.personinsights_client.converters import proto_group_type_mapping_to_dict
     from insights.personinsights_client.proto import GetGroupTypeMappingsByProjectIdsRequest

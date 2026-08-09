@@ -21,7 +21,7 @@ class TestReviewPerspectiveConfigAPI(APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
         sync_canonical_perspectives(self.team)
-        self.base = f"/v1/projects/{self.team.id}/review_hog/perspectives"
+        self.base = f"/v1/projects/{self.team.id}/review/perspectives"
 
     def _author_custom(self, created_by: User | None = None) -> None:
         LLMSkill.objects.create(
@@ -117,9 +117,9 @@ class TestReviewPerspectiveConfigAPI(APIBaseTest):
         # raw-id LLMSkill lookups 404ed / listed an empty menu).
         env = Team.objects.create(organization=self.organization, parent_team=self.team, name="env")
         name = CANONICAL_PERSPECTIVE_SKILL_NAMES[0]
-        url = f"/v1/projects/{env.id}/review_hog/perspectives/{name}/"
+        url = f"/v1/projects/{env.id}/review/perspectives/{name}/"
 
-        listing = self.client.get(f"/v1/projects/{env.id}/review_hog/perspectives/")
+        listing = self.client.get(f"/v1/projects/{env.id}/review/perspectives/")
         first = self.client.patch(url, {"enabled": False}, format="json")
         second = self.client.patch(url, {"enabled": True}, format="json")
 
@@ -136,7 +136,7 @@ class TestReviewPerspectiveConfigAPI(APIBaseTest):
         # never ran a review rendered an empty, unusable perspective menu. The first list must seed.
         cold = Team.objects.create(organization=self.organization, name="cold")
 
-        res = self.client.get(f"/v1/projects/{cold.id}/review_hog/perspectives/")
+        res = self.client.get(f"/v1/projects/{cold.id}/review/perspectives/")
 
         assert res.status_code == 200
         assert {i["skill_name"] for i in res.json()} >= set(CANONICAL_PERSPECTIVE_SKILL_NAMES)

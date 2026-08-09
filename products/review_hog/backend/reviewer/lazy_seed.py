@@ -1,7 +1,7 @@
 """Canonical review-script skill sync — mirror disk `SKILL.md` into per-team `LLMSkill` rows.
 
 Ported from Signals' `scout_harness/lazy_seed.py` (the scout fleet's canonical-skill sync) and
-trimmed to ReviewHog's needs: no per-team holdback. The reconcile is
+trimmed to Review's needs: no per-team holdback. The reconcile is
 prefix-and-category-driven so the same machinery seeds every skill set — the review
 **perspectives** (`review-script-perspective-*`), the **validation criteria**
 (`review-script-validation-*`), the **blind-spot check** (`review-script-blind-spots-*`), and the
@@ -9,7 +9,7 @@ prefix-and-category-driven so the same machinery seeds every skill set — the r
 It reads the matching dirs under `products/review_hog/skills/` and
 reconciles each against a team's `LLMSkill` rows — creating missing rows, updating ones the team
 hasn't edited, leaving diverged / hand-authored rows alone, tombstoning rows whose canonical was
-deleted. Only rows we seeded (`metadata.seeded_by == "review_hog"`) are ever updated.
+deleted. Only rows we seeded (`metadata.seeded_by == "review"`) are ever updated.
 
 Called at the start of every review run (the cold-start sync, `prune=True`) — creation, updates,
 and the pruning of disk-removed canonicals all ride the run path, scout-coordinator-style; there is
@@ -59,17 +59,17 @@ _MAX_SKILL_FILE_BYTES = 1_000_000
 _MAX_SKILL_FILE_COUNT = 50
 _MAX_SKILL_FILE_PATH_LENGTH = 500
 
-# Stamped on `LLMSkill.metadata.seeded_by` for every ReviewHog-managed row. Its presence is the
-# single source of truth for "ReviewHog owns this row": it gates which rows the sync may
+# Stamped on `LLMSkill.metadata.seeded_by` for every Review-managed row. Its presence is the
+# single source of truth for "Review owns this row": it gates which rows the sync may
 # update/prune, and distinguishes a canonical perspective from a team's hand-authored skill.
-REVIEW_FN_SEEDED_BY = "review_hog"
+REVIEW_FN_SEEDED_BY = "review"
 
-# Stamped on `LLMSkill.category` so the skills surface can group all of ReviewHog's pulled skills into
+# Stamped on `LLMSkill.category` so the skills surface can group all of Review's pulled skills into
 # one "Code review" tab without knowing the naming convention. Both skill sets share this one
 # category — the perspective-vs-validation split is carried by the skill-name prefix
 # (`review-script-perspective-*` vs `review-script-validation-*`), which the skills UI can group on — so a
 # single tab covers both. The sync owns this tag (it re-stamps a seeded row whose category drifted).
-REVIEW_FN_SKILL_CATEGORY = "review_hog"
+REVIEW_FN_SKILL_CATEGORY = "review"
 
 _SOURCE = "products/review_hog/skills"
 
@@ -342,7 +342,7 @@ def _resurrect_skill_from_canonical(
 ) -> None:
     """Recreate a canonical whose rows were all soft-deleted (e.g. archived from the Skills UI).
 
-    Skill deletion is not ReviewHog's opt-out signal — disabling the `ReviewSkillConfig` is — so the
+    Skill deletion is not Review's opt-out signal — disabling the `ReviewSkillConfig` is — so the
     sync restores the canonical at the next version instead of honoring an archive made on an
     unrelated surface. A racing write collides on the unique constraint; the caller swallows it.
     """
@@ -377,9 +377,9 @@ def _sync_canonicals(
     """Reconcile a team's rows with a set of canonical `<prefix>*` skills on disk.
 
     Per skill: create if missing, update if we seeded it and the team hasn't edited it, resurrect
-    if every row is soft-deleted (skill deletion is not ReviewHog's opt-out — the config toggle is),
+    if every row is soft-deleted (skill deletion is not Review's opt-out — the config toggle is),
     otherwise leave it alone (diverged / hand-authored). Only rows tagged
-    `metadata.seeded_by == "review_hog"` are ever updated.
+    `metadata.seeded_by == "review"` are ever updated.
 
     `prune` (default off) additionally tombstones live `<prefix>*` rows we seeded whose canonical was
     removed from disk — safe on the automatic path because the `not canonicals` early-return and the
@@ -406,7 +406,7 @@ def _sync_canonicals(
                 created.append(canonical.name)
             except IntegrityError:
                 logger.info(
-                    "review_hog: concurrent create lost the race; skipping",
+                    "review: concurrent create lost the race; skipping",
                     extra={"team_id": team.id, "skill_name": canonical.name},
                 )
             continue
@@ -420,7 +420,7 @@ def _sync_canonicals(
                 resurrected.append(canonical.name)
             except IntegrityError:
                 logger.info(
-                    "review_hog: concurrent resurrect lost the race; skipping",
+                    "review: concurrent resurrect lost the race; skipping",
                     extra={"team_id": team.id, "skill_name": canonical.name},
                 )
             continue
@@ -456,7 +456,7 @@ def _sync_canonicals(
             updated.append(canonical.name)
         except IntegrityError:
             logger.info(
-                "review_hog: concurrent update lost the race; skipping",
+                "review: concurrent update lost the race; skipping",
                 extra={"team_id": team.id, "skill_name": canonical.name},
             )
 
@@ -488,7 +488,7 @@ def _sync_canonicals(
 
     if created or updated or resurrected or pruned:
         logger.info(
-            "review_hog: synced canonical skills",
+            "review: synced canonical skills",
             extra={
                 "team_id": team.id,
                 "category": category,
@@ -564,4 +564,4 @@ def seed_canonicals_tolerantly(team_id: int, sync: Callable[[Team], SyncResult])
     try:
         sync(Team.objects.get(id=team_id))
     except Exception:
-        logger.warning("review_hog: canonical seed failed (%s)", getattr(sync, "__name__", "sync"), exc_info=True)
+        logger.warning("review: canonical seed failed (%s)", getattr(sync, "__name__", "sync"), exc_info=True)

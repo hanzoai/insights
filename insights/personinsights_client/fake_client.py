@@ -1,4 +1,4 @@
-"""Fake PersonHogClient for tests.
+"""Fake PersonClient for tests.
 
 Usage in tests::
 
@@ -50,8 +50,8 @@ def _order_identified_first(
     return sorted(dids, key=lambda d: is_anonymous_id(d.distinct_id))
 
 
-class FakePersonHogClient:
-    """In-memory fake that implements the same interface as PersonHogClient.
+class FakePersonClient:
+    """In-memory fake that implements the same interface as PersonClient.
 
     Stores data as real proto messages and returns real proto responses,
     so the full converter pipeline is exercised.
@@ -185,7 +185,7 @@ class FakePersonHogClient:
         if is_member:
             self._cohort_members[(cohort_id, person_id)] = True
 
-    # ── PersonHogClient interface ────────────────────────────────────
+    # ── PersonClient interface ────────────────────────────────────
 
     def close(self) -> None:
         pass
@@ -726,7 +726,7 @@ class FakePersonHogClient:
 def fake_personinsights_client():
     """Context manager that patches the personinsights client singleton.
 
-    Yields a ``FakePersonHogClient`` that is pre-seeded as empty. personinsights is
+    Yields a ``FakePersonClient`` that is pre-seeded as empty. personinsights is
     the sole read path, so patching ``get_personinsights_client`` is all that's needed.
 
     Example::
@@ -735,22 +735,22 @@ def fake_personinsights_client():
             fake.add_group_type_mapping(project_id=1, group_type="org", group_type_index=0)
             result = some_function_that_uses_personinsights(1)
     """
-    fake = FakePersonHogClient()
+    fake = FakePersonClient()
     with patch("insights.personinsights_client.client.get_personinsights_client", return_value=fake):
         yield fake
 
 
 # ── Global singleton for conftest integration ───────────────────────
 
-_active_fake: FakePersonHogClient | None = None
+_active_fake: FakePersonClient | None = None
 
 
-def set_active_fake(fake: FakePersonHogClient | None) -> None:
+def set_active_fake(fake: FakePersonClient | None) -> None:
     global _active_fake
     _active_fake = fake
 
 
-def get_active_fake() -> FakePersonHogClient:
+def get_active_fake() -> FakePersonClient:
     assert _active_fake is not None, "get_active_fake() called outside activate_personinsights_fake() context"
     return _active_fake
 
@@ -766,7 +766,7 @@ def personinsights_fake_active() -> bool:
 
 @contextmanager
 def activate_personinsights_fake():
-    """Activate a FakePersonHogClient for the duration of a test.
+    """Activate a FakePersonClient for the duration of a test.
 
     Patches get_personinsights_client so all reads route through the fake and blocks
     persons-DB ORM access so a stray Person.objects.* call fails loudly.  Test
@@ -775,7 +775,7 @@ def activate_personinsights_fake():
     import insights.personinsights_client.client as personinsights_client_module  # noqa: PLC0415
     from insights.person_db_router import block_persons_orm, unblock_persons_orm  # noqa: PLC0415
 
-    fake = FakePersonHogClient()
+    fake = FakePersonClient()
     set_active_fake(fake)
     block_persons_orm()
 

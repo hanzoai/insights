@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 from insights.cdp.site_functions import get_transpiled_function
 from insights.cdp.templates.insights_function_template import InsightsFunctionTemplateDC, sync_template_to_db
-from insights.cdp.validation import compile_hog
+from insights.cdp.validation import compile_script
 from insights.models.utils import uuid7
 
 from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
@@ -59,7 +59,7 @@ def mock_transpile(code: str, type: str = "site") -> str:
 # TODO this test class only tests part of the template. The script code is tested, the default mappings are not
 class BaseInsightsFunctionTemplateTest(BaseTest):
     template: InsightsFunctionTemplateDC
-    compiled_hog: Any
+    compiled_script: Any
     mock_fetch = MagicMock()
     mock_print = MagicMock()
     mock_insights_capture = MagicMock()
@@ -68,7 +68,7 @@ class BaseInsightsFunctionTemplateTest(BaseTest):
 
     def setUp(self):
         super().setUp()
-        self.compiled_hog = compile_hog(self.template.code, self.template.type)
+        self.compiled_script = compile_script(self.template.code, self.template.type)
 
         self.mock_print = MagicMock(side_effect=lambda *args: print("[DEBUG InsightsFunctionPrint]", *args))  # noqa: T201
         # Side effect - log the fetch call and return  with sensible output
@@ -95,7 +95,7 @@ class BaseInsightsFunctionTemplateTest(BaseTest):
         # Return a simple array which is easier to debug
         return [call.args for call in self.mock_insights_capture.mock_calls]
 
-    def createHogGlobals(self, globals=None) -> dict:
+    def createScriptGlobals(self, globals=None) -> dict:
         # Return an object simulating the
         data = {
             "event": {
@@ -123,7 +123,7 @@ class BaseInsightsFunctionTemplateTest(BaseTest):
         self.mock_fetch.reset_mock()
         self.mock_print.reset_mock()
         # Create the globals object
-        globals = self.createHogGlobals(globals)
+        globals = self.createScriptGlobals(globals)
         globals["inputs"] = inputs
 
         # Run the function
@@ -139,7 +139,7 @@ class BaseInsightsFunctionTemplateTest(BaseTest):
             final_functions.update(functions)
 
         return execute_bytecode(
-            self.compiled_hog,
+            self.compiled_script,
             globals,
             functions=final_functions,
         )

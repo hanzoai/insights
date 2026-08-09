@@ -3,7 +3,7 @@ import insights from 'insights-js'
 
 import { Skeleton } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { TZLabel } from 'lib/components/TZLabel'
 import { Button } from 'lib/elements/Button'
 import { Link } from 'lib/elements/Link'
@@ -23,7 +23,7 @@ import {
 import type { DashboardWidgetComponentProps } from '../registry'
 import { parseExperimentsListWidgetConfig } from './experimentsWidgetConfigValidation'
 
-const MascotExperiment = pngHoggie()
+const MascotExperiment = pngMascot()
 
 export type ExperimentsListWidgetRow = {
     id: number

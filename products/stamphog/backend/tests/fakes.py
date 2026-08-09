@@ -1,4 +1,4 @@
-"""Reusable GitHub, Slack, and sandbox fakes for the stamphog integration tests.
+"""Reusable GitHub, Slack, and sandbox fakes for the stamp integration tests.
 
 The chain has exactly four true boundaries; each fake stands in at one of them:
   * GitHub  — the egress transport ``github_request`` (``GitHubRecorder``)
@@ -142,7 +142,7 @@ class GitHubRecorder:
         self.collaborator_permissions: dict[tuple[str, str], str] = {}
         # (repo, number) -> raw reaction dicts for the in-flight reviewer-bot wait; default none.
         self.pr_reactions: dict[tuple[str, int], list[dict]] = {}
-        # (repo, number) -> id of the reaction stamphog's own add_pr_reaction posted, so a repeat POST
+        # (repo, number) -> id of the reaction stamp's own add_pr_reaction posted, so a repeat POST
         # returns the same id (GitHub's real idempotency) and a DELETE has something to clear.
         self._own_reactions: dict[tuple[str, int], int] = {}
         # Test hook: force every reaction POST to return this response (e.g. a 500) to
@@ -449,8 +449,8 @@ def approved_engine_output() -> str:
         "gates": [{"name": "size", "passed": True}, {"name": "deny_list", "passed": True}],
         "classification": {"tier": "low_risk", "reason": "docs + small logic change"},
         "policy": {"version": "1"},
-        "review_body": "Approved by stamphog. All deterministic gates passed; change is low risk.",
-        "stamphog_version": "test-1.0.0",
+        "review_body": "Approved by stamp. All deterministic gates passed; change is low risk.",
+        "stamp_version": "test-1.0.0",
     }
     return "uv run: resolved 1 package\n" + json.dumps(payload)
 

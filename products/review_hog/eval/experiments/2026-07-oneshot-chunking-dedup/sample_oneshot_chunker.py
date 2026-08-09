@@ -2,7 +2,7 @@
 the 2026-07-oneshot-chunking-dedup experiment's chunk-structure read (2-vs-3-chunk coin flip).
 
 Requires a persisted `pr_snapshot` for the latest team-1 ReviewReport, so run it while a run's data
-is still in the DB (after its dump, BEFORE `reset_review_hog`). Each sample is one direct gateway
+is still in the DB (after its dump, BEFORE `reset_review`). Each sample is one direct gateway
 call (~cents, no sandbox), sequential.
 
     N_SAMPLES=5 OUT_FILE=products/review_hog/eval/experiments/2026-07-oneshot-chunking-dedup/runs/chunker-offline-sample.md \
@@ -50,7 +50,7 @@ for a in ReviewReportArtefact.objects.for_team(TEAM).filter(
     if isinstance(c, PRSnapshotArtefact):
         snapshot = c  # latest wins, like the dump script
 if snapshot is None:
-    raise SystemExit("No pr_snapshot artefact — did reset_review_hog already wipe the run?")
+    raise SystemExit("No pr_snapshot artefact — did reset_review already wipe the run?")
 
 additions = count_reviewable_additions(snapshot.pr_files)
 file_additions = {f.filename: f.additions for f in snapshot.pr_files}

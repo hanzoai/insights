@@ -10,8 +10,8 @@ from .insight_variables_data_generator import InsightVariablesDataGenerator
 from .revenue_data_generator import RevenueDataGenerator
 from .web_data_generator import WebDataGenerator
 
-ORGANIZATION_NAME = "Hogflix"
-TEAM_NAME = "Hogflix Demo App"
+ORGANIZATION_NAME = "Scriptflix"
+TEAM_NAME = "Scriptflix Demo App"
 
 
 def demo_route(request: HttpRequest):

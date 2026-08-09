@@ -1,4 +1,4 @@
-"""Slack interactivity endpoint for the SupportHog app.
+"""Slack interactivity endpoint for the Support app.
 
 Receives button clicks from the "open a ticket?" nudge prompt posted in channels
 outside the configured support channels (``slack_nudge_enabled``, on by default).
@@ -19,14 +19,14 @@ from insights.models.integration import SlackIntegrationError
 
 from products.conversations.backend.services.region_routing import is_primary_region, proxy_to_secondary_region
 from products.conversations.backend.support_slack import team_exists_for_slack_workspace, validate_support_request
-from products.conversations.backend.tasks import process_supporthog_interactivity
+from products.conversations.backend.tasks import process_support_interactivity
 
 logger = structlog.get_logger(__name__)
 
 
 @csrf_exempt
-def supporthog_interactivity_handler(request: HttpRequest) -> HttpResponse:
-    """Handle Slack interactive button clicks for SupportHog.
+def support_interactivity_handler(request: HttpRequest) -> HttpResponse:
+    """Handle Slack interactive button clicks for Support.
 
     Regional routing matches the events endpoint: EU is the primary region. If the
     workspace isn't found locally, the request is proxied to the secondary region (US).
@@ -37,7 +37,7 @@ def supporthog_interactivity_handler(request: HttpRequest) -> HttpResponse:
     try:
         validate_support_request(request)
     except SlackIntegrationError as e:
-        logger.warning("supporthog_interactivity_invalid_request", error=str(e))
+        logger.warning("support_interactivity_invalid_request", error=str(e))
         return HttpResponse("Invalid request", status=403)
 
     try:
@@ -51,17 +51,17 @@ def supporthog_interactivity_handler(request: HttpRequest) -> HttpResponse:
     if not slack_team_id:
         return HttpResponse(status=200)
 
-    logger.info("supporthog_interactivity_received", payload_type=payload.get("type"), slack_team_id=slack_team_id)
+    logger.info("support_interactivity_received", payload_type=payload.get("type"), slack_team_id=slack_team_id)
 
     if team_exists_for_slack_workspace(slack_team_id) and not (settings.DEBUG and is_primary_region(request)):
-        cast(Any, process_supporthog_interactivity).delay(payload=payload, slack_team_id=slack_team_id)
+        cast(Any, process_support_interactivity).delay(payload=payload, slack_team_id=slack_team_id)
     elif is_primary_region(request):
         # Acking a failed proxy with 200 makes the click silently vanish — Slack shows the
         # clicker nothing and never resends. Surface the failure so Slack displays a
         # delivery error and the user knows to click again.
-        if not proxy_to_secondary_region(request, log_prefix="supporthog_interactivity"):
+        if not proxy_to_secondary_region(request, log_prefix="support_interactivity"):
             return HttpResponse("Failed to reach owning region", status=502)
     else:
-        logger.warning("supporthog_interactivity_no_team_any_region", slack_team_id=slack_team_id)
+        logger.warning("support_interactivity_no_team_any_region", slack_team_id=slack_team_id)
 
     return HttpResponse(status=200)

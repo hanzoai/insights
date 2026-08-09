@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 
 import { Collapse, Input, Table, ProfilePicture, Spinner } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { TZLabel } from 'lib/components/TZLabel'
 
 import { batchWorkflowJobsLogic } from './batchWorkflowJobsLogic'
@@ -14,7 +14,7 @@ import { MessageAsset } from './messageAssetsApi'
 import { workflowAssetsLogic } from './workflowAssetsLogic'
 import { WorkflowLogicProps, workflowLogic } from './workflowLogic'
 
-const MascotGreek = pngHoggie()
+const MascotGreek = pngMascot()
 
 function EmptyAssets(): JSX.Element {
     return (

@@ -272,7 +272,7 @@ class TestQuarantineBuild(BaseTest):
         assert result.available is False
         assert len(result.parse_errors) == 1 and "could not fetch" in result.parse_errors[0]
 
-    @parameterized.expand(["Insights", "Post Script/repo", "Insights/po$thog", "-bad/repo", "a/b/c", "Insights/"])
+    @parameterized.expand(["Insights", "Post Script/repo", "Insights/po$tscript", "-bad/repo", "a/b/c", "Insights/"])
     def test_invalid_repo_rejected_before_fetch(self, repo: str) -> None:
         with mock.patch(_REQUESTS_GET) as get:
             result = build_quarantine(team=self.team, repo=repo)

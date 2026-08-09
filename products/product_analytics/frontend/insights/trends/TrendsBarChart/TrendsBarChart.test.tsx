@@ -6,7 +6,7 @@ import { dimensions, setupJsdom, setupSyncRaf } from '@hanzo/quill-charts/testin
 
 import { ExportType } from '~/exporter/types'
 import { NodeKind } from '~/queries/schema/schema-general'
-import { buildTrendsQuery, chart, getHogChart, personsModal, renderInsight } from '~/test/insight-testing'
+import { buildTrendsQuery, chart, getScriptChart, personsModal, renderInsight } from '~/test/insight-testing'
 import { buildAnnotation } from '~/test/insight-testing/test-data'
 import { AnnotationScope, ChartDisplayType } from '~/types'
 
@@ -234,10 +234,10 @@ describe('TrendsBarChart (ActionsBarValue)', () => {
         // Axis titles are a layout-dependent overlay that commits a tick after the
         // chart's aria-label appears, so read them through waitFor rather than synchronously.
         await waitFor(() => {
-            expect(getHogChart().xAxisLabel()).toBe('Total events')
-            expect(getHogChart().yAxisLabel()).toBe('Series')
+            expect(getScriptChart().xAxisLabel()).toBe('Total events')
+            expect(getScriptChart().yAxisLabel()).toBe('Series')
             expect(
-                getHogChart()
+                getScriptChart()
                     .element.querySelector<SVGTextElement>('[data-attr="script-chart-axis-title-y"]')
                     ?.getAttribute('transform')
             ).toContain('rotate(-90')
@@ -275,7 +275,7 @@ describe('TrendsBarChart (ActionsBarValue)', () => {
 
         await waitFor(
             () => {
-                const ticks = getHogChart().yTicks()
+                const ticks = getScriptChart().yTicks()
                 expect(ticks).toHaveLength(expectedTicks)
                 if (containsTick) {
                     expect(ticks).toEqual(expect.arrayContaining([containsTick]))
@@ -299,11 +299,11 @@ describe('TrendsBarChart (ActionsBarValue)', () => {
 
         await waitFor(
             () => {
-                expect(getHogChart().valueLabels().length).toBeGreaterThan(1)
+                expect(getScriptChart().valueLabels().length).toBeGreaterThan(1)
             },
             { timeout: 5000 }
         )
-        const pillColors = getHogChart()
+        const pillColors = getScriptChart()
             .valueLabels()
             .map((l) => l.color)
         expect(new Set(pillColors).size).toBeGreaterThan(1)
@@ -347,7 +347,7 @@ describe('TrendsBarChart (ActionsBarValue)', () => {
 
         await waitFor(
             () => {
-                const ticks = getHogChart().yTicks()
+                const ticks = getScriptChart().yTicks()
                 if (expectAllRows) {
                     expect(ticks).toHaveLength(totalRows)
                 } else {
@@ -505,11 +505,11 @@ describe('TrendsBarChart overlays', () => {
         await screen.findByLabelText(/chart with/i, undefined, { timeout: 5000 })
         await waitFor(
             () => {
-                expect(getHogChart().valueLabels().length).toBeGreaterThan(0)
+                expect(getScriptChart().valueLabels().length).toBeGreaterThan(0)
             },
             { timeout: 5000 }
         )
-        const labels = getHogChart()
+        const labels = getScriptChart()
             .valueLabels()
             .map((l) => l.text)
         // Pageview series peaks at 210 — it should appear among the rendered labels.
@@ -535,7 +535,7 @@ describe('TrendsBarChart overlays', () => {
         await screen.findByLabelText(/chart with/i, undefined, { timeout: 5000 })
         await waitFor(
             () => {
-                expect(getHogChart().annotationBadges().length).toBeGreaterThan(0)
+                expect(getScriptChart().annotationBadges().length).toBeGreaterThan(0)
             },
             { timeout: 5000 }
         )
@@ -573,7 +573,7 @@ describe('TrendsBarChart overlays', () => {
             await screen.findByLabelText(/chart with/i, undefined, { timeout: 5000 })
             await waitFor(
                 () => {
-                    const lines = getHogChart().referenceLines()
+                    const lines = getScriptChart().referenceLines()
                     expect(lines.map((l) => l.label)).toEqual(['Target'])
                     expect(lines[0].orientation).toBe(expectedOrientation)
                 },

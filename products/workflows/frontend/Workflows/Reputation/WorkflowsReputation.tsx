@@ -230,7 +230,7 @@ export function WorkflowsReputation(): JSX.Element {
             <Table
                 dataSource={[...workflowSnapshots]}
                 loading={reputationResponseLoading}
-                rowKey={(snapshot) => snapshot.hog_flow_id}
+                rowKey={(snapshot) => snapshot.script_flow_id}
                 emptyState={
                     search.trim()
                         ? 'No sending workflows match your search.'
@@ -241,8 +241,8 @@ export function WorkflowsReputation(): JSX.Element {
                         title: 'Workflow',
                         key: 'workflow',
                         render: (_, snapshot: WorkflowEmailSendingRatesApi) => (
-                            <Link to={urls.workflow(snapshot.hog_flow_id, 'workflow')} className="font-semibold">
-                                {snapshot.hog_flow_name || snapshot.hog_flow_id}
+                            <Link to={urls.workflow(snapshot.script_flow_id, 'workflow')} className="font-semibold">
+                                {snapshot.script_flow_name || snapshot.script_flow_id}
                             </Link>
                         ),
                     },

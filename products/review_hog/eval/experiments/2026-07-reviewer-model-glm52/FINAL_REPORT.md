@@ -1,6 +1,6 @@
 # FINAL REPORT — reviewer-model comparison for the perspective-review step
 
-**Question:** is `@cf/zai-org/glm-5.2` better than `claude-sonnet-5` at applying ReviewHog's review
+**Question:** is `@cf/zai-org/glm-5.2` better than `claude-sonnet-5` at applying Review's review
 perspectives? Everything else held constant (validator Opus 4.8 @ xhigh, one-shots Sonnet, pinned
 4-chunk split, zero-comment clean room, PR frozen at `1341596e`). Setup and decisions: [PLAN.md](./PLAN.md).
 
@@ -98,16 +98,16 @@ track verified-real — worth its own calibration experiment (see follow-ups).
    every wave unit (zombie sandboxes kept billing). Lesson: never touch repo `*.py` while a run is live.
 2. **False-success empty reviews**: B1's first attempt "finished" green with 0 findings while every
    unit had failed with `403 Model not allowed for product 'background_agents'` — the tasks runner
-   returned a validated-empty `IssuesReview` from auth-failed sessions, defeating ReviewHog's
+   returned a validated-empty `IssuesReview` from auth-failed sessions, defeating Review's
    failure floor. **Real bug, needs a fix in the tasks runner / executor contract.**
 3. **`background_agents` allowlist drift**: it lacks `gpt-5.5` too — the old Codex review pin would
-   403→silently-fall-back-to-Opus in prod today. The routing fix (below) sidesteps it for ReviewHog.
+   403→silently-fall-back-to-Opus in prod today. The routing fix (below) sidesteps it for Review.
 
 ## Durable changes shipped with this experiment (kept in tree)
 
-- Gateway: `review_hog` product now has an explicit model allowlist (glm-5.2, sonnet-5, opus-4-8, gpt-5.5).
-- Agent (`insights/code` repo): `resolveGatewayProduct` routes `originProduct === "review_hog"` to the
-  `review_hog` gateway product instead of piggybacking `background_agents`.
+- Gateway: `review` product now has an explicit model allowlist (glm-5.2, sonnet-5, opus-4-8, gpt-5.5).
+- Agent (`insights/code` repo): `resolveGatewayProduct` routes `originProduct === "review"` to the
+  `review` gateway product instead of piggybacking `background_agents`.
 - `eval/scripts/dump_result.py`: per-stage wall-clock timing table (+ `review_stage` in `DUMP_OK`).
 
 ## 4-way extension (2026-07-24): gpt-5.5 (Codex) and Opus 4.8
@@ -123,7 +123,7 @@ M4=U+V. Per-run ops detail: [night-notes-2026-07-24.md](./night-notes-2026-07-24
 ### Arm C was a partial DNF: gpt-5.5 refuses the review turn
 
 Every failed arm-C perspective unit ended with ACP `stopReason: "refusal"` ~90–130s into the turn —
-gpt-5.5's provider-side safety layer declining ReviewHog's review prompt. **First-attempt refusal
+gpt-5.5's provider-side safety layer declining Review's review prompt. **First-attempt refusal
 rate: 17/17** across both runs; chunks 1–2 (the PR's provenance/security code) refused 8/8 in C1.
 Refusals are attempt-stochastic, not content-absolute: C2's retry ladder reached a third attempt and
 all remaining units completed, giving C2 full coverage. C1 never recovered chunks 1–2 → hard fail

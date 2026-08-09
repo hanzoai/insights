@@ -23,7 +23,7 @@ const CHIP_BG = 'rgb(245, 134, 52)'
  * a natural home; hovering a row highlights the matching bbox in the
  * image overlay, and overlay hover lights up the row.
  *
- * Pixelhog returns up to `CLUSTER_MAX` clusters ranked by pixel count,
+ * Pixelscript returns up to `CLUSTER_MAX` clusters ranked by pixel count,
  * with `total` carrying the true count when truncated. The header
  * surfaces both so users know whether they're seeing the full picture.
  */
@@ -39,7 +39,7 @@ export function SnapshotClusterPanel({
     }
     const totalShownPixels = items.reduce((sum, c) => sum + c.pixel_count, 0)
     const count = items.length
-    // pixelhog 1.2 semantics: `total` is the pre-merge raw CCL count;
+    // pixelscript 1.2 semantics: `total` is the pre-merge raw CCL count;
     // `truncated` fires only when max_clusters dropped some pre-merge.
     // When total > count without truncation, merging compressed
     // pre-merge clusters — surface as context, not as missing data.

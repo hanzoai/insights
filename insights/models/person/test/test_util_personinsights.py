@@ -17,14 +17,14 @@ from insights.models.person.util import (
 )
 from insights.personinsights_client.client import personinsights_call
 from insights.personinsights_client.fake_client import fake_personinsights_client, get_active_fake
-from insights.personinsights_client.test_helpers import PersonhogTestMixin
+from insights.personinsights_client.test_helpers import PersonTestMixin
 from insights.test.persons import create_person
 
-# ── Personhog internal logic tests ──────────────────────────────────
+# ── Person internal logic tests ──────────────────────────────────
 # These use the fake personinsights client to exercise the real proto/converter pipeline.
 
 
-class TestFetchPersonByUuidViaPersonhog(SimpleTestCase):
+class TestFetchPersonByUuidViaPerson(SimpleTestCase):
     def test_returns_person_with_distinct_ids(self):
         with fake_personinsights_client() as fake:
             fake.add_person(
@@ -69,7 +69,7 @@ class TestFetchPersonByUuidViaPersonhog(SimpleTestCase):
             fake.assert_not_called("get_distinct_ids_for_person")
 
 
-class TestFetchPersonByDistinctIdViaPersonhog(SimpleTestCase):
+class TestFetchPersonByDistinctIdViaPerson(SimpleTestCase):
     def test_returns_person_with_distinct_ids(self):
         with fake_personinsights_client() as fake:
             fake.add_person(
@@ -111,7 +111,7 @@ class TestFetchPersonByDistinctIdViaPersonhog(SimpleTestCase):
             fake.assert_not_called("get_distinct_ids_for_person")
 
 
-class TestFetchPersonByIdViaPersonhog(SimpleTestCase):
+class TestFetchPersonByIdViaPerson(SimpleTestCase):
     def test_returns_person_with_distinct_ids(self):
         with fake_personinsights_client() as fake:
             fake.add_person(
@@ -156,7 +156,7 @@ class TestFetchPersonByIdViaPersonhog(SimpleTestCase):
             fake.assert_not_called("get_distinct_ids_for_person")
 
 
-class TestFetchPersonsByDistinctIdsViaPersonhog(SimpleTestCase):
+class TestFetchPersonsByDistinctIdsViaPerson(SimpleTestCase):
     def test_returns_persons_with_distinct_ids(self):
         with fake_personinsights_client() as fake:
             fake.add_person(
@@ -223,7 +223,7 @@ class TestFetchPersonsByDistinctIdsViaPersonhog(SimpleTestCase):
             assert len(result[0].distinct_ids) == 1
 
 
-class TestFetchPersonsByUuidsViaPersonhog(SimpleTestCase):
+class TestFetchPersonsByUuidsViaPerson(SimpleTestCase):
     def test_returns_persons_with_distinct_ids(self):
         with fake_personinsights_client() as fake:
             fake.add_person(
@@ -309,7 +309,7 @@ class TestFetchPersonsByUuidsViaPersonhog(SimpleTestCase):
             assert result[0].distinct_ids == ["d1", "d2"]
 
 
-class TestValidateUuidsViaPersonhog(SimpleTestCase):
+class TestValidateUuidsViaPerson(SimpleTestCase):
     def test_returns_matching_uuids(self):
         with fake_personinsights_client() as fake:
             fake.add_person(team_id=1, person_id=1, uuid="uuid-1", distinct_ids=["d1"])
@@ -431,7 +431,7 @@ class TestGetPersonByPkOrUuid(SimpleTestCase):
 # ── personinsights_call unit tests ────────────────────────────────────
 
 
-class TestPersonhogCall(SimpleTestCase):
+class TestPersonCall(SimpleTestCase):
     @patch("insights.personinsights_client.metrics.PERSONFN_ROUTING_TOTAL")
     def test_calls_fn_and_increments_counter(self, mock_routing):
         result = personinsights_call("test_op", lambda: "personinsights_result")
@@ -471,7 +471,7 @@ class TestPersonhogCall(SimpleTestCase):
 # ── get_persons_mapped_by_distinct_id tests ────────────
 
 
-class TestGetPersonsMappedByDistinctId(PersonhogTestMixin, BaseTest):
+class TestGetPersonsMappedByDistinctId(PersonTestMixin, BaseTest):
     def test_single_person_single_distinct_id(self):
         person = self._seed_person(team=self.team, distinct_ids=["did-1"], properties={"email": "a@example.com"})
 

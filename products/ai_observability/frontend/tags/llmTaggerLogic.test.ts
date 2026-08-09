@@ -180,12 +180,12 @@ describe('llmTaggerLogic', () => {
             await expectLogic(logic).toMatchValues({ activeTab: 'configuration' })
         })
 
-        it('hogTestResults starts as null', () => {
-            expect(logic.values.hogTestResults).toBeNull()
+        it('scriptTestResults starts as null', () => {
+            expect(logic.values.scriptTestResults).toBeNull()
         })
 
-        it('clearHogTestResults resets to null', async () => {
-            logic.actions.testHogTaggerSuccess([
+        it('clearScriptTestResults resets to null', async () => {
+            logic.actions.testScriptTaggerSuccess([
                 {
                     event_uuid: 'e1',
                     input_preview: 'hello',
@@ -197,24 +197,24 @@ describe('llmTaggerLogic', () => {
             ])
 
             await expectLogic(logic).toMatchValues({
-                hogTestResults: expect.arrayContaining([expect.objectContaining({ event_uuid: 'e1' })]),
+                scriptTestResults: expect.arrayContaining([expect.objectContaining({ event_uuid: 'e1' })]),
             })
 
-            logic.actions.clearHogTestResults()
+            logic.actions.clearScriptTestResults()
 
-            await expectLogic(logic).toMatchValues({ hogTestResults: null })
+            await expectLogic(logic).toMatchValues({ scriptTestResults: null })
         })
 
-        it('hogTestLoading tracks test lifecycle', async () => {
-            expect(logic.values.hogTestLoading).toBe(false)
+        it('scriptTestLoading tracks test lifecycle', async () => {
+            expect(logic.values.scriptTestLoading).toBe(false)
 
-            logic.actions.testHogTagger()
+            logic.actions.testScriptTagger()
 
-            expect(logic.values.hogTestLoading).toBe(true)
+            expect(logic.values.scriptTestLoading).toBe(true)
 
-            logic.actions.testHogTaggerSuccess([])
+            logic.actions.testScriptTaggerSuccess([])
 
-            await expectLogic(logic).toMatchValues({ hogTestLoading: false })
+            await expectLogic(logic).toMatchValues({ scriptTestLoading: false })
         })
     })
 

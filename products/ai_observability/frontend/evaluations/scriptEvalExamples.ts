@@ -1,14 +1,14 @@
-import examples from './hogEvalExamples.json'
+import examples from './scriptEvalExamples.json'
 
-export interface HogEvalExample {
+export interface ScriptEvalExample {
     key: string
     label: string
     source: string
 }
 
-export const INSIGHTS_EVAL_EXAMPLES: readonly HogEvalExample[] = examples
+export const INSIGHTS_EVAL_EXAMPLES: readonly ScriptEvalExample[] = examples
 
-export function getHogEvalExample(key: string): HogEvalExample {
+export function getScriptEvalExample(key: string): ScriptEvalExample {
     const example = INSIGHTS_EVAL_EXAMPLES.find((candidate) => candidate.key === key)
     if (!example) {
         throw new Error(`Unknown Script evaluation example: ${key}`)

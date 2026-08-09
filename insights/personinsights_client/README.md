@@ -4,7 +4,7 @@ Python gRPC client for the personinsights service — the required interface for
 
 ## Why this client exists
 
-Personhog is an internal service that owns the source of truth for person-related data.
+Person is an internal service that owns the source of truth for person-related data.
 **All Django code must use this client (or the routed helpers built on it) instead of querying person/group tables via the ORM or raw SQL.**
 Direct ORM queries like `Person.objects.filter(...)` or `PersonDistinctId.objects.filter(...)` are not allowed for new code.
 
@@ -34,7 +34,7 @@ Do not query them directly — use the routed helpers or client RPCs.
 
 ## Client singleton
 
-`get_personinsights_client()` returns a thread-safe singleton `PersonHogClient` instance, configured from Django settings.
+`get_personinsights_client()` returns a thread-safe singleton `PersonClient` instance, configured from Django settings.
 Returns `None` when `PERSONFN_ADDR` is not set (e.g. in local dev without personinsights running).
 
 ## Proto converters
@@ -49,7 +49,7 @@ These ensure that existing serializers and property accessors work without modif
 
 ## Available RPCs
 
-The `PersonHogClient` in `client.py` exposes typed methods for every RPC:
+The `PersonClient` in `client.py` exposes typed methods for every RPC:
 
 **Person lookups:**
 `get_person`, `get_persons`, `get_person_by_uuid`, `get_persons_by_uuids`,
@@ -77,8 +77,8 @@ The `PersonHogClient` in `client.py` exposes typed methods for every RPC:
 
 ## Testing
 
-Use the `FakePersonHogClient` for tests.
-It implements the same interface as `PersonHogClient` using real proto messages,
+Use the `FakePersonClient` for tests.
+It implements the same interface as `PersonClient` using real proto messages,
 so the full converter pipeline is exercised end-to-end.
 
 ```python
@@ -123,9 +123,9 @@ The client emits Prometheus metrics at multiple layers:
 
 ## Directory layout
 
-- `client.py` — `PersonHogClient` with typed methods for each RPC, plus `get_personinsights_client()` singleton
+- `client.py` — `PersonClient` with typed methods for each RPC, plus `get_personinsights_client()` singleton
 - `converters.py` — proto-to-Django conversion functions
-- `fake_client.py` — `FakePersonHogClient` for tests
+- `fake_client.py` — `FakePersonClient` for tests
 - `interceptor.py` — gRPC interceptors for client name headers and request metrics
 - `metrics.py` — Prometheus counters for routing decisions
 - `proto/generated/` — auto-generated protobuf stubs (do not edit)

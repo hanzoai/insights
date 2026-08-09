@@ -786,7 +786,7 @@ export interface InsightsFlowBatchJobApi {
      * * `failed` - Failed */
     status?: InsightsFlowBatchJobStatusEnumApi
     /** ID of the workflow this batch run belongs to. */
-    hog_flow: string
+    script_flow: string
     /** Audience snapshot the run fanned out to, taken from the workflow's batch trigger filters. */
     readonly filters: unknown
     /** Variable value overrides applied to this run. */
@@ -845,7 +845,7 @@ export interface PatchedInsightsFlowGraphUpdateApi {
     operations?: InsightsFlowGraphOperationApi[]
 }
 
-export interface HogInvocationResultApi {
+export interface ScriptInvocationResultApi {
     invocation_id: string
     status: string
     error_kind: string
@@ -866,11 +866,11 @@ export interface HogInvocationResultApi {
 /**
  * The triggering payload (event/person/groups) the run executed against, as a JSON object.
  */
-export type HogInvocationResultDetailApiInvocationGlobals = { [key: string]: unknown }
+export type ScriptInvocationResultDetailApiInvocationGlobals = { [key: string]: unknown }
 
-export interface HogInvocationResultDetailApi {
+export interface ScriptInvocationResultDetailApi {
     /** The triggering payload (event/person/groups) the run executed against, as a JSON object. */
-    invocation_globals: HogInvocationResultDetailApiInvocationGlobals
+    invocation_globals: ScriptInvocationResultDetailApiInvocationGlobals
     invocation_id: string
     status: string
     error_kind: string
@@ -1014,10 +1014,10 @@ export interface InsightsFlowPublishResponseApi {
  * * `succeeded` - succeeded
  * * `failed` - failed
  */
-export type HogInvocationRerunFilterStatusEnumApi =
-    (typeof HogInvocationRerunFilterStatusEnumApi)[keyof typeof HogInvocationRerunFilterStatusEnumApi]
+export type ScriptInvocationRerunFilterStatusEnumApi =
+    (typeof ScriptInvocationRerunFilterStatusEnumApi)[keyof typeof ScriptInvocationRerunFilterStatusEnumApi]
 
-export const HogInvocationRerunFilterStatusEnumApi = {
+export const ScriptInvocationRerunFilterStatusEnumApi = {
     Running: 'running',
     Succeeded: 'succeeded',
     Failed: 'failed',
@@ -1026,13 +1026,13 @@ export const HogInvocationRerunFilterStatusEnumApi = {
 /**
  * Filter shape for the rerun endpoint. `window_start`/`window_end` are required.
  */
-export interface HogInvocationRerunFilterApi {
+export interface ScriptInvocationRerunFilterApi {
     /** Inclusive lower bound on `scheduled_at` (UTC). */
     window_start: string
     /** Exclusive upper bound on `scheduled_at` (UTC). */
     window_end: string
     /** Restrict to invocations whose latest status is one of these. Defaults to ['failed']. */
-    status?: HogInvocationRerunFilterStatusEnumApi[]
+    status?: ScriptInvocationRerunFilterStatusEnumApi[]
     /** Restrict to invocations whose error_kind matches one of these (e.g. 'http_5xx', 'timeout'). */
     error_kind?: string[]
     /**
@@ -1057,9 +1057,9 @@ export interface HogInvocationRerunFilterApi {
 /**
  * Rerun invocations of a script function or script flow from their stored payloads.
  */
-export interface HogInvocationRerunRequestApi {
+export interface ScriptInvocationRerunRequestApi {
     /** Required. `window_start` / `window_end` pin the query to a small set of date partitions on the `hog_invocation_results` table. Optional `invocation_ids` restricts to specific invocations within that window. */
-    filter: HogInvocationRerunFilterApi
+    filter: ScriptInvocationRerunFilterApi
 }
 
 /**
@@ -1068,7 +1068,7 @@ export interface HogInvocationRerunRequestApi {
  * re-enqueue work happens asynchronously in the `cdp-rerun-worker` service.
  * Use `rerun_job_id` to look up progress on the wrapper job later.
  */
-export interface HogInvocationRerunResponseApi {
+export interface ScriptInvocationRerunResponseApi {
     /** ID of the cyclotron wrapper job that will run the rerun. Use this to poll status. */
     rerun_job_id: string
     /** Always 0 — rerun runs asynchronously. Kept for response shape stability. */
@@ -1295,9 +1295,9 @@ export interface WorkflowEmailSendingRatesApi {
     /** Emails sent in the last 30 days. */
     readonly emails_sent: number
     /** The workflow these rates are for. */
-    readonly hog_flow_id: string
+    readonly script_flow_id: string
     /** Display name of the workflow; empty for unnamed workflows. */
-    readonly hog_flow_name: string
+    readonly script_flow_name: string
 }
 
 export interface TeamEmailReputationResponseApi {

@@ -16,9 +16,9 @@ from insights.models import OAuthApplication
 from insights.models.scoping import team_scope
 from insights.temporal.oauth import ARRAY_APP_CLIENT_ID_DEV, ARRAY_APP_CLIENT_ID_EU, ARRAY_APP_CLIENT_ID_US
 
-from products.stamphog.backend.temporal.activities import (
+from products.stamp.backend.temporal.activities import (
     MarkReviewFailedInput,
-    StamphogReviewInput,
+    StampReviewInput,
     dismiss_stale_approvals,
     fetch_review_context,
     list_in_flight_reviewer_bots,
@@ -27,9 +27,9 @@ from products.stamphog.backend.temporal.activities import (
     run_review_in_sandbox,
     signal_review_started,
 )
-from products.stamphog.backend.tests import fakes
+from products.stamp.backend.tests import fakes
 
-PRODUCT_DATABASES = {"default", "stamphog_db_writer", "stamphog_db_reader"}
+PRODUCT_DATABASES = {"default", "stamp_db_writer", "stamp_db_reader"}
 
 
 @pytest.fixture(autouse=True)
@@ -39,7 +39,7 @@ def _set_team_scope(request):
     ProductTeamModel is fail-closed — queries without context raise
     TeamScopeError. TestCase / APIBaseTest subclasses create their own team in
     setUp() and are skipped here (getfixturevalue("team") would duplicate-create
-    with the same api_token); those use StamphogTeamScopedTestMixin instead.
+    with the same api_token); those use StampTeamScopedTestMixin instead.
     """
     if request.node.get_closest_marker("django_db") is None:
         yield
@@ -55,7 +55,7 @@ def _set_team_scope(request):
         yield
 
 
-class StamphogTeamScopedTestMixin:
+class StampTeamScopedTestMixin:
     """Mixin for TestCase / APIBaseTest tests that use ProductTeamModel.
 
     Wraps setUp/tearDown with team_scope so the test body's queries find a
@@ -80,7 +80,7 @@ class StamphogTeamScopedTestMixin:
         super().tearDown()  # type: ignore[misc]
 
 
-WEBHOOK_PATH = "/webhooks/stamphog/github"
+WEBHOOK_PATH = "/webhooks/stamp/github"
 WEBHOOK_SECRET = "integration-webhook-secret"
 
 
@@ -95,7 +95,7 @@ def _generate_app_private_key() -> str:
 
 
 def _run_activity(activity_fn: Any, arg: Any) -> Any:
-    """Run a stamphog activity's plain sync body in-thread.
+    """Run a stamp activity's plain sync body in-thread.
 
     The activities are ``@activity.defn`` over ``@asyncify``; ``__wrapped__`` is the original
     sync function, callable directly so it shares the test's DB connection (production drives the
@@ -107,12 +107,12 @@ def _run_activity(activity_fn: Any, arg: Any) -> Any:
 def _inline_review_workflow(review_run_id: str, team_id: int) -> None:
     """Stand in for the Temporal client by driving the real activities in order.
 
-    Mirrors StamphogReviewWorkflow: dismiss stale approvals FIRST (fail-closed — even a context-fetch
+    Mirrors StampReviewWorkflow: dismiss stale approvals FIRST (fail-closed — even a context-fetch
     failure must not leave an earlier head's approval standing), signal the review has started (the
     "review in flight" 👀), then fetch context, run in the (faked) sandbox, post the verdict; on any
     error mark the run failed, exactly like the workflow's failure path.
     """
-    inp = StamphogReviewInput(review_run_id=review_run_id, team_id=team_id)
+    inp = StampReviewInput(review_run_id=review_run_id, team_id=team_id)
     try:
         _run_activity(dismiss_stale_approvals, inp)
         _run_activity(signal_review_started, inp)
@@ -127,7 +127,7 @@ def _inline_review_workflow(review_run_id: str, team_id: int) -> None:
 
 
 @dataclass
-class StamphogChain:
+class StampChain:
     """Handle for a wired-up full chain: the GitHub recorder plus a webhook poster."""
 
     recorder: fakes.GitHubRecorder
@@ -152,7 +152,7 @@ class StamphogChain:
 
 
 @pytest.fixture
-def stamphog_chain() -> Iterator[StamphogChain]:
+def stamp_chain() -> Iterator[StampChain]:
     """Wire the four chain boundaries (GitHub, Slack, sandbox, LLM) to deterministic fakes.
 
     The Temporal client is replaced with an inline runner of the real activities, and the task's
@@ -162,7 +162,7 @@ def stamphog_chain() -> Iterator[StamphogChain]:
     recorder = fakes.GitHubRecorder()
     # review-guidance.md is a required trusted policy file — run_review_in_sandbox fails closed without
     # it — so seed it for the whole chain; individual tests still set/override policy.yml as they need.
-    recorder.policy_files[".stamphog/review-guidance.md"] = "Review Insights PRs against the repo's norms.\n"
+    recorder.policy_files[".stamp/review-guidance.md"] = "Review Insights PRs against the repo's norms.\n"
     # The review activity mints a real sandbox OAuth token under the Array app, which resolves by
     # region client id — seed every region so get_instance_region()'s value doesn't matter here.
     for client_id in (ARRAY_APP_CLIENT_ID_DEV, ARRAY_APP_CLIENT_ID_US, ARRAY_APP_CLIENT_ID_EU):
@@ -191,48 +191,48 @@ def stamphog_chain() -> Iterator[StamphogChain]:
             )
         )
         # Hosted reviews hard-require the gateway (no raw-Anthropic fallback); point it at the
-        # stamphog product route like production would.
-        stack.enter_context(patch.dict(os.environ, {"AI_GATEWAY_URL": "https://llm-gateway.test/stamphog/v1"}))
+        # stamp product route like production would.
+        stack.enter_context(patch.dict(os.environ, {"AI_GATEWAY_URL": "https://llm-gateway.test/stamp/v1"}))
         # mark_review_failed emits a failure event through the real analytics client — a network
         # boundary, faked like the rest. Tests asserting on the event re-patch this locally.
-        stack.enter_context(patch("products.stamphog.backend.temporal.activities.ph_scoped_capture"))
+        stack.enter_context(patch("products.stamp.backend.temporal.activities.ph_scoped_capture"))
         stack.enter_context(
-            patch("products.stamphog.backend.logic.github_client.github_request", recorder.github_request)
+            patch("products.stamp.backend.logic.github_client.github_request", recorder.github_request)
         )
         stack.enter_context(
             patch(
-                "products.stamphog.backend.logic.github_client.remember_observed_core_limit",
+                "products.stamp.backend.logic.github_client.remember_observed_core_limit",
                 fakes.noop_remember_observed_core_limit,
             )
         )
         stack.enter_context(
             patch(
-                "products.stamphog.backend.logic.github_client.raise_if_github_rate_limited",
+                "products.stamp.backend.logic.github_client.raise_if_github_rate_limited",
                 fakes.noop_raise_if_github_rate_limited,
             )
         )
         stack.enter_context(
             patch(
-                "products.stamphog.backend.temporal.activities.get_sandbox_class_for_backend",
+                "products.stamp.backend.temporal.activities.get_sandbox_class_for_backend",
                 lambda backend: fake_sandbox,
             )
         )
         stack.enter_context(
-            patch("products.stamphog.backend.tasks.tasks.execute_stamphog_review_workflow", _inline_review_workflow)
+            patch("products.stamp.backend.tasks.tasks.execute_stamp_review_workflow", _inline_review_workflow)
         )
         stack.enter_context(
             patch(
-                "products.stamphog.backend.tasks.tasks.transaction.on_commit", side_effect=lambda fn, using=None: fn()
+                "products.stamp.backend.tasks.tasks.transaction.on_commit", side_effect=lambda fn, using=None: fn()
             )
         )
-        stack.enter_context(patch("products.stamphog.backend.logic.slack_digest.SlackIntegration", fake_slack))
-        stack.enter_context(patch("products.stamphog.backend.logic.channel_resolution.SlackIntegration", fake_slack))
+        stack.enter_context(patch("products.stamp.backend.logic.slack_digest.SlackIntegration", fake_slack))
+        stack.enter_context(patch("products.stamp.backend.logic.channel_resolution.SlackIntegration", fake_slack))
         stack.enter_context(
             patch(
-                "products.stamphog.backend.logic.digest.get_llm_client",
+                "products.stamp.backend.logic.digest.get_llm_client",
                 side_effect=RuntimeError("no gateway in tests"),
             )
         )
-        yield StamphogChain(
+        yield StampChain(
             recorder=recorder, client=Client(), sandbox_writes=sandbox_writes, sandbox_class=fake_sandbox
         )

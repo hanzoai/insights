@@ -12,7 +12,7 @@ from insights.admin.admins.event_ingestion_restriction_config import (
     EventIngestionRestrictionConfigAdmin,
     EventIngestionRestrictionConfigForm,
 )
-from insights.admin.admins.tophog_admin import (
+from insights.admin.admins.topfn_admin import (
     RESTRICTION_FILTER_FIELDS,
     _create_restriction_url,
     _extend_restriction,
@@ -25,7 +25,7 @@ from insights.admin.admins.tophog_admin import (
 from insights.models.event_ingestion_restriction_config import EventIngestionRestrictionConfig, RestrictionType
 
 
-class TestTopHogAdminHelpers(BaseTest):
+class TestTopFnAdminHelpers(BaseTest):
     def test_resolve_team_tokens_maps_team_id_to_api_token(self):
         tokens = _resolve_team_tokens(
             [
@@ -55,7 +55,7 @@ class TestTopHogAdminHelpers(BaseTest):
             ["analytics", "heatmaps"],
         )
         parsed = urlparse(url)
-        self.assertEqual(parsed.path, reverse("tophog-restrictions"))
+        self.assertEqual(parsed.path, reverse("topfn-restrictions"))
         self.assertEqual(
             parse_qs(parsed.query),
             {
@@ -96,8 +96,8 @@ class TestTopHogAdminHelpers(BaseTest):
             ("unknown_names_dropped", ["heatmaps", "ai"], []),
         ]
     )
-    def test_map_pipelines(self, _name, tophog_pipelines, expected):
-        self.assertEqual(_map_pipelines(tophog_pipelines), expected)
+    def test_map_pipelines(self, _name, topfn_pipelines, expected):
+        self.assertEqual(_map_pipelines(topfn_pipelines), expected)
 
     @parameterized.expand(
         [
@@ -125,13 +125,13 @@ class TestTopHogAdminHelpers(BaseTest):
             ),
         ]
     )
-    def test_restriction_matches(self, _name, config_kwargs, key, tophog_pipelines, expected):
+    def test_restriction_matches(self, _name, config_kwargs, key, topfn_pipelines, expected):
         restriction = EventIngestionRestrictionConfig(
             token="pk-abc",
             restriction_type=RestrictionType.DROP_EVENT_FROM_INGESTION,
             **{"pipelines": ["analytics"], **config_kwargs},
         )
-        self.assertEqual(_restriction_matches(restriction, key, tophog_pipelines), expected)
+        self.assertEqual(_restriction_matches(restriction, key, topfn_pipelines), expected)
 
     def test_extend_restriction_appends_only_to_nonempty_lists(self):
         restriction = EventIngestionRestrictionConfig.objects.create(
@@ -171,7 +171,7 @@ class TestTopHogAdminHelpers(BaseTest):
             restriction_type=RestrictionType.DROP_EVENT_FROM_INGESTION,
             distinct_ids=["existing"],
         )
-        url = reverse("tophog-restrictions") + "?token=pk-view&distinct_id=new-id"
+        url = reverse("topfn-restrictions") + "?token=pk-view&distinct_id=new-id"
         response = self.client.post(url, {"restriction_id": str(restriction.pk)})
         self.assertEqual(response.status_code, 302)
         restriction.refresh_from_db()

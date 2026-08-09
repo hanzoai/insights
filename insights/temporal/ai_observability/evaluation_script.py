@@ -23,7 +23,7 @@ from common.scriptvm.python.utils import ScriptVMException, ScriptVMMemoryExceed
 logger = structlog.get_logger(__name__)
 
 
-def coerce_hog_io_value(value: Any) -> str:
+def coerce_script_io_value(value: Any) -> str:
     """Coerce an extracted input/output value into a string for Script globals.
 
     String operations (ilike, length, etc.) should work consistently; users can still
@@ -34,13 +34,13 @@ def coerce_hog_io_value(value: Any) -> str:
     return "" if value is None or value == "" else str(value)
 
 
-def _extract_hog_message_text(messages: Any) -> str:
+def _extract_script_message_text(messages: Any) -> str:
     if messages is None or isinstance(messages, str | list | dict):
         return extract_text_from_messages(messages)
     return str(messages)
 
 
-def _get_hog_output_choice_content(choice: dict[str, Any]) -> Any:
+def _get_script_output_choice_content(choice: dict[str, Any]) -> Any:
     for key in ("content", "refusal", "text"):
         value = choice.get(key)
         if value is None or (isinstance(value, str | list | dict) and not value):
@@ -49,7 +49,7 @@ def _get_hog_output_choice_content(choice: dict[str, Any]) -> Any:
     return None
 
 
-def _normalize_hog_output_choice(choice: dict[str, Any]) -> dict[str, Any] | None:
+def _normalize_script_output_choice(choice: dict[str, Any]) -> dict[str, Any] | None:
     message = choice.get("message")
     if isinstance(message, dict):
         choice = message
@@ -57,31 +57,31 @@ def _normalize_hog_output_choice(choice: dict[str, Any]) -> dict[str, Any] | Non
     if not any(key in choice for key in ("content", "refusal", "text", "tool_calls")):
         return choice
 
-    content = _get_hog_output_choice_content(choice)
+    content = _get_script_output_choice_content(choice)
     if content is None and not choice.get("tool_calls"):
         return None
     if content is not None and not isinstance(content, str | list | dict):
-        content = coerce_hog_io_value(content)
+        content = coerce_script_io_value(content)
     return {"content": content, "tool_calls": choice.get("tool_calls")}
 
 
-def _extract_hog_output_text(output: Any) -> str:
+def _extract_script_output_text(output: Any) -> str:
     if isinstance(output, dict) and isinstance(output.get("choices"), list):
         output = output["choices"]
 
     messages: list[Any] = []
     for choice in output if isinstance(output, list) else [output]:
         if isinstance(choice, dict):
-            choice = _normalize_hog_output_choice(choice)
+            choice = _normalize_script_output_choice(choice)
             if choice is None:
                 continue
         elif not isinstance(choice, str):
-            choice = coerce_hog_io_value(choice)
+            choice = coerce_script_io_value(choice)
         messages.append(choice)
-    return _extract_hog_message_text(messages)
+    return _extract_script_message_text(messages)
 
 
-def hog_bytecode_references_global(bytecode: list[Any], global_name: str) -> bool:
+def script_bytecode_references_global(bytecode: list[Any], global_name: str) -> bool:
     """Return whether compiled Script bytecode reads a specific global."""
     return any(
         operation == Operation.GET_GLOBAL and index > 0 and bytecode[index - 1] == global_name
@@ -89,7 +89,7 @@ def hog_bytecode_references_global(bytecode: list[Any], global_name: str) -> boo
     )
 
 
-def build_hog_event_global(
+def build_script_event_global(
     event_type: str,
     properties: dict[str, Any],
     *,
@@ -108,17 +108,17 @@ def build_hog_event_global(
         "uuid": event_uuid,
         "event": event_type,
         "timestamp": timestamp,
-        "input": coerce_hog_io_value(input_raw),
-        "output": coerce_hog_io_value(output_raw),
+        "input": coerce_script_io_value(input_raw),
+        "output": coerce_script_io_value(output_raw),
         "properties": {key: value for key, value in properties.items() if key not in HEAVY_PROPERTY_NAMES},
     }
     if include_text:
-        event_global["input_text"] = _extract_hog_message_text(input_raw)
-        event_global["output_text"] = _extract_hog_output_text(output_raw)
+        event_global["input_text"] = _extract_script_message_text(input_raw)
+        event_global["output_text"] = _extract_script_output_text(output_raw)
     return event_global
 
 
-def execute_hog_eval_bytecode(bytecode: list, globals_dict: dict[str, Any], allows_na: bool) -> dict[str, Any]:
+def execute_script_eval_bytecode(bytecode: list, globals_dict: dict[str, Any], allows_na: bool) -> dict[str, Any]:
     """Run compiled Script eval bytecode against pre-built globals and shape the verdict.
 
     Shared by the single-event and trace-level Script activities — only the globals differ.
@@ -167,7 +167,7 @@ def execute_hog_eval_bytecode(bytecode: list, globals_dict: dict[str, Any], allo
     return result
 
 
-def finalize_hog_eval_result(result: dict[str, Any], *, allows_na: bool, unit_label: str) -> EvaluationActivityResult:
+def finalize_script_eval_result(result: dict[str, Any], *, allows_na: bool, unit_label: str) -> EvaluationActivityResult:
     """Turn raw Script bytecode output into an activity result.
 
     Shared by the trace and session Script activities: this is the block that decides whether a
@@ -189,7 +189,7 @@ def finalize_hog_eval_result(result: dict[str, Any], *, allows_na: bool, unit_la
         # code, recorded as a skipped evaluation rather than raised (which would flood error
         # tracking with one event per unit). Marked terminal so the workflow disables the broken
         # eval instead of re-running it against every matching unit (mirrors the generation path).
-        spec = require_user_error_spec("hog_error")
+        spec = require_user_error_spec("script_error")
         error_detail = status_reason_detail_for_terminal_user_error(spec, result["error"]) or spec.safe_message
         errored_result: EvaluationActivityResult = {
             "result_type": "boolean",
@@ -197,7 +197,7 @@ def finalize_hog_eval_result(result: dict[str, Any], *, allows_na: bool, unit_la
             "reasoning": error_detail,
             "allows_na": allows_na,
             "skipped": True,
-            "skip_reason": "hog_error",
+            "skip_reason": "script_error",
             "terminal_user_error": True,
             "status_reason": spec.status_reason,
         }
@@ -216,7 +216,7 @@ def finalize_hog_eval_result(result: dict[str, Any], *, allows_na: bool, unit_la
     return activity_result
 
 
-def run_hog_eval(bytecode: list, event_data: dict[str, Any], allows_na: bool = False) -> dict[str, Any]:
+def run_script_eval(bytecode: list, event_data: dict[str, Any], allows_na: bool = False) -> dict[str, Any]:
     """Run compiled Script bytecode against a single event.
 
     Used by both the Temporal activity and the test endpoint.
@@ -234,8 +234,8 @@ def run_hog_eval(bytecode: list, event_data: dict[str, Any], allows_na: bool = F
 
     globals_dict: dict[str, Any] = {
         # Generation-only compatibility globals kept for saved Script source.
-        "input": coerce_hog_io_value(input_raw),
-        "output": coerce_hog_io_value(output_raw),
+        "input": coerce_script_io_value(input_raw),
+        "output": coerce_script_io_value(output_raw),
         "properties": properties,
         "event": {
             "uuid": event_data.get("uuid", ""),
@@ -243,16 +243,16 @@ def run_hog_eval(bytecode: list, event_data: dict[str, Any], allows_na: bool = F
             "distinct_id": event_data.get("distinct_id", ""),
         },
     }
-    if hog_bytecode_references_global(bytecode, "target"):
+    if script_bytecode_references_global(bytecode, "target"):
         globals_dict["target"] = {
             "type": "generation",
             "id": event_data.get("uuid", ""),
             "total_cost_usd": properties.get("$ai_total_cost_usd"),
             "total_latency_seconds": properties.get("$ai_latency"),
         }
-    if hog_bytecode_references_global(bytecode, "evaluation_events"):
+    if script_bytecode_references_global(bytecode, "evaluation_events"):
         globals_dict["evaluation_events"] = [
-            build_hog_event_global(
+            build_script_event_global(
                 event_type,
                 properties,
                 event_uuid=event_data.get("uuid", ""),
@@ -260,11 +260,11 @@ def run_hog_eval(bytecode: list, event_data: dict[str, Any], allows_na: bool = F
             )
         ]
 
-    return execute_hog_eval_bytecode(bytecode, globals_dict, allows_na=allows_na)
+    return execute_script_eval_bytecode(bytecode, globals_dict, allows_na=allows_na)
 
 
 @temporalio.activity.defn
-async def execute_hog_eval_activity(evaluation: dict[str, Any], event_data: dict[str, Any]) -> EvaluationActivityResult:
+async def execute_script_eval_activity(evaluation: dict[str, Any], event_data: dict[str, Any]) -> EvaluationActivityResult:
     """Execute Script code to evaluate the target event."""
     if evaluation["evaluation_type"] != "script":
         raise ApplicationError(
@@ -281,7 +281,7 @@ async def execute_hog_eval_activity(evaluation: dict[str, Any], event_data: dict
     allows_na = output_config.get("allows_na", False)
 
     def _execute() -> dict[str, Any]:
-        return run_hog_eval(bytecode, event_data, allows_na=allows_na)
+        return run_script_eval(bytecode, event_data, allows_na=allows_na)
 
     result = await database_sync_to_async(_execute, thread_sensitive=False)()
 
@@ -298,7 +298,7 @@ async def execute_hog_eval_activity(evaluation: dict[str, Any], event_data: dict
         # non-boolean result). That's an expected outcome of running customer-authored code,
         # not a system fault — record it as a skipped evaluation the user can see, rather than
         # raising (which would flood error tracking with one event per matching generation).
-        spec = require_user_error_spec("hog_error")
+        spec = require_user_error_spec("script_error")
         error_detail = status_reason_detail_for_terminal_user_error(spec, result["error"]) or spec.safe_message
         errored_result: EvaluationActivityResult = {
             "result_type": "boolean",
@@ -306,7 +306,7 @@ async def execute_hog_eval_activity(evaluation: dict[str, Any], event_data: dict
             "reasoning": error_detail,
             "allows_na": allows_na,
             "skipped": True,
-            "skip_reason": "hog_error",
+            "skip_reason": "script_error",
             "terminal_user_error": True,
             "status_reason": spec.status_reason,
         }

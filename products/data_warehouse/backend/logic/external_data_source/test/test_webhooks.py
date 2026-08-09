@@ -177,12 +177,12 @@ class TestGetOrCreateWebhookInsightsFunction:
         assert first_result.insights_function_created is True
         assert first_result.insights_function is not None
 
-        hog_id = first_result.insights_function.id
+        script_id = first_result.insights_function.id
 
         second_result = get_or_create_webhook_insights_function(team, source, "source-123", schemas)
         assert second_result.insights_function_created is False
         assert second_result.insights_function is not None
-        assert second_result.insights_function.id == hog_id
+        assert second_result.insights_function.id == script_id
 
     def test_merges_schema_mapping_on_update(self):
         _, team = _create_org_and_team()
@@ -268,17 +268,17 @@ class TestCreateAndRegisterWebhook:
         ext_source = _create_external_data_source(team)
         schemas = _create_schemas(team, ext_source, ["Customers"])
 
-        hog_fn_result = get_or_create_webhook_insights_function(team, webhook_source, "source-123", schemas)
+        script_fn_result = get_or_create_webhook_insights_function(team, webhook_source, "source-123", schemas)
         webhook_source.create_webhook.return_value = WebhookCreationResult(success=True)
 
         config = MagicMock()
-        result = create_and_register_webhook(webhook_source, config, hog_fn_result, team.id)
+        result = create_and_register_webhook(webhook_source, config, script_fn_result, team.id)
 
         assert result.success is True
-        assert result.webhook_url == hog_fn_result.webhook_url
+        assert result.webhook_url == script_fn_result.webhook_url
         assert result.error is None
         webhook_source.create_webhook.assert_called_once_with(
-            config, hog_fn_result.webhook_url, team.id, api_version=None
+            config, script_fn_result.webhook_url, team.id, api_version=None
         )
 
     def test_success_saves_extra_inputs_to_insights_function(self):
@@ -290,21 +290,21 @@ class TestCreateAndRegisterWebhook:
         ext_source = _create_external_data_source(team)
         schemas = _create_schemas(team, ext_source, ["Customers"])
 
-        hog_fn_result = get_or_create_webhook_insights_function(team, webhook_source, "source-123", schemas)
+        script_fn_result = get_or_create_webhook_insights_function(team, webhook_source, "source-123", schemas)
         webhook_source.create_webhook.return_value = WebhookCreationResult(
             success=True,
             extra_inputs={"webhook_secret": "whsec_123"},
         )
 
         config = MagicMock()
-        result = create_and_register_webhook(webhook_source, config, hog_fn_result, team.id)
+        result = create_and_register_webhook(webhook_source, config, script_fn_result, team.id)
 
         assert result.success is True
-        assert hog_fn_result.insights_function is not None
-        assert hog_fn_result.insights_function.inputs is not None
+        assert script_fn_result.insights_function is not None
+        assert script_fn_result.insights_function.inputs is not None
 
-        hog_fn_result.insights_function.refresh_from_db()
-        assert hog_fn_result.insights_function.inputs["webhook_secret"]["value"] == "whsec_123"
+        script_fn_result.insights_function.refresh_from_db()
+        assert script_fn_result.insights_function.inputs["webhook_secret"]["value"] == "whsec_123"
 
     def test_failure_does_not_save_extra_inputs(self):
         _, team = _create_org_and_team()
@@ -313,7 +313,7 @@ class TestCreateAndRegisterWebhook:
         ext_source = _create_external_data_source(team)
         schemas = _create_schemas(team, ext_source, ["Customers"])
 
-        hog_fn_result = get_or_create_webhook_insights_function(team, webhook_source, "source-123", schemas)
+        script_fn_result = get_or_create_webhook_insights_function(team, webhook_source, "source-123", schemas)
 
         webhook_source.create_webhook.return_value = WebhookCreationResult(
             success=False,
@@ -322,30 +322,30 @@ class TestCreateAndRegisterWebhook:
         )
 
         config = MagicMock()
-        result = create_and_register_webhook(webhook_source, config, hog_fn_result, team.id)
+        result = create_and_register_webhook(webhook_source, config, script_fn_result, team.id)
 
         assert result.success is False
         assert result.error == "API error"
-        assert hog_fn_result.insights_function is not None
-        assert hog_fn_result.insights_function.inputs is not None
+        assert script_fn_result.insights_function is not None
+        assert script_fn_result.insights_function.inputs is not None
 
-        hog_fn_result.insights_function.refresh_from_db()
-        assert "webhook_secret" not in hog_fn_result.insights_function.inputs
+        script_fn_result.insights_function.refresh_from_db()
+        assert "webhook_secret" not in script_fn_result.insights_function.inputs
 
-    def test_returns_webhook_url_from_hog_fn_result(self):
+    def test_returns_webhook_url_from_script_fn_result(self):
         _, team = _create_org_and_team()
         _create_insights_function_template()
         webhook_source = _make_webhook_source()
         ext_source = _create_external_data_source(team)
         schemas = _create_schemas(team, ext_source, ["Customers"])
 
-        hog_fn_result = get_or_create_webhook_insights_function(team, webhook_source, "source-123", schemas)
+        script_fn_result = get_or_create_webhook_insights_function(team, webhook_source, "source-123", schemas)
         webhook_source.create_webhook.return_value = WebhookCreationResult(success=True)
 
         config = MagicMock()
-        result = create_and_register_webhook(webhook_source, config, hog_fn_result, team.id)
+        result = create_and_register_webhook(webhook_source, config, script_fn_result, team.id)
 
-        assert result.webhook_url == hog_fn_result.webhook_url
+        assert result.webhook_url == script_fn_result.webhook_url
 
     def test_propagates_pending_inputs_to_setup_result(self):
         _, team = _create_org_and_team()
@@ -354,14 +354,14 @@ class TestCreateAndRegisterWebhook:
         ext_source = _create_external_data_source(team)
         schemas = _create_schemas(team, ext_source, ["Customers"])
 
-        hog_fn_result = get_or_create_webhook_insights_function(team, webhook_source, "source-123", schemas)
+        script_fn_result = get_or_create_webhook_insights_function(team, webhook_source, "source-123", schemas)
         webhook_source.create_webhook.return_value = WebhookCreationResult(
             success=True,
             pending_inputs=["signing_secret"],
         )
 
         config = MagicMock()
-        result = create_and_register_webhook(webhook_source, config, hog_fn_result, team.id)
+        result = create_and_register_webhook(webhook_source, config, script_fn_result, team.id)
 
         assert result.success is True
         assert result.pending_inputs == ["signing_secret"]
@@ -373,11 +373,11 @@ class TestCreateAndRegisterWebhook:
         ext_source = _create_external_data_source(team)
         schemas = _create_schemas(team, ext_source, ["Customers"])
 
-        hog_fn_result = get_or_create_webhook_insights_function(team, webhook_source, "source-123", schemas)
+        script_fn_result = get_or_create_webhook_insights_function(team, webhook_source, "source-123", schemas)
         webhook_source.create_webhook.return_value = WebhookCreationResult(success=True)
 
         config = MagicMock()
-        result = create_and_register_webhook(webhook_source, config, hog_fn_result, team.id)
+        result = create_and_register_webhook(webhook_source, config, script_fn_result, team.id)
 
         assert result.pending_inputs == []
 
@@ -390,15 +390,15 @@ class TestReconcileWebhookEvents:
         ext_source = _create_external_data_source(team)
         schemas = _create_schemas(team, ext_source, ["Customers"])
 
-        hog_fn_result = get_or_create_webhook_insights_function(team, webhook_source, "source-123", schemas)
+        script_fn_result = get_or_create_webhook_insights_function(team, webhook_source, "source-123", schemas)
         webhook_source.sync_webhook_events.return_value = WebhookSyncResult(success=True)
 
         config = MagicMock()
-        result = reconcile_webhook_events(webhook_source, config, hog_fn_result, team.id, ["Customers"])
+        result = reconcile_webhook_events(webhook_source, config, script_fn_result, team.id, ["Customers"])
 
         assert result.success is True
         webhook_source.sync_webhook_events.assert_called_once_with(
-            config, hog_fn_result.webhook_url, team.id, ["Customers"], api_version=None
+            config, script_fn_result.webhook_url, team.id, ["Customers"], api_version=None
         )
 
     def test_propagates_failure_without_raising(self):
@@ -408,11 +408,11 @@ class TestReconcileWebhookEvents:
         ext_source = _create_external_data_source(team)
         schemas = _create_schemas(team, ext_source, ["Customers"])
 
-        hog_fn_result = get_or_create_webhook_insights_function(team, webhook_source, "source-123", schemas)
+        script_fn_result = get_or_create_webhook_insights_function(team, webhook_source, "source-123", schemas)
         webhook_source.sync_webhook_events.return_value = WebhookSyncResult(success=False, error="add Write permission")
 
         config = MagicMock()
-        result = reconcile_webhook_events(webhook_source, config, hog_fn_result, team.id, ["Customers"])
+        result = reconcile_webhook_events(webhook_source, config, script_fn_result, team.id, ["Customers"])
 
         assert result.success is False
         assert result.error == "add Write permission"

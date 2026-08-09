@@ -114,7 +114,7 @@ class TestTrackReviewCompleted(BaseTest):
 
         capture.assert_called_once()
         kwargs = capture.call_args.kwargs
-        assert kwargs["event"] == "reviewhog_review_completed"
+        assert kwargs["event"] == "review_review_completed"
         # No acting user resolved on this report — attribution falls back to the team.
         assert kwargs["distinct_id"] == str(self.team.uuid)
         props = kwargs["properties"]
@@ -202,7 +202,7 @@ class TestTrackReviewCompleted(BaseTest):
             assert props["review_runtime_adapter"] == "codex"
             assert props["review_reasoning_effort"] == "xhigh"
             assert props["review_arm_fallback"] is False
-        assert failed.kwargs["event"] == "reviewhog_review_failed"
+        assert failed.kwargs["event"] == "review_review_failed"
         assert failed.kwargs["properties"]["run_index"] == 1
         # The failed event needs its own stable uuid namespace: colliding with the completed event's
         # would make ingestion dedupe a real failure against a later success of the same turn.

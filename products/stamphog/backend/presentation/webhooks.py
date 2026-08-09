@@ -1,6 +1,6 @@
-"""Inbound webhook for the dedicated Stamphog GitHub App.
+"""Inbound webhook for the dedicated Stamp GitHub App.
 
-This is a standalone endpoint for Stamphog's own GitHub App — it does not share the
+This is a standalone endpoint for Stamp's own GitHub App — it does not share the
 unified ``insights.urls.github_webhook`` fan-out. The integration layer wires the URL.
 """
 
@@ -15,7 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 import structlog
 
-from products.stamphog.backend.tasks.tasks import process_installation_event, process_pull_request_event
+from products.stamp.backend.tasks.tasks import process_installation_event, process_pull_request_event
 
 logger = structlog.get_logger(__name__)
 
@@ -33,14 +33,14 @@ def _verify_signature(body: bytes, signature: str | None, secret: str) -> bool:
 
 
 @csrf_exempt
-def stamphog_github_webhook(request: HttpRequest) -> HttpResponse:
-    """Verify, filter, and enqueue an inbound Stamphog GitHub App delivery."""
+def stamp_github_webhook(request: HttpRequest) -> HttpResponse:
+    """Verify, filter, and enqueue an inbound Stamp GitHub App delivery."""
     if request.method != "POST":
         return HttpResponse(status=405)
 
     secret = getattr(settings, "STAMPFN_GITHUB_APP_WEBHOOK_SECRET", "")
     if not secret:
-        logger.error("stamphog_webhook_not_configured")
+        logger.error("stamp_webhook_not_configured")
         return HttpResponse("Webhook not configured", status=500)
 
     signature = request.headers.get("X-Hub-Signature-256")

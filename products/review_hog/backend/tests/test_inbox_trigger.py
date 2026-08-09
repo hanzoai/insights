@@ -14,14 +14,14 @@ from insights.models.user import User
 # resolution under test settings, where a local SANDBOX_PROVIDER env rejects DEBUG=False.
 import products.review_hog.backend.temporal.client  # noqa: F401
 from products.review_hog.backend.models import ReviewUserSettings
-from products.review_hog.backend.receivers import resolve_stamphog_acting_reviewer
+from products.review_hog.backend.receivers import resolve_stamp_acting_reviewer
 from products.signals.backend.models import SignalReport, SignalReportArtefact
 from products.tasks.backend.models import Task, TaskRun
 
 # receivers.py imports both at call time (startup-import-budget), so the defining modules are the
 # patch targets.
 _START = "products.review_hog.backend.temporal.client.start_review_pr_workflow"
-_STAMPFN_QUEUE = "products.stamphog.backend.facade.tasks.queue_inbox_pr_review"
+_STAMPFN_QUEUE = "products.stamp.backend.facade.tasks.queue_inbox_pr_review"
 # GitHub's own casing, as a real `output.pr_url` carries it. The task row lowercases its slug, so
 # this is what lets an assertion tell the task's repository apart from the PR URL's own claim.
 _PR_URL = "https://github.com/Insights/insights/pull/9"
@@ -55,7 +55,7 @@ class TestInboxTrigger(BaseTest):
         )
 
     def _opt_in(self, user: User, **flags: bool) -> None:
-        # No explicit flags means the classic ReviewHog inbox opt-in.
+        # No explicit flags means the classic Review inbox opt-in.
         ReviewUserSettings.objects.for_team(self.team.id).create(
             team=self.team, user=user, **(flags or {"review_inbox_prs": True})
         )
@@ -222,7 +222,7 @@ class TestInboxTrigger(BaseTest):
         # (the one that mints the approval) must not fire either.
         self._mock_start = mock_start
         self._suggest_reviewers(["alice"])
-        self._opt_in(self.alice, review_inbox_prs=True, stamphog_review_inbox_prs=True)
+        self._opt_in(self.alice, review_inbox_prs=True, stamp_review_inbox_prs=True)
         task = self._task()
         task.deleted = True
         task.save(update_fields=["deleted"])
@@ -242,7 +242,7 @@ class TestInboxTrigger(BaseTest):
     @patch(_START, return_value="wf-1")
     def test_the_first_resolved_reviewer_is_canonical(self, _name, reviewer_logins, expected, mock_start) -> None:
         # With multiple assigned reviewers, the first one resolving to an org member is canonical
-        # for which ReviewHog options apply (maintainer decision) — the review runs as them.
+        # for which Review options apply (maintainer decision) — the review runs as them.
         self._mock_start = mock_start
         bob = self._org_member("bob@hanzo.ai", github_login="bob")
         users = {"alice": self.alice, "bob": bob}
@@ -269,7 +269,7 @@ class TestInboxTrigger(BaseTest):
     @patch(_START, return_value="wf-1")
     def test_assigned_requester_gets_their_own_rules(self, mock_start) -> None:
         # A reviewer who personally asked for the implementation ("Create PR" — task.created_by)
-        # gets THEIR ReviewHog rules applied to its review, even when they are not the report's
+        # gets THEIR Review rules applied to its review, even when they are not the report's
         # first reviewer and the first reviewer never opted in.
         self._mock_start = mock_start
         self._org_member("bob@hanzo.ai", github_login="bob")  # first reviewer, not opted in
@@ -336,7 +336,7 @@ class TestInboxTrigger(BaseTest):
         # old internal-flag gate couldn't tell them apart and disabled the real implementation run too.
         self._mock_start = mock_start
         self._suggest_reviewers(["alice"])
-        self._opt_in(self.alice, review_inbox_prs=True, stamphog_review_inbox_prs=True)
+        self._opt_in(self.alice, review_inbox_prs=True, stamp_review_inbox_prs=True)
         self._record_output(self._run(self._task(), ai_stage="research"), {"pr_url": _PR_URL})
 
         mock_start.assert_not_called()
@@ -355,17 +355,17 @@ class TestInboxTrigger(BaseTest):
 
     @parameterized.expand(
         [
-            # (name, flags, expect_review_hog, expect_stamphog) — the two toggles on the one acting
+            # (name, flags, expect_review, expect_stamp) — the two toggles on the one acting
             # reviewer gate their reviews independently: neither may imply, block, or replace the other.
-            ("stamphog_only", {"stamphog_review_inbox_prs": True}, False, True),
-            ("both_toggles", {"review_inbox_prs": True, "stamphog_review_inbox_prs": True}, True, True),
-            ("review_hog_only", {"review_inbox_prs": True}, True, False),
+            ("stamp_only", {"stamp_review_inbox_prs": True}, False, True),
+            ("both_toggles", {"review_inbox_prs": True, "stamp_review_inbox_prs": True}, True, True),
+            ("review_only", {"review_inbox_prs": True}, True, False),
         ]
     )
     @patch(_STAMPFN_QUEUE)
     @patch(_START, return_value="wf-1")
     def test_the_two_toggles_gate_their_reviews_independently(
-        self, _name, flags, expect_review_hog, expect_stamphog, mock_start, mock_queue
+        self, _name, flags, expect_review, expect_stamp, mock_start, mock_queue
     ) -> None:
         self._mock_start = mock_start
         self._suggest_reviewers(["alice"])
@@ -373,8 +373,8 @@ class TestInboxTrigger(BaseTest):
         run = self._run(self._task())
         self._record_output(run, {"pr_url": _PR_URL})
 
-        assert mock_start.called is expect_review_hog
-        if expect_stamphog:
+        assert mock_start.called is expect_review
+        if expect_stamp:
             mock_queue.assert_called_once_with(
                 team_id=self.team.id,
                 pr_url=_PR_URL,
@@ -390,16 +390,16 @@ class TestInboxTrigger(BaseTest):
 
     @patch(_STAMPFN_QUEUE)
     @patch(_START, return_value="wf-1")
-    def test_stamphog_fires_on_any_assigned_reviewer_opting_in(self, mock_start, mock_queue) -> None:
-        # Stamphog reads no per-user options, so its gate is ANY assigned reviewer's opt-in;
-        # narrowing it to the canonical reviewer (which the ReviewHog leg does need, for that
+    def test_stamp_fires_on_any_assigned_reviewer_opting_in(self, mock_start, mock_queue) -> None:
+        # Stamp reads no per-user options, so its gate is ANY assigned reviewer's opt-in;
+        # narrowing it to the canonical reviewer (which the Review leg does need, for that
         # user's perspectives and threshold) would silently drop every review the other assignees
-        # asked for. ReviewHog's leg must not widen with it — here its canonical reviewer opted
-        # into neither, so only stamphog runs.
+        # asked for. Review's leg must not widen with it — here its canonical reviewer opted
+        # into neither, so only stamp runs.
         self._mock_start = mock_start
         bob = self._org_member("bob@hanzo.ai", github_login="bob")
         self._suggest_reviewers(["alice", "bob"])
-        self._opt_in(bob, review_inbox_prs=True, stamphog_review_inbox_prs=True)
+        self._opt_in(bob, review_inbox_prs=True, stamp_review_inbox_prs=True)
         self._record_output(self._run(self._task()), {"pr_url": _PR_URL})
 
         mock_start.assert_not_called()
@@ -407,16 +407,16 @@ class TestInboxTrigger(BaseTest):
         # Both legs must resolve the same reviewer: a trigger leg firing on bob's opt-in while the
         # webhook resolver only ever considered alice would retract the approval as opted-out on
         # the next push, with bob still opted in.
-        assert resolve_stamphog_acting_reviewer(self.team.id, str(self.signal_report.id), None) == bob.id
+        assert resolve_stamp_acting_reviewer(self.team.id, str(self.signal_report.id), None) == bob.id
 
     @patch(_STAMPFN_QUEUE)
     @patch(_START, return_value="wf-1")
-    def test_stamphog_leg_needs_a_pr_target(self, mock_start, mock_queue) -> None:
-        # A bare pushed branch reviews on the ReviewHog side (stored), but stamphog's verdict is a
-        # GitHub review — with no PR to post to, queueing a stamphog run would only burn a sandbox.
+    def test_stamp_leg_needs_a_pr_target(self, mock_start, mock_queue) -> None:
+        # A bare pushed branch reviews on the Review side (stored), but stamp's verdict is a
+        # GitHub review — with no PR to post to, queueing a stamp run would only burn a sandbox.
         self._mock_start = mock_start
         self._suggest_reviewers(["alice"])
-        self._opt_in(self.alice, review_inbox_prs=True, stamphog_review_inbox_prs=True)
+        self._opt_in(self.alice, review_inbox_prs=True, stamp_review_inbox_prs=True)
         self._record_output(self._run(self._task()), {"head_branch": _HEAD_BRANCH})
 
         mock_start.assert_called_once()
@@ -424,12 +424,12 @@ class TestInboxTrigger(BaseTest):
 
     @patch(_STAMPFN_QUEUE, side_effect=RuntimeError("broker down"))
     @patch(_START, return_value="wf-1")
-    def test_stamphog_queue_failure_never_raises_into_the_save_path(self, mock_start, mock_queue) -> None:
-        # Same contract as the ReviewHog leg: the Celery broker being down must cost a log line,
-        # not break the run's output save (and not take the ReviewHog review down with it).
+    def test_stamp_queue_failure_never_raises_into_the_save_path(self, mock_start, mock_queue) -> None:
+        # Same contract as the Review leg: the Celery broker being down must cost a log line,
+        # not break the run's output save (and not take the Review review down with it).
         self._mock_start = mock_start
         self._suggest_reviewers(["alice"])
-        self._opt_in(self.alice, review_inbox_prs=True, stamphog_review_inbox_prs=True)
+        self._opt_in(self.alice, review_inbox_prs=True, stamp_review_inbox_prs=True)
         self._record_output(self._run(self._task()), {"pr_url": _PR_URL})  # must not raise
 
         mock_queue.assert_called_once()
@@ -437,18 +437,18 @@ class TestInboxTrigger(BaseTest):
 
     @parameterized.expand(
         [
-            # (name, flags, expected) — the webhook-leg resolver must key on the STAMPHOG toggle:
-            # keying on review_inbox_prs would re-review for users who never opted into stamphog.
-            ("stamphog_toggle_on", {"stamphog_review_inbox_prs": True}, True),
-            ("only_review_hog_toggle_on", {"review_inbox_prs": True}, False),
+            # (name, flags, expected) — the webhook-leg resolver must key on the Stamp toggle:
+            # keying on review_inbox_prs would re-review for users who never opted into stamp.
+            ("stamp_toggle_on", {"stamp_review_inbox_prs": True}, True),
+            ("only_review_toggle_on", {"review_inbox_prs": True}, False),
         ]
     )
-    def test_resolve_stamphog_acting_reviewer_keys_on_the_stamphog_toggle(self, _name, flags, expected) -> None:
-        # The hook stamphog's webhook path calls before re-reviewing a self-driving PR on a later
+    def test_resolve_stamp_acting_reviewer_keys_on_the_stamp_toggle(self, _name, flags, expected) -> None:
+        # The hook stamp's webhook path calls before re-reviewing a self-driving PR on a later
         # push — switching the toggle off mid-PR must stop new runs.
         self._suggest_reviewers(["alice"])
         self._opt_in(self.alice, **flags)
 
-        resolved = resolve_stamphog_acting_reviewer(self.team.id, str(self.signal_report.id), None)
+        resolved = resolve_stamp_acting_reviewer(self.team.id, str(self.signal_report.id), None)
 
         assert resolved == (self.alice.id if expected else None)

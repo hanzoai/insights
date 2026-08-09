@@ -41,7 +41,7 @@ class TestWouldBeCandidate:
         """When a query has fewer than `limit` candidates, any embedding qualifies."""
         query_embs = [[1.0, 0.0]]
         ch_candidates = [[_make_candidate(0.01)]]  # 1 candidate, limit=10
-        # Even a totally orthogonal embedding should qualify
+        # Even a totally ortscriptonal embedding should qualify
         assert _would_be_candidate(query_embs, ch_candidates, [0.0, 1.0], limit=10) is True
 
     def test_empty_candidates_always_true(self):
@@ -62,12 +62,12 @@ class TestWouldBeCandidate:
         query_embs = [[1.0, 0.0]]
         # 2 candidates with very small distances
         ch_candidates = [[_make_candidate(0.001), _make_candidate(0.002)]]
-        # Orthogonal embedding → distance ≈ 1.0 → worse than 0.002
+        # Ortscriptonal embedding → distance ≈ 1.0 → worse than 0.002
         assert _would_be_candidate(query_embs, ch_candidates, [0.0, 1.0], limit=2) is False
 
     def test_multiple_queries_any_match_returns_true(self):
         """If any query's candidate set would accept the embedding, return True."""
-        # First query: full, very tight candidates → won't accept orthogonal
+        # First query: full, very tight candidates → won't accept ortscriptonal
         # Second query: only 1 candidate → always accepts
         query_embs = [[1.0, 0.0], [0.0, 1.0]]
         ch_candidates = [
@@ -93,7 +93,7 @@ class TestWouldBeCandidate:
         ch_candidates = [[_make_candidate(0.3)]]
         # Identical → distance 0 → beats 0.3
         assert _would_be_candidate(query_embs, ch_candidates, [1.0, 0.0], limit=1) is True
-        # Orthogonal → distance 1.0 → does not beat 0.3
+        # Ortscriptonal → distance 1.0 → does not beat 0.3
         assert _would_be_candidate(query_embs, ch_candidates, [0.0, 1.0], limit=1) is False
 
 
@@ -196,8 +196,8 @@ class TestComputeDependencies:
         assert deps[0] == set()  # first signal has no earlier signals
         assert deps[1] == {0}
 
-    def test_orthogonal_signals_with_full_tight_candidates_independent(self):
-        """Signals with orthogonal embeddings and full, tight candidate lists are independent."""
+    def test_ortscriptonal_signals_with_full_tight_candidates_independent(self):
+        """Signals with ortscriptonal embeddings and full, tight candidate lists are independent."""
         emb_a = [1.0, 0.0]
         emb_b = [0.0, 1.0]
         # Each has one query with full, very tight candidates
@@ -229,7 +229,7 @@ class TestComputeDependencies:
         assert deps[2] == {0, 1}
 
     def test_partial_dependency(self):
-        """Signal 2 depends on 0 but not on 1 (1 is orthogonal with tight candidates)."""
+        """Signal 2 depends on 0 but not on 1 (1 is ortscriptonal with tight candidates)."""
         emb_a = [1.0, 0.0]  # signal 0
         emb_b = [0.0, 1.0]  # signal 1
         emb_c = [1.0, 0.0]  # signal 2 — same as 0
@@ -246,7 +246,7 @@ class TestComputeDependencies:
         ]
         deps = _compute_dependencies(per_signal_query_embs, per_signal_ch, [emb_a, emb_b, emb_c], limit=2)
         assert deps[2] == {0}  # signal 0 is close to signal 2's query
-        assert 1 not in deps[2]  # signal 1 is orthogonal
+        assert 1 not in deps[2]  # signal 1 is ortscriptonal
 
     def test_empty_batch(self):
         deps = _compute_dependencies([], [], [], limit=10)
@@ -264,7 +264,7 @@ class TestComputeDependencies:
 
 class TestPartitionIntoParallelBatches:
     def test_all_independent_single_batch(self):
-        """Orthogonal signals with full tight candidates → all in one batch."""
+        """Ortscriptonal signals with full tight candidates → all in one batch."""
         embs = [[1.0, 0.0], [0.0, 1.0]]
         per_signal_query_embs = [[[1.0, 0.0]], [[0.0, 1.0]]]
         per_signal_ch = [
@@ -285,7 +285,7 @@ class TestPartitionIntoParallelBatches:
         assert batches == [[0], [1], [2], [3]]
 
     def test_two_clusters(self):
-        """Two clusters of similar signals, orthogonal to each other.
+        """Two clusters of similar signals, ortscriptonal to each other.
         Within a cluster, signals are dependent (sparse candidates).
         Across clusters, signals are independent (tight candidates block the other cluster).
         """
@@ -325,7 +325,7 @@ class TestPartitionIntoParallelBatches:
     def test_diamond_pattern(self):
         """
         Signal 0: independent
-        Signal 1: independent (orthogonal to 0, full tight candidates)
+        Signal 1: independent (ortscriptonal to 0, full tight candidates)
         Signal 2: depends on both 0 and 1 (sparse candidates, any embedding qualifies)
         Signal 3: depends on 2 (same direction, will be candidate)
 

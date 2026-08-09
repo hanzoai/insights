@@ -2679,9 +2679,9 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert body["limit"] > 0
 
     @override_settings(
-        HOGFLOW_BATCH_TRIGGER_LIMIT=5000,
-        HOGFLOW_BATCH_TRIGGER_LIMIT_ELEVATED=50000,
-        HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS=set(),
+        Flow_BATCH_TRIGGER_LIMIT=5000,
+        Flow_BATCH_TRIGGER_LIMIT_ELEVATED=50000,
+        Flow_BATCH_TRIGGER_ELEVATED_TEAM_IDS=set(),
     )
     def test_insights_flow_user_blast_radius_returns_default_limit_for_unlisted_team(self):
         with patch("products.workflows.backend.api.insights_flow.get_user_blast_radius") as mock_get_user_blast_radius:
@@ -2699,9 +2699,9 @@ class TestInsightsFlowAPI(APIBaseTest):
     def test_insights_flow_user_blast_radius_returns_elevated_limit_for_listed_team(self):
         with (
             override_settings(
-                HOGFLOW_BATCH_TRIGGER_LIMIT=5000,
-                HOGFLOW_BATCH_TRIGGER_LIMIT_ELEVATED=50000,
-                HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS={self.team.id},
+                Flow_BATCH_TRIGGER_LIMIT=5000,
+                Flow_BATCH_TRIGGER_LIMIT_ELEVATED=50000,
+                Flow_BATCH_TRIGGER_ELEVATED_TEAM_IDS={self.team.id},
             ),
             patch("products.workflows.backend.api.insights_flow.get_user_blast_radius") as mock_get_user_blast_radius,
         ):
@@ -3156,7 +3156,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert "delay" in action_types  # Delay is present
         assert action_types.count("function") == 2  # Two function actions
 
-    @override_settings(HOGFLOW_BATCH_TRIGGER_LIMIT=5000, HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS=set())
+    @override_settings(Flow_BATCH_TRIGGER_LIMIT=5000, Flow_BATCH_TRIGGER_ELEVATED_TEAM_IDS=set())
     @patch(
         "products.workflows.backend.models.insights_flow_batch_job.insights_flow_batch_job.create_batch_insights_flow_job_invocation"
     )
@@ -3184,8 +3184,8 @@ class TestInsightsFlowAPI(APIBaseTest):
         flow_id = self._create_active_insights_flow()
 
         with override_settings(
-            HOGFLOW_BATCH_TRIGGER_LIMIT_ELEVATED=50000,
-            HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS={self.team.id},
+            Flow_BATCH_TRIGGER_LIMIT_ELEVATED=50000,
+            Flow_BATCH_TRIGGER_ELEVATED_TEAM_IDS={self.team.id},
         ):
             response = self.client.post(
                 f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/batch_jobs",

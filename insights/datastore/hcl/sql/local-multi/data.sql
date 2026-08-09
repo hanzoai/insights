@@ -1663,7 +1663,7 @@ CREATE TABLE insights.sharded_sessions (
   pageview_count SimpleAggregateFunction(sum, Int64),
   autocapture_count SimpleAggregateFunction(sum, Int64)
 ) ENGINE = ReplicatedAggregatingMergeTree('/datastore/tables/{shard}/insights.sessions', '{replica}') ORDER BY (toStartOfDay(min_timestamp), team_id, session_id) PARTITION BY toYYYYMM(min_timestamp) SETTINGS index_granularity = 512;
-CREATE TABLE insights.sharded_tophog (
+CREATE TABLE insights.sharded_topfn (
   timestamp DateTime64(6, 'UTC'),
   metric LowCardinality(String),
   type LowCardinality(String) DEFAULT 'sum',
@@ -1673,8 +1673,8 @@ CREATE TABLE insights.sharded_tophog (
   pipeline LowCardinality(String),
   lane LowCardinality(String),
   labels Map(LowCardinality(String), String)
-) ENGINE = ReplicatedMergeTree('/datastore/tables/{shard}/insights.tophog', '{replica}') ORDER BY (pipeline, lane, metric, timestamp, key) PARTITION BY toYYYYMMDD(timestamp) TTL toDate(timestamp) + toIntervalDay(30) SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1;
-CREATE TABLE insights.tophog (
+) ENGINE = ReplicatedMergeTree('/datastore/tables/{shard}/insights.topfn', '{replica}') ORDER BY (pipeline, lane, metric, timestamp, key) PARTITION BY toYYYYMMDD(timestamp) TTL toDate(timestamp) + toIntervalDay(30) SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1;
+CREATE TABLE insights.topfn (
   timestamp DateTime64(6, 'UTC'),
   metric LowCardinality(String),
   type LowCardinality(String) DEFAULT 'sum',
@@ -1684,7 +1684,7 @@ CREATE TABLE insights.tophog (
   pipeline LowCardinality(String),
   lane LowCardinality(String),
   labels Map(LowCardinality(String), String)
-) ENGINE = Distributed('insights', 'insights', 'sharded_tophog', cityHash64(toString(key)));
+) ENGINE = Distributed('insights', 'insights', 'sharded_topfn', cityHash64(toString(key)));
 CREATE TABLE insights.usage_report_events_preagg (
   date Date,
   team_id Int64,

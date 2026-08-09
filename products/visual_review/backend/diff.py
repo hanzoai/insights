@@ -1,7 +1,7 @@
 """
-Image comparison using pixelhog (Rust-accelerated).
+Image comparison using pixelscript (Rust-accelerated).
 
-Single decode via pixelhog.Comparison; reuses the decoded buffers across
+Single decode via pixelscript.Comparison; reuses the decoded buffers across
 diff_count, ssim, diff_image, thumbnail, and clusters without paying for
 re-decode.
 """
@@ -9,11 +9,11 @@ re-decode.
 from dataclasses import dataclass
 
 from blake3 import blake3
-from pixelhog import Comparison
+from pixelscript import Comparison
 
 from .diff_metadata import ClusterSummary, DiffCluster
 
-# Aligned-bbox merge tunables passed through to pixelhog's clusters().
+# Aligned-bbox merge tunables passed through to pixelscript's clusters().
 # Catches the "list shifted vertically" pattern where every row of a
 # list becomes its own cluster despite being a single semantic change.
 # Validated against ~20k real master snapshot diffs: 62% collapse to a
@@ -24,7 +24,7 @@ CLUSTER_MERGE_OVERLAP_RATIO = 0.5
 THUMB_WIDTH = 200
 THUMB_HEIGHT = 140
 
-# Clustering parameters tuned for screenshot diffs. See pixelhog PR6_REVIEW
+# Clustering parameters tuned for screenshot diffs. See pixelscript PR6_REVIEW
 # for the rationale: dilation merges glyph fragments into region-level
 # clusters; min_pixels + min_side filter sub-character noise; max_clusters
 # caps at the rough UI legibility ceiling for bbox overlays. `total` on the
@@ -67,7 +67,7 @@ def compare_images(
     """Compare two PNG images: pixelmatch + SSIM + optional thumbnail + clusters.
 
     One decode of each PNG; subsequent ops reuse the decoded RGBA buffers.
-    When sizes differ, pixelhog pads to the largest dimensions and runs
+    When sizes differ, pixelscript pads to the largest dimensions and runs
     every metric against the padded buffers — including clusters. The
     padded region surfaces as a cluster of its own, which is the right
     answer ("here's the new content area") rather than something to hide.

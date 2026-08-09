@@ -16,14 +16,14 @@ from products.tasks.backend.models import Channel, Task
 # - ONBOARDING: the "Set up Insights" wizard task. Its `created_by` is the real person who
 #   went through onboarding (not a system pick), but we surface it team-wide so anyone on
 #   the team can see and pick up the setup, not just whoever happened to start it.
-# - HOGDESK: support-desk Code threads. The task is pinned to the support ticket via a
+# - Desk: support-desk Code threads. The task is pinned to the support ticket via a
 #   shared ticket tag, so any agent opening the ticket resumes the same thread — it must
 #   be viewable by the whole team, not just the agent who started it.
 TEAM_VISIBLE_ORIGIN_PRODUCTS = [
     Task.OriginProduct.SIGNAL_REPORT,
     Task.OriginProduct.SIGNALS_SCOUT,
     Task.OriginProduct.ONBOARDING,
-    Task.OriginProduct.HOGDESK,
+    Task.OriginProduct.Desk,
 ]
 
 # Origin products whose tasks are team-readable but stay creator-driven, like

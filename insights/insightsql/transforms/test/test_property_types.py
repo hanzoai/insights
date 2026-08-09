@@ -625,8 +625,8 @@ class TestPropertyTypes(BaseTest):
         )
         assert printed == self._events_schema_snapshot()
         assert (
-            "SELECT ifNull(equals(accurateCastOrNull(transform(toString(events__group_0.properties___group_boolean), hogvar, hogvar, NULL), hogvar), 1), 0), ifNull(equals(accurateCastOrNull(transform(toString(events__group_0.properties___group_boolean), hogvar, hogvar, NULL), hogvar), 0), 0), isNull(accurateCastOrNull(transform(toString(events__group_0.properties___group_boolean), hogvar, hogvar, NULL), hogvar))"
-            in re.sub(r"%\(insightsql_val_\d+\)s", "hogvar", printed)
+            "SELECT ifNull(equals(accurateCastOrNull(transform(toString(events__group_0.properties___group_boolean), scriptvar, scriptvar, NULL), scriptvar), 1), 0), ifNull(equals(accurateCastOrNull(transform(toString(events__group_0.properties___group_boolean), scriptvar, scriptvar, NULL), scriptvar), 0), 0), isNull(accurateCastOrNull(transform(toString(events__group_0.properties___group_boolean), scriptvar, scriptvar, NULL), scriptvar))"
+            in re.sub(r"%\(insightsql_val_\d+\)s", "scriptvar", printed)
         )
 
     @pytest.mark.usefixtures("unittest_snapshot")
@@ -1308,7 +1308,7 @@ class TestTimezoneIndexPruning(DatastoreTestMixin, BaseTest):
         self.team.timezone = timezone
         self.team.save()
         # This class asserts the structural shape of toTimeZone stripping (a PropertySwapper concern).
-        # Predicate pushdown is orthogonal: it relocates the (already-stripped) WHERE into an events subquery,
+        # Predicate pushdown is ortscriptonal: it relocates the (already-stripped) WHERE into an events subquery,
         # changing where these comparisons appear without changing the tz behavior. Disable it here so the
         # assertions stay about tz stripping; pushdown has its own test suite.
         context = InsightsQLContext(

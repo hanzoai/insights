@@ -50,7 +50,7 @@ class TestRunSandboxReview:
         assert "user prompt" in call_kwargs["prompt"]
         assert call_kwargs["branch"] == "test-branch"
         assert call_kwargs["step_name"] == "split"
-        # Spawn attribution: dropping any of these silently reverts ReviewHog's sandbox tasks to
+        # Spawn attribution: dropping any of these silently reverts Review's sandbox tasks to
         # user-visible "user_created" ones with no per-stage $ai_generation attribution.
         assert call_kwargs["origin_product"] == TaskOriginProduct.REVIEW_HOG
         assert call_kwargs["internal"] is True
@@ -118,7 +118,7 @@ class TestRunSandboxReview:
     @pytest.mark.asyncio
     async def test_warm_session_carries_the_same_spawn_attribution(self) -> None:
         # The validation warm sessions spawn through start_sandbox_session, not _run_prompt — the
-        # attribution trio (ReviewHog origin, internal, step as ai_stage) and the workflow-id prefix
+        # attribution trio (Review origin, internal, step as ai_stage) and the workflow-id prefix
         # must hold on this path too or only the single-turn steps stay attributed.
         mock_start = AsyncMock(return_value=(AsyncMock(), DummyModel(result="ok")))
 

@@ -13,7 +13,7 @@ import * as zod from 'zod'
  * Make a `review-script-blind-spots-*` skill the single sweep that runs on the requesting user's PR reviews, switching the user's other blind-spots skills off in the same call. Only skills visible to the user — the canonical plus the customs they authored — can be selected; anything else 404s. Upserts the per-user config row, so selecting a freshly authored custom skill works in one call.
  * @summary Select the active blind-spots skill
  */
-export const ReviewHogBlindSpotsPartialUpdateBody = /* @__PURE__ */ zod.object({
+export const ReviewBlindSpotsPartialUpdateBody = /* @__PURE__ */ zod.object({
     active: zod
         .boolean()
         .optional()
@@ -26,7 +26,7 @@ export const ReviewHogBlindSpotsPartialUpdateBody = /* @__PURE__ */ zod.object({
  * Toggle whether a `review-script-perspective-*` skill runs on the requesting user's PR reviews. Only skills visible to the user — the canonicals plus the customs they authored — can be toggled; anything else 404s. Upserts the per-user config row, so enabling a freshly authored custom perspective works in one call. Rejected if it would leave the user with no enabled perspective.
  * @summary Enable or disable a review perspective
  */
-export const ReviewHogPerspectivesPartialUpdateBody = /* @__PURE__ */ zod.object({
+export const ReviewPerspectivesPartialUpdateBody = /* @__PURE__ */ zod.object({
     enabled: zod
         .boolean()
         .optional()
@@ -34,10 +34,10 @@ export const ReviewHogPerspectivesPartialUpdateBody = /* @__PURE__ */ zod.object
 })
 
 /**
- * Start a ReviewHog review of any pull request the project's GitHub App installation can access, and publish it back to the PR. The requesting user is the review's acting user: their enabled perspectives, blind-spot check, validator, and urgency threshold drive the run, and it appears under their recent reviews. Nonexistent, closed, and fork PRs are rejected synchronously; a PR whose current commit already has a published review returns 'already_reviewed' without starting a run, and triggering a PR whose review is currently running joins the in-flight run. Otherwise non-blocking: returns the Temporal workflow id immediately while the review runs in the worker.
+ * Start a Review review of any pull request the project's GitHub App installation can access, and publish it back to the PR. The requesting user is the review's acting user: their enabled perspectives, blind-spot check, validator, and urgency threshold drive the run, and it appears under their recent reviews. Nonexistent, closed, and fork PRs are rejected synchronously; a PR whose current commit already has a published review returns 'already_reviewed' without starting a run, and triggering a PR whose review is currently running joins the in-flight run. Otherwise non-blocking: returns the Temporal workflow id immediately while the review runs in the worker.
  * @summary Start a review of a pull request
  */
-export const ReviewHogReviewsTriggerCreateBody = /* @__PURE__ */ zod.object({
+export const ReviewReviewsTriggerCreateBody = /* @__PURE__ */ zod.object({
     pr_url: zod
         .string()
         .describe(
@@ -46,21 +46,21 @@ export const ReviewHogReviewsTriggerCreateBody = /* @__PURE__ */ zod.object({
 })
 
 /**
- * Partially update the requesting user's ReviewHog settings for this project. Only the provided fields change.
- * @summary Update the user's ReviewHog settings
+ * Partially update the requesting user's Review settings for this project. Only the provided fields change.
+ * @summary Update the user's Review settings
  */
-export const ReviewHogSettingsPartialUpdateBody = /* @__PURE__ */ zod.object({
+export const ReviewSettingsPartialUpdateBody = /* @__PURE__ */ zod.object({
     review_inbox_prs: zod
         .boolean()
         .optional()
         .describe(
-            "Automatically review pull requests opened by self-driving implementations from the user's Inbox: ReviewHog reviews each one and posts its findings to the pull request."
+            "Automatically review pull requests opened by self-driving implementations from the user's Inbox: Review reviews each one and posts its findings to the pull request."
         ),
-    stamphog_review_inbox_prs: zod
+    stamp_review_inbox_prs: zod
         .boolean()
         .optional()
         .describe(
-            "Also have hosted Stamphog review those same Inbox pull requests: an approve-first review that posts a real GitHub approval when the change passes, and a comment when it doesn't. Only takes effect when the project has a synced, enabled Stamphog repository (see stamphog_connected)."
+            "Also have hosted Stamp review those same Inbox pull requests: an approve-first review that posts a real GitHub approval when the change passes, and a comment when it doesn't. Only takes effect when the project has a synced, enabled Stamp repository (see stamp_connected)."
         ),
     review_labeled_prs: zod
         .boolean()
@@ -81,7 +81,7 @@ export const ReviewHogSettingsPartialUpdateBody = /* @__PURE__ */ zod.object({
  * Make a `review-script-validation-*` skill the single validator that runs on the requesting user's PR reviews, switching the user's other validators off in the same call. Only skills visible to the user — the canonical plus the customs they authored — can be selected; anything else 404s. Upserts the per-user config row, so selecting a freshly authored custom validator works in one call.
  * @summary Select the active review validator
  */
-export const ReviewHogValidatorsPartialUpdateBody = /* @__PURE__ */ zod.object({
+export const ReviewValidatorsPartialUpdateBody = /* @__PURE__ */ zod.object({
     active: zod
         .boolean()
         .optional()

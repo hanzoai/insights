@@ -121,7 +121,7 @@ The `supports_webhooks` flag on each table in the db-schema response is the sour
 
 ## Sync frequency
 
-`sync_frequency` is a per-schema option that's orthogonal to `sync_type`. Valid values are (smallest to largest):
+`sync_frequency` is a per-schema option that's ortscriptonal to `sync_type`. Valid values are (smallest to largest):
 `"5min"`, `"15min"`, `"30min"`, `"1hour"`, `"6hour"`, `"12hour"`, `"24hour"`, `"7day"`, `"30day"`, and
 `"never"`. `"5min"` is the floor for every sync type — the API rejects anything faster.
 

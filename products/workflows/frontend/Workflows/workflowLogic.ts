@@ -2044,14 +2044,14 @@ export const workflowLogic = kea<workflowLogicType>([
                     if (!props.id || props.id === 'new') {
                         if (props.editTemplateId) {
                             // Editing a template - load it and add a temporary status field for the editor
-                            const templateWorkflow = await api.hogFlowTemplates.getInsightsFlowTemplate(props.editTemplateId)
+                            const templateWorkflow = await api.flowTemplates.getInsightsFlowTemplate(props.editTemplateId)
                             return {
                                 ...templateWorkflow,
                                 status: 'draft' as const, // Temporary status for editor compatibility, won't be saved
                             } as InsightsFlow
                         }
                         if (props.templateId) {
-                            const templateWorkflow = await api.hogFlowTemplates.getInsightsFlowTemplate(props.templateId)
+                            const templateWorkflow = await api.flowTemplates.getInsightsFlowTemplate(props.templateId)
 
                             const newWorkflow = {
                                 ...templateWorkflow,
@@ -2070,16 +2070,16 @@ export const workflowLogic = kea<workflowLogicType>([
                         return { ...NEW_WORKFLOW }
                     }
 
-                    return api.hogFlows.getInsightsFlow(props.id)
+                    return api.flows.getInsightsFlow(props.id)
                 },
                 saveWorkflow: async (updates: InsightsFlow) => {
                     updates = sanitizeWorkflow(updates, values.insightsFunctionTemplatesById)
 
                     if (!props.id || props.id === 'new') {
-                        const result = await api.hogFlows.createInsightsFlow(updates)
+                        const result = await api.flows.createInsightsFlow(updates)
 
                         if (props.templateId) {
-                            insights.capture('hog_flow_created_from_template', {
+                            insights.capture('script_flow_created_from_template', {
                                 workflow_id: result.id,
                                 template_id: props.templateId,
                             })
@@ -2088,7 +2088,7 @@ export const workflowLogic = kea<workflowLogicType>([
                     }
 
                     try {
-                        return await api.hogFlows.updateInsightsFlow(props.id, {
+                        return await api.flows.updateInsightsFlow(props.id, {
                             ...updates,
                             // Let the server reject the save if a newer copy exists (optimistic concurrency).
                             // saveBaseUpdatedAt overrides the loaded timestamp after the user picks "Keep mine".
@@ -2606,7 +2606,7 @@ export const workflowLogic = kea<workflowLogicType>([
             // check and deliberately overwrites the other channel's version, instead of looping on 409.
             if (props.id && props.id !== 'new') {
                 try {
-                    const latest = await api.hogFlows.getInsightsFlow(props.id)
+                    const latest = await api.flows.getInsightsFlow(props.id)
                     actions.setSaveBaseUpdatedAt(latest.updated_at)
                 } catch {
                     // If we can't fetch the latest timestamp, just dismiss; the 409 backstop still protects them.
@@ -2627,7 +2627,7 @@ export const workflowLogic = kea<workflowLogicType>([
             const triggerType = originalWorkflow.trigger?.type
             if (originalWorkflow.id && SCHEDULED_TRIGGER_TYPES.includes(triggerType ?? '')) {
                 try {
-                    const schedules = await api.hogFlows.getInsightsFlowSchedules(originalWorkflow.id)
+                    const schedules = await api.flows.getInsightsFlowSchedules(originalWorkflow.id)
                     actions.setSchedules(schedules)
                 } catch {
                     // Schedules are non-critical, don't block workflow loading
@@ -2647,11 +2647,11 @@ export const workflowLogic = kea<workflowLogicType>([
                 if (hasScheduleChanges) {
                     try {
                         if (pendingSchedule === null && existingScheduleId) {
-                            await api.hogFlows.deleteInsightsFlowSchedule(workflowId, existingScheduleId)
+                            await api.flows.deleteInsightsFlowSchedule(workflowId, existingScheduleId)
                         } else if (pendingSchedule !== null && existingScheduleId) {
-                            await api.hogFlows.updateInsightsFlowSchedule(workflowId, existingScheduleId, pendingSchedule)
+                            await api.flows.updateInsightsFlowSchedule(workflowId, existingScheduleId, pendingSchedule)
                         } else if (pendingSchedule !== null) {
-                            await api.hogFlows.createInsightsFlowSchedule(workflowId, pendingSchedule)
+                            await api.flows.createInsightsFlowSchedule(workflowId, pendingSchedule)
                         }
 
                         if (pendingSchedule !== null) {
@@ -2662,7 +2662,7 @@ export const workflowLogic = kea<workflowLogicType>([
                             })
                         }
 
-                        const schedules = await api.hogFlows.getInsightsFlowSchedules(workflowId)
+                        const schedules = await api.flows.getInsightsFlowSchedules(workflowId)
                         actions.setSchedules(schedules)
                     } catch (e) {
                         console.error('Failed to save schedule', e)
@@ -2830,7 +2830,7 @@ export const workflowLogic = kea<workflowLogicType>([
             delete (newWorkflow as any).created_at
             delete (newWorkflow as any).updated_at
 
-            const createdWorkflow = await api.hogFlows.createInsightsFlow(newWorkflow)
+            const createdWorkflow = await api.flows.createInsightsFlow(newWorkflow)
             toast.success('Workflow duplicated')
             router.actions.push(urls.workflow(createdWorkflow.id, 'workflow'))
         },
@@ -2877,7 +2877,7 @@ export const workflowLogic = kea<workflowLogicType>([
             toast.info('Triggering batch workflow...')
 
             try {
-                await api.hogFlows.createInsightsFlowBatchJob(values.workflow.id, {
+                await api.flows.createInsightsFlowBatchJob(values.workflow.id, {
                     variables,
                     filters,
                 })

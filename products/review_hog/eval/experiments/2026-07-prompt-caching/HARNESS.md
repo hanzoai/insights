@@ -150,7 +150,7 @@ GROUP BY unit_kind WITH TOTALS ORDER BY unit_kind
 ```
 
 - Note: sandbox units go through the harness's gateway product (`background_agents`) — do NOT filter on
-  `ai_product = 'review_hog'` for sandbox units (that only tags the one-shot chunking/dedup calls).
+  `ai_product = 'review'` for sandbox units (that only tags the one-shot chunking/dedup calls).
 - **Report the DISTRIBUTION (units_with_turn1_hit + per-unit values), never just the median** — see below.
 
 ## Smoke run 2 result (2026-07-06, live PR #68735, UNPATCHED local main) — the baseline is NOT zero anymore
@@ -215,7 +215,7 @@ re-ran. Sequence watched-file edits strictly before/after runs; check state with
   `GitHubIntegration.integration_from_installation_id("143741024", team_id=1, created_by=User.objects.get(pk=1))`
   (the "insights-local-dev" app installation persists on GitHub's side). A nuke also deletes archived `$ai_generation`
   events and ACP logs — plan measurement windows accordingly.
-- **`run_review` stdout is block-buffered when piped** — the `ReviewHog ▶ starting` banner and the result line flush
+- **`run_review` stdout is block-buffered when piped** — the `Review ▶ starting` banner and the result line flush
   only at process exit. Watch live progress in the temporal-worker log (stage banners) or via `temporal workflow list`.
 - **Tripwire reproduced on a full publish run** (PR #68749, 2026-07-06, single chunk): leader wrote 73.2K at turn 1;
   two followers read the identical 27,618-token [tools+preset] segment at +1s/+19s; the blind-spot fired +12.5 min

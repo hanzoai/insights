@@ -59,7 +59,7 @@ def test_only_validated_issues_count_and_chunk_appears() -> None:
         published_priorities=_SHOULD_FIX_PUBLISHED,
     )
 
-    assert "# ReviewHog Report" in body
+    assert "# Review Report" in body
     assert "## Business logic" in body  # chunk_type humanized into the header
     assert "**Issues:** 1 issue" in body  # only the valid issue counts
 

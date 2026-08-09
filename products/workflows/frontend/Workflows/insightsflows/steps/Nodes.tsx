@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 
 import { IconCopy, IconDrag, IconPlus } from '@hanzo/icons'
 
-import { hogFlowEditorLogic } from '../hogFlowEditorLogic'
+import { flowEditorLogic } from '../flowEditorLogic'
 import { NODE_HEIGHT, NODE_WIDTH } from '../react_flow_utils/constants'
 import { StepView } from './components/StepView'
 import { InsightsFlowStepNodeProps } from './types'
@@ -19,9 +19,9 @@ export const REACT_FLOW_NODE_TYPES: Record<ReactFlowNodeType, React.ComponentTyp
 
 function DropzoneNode({ id }: InsightsFlowStepNodeProps): JSX.Element {
     const [isHighlighted, setIsHighlighted] = useState(false)
-    const { isCopyingNode, isMovingNode } = useValues(hogFlowEditorLogic)
+    const { isCopyingNode, isMovingNode } = useValues(flowEditorLogic)
     const { setHighlightedDropzoneNodeId, copyNodeToHighlightedDropzone, moveNodeToHighlightedDropzone } =
-        useActions(hogFlowEditorLogic)
+        useActions(flowEditorLogic)
 
     useEffect(() => {
         setHighlightedDropzoneNodeId(isHighlighted ? id : null)
@@ -68,7 +68,7 @@ function DropzoneNode({ id }: InsightsFlowStepNodeProps): JSX.Element {
 function InsightsFlowActionNode(props: InsightsFlowStepNodeProps): JSX.Element | null {
     const updateNodeInternals = useUpdateNodeInternals()
 
-    const { nodesById } = useValues(hogFlowEditorLogic)
+    const { nodesById } = useValues(flowEditorLogic)
 
     useEffect(() => {
         updateNodeInternals(props.id)

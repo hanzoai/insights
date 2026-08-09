@@ -1,6 +1,6 @@
-"""Dedicated GitHub App client for Stamphog.
+"""Dedicated GitHub App client for Stamp.
 
-Stamphog runs as its own GitHub App (separate identity from Insights's product-integration App), so it
+Stamp runs as its own GitHub App (separate identity from Insights's product-integration App), so it
 mints its own installation tokens from ``STAMPFN_GITHUB_APP_CLIENT_ID`` (or ``STAMPFN_GITHUB_APP_ID``
 as a fallback) / ``STAMPFN_GITHUB_APP_PRIVATE_KEY``.
 Every outbound call goes through the shared egress transport (:func:`insights.egress.github.transport.github_request`),
@@ -30,11 +30,11 @@ from insights.egress.limiter.policies import Priority
 logger = structlog.get_logger(__name__)
 
 # Per-subsystem attribution on the shared GitHub egress metrics.
-_SOURCE = "stamphog"
+_SOURCE = "stamp"
 
-# Hidden marker that identifies Stamphog's single sticky status comment on a PR, so a re-review updates
+# Hidden marker that identifies Stamp's single sticky status comment on a PR, so a re-review updates
 # the same comment in place instead of stacking a new one every run. Invisible in the rendered comment.
-STICKY_COMMENT_MARKER = "<!-- stamphog:review-status -->"
+STICKY_COMMENT_MARKER = "<!-- stamp:review-status -->"
 
 
 def expected_app_bot_login() -> str | None:
@@ -44,7 +44,7 @@ def expected_app_bot_login() -> str | None:
     When we know the slug we can require that exact identity; when it isn't configured, callers decide
     whether "any Bot" is an acceptable floor (see ``_is_own_bot_actor``'s ``allow_any_bot``). Public
     (not underscore-prefixed) because the in-flight reviewer-bot wait in ``temporal/activities.py``
-    needs it too, to exclude stamphog's own 👀 reaction from the trusted-bot reactor set it reads.
+    needs it too, to exclude stamp's own 👀 reaction from the trusted-bot reactor set it reads.
     """
     slug = settings.STAMPFN_GITHUB_APP_SLUG
     return f"{slug}[bot]" if slug else None
@@ -158,8 +158,8 @@ def _parse_review_thread_comments(comment_nodes: list) -> list[dict]:
     ]
 
 
-class StamphogGitHubError(Exception):
-    """A Stamphog GitHub API call failed for a non-rate-limit reason (auth failure, unexpected status,
+class StampGitHubError(Exception):
+    """A Stamp GitHub API call failed for a non-rate-limit reason (auth failure, unexpected status,
     malformed response). Rate limits raise ``GitHubRateLimitError`` from the egress layer instead."""
 
     def __init__(self, message: str, *, status_code: int | None = None) -> None:
@@ -168,10 +168,10 @@ class StamphogGitHubError(Exception):
 
 
 def _app_private_key() -> str:
-    """The Stamphog App private key, with escaped newlines restored (env vars often carry ``\\n``)."""
+    """The Stamp App private key, with escaped newlines restored (env vars often carry ``\\n``)."""
     key = settings.STAMPFN_GITHUB_APP_PRIVATE_KEY
     if not key:
-        raise StamphogGitHubError("STAMPFN_GITHUB_APP_PRIVATE_KEY is not configured")
+        raise StampGitHubError("STAMPFN_GITHUB_APP_PRIVATE_KEY is not configured")
     return key.replace("\\n", "\n").strip()
 
 
@@ -187,7 +187,7 @@ def _build_app_jwt() -> str:
     # deploy ships STAMPFN_GITHUB_APP_CLIENT_ID.
     issuer = settings.STAMPFN_GITHUB_APP_CLIENT_ID or settings.STAMPFN_GITHUB_APP_ID
     if not issuer:
-        raise StamphogGitHubError("Neither STAMPFN_GITHUB_APP_CLIENT_ID nor STAMPFN_GITHUB_APP_ID is configured")
+        raise StampGitHubError("Neither STAMPFN_GITHUB_APP_CLIENT_ID nor STAMPFN_GITHUB_APP_ID is configured")
     now = int(time.time())
     try:
         return jwt.encode(
@@ -196,7 +196,7 @@ def _build_app_jwt() -> str:
             algorithm="RS256",
         )
     except Exception as exc:
-        raise StamphogGitHubError("Failed to encode Stamphog App JWT; check STAMPFN_GITHUB_APP_PRIVATE_KEY") from exc
+        raise StampGitHubError("Failed to encode Stamp App JWT; check STAMPFN_GITHUB_APP_PRIVATE_KEY") from exc
 
 
 # --- User-to-server OAuth: installation ownership verification ---
@@ -208,17 +208,17 @@ def _build_app_jwt() -> str:
 
 
 def exchange_oauth_code_for_user_token(code: str) -> str | None:
-    """Exchange a Stamphog user-to-server OAuth ``code`` for the authorizing user's access token.
+    """Exchange a Stamp user-to-server OAuth ``code`` for the authorizing user's access token.
 
     Talks to ``github.com/login/oauth/access_token`` (the App's OAuth endpoint, not the REST API) with
-    Stamphog's *own* client id/secret. Returns the user access token, or ``None`` when the creds are
+    Stamp's *own* client id/secret. Returns the user access token, or ``None`` when the creds are
     unset or GitHub rejects the code — callers must treat ``None`` as "unverified" and fail closed.
     """
     client_id = settings.STAMPFN_GITHUB_APP_CLIENT_ID
     client_secret = settings.STAMPFN_GITHUB_APP_CLIENT_SECRET
     if not client_id or not client_secret:
         # No creds means we can't verify ownership, so we must not bind anything.
-        logger.warning("stamphog github: STAMPFN_GITHUB_APP_CLIENT_ID/SECRET unset, cannot verify installation")
+        logger.warning("stamp github: STAMPFN_GITHUB_APP_CLIENT_ID/SECRET unset, cannot verify installation")
         return None
 
     # github.com/login is the App's OAuth host, not api.github.com, so it goes over plain requests
@@ -232,12 +232,12 @@ def exchange_oauth_code_for_user_token(code: str) -> str | None:
     try:
         data = response.json()
     except ValueError:
-        logger.warning("stamphog github: non-JSON response exchanging OAuth code", status_code=response.status_code)
+        logger.warning("stamp github: non-JSON response exchanging OAuth code", status_code=response.status_code)
         return None
     access_token = data.get("access_token")
     if not access_token:
         # Never log token/error bodies verbatim — just the coarse GitHub error slug.
-        logger.warning("stamphog github: OAuth code exchange returned no access_token", error=data.get("error"))
+        logger.warning("stamp github: OAuth code exchange returned no access_token", error=data.get("error"))
         return None
     return str(access_token)
 
@@ -249,7 +249,7 @@ def list_user_installations(user_access_token: str) -> list[dict[str, str]]:
     THIS App the user can access — the discovery primitive for the authorize-first connect flow, where
     no installation_id rides in the callback. Authenticated with the user token, so it is identity-blind
     on the egress budget (no ``installation_id`` passed to the gate) — GitHub meters it against the user,
-    not the installation. Raises :class:`StamphogGitHubError` on an unexpected status so the caller fails
+    not the installation. Raises :class:`StampGitHubError` on an unexpected status so the caller fails
     closed rather than silently treating an API hiccup as "no installations".
     """
     installations: list[dict[str, str]] = []
@@ -265,16 +265,16 @@ def list_user_installations(user_access_token: str) -> list[dict[str, str]]:
         )
         raise_if_github_rate_limited(response)
         if response.status_code != 200:
-            raise StamphogGitHubError(
+            raise StampGitHubError(
                 f"Failed to list user installations: {response.text[:200]}", status_code=response.status_code
             )
         try:
             data = response.json()
         except ValueError as exc:
-            raise StamphogGitHubError("Non-JSON response listing user installations") from exc
+            raise StampGitHubError("Non-JSON response listing user installations") from exc
         page_installations = data.get("installations") if isinstance(data, dict) else None
         if not isinstance(page_installations, list):
-            raise StamphogGitHubError("Unexpected user installations payload")
+            raise StampGitHubError("Unexpected user installations payload")
         for installation in page_installations:
             if not isinstance(installation, dict) or installation.get("id") is None:
                 continue
@@ -293,7 +293,7 @@ def user_can_access_installation(installation_id: str, user_access_token: str) -
     """Whether the OAuth'd user can reach the given App installation.
 
     Built on :func:`list_user_installations`: the submitted id must be among the installations visible to
-    the user's token. Raises :class:`StamphogGitHubError` on an unexpected status (via the underlying
+    the user's token. Raises :class:`StampGitHubError` on an unexpected status (via the underlying
     call) so the caller fails closed rather than silently treating an API hiccup as "no access".
     """
     return any(
@@ -308,7 +308,7 @@ def list_user_accessible_repositories(installation_id: str, user_access_token: s
     installation token. The installation covers every repo the installer selected, but a given user may
     only be able to reach a subset; binding the full installation set would let a user who can see one
     repo attach repos they can't access. This endpoint returns only the user-visible subset. Raises
-    :class:`StamphogGitHubError` on an unexpected status so the caller fails closed.
+    :class:`StampGitHubError` on an unexpected status so the caller fails closed.
     """
     full_names: list[str] = []
     for page in range(1, _MAX_PAGES + 1):
@@ -323,17 +323,17 @@ def list_user_accessible_repositories(installation_id: str, user_access_token: s
         )
         raise_if_github_rate_limited(response)
         if response.status_code != 200:
-            raise StamphogGitHubError(
+            raise StampGitHubError(
                 f"Failed to list user-accessible installation repositories: {response.text[:200]}",
                 status_code=response.status_code,
             )
         try:
             data = response.json()
         except ValueError as exc:
-            raise StamphogGitHubError("Non-JSON response listing user installation repositories") from exc
+            raise StampGitHubError("Non-JSON response listing user installation repositories") from exc
         repositories = data.get("repositories") if isinstance(data, dict) else None
         if not isinstance(repositories, list):
-            raise StamphogGitHubError("Unexpected user installation repositories payload")
+            raise StampGitHubError("Unexpected user installation repositories payload")
         for repo in repositories:
             full_name = repo.get("full_name") if isinstance(repo, dict) else None
             if isinstance(full_name, str) and full_name:
@@ -343,8 +343,8 @@ def list_user_accessible_repositories(installation_id: str, user_access_token: s
     return sorted(set(full_names))
 
 
-class StamphogGitHubClient:
-    """Installation-scoped GitHub client for one Stamphog App installation.
+class StampGitHubClient:
+    """Installation-scoped GitHub client for one Stamp App installation.
 
     Holds an installation id, mints and caches its installation token, and exposes the narrow set of
     read/write operations the reviewer needs. Stateless beyond the cached token, so callers construct
@@ -357,7 +357,7 @@ class StamphogGitHubClient:
     # --- Installation token lifecycle ---
 
     def _token_cache_key(self) -> str:
-        return f"stamphog:github:installation_token:{self.installation_id}"
+        return f"stamp:github:installation_token:{self.installation_id}"
 
     def _mint_installation_token(self) -> tuple[str, int]:
         """Mint a fresh installation token via the App JWT. Returns ``(token, expires_at_epoch)``."""
@@ -370,23 +370,23 @@ class StamphogGitHubClient:
             timeout=10,
         )
         if response.status_code != 201:
-            raise StamphogGitHubError(
-                f"Failed to mint Stamphog installation token: {response.text[:300]}",
+            raise StampGitHubError(
+                f"Failed to mint Stamp installation token: {response.text[:300]}",
                 status_code=response.status_code,
             )
         try:
             data = response.json()
         except ValueError as exc:
-            raise StamphogGitHubError("Non-JSON response minting installation token") from exc
+            raise StampGitHubError("Non-JSON response minting installation token") from exc
 
         token = data.get("token")
         expires_at = data.get("expires_at")
         if not token or not expires_at:
-            raise StamphogGitHubError("Installation token response missing token/expires_at")
+            raise StampGitHubError("Installation token response missing token/expires_at")
         try:
             expires_epoch = int(datetime.fromisoformat(expires_at.replace("Z", "+00:00")).timestamp())
         except ValueError as exc:
-            raise StamphogGitHubError(f"Invalid expires_at from GitHub: {expires_at}") from exc
+            raise StampGitHubError(f"Invalid expires_at from GitHub: {expires_at}") from exc
         return token, expires_epoch
 
     def _get_installation_token(self, *, force_refresh: bool = False) -> str:
@@ -449,17 +449,17 @@ class StamphogGitHubClient:
             # Only trusted installation-token responses feed the limiter's per-installation tier tracking.
             remember_observed_core_limit(self.installation_id, response)
             if response.status_code == 401 and attempt == 0:
-                logger.info("stamphog github: 401, refreshing installation token", installation_id=self.installation_id)
+                logger.info("stamp github: 401, refreshing installation token", installation_id=self.installation_id)
                 continue
             raise_if_github_rate_limited(response)
             return response
-        raise StamphogGitHubError(f"Stamphog GitHub request exhausted retries on {path}")
+        raise StampGitHubError(f"Stamp GitHub request exhausted retries on {path}")
 
     def _json(self, response: requests.Response, path: str) -> Any:
         try:
             return response.json()
         except ValueError as exc:
-            raise StamphogGitHubError(f"Non-JSON response on {path}", status_code=response.status_code) from exc
+            raise StampGitHubError(f"Non-JSON response on {path}", status_code=response.status_code) from exc
 
     # --- Read operations ---
 
@@ -468,7 +468,7 @@ class StamphogGitHubClient:
         path = f"/repos/{repo}/pulls/{number}"
         response = self._request("GET", path, endpoint="/repos/{owner}/{repo}/pulls/{pull_number}")
         if response.status_code != 200:
-            raise StamphogGitHubError(
+            raise StampGitHubError(
                 f"Failed to fetch PR {repo}#{number}: {response.text[:300]}", status_code=response.status_code
             )
         return self._json(response, path)
@@ -492,7 +492,7 @@ class StamphogGitHubClient:
                 params={"per_page": _PER_PAGE, "page": page},
             )
             if response.status_code != 200:
-                raise StamphogGitHubError(
+                raise StampGitHubError(
                     f"Failed to fetch reactions for {repo}#{number}: {response.text[:300]}",
                     status_code=response.status_code,
                 )
@@ -507,7 +507,7 @@ class StamphogGitHubClient:
             )
             if len(items) < _PER_PAGE:
                 return reactions
-        raise StamphogGitHubError(
+        raise StampGitHubError(
             f"Reactions on {repo}#{number} exceed {_MAX_PAGES * _PER_PAGE}; refusing to evaluate a truncated list"
         )
 
@@ -532,11 +532,11 @@ class StamphogGitHubClient:
                 json_body={"content": content},
             )
         except Exception:
-            logger.warning("stamphog github: failed to add PR reaction", repo=repo, pr_number=number, exc_info=True)
+            logger.warning("stamp github: failed to add PR reaction", repo=repo, pr_number=number, exc_info=True)
             return None
         if response.status_code not in (200, 201):
             logger.warning(
-                "stamphog github: unexpected status adding PR reaction",
+                "stamp github: unexpected status adding PR reaction",
                 repo=repo,
                 pr_number=number,
                 status_code=response.status_code,
@@ -544,8 +544,8 @@ class StamphogGitHubClient:
             return None
         try:
             data = self._json(response, path)
-        except StamphogGitHubError:
-            logger.warning("stamphog github: non-JSON response adding PR reaction", repo=repo, pr_number=number)
+        except StampGitHubError:
+            logger.warning("stamp github: non-JSON response adding PR reaction", repo=repo, pr_number=number)
             return None
         reaction_id = data.get("id") if isinstance(data, dict) else None
         return reaction_id if isinstance(reaction_id, int) else None
@@ -568,11 +568,11 @@ class StamphogGitHubClient:
                 endpoint="/repos/{owner}/{repo}/issues/{issue_number}/reactions/{reaction_id}",
             )
         except Exception:
-            logger.warning("stamphog github: failed to remove PR reaction", repo=repo, pr_number=number, exc_info=True)
+            logger.warning("stamp github: failed to remove PR reaction", repo=repo, pr_number=number, exc_info=True)
             return
         if response.status_code not in (200, 204, 404):
             logger.warning(
-                "stamphog github: unexpected status removing PR reaction",
+                "stamp github: unexpected status removing PR reaction",
                 repo=repo,
                 pr_number=number,
                 status_code=response.status_code,
@@ -590,7 +590,7 @@ class StamphogGitHubClient:
         if response.status_code == 404:
             return "none"
         if response.status_code != 200:
-            raise StamphogGitHubError(
+            raise StampGitHubError(
                 f"Failed to fetch collaborator permission for {username} on {repo}: {response.text[:300]}",
                 status_code=response.status_code,
             )
@@ -611,13 +611,13 @@ class StamphogGitHubClient:
                 params={"per_page": _PER_PAGE, "page": page},
             )
             if response.status_code != 200:
-                raise StamphogGitHubError(
+                raise StampGitHubError(
                     f"Failed to fetch PR files {repo}#{number}: {response.text[:300]}",
                     status_code=response.status_code,
                 )
             page_files = self._json(response, f"/repos/{repo}/pulls/{number}/files")
             if not isinstance(page_files, list):
-                raise StamphogGitHubError(f"Unexpected PR files payload for {repo}#{number}")
+                raise StampGitHubError(f"Unexpected PR files payload for {repo}#{number}")
             files.extend(file for file in page_files if isinstance(file, dict))
             if len(page_files) < _PER_PAGE:
                 break
@@ -640,20 +640,20 @@ class StamphogGitHubClient:
                 params={"per_page": _PER_PAGE, "page": page},
             )
             if response.status_code != 200:
-                raise StamphogGitHubError(
+                raise StampGitHubError(
                     f"Failed to fetch PR reviews {repo}#{number}: {response.text[:300]}",
                     status_code=response.status_code,
                 )
             page_reviews = self._json(response, f"/repos/{repo}/pulls/{number}/reviews")
             if not isinstance(page_reviews, list):
-                raise StamphogGitHubError(f"Unexpected PR reviews payload for {repo}#{number}")
+                raise StampGitHubError(f"Unexpected PR reviews payload for {repo}#{number}")
             reviews.extend(review for review in page_reviews if isinstance(review, dict))
             if len(page_reviews) < _PER_PAGE:
                 return reviews
         # Past the cap the tail is invisible — and list_own_active_approvals rides this list for the
         # orphan sweeps, where a silently missing approval defeats the guarantee. Fail closed like
         # the thread fetch rather than pretending the truncated list is complete.
-        raise StamphogGitHubError(
+        raise StampGitHubError(
             f"PR reviews on {repo}#{number} exceed {_MAX_PAGES} pages; refusing to act on a truncated list"
         )
 
@@ -677,7 +677,7 @@ class StamphogGitHubClient:
             # otherwise be invisible until an orphan approval stands over unreviewed commits.
             if settings.STAMPFN_GITHUB_APP_PRIVATE_KEY:
                 logger.warning(
-                    "stamphog github: STAMPFN_GITHUB_APP_SLUG unset with App credentials configured — "
+                    "stamp github: STAMPFN_GITHUB_APP_SLUG unset with App credentials configured — "
                     "own-approval sweeps and adopt-before-post are disabled",
                     repo=repo,
                     pr_number=number,
@@ -710,17 +710,17 @@ class StamphogGitHubClient:
                 params={"per_page": _PER_PAGE, "page": page},
             )
             if response.status_code != 200:
-                raise StamphogGitHubError(
+                raise StampGitHubError(
                     f"Failed to fetch PR discussion {repo}#{number}: {response.text[:300]}",
                     status_code=response.status_code,
                 )
             page_comments = self._json(response, f"/repos/{repo}/issues/{number}/comments")
             if not isinstance(page_comments, list):
-                raise StamphogGitHubError(f"Unexpected PR discussion payload for {repo}#{number}")
+                raise StampGitHubError(f"Unexpected PR discussion payload for {repo}#{number}")
             comments.extend(comment for comment in page_comments if isinstance(comment, dict))
             if len(page_comments) < _PER_PAGE:
                 return comments
-        raise StamphogGitHubError(
+        raise StampGitHubError(
             f"PR discussion on {repo}#{number} exceeds {_MAX_PAGES * _PER_PAGE} comments; "
             "refusing to review with a truncated discussion"
         )
@@ -743,7 +743,7 @@ class StamphogGitHubClient:
         payload that rides in ``run.output``.
         """
         if "/" not in repo:
-            raise StamphogGitHubError(f"Expected an owner/name repo, got {repo!r}")
+            raise StampGitHubError(f"Expected an owner/name repo, got {repo!r}")
         owner, name = repo.split("/", 1)
         threads: list[dict] = []
         cursor: str | None = None
@@ -758,16 +758,16 @@ class StamphogGitHubClient:
                 },
             )
             if response.status_code != 200:
-                raise StamphogGitHubError(
+                raise StampGitHubError(
                     f"Failed to fetch review threads for {repo}#{number}: {response.text[:300]}",
                     status_code=response.status_code,
                 )
             data = self._json(response, "/graphql")
             if not isinstance(data, dict) or data.get("errors"):
-                raise StamphogGitHubError(f"GraphQL errors fetching review threads for {repo}#{number}")
+                raise StampGitHubError(f"GraphQL errors fetching review threads for {repo}#{number}")
             pull_request = ((data.get("data") or {}).get("repository") or {}).get("pullRequest")
             if not isinstance(pull_request, dict):
-                raise StamphogGitHubError(f"Unexpected review-threads payload for {repo}#{number}")
+                raise StampGitHubError(f"Unexpected review-threads payload for {repo}#{number}")
             review_threads = pull_request.get("reviewThreads") or {}
             for node in review_threads.get("nodes") or []:
                 if not isinstance(node, dict):
@@ -797,7 +797,7 @@ class StamphogGitHubClient:
             if not page_info.get("hasNextPage"):
                 return threads
             cursor = page_info.get("endCursor")
-        raise StamphogGitHubError(
+        raise StampGitHubError(
             f"Review threads on {repo}#{number} exceed {_MAX_PAGES} pages; refusing to review a truncated list"
         )
 
@@ -811,7 +811,7 @@ class StamphogGitHubClient:
         rather than returning a truncated thread the reviewer would read as complete.
         """
         if not thread_id:
-            raise StamphogGitHubError(
+            raise StampGitHubError(
                 f"A review thread on {repo}#{number} overflows its comment window but carries no node id"
             )
         collected: list[dict] = []
@@ -823,23 +823,23 @@ class StamphogGitHubClient:
                 json_body={"query": _THREAD_COMMENTS_QUERY, "variables": {"id": thread_id, "cursor": cursor}},
             )
             if response.status_code != 200:
-                raise StamphogGitHubError(
+                raise StampGitHubError(
                     f"Failed to fetch thread comments for {repo}#{number}: {response.text[:300]}",
                     status_code=response.status_code,
                 )
             data = self._json(response, "/graphql")
             if not isinstance(data, dict) or data.get("errors"):
-                raise StamphogGitHubError(f"GraphQL errors fetching thread comments for {repo}#{number}")
+                raise StampGitHubError(f"GraphQL errors fetching thread comments for {repo}#{number}")
             thread_node = (data.get("data") or {}).get("node")
             if not isinstance(thread_node, dict):
-                raise StamphogGitHubError(f"Unexpected thread-comments payload for {repo}#{number}")
+                raise StampGitHubError(f"Unexpected thread-comments payload for {repo}#{number}")
             comment_page = thread_node.get("comments") or {}
             collected.extend(_parse_review_thread_comments(comment_page.get("nodes") or []))
             page_info = comment_page.get("pageInfo") or {}
             if not page_info.get("hasNextPage"):
                 return collected
             cursor = page_info.get("endCursor")
-        raise StamphogGitHubError(
+        raise StampGitHubError(
             f"A review thread on {repo}#{number} exceeds {_MAX_PAGES} comment pages; "
             "refusing to review a truncated thread"
         )
@@ -861,14 +861,14 @@ class StamphogGitHubClient:
                 params={"per_page": _PER_PAGE, "page": page},
             )
             if response.status_code != 200:
-                raise StamphogGitHubError(
+                raise StampGitHubError(
                     f"Failed to fetch check runs {repo}@{head_sha}: {response.text[:300]}",
                     status_code=response.status_code,
                 )
             data = self._json(response, f"/repos/{repo}/commits/{head_sha}/check-runs")
             page_runs = data.get("check_runs") if isinstance(data, dict) else None
             if not isinstance(page_runs, list):
-                raise StamphogGitHubError(f"Unexpected check runs payload for {repo}@{head_sha}")
+                raise StampGitHubError(f"Unexpected check runs payload for {repo}@{head_sha}")
             check_runs.extend(run for run in page_runs if isinstance(run, dict))
             if len(page_runs) < _PER_PAGE:
                 break
@@ -896,11 +896,11 @@ class StamphogGitHubClient:
                     params={"q": query, "per_page": _PER_PAGE, "page": page},
                 )
             except Exception:
-                logger.warning("stamphog_github_author_prs_request_failed", repo=repo, author=author, exc_info=True)
+                logger.warning("stamp_github_author_prs_request_failed", repo=repo, author=author, exc_info=True)
                 break
             if response.status_code != 200:
                 logger.warning(
-                    "stamphog_github_author_prs_http_error",
+                    "stamp_github_author_prs_http_error",
                     repo=repo,
                     author=author,
                     status_code=response.status_code,
@@ -934,14 +934,14 @@ class StamphogGitHubClient:
                 params={"per_page": _PER_PAGE, "page": page},
             )
             if response.status_code != 200:
-                raise StamphogGitHubError(
+                raise StampGitHubError(
                     f"Failed to list installation repositories: {response.text[:300]}",
                     status_code=response.status_code,
                 )
             data = self._json(response, "/installation/repositories")
             repositories = data.get("repositories") if isinstance(data, dict) else None
             if not isinstance(repositories, list):
-                raise StamphogGitHubError("Unexpected installation repositories payload")
+                raise StampGitHubError("Unexpected installation repositories payload")
             for repo in repositories:
                 full_name = repo.get("full_name") if isinstance(repo, dict) else None
                 if isinstance(full_name, str) and full_name:
@@ -966,7 +966,7 @@ class StamphogGitHubClient:
         if response.status_code == 404:
             return None
         if response.status_code != 200:
-            raise StamphogGitHubError(
+            raise StampGitHubError(
                 f"Failed to fetch {repo}:{path}: {response.text[:200]}", status_code=response.status_code
             )
         # The raw media type yields the body directly. Some proxies/older responses may still send the
@@ -978,7 +978,7 @@ class StamphogGitHubClient:
                 try:
                     return base64.b64decode(data["content"]).decode("utf-8")
                 except (binascii.Error, UnicodeDecodeError) as exc:
-                    raise StamphogGitHubError(f"Failed to decode base64 contents for {repo}:{path}") from exc
+                    raise StampGitHubError(f"Failed to decode base64 contents for {repo}:{path}") from exc
         return response.text
 
     # --- Write operations ---
@@ -997,7 +997,7 @@ class StamphogGitHubClient:
             json_body={"event": "APPROVE", "body": body, "commit_id": commit_id},
         )
         if response.status_code not in (200, 201):
-            raise StamphogGitHubError(
+            raise StampGitHubError(
                 f"Failed to approve PR {repo}#{number}: {response.text[:300]}", status_code=response.status_code
             )
         return self._json(response, path)
@@ -1016,10 +1016,10 @@ class StamphogGitHubClient:
             endpoint="/repos/{owner}/{repo}/issues/{issue_number}/labels/{name}",
         )
         if response.status_code == 404:
-            logger.info("stamphog github: label already absent, skipping removal", repo=repo, pr_number=number)
+            logger.info("stamp github: label already absent, skipping removal", repo=repo, pr_number=number)
             return
         if response.status_code != 200:
-            raise StamphogGitHubError(
+            raise StampGitHubError(
                 f"Failed to remove label from {repo}#{number}: {response.text[:200]}",
                 status_code=response.status_code,
             )
@@ -1028,9 +1028,9 @@ class StamphogGitHubClient:
         """Add a label to a PR (``POST .../issues/{number}/labels``).
 
         A 404 (repo not found) or 422 (label does not exist on the repo) is swallowed, so a vendored
-        stamphog in another repo never raises over a label — e.g. ``reviewhog`` — that isn't set up
-        there. Any other non-success raises ``StamphogGitHubError``; see ``post_verdict`` for how the
-        ReviewHog handoff caller treats that as best-effort.
+        stamp in another repo never raises over a label — e.g. ``review`` — that isn't set up
+        there. Any other non-success raises ``StampGitHubError``; see ``post_verdict`` for how the
+        Review handoff caller treats that as best-effort.
         """
         path = f"/repos/{repo}/issues/{number}/labels"
         response = self._request(
@@ -1041,14 +1041,14 @@ class StamphogGitHubClient:
         )
         if response.status_code in (404, 422):
             logger.info(
-                "stamphog github: reviewhog label unavailable on repo, skipping handoff",
+                "stamp github: review label unavailable on repo, skipping handoff",
                 repo=repo,
                 pr_number=number,
                 status_code=response.status_code,
             )
             return
         if response.status_code not in (200, 201):
-            raise StamphogGitHubError(
+            raise StampGitHubError(
                 f"Failed to add label to {repo}#{number}: {response.text[:200]}",
                 status_code=response.status_code,
             )
@@ -1056,7 +1056,7 @@ class StamphogGitHubClient:
     def dismiss_pr_review(self, repo: str, pr_number: int, review_id: int, message: str) -> None:
         """Dismiss a previously submitted review (``PUT .../reviews/{review_id}/dismissals``).
 
-        Used to retract a stale stamphog APPROVE once the PR head moves — GitHub keeps an approval
+        Used to retract a stale stamp APPROVE once the PR head moves — GitHub keeps an approval
         satisfying required reviews until it is explicitly dismissed. A 422 means the review is no
         longer active (already dismissed, or the PR state changed underneath us), a benign no-op we
         swallow; any other non-success raises so a real failure isn't mistaken for a dismissal.
@@ -1070,20 +1070,20 @@ class StamphogGitHubClient:
         )
         if response.status_code == 422:
             logger.info(
-                "stamphog github: review no longer active, skipping dismissal",
+                "stamp github: review no longer active, skipping dismissal",
                 repo=repo,
                 pr_number=pr_number,
                 review_id=review_id,
             )
             return
         if response.status_code != 200:
-            raise StamphogGitHubError(
+            raise StampGitHubError(
                 f"Failed to dismiss review {review_id} on {repo}#{pr_number}: {response.text[:200]}",
                 status_code=response.status_code,
             )
 
     def upsert_sticky_comment(self, repo: str, number: int, body: str) -> dict:
-        """Create or update Stamphog's single status comment on a PR, identified by a hidden marker.
+        """Create or update Stamp's single status comment on a PR, identified by a hidden marker.
 
         Finds an existing comment carrying :data:`STICKY_COMMENT_MARKER` and edits it in place; otherwise
         posts a new one. The marker is prepended so it survives round-trips but stays invisible in the
@@ -1100,7 +1100,7 @@ class StamphogGitHubClient:
                 json_body={"body": marked_body},
             )
             if response.status_code != 200:
-                raise StamphogGitHubError(
+                raise StampGitHubError(
                     f"Failed to update sticky comment on {repo}#{number}: {response.text[:200]}",
                     status_code=response.status_code,
                 )
@@ -1114,7 +1114,7 @@ class StamphogGitHubClient:
             json_body={"body": marked_body},
         )
         if response.status_code != 201:
-            raise StamphogGitHubError(
+            raise StampGitHubError(
                 f"Failed to create sticky comment on {repo}#{number}: {response.text[:200]}",
                 status_code=response.status_code,
             )
@@ -1140,12 +1140,12 @@ class StamphogGitHubClient:
                 json_body={"query": query, "variables": {"org": org, "login": login}},
             )
         except Exception:
-            logger.warning("stamphog_github_team_lookup_request_failed", org=org, login=login, exc_info=True)
+            logger.warning("stamp_github_team_lookup_request_failed", org=org, login=login, exc_info=True)
             return []
 
         if response.status_code != 200:
             logger.warning(
-                "stamphog_github_team_lookup_http_error",
+                "stamp_github_team_lookup_http_error",
                 org=org,
                 login=login,
                 status_code=response.status_code,
@@ -1155,13 +1155,13 @@ class StamphogGitHubClient:
 
         try:
             data = self._json(response, "/graphql")
-        except StamphogGitHubError:
-            logger.warning("stamphog_github_team_lookup_non_json_response", org=org, login=login)
+        except StampGitHubError:
+            logger.warning("stamp_github_team_lookup_non_json_response", org=org, login=login)
             return []
 
         if not isinstance(data, dict) or data.get("errors"):
             logger.warning(
-                "stamphog_github_team_lookup_graphql_errors",
+                "stamp_github_team_lookup_graphql_errors",
                 org=org,
                 login=login,
                 errors=(data or {}).get("errors") if isinstance(data, dict) else None,
@@ -1170,7 +1170,7 @@ class StamphogGitHubClient:
 
         organization = (data.get("data") or {}).get("organization")
         if not organization:
-            logger.warning("stamphog_github_team_lookup_null_organization", org=org, login=login)
+            logger.warning("stamp_github_team_lookup_null_organization", org=org, login=login)
             return []
 
         nodes = (organization.get("teams") or {}).get("nodes") or []
@@ -1192,13 +1192,13 @@ class StamphogGitHubClient:
                 params={"per_page": _PER_PAGE, "page": page},
             )
             if response.status_code != 200:
-                raise StamphogGitHubError(
+                raise StampGitHubError(
                     f"Failed to list comments on {repo}#{number}: {response.text[:200]}",
                     status_code=response.status_code,
                 )
             comments = self._json(response, f"/repos/{repo}/issues/{number}/comments")
             if not isinstance(comments, list):
-                raise StamphogGitHubError(f"Unexpected comments payload for {repo}#{number}")
+                raise StampGitHubError(f"Unexpected comments payload for {repo}#{number}")
             for comment in comments:
                 if not (isinstance(comment, dict) and STICKY_COMMENT_MARKER in (comment.get("body") or "")):
                     continue

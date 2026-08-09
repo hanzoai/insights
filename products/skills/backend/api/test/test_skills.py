@@ -107,7 +107,7 @@ class TestLLMSkillAPI(APIBaseTest):
 
     @parameterized.expand(
         [
-            ("review_hog_prefix", "review-script-perspective-custom-x", "review_hog"),
+            ("review_prefix", "review-script-perspective-custom-x", "review"),
             ("scout_prefix", "signals-scout-custom-x", "scout"),
             ("plain_name", "my-plain-skill", ""),
         ]
@@ -150,7 +150,7 @@ class TestLLMSkillAPI(APIBaseTest):
             ("consecutive_hyphens", "my--skill"),
             ("reserved_new", "new"),
             ("reserved_scouts", "scouts"),
-            ("reserved_review_hog", "review-script"),
+            ("reserved_review", "review-script"),
         ]
     )
     def test_create_skill_validates_name_format(self, _label, skill_name):

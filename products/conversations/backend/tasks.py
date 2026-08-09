@@ -99,16 +99,16 @@ from products.conversations.backend.teams import (
 from products.conversations.backend.teams_attachments import extract_teams_graph_images
 from products.conversations.backend.teams_formatting import build_teams_reply_html
 
-from .support_slack import SUPPORT_SLACK_ALLOWED_HOST_SUFFIXES, supporthog_missing_file_scopes
+from .support_slack import SUPPORT_SLACK_ALLOWED_HOST_SUFFIXES, support_missing_file_scopes
 
 logger = structlog.get_logger(__name__)
 SUPPORTFN_EVENT_IDEMPOTENCY_TTL_SECONDS = 6 * 60
-SUPPORTFN_EVENT_IDEMPOTENCY_KEY_PREFIX = "supporthog:slack:event:"
-SUPPORTFN_TEAMS_EVENT_IDEMPOTENCY_KEY_PREFIX = "supporthog:teams:event:"
-SUPPORTFN_GITHUB_EVENT_IDEMPOTENCY_KEY_PREFIX = "supporthog:github:event:"
+SUPPORTFN_EVENT_IDEMPOTENCY_KEY_PREFIX = "support:slack:event:"
+SUPPORTFN_TEAMS_EVENT_IDEMPOTENCY_KEY_PREFIX = "support:teams:event:"
+SUPPORTFN_GITHUB_EVENT_IDEMPOTENCY_KEY_PREFIX = "support:github:event:"
 
 
-def _is_duplicate_supporthog_event(event_id: str) -> bool:
+def _is_duplicate_support_event(event_id: str) -> bool:
     key = f"{SUPPORTFN_EVENT_IDEMPOTENCY_KEY_PREFIX}{event_id}"
     return not cache.add(key, True, timeout=SUPPORTFN_EVENT_IDEMPOTENCY_TTL_SECONDS)
 
@@ -127,9 +127,9 @@ def is_duplicate_teams_event(activity_id: str) -> bool:
 
 @shared_task(ignore_result=True, max_retries=3, default_retry_delay=5)
 @skip_team_scope_audit
-def process_supporthog_event(event: dict[str, Any], slack_team_id: str, event_id: str | None = None) -> None:
-    if event_id and _is_duplicate_supporthog_event(event_id):
-        logger.info("supporthog_event_duplicate_skipped", event_id=event_id)
+def process_support_event(event: dict[str, Any], slack_team_id: str, event_id: str | None = None) -> None:
+    if event_id and _is_duplicate_support_event(event_id):
+        logger.info("support_event_duplicate_skipped", event_id=event_id)
         return
 
     config = (
@@ -138,14 +138,14 @@ def process_supporthog_event(event: dict[str, Any], slack_team_id: str, event_id
         .first()
     )
     if not config:
-        logger.warning("supporthog_no_team", slack_team_id=slack_team_id)
+        logger.warning("support_no_team", slack_team_id=slack_team_id)
         return
 
     team = config.team
     support_settings = team.conversations_settings or {}
     if not support_settings.get("slack_enabled"):
         logger.info(
-            "supporthog_support_not_configured",
+            "support_support_not_configured",
             team_id=team.id,
             slack_team_id=slack_team_id,
         )
@@ -165,14 +165,14 @@ def process_supporthog_event(event: dict[str, Any], slack_team_id: str, event_id
             handle_member_left_channel(event, team, slack_team_id)
     except Exception as e:
         logger.exception(
-            "supporthog_event_handler_failed",
+            "support_event_handler_failed",
             event_type=event_type,
             error=str(e),
         )
-        raise cast(Any, process_supporthog_event).retry(exc=e)
+        raise cast(Any, process_support_event).retry(exc=e)
 
 
-def _delete_supporthog_prompt(team: Team, channel: str, message_ts: str) -> None:
+def _delete_support_prompt(team: Team, channel: str, message_ts: str) -> None:
     """Delete the "open a ticket?" prompt message after a "No thanks" click.
 
     Best-effort: a failure here never blocks anything else.
@@ -182,10 +182,10 @@ def _delete_supporthog_prompt(team: Team, channel: str, message_ts: str) -> None
     try:
         get_slack_client(team).chat_delete(channel=channel, ts=message_ts)
     except Exception:
-        logger.warning("supporthog_interactivity_prompt_delete_failed", exc_info=True)
+        logger.warning("support_interactivity_prompt_delete_failed", exc_info=True)
 
 
-def _update_supporthog_prompt(team: Team, channel: str, message_ts: str, text: str) -> bool:
+def _update_support_prompt(team: Team, channel: str, message_ts: str, text: str) -> bool:
     """Replace the "open a ticket?" prompt in place with a new status line (buttons removed).
 
     Never raises — a failure here must not block the ticket creation that already ran —
@@ -203,7 +203,7 @@ def _update_supporthog_prompt(team: Team, channel: str, message_ts: str, text: s
         )
         return True
     except Exception:
-        logger.warning("supporthog_interactivity_prompt_update_failed", exc_info=True)
+        logger.warning("support_interactivity_prompt_update_failed", exc_info=True)
         return False
 
 
@@ -218,7 +218,7 @@ def _post_dismiss_acknowledgment(team: Team, channel: str, user: str, thread_ts:
     try:
         client = get_slack_client(team)
         bot_id = get_bot_user_id(client)
-        mention = f"<@{bot_id}>" if bot_id else "the SupportHog bot"
+        mention = f"<@{bot_id}>" if bot_id else "the Support bot"
         client.chat_postEphemeral(
             channel=channel,
             user=user,
@@ -226,12 +226,12 @@ def _post_dismiss_acknowledgment(team: Team, channel: str, user: str, thread_ts:
             text=f"Got it — if you change your mind, react with :{emoji}: or tag {mention}.",
         )
     except Exception:
-        logger.warning("supporthog_interactivity_dismiss_ack_failed", exc_info=True)
+        logger.warning("support_interactivity_dismiss_ack_failed", exc_info=True)
 
 
 @shared_task(ignore_result=True, max_retries=3, default_retry_delay=5)
 @skip_team_scope_audit
-def process_supporthog_interactivity(payload: dict[str, Any], slack_team_id: str) -> None:
+def process_support_interactivity(payload: dict[str, Any], slack_team_id: str) -> None:
     """Handle a button click from the opt-in "open a ticket?" confirmation prompt."""
     config = (
         TeamConversationsSlackConfig.objects.filter(slack_team_id=slack_team_id, slack_bot_token__isnull=False)
@@ -239,7 +239,7 @@ def process_supporthog_interactivity(payload: dict[str, Any], slack_team_id: str
         .first()
     )
     if not config:
-        logger.warning("supporthog_interactivity_no_team", slack_team_id=slack_team_id)
+        logger.warning("support_interactivity_no_team", slack_team_id=slack_team_id)
         return
 
     team = config.team
@@ -277,7 +277,7 @@ def process_supporthog_interactivity(payload: dict[str, Any], slack_team_id: str
         click_properties = nudge_event_properties(source_channel, source_message_ts, clicker, classifier_verdict)
 
         if action_id == TICKET_CONFIRM_ACTION_DISMISS:
-            _delete_supporthog_prompt(team, prompt_channel, prompt_ts)
+            _delete_support_prompt(team, prompt_channel, prompt_ts)
             _post_dismiss_acknowledgment(team, prompt_channel, clicker, source_message_ts)
             # Don't pester them again in this channel for a while.
             if clicker:
@@ -292,12 +292,12 @@ def process_supporthog_interactivity(payload: dict[str, Any], slack_team_id: str
                 # a progress line right away so the click visibly landed and repeat clicks
                 # stop. First attempt only, and only while no sibling delivery has already
                 # resolved the prompt (a stale placeholder must not overwrite a confirmation).
-                is_retry = bool(getattr(cast(Any, process_supporthog_interactivity).request, "retries", 0))
+                is_retry = bool(getattr(cast(Any, process_support_interactivity).request, "retries", 0))
                 ticket_already_open = Ticket.objects.filter(
                     team=team, slack_channel_id=source_channel, slack_thread_ts=source_message_ts
                 ).exists()
                 if not is_retry and not ticket_already_open:
-                    _update_supporthog_prompt(
+                    _update_support_prompt(
                         team, prompt_channel, prompt_ts, ":hourglass_flowing_sand: Opening a ticket…"
                     )
                 try:
@@ -314,19 +314,19 @@ def process_supporthog_interactivity(payload: dict[str, Any], slack_team_id: str
                         # false failure — the re-run resolves to the committed ticket via
                         # the existing-ticket check in create_ticket_from_confirmation.
                         # Genuine failures exhaust retries into the error update below.
-                        raise cast(Any, process_supporthog_interactivity).retry()
+                        raise cast(Any, process_support_interactivity).retry()
                 except Retry:
                     raise
                 except MaxRetriesExceededError:
                     pass
                 except Exception as e:
-                    logger.exception("supporthog_interactivity_create_failed", error=str(e))
+                    logger.exception("support_interactivity_create_failed", error=str(e))
                     # Retry transient failures — the retried run redoes the whole handler,
                     # so the prompt still resolves on eventual success. Once retries are
                     # exhausted, fall through to the error update below rather than leaving
                     # the user staring at live buttons forever.
                     try:
-                        raise cast(Any, process_supporthog_interactivity).retry(exc=e)
+                        raise cast(Any, process_support_interactivity).retry(exc=e)
                     except MaxRetriesExceededError:
                         pass
             # Replace the prompt in place: a confirmation when we have a ticket (created or
@@ -337,14 +337,14 @@ def process_supporthog_interactivity(payload: dict[str, Any], slack_team_id: str
             else:
                 emoji = get_safe_ticket_emoji(support_settings)
                 text = f":warning: Couldn't open a ticket — react with :{emoji}: or @mention us to try again."
-            final_update_ok = _update_supporthog_prompt(team, prompt_channel, prompt_ts, text)
+            final_update_ok = _update_support_prompt(team, prompt_channel, prompt_ts, text)
             if not final_update_ok and prompt_channel and prompt_ts:
                 # The progress placeholder must never be the prompt's last word — if the
                 # final update fails transiently, retry the task (creation is idempotent,
                 # the re-run re-attempts just this update). Once retries are exhausted,
                 # fall through so the funnel event still records the outcome.
                 try:
-                    raise cast(Any, process_supporthog_interactivity).retry()
+                    raise cast(Any, process_support_interactivity).retry()
                 except MaxRetriesExceededError:
                     pass
             # Captured after all retry exits (each retry re-raise leaves the task first),
@@ -499,7 +499,7 @@ def post_reply_to_slack(
                     ticket_id=ticket_id,
                     channel=slack_channel_id,
                     fallback_count=len(unique_urls),
-                    missing_file_scopes=supporthog_missing_file_scopes(team),
+                    missing_file_scopes=support_missing_file_scopes(team),
                 )
 
         logger.info(
@@ -926,7 +926,7 @@ def send_teams_help(self, activity: dict[str, Any], reply: bool = False) -> None
             reply=reply,
         )
     except Exception as exc:
-        logger.exception("supporthog_teams_help_failed", error=str(exc), reply=reply)
+        logger.exception("support_teams_help_failed", error=str(exc), reply=reply)
         raise cast(Any, self).retry(exc=exc)
     if not ok:
         raise cast(Any, self).retry(exc=Exception("teams_help_card_post_failed"))
@@ -938,7 +938,7 @@ def process_teams_event(activity: dict[str, Any], tenant_id: str, activity_id: s
     """Process an inbound Teams Bot Framework activity."""
 
     if activity_id and is_duplicate_teams_event(activity_id):
-        logger.info("supporthog_teams_event_duplicate_skipped", activity_id=activity_id)
+        logger.info("support_teams_event_duplicate_skipped", activity_id=activity_id)
         return
 
     config = (
@@ -947,13 +947,13 @@ def process_teams_event(activity: dict[str, Any], tenant_id: str, activity_id: s
         .first()
     )
     if not config:
-        logger.warning("supporthog_teams_no_team", tenant_id=tenant_id)
+        logger.warning("support_teams_no_team", tenant_id=tenant_id)
         return
 
     team = config.team
     support_settings = team.conversations_settings or {}
     if not support_settings.get("teams_enabled"):
-        logger.info("supporthog_teams_not_configured", team_id=team.id, tenant_id=tenant_id)
+        logger.info("support_teams_not_configured", team_id=team.id, tenant_id=tenant_id)
         return
 
     # Capture the tenant's Bot Framework serviceUrl from any inbound activity so
@@ -970,7 +970,7 @@ def process_teams_event(activity: dict[str, Any], tenant_id: str, activity_id: s
         else:
             handle_teams_message(activity, team, tenant_id)
     except Exception as e:
-        logger.exception("supporthog_teams_event_handler_failed", error=str(e))
+        logger.exception("support_teams_event_handler_failed", error=str(e))
         raise cast(Any, process_teams_event).retry(exc=e)
 
 

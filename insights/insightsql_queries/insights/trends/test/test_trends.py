@@ -261,19 +261,19 @@ class TestTrends(DatastoreTestMixin, APIBaseTest):
                 team=self.team,
                 event="sign up",
                 distinct_id="blabla",
-                properties={"$current_url": "http://hogflix/first"},
+                properties={"$current_url": "http://scriptflix/first"},
             )
             self._create_event(
                 team=self.team,
                 event="sign up",
                 distinct_id="blabla",
-                properties={"$current_url": "http://hogflix/first/"},
+                properties={"$current_url": "http://scriptflix/first/"},
             )
             self._create_event(
                 team=self.team,
                 event="sign up",
                 distinct_id="blabla",
-                properties={"$current_url": "http://hogflix/second"},
+                properties={"$current_url": "http://scriptflix/second"},
             )
 
     def _create_event_count_per_actor_events(self):
@@ -714,7 +714,7 @@ class TestTrends(DatastoreTestMixin, APIBaseTest):
             )
 
         labels = [item["label"] for item in response]
-        assert sorted(labels) == ["http://hogflix/first", "http://hogflix/second"]
+        assert sorted(labels) == ["http://scriptflix/first", "http://scriptflix/second"]
         breakdown_values = [item["breakdown_value"] for item in response]
         assert sorted(breakdown_values) == sorted(labels)
 

@@ -1232,13 +1232,13 @@ class TestCohortCalculationTasks(APIBaseTest):
             patch("products.feature_flags.backend.tasks.update_team_flags_cache") as mock_flags_cache,
             patch(
                 "products.cdp.backend.tasks.insights_functions.refresh_affected_insights_functions"
-            ) as mock_hog_refresh,
+            ) as mock_script_refresh,
         ):
             cohort._safe_save_cohort_state(team_id=self.team.pk, processing_error=None)
 
         mock_dep_cache.assert_not_called()
         mock_flags_cache.delay.assert_not_called()
-        mock_hog_refresh.delay.assert_not_called()
+        mock_script_refresh.delay.assert_not_called()
 
     def test_insert_cohort_from_query_count_updated_on_exception(self) -> None:
         from insights.tasks.calculate_cohort import insert_cohort_from_query

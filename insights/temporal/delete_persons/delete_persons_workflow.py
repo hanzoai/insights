@@ -15,7 +15,7 @@ from insights.temporal.common.heartbeat import Heartbeater
 
 LOGGER = get_logger(__name__)
 
-# Personhog RPC request caps (see proto/personinsights/types/v1/person.proto).
+# Person RPC request caps (see proto/personinsights/types/v1/person.proto).
 GET_PERSONS_MAX_IDS = 250
 DELETE_PERSONS_MAX_UUIDS = 1000
 

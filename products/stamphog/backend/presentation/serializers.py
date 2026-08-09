@@ -1,4 +1,4 @@
-"""DRF serializers for stamphog."""
+"""DRF serializers for stamp."""
 
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field, extend_schema_serializer
@@ -7,7 +7,7 @@ from rest_framework import serializers
 from insights.models.integration import Integration
 
 from ..facade.enums import ChannelResolutionSource, DigestRunStatus, ReviewRunStatus, ReviewVerdict
-from ..models import DigestChannel, DigestRun, PullRequest, ReviewRun, StamphogRepoConfig
+from ..models import DigestChannel, DigestRun, PullRequest, ReviewRun, StampRepoConfig
 
 
 class _GateResultSummarySerializer(serializers.Serializer):
@@ -39,10 +39,10 @@ class _ReviewOutputSummarySerializer(serializers.Serializer):
     must never read over the API. Only these derived, content-free fields are exposed.
     """
 
-    stamphog_version = serializers.CharField(
+    stamp_version = serializers.CharField(
         read_only=True,
         required=False,
-        help_text="Version of the stamphog engine that produced this review, if it reported one.",
+        help_text="Version of the stamp engine that produced this review, if it reported one.",
     )
     reviewer_exit_code = serializers.IntegerField(
         read_only=True,
@@ -51,7 +51,7 @@ class _ReviewOutputSummarySerializer(serializers.Serializer):
     )
 
 
-class StamphogRepoConfigSerializer(serializers.ModelSerializer):
+class StampRepoConfigSerializer(serializers.ModelSerializer):
     def get_fields(self) -> dict[str, serializers.Field]:
         fields = super().get_fields()
         # provider + repository are the config's identity: they resolve inbound webhooks and anchor
@@ -70,7 +70,7 @@ class StamphogRepoConfigSerializer(serializers.ModelSerializer):
         return value
 
     class Meta:
-        model = StamphogRepoConfig
+        model = StampRepoConfig
         fields = [
             "id",
             "provider",
@@ -90,7 +90,7 @@ class StamphogRepoConfigSerializer(serializers.ModelSerializer):
                 "help_text": "SCM provider this config talks to. Defaults to 'github'.",
             },
             "repository": {"help_text": "Repository full name, e.g. 'Insights/insights'."},
-            "enabled": {"help_text": "Whether stamphog actively reviews pull requests for this repo."},
+            "enabled": {"help_text": "Whether stamp actively reviews pull requests for this repo."},
             # Read-only on purpose: an installation id may only ever be set by the verified
             # sync_installation flow, which proves the caller owns the installation before binding it.
             # A client-supplied value on the plain create/update path is ignored, so a manually created
@@ -116,18 +116,18 @@ class StamphogRepoConfigSerializer(serializers.ModelSerializer):
             "trigger_label": {
                 "required": False,
                 "help_text": (
-                    "Pull request label that triggers a review when review_mode is 'label'. Defaults to 'stamphog'."
+                    "Pull request label that triggers a review when review_mode is 'label'. Defaults to 'stamp'."
                 ),
             },
         }
 
 
-class StamphogInstallInfoSerializer(serializers.Serializer):
+class StampInstallInfoSerializer(serializers.Serializer):
     """Static info the frontend needs to render the 'Connect a repository' button."""
 
     app_slug = serializers.CharField(
         read_only=True,
-        help_text="URL-friendly slug of the dedicated Stamphog GitHub App, or blank if unconfigured.",
+        help_text="URL-friendly slug of the dedicated Stamp GitHub App, or blank if unconfigured.",
     )
     install_url = serializers.CharField(
         read_only=True,
@@ -148,7 +148,7 @@ class StamphogInstallInfoSerializer(serializers.Serializer):
     )
 
 
-class StamphogSyncInstallationRequestSerializer(serializers.Serializer):
+class StampSyncInstallationRequestSerializer(serializers.Serializer):
     """Request body for binding a GitHub App installation to the current team.
 
     Always requires the user-to-server OAuth ``code`` (the ownership proof) and the ``state`` token.
@@ -184,7 +184,7 @@ class StamphogSyncInstallationRequestSerializer(serializers.Serializer):
     )
 
 
-class StamphogDiscoveredInstallationSerializer(serializers.Serializer):
+class StampDiscoveredInstallationSerializer(serializers.Serializer):
     """One installation of the App the authorizing user can reach, offered for an explicit pick."""
 
     id = serializers.CharField(read_only=True, help_text="GitHub installation id, as a string.")
@@ -193,10 +193,10 @@ class StamphogDiscoveredInstallationSerializer(serializers.Serializer):
     )
 
 
-class StamphogSyncInstallationResponseSerializer(serializers.Serializer):
+class StampSyncInstallationResponseSerializer(serializers.Serializer):
     """Result of syncing an installation: rows created/kept for this team, plus conflicting repos skipped."""
 
-    synced = StamphogRepoConfigSerializer(
+    synced = StampRepoConfigSerializer(
         many=True,
         read_only=True,
         help_text="Repo configs now bound to this team for the installation (created this call or already present).",
@@ -214,7 +214,7 @@ class StamphogSyncInstallationResponseSerializer(serializers.Serializer):
             "the GitHub install page (install_url). Always false on the explicit installation_id path."
         ),
     )
-    installations = StamphogDiscoveredInstallationSerializer(
+    installations = StampDiscoveredInstallationSerializer(
         many=True,
         read_only=True,
         help_text=(
@@ -226,7 +226,7 @@ class StamphogSyncInstallationResponseSerializer(serializers.Serializer):
     )
 
 
-@extend_schema_serializer(component_name="StamphogPullRequest")
+@extend_schema_serializer(component_name="StampPullRequest")
 class PullRequestSerializer(serializers.ModelSerializer):
     repository = serializers.CharField(
         source="repo_config.repository",
@@ -328,7 +328,7 @@ class ReviewRunSerializer(serializers.ModelSerializer):
     )
     output = serializers.SerializerMethodField(
         help_text=(
-            "Allowlisted, non-sensitive subset of the reviewer output blob (stamphog version, reviewer "
+            "Allowlisted, non-sensitive subset of the reviewer output blob (stamp version, reviewer "
             "exit code). The raw reviewer stdout, PR payload, changed-file patches, and policy file "
             "contents are deliberately excluded — they carry repository content a project member without "
             "repo access must not read."
@@ -340,8 +340,8 @@ class ReviewRunSerializer(serializers.ModelSerializer):
         # Explicit allowlist: never echo reviewer_raw / pr / files / policy_files out of the API.
         raw = obj.output or {}
         summary: dict[str, object] = {}
-        if "stamphog_version" in raw:
-            summary["stamphog_version"] = raw["stamphog_version"]
+        if "stamp_version" in raw:
+            summary["stamp_version"] = raw["stamp_version"]
         if "reviewer_exit_code" in raw:
             summary["reviewer_exit_code"] = raw["reviewer_exit_code"]
         return summary
@@ -407,8 +407,8 @@ class DigestChannelSerializer(serializers.ModelSerializer):
         help_text=(
             "How this row was created: 'manual' (via this API), 'slack_name_match' (auto-provisioned "
             "because the workspace has a channel named exactly like the audience_key), "
-            "'stamphog_config' (auto-provisioned from the channel the repo declared under 'digest:' in "
-            ".stamphog/policy.yml), "
+            "'stamp_config' (auto-provisioned from the channel the repo declared under 'digest:' in "
+            ".stamp/policy.yml), "
             "or 'owners_contact' (reserved for the future owners.yaml contact.slack step, not implemented yet)."
         ),
     )

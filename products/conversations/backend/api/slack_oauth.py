@@ -21,9 +21,9 @@ from insights.rate_limit import SupportSlackOAuthCallbackThrottle
 
 from products.conversations.backend.models import TeamConversationsSlackConfig
 from products.conversations.backend.permissions import IsConversationsAdmin
-from products.conversations.backend.support_slack import clear_supporthog_slack_token, save_supporthog_slack_token
+from products.conversations.backend.support_slack import clear_support_slack_token, save_support_slack_token
 
-STATE_SALT = "conversations.supporthog.slack.oauth"
+STATE_SALT = "conversations.support.slack.oauth"
 STATE_MAX_AGE_SECONDS = 10 * 60
 SUPPORTFN_SLACK_SCOPES = [
     "channels:history",
@@ -119,7 +119,7 @@ class SupportSlackDisconnectView(APIView):
         if not isinstance(user, User) or user.current_team is None:
             return Response({"error": "No current team selected"}, status=400)
 
-        clear_supporthog_slack_token(
+        clear_support_slack_token(
             team=user.current_team,
             user=user,
             is_impersonated_session=is_impersonated(request),
@@ -221,7 +221,7 @@ def support_slack_oauth_callback(request: HttpRequest) -> HttpResponse:
             if conflicting_config:
                 return _error_response(next_path, "slack_workspace_already_connected", 409)
 
-            save_supporthog_slack_token(
+            save_support_slack_token(
                 team=team,
                 user=user,
                 is_impersonated_session=is_impersonated(request),

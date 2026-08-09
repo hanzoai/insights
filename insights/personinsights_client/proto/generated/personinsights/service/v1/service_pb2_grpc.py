@@ -28,8 +28,8 @@ if _version_not_supported:
     )
 
 
-class PersonHogServiceStub:
-    """PersonHogService is the public API exposed by the router.
+class PersonServiceStub:
+    """PersonService is the public API exposed by the router.
     Clients call this service; the router handles backend selection and routing.
     """
 
@@ -40,255 +40,255 @@ class PersonHogServiceStub:
             channel: A grpc.Channel.
         """
         self.GetPerson = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/GetPerson",
+            "/personinsights.service.v1.PersonService/GetPerson",
             request_serializer=personinsights_dot_types_dot_v1_dot_person__pb2.GetPersonRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_person__pb2.GetPersonResponse.FromString,
             _registered_method=True,
         )
         self.GetPersons = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/GetPersons",
+            "/personinsights.service.v1.PersonService/GetPersons",
             request_serializer=personinsights_dot_types_dot_v1_dot_person__pb2.GetPersonsRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_person__pb2.PersonsResponse.FromString,
             _registered_method=True,
         )
         self.GetPersonByUuid = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/GetPersonByUuid",
+            "/personinsights.service.v1.PersonService/GetPersonByUuid",
             request_serializer=personinsights_dot_types_dot_v1_dot_person__pb2.GetPersonByUuidRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_person__pb2.GetPersonResponse.FromString,
             _registered_method=True,
         )
         self.GetPersonsByUuids = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/GetPersonsByUuids",
+            "/personinsights.service.v1.PersonService/GetPersonsByUuids",
             request_serializer=personinsights_dot_types_dot_v1_dot_person__pb2.GetPersonsByUuidsRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_person__pb2.PersonsResponse.FromString,
             _registered_method=True,
         )
         self.GetPersonByDistinctId = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/GetPersonByDistinctId",
+            "/personinsights.service.v1.PersonService/GetPersonByDistinctId",
             request_serializer=personinsights_dot_types_dot_v1_dot_person__pb2.GetPersonByDistinctIdRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_person__pb2.GetPersonResponse.FromString,
             _registered_method=True,
         )
         self.GetPersonsByDistinctIdsInTeam = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/GetPersonsByDistinctIdsInTeam",
+            "/personinsights.service.v1.PersonService/GetPersonsByDistinctIdsInTeam",
             request_serializer=personinsights_dot_types_dot_v1_dot_person__pb2.GetPersonsByDistinctIdsInTeamRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_person__pb2.PersonsByDistinctIdsInTeamResponse.FromString,
             _registered_method=True,
         )
         self.GetPersonsByDistinctIds = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/GetPersonsByDistinctIds",
+            "/personinsights.service.v1.PersonService/GetPersonsByDistinctIds",
             request_serializer=personinsights_dot_types_dot_v1_dot_person__pb2.GetPersonsByDistinctIdsRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_person__pb2.PersonsByDistinctIdsResponse.FromString,
             _registered_method=True,
         )
         self.GetDistinctIdsForPerson = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/GetDistinctIdsForPerson",
+            "/personinsights.service.v1.PersonService/GetDistinctIdsForPerson",
             request_serializer=personinsights_dot_types_dot_v1_dot_person__pb2.GetDistinctIdsForPersonRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_person__pb2.GetDistinctIdsForPersonResponse.FromString,
             _registered_method=True,
         )
         self.GetDistinctIdsForPersons = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/GetDistinctIdsForPersons",
+            "/personinsights.service.v1.PersonService/GetDistinctIdsForPersons",
             request_serializer=personinsights_dot_types_dot_v1_dot_person__pb2.GetDistinctIdsForPersonsRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_person__pb2.GetDistinctIdsForPersonsResponse.FromString,
             _registered_method=True,
         )
         self.GetHashKeyOverrideContext = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/GetHashKeyOverrideContext",
+            "/personinsights.service.v1.PersonService/GetHashKeyOverrideContext",
             request_serializer=personinsights_dot_types_dot_v1_dot_feature__flag__pb2.GetHashKeyOverrideContextRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_feature__flag__pb2.GetHashKeyOverrideContextResponse.FromString,
             _registered_method=True,
         )
         self.UpsertHashKeyOverrides = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/UpsertHashKeyOverrides",
+            "/personinsights.service.v1.PersonService/UpsertHashKeyOverrides",
             request_serializer=personinsights_dot_types_dot_v1_dot_feature__flag__pb2.UpsertHashKeyOverridesRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_feature__flag__pb2.UpsertHashKeyOverridesResponse.FromString,
             _registered_method=True,
         )
         self.DeleteHashKeyOverridesByTeams = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/DeleteHashKeyOverridesByTeams",
+            "/personinsights.service.v1.PersonService/DeleteHashKeyOverridesByTeams",
             request_serializer=personinsights_dot_types_dot_v1_dot_feature__flag__pb2.DeleteHashKeyOverridesByTeamsRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_feature__flag__pb2.DeleteHashKeyOverridesByTeamsResponse.FromString,
             _registered_method=True,
         )
         self.CheckCohortMembership = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/CheckCohortMembership",
+            "/personinsights.service.v1.PersonService/CheckCohortMembership",
             request_serializer=personinsights_dot_types_dot_v1_dot_cohort__pb2.CheckCohortMembershipRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_cohort__pb2.CohortMembershipResponse.FromString,
             _registered_method=True,
         )
         self.CountCohortMembers = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/CountCohortMembers",
+            "/personinsights.service.v1.PersonService/CountCohortMembers",
             request_serializer=personinsights_dot_types_dot_v1_dot_cohort__pb2.CountCohortMembersRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_cohort__pb2.CountCohortMembersResponse.FromString,
             _registered_method=True,
         )
         self.DeleteCohortMember = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/DeleteCohortMember",
+            "/personinsights.service.v1.PersonService/DeleteCohortMember",
             request_serializer=personinsights_dot_types_dot_v1_dot_cohort__pb2.DeleteCohortMemberRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_cohort__pb2.DeleteCohortMemberResponse.FromString,
             _registered_method=True,
         )
         self.DeleteCohortMembersBulk = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/DeleteCohortMembersBulk",
+            "/personinsights.service.v1.PersonService/DeleteCohortMembersBulk",
             request_serializer=personinsights_dot_types_dot_v1_dot_cohort__pb2.DeleteCohortMembersBulkRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_cohort__pb2.DeleteCohortMembersBulkResponse.FromString,
             _registered_method=True,
         )
         self.InsertCohortMembers = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/InsertCohortMembers",
+            "/personinsights.service.v1.PersonService/InsertCohortMembers",
             request_serializer=personinsights_dot_types_dot_v1_dot_cohort__pb2.InsertCohortMembersRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_cohort__pb2.InsertCohortMembersResponse.FromString,
             _registered_method=True,
         )
         self.ListCohortMemberIds = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/ListCohortMemberIds",
+            "/personinsights.service.v1.PersonService/ListCohortMemberIds",
             request_serializer=personinsights_dot_types_dot_v1_dot_cohort__pb2.ListCohortMemberIdsRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_cohort__pb2.ListCohortMemberIdsResponse.FromString,
             _registered_method=True,
         )
         self.GetGroup = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/GetGroup",
+            "/personinsights.service.v1.PersonService/GetGroup",
             request_serializer=personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupResponse.FromString,
             _registered_method=True,
         )
         self.GetGroups = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/GetGroups",
+            "/personinsights.service.v1.PersonService/GetGroups",
             request_serializer=personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupsRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_group__pb2.GroupsResponse.FromString,
             _registered_method=True,
         )
         self.GetGroupsBatch = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/GetGroupsBatch",
+            "/personinsights.service.v1.PersonService/GetGroupsBatch",
             request_serializer=personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupsBatchRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupsBatchResponse.FromString,
             _registered_method=True,
         )
         self.ListGroups = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/ListGroups",
+            "/personinsights.service.v1.PersonService/ListGroups",
             request_serializer=personinsights_dot_types_dot_v1_dot_group__pb2.ListGroupsRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_group__pb2.ListGroupsResponse.FromString,
             _registered_method=True,
         )
         self.GetGroupTypeMappingsByTeamId = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/GetGroupTypeMappingsByTeamId",
+            "/personinsights.service.v1.PersonService/GetGroupTypeMappingsByTeamId",
             request_serializer=personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupTypeMappingsByTeamIdRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_group__pb2.GroupTypeMappingsResponse.FromString,
             _registered_method=True,
         )
         self.GetGroupTypeMappingsByTeamIds = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/GetGroupTypeMappingsByTeamIds",
+            "/personinsights.service.v1.PersonService/GetGroupTypeMappingsByTeamIds",
             request_serializer=personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupTypeMappingsByTeamIdsRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_group__pb2.GroupTypeMappingsBatchResponse.FromString,
             _registered_method=True,
         )
         self.GetGroupTypeMappingsByProjectId = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/GetGroupTypeMappingsByProjectId",
+            "/personinsights.service.v1.PersonService/GetGroupTypeMappingsByProjectId",
             request_serializer=personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupTypeMappingsByProjectIdRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_group__pb2.GroupTypeMappingsResponse.FromString,
             _registered_method=True,
         )
         self.GetGroupTypeMappingsByProjectIds = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/GetGroupTypeMappingsByProjectIds",
+            "/personinsights.service.v1.PersonService/GetGroupTypeMappingsByProjectIds",
             request_serializer=personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupTypeMappingsByProjectIdsRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_group__pb2.GroupTypeMappingsBatchResponse.FromString,
             _registered_method=True,
         )
         self.GetGroupTypeMappingByDashboardId = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/GetGroupTypeMappingByDashboardId",
+            "/personinsights.service.v1.PersonService/GetGroupTypeMappingByDashboardId",
             request_serializer=personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupTypeMappingByDashboardIdRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupTypeMappingByDashboardIdResponse.FromString,
             _registered_method=True,
         )
         self.CountGroupTypeMappings = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/CountGroupTypeMappings",
+            "/personinsights.service.v1.PersonService/CountGroupTypeMappings",
             request_serializer=personinsights_dot_types_dot_v1_dot_group__pb2.CountGroupTypeMappingsRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_group__pb2.CountGroupTypeMappingsResponse.FromString,
             _registered_method=True,
         )
         self.CreateGroup = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/CreateGroup",
+            "/personinsights.service.v1.PersonService/CreateGroup",
             request_serializer=personinsights_dot_types_dot_v1_dot_group__pb2.CreateGroupRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_group__pb2.CreateGroupResponse.FromString,
             _registered_method=True,
         )
         self.UpdateGroup = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/UpdateGroup",
+            "/personinsights.service.v1.PersonService/UpdateGroup",
             request_serializer=personinsights_dot_types_dot_v1_dot_group__pb2.UpdateGroupRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_group__pb2.UpdateGroupResponse.FromString,
             _registered_method=True,
         )
         self.DeleteGroupsBatchForTeam = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/DeleteGroupsBatchForTeam",
+            "/personinsights.service.v1.PersonService/DeleteGroupsBatchForTeam",
             request_serializer=personinsights_dot_types_dot_v1_dot_group__pb2.DeleteGroupsBatchForTeamRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_group__pb2.DeleteGroupsBatchForTeamResponse.FromString,
             _registered_method=True,
         )
         self.UpdateGroupTypeMapping = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/UpdateGroupTypeMapping",
+            "/personinsights.service.v1.PersonService/UpdateGroupTypeMapping",
             request_serializer=personinsights_dot_types_dot_v1_dot_group__pb2.UpdateGroupTypeMappingRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_group__pb2.UpdateGroupTypeMappingResponse.FromString,
             _registered_method=True,
         )
         self.DeleteGroupTypeMapping = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/DeleteGroupTypeMapping",
+            "/personinsights.service.v1.PersonService/DeleteGroupTypeMapping",
             request_serializer=personinsights_dot_types_dot_v1_dot_group__pb2.DeleteGroupTypeMappingRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_group__pb2.DeleteGroupTypeMappingResponse.FromString,
             _registered_method=True,
         )
         self.DeleteGroupTypeMappingsBatchForTeam = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/DeleteGroupTypeMappingsBatchForTeam",
+            "/personinsights.service.v1.PersonService/DeleteGroupTypeMappingsBatchForTeam",
             request_serializer=personinsights_dot_types_dot_v1_dot_group__pb2.DeleteGroupTypeMappingsBatchForTeamRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_group__pb2.DeleteGroupTypeMappingsBatchForTeamResponse.FromString,
             _registered_method=True,
         )
         self.UpdatePersonProperties = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/UpdatePersonProperties",
+            "/personinsights.service.v1.PersonService/UpdatePersonProperties",
             request_serializer=personinsights_dot_types_dot_v1_dot_person__pb2.UpdatePersonPropertiesRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_person__pb2.UpdatePersonPropertiesResponse.FromString,
             _registered_method=True,
         )
         self.DeletePersons = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/DeletePersons",
+            "/personinsights.service.v1.PersonService/DeletePersons",
             request_serializer=personinsights_dot_types_dot_v1_dot_person__pb2.DeletePersonsRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_person__pb2.DeletePersonsResponse.FromString,
             _registered_method=True,
         )
         self.DeletePersonsBatchForTeam = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/DeletePersonsBatchForTeam",
+            "/personinsights.service.v1.PersonService/DeletePersonsBatchForTeam",
             request_serializer=personinsights_dot_types_dot_v1_dot_person__pb2.DeletePersonsBatchForTeamRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_person__pb2.DeletePersonsBatchForTeamResponse.FromString,
             _registered_method=True,
         )
         self.DeletePersonlessDistinctIdsBatchForTeam = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/DeletePersonlessDistinctIdsBatchForTeam",
+            "/personinsights.service.v1.PersonService/DeletePersonlessDistinctIdsBatchForTeam",
             request_serializer=personinsights_dot_types_dot_v1_dot_person__pb2.DeletePersonlessDistinctIdsBatchForTeamRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_person__pb2.DeletePersonlessDistinctIdsBatchForTeamResponse.FromString,
             _registered_method=True,
         )
         self.SplitPerson = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/SplitPerson",
+            "/personinsights.service.v1.PersonService/SplitPerson",
             request_serializer=personinsights_dot_types_dot_v1_dot_person__pb2.SplitPersonRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_person__pb2.SplitPersonResponse.FromString,
             _registered_method=True,
         )
         self.SetPersonDistinctIdVersionFloor = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/SetPersonDistinctIdVersionFloor",
+            "/personinsights.service.v1.PersonService/SetPersonDistinctIdVersionFloor",
             request_serializer=personinsights_dot_types_dot_v1_dot_person__pb2.SetPersonDistinctIdVersionFloorRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_person__pb2.SetPersonDistinctIdVersionFloorResponse.FromString,
             _registered_method=True,
         )
         self.SetPersonVersionFloor = channel.unary_unary(
-            "/personinsights.service.v1.PersonHogService/SetPersonVersionFloor",
+            "/personinsights.service.v1.PersonService/SetPersonVersionFloor",
             request_serializer=personinsights_dot_types_dot_v1_dot_person__pb2.SetPersonVersionFloorRequest.SerializeToString,
             response_deserializer=personinsights_dot_types_dot_v1_dot_person__pb2.SetPersonVersionFloorResponse.FromString,
             _registered_method=True,
         )
 
 
-class PersonHogServiceServicer:
-    """PersonHogService is the public API exposed by the router.
+class PersonServiceServicer:
+    """PersonService is the public API exposed by the router.
     Clients call this service; the router handles backend selection and routing.
     """
 
@@ -547,7 +547,7 @@ class PersonHogServiceServicer:
         raise NotImplementedError("Method not implemented!")
 
 
-def add_PersonHogServiceServicer_to_server(servicer, server):
+def add_PersonServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
         "GetPerson": grpc.unary_unary_rpc_method_handler(
             servicer.GetPerson,
@@ -756,14 +756,14 @@ def add_PersonHogServiceServicer_to_server(servicer, server):
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-        "personinsights.service.v1.PersonHogService", rpc_method_handlers
+        "personinsights.service.v1.PersonService", rpc_method_handlers
     )
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers("personinsights.service.v1.PersonHogService", rpc_method_handlers)
+    server.add_registered_method_handlers("personinsights.service.v1.PersonService", rpc_method_handlers)
 
 
-class PersonHogService:
-    """PersonHogService is the public API exposed by the router.
+class PersonService:
+    """PersonService is the public API exposed by the router.
     Clients call this service; the router handles backend selection and routing.
     """
 
@@ -783,7 +783,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/GetPerson",
+            "/personinsights.service.v1.PersonService/GetPerson",
             personinsights_dot_types_dot_v1_dot_person__pb2.GetPersonRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_person__pb2.GetPersonResponse.FromString,
             options,
@@ -813,7 +813,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/GetPersons",
+            "/personinsights.service.v1.PersonService/GetPersons",
             personinsights_dot_types_dot_v1_dot_person__pb2.GetPersonsRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_person__pb2.PersonsResponse.FromString,
             options,
@@ -843,7 +843,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/GetPersonByUuid",
+            "/personinsights.service.v1.PersonService/GetPersonByUuid",
             personinsights_dot_types_dot_v1_dot_person__pb2.GetPersonByUuidRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_person__pb2.GetPersonResponse.FromString,
             options,
@@ -873,7 +873,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/GetPersonsByUuids",
+            "/personinsights.service.v1.PersonService/GetPersonsByUuids",
             personinsights_dot_types_dot_v1_dot_person__pb2.GetPersonsByUuidsRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_person__pb2.PersonsResponse.FromString,
             options,
@@ -903,7 +903,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/GetPersonByDistinctId",
+            "/personinsights.service.v1.PersonService/GetPersonByDistinctId",
             personinsights_dot_types_dot_v1_dot_person__pb2.GetPersonByDistinctIdRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_person__pb2.GetPersonResponse.FromString,
             options,
@@ -933,7 +933,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/GetPersonsByDistinctIdsInTeam",
+            "/personinsights.service.v1.PersonService/GetPersonsByDistinctIdsInTeam",
             personinsights_dot_types_dot_v1_dot_person__pb2.GetPersonsByDistinctIdsInTeamRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_person__pb2.PersonsByDistinctIdsInTeamResponse.FromString,
             options,
@@ -963,7 +963,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/GetPersonsByDistinctIds",
+            "/personinsights.service.v1.PersonService/GetPersonsByDistinctIds",
             personinsights_dot_types_dot_v1_dot_person__pb2.GetPersonsByDistinctIdsRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_person__pb2.PersonsByDistinctIdsResponse.FromString,
             options,
@@ -993,7 +993,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/GetDistinctIdsForPerson",
+            "/personinsights.service.v1.PersonService/GetDistinctIdsForPerson",
             personinsights_dot_types_dot_v1_dot_person__pb2.GetDistinctIdsForPersonRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_person__pb2.GetDistinctIdsForPersonResponse.FromString,
             options,
@@ -1023,7 +1023,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/GetDistinctIdsForPersons",
+            "/personinsights.service.v1.PersonService/GetDistinctIdsForPersons",
             personinsights_dot_types_dot_v1_dot_person__pb2.GetDistinctIdsForPersonsRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_person__pb2.GetDistinctIdsForPersonsResponse.FromString,
             options,
@@ -1053,7 +1053,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/GetHashKeyOverrideContext",
+            "/personinsights.service.v1.PersonService/GetHashKeyOverrideContext",
             personinsights_dot_types_dot_v1_dot_feature__flag__pb2.GetHashKeyOverrideContextRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_feature__flag__pb2.GetHashKeyOverrideContextResponse.FromString,
             options,
@@ -1083,7 +1083,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/UpsertHashKeyOverrides",
+            "/personinsights.service.v1.PersonService/UpsertHashKeyOverrides",
             personinsights_dot_types_dot_v1_dot_feature__flag__pb2.UpsertHashKeyOverridesRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_feature__flag__pb2.UpsertHashKeyOverridesResponse.FromString,
             options,
@@ -1113,7 +1113,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/DeleteHashKeyOverridesByTeams",
+            "/personinsights.service.v1.PersonService/DeleteHashKeyOverridesByTeams",
             personinsights_dot_types_dot_v1_dot_feature__flag__pb2.DeleteHashKeyOverridesByTeamsRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_feature__flag__pb2.DeleteHashKeyOverridesByTeamsResponse.FromString,
             options,
@@ -1143,7 +1143,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/CheckCohortMembership",
+            "/personinsights.service.v1.PersonService/CheckCohortMembership",
             personinsights_dot_types_dot_v1_dot_cohort__pb2.CheckCohortMembershipRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_cohort__pb2.CohortMembershipResponse.FromString,
             options,
@@ -1173,7 +1173,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/CountCohortMembers",
+            "/personinsights.service.v1.PersonService/CountCohortMembers",
             personinsights_dot_types_dot_v1_dot_cohort__pb2.CountCohortMembersRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_cohort__pb2.CountCohortMembersResponse.FromString,
             options,
@@ -1203,7 +1203,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/DeleteCohortMember",
+            "/personinsights.service.v1.PersonService/DeleteCohortMember",
             personinsights_dot_types_dot_v1_dot_cohort__pb2.DeleteCohortMemberRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_cohort__pb2.DeleteCohortMemberResponse.FromString,
             options,
@@ -1233,7 +1233,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/DeleteCohortMembersBulk",
+            "/personinsights.service.v1.PersonService/DeleteCohortMembersBulk",
             personinsights_dot_types_dot_v1_dot_cohort__pb2.DeleteCohortMembersBulkRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_cohort__pb2.DeleteCohortMembersBulkResponse.FromString,
             options,
@@ -1263,7 +1263,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/InsertCohortMembers",
+            "/personinsights.service.v1.PersonService/InsertCohortMembers",
             personinsights_dot_types_dot_v1_dot_cohort__pb2.InsertCohortMembersRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_cohort__pb2.InsertCohortMembersResponse.FromString,
             options,
@@ -1293,7 +1293,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/ListCohortMemberIds",
+            "/personinsights.service.v1.PersonService/ListCohortMemberIds",
             personinsights_dot_types_dot_v1_dot_cohort__pb2.ListCohortMemberIdsRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_cohort__pb2.ListCohortMemberIdsResponse.FromString,
             options,
@@ -1323,7 +1323,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/GetGroup",
+            "/personinsights.service.v1.PersonService/GetGroup",
             personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupResponse.FromString,
             options,
@@ -1353,7 +1353,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/GetGroups",
+            "/personinsights.service.v1.PersonService/GetGroups",
             personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupsRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_group__pb2.GroupsResponse.FromString,
             options,
@@ -1383,7 +1383,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/GetGroupsBatch",
+            "/personinsights.service.v1.PersonService/GetGroupsBatch",
             personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupsBatchRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupsBatchResponse.FromString,
             options,
@@ -1413,7 +1413,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/ListGroups",
+            "/personinsights.service.v1.PersonService/ListGroups",
             personinsights_dot_types_dot_v1_dot_group__pb2.ListGroupsRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_group__pb2.ListGroupsResponse.FromString,
             options,
@@ -1443,7 +1443,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/GetGroupTypeMappingsByTeamId",
+            "/personinsights.service.v1.PersonService/GetGroupTypeMappingsByTeamId",
             personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupTypeMappingsByTeamIdRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_group__pb2.GroupTypeMappingsResponse.FromString,
             options,
@@ -1473,7 +1473,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/GetGroupTypeMappingsByTeamIds",
+            "/personinsights.service.v1.PersonService/GetGroupTypeMappingsByTeamIds",
             personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupTypeMappingsByTeamIdsRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_group__pb2.GroupTypeMappingsBatchResponse.FromString,
             options,
@@ -1503,7 +1503,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/GetGroupTypeMappingsByProjectId",
+            "/personinsights.service.v1.PersonService/GetGroupTypeMappingsByProjectId",
             personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupTypeMappingsByProjectIdRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_group__pb2.GroupTypeMappingsResponse.FromString,
             options,
@@ -1533,7 +1533,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/GetGroupTypeMappingsByProjectIds",
+            "/personinsights.service.v1.PersonService/GetGroupTypeMappingsByProjectIds",
             personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupTypeMappingsByProjectIdsRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_group__pb2.GroupTypeMappingsBatchResponse.FromString,
             options,
@@ -1563,7 +1563,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/GetGroupTypeMappingByDashboardId",
+            "/personinsights.service.v1.PersonService/GetGroupTypeMappingByDashboardId",
             personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupTypeMappingByDashboardIdRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_group__pb2.GetGroupTypeMappingByDashboardIdResponse.FromString,
             options,
@@ -1593,7 +1593,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/CountGroupTypeMappings",
+            "/personinsights.service.v1.PersonService/CountGroupTypeMappings",
             personinsights_dot_types_dot_v1_dot_group__pb2.CountGroupTypeMappingsRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_group__pb2.CountGroupTypeMappingsResponse.FromString,
             options,
@@ -1623,7 +1623,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/CreateGroup",
+            "/personinsights.service.v1.PersonService/CreateGroup",
             personinsights_dot_types_dot_v1_dot_group__pb2.CreateGroupRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_group__pb2.CreateGroupResponse.FromString,
             options,
@@ -1653,7 +1653,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/UpdateGroup",
+            "/personinsights.service.v1.PersonService/UpdateGroup",
             personinsights_dot_types_dot_v1_dot_group__pb2.UpdateGroupRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_group__pb2.UpdateGroupResponse.FromString,
             options,
@@ -1683,7 +1683,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/DeleteGroupsBatchForTeam",
+            "/personinsights.service.v1.PersonService/DeleteGroupsBatchForTeam",
             personinsights_dot_types_dot_v1_dot_group__pb2.DeleteGroupsBatchForTeamRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_group__pb2.DeleteGroupsBatchForTeamResponse.FromString,
             options,
@@ -1713,7 +1713,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/UpdateGroupTypeMapping",
+            "/personinsights.service.v1.PersonService/UpdateGroupTypeMapping",
             personinsights_dot_types_dot_v1_dot_group__pb2.UpdateGroupTypeMappingRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_group__pb2.UpdateGroupTypeMappingResponse.FromString,
             options,
@@ -1743,7 +1743,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/DeleteGroupTypeMapping",
+            "/personinsights.service.v1.PersonService/DeleteGroupTypeMapping",
             personinsights_dot_types_dot_v1_dot_group__pb2.DeleteGroupTypeMappingRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_group__pb2.DeleteGroupTypeMappingResponse.FromString,
             options,
@@ -1773,7 +1773,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/DeleteGroupTypeMappingsBatchForTeam",
+            "/personinsights.service.v1.PersonService/DeleteGroupTypeMappingsBatchForTeam",
             personinsights_dot_types_dot_v1_dot_group__pb2.DeleteGroupTypeMappingsBatchForTeamRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_group__pb2.DeleteGroupTypeMappingsBatchForTeamResponse.FromString,
             options,
@@ -1803,7 +1803,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/UpdatePersonProperties",
+            "/personinsights.service.v1.PersonService/UpdatePersonProperties",
             personinsights_dot_types_dot_v1_dot_person__pb2.UpdatePersonPropertiesRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_person__pb2.UpdatePersonPropertiesResponse.FromString,
             options,
@@ -1833,7 +1833,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/DeletePersons",
+            "/personinsights.service.v1.PersonService/DeletePersons",
             personinsights_dot_types_dot_v1_dot_person__pb2.DeletePersonsRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_person__pb2.DeletePersonsResponse.FromString,
             options,
@@ -1863,7 +1863,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/DeletePersonsBatchForTeam",
+            "/personinsights.service.v1.PersonService/DeletePersonsBatchForTeam",
             personinsights_dot_types_dot_v1_dot_person__pb2.DeletePersonsBatchForTeamRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_person__pb2.DeletePersonsBatchForTeamResponse.FromString,
             options,
@@ -1893,7 +1893,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/DeletePersonlessDistinctIdsBatchForTeam",
+            "/personinsights.service.v1.PersonService/DeletePersonlessDistinctIdsBatchForTeam",
             personinsights_dot_types_dot_v1_dot_person__pb2.DeletePersonlessDistinctIdsBatchForTeamRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_person__pb2.DeletePersonlessDistinctIdsBatchForTeamResponse.FromString,
             options,
@@ -1923,7 +1923,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/SplitPerson",
+            "/personinsights.service.v1.PersonService/SplitPerson",
             personinsights_dot_types_dot_v1_dot_person__pb2.SplitPersonRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_person__pb2.SplitPersonResponse.FromString,
             options,
@@ -1953,7 +1953,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/SetPersonDistinctIdVersionFloor",
+            "/personinsights.service.v1.PersonService/SetPersonDistinctIdVersionFloor",
             personinsights_dot_types_dot_v1_dot_person__pb2.SetPersonDistinctIdVersionFloorRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_person__pb2.SetPersonDistinctIdVersionFloorResponse.FromString,
             options,
@@ -1983,7 +1983,7 @@ class PersonHogService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/personinsights.service.v1.PersonHogService/SetPersonVersionFloor",
+            "/personinsights.service.v1.PersonService/SetPersonVersionFloor",
             personinsights_dot_types_dot_v1_dot_person__pb2.SetPersonVersionFloorRequest.SerializeToString,
             personinsights_dot_types_dot_v1_dot_person__pb2.SetPersonVersionFloorResponse.FromString,
             options,

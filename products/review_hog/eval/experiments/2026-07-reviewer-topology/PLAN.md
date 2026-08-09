@@ -1,7 +1,7 @@
 # Reviewer-quality experiment — finding the best reviewer topology
 
 > **ARCHIVED 2026-07-02 — experiment complete.** This was the live working scratchpad; it moved here from
-> `products/review_hog/EXPERIMENT_reviewer_quality.md` after the runs finished, and its `playground/reviewhog-quality-iterations/`
+> `products/review_hog/EXPERIMENT_reviewer_quality.md` after the runs finished, and its `playground/review-quality-iterations/`
 > paths are historical — the artifacts now live next to this file: `FINAL_REPORT.md` (read this first), `judge_results.json`,
 > `runs/` (17 per-run dumps), `fixtures/` (PR diff, prior bot comments, copy of the old report), and the harness at
 > `../../scripts/dump_result.py`.
@@ -9,11 +9,11 @@
 > **Working scratchpad. Survives compaction — update the Run Log + Decisions as we go.**
 > Companion to `ARCHITECTURE.md`. Scope = the **reviewer stage only** (chunking + perspective topology).
 > The **validator is held constant** (current strict validator) — out of scope this round.
-> Model held constant: **Claude Opus 4.8 @ xhigh** for reviewers (switched back from GPT-5.5 Codex, which was unreliable). Reviewer-model comparison is a later round; the old ReviewHog yardstick below was produced with GPT-5.5, so coverage differences may partly reflect the model, not just topology.
+> Model held constant: **Claude Opus 4.8 @ xhigh** for reviewers (switched back from GPT-5.5 Codex, which was unreliable). Reviewer-model comparison is a later round; the old Review yardstick below was produced with GPT-5.5, so coverage differences may partly reflect the model, not just topology.
 
 ## Goal & priority order
 
-Find the reviewer topology that gets **closest to (or beats) the old ReviewHog's coverage** on the same PR.
+Find the reviewer topology that gets **closest to (or beats) the old Review's coverage** on the same PR.
 Priorities, in order (quality dominates):
 
 1. **Quality** (largest weight) — coverage vs the old report (issues found that the old found) + not adding junk.
@@ -48,7 +48,7 @@ Old report: `/Users/woutut/Documents/Code/pr_reviewer/reviews/62096/review_repor
 severity/category, and several need real depth (subagent toolkits, markdown render path). 52901 = 5 files/1 chunk (no
 chunking signal). 62116 = findings clump (6 of 11 in one chunk).
 
-### The yardstick — old ReviewHog's 10 findings (all validated Valid by the old lenient validator)
+### The yardstick — old Review's 10 findings (all validated Valid by the old lenient validator)
 
 | #   | old id | chunk | pri          | cat         | finding                                                                   |
 | --- | ------ | ----- | ------------ | ----------- | ------------------------------------------------------------------------- |
@@ -143,14 +143,14 @@ initial_permission_mode` kwargs (defaults None; validate callers unchanged) pass
    (mirror the existing sequential-branch tests).
 
 **✅ BUILT 2026-07-02 (uncommitted):** all 6 map items above + C6's `plan_pinned_chunks` landed exactly as mapped;
-`review_perspective_session_activity` registered in `temporal/__init__.py`; 297 review_hog tests + ruff green
+`review_perspective_session_activity` registered in `temporal/__init__.py`; 297 review tests + ruff green
 (4 new tests: session skip-resume/model-pin/per-chunk-persist, warm-branch workflow routing, follow-up prompt
 content, pinned-plan builder). 4-lens adversarial review workflow run before first C5 launch (results in Run log
 notes).
 
 ### `C6-pinnedchunks` (IN — runs after C5; added 2026-07-02)
 
-Motivated by C1's runs: the 3-chunk split (run 2, near-identical to old ReviewHog's) gave the best funnel (13→10→5),
+Motivated by C1's runs: the 3-chunk split (run 2, near-identical to old Review's) gave the best funnel (13→10→5),
 but the chunker finds it stochastically — the mode is the flatter 2-chunk split (runs 1+3), which barely beats
 baseline. C1's "small chunks help" conclusion is therefore **confounded** (structure vs review-pass luck, n=1 for the
 3-chunk split). C6 de-confounds: **pin the exact C1-run-2 3-chunk split** (hardcoded `ChunksList` behind
@@ -159,16 +159,16 @@ perspectives × 2 runs. Cheapest config there is (no chunking turn, ~9 units, ~2
 Interpretation: pinned-3-chunks reproducing the strong funnel ⇒ structure is causal ⇒ prod lesson =
 deterministic/target-seeking chunking (best-of-N chunker samples or explicit chunk-count guidance), far cheaper than
 sequential's 2× wall-clock. Not reproducing ⇒ the C1-run-2 outlier was review-pass luck ⇒ stop chasing chunk
-granularity. Pinned split (from `C1-smallchunks-2.md`): chunk 1 = `ee/hogai/tools/actions/core.py`; chunk 2 =
-`ee/hogai/tools/actions/tool.py`, `ee/hogai/tools/actions/__init__.py`, `ee/hogai/tools/__init__.py`,
-`ee/hogai/chat_agent/toolkit.py`; chunk 3 = `frontend/src/scenes/max/max-constants.tsx`,
+granularity. Pinned split (from `C1-smallchunks-2.md`): chunk 1 = `ee/scriptai/tools/actions/core.py`; chunk 2 =
+`ee/scriptai/tools/actions/tool.py`, `ee/scriptai/tools/actions/__init__.py`, `ee/scriptai/tools/__init__.py`,
+`ee/scriptai/chat_agent/toolkit.py`; chunk 3 = `frontend/src/scenes/max/max-constants.tsx`,
 `frontend/src/queries/schema/schema-assistant-messages.ts`, `frontend/src/queries/schema.json`,
 `insights/schema_enums.py`. Deliberately NOT adding: more topology permutations (sequential+gap etc.) or model/effort
 sweeps — later rounds.
 
 ## What each run captures (the dump)
 
-One `.md` per run in `playground/reviewhog-quality-iterations/<label>[-<n>].md`, same format for all, containing:
+One `.md` per run in `playground/review-quality-iterations/<label>[-<n>].md`, same format for all, containing:
 
 - **Config snapshot** (chunking constants, topology flag, model/effort) + PR head + timestamp.
 - **Funnel:** raw issues found (pre-dedup, summed over perspective results) → after dedup → passed validator.
@@ -182,7 +182,7 @@ The old report stays in its own format (it's the reference, not a run).
 
 ## The dump/reset harness
 
-A single self-contained script `playground/reviewhog-quality-iterations/dump_result.py`, run via
+A single self-contained script `playground/review-quality-iterations/dump_result.py`, run via
 `manage.py shell -c "exec(open(...).read())"` with a `LABEL` env var (mirrors the verify scripts already used). It
 consolidates the 3 scratch scripts (verify pins / findings / show body). Loop per config:
 
@@ -190,7 +190,7 @@ consolidates the 3 scratch scripts (verify pins / findings / show body). Loop pe
 2. `run_review --pr-url https://github.com/Insights/insights/pull/62096 --team-id 1 --user-id 1` (NO `--publish`),
    blocks ~10–15 min. (Full invocation: `flox activate -- bash -c "SANDBOX_PROVIDER=MODAL_DOCKER DJANGO_SETTINGS_MODULE=insights.settings python manage.py run_review --pr-url https://github.com/Insights/insights/pull/62096 --team-id 1 --user-id 1"`.)
 3. `LABEL=<config> manage.py shell -c "exec(dump_result.py)"` → writes the `.md` + metrics.
-4. `manage.py reset_review_hog --yes` (DEBUG-only wipe) so the next run doesn't resume from DB.
+4. `manage.py reset_review --yes` (DEBUG-only wipe) so the next run doesn't resume from DB.
 5. Next config.
 
 ## Implementation touch-points (conditional constants branch here)
@@ -239,12 +239,12 @@ better-of-two and note variance.
 - **C5-warmsession is IN as a final stage (added 2026-07-02, was "future session")** — implemented after C4's runs complete (no `.py` edits while a run is in flight: nodemon restarts the worker and kills in-flight sandbox activities), then run ×2 like the others.
 - **C6-pinnedchunks is IN, runs after C5 (added 2026-07-02, user approved the token cost)** — pinned C1-run-2 3-chunk split × parallel; code implemented together with C5 in the same post-C4 gap. Full rationale + the pinned file split in its section above.
 - **Post-report follow-ups authorized (2026-07-02):** after the judge report, if the results raise a question one more config (C7+) would settle AND it could change the final recommendation, design + run it unattended (~2 runs, same append-only dump discipline). If the picture is conclusive, stop — no obligation to invent configs.
-- **JUDGING DONE 2026-07-02 → `playground/reviewhog-quality-iterations/FINAL_REPORT.md`** (+ raw `judge_results.json`). Headlines: best topology = C4 (3/10 old-coverage, best breadth/token via the gap pass); **5 of the old 10 never surfaced in ANY of 15 runs (#1,4,7,8,10 — incl. both must_fix)** → skill-content blind spot, not topology; validator strictness costs ~1–2 more (#6 killed 7/8 times it was found); every run also found 1–3 judge-valid NEW findings the old missed. Suppression map EMPTY (no old finding pre-covered by prior bot comments — root causes differ).
+- **JUDGING DONE 2026-07-02 → `playground/review-quality-iterations/FINAL_REPORT.md`** (+ raw `judge_results.json`). Headlines: best topology = C4 (3/10 old-coverage, best breadth/token via the gap pass); **5 of the old 10 never surfaced in ANY of 15 runs (#1,4,7,8,10 — incl. both must_fix)** → skill-content blind spot, not topology; validator strictness costs ~1–2 more (#6 killed 7/8 times it was found); every run also found 1–3 judge-valid NEW findings the old missed. Suppression map EMPTY (no old finding pre-covered by prior bot comments — root causes differ).
 - **C7-gappinned running (added post-report per the authorization):** C4 topology + pinned 3-chunk split ×2, to de-noise the C4 recommendation (its pair straddled the chunker coin-flip). Addendum lands in FINAL_REPORT.md.
 - Small-chunk start = **~250 add target / ~400 soft-max**, tune during C1 to land ≈3 chunks.
   - **Tuned outcome (C1 run 1): accepted 2 chunks at 250/400.** The chunker keeps the backend concern whole (424 adds, one real seam vs frontend) per its "split only at real seams" rule — lowering the target further fights the prompt, not the numbers. 2 chunks = the lever engaged (1→2); C3/C4 reuse 250/400.
   - ~~Chunker robustness finding~~ **Retracted:** `test_action_tools.py` is excluded deterministically at fetch by `PRFilter.is_test_file` (`github_meta.py:299`) — the chunker assigned all 9 reviewable files it was given. Uniform across all configs; not a chunker gap. (A completeness guard on chunker output would still be cheap insurance, but nothing misbehaved here.)
-- Results dir = `playground/reviewhog-quality-iterations/`. **No publish** on any run.
+- Results dir = `playground/review-quality-iterations/`. **No publish** on any run.
 - Execution: the user will drive the loop unattended (allow-all permissions), so runs proceed without approval stops.
 
 ## Run log
@@ -254,7 +254,7 @@ better-of-two and note variance.
 | C0-baseline             | 1   | 2026-07-01 | 1      | 7→5→3           | 12.0M in / 69k out (93 gens)   | 758s (12.6 min)                                                          | `C0-baseline-1.md`     | 3 units (1×3), single-chunk gate hit as expected                                                                                                                                                                                                                                                                                                                      |
 | C0-baseline             | 2   | 2026-07-01 | 1      | 7→6→4           | 10.2M in / 70k out (83 gens)   | 878s (14.6 min)                                                          | `C0-baseline-2.md`     | 3 units (1×3), consistent with run 1                                                                                                                                                                                                                                                                                                                                  |
 | C1-smallchunks          | 1   | 2026-07-01 | 2      | 9→7→4           | 14.7M in / 112k out (141 gens) | 1013s (16.9 min)                                                         | `C1-smallchunks-1.md`  | 6 units (2×3). Chunker chose 2 chunks not 3 (backend 424 adds — over soft-max, kept whole at a real seam; frontend 73). `test_action_tools.py` (177 adds) absent by design — `PRFilter.is_test_file` drops test files at fetch (`github_meta.py:299`), uniformly in every config; the chunker assigned all 9 reviewable files (424+73 = 497 = full reviewable total). |
-| C1-smallchunks          | 2   | 2026-07-01 | 3      | 13→10→5         | 15.0M in / 165k out (161 gens) | 968s (16.1 min)                                                          | `C1-smallchunks-2.md`  | 9 units (3×3). Chunker nondeterminism: this run split core.py / tool+toolkit / frontend — near-identical to the old ReviewHog's 3 chunks. Best funnel so far. **2-vs-3-chunk divergence → 3rd C1 run queued per plan.**                                                                                                                                               |
+| C1-smallchunks          | 2   | 2026-07-01 | 3      | 13→10→5         | 15.0M in / 165k out (161 gens) | 968s (16.1 min)                                                          | `C1-smallchunks-2.md`  | 9 units (3×3). Chunker nondeterminism: this run split core.py / tool+toolkit / frontend — near-identical to the old Review's 3 chunks. Best funnel so far. **2-vs-3-chunk divergence → 3rd C1 run queued per plan.**                                                                                                                                               |
 | C1-smallchunks          | 3   | 2026-07-01 | 2      | 6→4→3           | 11.2M in / 105k out (111 gens) | 813s (13.6 min)                                                          | `C1-smallchunks-3.md`  | 6 units (2×3), same backend/frontend split as run 1 → **2 chunks is the mode (2/3 runs); run 2's 3-chunk split is the outlier and the best funnel** — chunk granularity, not luck, looks causal for coverage. Note also big same-split variance (run 1: 9 raw vs run 3: 6 raw).                                                                                       |
 | C2-sequential           | 1   | 2026-07-01 | 1      | 6→6→4           | 11.3M in / 80k out (90 gens)   | 1574s (26.2 min, DB-derived — CLI watcher reaped)                        | `C2-sequential-1.md`   | 3 serial units (3+2+1 raw per pass). **Zero dedup loss — passes didn't overlap** (vs C0 losing 1–2); same tokens as C0, 4 valid, but ~2× wall-clock.                                                                                                                                                                                                                  |
 | C2-sequential           | 2   | 2026-07-02 | 1      | 4→4→3           | 10.5M in / 72k out (81 gens)   | 1488s (24.8 min)                                                         | `C2-sequential-2.md`   | 3 serial units (1+2+1 raw per pass). Again zero dedup loss, but lower raw than run 1 — sequential "dig deeper" framing may suppress volume; valid 3 ≈ C0.                                                                                                                                                                                                             |

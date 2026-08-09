@@ -11,11 +11,11 @@ import { AvailableFeature, GroupType, GroupTypeIndex, OrganizationType } from '~
 import {
     createGlobalsFromResponse,
     groupSelectColumns,
-    hogFlowEditorTestLogic,
+    flowEditorTestLogic,
     parseGroupsFromResult,
-} from './hogFlowEditorTestLogic'
+} from './flowEditorTestLogic'
 
-// Mounting hogFlowEditorTestLogic mounts workflowLogic, whose afterMount loads the script
+// Mounting flowEditorTestLogic mounts workflowLogic, whose afterMount loads the script
 // flow; without a valid fixture the editor's resetFlowFromInsightsFlow crashes and logs.
 const WORKFLOW_FIXTURE = {
     id: 'test-workflow',
@@ -51,8 +51,8 @@ const WORKFLOW_FIXTURE = {
     updated_at: '2026-05-01T00:00:00.000Z',
 }
 
-describe('hogFlowEditorTestLogic', () => {
-    let logic: ReturnType<typeof hogFlowEditorTestLogic.build>
+describe('flowEditorTestLogic', () => {
+    let logic: ReturnType<typeof flowEditorTestLogic.build>
 
     const groupTypes = new Map<GroupTypeIndex, GroupType>([
         [0 as GroupTypeIndex, { group_type: 'organization', group_type_index: 0 } as GroupType],
@@ -148,7 +148,7 @@ describe('hogFlowEditorTestLogic', () => {
 
     beforeEach(() => {
         initKeaTests()
-        useMocks({ get: { '/v1/environments/:team_id/hog_flows/:id/': WORKFLOW_FIXTURE } })
+        useMocks({ get: { '/v1/environments/:team_id/script_flows/:id/': WORKFLOW_FIXTURE } })
     })
 
     describe('groupTypesForTest gating on group_analytics', () => {
@@ -163,7 +163,7 @@ describe('hogFlowEditorTestLogic', () => {
             useAvailableFeatures([AvailableFeature.GROUP_ANALYTICS])
             groupsModel.mount()
             groupsModel.actions.loadAllGroupTypesSuccess(MOCK_GROUP_TYPES)
-            logic = hogFlowEditorTestLogic({ id: 'test-workflow' })
+            logic = flowEditorTestLogic({ id: 'test-workflow' })
             logic.mount()
 
             expect(logic.values.groupsEnabled).toBe(true)
@@ -178,7 +178,7 @@ describe('hogFlowEditorTestLogic', () => {
             groupsModel.mount()
             // Group types load ungated, mirroring groupsModel.afterMount in real usage
             groupsModel.actions.loadAllGroupTypesSuccess(MOCK_GROUP_TYPES)
-            logic = hogFlowEditorTestLogic({ id: 'test-workflow' })
+            logic = flowEditorTestLogic({ id: 'test-workflow' })
             logic.mount()
 
             expect(logic.values.groupsEnabled).toBe(false)
@@ -192,7 +192,7 @@ describe('hogFlowEditorTestLogic', () => {
 
     describe('accumulatedVariables reducer', () => {
         beforeEach(() => {
-            logic = hogFlowEditorTestLogic({ id: 'test-workflow' })
+            logic = flowEditorTestLogic({ id: 'test-workflow' })
             logic.mount()
         })
 

@@ -28,7 +28,7 @@ interface WorkflowTemplateChooserProps {
 // Adapted from DashboardTemplateChooser.tsx; try to keep parity for a consistent user experience
 export function WorkflowTemplateChooser(props: WorkflowTemplateChooserProps): JSX.Element {
     const { filteredTemplates, workflowTemplatesLoading } = useValues(workflowTemplatesLogic)
-    const { deleteHogflowTemplate } = useActions(workflowTemplatesLogic)
+    const { deleteFlowTemplate } = useActions(workflowTemplatesLogic)
     const { user } = useValues(userLogic)
 
     const { createWorkflowFromTemplate, createEmptyWorkflow } = useActions(newWorkflowLogic)
@@ -99,7 +99,7 @@ export function WorkflowTemplateChooser(props: WorkflowTemplateChooserProps): JS
                                               status: 'danger',
                                               onClick: async () => {
                                                   try {
-                                                      await deleteHogflowTemplate(template)
+                                                      await deleteFlowTemplate(template)
                                                       toast.success(`Template "${template.name}" deleted`)
                                                   } catch (error: any) {
                                                       toast.error(
