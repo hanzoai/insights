@@ -448,14 +448,15 @@ export const maxGlobalLogic = kea<maxGlobalLogicType>([
             () => [router.selectors.searchParams],
             (searchParams: Record<string, any>): string | null => searchParams?.chat ?? null,
         ],
-        // On Cloud/dev a provider key is always present. On a self-hosted (hobby) instance Max only
-        // works once ANTHROPIC_API_KEY is configured, so we surface a "set the key" state instead.
+        // On Cloud/dev the assistant always has somewhere to send a request. Self-hosted it needs
+        // to be pointed at one — our gateway, or a provider key — so we surface a "set it up"
+        // state rather than failing at call time.
         // Treat a not-yet-loaded preflight (null) as available so the empty-state doesn't flash
-        // before preflight resolves — once loaded we gate on cloud/dev or the key being present.
+        // before preflight resolves — once loaded we gate on cloud/dev or the backend's own answer.
         isMaxAvailable: [
             (s) => [s.isCloudOrDev, s.preflight],
             (isCloudOrDev: boolean | undefined, preflight: null | import('~/types').PreflightStatus): boolean =>
-                !preflight || !!isCloudOrDev || !!preflight.anthropic_available,
+                !preflight || !!isCloudOrDev || !!preflight.assistant_available,
         ],
         isOrganizationCreatedRecently: [
             (s) => [s.currentOrganization],
