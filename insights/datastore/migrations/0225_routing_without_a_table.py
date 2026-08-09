@@ -49,18 +49,19 @@ from insights.models.event.plane import (
     EVENT_MV_SQL,
     USER_ALIAS_MV_SQL,
     USER_MV_SQL,
-    provisioned,
 )
 
 # ONE reading of the app's records, so every view this migration creates routes
 # the same way. See the routing note in `plane.py`.
-ROUTING = provisioned()
+# Routing is gone: the org IS the tenant, so there is no org -> project map to
+# read and these builders take no argument. Keeping the old call shape here
+# broke the import of EVERY datastore migration, so nothing could run at all.
 
 operations = [
     run_sql_with_exceptions(DROP_EVENT_MV_SQL(), node_roles=[NodeRole.DATA]),
-    run_sql_with_exceptions(EVENT_MV_SQL(ROUTING), node_roles=[NodeRole.DATA]),
+    run_sql_with_exceptions(EVENT_MV_SQL(), node_roles=[NodeRole.DATA]),
     run_sql_with_exceptions(DROP_USER_MV_SQL(), node_roles=[NodeRole.DATA]),
-    run_sql_with_exceptions(USER_MV_SQL(ROUTING), node_roles=[NodeRole.DATA]),
+    run_sql_with_exceptions(USER_MV_SQL(), node_roles=[NodeRole.DATA]),
     run_sql_with_exceptions(DROP_USER_ALIAS_MV_SQL(), node_roles=[NodeRole.DATA]),
-    run_sql_with_exceptions(USER_ALIAS_MV_SQL(ROUTING), node_roles=[NodeRole.DATA]),
+    run_sql_with_exceptions(USER_ALIAS_MV_SQL(), node_roles=[NodeRole.DATA]),
 ]

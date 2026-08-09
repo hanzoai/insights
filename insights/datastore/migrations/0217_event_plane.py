@@ -12,7 +12,7 @@ Requires `event.event` to exist — Cloud owns it; see
 
 from insights.datastore.client.connection import NodeRole
 from insights.datastore.client.migration_tools import run_sql_with_exceptions
-from insights.models.event.plane import DROP_EVENT_MV_SQL, EVENT_BACKFILL_SQL, EVENT_MV_SQL, provisioned
+from insights.models.event.plane import DROP_EVENT_MV_SQL, EVENT_BACKFILL_SQL, EVENT_MV_SQL
 
 # This migration used to create `insights.org_team`, the org -> project lookup
 # the view read. There is no such table any more: the mapping lives in the app's
@@ -23,7 +23,9 @@ from insights.models.event.plane import DROP_EVENT_MV_SQL, EVENT_BACKFILL_SQL, E
 
 # ONE reading of the app's records, so every view this migration creates routes
 # the same way. See the routing note in `plane.py`.
-ROUTING = provisioned()
+# Routing is gone: the org IS the tenant, so there is no org -> project map to
+# read and these builders take no argument. Keeping the old call shape here
+# broke the import of EVERY datastore migration, so nothing could run at all.
 
 operations = [
     # Recreate so a changed projection takes effect on re-run.
@@ -32,13 +34,13 @@ operations = [
         node_roles=[NodeRole.DATA],
     ),
     run_sql_with_exceptions(
-        EVENT_MV_SQL(ROUTING),
+        EVENT_MV_SQL(),
         node_roles=[NodeRole.DATA],
     ),
     # The view is live first, so the backfill only ever overlaps it. uuid is
     # deterministic, so the overlap collapses in the ReplacingMergeTree.
     run_sql_with_exceptions(
-        EVENT_BACKFILL_SQL(ROUTING),
+        EVENT_BACKFILL_SQL(),
         node_roles=[NodeRole.DATA],
     ),
 ]
