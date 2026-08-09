@@ -1,4 +1,4 @@
-import { InsightsFlowAction } from '~/cdp/schema/hogflow'
+import { InsightsFlowAction } from '~/cdp/schema/insightsflow'
 import { logger } from '~/common/utils/logger'
 
 import { CyclotronJobInvocationInsightsFunction } from '../../types'

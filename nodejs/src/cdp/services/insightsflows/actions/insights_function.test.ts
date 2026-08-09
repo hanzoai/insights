@@ -2,21 +2,18 @@ import { mockFetch } from '~/tests/helpers/mocks/request.mock'
 
 import { DateTime } from 'luxon'
 
-import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/hogflow.builder'
+import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/insightsflow.builder'
 import { insertInsightsFunctionTemplate, insertIntegration } from '~/cdp/_tests/fixtures'
 import { createExampleInsightsFlowInvocation } from '~/cdp/_tests/fixtures-insightsflows'
-import { InsightsFlowAction } from '~/cdp/schema/hogflow'
+import { InsightsFlowAction } from '~/cdp/schema/insightsflow'
 import { createInvocationResult } from '~/cdp/utils/invocation-utils'
 import { closeHub, createHub } from '~/common/utils/db/hub'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '~/types'
 
 import { CyclotronJobInvocationInsightsFlow, DBInsightsFunctionTemplate } from '../../../types'
-import { HogExecutorAsyncService } from '../../script-executor-async.service'
-import { HogExecutorService } from '../../script-executor.service'
-import { HogInputsService } from '../../script-inputs.service'
-import { InsightsFunctionTemplateManagerService } from '../../managers/script-function-template-manager.service'
 import { RecipientsManagerService } from '../../managers/recipients-manager.service'
+import { InsightsFunctionTemplateManagerService } from '../../managers/script-function-template-manager.service'
 import { TeamWorkflowsConfigService } from '../../managers/team-workflows-config.service'
 import { EmailSuppressionService, emailSuppressionConfigFromEnv } from '../../messaging/email-suppression.service'
 import { EmailValidationService } from '../../messaging/email-validation.service'
@@ -24,8 +21,11 @@ import { EmailService } from '../../messaging/email.service'
 import { EmailTrackingCodeSigner } from '../../messaging/helpers/tracking-code'
 import { RecipientPreferencesService } from '../../messaging/recipient-preferences.service'
 import { RecipientTokensService } from '../../messaging/recipient-tokens.service'
-import { InsightsFlowFunctionsService } from '../hogflow-functions.service'
-import { findActionByType } from '../hogflow-utils'
+import { HogExecutorAsyncService } from '../../script-executor-async.service'
+import { HogExecutorService } from '../../script-executor.service'
+import { HogInputsService } from '../../script-inputs.service'
+import { InsightsFlowFunctionsService } from '../insightsflow-functions.service'
+import { findActionByType } from '../insightsflow-utils'
 import { InsightsFunctionHandler } from './insights_function'
 
 describe('InsightsFunctionHandler', () => {
@@ -230,7 +230,10 @@ describe('InsightsFunctionHandler', () => {
         })
 
         it('should forward groups to the script function invocation globals', async () => {
-            const buildInsightsFunctionInvocationSpy = jest.spyOn(mockInsightsFlowFunctionsService, 'buildInsightsFunctionInvocation')
+            const buildInsightsFunctionInvocationSpy = jest.spyOn(
+                mockInsightsFlowFunctionsService,
+                'buildInsightsFunctionInvocation'
+            )
 
             const invocationResult = createInvocationResult<CyclotronJobInvocationInsightsFlow>(invocation, {
                 queue: 'script',
@@ -256,7 +259,11 @@ describe('InsightsFunctionHandler', () => {
                 queuePriority: 0,
             })
 
-            const handlerResult = await insightsFunctionHandler.execute({ invocation, action, result: invocationResult })
+            const handlerResult = await insightsFunctionHandler.execute({
+                invocation,
+                action,
+                result: invocationResult,
+            })
 
             expect(handlerResult.error).toBeUndefined()
             expect(mockFetch.mock.calls[0][1].body).toContain('"name":"Chris McNeill"')
@@ -280,7 +287,11 @@ describe('InsightsFunctionHandler', () => {
                 queuePriority: 0,
             })
 
-            const handlerResult = await insightsFunctionHandler.execute({ invocation, action, result: invocationResult })
+            const handlerResult = await insightsFunctionHandler.execute({
+                invocation,
+                action,
+                result: invocationResult,
+            })
 
             const warnings = invocationResult.logs.filter(
                 (l) => l.level === 'warn' && l.message.includes('not set for this run')
@@ -347,7 +358,10 @@ describe('InsightsFunctionHandler', () => {
     })
 
     it('should pass proper inputs to buildInsightsFunctionInvocation', async () => {
-        const buildInsightsFunctionInvocationSpy = jest.spyOn(mockInsightsFlowFunctionsService, 'buildInsightsFunctionInvocation')
+        const buildInsightsFunctionInvocationSpy = jest.spyOn(
+            mockInsightsFlowFunctionsService,
+            'buildInsightsFunctionInvocation'
+        )
 
         const invocationResult = createInvocationResult<CyclotronJobInvocationInsightsFlow>(invocation, {
             queue: 'script',
@@ -624,7 +638,10 @@ describe('InsightsFunctionHandler', () => {
 
             const flowAction = findActionByType(hogFlow, 'function')!
 
-            const builtInsightsFunction = await mockInsightsFlowFunctionsService.buildInsightsFunction(hogFlow, flowAction.config)
+            const builtInsightsFunction = await mockInsightsFlowFunctionsService.buildInsightsFunction(
+                hogFlow,
+                flowAction.config
+            )
 
             expect(builtInsightsFunction.inputs_schema).toEqual(
                 expect.arrayContaining([

@@ -1,4 +1,4 @@
-import { findMissingVariableReferences } from './hogflow-variable-usage'
+import { findMissingVariableReferences } from './insightsflow-variable-usage'
 
 describe('findMissingVariableReferences', () => {
     it.each([

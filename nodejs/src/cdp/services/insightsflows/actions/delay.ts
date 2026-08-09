@@ -1,8 +1,8 @@
 import { DateTime, DurationLike } from 'luxon'
 
-import { InsightsFlowAction } from '~/cdp/schema/hogflow'
+import { InsightsFlowAction } from '~/cdp/schema/insightsflow'
 
-import { findContinueAction } from '../hogflow-utils'
+import { findContinueAction } from '../insightsflow-utils'
 import { ActionHandler, ActionHandlerOptions, ActionHandlerResult } from './action.interface'
 
 export class DelayHandler implements ActionHandler {

@@ -1,6 +1,6 @@
 import { Counter } from 'prom-client'
 
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { InsightsFlow } from '~/cdp/schema/insightsflow'
 
 import { QuotaLimiting } from '../../../common/services/quota-limiting.service'
 import { CyclotronJobInvocationInsightsFlow } from '../../types'

@@ -142,8 +142,8 @@ export CYCLOTRON_NODE_DATABASE_URL=${CYCLOTRON_NODE_DATABASE_URL:-postgres://ins
 # Clean up orphaned dev processes left behind by a previous unclean shutdown.
 # These "zombies" hold ports and memory and cause most local dev issues. Only
 # orphans are killed — processes under an active process manager are left alone.
-# Set HOGLI_SKIP_ZOMBIE_CHECK=1 to skip. Never let it fail the script (set -e).
-if [[ -z "${HOGLI_SKIP_ZOMBIE_CHECK:-}" ]] && command -v insightscli &>/dev/null; then
+# Set INSIGHTSCLI_SKIP_ZOMBIE_CHECK=1 to skip. Never let it fail the script (set -e).
+if [[ -z "${INSIGHTSCLI_SKIP_ZOMBIE_CHECK:-}" ]] && command -v insightscli &>/dev/null; then
     insightscli doctor:zombies --yes || true
 fi
 
@@ -281,9 +281,9 @@ else
     GENERATED_CONFIG="$REPOSITORY_ROOT/.insights/.generated/mprocs.yaml"
 
     # Generate/regenerate config using insightscli (defaults to product_analytics if no config exists)
-    # HOGLI_PROCESS_MANAGER is picked up by dev:generate for telemetry
+    # INSIGHTSCLI_PROCESS_MANAGER is picked up by dev:generate for telemetry
     if command -v insightscli &>/dev/null; then
-        INSIGHTS_TELEMETRY_OPT_OUT=1 HOGLI_PROCESS_MANAGER="$PROCESS_MANAGER" insightscli dev:generate 2>/dev/null || true
+        INSIGHTS_TELEMETRY_OPT_OUT=1 INSIGHTSCLI_PROCESS_MANAGER="$PROCESS_MANAGER" insightscli dev:generate 2>/dev/null || true
     fi
 
     if [[ -f "$GENERATED_CONFIG" ]]; then

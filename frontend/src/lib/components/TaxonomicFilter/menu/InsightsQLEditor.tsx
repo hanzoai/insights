@@ -86,7 +86,7 @@ export function MenuFilterInsightsQLEditor({
                                 <CodeEditorInline
                                     value={expression}
                                     onChange={(v) => setExpression(v ?? '')}
-                                    language="hogQLExpr"
+                                    language="insightsQLExpr"
                                     minHeight="120px"
                                     autoFocus
                                     onPressCmdEnter={(value) => commit(value)}

@@ -17,16 +17,16 @@ import { createInsightsFunction, insertInsightsFunction } from '../_tests/fixtur
 import { insightsPluginGeoip } from '../legacy-plugins/_transformations/insights-plugin-geoip/template'
 import { propertyFilterPlugin } from '../legacy-plugins/_transformations/property-filter-plugin/template'
 import { InsightsFunctionTemplate } from '../types'
+import { resetScriptvmNodeModuleCacheForTests } from './rust-vm'
 import type { HogTransformerServiceConfig } from './script-transformer.service'
 import { HogTransformerService, createHogTransformerService } from './script-transformer.service'
-import { resetHogvmNodeModuleCacheForTests } from './rust-vm'
 
 jest.mock('@hanzo/scriptvm-node', () => ({
     init: jest.fn(),
     executeSync: jest.fn(),
 }))
 
-const mockHogvmNode = jest.mocked(jest.requireMock<typeof import('@hanzo/scriptvm-node')>('@hanzo/scriptvm-node'))
+const mockScriptvmNode = jest.mocked(jest.requireMock<typeof import('@hanzo/scriptvm-node')>('@hanzo/scriptvm-node'))
 
 const createPluginEvent = (event: Partial<PluginEvent> = {}, teamId: number = 1): PluginEvent => {
     return {
@@ -1167,7 +1167,10 @@ describe('HogTransformer', () => {
             await insertInsightsFunction(hub.postgres, teamId, geoIp)
             await insertInsightsFunction(hub.postgres, teamId, filterPlugin)
 
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [geoIp.id, filterPlugin.id])
+            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
+                geoIp.id,
+                filterPlugin.id,
+            ])
 
             const event: PluginEvent = createPluginEvent({ event: 'keep-me', team_id: teamId })
             const result = await hogTransformer.transformEventAndProduceMessages(event)
@@ -1445,7 +1448,10 @@ describe('HogTransformer', () => {
                 workingFunction.id,
             ])
 
-            const queueAppMetricsSpy = jest.spyOn(hogTransformer['insightsFunctionMonitoringService'], 'queueAppMetrics')
+            const queueAppMetricsSpy = jest.spyOn(
+                hogTransformer['insightsFunctionMonitoringService'],
+                'queueAppMetrics'
+            )
             const queueLogsSpy = jest.spyOn(hogTransformer['insightsFunctionMonitoringService'], 'queueLogs')
 
             const event = createPluginEvent({ event: 'test-event' }, teamId)
@@ -1638,7 +1644,7 @@ describe('HogTransformer', () => {
         let bytecode: any[]
 
         beforeEach(async () => {
-            resetHogvmNodeModuleCacheForTests()
+            resetScriptvmNodeModuleCacheForTests()
 
             hub.CDP_FN_RUST_VM_EXECUTION_ENABLED = true
             hogTransformer = createHogTransformerService(hub, {
@@ -1660,7 +1666,7 @@ describe('HogTransformer', () => {
         })
 
         it('executes transformations on the rust vm when the flag is enabled', async () => {
-            mockHogvmNode.executeSync.mockReturnValue({
+            mockScriptvmNode.executeSync.mockReturnValue({
                 result: { properties: { from_rust: true } },
                 durationUs: 100,
                 logs: [],
@@ -1669,8 +1675,8 @@ describe('HogTransformer', () => {
 
             const result = await hogTransformer.transformEventAndProduceMessages(createPluginEvent({}, teamId))
 
-            expect(mockHogvmNode.executeSync).toHaveBeenCalledTimes(1)
-            expect(mockHogvmNode.executeSync.mock.calls[0][0]).toEqual(bytecode)
+            expect(mockScriptvmNode.executeSync).toHaveBeenCalledTimes(1)
+            expect(mockScriptvmNode.executeSync.mock.calls[0][0]).toEqual(bytecode)
             expect(result.event?.properties).toEqual({
                 from_rust: true,
                 $transformations_succeeded: ['Rust routed (bbbbbbbb-bbbb-4bbb-bbbb-bbbbbbbbbbbb)'],
@@ -1678,7 +1684,7 @@ describe('HogTransformer', () => {
         })
 
         it('falls back to the node vm when the rust vm cannot run the program', async () => {
-            mockHogvmNode.executeSync.mockReturnValue({
+            mockScriptvmNode.executeSync.mockReturnValue({
                 error: 'Native call failed: unsupported_ext_fn:geoipLookup',
                 durationUs: 100,
                 logs: [],
@@ -1687,7 +1693,7 @@ describe('HogTransformer', () => {
 
             const result = await hogTransformer.transformEventAndProduceMessages(createPluginEvent({}, teamId))
 
-            expect(mockHogvmNode.executeSync).toHaveBeenCalledTimes(1)
+            expect(mockScriptvmNode.executeSync).toHaveBeenCalledTimes(1)
             // The node vm ran the real bytecode: the event survives with its original properties.
             expect(result.event?.properties).toMatchObject({
                 $current_url: 'https://example.com',

@@ -806,8 +806,8 @@ export interface InsightsQLAutocompleteResponse {
 export enum HogLanguage {
     script = 'script',
     hogJson = 'hogJson',
-    hogQL = 'hogQL',
-    hogQLExpr = 'hogQLExpr',
+    insightsQL = 'insightsQL',
+    insightsQLExpr = 'insightsQLExpr',
     hogTemplate = 'hogTemplate',
     liquid = 'liquid',
 }

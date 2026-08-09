@@ -677,7 +677,7 @@ def get_generated_mprocs_path() -> Path:
 
     Checks local path first, then main repo if in a worktree.
     """
-    override_path = os.getenv("HOGLI_MPROCS_PATH")
+    override_path = os.getenv("INSIGHTSCLI_MPROCS_PATH")
     if override_path:
         return Path(override_path)
 

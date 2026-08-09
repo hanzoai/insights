@@ -1,13 +1,13 @@
 import { DateTime } from 'luxon'
 
-import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/hogflow.builder'
+import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/insightsflow.builder'
 import { INSIGHTS_FILTERS_EXAMPLES } from '~/cdp/_tests/examples'
 import { createExampleInsightsFlowInvocation } from '~/cdp/_tests/fixtures-insightsflows'
-import { InsightsFlow, InsightsFlowAction } from '~/cdp/schema/hogflow'
+import { InsightsFlow, InsightsFlowAction } from '~/cdp/schema/insightsflow'
 import { CyclotronJobInvocationInsightsFlow } from '~/cdp/types'
 import { createInvocationResult } from '~/cdp/utils/invocation-utils'
 
-import { findActionById, findActionByType } from '../hogflow-utils'
+import { findActionById, findActionByType } from '../insightsflow-utils'
 import {
     ConditionalBranchHandler,
     checkConditions,

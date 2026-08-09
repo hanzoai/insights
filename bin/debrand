@@ -58,13 +58,10 @@ CONTENT_RULES: list[tuple[str, str]] = [
     ("posthoganalytics", "hanzo_insights"),
     ("posthog-js", "insights-js"),
     ("posthog_js", "insights_js"),
-    # Query language.
-    ("hogql_queries", "insightsql_queries"),
-    ("hogql_parser", "insightsql_parser"),
-    ("HogQLX", "InsightsQLX"),
-    ("HOGQL", "INSIGHTSQL"),
-    ("HogQL", "InsightsQL"),
-    ("hogql", "insightsql"),
+    # Query language. Handled by CONTENT_REGEX rather than here, because the
+    # suffix carries seven casings across the tree (`HOGQL`, `HogQL`, `Hogql`,
+    # `hogQL`, `hogQl`, `HogQl`, `hogql`) and only the prefix is ours to rename.
+    # Seven string pairs was the shape that kept coming up one short.
     # Warehouse. We say datastore everywhere. The ORM is first because our fork
     # flattened the vendor's namespace package: `infi.clickhouse_orm` is one
     # distribution, and the generic rule below would leave the `infi.` prefix
@@ -89,8 +86,8 @@ CONTENT_RULES: list[tuple[str, str]] = [
     ("hogflows", "insightsflows"),
     ("hogflow", "insightsflow"),
     ("HogFlow", "InsightsFlow"),
-    ("hogvm", "scriptvm"),
-    ("HogVM", "ScriptVM"),
+    # The VM's name is in CONTENT_REGEX with the query language's, for the same
+    # reason: `hogvm`, `HogVM`, `Hogvm`, `hogVm` and `HOGVM` are all in the tree.
     # Ahead of HOG_, which would otherwise split POSTHOG_FOO into POST + HOG_
     # and yield INSIGHTS_FOO — an env var no deployment sets. The live pods set
     # INSIGHTS_SKIP_MIGRATION_CHECKS, read by bin/migrate-check on the container
@@ -105,6 +102,12 @@ CONTENT_RULES: list[tuple[str, str]] = [
     ("Hedgehog", "Mascot"),
     ("HedgeHog", "Mascot"),
     ("hedgehog", "mascot"),
+    # The CLI's env prefix, which HOG_ above cannot reach: `HOGLI_` is
+    # H-O-G-L, so `HOG_` never matches it and the lowercase rule below never
+    # sees an uppercase name. The prefix is the program's own name, so it
+    # follows the program: bin/insightscli reads INSIGHTSCLI_DEBUG. There is
+    # no alias -- an env var read under two names is two names.
+    ("HOGLI_", "INSIGHTSCLI_"),
     ("hogli", "insightscli"),
     ("personhog", "personinsights"),
     ("PostholgStories", "InsightsStories"),
@@ -127,11 +130,45 @@ CONTENT_RULES: list[tuple[str, str]] = [
 ]
 
 # Applied after the table above. `Lemon<Component>` is the design-system
-# prefix strip: LemonButton -> Button. `hog` alone means a script.
+# prefix strip: LemonButton -> Button. `hog` alone means a script, and `hoge`
+# is that script compiled -- upstream's pairing, kept as `.py`/`.pyc` keeps it,
+# because the two names have to stay one letter apart or the compiler and the
+# runner stop agreeing about what they hand each other.
 CONTENT_REGEX: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"\bLemon(?=[A-Z][A-Za-z0-9]*)"), ""),
+    # The query language and the VM. Only the prefix is ours -- `QL` is SQL's
+    # and `VM` is a virtual machine's -- so the rule renames the prefix and
+    # leaves the suffix's casing exactly as the author wrote it. One rule per
+    # prefix casing covers every spelling in the tree and every one upstream
+    # coins next, which a table of whole-word pairs cannot: it was seven pairs
+    # deep and still missing `Hogql`, `hogQl`, `HogQl`, `Hogvm`, `hogVm` and
+    # `HOGVM`. Ahead of the bare `hog` word rule, which these overlap.
+    (re.compile(r"HOG(?=[Qq][Ll])"), "INSIGHTS"),
+    (re.compile(r"Hog(?=[Qq][Ll])"), "Insights"),
+    (re.compile(r"hog(?=[Qq][Ll])"), "insights"),
+    (re.compile(r"HOG(?=[Vv][Mm])"), "SCRIPT"),
+    (re.compile(r"Hog(?=[Vv][Mm])"), "Script"),
+    (re.compile(r"hog(?=[Vv][Mm])"), "script"),
+    # Ahead of the bare word only for reading order: `hog` cannot match inside
+    # `hoge` anyway, because `g`->`e` is not a boundary. That asymmetry is what
+    # split the language three ways before -- `".hog"` was rewritten to
+    # `".script"` and `".hoge"` was left alone, so the runner looked for one
+    # extension, the compiler wrote another, and the files on disk carried a
+    # third. One rule per spelling, in one table, is the fix.
+    (re.compile(r"\bhoge\b"), "scriptc"),
+    (re.compile(r"\bHoge\b"), "Scriptc"),
     (re.compile(r"\bhog\b"), "script"),
     (re.compile(r"\bHog\b"), "Script"),
+    # Django squashes app label and model name into one lowercase word for a
+    # table, so the separatorless spelling is the shape a PHYSICAL name takes:
+    # `insights_hogfunction`, the constraint `unique_hogfunction_revision_
+    # version`, the migration `0948_hogfunction_batch_export`. Those are
+    # identities the database holds, refused here for the same reason
+    # MIGRATION_RE refuses a migration filename. The lookbehind is the whole
+    # distinction: joined to a word on its left it is a database identifier,
+    # standing at a token boundary it is a label -- a kea path, a toast id, a
+    # template directory -- and only labels are ours to rename.
+    (re.compile(r"(?<![A-Za-z0-9_])hogfunction"), "insightsfunction"),
 ]
 
 # --- the ordering invariant ---------------------------------------------
@@ -169,8 +206,6 @@ IDENT_CONTINUATIONS = ("_", "A", "z", "0")
 
 PATH_RULES: list[tuple[str, str]] = [
     ("posthog.com", "hanzo.ai"),
-    ("hogql_queries", "insightsql_queries"),
-    ("hogql_parser", "insightsql_parser"),
     ("hog-transformations", "script-transformations"),
     ("hog-functions", "insights-functions"),
     # `hog-function-utils.ts` is imported as `./script-function-utils` once the
@@ -192,9 +227,6 @@ PATH_RULES: list[tuple[str, str]] = [
     ("Hedgehog", "Mascot"),
     ("HedgeHog", "Mascot"),
     ("hedgehog", "mascot"),
-    ("hogql", "insightsql"),
-    ("HogQL", "InsightsQL"),
-    ("hogvm", "scriptvm"),
     ("hogli", "insightscli"),
     ("lemon-ui", "elements"),
     ("clickhouse", "datastore"),
@@ -207,26 +239,6 @@ PATH_RULES: list[tuple[str, str]] = [
     ("posthog", "insights"),
 ]
 
-# A bare `hog` in a path means different things in different places, so it is
-# never rewritten blanket. Sprite assets are the mascot, script programs carry
-# the query-language extension, and everything else is spelled out above.
-PATH_SCOPED_RULES: list[tuple[str, str]] = [
-    ("-hog-", "-mascot-"),
-    ("_hog_", "_iql_"),
-    # A whole path component named `hog` is the script language, and CONTENT's
-    # `\bhog\b` rule already rewrites every reference to it: `lib/hog.ts` is
-    # imported as `lib/script`, `debug/hog/` as `debug/script/`. Anchored on the
-    # separators so it can only ever match a whole component -- `hogql` and
-    # `hedgehog` are handled above and must not be touched here.
-    ("/hog/", "/script/"),
-    ("/hog.", "/script."),
-]
-
-PATH_SUFFIX_RULES: list[tuple[str, str]] = [
-    (".hoge", ".iqle"),
-    (".hog", ".iql"),
-]
-
 # Directory renames that are ours by convention rather than by branding.
 # `kafka` is scoped to the client wrapper so real vendored Kafka code and the
 # livestream Go bindings keep their upstream names.
@@ -235,24 +247,25 @@ PATH_DIR_RULES: list[tuple[str, str]] = [
     ("nodejs/src/session-recording/kafka/", "nodejs/src/session-recording/stream/"),
 ]
 
-# Rules a path shares with content, because an import specifier IS a path.
+# An import specifier IS a path, so a path shares CONTENT_REGEX -- the same
+# object, not a copy of it. Two lists that had to agree is precisely what kept
+# not agreeing: the design-system strip landed in content and not in paths, and
+# every `@hanzo/elements` import dangled; the script extension landed in paths
+# and not in content, and the runner, the compiler and the files on disk ended
+# up spelling it three different ways; `-hog-` was rewritten to `-mascot-` in
+# paths while content said `script`, so ReviewHog's skill directories stopped
+# matching the prefix that discovers them and the product silently ran with no
+# perspectives at all. Sharing the list is what makes those unrepresentable --
+# there is nothing left to keep in step.
 #
-# `lib/lemon-ui/LemonTabs/LemonTabs.tsx` is rewritten by CONTENT_REGEX wherever
-# it appears in a file, so the file it names has to move the same way or the
-# import resolves to nothing. Keeping the two lists in sync by hand is what
-# broke: the content strip landed, the path strip did not, and the frontend
-# stopped building with every design-system import dangling. `--check` now
-# asserts the agreement instead of trusting it.
-#
-# Deliberately `(?=[A-Z])` and nothing looser, mirroring CONTENT_REGEX exactly.
-# `lemon_squeezy` is Lemon Squeezy, a payments vendor whose warehouse source we
-# import, so a rule matching a bare `lemon` would rename someone else's product.
-# Lowercase `lemonBannerLogic` is likewise left alone, because content leaves it
-# alone -- `LemonBanner/lemonBannerLogic.ts` becomes `Banner/lemonBannerLogic.ts`,
-# which is what the rewritten import asks for.
-PATH_REGEX: list[tuple[re.Pattern[str], str]] = [
-    (re.compile(r"\bLemon(?=[A-Z][A-Za-z0-9]*)"), ""),
-]
+# Every rule here is therefore constrained twice over: it must be right for a
+# path AND right for a file's bytes. `\bLemon(?=[A-Z])` and nothing looser,
+# because `lemon_squeezy` is Lemon Squeezy, a payments vendor whose warehouse
+# source we import, and a rule matching a bare `lemon` would rename someone
+# else's product. `\bhog\b` cannot reach `hedgehog`, `tophog`, `stamphog`,
+# `hog_invocation_results` or `hogfunction` -- each of those is either handled
+# above by name or is a physical name we do not own.
+PATH_REGEX = CONTENT_REGEX
 
 # Compose files follow the house convention.
 PATH_EXACT_RULES: dict[str, str] = {
@@ -406,6 +419,11 @@ CONTENT_ALLOWLIST: dict[str, str] = {
     ),
     "frontend/src/scenes/App.tsx": (
         "Same wrapper-export alias as ErrorBoundary.tsx."
+    ),
+    "frontend/src/scenes/saved-insights/insightTypesMetadata.tsx": (
+        "Aliases `IconHogQL` from the icons package, which we take from "
+        "upstream under our own scope. The export name is theirs; aliasing it "
+        "on import is how the name stops at the boundary."
     ),
 }
 
@@ -668,11 +686,6 @@ def rewrite_path(p: str) -> str:
         p = p.replace(old, new)
     for pat, rep in PATH_REGEX:
         p = pat.sub(rep, p)
-    for old, new in PATH_SCOPED_RULES:
-        p = p.replace(old, new)
-    for old, new in PATH_SUFFIX_RULES:
-        if p.endswith(old):
-            p = p[: -len(old)] + new
     return p
 
 
@@ -931,12 +944,22 @@ def path_rules_have_content_counterparts() -> int:
 
     Checked against the rules rather than the tree, because the tree only shows
     the instances that exist today and the rule keeps producing more.
+
+    Both whole pipelines are run, not just the one rule: a path rule's output
+    goes on to meet PATH_REGEX, and a rule that agreed in isolation can still
+    disagree once the regexes have had it. `.hog` was that case -- the suffix
+    table said `.iql` and the shared regex said `.script`, and the rule-only
+    comparison saw nothing wrong.
     """
-    bad = [(old, new, rewrite_text(old)) for old, new in PATH_RULES if rewrite_text(old) != new]
+    bad = [
+        (old, rewrite_path(old), rewrite_text(old))
+        for old, _ in PATH_RULES
+        if rewrite_path(old) != rewrite_text(old)
+    ]
     if bad:
         print(f"FAIL: {len(bad)} path rules rename something content rewriting leaves alone")
-        for old, new, got in bad:
-            print(f"    {old!r}: path -> {new!r}, but content -> {got!r}")
+        for old, as_path, as_text in bad:
+            print(f"    {old!r}: path -> {as_path!r}, but content -> {as_text!r}")
     return 1 if bad else 0
 
 
@@ -1116,6 +1139,116 @@ def check_marks(root: str) -> int:
     return 1 if (hits or marks) else 0
 
 
+# --- retired spellings ---------------------------------------------------
+#
+# The rules above rename on the way IN, from a fresh upstream import. Nothing
+# stopped a retired name walking back into the tree afterwards -- by hand, in a
+# cherry-pick, in generated output -- and `--check` was green throughout,
+# because it only ever looked for the company's name and these are the mascot's.
+#
+# Each entry is a spelling this fork does not use and the name it goes by
+# instead. They are refused rather than rewritten because a rewrite happens once
+# and a refusal happens on every commit.
+#
+# Deliberately NOT the whole of `hog`. `tophog` is seven Datastore tables and a
+# Kafka topic, `stamphog` and `review_hog` are two live Django apps with rows in
+# `django_migrations`, `hog_invocation_results` is a table, `hogland` is someone
+# else's service and `@hanzo/brand/hoggies` is a subpath of a package we do not
+# publish. Those are named below as outstanding, never as exempt -- an exemption
+# is a decision someone made, and nobody has made those.
+RETIRED: tuple[tuple[re.Pattern[str], str], ...] = (
+    (re.compile(r"HOGLI_"), "INSIGHTSCLI_ (the env prefix is the program's own name)"),
+    (re.compile(r"\bhoge\b|\bHoge\b"), "scriptc -- the compiler, and .scriptc bytecode"),
+    (re.compile(r"\bhog\b|\bHog\b"), "script -- the language, and .script source"),
+    (re.compile(r"[Hh]og[Qq][Ll]|HOGQL"), "InsightsQL"),
+    (re.compile(r"[Hh]og[Vv][Mm]|HOGVM"), "ScriptVM"),
+    (re.compile(r"(?<![A-Za-z0-9_])hogfunction"), "insightsfunction"),
+    # The extensions a previous pass invented for the script language, which
+    # named it after the SQL dialect instead. Refused so the language cannot go
+    # back to having two names.
+    (re.compile(r"\.iqle?(?![A-Za-z0-9])"), ".script and .scriptc"),
+)
+
+# Coarse enough for POSIX ERE, which has no word boundary. `git grep` narrows
+# 35k tracked files to the few hundred worth opening; RETIRED then says which
+# token matched and where, because a guard that only says "this file is dirty"
+# makes the next person grep for the answer themselves.
+RETIRED_GREP = "hog|HOG|Hog|[.]iql"
+
+
+def is_manifest(p: str) -> bool:
+    b = os.path.basename(p)
+    return b in MANIFESTS or b in SKIP_CONTENT_NAMES
+
+
+def partition(hits: list[str]) -> tuple[list[str], list[str], list[str]]:
+    """Split files carrying a foreign name into attribution, pending and leaked.
+
+    Manifests and lockfiles are reported, never allowlisted. They name packages
+    that have to resolve, so each one is either a repo we host under our own
+    name or a dependency we still take from upstream -- a decision per entry,
+    and outstanding work until someone makes it. Calling that an exemption would
+    hide it.
+    """
+    exempt = set(CONTENT_ALLOWLIST)
+    rest = [h for h in hits if h not in exempt and not is_licence(h)]
+    return (
+        sorted(h for h in hits if is_licence(h)),
+        sorted(h for h in rest if is_manifest(h)),
+        [h for h in rest if not is_manifest(h)],
+    )
+
+
+def check_hog(root: str) -> int:
+    """Refuse the spellings this fork has retired, in content and in paths."""
+    # Classify on what RETIRED actually matches, not on what the coarse grep
+    # let through: `sha512-...KBBHOGSV...` is a lockfile integrity hash, and
+    # reporting a manifest because a base64 digest happens to contain the
+    # letters is how a report stops being read.
+    coarse = subprocess.run(
+        ["git", "grep", "-lIE", RETIRED_GREP], cwd=root, capture_output=True, text=True
+    ).stdout.split()
+    found: dict[str, list[tuple[int, str, str]]] = {}
+    for rel in sorted(set(coarse) - set(CONTENT_ALLOWLIST)):
+        if is_licence(rel):
+            continue
+        with open(os.path.join(root, rel), encoding="utf-8", errors="replace") as fh:
+            for n, line in enumerate(fh, 1):
+                for pat, instead in RETIRED:
+                    m = pat.search(line)
+                    if m:
+                        found.setdefault(rel, []).append((n, m.group(0), instead))
+    pending = sorted(r for r in found if is_manifest(r))
+    leaked = [
+        (rel, n, tok, instead)
+        for rel, lines in sorted(found.items())
+        if not is_manifest(rel)
+        for n, tok, instead in lines
+    ]
+    # A migration's filename is its identity in `django_migrations`, so it is
+    # frozen for the same reason MIGRATION_RE freezes it against renaming.
+    paths = [
+        p
+        for p in tracked_files(root)
+        if not is_migration(p) and any(pat.search(p) for pat, _ in RETIRED)
+    ]
+
+    if pending:
+        print(f"PENDING: {len(pending)} dependency manifests still name a mascot package.")
+        for p in pending:
+            print(f"    {p}")
+    if leaked:
+        print(f"FAIL: {len(leaked)} lines spell a name this fork retired")
+        print("    The rename runs through bin/debrand, so the fix is a rule, not an edit.")
+        for rel, n, tok, instead in leaked[:20]:
+            print(f"    {rel}:{n}: {tok!r} -- say {instead}")
+    if paths:
+        print(f"FAIL: {len(paths)} tracked paths spell a name this fork retired")
+        for p in paths[:20]:
+            print(f"    {p}")
+    return 1 if (leaked or paths) else 0
+
+
 def check_license(root: str) -> int:
     """The licence must still carry the notice MIT obliges us to pass on.
 
@@ -1162,6 +1295,68 @@ def check_license(root: str) -> int:
 MODULE_REF_RE = re.compile(
     r"(?P<pre>(?:^|\n)[ \t]*(?P<kw>from|import)[ \t]+)(?P<dots>\.*)(?P<mod>[A-Za-z_][\w.]*)"
 )
+
+# The tree has two module systems and only one of them was ever checked, so the
+# same staleness sat in TypeScript unseen: 190 specifiers named a file that had
+# been renamed out from under them -- the whole CDP consumer graph, which is the
+# event worker. Python was checked because `--check` grew up around a Django
+# boot; the worker fails the same way and says so in a different syntax.
+TS_REF_RE = re.compile(
+    r"""(?P<pre>(?:from|import|require)\s*\(?\s*(?P<q>['"]))(?P<spec>[^'"\n]+)(?P=q)"""
+)
+
+TS_EXT = (".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".d.ts", ".json", ".node")
+
+
+def ts_file(base: str, tracked: set[str], root: str) -> bool:
+    """Whether a TypeScript specifier, already made repo-relative, names a file."""
+    return (
+        base in tracked
+        or any(base + e in tracked for e in TS_EXT)
+        or any(f"{base}/index{e}" in tracked for e in TS_EXT)
+        or os.path.isdir(os.path.join(root, base))
+    )
+
+
+def ts_path(spec: str, rel: str) -> str | None:
+    """A specifier as a repo-relative path, or None if it names a package.
+
+    Two spellings resolve to a file rather than to node_modules: the relative
+    one, and `~/`, which every tsconfig in the tree points at its own package.
+    The `~/` root is read off the importing file rather than out of a tsconfig,
+    because `~/tests/x` and `~/cdp/x` resolve against different roots in the
+    SAME package and both spellings are in use.
+    """
+    if spec.startswith("."):
+        return os.path.normpath(os.path.join(os.path.dirname(rel), spec))
+    if spec.startswith("~/"):
+        pkg = rel.split("/", 1)[0]
+        tail = spec[2:]
+        return f"{pkg}/{'' if tail.startswith('tests/') else 'src/'}{tail}"
+    return None
+
+
+def ts_ref_target(spec: str, rel: str, tracked: set[str], root: str) -> str | None:
+    """The specifier this one should be, or None if it is fine.
+
+    Derived from the tree exactly as the Python side is: put the path the
+    specifier names through the same rules the file went through, and if THAT
+    resolves while the original does not, the file moved and the reference is
+    stale. Nothing is guessed -- a specifier that resolves to nothing under both
+    spellings is left alone and reported, because renaming it would be a guess.
+    """
+    base = ts_path(spec, rel)
+    if base is None or ts_file(base, tracked, root):
+        return None
+    moved = rewrite_path(base)
+    if moved == base or not ts_file(moved, tracked, root):
+        return None
+    if spec.startswith("~/"):
+        pkg = rel.split("/", 1)[0]
+        tail = moved[len(pkg) + 1:]
+        return "~/" + (tail[len("src/"):] if tail.startswith("src/") else tail)
+    out = os.path.relpath(moved, os.path.dirname(rel))
+    return out if out.startswith(".") else "./" + out
 
 
 def package_of(rel: str) -> str:
@@ -1237,34 +1432,18 @@ def ref_target(mm: re.Match[str], rel: str, tracked: set[str], fp: set[str],
     return target[len(prefix):] if target.startswith(prefix) else None
 
 
-def stale_module_refs(root: str) -> dict[str, list[str]]:
-    """Stale first-party module references, mapped to the files that carry them."""
-    tracked = set(tracked_files(root))
-    fp = first_party(tracked)
-    out: dict[str, list[str]] = {}
-    for rel in sorted(p for p in tracked if p.endswith(".py")):
-        try:
-            src = open(os.path.join(root, rel), encoding="utf-8", errors="ignore").read()
-        except OSError:
-            continue
-        for mm in MODULE_REF_RE.finditer(src):
-            if ref_target(mm, rel, tracked, fp, root):
-                out.setdefault(mm.group("dots") + mm.group("mod"), []).append(rel)
-    return out
+TS_SOURCE = (".ts", ".tsx", ".mts", ".cts", ".js", ".jsx")
 
 
-def rewrite_module_refs(root: str, dry: bool) -> int:
-    tracked = set(tracked_files(root))
-    fp = first_party(tracked)
-    fixed = 0
-    for rel in sorted(p for p in tracked if p.endswith(".py")):
-        path = os.path.join(root, rel)
-        try:
-            src = open(path, encoding="utf-8", errors="ignore").read()
-        except OSError:
-            continue
-        moved: dict[str, str] = {}
+def repoint(rel: str, src: str, tracked: set[str], fp: set[str], root: str) -> tuple[str, dict[str, str]]:
+    """One file's source with its stale references repaired, and what moved.
 
+    Both module systems go through here, because "a reference names a file that
+    is not there" is one defect wearing two syntaxes, and splitting it in two is
+    how TypeScript ended up unchecked.
+    """
+    moved: dict[str, str] = {}
+    if rel.endswith(".py"):
         def sub(mm: re.Match[str]) -> str:
             target = ref_target(mm, rel, tracked, fp, root)
             if not target:
@@ -1272,7 +1451,48 @@ def rewrite_module_refs(root: str, dry: bool) -> int:
             moved[mm.group("dots") + mm.group("mod")] = mm.group("dots") + target
             return mm.group("pre") + mm.group("dots") + target
 
-        new = MODULE_REF_RE.sub(sub, src)
+        return MODULE_REF_RE.sub(sub, src), moved
+
+    def sub_ts(mm: re.Match[str]) -> str:
+        target = ts_ref_target(mm.group("spec"), rel, tracked, root)
+        if not target:
+            return mm.group(0)
+        moved[mm.group("spec")] = target
+        return mm.group("pre") + target + mm.group("q")
+
+    return TS_REF_RE.sub(sub_ts, src), moved
+
+
+def referencing_files(tracked: set[str]) -> list[str]:
+    return sorted(p for p in tracked if p.endswith(".py") or p.endswith(TS_SOURCE))
+
+
+def stale_module_refs(root: str) -> dict[str, list[str]]:
+    """Stale first-party module references, mapped to the files that carry them."""
+    tracked = set(tracked_files(root))
+    fp = first_party(tracked)
+    out: dict[str, list[str]] = {}
+    for rel in referencing_files(tracked):
+        try:
+            src = open(os.path.join(root, rel), encoding="utf-8", errors="ignore").read()
+        except OSError:
+            continue
+        for ref in repoint(rel, src, tracked, fp, root)[1]:
+            out.setdefault(ref, []).append(rel)
+    return out
+
+
+def rewrite_module_refs(root: str, dry: bool) -> int:
+    tracked = set(tracked_files(root))
+    fp = first_party(tracked)
+    fixed = 0
+    for rel in referencing_files(tracked):
+        path = os.path.join(root, rel)
+        try:
+            src = open(path, encoding="utf-8", errors="ignore").read()
+        except OSError:
+            continue
+        new, moved = repoint(rel, src, tracked, fp, root)
         if new != src:
             for old, target in sorted(moved.items()):
                 print(f"{'would point' if dry else 'pointed'} {rel}: {old} -> {target}")
@@ -1317,6 +1537,7 @@ def check(root: str) -> int:
     bad += check_modules(root)
     bad += check_mangled(root)
     bad += check_marks(root)
+    bad += check_hog(root)
     paths = [p for p in tracked_files(root) if "posthog" in p.lower()]
     if paths:
         bad += 1
@@ -1326,19 +1547,7 @@ def check(root: str) -> int:
     hits = subprocess.run(
         ["git", "grep", "-ilI", "posthog"], cwd=root, capture_output=True, text=True
     ).stdout.split()
-    # Manifests and lockfiles are reported, never allowlisted. They name
-    # packages that have to resolve, so each one is either a repo we host
-    # under our own name or a dependency we still take from upstream — a
-    # decision per entry, and outstanding work until someone makes it.
-    # Calling that an exemption would hide it.
-    def is_manifest(p: str) -> bool:
-        b = os.path.basename(p)
-        return b in MANIFESTS or b in SKIP_CONTENT_NAMES
-
-    exempt = set(CONTENT_ALLOWLIST)
-    attribution = sorted(h for h in hits if is_licence(h))
-    pending = sorted(h for h in hits if h not in exempt and not is_licence(h) and is_manifest(h))
-    leaked = [h for h in hits if h not in exempt and not is_licence(h) and not is_manifest(h)]
+    attribution, pending, leaked = partition(hits)
     if attribution:
         print(f"attribution: {len(attribution)} licence files name the upstream, as MIT requires")
     bad += licences_unlaundered(root)

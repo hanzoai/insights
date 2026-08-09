@@ -36,17 +36,17 @@ export async function compileHog(script: string): Promise<HogBytecode> {
             return CACHE[script]
         }
 
-        // We invoke the ./bin/script from the root of the directory like bin/hoge <file.script> [output.hoge]
+        // We invoke the ./bin/script from the root of the directory like bin/scriptc <file.script> [output.scriptc]
         // We need to write and read from a temp file
         const uuid = new UUIDT().toString()
         const tempFile = path.join(tmpdir(), `script-${uuid}.script`)
         await writeFile(tempFile, script)
 
-        const outputFile = path.join(tmpdir(), `script-${uuid}.hoge`)
+        const outputFile = path.join(tmpdir(), `script-${uuid}.scriptc`)
         try {
             await new Promise((resolve, reject) => {
                 exec(
-                    `cd ${ROOT_DIR} && ./bin/hoge ${tempFile} ${outputFile}`,
+                    `cd ${ROOT_DIR} && ./bin/scriptc ${tempFile} ${outputFile}`,
                     {
                         env: {
                             ...process.env,

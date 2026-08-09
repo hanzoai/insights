@@ -16,12 +16,7 @@ This file checks two things:
 
 import re
 
-from insights.test.base import (
-    APIBaseTest,
-    DatastoreTestMixin,
-    _create_event,
-    flush_persons_and_events,
-)
+from insights.test.base import APIBaseTest, DatastoreTestMixin, _create_event, flush_persons_and_events
 
 from insights.datastore.client.execute import sync_execute
 from insights.models import Organization, Team
@@ -71,7 +66,7 @@ _MUTATION_SAFE_FUNCTIONS = frozenset(
 )
 
 
-class TestWithinNonHogqlDelete(DatastoreTestMixin, APIBaseTest):
+class TestWithinNonInsightsqlDelete(DatastoreTestMixin, APIBaseTest):
     maxDiff = None
 
     def test_compiled_predicate_is_unqualified_and_mutation_safe_without_materialized_column(self) -> None:
