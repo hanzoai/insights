@@ -2,9 +2,9 @@ import { PluginsServerConfig } from '~/types'
 
 import { JobQueue } from '../services/job-queue/job-queue.interface'
 import { CdpConsumerBaseDeps } from './cdp-base.consumer'
-import { CdpCyclotronWorkerInsightsFlow } from './cdp-cyclotron-worker-hogflow.consumer'
+import { CdpCyclotronWorkerFlow } from './cdp-cyclotron-worker-flow.consumer'
 
-export class CdpCyclotronWorkerEmail extends CdpCyclotronWorkerInsightsFlow {
+export class CdpCyclotronWorkerEmail extends CdpCyclotronWorkerFlow {
     protected override name = 'CdpCyclotronWorkerEmail'
 
     constructor(config: PluginsServerConfig, deps: CdpConsumerBaseDeps, jobQueue: JobQueue) {
