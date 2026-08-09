@@ -1,5 +1,5 @@
 import Ajv, { ErrorObject } from 'ajv'
-import { EventType, eventWithTime } from 'insights-js/rrweb-types'
+import { EventType, eventWithTime } from '@hanzo/insights-rrweb-types'
 
 import { transformEventToWeb, transformToWeb } from '@hanzo/replay-shared'
 import { wireframe, wireframeText } from '@hanzo/replay-shared/mobile/mobile.types'

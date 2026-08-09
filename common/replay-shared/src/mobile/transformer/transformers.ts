@@ -8,7 +8,7 @@ import {
     metaEvent,
     mutationData,
     removedNodeMutation,
-} from 'insights-js/rrweb-types'
+} from '@hanzo/insights-rrweb-types'
 
 import { ReplayTelemetry } from '../../telemetry'
 import { isObject } from '../../utils'

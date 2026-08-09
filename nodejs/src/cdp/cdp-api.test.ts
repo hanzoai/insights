@@ -104,7 +104,7 @@ describe('CDP API', () => {
         cdpDeps = createCdpConsumerDeps(hub)
         api = new CdpApi(hub, cdpDeps, {
             hogQueue: createMockJobQueue(),
-            hogflowQueue: createMockJobQueue(),
+            flowQueue: createMockJobQueue(),
         })
         app = setupExpressApp()
         app.use('/', api.router())
@@ -1281,7 +1281,7 @@ describe('CDP API', () => {
 
         beforeEach(async () => {
             mockQueueInvocations = jest.fn().mockResolvedValue(undefined)
-            api['hogflowQueue'] = { queueInvocations: mockQueueInvocations } as any
+            api['flowQueue'] = { queueInvocations: mockQueueInvocations } as any
 
             scheduleFlow = await insertFlow({
                 id: new UUIDT().toString(),

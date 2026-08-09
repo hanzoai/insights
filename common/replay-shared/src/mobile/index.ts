@@ -1,4 +1,4 @@
-import { eventWithTime } from 'insights-js/rrweb-types'
+import { eventWithTime } from '@hanzo/insights-rrweb-types'
 
 import { noOpTelemetry, ReplayTelemetry } from '../telemetry'
 import { mobileEventWithTime } from './mobile.types'
