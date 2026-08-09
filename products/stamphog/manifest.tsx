@@ -11,7 +11,7 @@ export const manifest: ProductManifest = {
         Stamp: {
             // Single scene handles both the landing/list view and the post-install
             // GitHub App callback — the scene logic inspects search params to decide.
-            import: () => import('./frontend/scenes/StampScene/StampScene'),
+            import: () => import('./frontend/scenes/StamphogScene/StamphogScene'),
             projectBased: true,
             name: 'Stamp',
             iconType: 'stamp',
