@@ -11,13 +11,13 @@ from insights.models.personal_api_key import PersonalAPIKey, hash_key_value
 from insights.models.team import Team
 from insights.models.utils import generate_random_token_personal
 
-from products.stamp.backend.facade.enums import ReviewRunStatus
-from products.stamp.backend.models import DigestChannel, PullRequest, ReviewRun, StampRepoConfig
-from products.stamp.backend.presentation.views import _INSTALL_STATE_SALT
-from products.stamp.backend.tests.conftest import PRODUCT_DATABASES, StampTeamScopedTestMixin
+from products.stamphog.backend.facade.enums import ReviewRunStatus
+from products.stamphog.backend.models import DigestChannel, PullRequest, ReviewRun, StampRepoConfig
+from products.stamphog.backend.presentation.views import _INSTALL_STATE_SALT
+from products.stamphog.backend.tests.conftest import PRODUCT_DATABASES, StampTeamScopedTestMixin
 
-_VIEWS = "products.stamp.backend.presentation.views"
-_CLIENT = "products.stamp.backend.logic.github_client.StampGitHubClient"
+_VIEWS = "products.stamphog.backend.presentation.views"
+_CLIENT = "products.stamphog.backend.logic.github_client.StampGitHubClient"
 
 
 def _install_state(team_id: int, user_id: int) -> str:

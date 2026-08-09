@@ -49,7 +49,7 @@ from django.db.models.signals import post_save
 from products.review_hog.backend.models import ReviewUserSettings
 from products.signals.backend.models import SignalReportArtefact
 from products.signals.backend.report_generation.resolve_reviewers import resolve_org_github_login_to_users
-from products.stamp.backend.facade.inbox_hooks import register_inbox_acting_reviewer_resolver
+from products.stamphog.backend.facade.inbox_hooks import register_inbox_acting_reviewer_resolver
 
 # This module loads during django.setup() (AppConfig.ready() wires the receiver), and
 # insights/test/test_startup_import_budget.py forbids temporalio/modal/openai/anthropic at setup —
@@ -246,7 +246,7 @@ def _start_stamp_review(
     """
     # Function-local: pulls the stamp task module (temporalio via its workflow client), which
     # the startup-import-budget test forbids at django.setup() — see the module-top comment.
-    from products.stamp.backend.facade.tasks import queue_inbox_pr_review  # noqa: PLC0415
+    from products.stamphog.backend.facade.tasks import queue_inbox_pr_review  # noqa: PLC0415
 
     try:
         queue_inbox_pr_review(

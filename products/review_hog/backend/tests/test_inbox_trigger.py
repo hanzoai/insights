@@ -21,7 +21,7 @@ from products.tasks.backend.models import Task, TaskRun
 # receivers.py imports both at call time (startup-import-budget), so the defining modules are the
 # patch targets.
 _START = "products.review_hog.backend.temporal.client.start_review_pr_workflow"
-_STAMPFN_QUEUE = "products.stamp.backend.facade.tasks.queue_inbox_pr_review"
+_STAMPFN_QUEUE = "products.stamphog.backend.facade.tasks.queue_inbox_pr_review"
 # GitHub's own casing, as a real `output.pr_url` carries it. The task row lowercases its slug, so
 # this is what lets an assertion tell the task's repository apart from the PR URL's own claim.
 _PR_URL = "https://github.com/Insights/insights/pull/9"

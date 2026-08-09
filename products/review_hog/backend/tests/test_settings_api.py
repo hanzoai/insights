@@ -7,7 +7,7 @@ from insights.models.scoping import team_scope
 
 from products.review_hog.backend.models import ReviewUserSettings
 from products.skills.backend.models.skills import LLMSkill
-from products.stamp.backend.models import StampRepoConfig
+from products.stamphog.backend.models import StampRepoConfig
 
 
 class TestReviewUserSettingsAPI(APIBaseTest):

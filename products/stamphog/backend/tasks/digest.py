@@ -19,11 +19,11 @@ from django.utils import timezone
 import structlog
 from celery import shared_task
 
-from products.stamp.backend.facade.enums import DigestRunStatus
-from products.stamp.backend.logic.channel_resolution import auto_provision_channel
-from products.stamp.backend.logic.digest import summarize_merged_prs
-from products.stamp.backend.logic.slack_digest import post_digest
-from products.stamp.backend.models import DigestChannel, DigestRun, PullRequest
+from products.stamphog.backend.facade.enums import DigestRunStatus
+from products.stamphog.backend.logic.channel_resolution import auto_provision_channel
+from products.stamphog.backend.logic.digest import summarize_merged_prs
+from products.stamphog.backend.logic.slack_digest import post_digest
+from products.stamphog.backend.models import DigestChannel, DigestRun, PullRequest
 
 logger = structlog.get_logger(__name__)
 

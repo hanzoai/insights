@@ -35,7 +35,7 @@ async def execute_stamp_review_workflow(review_run_id: str, team_id: int) -> Non
     """
     # Deferred so the workflow module (and the temporalio workflow sandbox it drags
     # in) stays off the Celery/web import path that this client rides on.
-    from products.stamp.backend.temporal.workflow import (  # noqa: PLC0415 — keep the workflow sandbox off the import path
+    from products.stamphog.backend.temporal.workflow import (  # noqa: PLC0415 — keep the workflow sandbox off the import path
         StampReviewInput,
     )
 

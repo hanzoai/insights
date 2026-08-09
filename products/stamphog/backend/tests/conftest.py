@@ -16,7 +16,7 @@ from insights.models import OAuthApplication
 from insights.models.scoping import team_scope
 from insights.temporal.oauth import ARRAY_APP_CLIENT_ID_DEV, ARRAY_APP_CLIENT_ID_EU, ARRAY_APP_CLIENT_ID_US
 
-from products.stamp.backend.temporal.activities import (
+from products.stamphog.backend.temporal.activities import (
     MarkReviewFailedInput,
     StampReviewInput,
     dismiss_stale_approvals,
@@ -27,7 +27,7 @@ from products.stamp.backend.temporal.activities import (
     run_review_in_sandbox,
     signal_review_started,
 )
-from products.stamp.backend.tests import fakes
+from products.stamphog.backend.tests import fakes
 
 PRODUCT_DATABASES = {"default", "stamp_db_writer", "stamp_db_reader"}
 
@@ -195,41 +195,41 @@ def stamp_chain() -> Iterator[StampChain]:
         stack.enter_context(patch.dict(os.environ, {"AI_GATEWAY_URL": "https://llm-gateway.test/stamp/v1"}))
         # mark_review_failed emits a failure event through the real analytics client — a network
         # boundary, faked like the rest. Tests asserting on the event re-patch this locally.
-        stack.enter_context(patch("products.stamp.backend.temporal.activities.ph_scoped_capture"))
+        stack.enter_context(patch("products.stamphog.backend.temporal.activities.ph_scoped_capture"))
         stack.enter_context(
-            patch("products.stamp.backend.logic.github_client.github_request", recorder.github_request)
+            patch("products.stamphog.backend.logic.github_client.github_request", recorder.github_request)
         )
         stack.enter_context(
             patch(
-                "products.stamp.backend.logic.github_client.remember_observed_core_limit",
+                "products.stamphog.backend.logic.github_client.remember_observed_core_limit",
                 fakes.noop_remember_observed_core_limit,
             )
         )
         stack.enter_context(
             patch(
-                "products.stamp.backend.logic.github_client.raise_if_github_rate_limited",
+                "products.stamphog.backend.logic.github_client.raise_if_github_rate_limited",
                 fakes.noop_raise_if_github_rate_limited,
             )
         )
         stack.enter_context(
             patch(
-                "products.stamp.backend.temporal.activities.get_sandbox_class_for_backend",
+                "products.stamphog.backend.temporal.activities.get_sandbox_class_for_backend",
                 lambda backend: fake_sandbox,
             )
         )
         stack.enter_context(
-            patch("products.stamp.backend.tasks.tasks.execute_stamp_review_workflow", _inline_review_workflow)
+            patch("products.stamphog.backend.tasks.tasks.execute_stamp_review_workflow", _inline_review_workflow)
         )
         stack.enter_context(
             patch(
-                "products.stamp.backend.tasks.tasks.transaction.on_commit", side_effect=lambda fn, using=None: fn()
+                "products.stamphog.backend.tasks.tasks.transaction.on_commit", side_effect=lambda fn, using=None: fn()
             )
         )
-        stack.enter_context(patch("products.stamp.backend.logic.slack_digest.SlackIntegration", fake_slack))
-        stack.enter_context(patch("products.stamp.backend.logic.channel_resolution.SlackIntegration", fake_slack))
+        stack.enter_context(patch("products.stamphog.backend.logic.slack_digest.SlackIntegration", fake_slack))
+        stack.enter_context(patch("products.stamphog.backend.logic.channel_resolution.SlackIntegration", fake_slack))
         stack.enter_context(
             patch(
-                "products.stamp.backend.logic.digest.get_llm_client",
+                "products.stamphog.backend.logic.digest.get_llm_client",
                 side_effect=RuntimeError("no gateway in tests"),
             )
         )

@@ -34,7 +34,7 @@ from insights.schema import ProductKey
 from insights.api.app_metrics2 import AppMetricsMixin, fetch_app_metric_totals_by_source
 from insights.api.documentation import _FallbackSerializer
 from insights.api.script_invocation_rerun import ScriptInvocationRerunRequestSerializer, ScriptInvocationRerunResponseSerializer
-from insights.api.hog_invocation_results import (
+from insights.api.script_invocation_results import (
     ScriptInvocationResultDetailSerializer,
     ScriptInvocationResultSerializer,
     ScriptInvocationResultsRequestSerializer,

@@ -22,13 +22,13 @@ from celery import shared_task
 from insights.egress.github.transport import GitHubRateLimitError
 from insights.models.instance_setting import get_instance_setting
 
-from products.stamp.backend.facade.enums import TERMINAL_STATUSES, ReviewMode, ReviewRunStatus, ReviewVerdict
-from products.stamp.backend.facade.inbox_hooks import get_inbox_acting_reviewer_resolver
-from products.stamp.backend.logic.approvals import dismiss_stale_approvals_for_head
-from products.stamp.backend.logic.audiences import resolve_audience_key
-from products.stamp.backend.logic.github_client import StampGitHubClient
-from products.stamp.backend.models import PullRequest, ReviewRun, StampRepoConfig
-from products.stamp.backend.temporal.client import execute_stamp_review_workflow
+from products.stamphog.backend.facade.enums import TERMINAL_STATUSES, ReviewMode, ReviewRunStatus, ReviewVerdict
+from products.stamphog.backend.facade.inbox_hooks import get_inbox_acting_reviewer_resolver
+from products.stamphog.backend.logic.approvals import dismiss_stale_approvals_for_head
+from products.stamphog.backend.logic.audiences import resolve_audience_key
+from products.stamphog.backend.logic.github_client import StampGitHubClient
+from products.stamphog.backend.models import PullRequest, ReviewRun, StampRepoConfig
+from products.stamphog.backend.temporal.client import execute_stamp_review_workflow
 from products.tasks.backend.facade.api import find_signal_implementation_run
 
 logger = structlog.get_logger(__name__)
