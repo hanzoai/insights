@@ -762,9 +762,7 @@ def test_installation_repos_added_skips_when_installation_spans_multiple_teams(t
     # authenticated sync flow — no row is created for either team.
     second_team = _make_second_team(team.organization)
     with team_scope(second_team.id):
-        StampRepoConfig.objects.create(
-            team_id=second_team.id, repository="acme/other", installation_id=INSTALLATION_ID
-        )
+        StampRepoConfig.objects.create(team_id=second_team.id, repository="acme/other", installation_id=INSTALLATION_ID)
 
     payload = _installation_payload(action="added", added=["acme/brand-new"])
     process_installation_event(payload, "delivery-multi-add")

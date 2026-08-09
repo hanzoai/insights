@@ -86,7 +86,6 @@ from insights.insightsql.database.schema.experiment_metric_events_preaggregated 
 from insights.insightsql.database.schema.groups import GroupsTable, RawGroupsTable
 from insights.insightsql.database.schema.groups_revenue_analytics import GroupsRevenueAnalyticsTable
 from insights.insightsql.database.schema.heatmaps import HeatmapsTable
-from insights.insightsql.database.schema.hog_invocation_results import ScriptInvocationResultsTable
 from insights.insightsql.database.schema.information_schema import disable_data_catalog
 from insights.insightsql.database.schema.log_entries import (
     BatchExportLogEntriesTable,
@@ -94,10 +93,14 @@ from insights.insightsql.database.schema.log_entries import (
     ReplayConsoleLogsLogEntriesTable,
 )
 from insights.insightsql.database.schema.logs import LogAttributesTable, LogsKafkaMetricsTable, LogsTable
-from insights.insightsql.database.schema.marketing_conversions_preaggregated import MarketingConversionsPreaggregatedTable
+from insights.insightsql.database.schema.marketing_conversions_preaggregated import (
+    MarketingConversionsPreaggregatedTable,
+)
 from insights.insightsql.database.schema.marketing_costs_preaggregated import MarketingCostsPreaggregatedTable
 from insights.insightsql.database.schema.marketing_costs_precomputed import MarketingCostsPrecomputedTable
-from insights.insightsql.database.schema.marketing_touchpoints_preaggregated import MarketingTouchpointsPreaggregatedTable
+from insights.insightsql.database.schema.marketing_touchpoints_preaggregated import (
+    MarketingTouchpointsPreaggregatedTable,
+)
 from insights.insightsql.database.schema.metrics import (
     MetricAttributesTable,
     MetricSamplesTable,
@@ -118,15 +121,13 @@ from insights.insightsql.database.schema.preaggregation_results import Preaggreg
 from insights.insightsql.database.schema.precalculated_events import PrecalculatedEventsTable
 from insights.insightsql.database.schema.precalculated_person_properties import PrecalculatedPersonPropertiesTable
 from insights.insightsql.database.schema.query_log_archive import QueryLogArchiveTable, RawQueryLogArchiveTable
+from insights.insightsql.database.schema.script_invocation_results import ScriptInvocationResultsTable
 from insights.insightsql.database.schema.session_replay_events import (
     RawSessionReplayEventsTable,
     SessionReplayEventsTable,
 )
 from insights.insightsql.database.schema.session_replay_features import SessionReplayFeaturesTable
-from insights.insightsql.database.schema.sessions import (
-    RawSessionsTable,
-    SessionsTable,
-)
+from insights.insightsql.database.schema.sessions import RawSessionsTable, SessionsTable
 from insights.insightsql.database.schema.spans import TraceAttributesTable, TraceSpansTable
 from insights.insightsql.database.schema.static_cohort_people import StaticCohortPeople
 from insights.insightsql.database.schema.system import SystemTables
@@ -136,7 +137,9 @@ from insights.insightsql.database.schema.web_analytics_preaggregated import (
 )
 from insights.insightsql.database.schema.web_goals_preaggregated import WebGoalsPreaggregatedTable
 from insights.insightsql.database.schema.web_overview_preaggregated import WebOverviewPreaggregatedTable
-from insights.insightsql.database.schema.web_stats_frustration_preaggregated import WebStatsFrustrationPreaggregatedTable
+from insights.insightsql.database.schema.web_stats_frustration_preaggregated import (
+    WebStatsFrustrationPreaggregatedTable,
+)
 from insights.insightsql.database.schema.web_stats_paths_preaggregated import WebStatsPathsPreaggregatedTable
 from insights.insightsql.database.schema.web_stats_preaggregated import WebStatsPreaggregatedTable
 from insights.insightsql.database.schema.web_vitals_paths_preaggregated import WebVitalsPathsPreaggregatedTable
@@ -164,8 +167,8 @@ if TYPE_CHECKING:
         DatabaseSchemaDataWarehouseTable,
         DatabaseSchemaEndpointTable,
         DatabaseSchemaField,
-        DatabaseSchemaManagedViewTable,
         DatabaseSchemaInsightsTable,
+        DatabaseSchemaManagedViewTable,
         DatabaseSchemaSystemTable,
         DatabaseSchemaTableCertification,
         DatabaseSchemaViewTable,
@@ -882,8 +885,8 @@ class Database(BaseModel):
         from insights.schema import (  # noqa: PLC0415
             DatabaseSchemaDataWarehouseTable,
             DatabaseSchemaEndpointTable,
-            DatabaseSchemaManagedViewTable,
             DatabaseSchemaInsightsTable,
+            DatabaseSchemaManagedViewTable,
             DatabaseSchemaSchema,
             DatabaseSchemaSource,
             DatabaseSchemaSystemTable,

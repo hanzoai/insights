@@ -933,9 +933,7 @@ def process_pull_request_event(payload: dict[str, Any], delivery_id: str) -> Non
                         _INBOX_OPT_OUT_DISMISS_MESSAGE if carve_out.opted_out else _UNTRUSTED_SKIP_DISMISS_MESSAGE,
                     )
             except Exception as e:
-                logger.exception(
-                    "stamp_pr_event_untrusted_skip_dismiss_failed", delivery_id=delivery_id, error=str(e)
-                )
+                logger.exception("stamp_pr_event_untrusted_skip_dismiss_failed", delivery_id=delivery_id, error=str(e))
                 raise cast(Any, process_pull_request_event).retry(exc=e)
         if carve_out_error is not None:
             # The dismissal above already ran, so the stale-approval invariant holds however many
@@ -969,9 +967,7 @@ def process_pull_request_event(payload: dict[str, Any], delivery_id: str) -> Non
             try:
                 _retract_stale_approvals_on_skip(repo_config, pr, _UNTRUSTED_SKIP_DISMISS_MESSAGE)
             except Exception as e:
-                logger.exception(
-                    "stamp_pr_event_disabled_skip_dismiss_failed", delivery_id=delivery_id, error=str(e)
-                )
+                logger.exception("stamp_pr_event_disabled_skip_dismiss_failed", delivery_id=delivery_id, error=str(e))
                 raise cast(Any, process_pull_request_event).retry(exc=e)
         logger.info("stamp_pr_event_repo_disabled", repo=repo)
         if delivery_id:

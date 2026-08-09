@@ -64,9 +64,7 @@ def _author_team_audience_key(repo_config: StampRepoConfig, pr_payload: dict[str
         # GitHub org team-slug governance; only PUBLIC channels are matched (see channel_resolution).
         return chosen
     except Exception:
-        logger.warning(
-            "stamp_author_team_audience_resolution_failed", repository=repo_config.repository, exc_info=True
-        )
+        logger.warning("stamp_author_team_audience_resolution_failed", repository=repo_config.repository, exc_info=True)
         return _repository_audience_key(repo_config)
 
 

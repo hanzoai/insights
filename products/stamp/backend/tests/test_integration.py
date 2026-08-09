@@ -213,9 +213,7 @@ def test_sandbox_destroy_failure_does_not_mask_a_completed_review(team, stamp_ch
 
 
 @pytest.mark.django_db(databases=PRODUCT_DATABASES)
-def test_sandbox_gets_minted_short_lived_credential_and_closed_egress(
-    team, user, stamp_chain: StampChain
-) -> None:
+def test_sandbox_gets_minted_short_lived_credential_and_closed_egress(team, user, stamp_chain: StampChain) -> None:
     # The sandbox runs an LLM over untrusted PR content, so it must never hold a long-lived
     # credential: no raw Anthropic key, not the worker's own gateway key — only a per-run OAuth
     # token minted under the connecting user — and its egress must be fenced to the hosts a
@@ -391,10 +389,7 @@ def test_missing_policy_files_fall_back_to_server_defaults(team, stamp_chain: St
     assert run.status == ReviewRunStatus.COMPLETED
 
     injected = {path: payload.decode() for path, payload in stamp_chain.sandbox_writes}
-    assert (
-        injected[f"{STAMPFN_SANDBOX_REPO_DIR}/.stamp/policy.yml"]
-        == (POLICY_DEFAULTS_DIR / "policy.yml").read_text()
-    )
+    assert injected[f"{STAMPFN_SANDBOX_REPO_DIR}/.stamp/policy.yml"] == (POLICY_DEFAULTS_DIR / "policy.yml").read_text()
     assert (
         injected[f"{STAMPFN_SANDBOX_REPO_DIR}/.stamp/review-guidance.md"]
         == (POLICY_DEFAULTS_DIR / "review-guidance.md").read_text()
@@ -868,9 +863,7 @@ def test_approval_posted_while_losing_supersession_race_is_dismissed(team, stamp
 
 
 @pytest.mark.django_db(databases=PRODUCT_DATABASES)
-def test_retry_dismisses_orphan_when_superseded_before_the_fresh_status_recheck(
-    team, stamp_chain: StampChain
-) -> None:
+def test_retry_dismisses_orphan_when_superseded_before_the_fresh_status_recheck(team, stamp_chain: StampChain) -> None:
     # A prior attempt posted the approval (id persisted) and crashed before the terminal save; on
     # the Temporal retry, a same-head re-review supersedes the run between the load and the fresh
     # status recheck. The stale-approval sweep excludes same-head approvals, so this early return
@@ -956,9 +949,7 @@ def test_bot_eyes_on_a_later_reactions_page_still_counts_as_in_flight(team, stam
     eyes = {"user": {"login": "greptile-apps[bot]"}, "content": "eyes", "created_at": now_iso}
     stamp_chain.recorder.pr_reactions[(REPO, 115)] = [*junk, eyes]
 
-    result = _run_activity(
-        list_in_flight_reviewer_bots, StampReviewInput(review_run_id=str(run.id), team_id=team.id)
-    )
+    result = _run_activity(list_in_flight_reviewer_bots, StampReviewInput(review_run_id=str(run.id), team_id=team.id))
 
     assert result["in_flight"] == ["greptile-apps[bot]"]
 

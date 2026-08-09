@@ -11,7 +11,7 @@ from django.urls import reverse
 
 from insights.models.event_ingestion_restriction_config import EventIngestionRestrictionConfig
 from insights.models.team.team import Team
-from insights.models.topfn.queries import query_topfn_filter_options, query_topfn_metrics
+from insights.models.tophog.queries import query_topfn_filter_options, query_topfn_metrics
 
 logger = logging.getLogger(__name__)
 

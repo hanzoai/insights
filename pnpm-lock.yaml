@@ -790,9 +790,9 @@ importers:
       '@hanzo/products-skills':
         specifier: workspace:*
         version: link:../products/skills
-      '@hanzo/products-stamphog':
+      '@hanzo/products-stamp':
         specifier: workspace:*
-        version: link:../products/stamphog
+        version: link:../products/stamp
       '@hanzo/products-streamlit-apps':
         specifier: workspace:*
         version: link:../products/streamlit_apps
@@ -4042,7 +4042,7 @@ importers:
 
   products/slack_app: {}
 
-  products/stamphog:
+  products/stamp:
     dependencies:
       '@hanzo/icons':
         specifier: npm:@hanzo/insights-icons@0.36.7

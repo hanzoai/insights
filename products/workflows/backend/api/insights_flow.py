@@ -33,25 +33,28 @@ from insights.schema import ProductKey
 
 from insights.api.app_metrics2 import AppMetricsMixin, fetch_app_metric_totals_by_source
 from insights.api.documentation import _FallbackSerializer
-from insights.api.script_invocation_rerun import ScriptInvocationRerunRequestSerializer, ScriptInvocationRerunResponseSerializer
-from insights.api.hog_invocation_results import (
+from insights.api.log_entries import LogEntryMixin
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.script_invocation_rerun import (
+    ScriptInvocationRerunRequestSerializer,
+    ScriptInvocationRerunResponseSerializer,
+)
+from insights.api.script_invocation_results import (
     ScriptInvocationResultDetailSerializer,
     ScriptInvocationResultSerializer,
     ScriptInvocationResultsRequestSerializer,
-    fetch_script_invocation_result,
     fetch_hog_invocation_results,
+    fetch_script_invocation_result,
     tag_invocation_results_query,
 )
-from insights.api.log_entries import LogEntryMixin
-from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.shared import UserBasicSerializer
 from insights.api.utils import log_activity_from_viewset
 from insights.auth import InternalAPIAuthentication
 from insights.cdp.filters import compile_filters_expr
 from insights.cdp.validation import (
-    InsightsFunctionFiltersSerializer,
     InputsSchemaItemSerializer,
     InputsSerializer,
+    InsightsFunctionFiltersSerializer,
     generate_template_bytecode,
 )
 from insights.datastore.query_tagging import Feature, tag_queries
@@ -1845,7 +1848,9 @@ class InsightsFlowSerializer(InsightsFlowMinimalSerializer):
         required=True,
         help_text="Ordered action nodes. Exactly one type='trigger' required. Typically one type='exit' too.",
     )
-    variables = InsightsFlowVariableSerializer(required=False, help_text="Workflow vars (key, type, default). Total <5KB.")
+    variables = InsightsFlowVariableSerializer(
+        required=False, help_text="Workflow vars (key, type, default). Total <5KB."
+    )
     schedules = InsightsFlowScheduleSerializer(
         many=True,
         read_only=True,
@@ -2068,7 +2073,9 @@ class InsightsFlowSerializer(InsightsFlowMinimalSerializer):
                 warnings = []
             for warning in warnings:
                 logger.info(
-                    "insights_flow_graph_warning", warning=warning, insights_flow_id=str(instance.id) if instance else None
+                    "insights_flow_graph_warning",
+                    warning=warning,
+                    insights_flow_id=str(instance.id) if instance else None,
                 )
 
         conversion = data.get("conversion")
@@ -2820,7 +2827,9 @@ class InsightsFlowViewSet(
             ac_resource_type=self.scope_object,
         )
 
-    def _report_workflow_action(self, event: str, instance: InsightsFlow, extra_properties: Optional[dict] = None) -> None:
+    def _report_workflow_action(
+        self, event: str, instance: InsightsFlow, extra_properties: Optional[dict] = None
+    ) -> None:
         # report_user_action injects source and MCP-client properties from the request, so usage is
         # attributable per channel (web builder vs MCP vs raw API). Capture must never break the request.
         try:
@@ -3252,7 +3261,9 @@ class InsightsFlowViewSet(
         team_id = self.team_id
         insights_flow_id = str(after.id)
         transaction.on_commit(
-            lambda: reschedule_insights_flow_timing.delay(team_id=team_id, insights_flow_id=insights_flow_id, action_ids=action_ids)
+            lambda: reschedule_insights_flow_timing.delay(
+                team_id=team_id, insights_flow_id=insights_flow_id, action_ids=action_ids
+            )
         )
 
     def _require_audience_confirm_token(self, request: Request, insights_flow: InsightsFlow) -> None:
@@ -3314,7 +3325,9 @@ class InsightsFlowViewSet(
             )
         except Exception:
             logger.warning(
-                "Failed to fetch in-flight run count for workflow", insights_flow_id=str(insights_flow.id), exc_info=True
+                "Failed to fetch in-flight run count for workflow",
+                insights_flow_id=str(insights_flow.id),
+                exc_info=True,
             )
         return None
 
@@ -3462,7 +3475,11 @@ class InsightsFlowViewSet(
         # Version history: one snapshot per live-content change, newest first. Content is fetched
         # per-version via the detail endpoint — the list stays light.
         instance = self.get_object()
-        queryset = InsightsFlowRevision.objects.filter(insights_flow=instance).order_by("-version").select_related("created_by")
+        queryset = (
+            InsightsFlowRevision.objects.filter(insights_flow=instance)
+            .order_by("-version")
+            .select_related("created_by")
+        )
         page = self.paginate_queryset(queryset)
         return self.get_paginated_response(InsightsFlowRevisionBasicSerializer(page, many=True).data)
 
@@ -4087,10 +4104,14 @@ class InsightsFlowViewSet(
             # The consumer fans out to the trigger's stored filters, so snapshot those on the job -
             # caller-supplied filters are never what actually runs.
             batch_job = serializer.save(filters=(insights_flow.trigger or {}).get("filters") or {})
-            self._report_workflow_action("insights_flow_batch_job_created", insights_flow, {"batch_job_id": str(batch_job.id)})
+            self._report_workflow_action(
+                "insights_flow_batch_job_created", insights_flow, {"batch_job_id": str(batch_job.id)}
+            )
             return Response(InsightsFlowBatchJobSerializer(batch_job).data)
         else:
-            batch_jobs = InsightsFlowBatchJob.objects.filter(insights_flow=insights_flow, team=self.team).order_by("-created_at")
+            batch_jobs = InsightsFlowBatchJob.objects.filter(insights_flow=insights_flow, team=self.team).order_by(
+                "-created_at"
+            )
             serializer = InsightsFlowBatchJobSerializer(batch_jobs, many=True)
             return Response(serializer.data)
 
@@ -4121,10 +4142,14 @@ class InsightsFlowViewSet(
             serializer = InsightsFlowScheduleSerializer(data=request.data, context=self.get_serializer_context())
             serializer.is_valid(raise_exception=True)
             schedule = serializer.save(team=self.team, insights_flow=insights_flow)
-            self._report_workflow_action("insights_flow_schedule_created", insights_flow, {"schedule_id": str(schedule.id)})
+            self._report_workflow_action(
+                "insights_flow_schedule_created", insights_flow, {"schedule_id": str(schedule.id)}
+            )
             return Response(serializer.data, status=201)
 
-        schedules = InsightsFlowSchedule.objects.filter(insights_flow=insights_flow, team=self.team).order_by("-created_at")
+        schedules = InsightsFlowSchedule.objects.filter(insights_flow=insights_flow, team=self.team).order_by(
+            "-created_at"
+        )
         serializer = InsightsFlowScheduleSerializer(schedules, many=True)
         return Response(serializer.data)
 
@@ -4150,7 +4175,9 @@ class InsightsFlowViewSet(
         if request.method == "DELETE":
             schedule_id_str = str(schedule.id)
             schedule.delete()
-            self._report_workflow_action("insights_flow_schedule_deleted", insights_flow, {"schedule_id": schedule_id_str})
+            self._report_workflow_action(
+                "insights_flow_schedule_deleted", insights_flow, {"schedule_id": schedule_id_str}
+            )
             return Response(status=204)
 
         serializer = InsightsFlowScheduleSerializer(
@@ -4360,7 +4387,9 @@ class InternalInsightsFlowViewSet(TeamAndOrgViewSetMixin, LogEntryMixin, AppMetr
                             InsightsFlowSchedule.objects.select_for_update(skip_locked=True)
                             .select_related("insights_flow")
                             .filter(
-                                id=schedule_id, status=InsightsFlowSchedule.Status.ACTIVE, next_run_at__lte=timezone.now()
+                                id=schedule_id,
+                                status=InsightsFlowSchedule.Status.ACTIVE,
+                                next_run_at__lte=timezone.now(),
                             )
                             .first()
                         )

@@ -122,7 +122,7 @@ export const productScenes: Record<string, () => Promise<any>> = {
     ReplayVisionAction: () => import('../../products/replay_vision/frontend/replay_scanners/VisionActionScene'),
     ReplayVisionActionEditor: () => import('../../products/replay_vision/frontend/replay_scanners/ActionEditorScene'),
     ReplayVisionActionRun: () => import('../../products/replay_vision/frontend/replay_scanners/VisionActionRunScene'),
-    CodeReview: () => import('../../products/review/frontend/CodeReviewScene'),
+    CodeReview: () => import('../../products/review_hog/frontend/CodeReviewScene'),
     SessionGroupSummariesTable: () => import('../../products/session_summaries/frontend/SessionGroupSummariesTable'),
     SessionGroupSummary: () => import('../../products/session_summaries/frontend/SessionGroupSummaryScene'),
     Skills: () => import('../../products/skills/frontend/LLMSkillsScene'),
