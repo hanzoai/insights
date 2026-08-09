@@ -92,6 +92,7 @@ from .views import (
     render_query,
     robots_txt,
     security_txt,
+    static_not_found,
     stats,
     update_preferences,
 )
@@ -831,5 +832,8 @@ for route in frontend_unauthenticated_routes:
 # Anchored, and before the catch-all below, which is the only pattern it could
 # lose to: `^.*` matches the empty path too, and first match wins.
 urlpatterns.append(re_path(r"^$", root))
+
+# Before the catch-all: a missing /static/ file is a 404, never a login redirect.
+urlpatterns.append(re_path(r"^static/", static_not_found))
 
 urlpatterns.append(re_path(r"^.*", home_with_region_redirect))

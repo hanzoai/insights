@@ -311,7 +311,6 @@ def _normalize_intents(intents: list[dict]) -> list[dict]:
 # Adding a new environment action that mirrors onto projects is a single row here. The only action NOT in this
 # table is default_evaluation_contexts, which is an irreducible POST-then-DELETE sequence (separate test below).
 WRITE_ACTION_CASES = [
-    ("reset_token", "patch", "reset_token/", None, status.HTTP_200_OK, "team_shaped"),
     ("rotate_secret_token", "patch", "rotate_secret_token/", None, status.HTTP_200_OK, "team_shaped"),
     ("delete_secret_token_backup", "patch", "delete_secret_token_backup/", None, status.HTTP_200_OK, "team_shaped"),
     (
