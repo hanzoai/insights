@@ -40,19 +40,19 @@ describe('replayScannerLogic', () => {
         createSpy = jest.fn(() => [201, { id: 'created-scanner' }])
         useMocks({
             get: {
-                '/api/projects/:team/vision/scanners/:id/': () => [404, {}],
-                '/api/projects/:team/vision/scanners/:id/observations/': { results: [] },
-                '/api/projects/:team/vision/scanners/:id/observations/stats/': {
+                '/v1/projects/:team/vision/scanners/:id/': () => [404, {}],
+                '/v1/projects/:team/vision/scanners/:id/observations/': { results: [] },
+                '/v1/projects/:team/vision/scanners/:id/observations/stats/': {
                     status_counts: { total: 0, succeeded: 0, failed: 0, ineligible: 0, in_flight: 0 },
                     coverage: { recent_sessions: 0, total_sessions: 0, recent_days: 14 },
                     available_tags: [],
                 },
             },
             post: {
-                '/api/projects/:team/vision/scanners/': createSpy,
-                '/api/projects/:team/vision/scanners/:id/observe/': observeSpy,
-                '/api/projects/:team/vision/observations/:id/retry/': retrySpy,
-                '/api/projects/:team/vision/scanners/suggest_tags/': suggestSpy,
+                '/v1/projects/:team/vision/scanners/': createSpy,
+                '/v1/projects/:team/vision/scanners/:id/observe/': observeSpy,
+                '/v1/projects/:team/vision/observations/:id/retry/': retrySpy,
+                '/v1/projects/:team/vision/scanners/suggest_tags/': suggestSpy,
             },
         })
         // The draft layer persists form edits to localStorage; without a reset, one test's edits
@@ -566,7 +566,7 @@ describe('replayScannerLogic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/projects/:team/vision/scanners/:id/': () => [
+                    '/v1/projects/:team/vision/scanners/:id/': () => [
                         200,
                         {
                             id: 'sid',
@@ -577,8 +577,8 @@ describe('replayScannerLogic', () => {
                             enabled: true,
                         },
                     ],
-                    '/api/projects/:team/vision/scanners/:id/observations/': { results: [], count: 0 },
-                    '/api/projects/:team/vision/scanners/:id/observations/stats/': {
+                    '/v1/projects/:team/vision/scanners/:id/observations/': { results: [], count: 0 },
+                    '/v1/projects/:team/vision/scanners/:id/observations/stats/': {
                         status_counts: {
                             total: 0,
                             succeeded: 0,

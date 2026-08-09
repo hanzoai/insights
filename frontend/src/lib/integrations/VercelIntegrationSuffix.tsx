@@ -104,7 +104,7 @@ function VercelEnvMappingEditor({
         setSaving(true)
         setError(null)
         try {
-            const res = await fetch(`/api/organizations/@current/integrations/${integration.id}/environment-mapping/`, {
+            const res = await fetch(`/v1/organizations/@current/integrations/${integration.id}/environment-mapping/`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

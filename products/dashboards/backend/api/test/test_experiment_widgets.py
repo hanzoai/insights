@@ -469,7 +469,7 @@ class TestExperimentWidgetsViaRunWidgetsEndpoint(APIBaseTest):
 
     def _run(self, dashboard_id: int, tile_ids: list[int]) -> dict[str, Any]:
         response = self.client.get(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/run_widgets/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/run_widgets/",
             {"tile_ids": ",".join(str(tile_id) for tile_id in tile_ids)},
         )
         self.assertEqual(response.status_code, 200, response.content)

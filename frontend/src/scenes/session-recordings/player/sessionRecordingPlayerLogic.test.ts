@@ -350,8 +350,8 @@ describe('sessionRecordingPlayerLogic', () => {
             logic.unmount()
             overrideSessionRecordingMocks({
                 getMocks: {
-                    '/api/environments/:team_id/session_recordings/:id/snapshots': () => [500, { status: 0 }],
-                    '/api/projects/:team_id/session_recordings/:id/snapshots': () => [500, { status: 0 }],
+                    '/v1/environments/:team_id/session_recordings/:id/snapshots': () => [500, { status: 0 }],
+                    '/v1/projects/:team_id/session_recordings/:id/snapshots': () => [500, { status: 0 }],
                 },
             })
             logic = sessionRecordingPlayerLogic({

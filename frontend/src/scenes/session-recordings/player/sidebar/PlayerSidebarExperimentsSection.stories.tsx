@@ -69,8 +69,8 @@ Default.parameters = {
 Default.decorators = [
     mswDecorator({
         get: {
-            '/api/environments/:team_id/session_recordings/:id': recordingMetaJson,
-            '/api/projects/:team_id/experiments/session_context/': experimentSessionContextResponse,
+            '/v1/environments/:team_id/session_recordings/:id': recordingMetaJson,
+            '/v1/projects/:team_id/experiments/session_context/': experimentSessionContextResponse,
         },
     }),
 ]
@@ -90,8 +90,8 @@ CurrentExperimentNotExposed.parameters = {
 CurrentExperimentNotExposed.decorators = [
     mswDecorator({
         get: {
-            '/api/environments/:team_id/session_recordings/:id': recordingMetaJson,
-            '/api/projects/:team_id/experiments/session_context/': experimentSessionContextEnrolledCurrentResponse,
+            '/v1/environments/:team_id/session_recordings/:id': recordingMetaJson,
+            '/v1/projects/:team_id/experiments/session_context/': experimentSessionContextEnrolledCurrentResponse,
         },
     }),
 ]
@@ -112,8 +112,8 @@ Loading.parameters = {
 Loading.decorators = [
     mswDecorator({
         get: {
-            '/api/environments/:team_id/session_recordings/:id': recordingMetaJson,
-            '/api/projects/:team_id/experiments/session_context/': async () => {
+            '/v1/environments/:team_id/session_recordings/:id': recordingMetaJson,
+            '/v1/projects/:team_id/experiments/session_context/': async () => {
                 await delay('infinite')
                 return [200, { session_id: 'experiment-context-loading', results: [] }]
             },
@@ -135,8 +135,8 @@ export function Empty(): JSX.Element {
 Empty.decorators = [
     mswDecorator({
         get: {
-            '/api/environments/:team_id/session_recordings/:id': recordingMetaJson,
-            '/api/projects/:team_id/experiments/session_context/': {
+            '/v1/environments/:team_id/session_recordings/:id': recordingMetaJson,
+            '/v1/projects/:team_id/experiments/session_context/': {
                 session_id: 'experiment-context-empty',
                 results: [],
             },

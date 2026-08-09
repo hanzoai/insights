@@ -191,9 +191,9 @@ function makeMocks(
 ): Record<string, Record<string, unknown>> {
     return {
         get: {
-            [`/api/environments/:team_id/insights_functions/${insightsFunctionId}/`]: insightsFunction,
-            '/api/environments/:team_id/insights_functions/': { count: 1, results: [insightsFunction], next: null },
-            [`/api/projects/:team_id/surveys/${MOCK_SURVEY_ID}/`]: MOCK_SURVEY,
+            [`/v1/environments/:team_id/insights_functions/${insightsFunctionId}/`]: insightsFunction,
+            '/v1/environments/:team_id/insights_functions/': { count: 1, results: [insightsFunction], next: null },
+            [`/v1/projects/:team_id/surveys/${MOCK_SURVEY_ID}/`]: MOCK_SURVEY,
         },
     }
 }

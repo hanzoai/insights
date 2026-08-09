@@ -61,7 +61,7 @@ def test_process_query_task_workload_routing(
 def test_endpoints_tag_workload_routing(client_from_pool, workload, expected_workload):
     # The ENDPOINTS tag reroutes queries to the endpoints cluster, but must not override
     # the LOGS cluster pin either.
-    with tags_context(kind="request", id="api/endpoint", workload=Workload.ENDPOINTS):
+    with tags_context(kind="request", id="/v1/endpoint", workload=Workload.ENDPOINTS):
         sync_execute("SELECT 1", workload=workload, flush=False)
 
     assert client_from_pool.call_args[0][0] == expected_workload
@@ -71,7 +71,7 @@ def test_endpoints_tag_workload_routing(client_from_pool, workload, expected_wor
     "product,kind,tag_id,requested_ch_user,expected_ch_user",
     [
         (Product.LLM_ANALYTICS, "temporal", "llma-eval-reports", DatastoreUser.DEFAULT, DatastoreUser.LLM_ANALYTICS),
-        (Product.LLM_ANALYTICS, "request", "api/projects/2/llm_analytics", DatastoreUser.DEFAULT, DatastoreUser.APP),
+        (Product.LLM_ANALYTICS, "request", "/v1/projects/2/llm_analytics", DatastoreUser.DEFAULT, DatastoreUser.APP),
         (Product.WAREHOUSE, "temporal", "data-imports", DatastoreUser.DEFAULT, DatastoreUser.DEFAULT),
         # The AI observability usage reports carry this product tag from Celery. The budget is sized
         # for the per-team Temporal fan-out, so they stay off it.

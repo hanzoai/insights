@@ -625,7 +625,7 @@ export const EmptyEventsWithStaleToggle: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/event_definitions': [],
+                '/v1/projects/:team_id/event_definitions': [],
             },
         }),
     ],

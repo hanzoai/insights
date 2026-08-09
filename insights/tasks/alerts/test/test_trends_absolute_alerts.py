@@ -56,7 +56,7 @@ class TestTimeSeriesTrendsAbsoluteAlerts(APIBaseTest, DatastoreDestroyTablesMixi
         check_ongoing_interval: bool = False,
     ) -> dict:
         alert = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             data={
                 "name": "alert name",
                 "insight": insight["id"],

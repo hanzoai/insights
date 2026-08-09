@@ -24,7 +24,7 @@ async function createSharedDashboard(
     }
 
     const dashboardName = 'Logged-out dashboard render'
-    const dashboardResponse = await page.request.post(`/api/projects/${workspace.team_id}/dashboards/`, {
+    const dashboardResponse = await page.request.post(`/v1/projects/${workspace.team_id}/dashboards/`, {
         headers: authHeaders,
         data: { name: dashboardName },
     })
@@ -45,14 +45,14 @@ async function createSharedDashboard(
         dashboards: [dashboardData.id],
     }
 
-    const insightResponse = await page.request.post(`/api/projects/${workspace.team_id}/insights/`, {
+    const insightResponse = await page.request.post(`/v1/projects/${workspace.team_id}/insights/`, {
         headers: authHeaders,
         data: insightPayload,
     })
     expect(insightResponse.ok()).toBe(true)
 
     const sharingResponse = await page.request.patch(
-        `/api/projects/${workspace.team_id}/dashboards/${dashboardData.id}/sharing`,
+        `/v1/projects/${workspace.team_id}/dashboards/${dashboardData.id}/sharing`,
         {
             headers: authHeaders,
             data: { enabled: true },

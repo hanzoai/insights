@@ -26,7 +26,7 @@ else:
 
 class TestProductPushCampaignAPI(APIBaseTest):
     def _url(self, organization_id: str | None = None) -> str:
-        return f"/api/organizations/{organization_id or self.organization.id}/product_push_campaign/active/"
+        return f"/v1/organizations/{organization_id or self.organization.id}/product_push_campaign/active/"
 
     def test_active_returns_204_when_no_campaign_is_running(self) -> None:
         ProductPushCampaign.objects.create(

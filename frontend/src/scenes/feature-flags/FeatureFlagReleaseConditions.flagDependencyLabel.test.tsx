@@ -38,7 +38,7 @@ describe('feature flag release conditions flag dependency label', () => {
         initKeaTests()
         useMocks({
             post: {
-                '/api/projects/:team/feature_flags/bulk_keys/': [200, { keys: { '42': 'beta-banner' } }],
+                '/v1/projects/:team/feature_flags/bulk_keys/': [200, { keys: { '42': 'beta-banner' } }],
             },
         })
     })

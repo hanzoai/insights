@@ -102,7 +102,7 @@ class TestPersonalAPIKeyAuthentication(APIBaseTest):
 
         with freeze_time("2021-08-25T22:10:14.252"):
             response = self.client.get(
-                f"/api/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
+                f"/v1/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -125,7 +125,7 @@ class TestPersonalAPIKeyAuthentication(APIBaseTest):
 
         with freeze_time("2022-08-25T22:00:14.252"):
             response = self.client.get(
-                f"/api/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
+                f"/v1/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -148,7 +148,7 @@ class TestPersonalAPIKeyAuthentication(APIBaseTest):
 
         with freeze_time("2021-08-26T22:00:14.252"):
             response = self.client.get(
-                f"/api/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
+                f"/v1/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -167,7 +167,7 @@ class TestPersonalAPIKeyAuthentication(APIBaseTest):
 
         with freeze_time("2022-08-25T22:00:14.252"):
             response = self.client.get(
-                f"/api/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
+                f"/v1/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -190,7 +190,7 @@ class TestPersonalAPIKeyAuthentication(APIBaseTest):
 
         with freeze_time("2021-08-25T21:14:14.252"):
             response = self.client.get(
-                f"/api/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
+                f"/v1/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -212,7 +212,7 @@ class TestPersonalAPIKeyAuthentication(APIBaseTest):
 
         with freeze_time("2021-08-24T21:14:14.252"):
             response = self.client.get(
-                f"/api/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
+                f"/v1/projects/{self.team.pk}/feature_flags/", headers={"authorization": f"Bearer {personal_api_key}"}
             )
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -227,15 +227,15 @@ class TestTimeSensitivePermissions(APIBaseTest):
         self.organization_membership.save()
         now = datetime.now()
         with freeze_time(now):
-            res = self.client.patch("/api/organizations/@current", {"name": "new name"})
+            res = self.client.patch("/v1/organizations/@current", {"name": "new name"})
             assert res.status_code == 200
 
         with freeze_time(now + timedelta(seconds=settings.SESSION_SENSITIVE_ACTIONS_AGE - 100)):
-            res = self.client.patch("/api/organizations/@current", {"name": "new name"})
+            res = self.client.patch("/v1/organizations/@current", {"name": "new name"})
             assert res.status_code == 200
 
         with freeze_time(now + timedelta(seconds=settings.SESSION_SENSITIVE_ACTIONS_AGE + 10)):
-            res = self.client.patch("/api/organizations/@current", {"name": "new name"})
+            res = self.client.patch("/v1/organizations/@current", {"name": "new name"})
             assert res.status_code == 403
             assert res.json() == {
                 "type": "authentication_error",
@@ -244,21 +244,21 @@ class TestTimeSensitivePermissions(APIBaseTest):
                 "attr": None,
             }
 
-            res = self.client.get("/api/organizations/@current")
+            res = self.client.get("/v1/organizations/@current")
             assert res.status_code == 200
 
     def test_user_after_timeout_modifications_require_reauthentication(self):
         now = datetime.now()
         with freeze_time(now):
-            res = self.client.patch("/api/users/@me", {"first_name": "new name"})
+            res = self.client.patch("/v1/users/@me", {"first_name": "new name"})
             assert res.status_code == 200
 
         with freeze_time(now + timedelta(seconds=settings.SESSION_SENSITIVE_ACTIONS_AGE - 100)):
-            res = self.client.patch("/api/users/@me", {"first_name": "new name"})
+            res = self.client.patch("/v1/users/@me", {"first_name": "new name"})
             assert res.status_code == 200
 
         with freeze_time(now + timedelta(seconds=settings.SESSION_SENSITIVE_ACTIONS_AGE + 10)):
-            res = self.client.patch("/api/users/@me", {"first_name": "new name"})
+            res = self.client.patch("/v1/users/@me", {"first_name": "new name"})
             assert res.status_code == 403
             assert res.json() == {
                 "type": "authentication_error",
@@ -267,21 +267,21 @@ class TestTimeSensitivePermissions(APIBaseTest):
                 "attr": None,
             }
 
-            res = self.client.get("/api/users/@me")
+            res = self.client.get("/v1/users/@me")
             assert res.status_code == 200
 
     def test_user_can_update_theme_without_recent_authentication(self):
         now = datetime.now()
         with freeze_time(now):
-            res = self.client.patch("/api/users/@me", {"theme_mode": "dark"})
+            res = self.client.patch("/v1/users/@me", {"theme_mode": "dark"})
             assert res.status_code == 200
 
         with freeze_time(now + timedelta(seconds=settings.SESSION_SENSITIVE_ACTIONS_AGE + 10)):
-            res = self.client.patch("/api/users/@me", {"theme_mode": "light"})
+            res = self.client.patch("/v1/users/@me", {"theme_mode": "light"})
             assert res.status_code == 200
 
             res = self.client.patch(
-                "/api/users/@me",
+                "/v1/users/@me",
                 {"theme_mode": "system", "first_name": "still protected"},
             )
             assert res.status_code == 403
@@ -294,14 +294,14 @@ class TestTimeSensitivePermissions(APIBaseTest):
         now = datetime.now()
         with freeze_time(now):
             res = self.client.patch(
-                "/api/users/@me",
+                "/v1/users/@me",
                 {"set_current_organization": str(new_org.id)},
             )
             assert res.status_code == 200
 
         with freeze_time(now + timedelta(seconds=settings.SESSION_SENSITIVE_ACTIONS_AGE + 10)):
             res = self.client.patch(
-                "/api/users/@me",
+                "/v1/users/@me",
                 {"set_current_organization": str(self.organization.id)},
             )
             assert res.status_code == 200
@@ -316,14 +316,14 @@ class TestTimeSensitivePermissions(APIBaseTest):
     def test_user_can_update_non_sensitive_fields_without_recent_authentication(self, _name, payload):
         now = datetime.now()
         with freeze_time(now + timedelta(seconds=settings.SESSION_SENSITIVE_ACTIONS_AGE + 10)):
-            res = self.client.patch("/api/users/@me", payload, format="json")
+            res = self.client.patch("/v1/users/@me", payload, format="json")
             assert res.status_code != 403, f"Field update should not require re-authentication, got: {res.json()}"
 
     def test_user_can_update_mascot_config_without_recent_authentication(self):
         now = datetime.now()
         with freeze_time(now + timedelta(seconds=settings.SESSION_SENSITIVE_ACTIONS_AGE + 10)):
             res = self.client.patch(
-                "/api/users/@me/mascot_config",
+                "/v1/users/@me/mascot_config",
                 {"enabled": True, "color": "red"},
                 format="json",
             )
@@ -336,7 +336,7 @@ class TestTimeSensitivePermissions(APIBaseTest):
         now = datetime.now()
         with freeze_time(now + timedelta(seconds=settings.SESSION_SENSITIVE_ACTIONS_AGE + 10)):
             res = self.client.post(
-                "/api/users/@me/scene_personalisation",
+                "/v1/users/@me/scene_personalisation",
                 {"scene": "Person", "dashboard": dashboard.id},
                 format="json",
             )
@@ -1027,7 +1027,7 @@ class TestKnownLoginDeviceCookieMiddleware(APIBaseTest):
     CONFIG_AUTO_LOGIN = False
 
     def test_middleware_sets_signed_cookie_after_login(self):
-        response = self.client.post("/api/login/", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        response = self.client.post("/v1/login/", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
         cookie = response.cookies.get(KNOWN_DEVICE_COOKIE.format(user_id=self.user.id))
         assert cookie is not None
         assert cookie.value != "1"  # signed, not a plain flag
@@ -1044,24 +1044,24 @@ class TestKnownLoginDeviceCookieMiddleware(APIBaseTest):
         new_device_subject = "A new device logged into your account"
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True, CUSTOMER_IO_API_KEY=None):
             # First login - sets cookie and sends new-device notification
-            self.client.post("/api/login/", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+            self.client.post("/v1/login/", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
             initial_count = sum(1 for m in mail.outbox if m.subject == new_device_subject)
 
             # Second login - signed cookie is present, new-device notification must be skipped
-            self.client.post("/api/login/", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+            self.client.post("/v1/login/", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
             assert sum(1 for m in mail.outbox if m.subject == new_device_subject) == initial_count
 
     @patch("insights.middleware.is_impersonated_session", return_value=True)
     def test_middleware_does_not_set_cookie_during_impersonation(self, _mock_is_impersonated):
         # Log in first so the client has an authenticated session
-        self.client.post("/api/login/", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        self.client.post("/v1/login/", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
 
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         assert response.status_code == 200
         assert KNOWN_DEVICE_COOKIE.format(user_id=self.user.id) not in response.cookies
 
     def test_does_not_set_known_device_cookie_for_internal_api_user(self):
-        request = RequestFactory().get("/api/internal/insights_flows/process_due_schedules")
+        request = RequestFactory().get("/v1/internal/insights_flows/process_due_schedules")
         SessionMiddleware(lambda r: HttpResponse()).process_request(request)
         # Simulate a session that *looks* logged-in to prove the synthetic-user guard wins on its own
         request.session[BACKEND_SESSION_KEY] = "django.contrib.auth.backends.ModelBackend"
@@ -1076,7 +1076,7 @@ class TestKnownLoginDeviceCookieMiddleware(APIBaseTest):
         # Regression: under ASGI, hanzo_insights' middleware awaits `request.auser`, which reads
         # the session and sets `session.accessed=True` even on requests that never went through
         # `auth.login()`. The gate must rely on `BACKEND_SESSION_KEY`, not on `session.accessed`.
-        request = RequestFactory().get("/api/some_endpoint")
+        request = RequestFactory().get("/v1/some_endpoint")
         SessionMiddleware(lambda r: HttpResponse()).process_request(request)
         # Touch the session the way an upstream middleware would — flips `accessed` but does not log in
         request.session.get("anything")
@@ -1142,7 +1142,7 @@ async def test_known_device_cookie_async_chain_with_project_secret_api_key():
     # protocols are compatible at runtime, just disagree on dict/MutableMapping in the typing.
     async with AsyncClient(transport=ASGITransport(app=asgi_app), base_url="http://testserver") as ac:  # type: ignore[arg-type]
         response = await ac.get(
-            f"/api/projects/{team.id}/feature_flags/rc-async-test/remote_config",
+            f"/v1/projects/{team.id}/feature_flags/rc-async-test/remote_config",
             headers={"authorization": f"Bearer {team.secret_api_token}"},
         )
 

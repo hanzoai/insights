@@ -180,7 +180,7 @@ export const modelPickerLogic = kea<modelPickerLogicType>([
                         try {
                             // nosemgrep: prefer-codegen-api
                             const rawModels = (await api.get(
-                                `/api/llm_proxy/models/?provider_key_id=${encodeURIComponent(key.id)}`
+                                `/v1/llm_proxy/models/?provider_key_id=${encodeURIComponent(key.id)}`
                             )) as (Omit<ModelOption, 'providerKeyId' | 'isRecommended'> & {
                                 is_recommended?: boolean
                             })[]
@@ -213,7 +213,7 @@ export const modelPickerLogic = kea<modelPickerLogicType>([
             __default: [] as ModelOption[],
             loadPlaygroundModels: async (): Promise<ModelOption[]> => {
                 // nosemgrep: prefer-codegen-api
-                const rawModels = (await api.get('/api/llm_proxy/models/')) as (Omit<ModelOption, 'isRecommended'> & {
+                const rawModels = (await api.get('/v1/llm_proxy/models/')) as (Omit<ModelOption, 'isRecommended'> & {
                     is_recommended?: boolean
                 })[]
                 return (rawModels ?? []).map((m) => ({

@@ -11,7 +11,7 @@ from insights.models.organization import OrganizationMembership
 from insights.models.team import Team
 from insights.models.user import User
 
-TRIGGER_URL = "/api/review_hog/trigger/"
+TRIGGER_URL = "/v1/review_hog/trigger/"
 _START = "products.review_hog.backend.api.trigger.start_review_pr_workflow"
 
 

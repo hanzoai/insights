@@ -39,7 +39,7 @@
                         "date_from": "2026-01-20",
                         "date_to": "2026-01-20"
                     },
-                    "url": "api/projects/1/persons/trends/?date_from=2026-01-20&date_to=2026-01-20&display=ActionsBar&events=%5B%7B%22id%22%3A+%22%24pageview%22%7D%5D&insight=TRENDS&interval=day&entity_id=%24pageview&entity_type=events"
+                    "url": "v1/projects/1/persons/trends/?date_from=2026-01-20&date_to=2026-01-20&display=ActionsBar&events=%5B%7B%22id%22%3A+%22%24pageview%22%7D%5D&insight=TRENDS&interval=day&entity_id=%24pageview&entity_type=events"
                 }
             ],
             "filter": {

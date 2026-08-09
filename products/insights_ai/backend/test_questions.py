@@ -413,8 +413,8 @@ class TestQuestionApi(APIBaseTest):
         assert Question.objects.filter(team=self.team).count() == 2
 
     def test_the_read_surface_is_not_under_api(self):
-        """`/v1/`, never `/api/`."""
-        response = self.client.get(f"/api/projects/{self.team.pk}/assistant/questions")
+        """`/v1/`, never `/v1/`."""
+        response = self.client.get(f"/v1/projects/{self.team.pk}/assistant/questions")
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
 

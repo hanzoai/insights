@@ -457,15 +457,15 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/mcp_analytics/intent_clusters/': CLUSTER_SNAPSHOT,
-                '/api/projects/:team_id/mcp_analytics/sessions/activity_overview/': ACTIVITY_OVERVIEW,
-                '/api/environments/:team_id/mcp_analytics/sessions/': SESSION_LIST,
-                '/api/environments/:team_id/mcp_analytics/sessions/:session_id/tool_calls/': TOOL_CALL_LIST,
-                '/api/projects/:team_id/property_definitions': ({ request }) => {
+                '/v1/projects/:team_id/mcp_analytics/intent_clusters/': CLUSTER_SNAPSHOT,
+                '/v1/projects/:team_id/mcp_analytics/sessions/activity_overview/': ACTIVITY_OVERVIEW,
+                '/v1/environments/:team_id/mcp_analytics/sessions/': SESSION_LIST,
+                '/v1/environments/:team_id/mcp_analytics/sessions/:session_id/tool_calls/': TOOL_CALL_LIST,
+                '/v1/projects/:team_id/property_definitions': ({ request }) => {
                     const isFeatureFlag = new URL(request.url).searchParams.get('is_feature_flag') === 'true'
                     return [200, isFeatureFlag ? MCP_FEATURE_FLAG_DEFINITIONS : MCP_PROPERTY_DEFINITIONS]
                 },
-                '/api/environments/:team_id/events/values/': [
+                '/v1/environments/:team_id/events/values/': [
                     { name: 'execute-sql' },
                     { name: 'read-data-schema' },
                     { name: 'query-trends' },
@@ -473,8 +473,8 @@ const meta: Meta = {
             },
             post: {
                 // POST, not GET — the endpoint generates the digest (and caches it) on call.
-                '/api/projects/:team_id/mcp_analytics/sessions/intent_digest/': INTENT_DIGEST,
-                '/api/environments/:team_id/query/:kind': async ({ request }) => {
+                '/v1/projects/:team_id/mcp_analytics/sessions/intent_digest/': INTENT_DIGEST,
+                '/v1/environments/:team_id/query/:kind': async ({ request }) => {
                     const body = (await request.json()) as Record<string, any>
                     const query: string = body?.query?.query ?? ''
                     // The harness tile sends a typed MCPHarnessBreakdownQuery node (the runner

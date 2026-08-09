@@ -25,7 +25,7 @@ class TestProxyRecordAPI(APIBaseTest):
         self.organization.refresh_from_db()
 
     def test_list_returns_max_proxy_records_from_feature(self):
-        response = self.client.get(f"/api/organizations/{self.organization.id}/proxy_records/")
+        response = self.client.get(f"/v1/organizations/{self.organization.id}/proxy_records/")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert "results" in data
@@ -37,7 +37,7 @@ class TestProxyRecordAPI(APIBaseTest):
         self.organization.available_product_features = []
         self.organization.save()
 
-        response = self.client.get(f"/api/organizations/{self.organization.id}/proxy_records/")
+        response = self.client.get(f"/v1/organizations/{self.organization.id}/proxy_records/")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert data["max_proxy_records"] == 2
@@ -49,7 +49,7 @@ class TestProxyRecordAPI(APIBaseTest):
         mock_sync_connect.return_value = mock_temporal
 
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/proxy_records/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/",
             {"domain": "test.example.com"},
         )
         assert response.status_code == status.HTTP_201_CREATED
@@ -73,7 +73,7 @@ class TestProxyRecordAPI(APIBaseTest):
             )
 
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/proxy_records/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/",
             {"domain": "proxy2.example.com"},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -89,21 +89,21 @@ class TestProxyRecordAPI(APIBaseTest):
         self.organization.save()
 
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/proxy_records/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/",
             {"domain": "test.example.com"},
         )
         assert response.status_code == status.HTTP_201_CREATED
 
     def test_create_with_missing_domain_rejected(self):
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/proxy_records/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/",
             {},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_create_with_empty_domain_rejected(self):
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/proxy_records/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/",
             {"domain": ""},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -113,7 +113,7 @@ class TestProxyRecordAPI(APIBaseTest):
         mock_sync_connect.side_effect = Exception("connection failed")
 
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/proxy_records/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/",
             {"domain": "fail.example.com"},
         )
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -124,7 +124,7 @@ class TestProxyRecordAPI(APIBaseTest):
         self.organization_membership.save()
 
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/proxy_records/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/",
             {"domain": "test.example.com"},
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -139,7 +139,7 @@ class TestProxyRecordAPI(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/organizations/{self.organization.id}/proxy_records/{record.id}/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/{record.id}/",
         )
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -159,7 +159,7 @@ class TestProxyRecordAPI(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/organizations/{self.organization.id}/proxy_records/{record.id}/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/{record.id}/",
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -185,7 +185,7 @@ class TestProxyRecordAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/proxy_records/{record.id}/retry/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/{record.id}/retry/",
         )
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -216,7 +216,7 @@ class TestProxyRecordAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/proxy_records/{record.id}/retry/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/{record.id}/retry/",
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Cannot retry" in response.json()["detail"]
@@ -234,7 +234,7 @@ class TestProxyRecordAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/proxy_records/{record.id}/retry/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/{record.id}/retry/",
         )
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         record.refresh_from_db()
@@ -253,7 +253,7 @@ class TestProxyRecordAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/proxy_records/{record.id}/retry/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/{record.id}/retry/",
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
@@ -268,7 +268,7 @@ class TestProxyRecordAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/proxy_records/{record.id}/retry/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/{record.id}/retry/",
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -289,7 +289,7 @@ class TestProxyRecordAPI(APIBaseTest):
         )
 
         response = self.client.delete(
-            f"/api/organizations/{self.organization.id}/proxy_records/{record.id}/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/{record.id}/",
         )
         assert response.status_code == status.HTTP_200_OK
         assert not ProxyRecord.objects.filter(id=record.id).exists()
@@ -318,7 +318,7 @@ class TestProxyRecordAPI(APIBaseTest):
         )
 
         response = self.client.delete(
-            f"/api/organizations/{self.organization.id}/proxy_records/{record.id}/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/{record.id}/",
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -339,7 +339,7 @@ class TestProxyRecordAPI(APIBaseTest):
         )
 
         response = self.client.delete(
-            f"/api/organizations/{self.organization.id}/proxy_records/{record.id}/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/{record.id}/",
         )
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         record.refresh_from_db()
@@ -356,7 +356,7 @@ class TestProxyRecordAPI(APIBaseTest):
         )
 
         response = self.client.delete(
-            f"/api/organizations/{self.organization.id}/proxy_records/{record.id}/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/{record.id}/",
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -373,7 +373,7 @@ class TestProxyRecordAPI(APIBaseTest):
         )
 
         response = self.client.delete(
-            f"/api/organizations/{self.organization.id}/proxy_records/{record.id}/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/{record.id}/",
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
@@ -416,7 +416,7 @@ class TestProxyRecordAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/proxy_records/{record.id}/diagnose/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/{record.id}/diagnose/",
         )
 
         assert response.status_code == status.HTTP_200_OK, response.content
@@ -436,7 +436,7 @@ class TestProxyRecordAPI(APIBaseTest):
 
     def test_diagnose_returns_404_for_unknown_id(self):
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/proxy_records/00000000-0000-0000-0000-000000000000/diagnose/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/00000000-0000-0000-0000-000000000000/diagnose/",
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -450,7 +450,7 @@ class TestProxyRecordAPI(APIBaseTest):
             status=ProxyRecord.Status.VALID,
         )
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/proxy_records/{record.id}/diagnose/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/{record.id}/diagnose/",
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -467,7 +467,7 @@ class TestProxyRecordAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/proxy_records/{record.id}/diagnose/",
+            f"/v1/organizations/{self.organization.id}/proxy_records/{record.id}/diagnose/",
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
@@ -493,10 +493,10 @@ class TestProxyRecordAPI(APIBaseTest):
             status=ProxyRecord.Status.VALID,
         )
 
-        first = self.client.post(f"/api/organizations/{self.organization.id}/proxy_records/{record.id}/diagnose/")
+        first = self.client.post(f"/v1/organizations/{self.organization.id}/proxy_records/{record.id}/diagnose/")
         assert first.status_code == status.HTTP_200_OK
 
-        second = self.client.post(f"/api/organizations/{self.organization.id}/proxy_records/{record.id}/diagnose/")
+        second = self.client.post(f"/v1/organizations/{self.organization.id}/proxy_records/{record.id}/diagnose/")
         assert second.status_code == status.HTTP_429_TOO_MANY_REQUESTS
         assert "wait" in second.json()["detail"].lower()
 
@@ -519,7 +519,7 @@ class TestProxyRecordAPI(APIBaseTest):
 
         with patch("insights.api.proxy_record.capture_exception") as cap_mock:
             response = self.client.post(
-                f"/api/organizations/{self.organization.id}/proxy_records/{record.id}/diagnose/",
+                f"/v1/organizations/{self.organization.id}/proxy_records/{record.id}/diagnose/",
             )
 
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR

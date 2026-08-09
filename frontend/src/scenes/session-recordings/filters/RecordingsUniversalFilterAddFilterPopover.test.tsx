@@ -31,14 +31,14 @@ describe('RecordingsUniversalFilterAddFilterPopover (pill category dropdown)', (
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/event_definitions': mockGetEventDefinitions,
-                '/api/projects/:team/property_definitions': mockGetPropertyDefinitions,
-                '/api/environments/:team/persons/properties': [],
-                '/api/environments/:team/events/values': [],
-                '/api/environments/:team/persons/values': [],
+                '/v1/projects/:team/event_definitions': mockGetEventDefinitions,
+                '/v1/projects/:team/property_definitions': mockGetPropertyDefinitions,
+                '/v1/environments/:team/persons/properties': [],
+                '/v1/environments/:team/events/values': [],
+                '/v1/environments/:team/persons/values': [],
             },
             post: {
-                '/api/environments/:team/query': { results: [] },
+                '/v1/environments/:team/query': { results: [] },
             },
         })
         initKeaTests()

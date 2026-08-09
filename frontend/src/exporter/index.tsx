@@ -27,14 +27,14 @@ if (!isInterview) {
 }
 
 // The interview URL embeds the SharingConfiguration access token (/interview/<token>/) and the
-// public start_call API path (/api/user_interviews/share/<token>/start_call/) embeds it too.
+// public start_call API path (/v1/user_interviews/share/<token>/start_call/) embeds it too.
 // Two hooks redact it everywhere a viewer of analytics or replay could otherwise read it:
 //   - `before_send` strips URL-shaped event properties ($current_url, $pathname, $referrer, ...)
 //   - `maskCapturedNetworkRequestFn` is also the hook insights-js uses for ALL replay URL
 //     surfaces — captured network requests, the rrweb `EventType.Meta` header, `$url_changed`
 //     custom events on SPA route transitions, and masked $current_url in captured console events.
 // Together they cover every surface where the token could land for a viewer to reuse.
-const INTERVIEW_TOKEN_RE = /\/interview\/[^/?#]+|\/api\/user_interviews\/share\/[^/?#]+/g
+const INTERVIEW_TOKEN_RE = /\/interview\/[^/?#]+|\/v1\/user_interviews\/share\/[^/?#]+/g
 const URL_PROPERTIES = ['$current_url', '$pathname', '$referrer', '$initial_current_url', '$initial_pathname']
 const redactInterviewToken = (value: string): string =>
     value.replace(INTERVIEW_TOKEN_RE, (match) => match.replace(/\/[^/?#]+$/, '/<redacted>'))

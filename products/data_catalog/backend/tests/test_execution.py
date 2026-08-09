@@ -40,7 +40,7 @@ def _decoded_sql_editor_link(url: str) -> dict:
 class TestMetricRunExecution(DatastoreTestMixin, APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.run_url = f"/api/projects/{self.team.id}/data_catalog/metrics/mrr/run/"
+        self.run_url = f"/v1/projects/{self.team.id}/data_catalog/metrics/mrr/run/"
         for i in range(3):
             _create_event(team=self.team, event="purchase", distinct_id=f"user_{i}")
         flush_persons_and_events()
@@ -173,7 +173,9 @@ class TestMetricRunPreparation(APIBaseTest):
             ("interval", {"interval": "week"}, "interval"),
         ]
     )
-    def test_insightsql_date_override_names_the_provided_field(self, _name: str, params: dict, expected_field: str) -> None:
+    def test_insightsql_date_override_names_the_provided_field(
+        self, _name: str, params: dict, expected_field: str
+    ) -> None:
         # The rejection must point at whichever date param the caller actually sent, not always date_from.
         with self.assertRaises(ValidationError) as ctx:
             prepare_execution_query(_INSIGHTSQL, **params)
@@ -192,7 +194,7 @@ class TestMetricRunAttribution(APIBaseTest):
             description="d",
             definition={"kind": "MarkdownDefinition", "markdown": "1. Count activated users."},
         )
-        self.run_url = f"/api/projects/{self.team.id}/data_catalog/metrics/activation/run/"
+        self.run_url = f"/v1/projects/{self.team.id}/data_catalog/metrics/activation/run/"
 
     def test_last_run_at_set_and_throttled(self) -> None:
         self.client.post(self.run_url)

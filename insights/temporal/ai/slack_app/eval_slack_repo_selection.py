@@ -242,9 +242,9 @@ CASES: list[Case] = [
     Case(
         name="api_viewset",
         description="Explicit code pattern ('viewset') bypasses heuristic; agent picks the API repo.",
-        text_template="@Insights the /api/projects/ viewset crashes on large payloads, can you fix it",
+        text_template="@Insights the /v1/projects/ viewset crashes on large payloads, can you fix it",
         thread_messages=[
-            {"user": "tester", "text": "@Insights the /api/projects/ viewset crashes on large payloads, can you fix it"}
+            {"user": "tester", "text": "@Insights the /v1/projects/ viewset crashes on large payloads, can you fix it"}
         ],
         expected_stage="agent",
         expected_outcome="found",

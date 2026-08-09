@@ -112,7 +112,7 @@ function ModalShell({
 export const ModalInline: Story = {
     render: () => {
         useStorybookMocks({
-            post: { '/api/environments/:team_id/query/:kind/': actorsQueryHandler },
+            post: { '/v1/environments/:team_id/query/:kind/': actorsQueryHandler },
         })
 
         return (
@@ -137,7 +137,7 @@ export const ModalInline: Story = {
 export const ModalWithAllSelected: Story = {
     render: () => {
         useStorybookMocks({
-            post: { '/api/environments/:team_id/query/:kind/': actorsQueryHandler },
+            post: { '/v1/environments/:team_id/query/:kind/': actorsQueryHandler },
         })
 
         const allSelected = Object.fromEntries(mockPersons.map((p) => [p.id, true]))
@@ -161,7 +161,7 @@ export const ModalEmpty: Story = {
     render: () => {
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/query/:kind/': emptyActorsQueryHandler,
+                '/v1/environments/:team_id/query/:kind/': emptyActorsQueryHandler,
             },
         })
 

@@ -23,7 +23,7 @@ describe('userLogic', () => {
         initKeaTests()
         useMocks({
             get: {
-                '/api/users/@me/': () => [200, userWithLightTheme],
+                '/v1/users/@me/': () => [200, userWithLightTheme],
             },
         })
         userLogic.mount()

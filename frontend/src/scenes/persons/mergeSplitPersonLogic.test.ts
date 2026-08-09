@@ -25,10 +25,10 @@ describe('mergeSplitPersonLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/persons/': { results: [MOCK_PERSON], count: 1 },
+                '/v1/environments/:team_id/persons/': { results: [MOCK_PERSON], count: 1 },
             },
             post: {
-                '/api/person/123/split/': { success: true },
+                '/v1/person/123/split/': { success: true },
             },
         })
         initKeaTests()

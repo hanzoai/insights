@@ -6,12 +6,12 @@ from insights.api.project import ProjectBackwardCompatSerializer, ProjectViewSet
 from insights.api.shared import ProjectBackwardCompatBasicSerializer, TeamBasicSerializer
 from insights.api.team import TeamSerializer, TeamViewSet
 
-# /api/projects/ (Project model) is the canonical surface; /api/environments/ (Team model) is the
-# backward-compat alias, now served through /api/projects/ by an in-process path rewrite
+# /v1/projects/ (Project model) is the canonical surface; /v1/environments/ (Team model) is the
+# backward-compat alias, now served through /v1/projects/ by an in-process path rewrite
 # (EnvironmentsRewriteMiddleware) rather than its own registered routes. For that rewrite to be safe,
 # the project surface must be a SUPERSET of the environment surface at the resource level: every
 # serializer field and viewset action on the root Team viewset must also exist on the root Project
-# viewset, so a rewritten /api/environments/ request never drops a field or 404s an action.
+# viewset, so a rewritten /v1/environments/ request never drops a field or 404s an action.
 #
 # The allowlists below capture the only intentional differences. Anything outside them is drift — most
 # likely a field or action added to the Team/environment side without mirroring it onto projects — and
@@ -42,8 +42,8 @@ class TestTeamProjectParity(BaseTest):
         self.assertEqual(
             missing_on_project,
             set(),
-            f"/api/environments/ exposes fields that /api/projects/ does not: {sorted(missing_on_project)}. "
-            f"Mirror them onto ProjectBackwardCompatSerializer (or the rewrite to /api/projects/ would drop them).",
+            f"/v1/environments/ exposes fields that /v1/projects/ does not: {sorted(missing_on_project)}. "
+            f"Mirror them onto ProjectBackwardCompatSerializer (or the rewrite to /v1/projects/ would drop them).",
         )
 
         project_only = project_fields - team_fields
@@ -60,7 +60,7 @@ class TestTeamProjectParity(BaseTest):
         self.assertEqual(
             team_basic_fields,
             project_basic_fields,
-            "List responses diverge between /api/environments/ and /api/projects/. "
+            "List responses diverge between /v1/environments/ and /v1/projects/. "
             f"Only on environments: {sorted(team_basic_fields - project_basic_fields)}; "
             f"only on projects: {sorted(project_basic_fields - team_basic_fields)}.",
         )
@@ -73,8 +73,8 @@ class TestTeamProjectParity(BaseTest):
         self.assertEqual(
             missing_on_project,
             set(),
-            f"/api/environments/ exposes actions that /api/projects/ does not: {sorted(missing_on_project)}. "
-            f"Mirror them onto ProjectViewSet (or the rewrite to /api/projects/ would 404 them).",
+            f"/v1/environments/ exposes actions that /v1/projects/ does not: {sorted(missing_on_project)}. "
+            f"Mirror them onto ProjectViewSet (or the rewrite to /v1/projects/ would 404 them).",
         )
 
         project_only = project_actions - team_actions

@@ -70,7 +70,7 @@ export const userDangerZoneLogic = kea<userDangerZoneLogicType>({
             null,
             {
                 leaveOrganization: async (organizationId: string) => {
-                    await api.delete(`api/organizations/${organizationId}/members/@me/`)
+                    await api.delete(`v1/organizations/${organizationId}/members/@me/`)
 
                     return null
                 },

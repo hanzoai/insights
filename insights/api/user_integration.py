@@ -183,7 +183,9 @@ class UserSlackLinkStartResponseSerializer(serializers.Serializer):
 
 
 class UserSlackLinkableWorkspaceItemSerializer(serializers.Serializer):
-    insights_team_id = serializers.IntegerField(help_text="Insights team/project id owning the Slack workspace install.")
+    insights_team_id = serializers.IntegerField(
+        help_text="Insights team/project id owning the Slack workspace install."
+    )
     insights_team_name = serializers.CharField(help_text="Insights team/project name, for display in a picker.")
     insights_organization_name = serializers.CharField(
         help_text="Insights organization name owning the team, for picker disambiguation.",
@@ -205,7 +207,7 @@ class UserSlackLinkableWorkspaceListResponseSerializer(serializers.Serializer):
 
 @extend_schema(extensions={"x-product": "core"})
 class UserIntegrationViewSet(viewsets.GenericViewSet):
-    """`/api/users/@me/integrations/` — manage the user's personal GitHub integrations."""
+    """`/v1/users/@me/integrations/` — manage the user's personal GitHub integrations."""
 
     scope_object = "user"
     required_scopes: list[str] | None = None
@@ -444,7 +446,7 @@ class UserIntegrationViewSet(viewsets.GenericViewSet):
         """Start GitHub linking: either full App install or OAuth-only (user-to-server).
 
         ``**_kwargs`` absorbs ``parent_lookup_uuid`` from the nested
-        ``/api/users/{uuid}/integrations/`` router (same pattern as ``local_evaluation``
+        ``/v1/users/{uuid}/integrations/`` router (same pattern as ``local_evaluation``
         under projects).
 
         Usually returns ``install_url`` pointing at ``/installations/new`` so the

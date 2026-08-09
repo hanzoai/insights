@@ -177,7 +177,7 @@ class TestRunPatternsDiff(DatastoreTestMixin, APIBaseTest):
         # window shifted -7d, with the query's filters carried over, and the whole diff
         # deterministic across reruns.
         current = [self._log(f"User {name} not found", day=23, severity="error") for name in ("alice", "bob", "carol")]
-        baseline = [self._log(f"GET /api/orders/{i} ok", day=16) for i in range(3)]
+        baseline = [self._log(f"GET /v1/orders/{i} ok", day=16) for i in range(3)]
         other_service = [
             self._log("ignore me entirely", day=23, service="db"),
             *[self._log("ignore me entirely", day=16, service="db") for _ in range(2)],
@@ -196,7 +196,7 @@ class TestRunPatternsDiff(DatastoreTestMixin, APIBaseTest):
 
         by_classification = {e["classification"]: e for e in results["entries"]}
         assert by_classification["new"]["pattern"]["pattern"] == "User <*> not found"
-        assert by_classification["gone"]["pattern"]["pattern"] == "GET /api/orders/<num> ok"
+        assert by_classification["gone"]["pattern"]["pattern"] == "GET /v1/orders/<num> ok"
         # The serviceNames filter reached both windows: the "db" rows appear in neither.
         assert len(results["entries"]) == 2
         assert results["current"]["total_count"] == 3

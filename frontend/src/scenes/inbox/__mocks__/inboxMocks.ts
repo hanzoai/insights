@@ -252,7 +252,7 @@ export function mockSignals(reportId: string, count = 4): SignalNode[] {
     return Array.from({ length: count }).map((_, i) => ({
         signal_id: `${reportId}-sig-${i}`,
         content: [
-            'User clicked **Submit** with an empty recipient row; the request returned `500` from `/api/invites`.',
+            'User clicked **Submit** with an empty recipient row; the request returned `500` from `/v1/invites`.',
             'Session shows three retries of the same failing checkout call before the user gave up.',
             'Error fingerprint `2c6be0b` first seen 2026-05-26, now recurring ~12×/day.',
             'Support ticket references the same flow: "I keep getting an error when inviting my team".',
@@ -379,7 +379,7 @@ export function mockArtefacts(reportId: string): { results: any[]; count: number
             content: {
                 old_summary: 'Users hit an error when inviting their team.',
                 new_summary:
-                    'Submitting the invite form with an empty recipient row returns a `500` from `/api/invites`. ' +
+                    'Submitting the invite form with an empty recipient row returns a `500` from `/v1/invites`. ' +
                     'The gap is missing client-side validation before submit.',
             },
             created_at: BASE_DATE,

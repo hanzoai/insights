@@ -535,7 +535,7 @@ export const createExperimentLogic = kea<createExperimentLogicType>([
                 }
 
                 const response = (await api.create(
-                    `api/projects/${values.currentProjectId}/experiments`,
+                    `v1/projects/${values.currentProjectId}/experiments`,
                     experimentPayload
                 )) as Experiment
 

@@ -8,6 +8,7 @@ from rest_framework import status
 
 from insights.models import Project, Team
 from insights.models.activity_logging.activity_log import ActivityLog
+from insights.models.ee_models import AccessControl
 from insights.models.organization import Organization, OrganizationMembership
 from insights.models.resource_transfer.resource_transfer import ResourceTransfer
 from insights.models.scoping import team_scope
@@ -19,8 +20,6 @@ from products.dashboards.backend.models.dashboard_tile import DashboardTile
 from products.dashboards.backend.models.dashboard_widget import DashboardWidget
 from products.product_analytics.backend.models.insight import Insight
 from products.surveys.backend.models import Survey
-
-from insights.models.ee_models import AccessControl
 
 
 class TestResourceTransferPreview(APIBaseTest):
@@ -34,7 +33,7 @@ class TestResourceTransferPreview(APIBaseTest):
         )
 
     def _preview_url(self) -> str:
-        return f"/api/organizations/{self.organization.id}/resource_transfers/preview/"
+        return f"/v1/organizations/{self.organization.id}/resource_transfers/preview/"
 
     def test_preview_returns_mutable_resources_only(self) -> None:
         insight = Insight.objects.create(team=self.team, name="My insight")
@@ -286,7 +285,7 @@ class TestResourceTransferTransfer(APIBaseTest):
         )
 
     def _transfer_url(self) -> str:
-        return f"/api/organizations/{self.organization.id}/resource_transfers/transfer/"
+        return f"/v1/organizations/{self.organization.id}/resource_transfers/transfer/"
 
     def test_transfer_creates_resources_in_destination(self) -> None:
         insight = Insight.objects.create(team=self.team, name="My insight")
@@ -583,7 +582,7 @@ class TestResourceTransferSearch(APIBaseTest):
         )
 
     def _search_url(self) -> str:
-        return f"/api/organizations/{self.organization.id}/resource_transfers/search/"
+        return f"/v1/organizations/{self.organization.id}/resource_transfers/search/"
 
     def test_search_returns_resources_in_target_team(self) -> None:
         Insight.objects.create(team=self.dest_team, name="Target insight A")
@@ -727,10 +726,10 @@ class TestResourceTransferTenantIsolation(APIBaseTest):
         )
 
     def _preview_url(self) -> str:
-        return f"/api/organizations/{self.organization.id}/resource_transfers/preview/"
+        return f"/v1/organizations/{self.organization.id}/resource_transfers/preview/"
 
     def _transfer_url(self) -> str:
-        return f"/api/organizations/{self.organization.id}/resource_transfers/transfer/"
+        return f"/v1/organizations/{self.organization.id}/resource_transfers/transfer/"
 
     def test_preview_rejects_insight_referencing_foreign_org_action(self) -> None:
         foreign_action = Action.objects.create(team=self.foreign_team, name="Secret action")
@@ -850,13 +849,13 @@ class TestResourceTransferProjectAccessControl(APIBaseTest):
         self.insight = Insight.objects.create(team=self.private_team, name="Secret insight")
 
     def _preview_url(self) -> str:
-        return f"/api/organizations/{self.organization.id}/resource_transfers/preview/"
+        return f"/v1/organizations/{self.organization.id}/resource_transfers/preview/"
 
     def _transfer_url(self) -> str:
-        return f"/api/organizations/{self.organization.id}/resource_transfers/transfer/"
+        return f"/v1/organizations/{self.organization.id}/resource_transfers/transfer/"
 
     def _search_url(self) -> str:
-        return f"/api/organizations/{self.organization.id}/resource_transfers/search/"
+        return f"/v1/organizations/{self.organization.id}/resource_transfers/search/"
 
     def _endpoint_params(self, endpoint: str) -> tuple[str, dict]:
         if endpoint == "preview":

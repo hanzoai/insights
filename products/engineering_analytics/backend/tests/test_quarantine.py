@@ -360,7 +360,7 @@ class TestQuarantineAPI(APIBaseTest):
         cache.clear()
 
     def _url(self) -> str:
-        return f"/api/projects/{self.team.id}/engineering_analytics/quarantine/"
+        return f"/v1/projects/{self.team.id}/engineering_analytics/quarantine/"
 
     @freeze_time("2026-06-12")
     def test_quarantine_serializes(self) -> None:
@@ -668,7 +668,7 @@ class TestQuarantineRequest(BaseTest):
 
 class TestQuarantineRequestAPI(APIBaseTest):
     def _url(self) -> str:
-        return f"/api/projects/{self.team.id}/engineering_analytics/quarantine/request/"
+        return f"/v1/projects/{self.team.id}/engineering_analytics/quarantine/request/"
 
     def _body(self, **overrides: Any) -> dict[str, Any]:
         body: dict[str, Any] = {

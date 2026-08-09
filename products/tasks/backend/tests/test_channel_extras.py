@@ -14,7 +14,7 @@ class ChannelExtrasBaseTest(APIBaseTest):
         super().setUp()
         with team_scope(self.team.id):
             self.channel = Channel.objects.create(team=self.team, name="general", created_by=self.user)
-        self.base = f"/api/projects/{self.team.id}/task_channels/{self.channel.id}"
+        self.base = f"/v1/projects/{self.team.id}/task_channels/{self.channel.id}"
 
 
 class TestChannelRetrieve(ChannelExtrasBaseTest):
@@ -29,7 +29,7 @@ class TestChannelRetrieve(ChannelExtrasBaseTest):
             personal = Channel.objects.create(
                 team=self.team, name="me", channel_type=Channel.ChannelType.PERSONAL, created_by=other
             )
-        response = self.client.get(f"/api/projects/{self.team.id}/task_channels/{personal.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/task_channels/{personal.id}/")
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -114,7 +114,7 @@ class TestChannelStars(ChannelExtrasBaseTest):
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert ChannelStar.objects.unscoped().filter(channel=self.channel, user=self.user).exists()
 
-        channels = self.client.get(f"/api/projects/{self.team.id}/task_channels/").json()
+        channels = self.client.get(f"/v1/projects/{self.team.id}/task_channels/").json()
         starred = {c["name"]: c["starred"] for c in channels}
         assert starred["general"] is True
 

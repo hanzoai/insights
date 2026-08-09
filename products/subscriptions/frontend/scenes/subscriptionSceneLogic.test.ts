@@ -81,12 +81,12 @@ describe('subscriptionSceneLogic', () => {
     it('includes status in deliveries list request when status filter is set', async () => {
         useMocks({
             get: {
-                [`/api/projects/${MOCK_TEAM_ID}/subscriptions/1/`]: [200, MOCK_SUBSCRIPTION],
-                [`/api/environments/${MOCK_TEAM_ID}/subscriptions/1/deliveries/`]: ({ request }) => {
+                [`/v1/projects/${MOCK_TEAM_ID}/subscriptions/1/`]: [200, MOCK_SUBSCRIPTION],
+                [`/v1/environments/${MOCK_TEAM_ID}/subscriptions/1/deliveries/`]: ({ request }) => {
                     deliveriesRequestUrls.push(request.url)
                     return [200, { results: [], next: null, previous: null }]
                 },
-                [`/api/projects/${MOCK_TEAM_ID}/subscriptions/1/deliveries/`]: ({ request }) => {
+                [`/v1/projects/${MOCK_TEAM_ID}/subscriptions/1/deliveries/`]: ({ request }) => {
                     deliveriesRequestUrls.push(request.url)
                     return [200, { results: [], next: null, previous: null }]
                 },
@@ -112,8 +112,8 @@ describe('subscriptionSceneLogic', () => {
     it('loads delivery history once the subscription has loaded', async () => {
         useMocks({
             get: {
-                [`/api/projects/${MOCK_TEAM_ID}/subscriptions/1/`]: [200, MOCK_SUBSCRIPTION],
-                [`/api/projects/${MOCK_TEAM_ID}/subscriptions/1/deliveries/`]: () => {
+                [`/v1/projects/${MOCK_TEAM_ID}/subscriptions/1/`]: [200, MOCK_SUBSCRIPTION],
+                [`/v1/projects/${MOCK_TEAM_ID}/subscriptions/1/deliveries/`]: () => {
                     deliveriesRequestUrls.push('deliveries')
                     return [200, { results: [], next: null, previous: null }]
                 },
@@ -138,14 +138,14 @@ describe('subscriptionSceneLogic', () => {
         let testDeliveryCalls = 0
         useMocks({
             get: {
-                [`/api/projects/${MOCK_TEAM_ID}/subscriptions/1/`]: [200, MOCK_SUBSCRIPTION],
-                [`/api/projects/${MOCK_TEAM_ID}/subscriptions/1/deliveries/`]: [
+                [`/v1/projects/${MOCK_TEAM_ID}/subscriptions/1/`]: [200, MOCK_SUBSCRIPTION],
+                [`/v1/projects/${MOCK_TEAM_ID}/subscriptions/1/deliveries/`]: [
                     200,
                     { results: [], next: null, previous: null },
                 ],
             },
             post: {
-                [`/api/projects/${MOCK_TEAM_ID}/subscriptions/1/test-delivery/`]: () => {
+                [`/v1/projects/${MOCK_TEAM_ID}/subscriptions/1/test-delivery/`]: () => {
                     testDeliveryCalls += 1
                     return [status, {}]
                 },
@@ -173,8 +173,8 @@ describe('subscriptionSceneLogic', () => {
             get: {
                 // Function form, not the `[200, body]` shorthand: useMocks serializes a bare array as
                 // the whole response body, so only a function-returned tuple delivers the object itself.
-                [`/api/projects/${MOCK_TEAM_ID}/subscriptions/2/`]: () => [200, MOCK_AI_SUBSCRIPTION],
-                [`/api/projects/${MOCK_TEAM_ID}/subscriptions/2/deliveries/`]: () => {
+                [`/v1/projects/${MOCK_TEAM_ID}/subscriptions/2/`]: () => [200, MOCK_AI_SUBSCRIPTION],
+                [`/v1/projects/${MOCK_TEAM_ID}/subscriptions/2/deliveries/`]: () => {
                     deliveriesRequestUrls.push('deliveries')
                     return [200, { results: [], next: null, previous: null }]
                 },
@@ -198,7 +198,7 @@ describe('subscriptionSceneLogic', () => {
     ])('captures ai_report_feedback (%s, %s) from URL params and strips them', async (feedback, source) => {
         useMocks({
             get: {
-                [`/api/projects/${MOCK_TEAM_ID}/subscriptions/2/`]: () => [200, MOCK_AI_SUBSCRIPTION],
+                [`/v1/projects/${MOCK_TEAM_ID}/subscriptions/2/`]: () => [200, MOCK_AI_SUBSCRIPTION],
             },
         })
         initKeaTests()
@@ -239,7 +239,7 @@ describe('subscriptionSceneLogic', () => {
     it('captures ai_report_clicked from the report CTA delivery param and strips it', async () => {
         useMocks({
             get: {
-                [`/api/projects/${MOCK_TEAM_ID}/subscriptions/2/`]: () => [200, MOCK_AI_SUBSCRIPTION],
+                [`/v1/projects/${MOCK_TEAM_ID}/subscriptions/2/`]: () => [200, MOCK_AI_SUBSCRIPTION],
             },
         })
         initKeaTests()
@@ -268,7 +268,7 @@ describe('subscriptionSceneLogic', () => {
     it('does not re-capture from a feedback link for an already-recorded delivery', async () => {
         useMocks({
             get: {
-                [`/api/projects/${MOCK_TEAM_ID}/subscriptions/2/`]: () => [200, MOCK_AI_SUBSCRIPTION],
+                [`/v1/projects/${MOCK_TEAM_ID}/subscriptions/2/`]: () => [200, MOCK_AI_SUBSCRIPTION],
             },
         })
         initKeaTests()
@@ -301,7 +301,7 @@ describe('subscriptionSceneLogic', () => {
     it('persists recorded feedback across remounts', async () => {
         useMocks({
             get: {
-                [`/api/projects/${MOCK_TEAM_ID}/subscriptions/2/`]: () => [200, MOCK_AI_SUBSCRIPTION],
+                [`/v1/projects/${MOCK_TEAM_ID}/subscriptions/2/`]: () => [200, MOCK_AI_SUBSCRIPTION],
             },
         })
         initKeaTests()
@@ -325,7 +325,7 @@ describe('subscriptionSceneLogic', () => {
     it('captures in-app thumbs feedback and records it per delivery', async () => {
         useMocks({
             get: {
-                [`/api/projects/${MOCK_TEAM_ID}/subscriptions/2/`]: () => [200, MOCK_AI_SUBSCRIPTION],
+                [`/v1/projects/${MOCK_TEAM_ID}/subscriptions/2/`]: () => [200, MOCK_AI_SUBSCRIPTION],
             },
         })
         initKeaTests()

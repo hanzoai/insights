@@ -25,7 +25,7 @@ class TestOrganizationPersonalAPIKeyAPI(APIBaseTest):
         )
 
     def _url(self, org=None):
-        return f"/api/organizations/{(org or self.organization).id}/personal_api_keys/"
+        return f"/v1/organizations/{(org or self.organization).id}/personal_api_keys/"
 
     def _set_level(self, level):
         self.organization_membership.level = level

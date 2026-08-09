@@ -25,7 +25,7 @@ describe('batchExportSceneLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/batch_exports/test-id/': {
+                '/v1/environments/:team_id/batch_exports/test-id/': {
                     id: 'test-id',
                     team_id: 997,
                     name: 'Test Export',
@@ -35,7 +35,7 @@ describe('batchExportSceneLogic', () => {
                     model: 'events',
                     filters: [],
                 },
-                '/api/environments/:team_id/batch_exports/test/': { steps: [] },
+                '/v1/environments/:team_id/batch_exports/test/': { steps: [] },
             },
         })
         initKeaTests()

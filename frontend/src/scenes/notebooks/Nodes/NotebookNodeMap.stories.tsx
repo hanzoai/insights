@@ -90,9 +90,9 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                'api/projects/:team_id/notebooks/': notebooksListMock,
-                'api/projects/:team_id/notebooks/map-with-location/': makeNotebook('map-with-location'),
-                'api/projects/:team_id/notebooks/map-without-location/': makeNotebook('map-without-location'),
+                'v1/projects/:team_id/notebooks/': notebooksListMock,
+                'v1/projects/:team_id/notebooks/map-with-location/': makeNotebook('map-with-location'),
+                'v1/projects/:team_id/notebooks/map-without-location/': makeNotebook('map-without-location'),
             },
         }),
     ],
@@ -108,7 +108,7 @@ export const WithLocation: Story = {
     decorators: [
         mswDecorator({
             get: {
-                'api/environments/:team_id/persons/': {
+                'v1/environments/:team_id/persons/': {
                     count: 1,
                     next: null,
                     previous: null,
@@ -126,7 +126,7 @@ export const WithoutLocation: Story = {
     decorators: [
         mswDecorator({
             get: {
-                'api/environments/:team_id/persons/': {
+                'v1/environments/:team_id/persons/': {
                     count: 1,
                     next: null,
                     previous: null,

@@ -26,7 +26,7 @@ class RecordingApiClient:
     async def fetch_block(
         self, key: str, start_byte: int, end_byte: int, session_id: str, team_id: int, *, decompress: bool = False
     ) -> bytes:
-        url = f"{self.base_url}/api/projects/{team_id}/recordings/{session_id}/block"
+        url = f"{self.base_url}/v1/projects/{team_id}/recordings/{session_id}/block"
         params: dict[str, str | int] = {"key": key, "start_byte": start_byte, "end_byte": end_byte}
         if decompress:
             params["decompress"] = "true"
@@ -65,7 +65,7 @@ class RecordingApiClient:
             raise BlockFetchError(f"Failed to fetch block from Recording API: {str(e)}")
 
     async def list_blocks(self, session_id: str, team_id: int) -> list[dict]:
-        url = f"{self.base_url}/api/projects/{team_id}/recordings/{session_id}/blocks"
+        url = f"{self.base_url}/v1/projects/{team_id}/recordings/{session_id}/blocks"
 
         try:
             async with self.session.get(url) as response:
@@ -91,7 +91,7 @@ class RecordingApiClient:
 
         Returns list of session IDs that failed to delete.
         """
-        url = f"{self.base_url}/api/projects/{team_id}/recordings/delete"
+        url = f"{self.base_url}/v1/projects/{team_id}/recordings/delete"
 
         try:
             async with self.session.post(url, json={"session_ids": session_ids, "deleted_by": deleted_by}) as response:

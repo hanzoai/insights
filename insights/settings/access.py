@@ -142,7 +142,7 @@ TASKS_AGENT_PROXY_INTERNAL_URL: str | None = os.getenv("TASKS_AGENT_PROXY_INTERN
 # agent-proxy in production; unset (local/CI) disables the check.
 AGENT_PROXY_CALLBACK_SECRET: str | None = os.getenv("AGENT_PROXY_CALLBACK_SECRET") or None
 
-# ReviewHog production label trigger. The trigger endpoint (POST /api/review_hog/trigger) authenticates
+# ReviewHog production label trigger. The trigger endpoint (POST /v1/review_hog/trigger) authenticates
 # CI by comparing the request's bearer token to REVIEWFN_TRIGGER_TOKEN (a shared secret provisioned to
 # both Django and the GitHub Action). Unset fails closed outside local dev/test. REVIEWFN_TEAM_ID is the
 # team the review runs and publishes under; REVIEWFN_RUN_USER_ID is the user the sandbox tasks run as

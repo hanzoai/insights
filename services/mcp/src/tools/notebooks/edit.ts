@@ -425,7 +425,7 @@ export const editHandler: ToolBase<typeof NotebookEditSchema, Schemas.Notebook>[
     params: Params
 ) => {
     const projectId = await context.stateManager.getProjectId()
-    const notebookPath = `/api/projects/${encodeURIComponent(projectId)}/notebooks/${encodeURIComponent(params.short_id)}/`
+    const notebookPath = `/v1/projects/${encodeURIComponent(projectId)}/notebooks/${encodeURIComponent(params.short_id)}/`
 
     // Load current notebook.
     const notebook = await context.api.request<Schemas.Notebook>({ method: 'GET', path: notebookPath })

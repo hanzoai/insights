@@ -28,7 +28,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/external_data_sources/': () => {
+                '/v1/environments/:team_id/external_data_sources/': () => {
                     return [
                         200,
                         {
@@ -47,7 +47,7 @@ const meta: Meta = {
                         },
                     ]
                 },
-                '/api/environments/:team_id/external_data_sources/wizard': () => {
+                '/v1/environments/:team_id/external_data_sources/wizard': () => {
                     return [
                         200,
                         {
@@ -59,7 +59,7 @@ const meta: Meta = {
                 },
             },
             post: {
-                '/api/environments/:team_id/query/:kind': async ({ request }) => {
+                '/v1/environments/:team_id/query/:kind': async ({ request }) => {
                     const body = (await request.json()) as {
                         query?: { kind?: string; source?: { kind?: string } }
                     }

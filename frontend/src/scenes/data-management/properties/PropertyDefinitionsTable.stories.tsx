@@ -70,7 +70,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/property_definitions/': ({ request }) => {
+                '/v1/projects/:team_id/property_definitions/': ({ request }) => {
                     const verified = new URL(request.url).searchParams.get('verified')
                     let results = MOCK_PROPERTY_DEFINITIONS.results
 

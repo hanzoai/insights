@@ -51,8 +51,8 @@ const mockTaggers: Tagger[] = [
 ]
 
 const providerKeyMocks = {
-    '/api/environments/:team_id/llm_analytics/provider_keys/': { results: [] },
-    '/api/environments/:team_id/llm_analytics/evaluation_config/': {
+    '/v1/environments/:team_id/llm_analytics/provider_keys/': { results: [] },
+    '/v1/environments/:team_id/llm_analytics/evaluation_config/': {
         active_provider_key: null,
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-01T00:00:00Z',
@@ -67,7 +67,7 @@ describe('llmTaggersLogic', () => {
             useMocks({
                 get: {
                     ...providerKeyMocks,
-                    '/api/environments/:team_id/taggers/': { results: mockTaggers },
+                    '/v1/environments/:team_id/taggers/': { results: mockTaggers },
                 },
             })
             initKeaTests()
@@ -106,7 +106,7 @@ describe('llmTaggersLogic', () => {
             useMocks({
                 get: {
                     ...providerKeyMocks,
-                    '/api/environments/:team_id/taggers/': () => {
+                    '/v1/environments/:team_id/taggers/': () => {
                         if (firstGet) {
                             firstGet = false
                             return [200, { results: [] }]
@@ -115,7 +115,7 @@ describe('llmTaggersLogic', () => {
                     },
                 },
                 post: {
-                    '/api/environments/:team_id/taggers/': async ({ request }) => {
+                    '/v1/environments/:team_id/taggers/': async ({ request }) => {
                         const body = (await request.json()) as Record<string, any>
                         createCalls.push(body)
                         return [200, { id: `new-${createCalls.length}`, ...body }]
@@ -146,7 +146,7 @@ describe('llmTaggersLogic', () => {
             useMocks({
                 get: {
                     ...providerKeyMocks,
-                    '/api/environments/:team_id/taggers/': { results: mockTaggers },
+                    '/v1/environments/:team_id/taggers/': { results: mockTaggers },
                 },
             })
             initKeaTests()
@@ -220,11 +220,11 @@ describe('llmTaggersLogic', () => {
             useMocks({
                 get: {
                     ...providerKeyMocks,
-                    '/api/environments/:team_id/taggers/': { results: mockTaggers },
-                    '/api/environments/:team_id/taggers/:id/': mockTaggers[0],
+                    '/v1/environments/:team_id/taggers/': { results: mockTaggers },
+                    '/v1/environments/:team_id/taggers/:id/': mockTaggers[0],
                 },
                 patch: {
-                    '/api/environments/:team_id/taggers/:id/': () => {
+                    '/v1/environments/:team_id/taggers/:id/': () => {
                         return [200, { ...mockTaggers[0], enabled: !mockTaggers[0].enabled }]
                     },
                 },

@@ -34,7 +34,7 @@ describe('feature-flag-get-definition-by-key', () => {
         expect(request).toHaveBeenCalledTimes(1)
         expect(request).toHaveBeenCalledWith({
             method: 'GET',
-            path: '/api/projects/42/feature_flags/',
+            path: '/v1/projects/42/feature_flags/',
             query: { key: 'new-checkout', limit: 5 },
         })
         expect(result).toMatchObject({ id: 7, key: 'new-checkout', found: true })

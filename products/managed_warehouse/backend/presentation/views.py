@@ -122,9 +122,9 @@ def _request(
 ) -> Response:
     """Proxy a request to the duckgres provisioning API, gated on the org's feature flag.
 
-    An empty path targets the org resource itself (`/api/v1/orgs/{org}`, e.g. to delete it);
-    paths starting with "/" are org-scoped (`/api/v1/orgs/{org}{path}`); others are global
-    API paths (`/api/v1/{path}`).
+    An empty path targets the org resource itself (`/v1/v1/orgs/{org}`, e.g. to delete it);
+    paths starting with "/" are org-scoped (`/v1/v1/orgs/{org}{path}`); others are global
+    API paths (`/v1/v1/{path}`).
 
     `require_enabled` gates on the user-facing `data-warehouse-scene` flag and is the right
     default for UI-driven calls. Backend/background callers (e.g. the Dagster duckling
@@ -147,11 +147,11 @@ def _request(
         )
 
     if path == "":
-        url = f"{base_url.rstrip('/')}/api/v1/orgs/{org_id}"
+        url = f"{base_url.rstrip('/')}/v1/v1/orgs/{org_id}"
     elif path.startswith("/"):
-        url = f"{base_url.rstrip('/')}/api/v1/orgs/{org_id}{path}"
+        url = f"{base_url.rstrip('/')}/v1/v1/orgs/{org_id}{path}"
     else:
-        url = f"{base_url.rstrip('/')}/api/v1/{path}"
+        url = f"{base_url.rstrip('/')}/v1/v1/{path}"
 
     headers = {}
     if token:

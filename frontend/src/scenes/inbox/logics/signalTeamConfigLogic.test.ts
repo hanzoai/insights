@@ -21,9 +21,9 @@ describe('signalTeamConfigLogic', () => {
         }
         lastPostBody = null
         useMocks({
-            get: { '/api/projects/:team_id/signals/config/': () => [200, serverConfig] },
+            get: { '/v1/projects/:team_id/signals/config/': () => [200, serverConfig] },
             post: {
-                '/api/projects/:team_id/signals/config/': async ({ request }) => {
+                '/v1/projects/:team_id/signals/config/': async ({ request }) => {
                     lastPostBody = (await request.json()) as Partial<SignalTeamConfig>
                     serverConfig = { ...serverConfig, ...lastPostBody }
                     return [200, serverConfig]
@@ -62,8 +62,8 @@ describe('signalTeamConfigLogic', () => {
             autostart_base_branches: {},
         }
         useMocks({
-            get: { '/api/projects/:team_id/signals/config/': () => [200, serverConfig] },
-            post: { '/api/projects/:team_id/signals/config/': () => [500, { detail: 'Failed to save' }] },
+            get: { '/v1/projects/:team_id/signals/config/': () => [200, serverConfig] },
+            post: { '/v1/projects/:team_id/signals/config/': () => [500, { detail: 'Failed to save' }] },
         })
         initKeaTests()
         logic = signalTeamConfigLogic()
@@ -128,9 +128,9 @@ describe('signalTeamConfigLogic', () => {
         })
 
         useMocks({
-            get: { '/api/projects/:team_id/signals/config/': () => [200, initialConfig] },
+            get: { '/v1/projects/:team_id/signals/config/': () => [200, initialConfig] },
             post: {
-                '/api/projects/:team_id/signals/config/': async ({ request }) => {
+                '/v1/projects/:team_id/signals/config/': async ({ request }) => {
                     const body = (await request.json()) as Partial<SignalTeamConfig>
                     postBodies.push(body)
                     if (postBodies.length === 1) {

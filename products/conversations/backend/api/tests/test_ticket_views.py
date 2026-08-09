@@ -20,7 +20,7 @@ class TestTicketViewAPI(APIBaseTest):
 
     def setUp(self):
         super().setUp()
-        self.base_url = f"/api/environments/{self.team.pk}/conversations/views/"
+        self.base_url = f"/v1/environments/{self.team.pk}/conversations/views/"
 
     def _valid_payload(self, **overrides) -> dict:
         defaults = {

@@ -61,7 +61,7 @@ export const setActiveHandler: ToolBase<typeof schema, Result>['handler'] = asyn
         // was resolved yet we're just establishing context, not switching away.
         switchedOrg = activeOrgId !== undefined
         // Fetch the org through the shared resolver so the scoped-token guard
-        // (which skips the non-project-nested `/api/organizations/{id}/` call the
+        // (which skips the non-project-nested `/v1/organizations/{id}/` call the
         // backend rejects for project-scoped keys) and org caching stay in one
         // place instead of being duplicated here and drifting.
         org = await context.stateManager.getCachedOrFetchOrg()

@@ -76,7 +76,7 @@ export const NoSearchEntered: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/projects/:team_id/session_recording_playlists': ({ request }) => {
+                '/v1/projects/:team_id/session_recording_playlists': ({ request }) => {
                     const search = new URL(request.url).searchParams.get('search')
                     return [200, filterPlaylistsBySearch(search)]
                 },
@@ -90,7 +90,7 @@ export const SearchWithResults: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/projects/:team_id/session_recording_playlists': ({ request }) => {
+                '/v1/projects/:team_id/session_recording_playlists': ({ request }) => {
                     const search = new URL(request.url).searchParams.get('search')
                     return [200, filterPlaylistsBySearch(search)]
                 },
@@ -104,7 +104,7 @@ export const SearchWithNoResults: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/projects/:team_id/session_recording_playlists': () => [200, emptyPlaylists],
+                '/v1/projects/:team_id/session_recording_playlists': () => [200, emptyPlaylists],
             },
         })
         return <StoryWrapper initialSearch="no-match-for-this-term" />
@@ -115,7 +115,7 @@ export const NoCollections: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/projects/:team_id/session_recording_playlists': () => [200, emptyPlaylists],
+                '/v1/projects/:team_id/session_recording_playlists': () => [200, emptyPlaylists],
             },
         })
         return <StoryWrapper />

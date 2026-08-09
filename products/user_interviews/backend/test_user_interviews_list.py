@@ -17,7 +17,7 @@ class TestUserInterviewsListFilters(APIBaseTest):
         self.addCleanup(patcher.stop)
 
     def _list_url(self, team: Team | None = None) -> str:
-        return f"/api/environments/{(team or self.team).id}/user_interviews/"
+        return f"/v1/environments/{(team or self.team).id}/user_interviews/"
 
     def _create_topic(self, topic_text: str, team: Team | None = None) -> UserInterviewTopic:
         return UserInterviewTopic.objects.create(

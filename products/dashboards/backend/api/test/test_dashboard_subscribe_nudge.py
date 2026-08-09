@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from rest_framework.response import _MonkeyPatchedResponse
 
 from insights.constants import AvailableFeature
+from insights.models.ee_models import AccessControl
 from insights.models.organization import Organization, OrganizationMembership
 from insights.models.personal_api_key import PersonalAPIKey
 from insights.models.team import Team
@@ -18,8 +19,6 @@ from insights.models.utils import generate_random_token_personal, hash_key_value
 
 from products.dashboards.backend.models.dashboard import Dashboard
 from products.notifications.backend.facade.api import NotificationType, Priority, TargetType
-
-from insights.models.ee_models import AccessControl
 
 
 @patch("products.dashboards.backend.api.dashboard.create_notification")
@@ -30,7 +29,7 @@ class TestDashboardSubscribeNudge(APIBaseTest):
         self.dashboard = Dashboard.objects.create(team=self.team, name="Key metrics", created_by=self.user)
 
     def _post_nudge(self, dashboard_id: int) -> "_MonkeyPatchedResponse":
-        return self.client.post(f"/api/environments/{self.team.id}/dashboards/{dashboard_id}/subscribe_nudge/")
+        return self.client.post(f"/v1/environments/{self.team.id}/dashboards/{dashboard_id}/subscribe_nudge/")
 
     def test_creates_notification_for_requesting_user(self, mock_create_notification: MagicMock) -> None:
         mock_create_notification.return_value = MagicMock()
@@ -160,7 +159,7 @@ class TestDashboardSubscribeNudge(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/dashboards/{self.dashboard.id}/subscribe_nudge/",
+            f"/v1/environments/{self.team.id}/dashboards/{self.dashboard.id}/subscribe_nudge/",
             HTTP_AUTHORIZATION=f"Bearer {token}",
         )
 

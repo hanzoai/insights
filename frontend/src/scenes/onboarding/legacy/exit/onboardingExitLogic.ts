@@ -236,11 +236,11 @@ export const onboardingExitLogic = kea<onboardingExitLogicType>([
 
                 // Seed the freshest user into userLogic BEFORE navigating, otherwise sceneLogic's
                 // onboarding-redirect check reads stale state and bounces us straight back to /onboarding.
-                // We hit `/api/users/@me/` — the same endpoint `loadUser` uses — so the response shape
+                // We hit `/v1/users/@me/` — the same endpoint `loadUser` uses — so the response shape
                 // matches what the rest of the app (and `isOnboardingRedirectSuppressed`) expects, and
                 // `onboarding_skipped_at` reliably lands in state before the scene change fires.
                 try {
-                    const freshUser = await api.get<UserType>('api/users/@me/')
+                    const freshUser = await api.get<UserType>('v1/users/@me/')
                     actions.loadUserSuccess(freshUser)
                 } catch {
                     // If the refresh fails, trigger a background load so the app eventually converges.

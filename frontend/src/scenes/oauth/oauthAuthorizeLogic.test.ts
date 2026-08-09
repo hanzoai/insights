@@ -13,7 +13,7 @@ describe('oauthAuthorizeLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/users/@me/': MOCK_DEFAULT_USER,
+                '/v1/users/@me/': MOCK_DEFAULT_USER,
             },
         })
         initKeaTests()

@@ -32,7 +32,7 @@ function makeLogMessage(overrides: Partial<LogMessage> = {}): LogMessage {
         body: 'Processing request for /api/users',
         attributes: {
             'http.method': 'GET',
-            'http.url': '/api/users',
+            'http.url': '/v1/users',
             'http.status_code': '200',
         },
         timestamp: dayjs('2025-01-15T10:30:00Z').toISOString(),

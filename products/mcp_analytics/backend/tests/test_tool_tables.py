@@ -378,7 +378,7 @@ class TestMCPToolFailureOccurrencesQueryRunner(_MCPAnalyticsTeamScopedTestMixin,
         PersonalAPIKey.objects.create(label="test", user=self.user, secure_value=hash_key_value(value), scopes=scopes)
 
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/query/",
+            f"/v1/projects/{self.team.pk}/query/",
             {"query": {"kind": "MCPToolFailureOccurrencesQuery", "toolName": "query_run", "errorType": "internal"}},
             HTTP_AUTHORIZATION=f"Bearer {value}",
         )

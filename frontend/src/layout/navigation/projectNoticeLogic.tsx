@@ -300,7 +300,7 @@ export const projectNoticeLogic = kea<projectNoticeLogicType>([
             __default: null as null | ProxyRecord[],
             loadRecords: async () => {
                 try {
-                    const response = await api.get(`api/organizations/${values.currentOrganizationId}/proxy_records`)
+                    const response = await api.get(`v1/organizations/${values.currentOrganizationId}/proxy_records`)
                     return response.results
                 } catch (error) {
                     // A missing or expired session makes this boot-time GET 401. A restricted org member

@@ -37,7 +37,7 @@ describe('externalDataSourcesDbSchema', () => {
 
         expect(requestMock).toHaveBeenCalledWith({
             method: 'POST',
-            path: '/api/projects/42/external_data_sources/database_schema/',
+            path: '/v1/projects/42/external_data_sources/database_schema/',
             body: {
                 source_type: 'Postgres',
                 host: 'localhost',
@@ -82,7 +82,7 @@ describe('externalDataSourcesPreview', () => {
 
         expect(requestMock).toHaveBeenCalledWith({
             method: 'POST',
-            path: '/api/projects/42/external_data_sources/preview_resource/',
+            path: '/v1/projects/42/external_data_sources/preview_resource/',
             body: {
                 source_type: 'Custom',
                 payload: { manifest_json: '{"client":{}}', auth_api_key: 'sk_test' },
@@ -123,7 +123,7 @@ describe('externalDataSourcesJobs', () => {
         })
 
         const path = requestMock.mock.calls[0]![0].path as string
-        expect(path).toContain('/api/projects/42/external_data_sources/source-123/jobs/')
+        expect(path).toContain('/v1/projects/42/external_data_sources/source-123/jobs/')
         expect(path).toContain('after=2025-01-01T00%3A00%3A00Z')
         expect(path).toContain('before=2025-12-31T23%3A59%3A59Z')
         expect(path).toContain('schemas=users')
@@ -140,7 +140,7 @@ describe('externalDataSourcesJobs', () => {
 
         expect(requestMock).toHaveBeenCalledWith({
             method: 'GET',
-            path: '/api/projects/42/external_data_sources/source-456/jobs/',
+            path: '/v1/projects/42/external_data_sources/source-456/jobs/',
         })
     })
 

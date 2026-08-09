@@ -80,7 +80,7 @@ describe('hogFlowOutputMappingLogic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/environments/:team_id/hog_flows/:id/': {
+                    '/v1/environments/:team_id/hog_flows/:id/': {
                         id: WORKFLOW_ID,
                         name: 'Test workflow',
                         actions: [],
@@ -93,8 +93,8 @@ describe('hogFlowOutputMappingLogic', () => {
                         created_at: '',
                         updated_at: '',
                     },
-                    '/api/environments/:team_id/messaging_categories/': { results: [], count: 0 },
-                    '/api/projects/:team_id/insights_function_templates/': { results: [], count: 0 },
+                    '/v1/environments/:team_id/messaging_categories/': { results: [], count: 0 },
+                    '/v1/projects/:team_id/insights_function_templates/': { results: [], count: 0 },
                 },
             })
             initKeaTests()

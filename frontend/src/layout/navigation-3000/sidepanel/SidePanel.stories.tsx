@@ -45,25 +45,25 @@ const meta: Meta<StoryArgs> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/dashboard_templates/': {},
-                '/api/projects/:id/integrations': { results: [] },
-                '/api/organizations/:organization_id/pipeline_destinations/': { results: [] },
-                '/api/projects/:id/pipeline_destination_configs/': { results: [] },
-                '/api/projects/:id/batch_exports/': { results: [] },
-                '/api/projects/:id/surveys/': { results: [] },
-                '/api/projects/:id/surveys/responses_count/': { results: [] },
-                '/api/environments/:team_id/exports/': { results: [] },
-                '/api/environments/:team_id/events': { results: [] },
-                '/api/projects/:team_id/feature_flags/:flagId/': ({ params }) => [
+                '/v1/projects/:team_id/dashboard_templates/': {},
+                '/v1/projects/:id/integrations': { results: [] },
+                '/v1/organizations/:organization_id/pipeline_destinations/': { results: [] },
+                '/v1/projects/:id/pipeline_destination_configs/': { results: [] },
+                '/v1/projects/:id/batch_exports/': { results: [] },
+                '/v1/projects/:id/surveys/': { results: [] },
+                '/v1/projects/:id/surveys/responses_count/': { results: [] },
+                '/v1/environments/:team_id/exports/': { results: [] },
+                '/v1/environments/:team_id/events': { results: [] },
+                '/v1/projects/:team_id/feature_flags/:flagId/': ({ params }) => [
                     200,
                     featureFlagsFixture.results.find((flag) => flag.id === Number(params['flagId'])),
                 ],
-                '/api/projects/:team_id/feature_flags/:flagId/status': {
+                '/v1/projects/:team_id/feature_flags/:flagId/status': {
                     status: 'active',
                     reason: 'Feature flag is active',
                 },
-                '/api/projects/:team_id/feature_flags/:flagId/activity': { results: [], count: 0 },
-                '/api/projects/:team_id/feature_flags/:flagId/access_controls': {
+                '/v1/projects/:team_id/feature_flags/:flagId/activity': { results: [], count: 0 },
+                '/v1/projects/:team_id/feature_flags/:flagId/access_controls': {
                     access_controls: [],
                     available_access_levels: [
                         AccessControlLevel.None,
@@ -74,7 +74,7 @@ const meta: Meta<StoryArgs> = {
                     default_access_level: AccessControlLevel.Viewer,
                     user_can_edit_access_levels: true,
                 },
-                '/api/environments/:team_id/default_evaluation_contexts/': {
+                '/v1/environments/:team_id/default_evaluation_contexts/': {
                     default_evaluation_contexts: [],
                     available_contexts: [],
                     hidden_contexts: [],
@@ -82,8 +82,8 @@ const meta: Meta<StoryArgs> = {
                 },
             },
             post: {
-                '/api/environments/:team_id/query/:kind': {},
-                '/api/projects/:team_id/feature_flags/user_blast_radius/': { affected: 120, total: 2000 },
+                '/v1/environments/:team_id/query/:kind': {},
+                '/v1/projects/:team_id/feature_flags/user_blast_radius/': { affected: 120, total: 2000 },
             },
         }),
     ],

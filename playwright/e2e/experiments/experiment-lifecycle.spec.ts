@@ -123,7 +123,7 @@ test.describe('Experiment lifecycle', () => {
                 // the API response to ensure the metric is persisted before proceeding
                 const metricSaveResponse = page.waitForResponse(
                     (resp) =>
-                        resp.url().includes('/api/projects/') &&
+                        resp.url().includes('/v1/projects/') &&
                         resp.url().includes('/experiments/') &&
                         resp.request().method() === 'PATCH'
                 )

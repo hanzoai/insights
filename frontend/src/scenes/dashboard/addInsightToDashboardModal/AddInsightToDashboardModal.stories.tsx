@@ -50,12 +50,12 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/dashboards/': __dashboards as any,
-                [`/api/environments/:team_id/dashboards/${DASHBOARD_ID}/`]: dashboard,
-                '/api/environments/:team_id/insights/': mockInsightsList,
+                '/v1/environments/:team_id/dashboards/': __dashboards as any,
+                [`/v1/environments/:team_id/dashboards/${DASHBOARD_ID}/`]: dashboard,
+                '/v1/environments/:team_id/insights/': mockInsightsList,
             },
             post: {
-                '/api/environments/:team_id/insights/cancel/': [201],
+                '/v1/environments/:team_id/insights/cancel/': [201],
             },
         }),
     ],
@@ -97,12 +97,12 @@ export const Empty: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/dashboards/': __dashboards as any,
-                [`/api/environments/:team_id/dashboards/${DASHBOARD_ID}/`]: dashboard,
-                '/api/environments/:team_id/insights/': { results: [], count: 0, next: null, previous: null },
+                '/v1/environments/:team_id/dashboards/': __dashboards as any,
+                [`/v1/environments/:team_id/dashboards/${DASHBOARD_ID}/`]: dashboard,
+                '/v1/environments/:team_id/insights/': { results: [], count: 0, next: null, previous: null },
             },
             post: {
-                '/api/environments/:team_id/insights/cancel/': [201],
+                '/v1/environments/:team_id/insights/cancel/': [201],
             },
         }),
     ],

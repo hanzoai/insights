@@ -626,13 +626,13 @@ async def test_update_external_job_activity_with_not_source_sepecific_non_retrya
     [
         (
             "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='example.zendesk.com', port=443): "
-            "Max retries exceeded with url: /api/v2/users?page%5Bsize%5D=100 (Caused by "
+            "Max retries exceeded with url: /v1/v2/users?page%5Bsize%5D=100 (Caused by "
             "SSLError(SSLError(1, '[SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake "
             "failure (_ssl.c:1032)')))\"))"
         ),
         (
             "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='example.zendesk.com', port=443): "
-            "Max retries exceeded with url: /api/v2/users?page%5Bsize%5D=100 (Caused by "
+            "Max retries exceeded with url: /v1/v2/users?page%5Bsize%5D=100 (Caused by "
             "SSLError(SSLError(1, '[SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake "
             "failure (_ssl.c:1010)')))\"))"
         ),

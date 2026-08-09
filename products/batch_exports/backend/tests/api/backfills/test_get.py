@@ -212,7 +212,7 @@ def test_cannot_get_backfills_for_other_organizations(client: HttpClient, organi
     another_user = create_user("another-test@user.com", "Another Test User", another_organization)
 
     client.force_login(another_user)
-    response = client.get(f"/api/projects/{team.pk}/batch_exports/{batch_export.id}/backfills/{backfill.id}")
+    response = client.get(f"/v1/projects/{team.pk}/batch_exports/{batch_export.id}/backfills/{backfill.id}")
     assert response.status_code == status.HTTP_403_FORBIDDEN, response.json()
 
 
@@ -235,7 +235,7 @@ def test_backfills_are_partitioned_by_team(client: HttpClient, organization, tea
 
     client.force_login(user)
 
-    response = client.get(f"/api/projects/{another_team.pk}/batch_exports/{batch_export.id}/backfills/{backfill.id}")
+    response = client.get(f"/v1/projects/{another_team.pk}/batch_exports/{batch_export.id}/backfills/{backfill.id}")
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.json()
 
     # And switch the teams around for good measure
@@ -250,6 +250,6 @@ def test_backfills_are_partitioned_by_team(client: HttpClient, organization, tea
     )
 
     response = client.get(
-        f"/api/projects/{team.pk}/batch_exports/{another_batch_export.id}/backfills/{another_backfill.id}"
+        f"/v1/projects/{team.pk}/batch_exports/{another_batch_export.id}/backfills/{another_backfill.id}"
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND, response.json()

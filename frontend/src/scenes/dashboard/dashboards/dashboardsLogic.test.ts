@@ -68,7 +68,7 @@ describe('dashboardsLogic', () => {
 
         useMocks({
             get: {
-                '/api/environments/:team_id/dashboards/': {
+                '/v1/environments/:team_id/dashboards/': {
                     count: 7,
                     next: null,
                     previous: null,
@@ -203,7 +203,7 @@ describe('dashboardsLogic', () => {
         const needleDashboard = allDashboards.find((d) => d.name === 'needle')!
         useMocks({
             get: {
-                '/api/environments/:team_id/dashboards/': ({ request }) => {
+                '/v1/environments/:team_id/dashboards/': ({ request }) => {
                     if (new URL(request.url).searchParams.get('search')) {
                         return [200, { count: 1, next: null, previous: null, results: [needleDashboard] }]
                     }
@@ -230,7 +230,7 @@ describe('dashboardsLogic', () => {
         // active; that's covered by a separate test below.)
         useMocks({
             get: {
-                '/api/environments/:team_id/dashboards/': () => {
+                '/v1/environments/:team_id/dashboards/': () => {
                     return [200, { count: 0, next: null, previous: null, results: [] }]
                 },
             },
@@ -249,7 +249,7 @@ describe('dashboardsLogic', () => {
         let lastRequestUrl: URL | null = null
         useMocks({
             get: {
-                '/api/environments/:team_id/dashboards/': ({ request }) => {
+                '/v1/environments/:team_id/dashboards/': ({ request }) => {
                     lastRequestUrl = new URL(request.url)
                     return [200, { count: 0, next: null, previous: null, results: [] }]
                 },
@@ -270,7 +270,7 @@ describe('dashboardsLogic', () => {
         let requestCount = 0
         useMocks({
             get: {
-                '/api/environments/:team_id/dashboards/': () => {
+                '/v1/environments/:team_id/dashboards/': () => {
                     requestCount += 1
                     return [200, { count: 0, next: null, previous: null, results: [] }]
                 },
@@ -392,7 +392,7 @@ describe('dashboardsLogic', () => {
         let lastRequestUrl: URL | null = null
         useMocks({
             get: {
-                '/api/environments/:team_id/dashboards/': ({ request }) => {
+                '/v1/environments/:team_id/dashboards/': ({ request }) => {
                     lastRequestUrl = new URL(request.url)
                     return [200, { count: 0, next: null, previous: null, results: [] }]
                 },
@@ -419,7 +419,7 @@ describe('dashboardsLogic', () => {
         // urlToAction — this one mounts on /dashboard to exercise that round trip.)
         useMocks({
             get: {
-                '/api/environments/:team_id/dashboards/': () => {
+                '/v1/environments/:team_id/dashboards/': () => {
                     return [200, { count: 0, next: null, previous: null, results: [] }]
                 },
             },

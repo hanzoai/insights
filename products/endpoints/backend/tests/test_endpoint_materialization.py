@@ -101,7 +101,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         }
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/", updated_data, format="json"
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/", updated_data, format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -150,7 +150,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             side_effect=UnsatisfiableFrequencyError("15min is finer than the 24h upstream source"),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
                 {"is_materialized": True, "data_freshness_seconds": 86400},
                 format="json",
             )
@@ -184,7 +184,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             side_effect=Exception("dependency resolution failed"),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
                 {"is_materialized": True, "data_freshness_seconds": 86400},
                 format="json",
             )
@@ -206,7 +206,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # Enable materialization with 24-hour frequency
         self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "data_freshness_seconds": 86400,
@@ -221,7 +221,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # Update to 12-hour frequency
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "data_freshness_seconds": 43200,
@@ -237,7 +237,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # Update to 1-hour frequency
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "data_freshness_seconds": 3600,
@@ -253,7 +253,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # Update to 30-minute frequency
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "data_freshness_seconds": 1800,
@@ -268,7 +268,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # Update to 15-minute frequency (the new floor)
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "data_freshness_seconds": 900,
@@ -290,7 +290,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
     )
     def test_data_freshness_off_bucket_rejected_on_create(self, _name, data_freshness_seconds):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/",
+            f"/v1/environments/{self.team.id}/endpoints/",
             {
                 "name": f"test_freq_{_name}",
                 "query": self.sample_insightsql_query,
@@ -316,7 +316,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             created_by=self.user,
         )
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "data_freshness_seconds": data_freshness_seconds,
@@ -338,7 +338,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         version = endpoint.versions.first()
 
         self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "data_freshness_seconds": 86400,
@@ -353,7 +353,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # Disable materialization
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_materialized": False},
             format="json",
         )
@@ -385,7 +385,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "data_freshness_seconds": 86400,
@@ -413,7 +413,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             side_effect=QueryError("Unresolved placeholder: {variables.event_id}"),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
                 {"is_materialized": True, "data_freshness_seconds": 86400},
                 format="json",
             )
@@ -454,7 +454,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "data_freshness_seconds": 86400,
@@ -487,7 +487,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         version = endpoint.versions.first()
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "data_freshness_seconds": 43200,
@@ -579,7 +579,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         version = endpoint.versions.first()
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "data_freshness_seconds": 43200,
@@ -605,7 +605,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         )
 
         # Before materialization
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertFalse(response_data["is_materialized"])
@@ -614,7 +614,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # After materialization
         self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "data_freshness_seconds": 43200,
@@ -622,7 +622,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             format="json",
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         # is_materialized is derived from saved_query.table_id — False until Temporal creates the table
@@ -646,9 +646,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         )
 
         # Before materialization - should show can_materialize
-        response = self.client.get(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/materialization_status/"
-        )
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/materialization_status/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertTrue(response_data["can_materialize"])
@@ -657,7 +655,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # Enable materialization
         self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "data_freshness_seconds": 21600,
@@ -666,9 +664,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         )
 
         # After materialization - should show full status
-        response = self.client.get(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/materialization_status/"
-        )
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/materialization_status/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertTrue(response_data["can_materialize"])
@@ -701,7 +697,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         version = endpoint.versions.first()
 
         self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "data_freshness_seconds": 86400,
@@ -738,7 +734,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             mock_execute.return_value = old_cached_response
 
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
                 {},
                 format="json",
             )
@@ -746,7 +742,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             self.assertEqual(mock_execute.call_count, 2, "Old cache should be detected as stale and refreshed")
 
         self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"query": updated_query},
             format="json",
         )
@@ -785,7 +781,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             mock_execute.side_effect = [new_cached_response, fresh_response]
 
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
                 {},
                 format="json",
             )
@@ -829,7 +825,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # filters_override is no longer allowed - should be rejected
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
             {
                 "filters_override": {
                     "properties": [{"type": "event", "key": "$lib", "operator": "exact", "value": "$web"}]
@@ -886,7 +882,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             ) as mock_inline,
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
                 {},
                 format="json",
             )
@@ -939,7 +935,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             ) as mock_inline,
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
                 {},
                 format="json",
             )
@@ -997,7 +993,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             ) as mock_inline,
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
                 {},
                 format="json",
             )
@@ -1040,9 +1036,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             last_run_at=job_time,
         )
 
-        response = self.client.get(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/materialization_status/"
-        )
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/materialization_status/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["last_materialized_at"], job_time.isoformat())
@@ -1088,7 +1082,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             ) as mock_inline,
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
                 {"refresh": "force"},
                 format="json",
             )
@@ -1139,7 +1133,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             ) as mock_inline,
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
                 {"refresh": "direct"},
                 format="json",
             )
@@ -1160,7 +1154,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
             {"refresh": "direct"},
             format="json",
         )
@@ -1203,7 +1197,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # Enable materialization
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "data_freshness_seconds": 43200,
@@ -1247,7 +1241,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             EndpointExecutionService, "_execute_query_and_respond", return_value=Response({})
         ) as mock_exec:
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
                 {"variables": {"$browser": "Chrome"}},
                 format="json",
             )
@@ -1288,7 +1282,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             is_active=True,
         )
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_materialized": True, "data_freshness_seconds": 43200},
             format="json",
         )
@@ -1311,7 +1305,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         # Property with a key but no value: passes the deprecated-override gate yet yields no filter.
         with mock.patch.object(EndpointExecutionService, "_execute_query_and_respond", return_value=Response({})):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
                 {"filters_override": {"properties": [{"key": "$browser", "type": "event"}]}},
                 format="json",
             )
@@ -1321,7 +1315,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         # A filters_override that DOES carry a usable value still satisfies the requirement.
         with mock.patch.object(EndpointExecutionService, "_execute_query_and_respond", return_value=Response({})):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
                 {"filters_override": {"properties": [{"key": "$browser", "type": "event", "value": "Chrome"}]}},
                 format="json",
             )
@@ -1355,7 +1349,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             is_active=True,
         )
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_materialized": True, "data_freshness_seconds": 43200},
             format="json",
         )
@@ -1378,7 +1372,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         # Supplying only one breakdown value via filters_override leaves $os unfiltered.
         with mock.patch.object(EndpointExecutionService, "_execute_query_and_respond", return_value=Response({})):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
                 {"filters_override": {"properties": [{"key": "$browser", "type": "event", "value": "Chrome"}]}},
                 format="json",
             )
@@ -1400,7 +1394,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         with mock.patch.object(EndpointExecutionService, "_execute_query_and_respond", return_value=Response({})):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
                 {"filters_override": {"properties": [{"key": "$os", "type": "event", "value": "Mac OS X"}]}},
                 format="json",
             )
@@ -1442,7 +1436,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # Enable materialization
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {
                 "is_materialized": True,
                 "data_freshness_seconds": 43200,
@@ -1485,7 +1479,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             EndpointExecutionService, "_execute_query_and_respond", return_value=Response({})
         ) as mock_exec:
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
                 {"variables": {"event_name": "$pageview"}},
                 format="json",
             )
@@ -1522,7 +1516,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             created_by=self.user,
         )
         self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_materialized": True, "data_freshness_seconds": 86400},
             format="json",
         )
@@ -1533,7 +1527,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         saved_query.latest_error = latest_error
         saved_query.save()
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["materialization"]["error"], expected_error)
 
@@ -1547,7 +1541,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_materialized": True, "data_freshness_seconds": 86400},
             format="json",
         )
@@ -1573,7 +1567,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         )
 
         self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_materialized": True, "data_freshness_seconds": 86400},
             format="json",
         )
@@ -1588,7 +1582,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         self.assertTrue(Node.objects.filter(team=self.team, saved_query_id=saved_query_id).exists())
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_materialized": False},
             format="json",
         )
@@ -1606,7 +1600,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         )
 
         self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_materialized": True, "data_freshness_seconds": 86400},
             format="json",
         )
@@ -1620,7 +1614,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         self.assertTrue(Node.objects.filter(team=self.team, saved_query_id=saved_query_id).exists())
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/")
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Node.objects.filter(team=self.team, saved_query_id=saved_query_id).exists())
@@ -1654,7 +1648,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_materialized": True, "data_freshness_seconds": 86400},
             format="json",
         )
@@ -1703,14 +1697,17 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         version.save()
 
         # Update with a new query — version creation succeeds, but materialization fails
-        new_query = {"kind": "InsightsQLQuery", "query": "SELECT * FROM events WHERE timestamp > now() - INTERVAL 1 DAY"}
+        new_query = {
+            "kind": "InsightsQLQuery",
+            "query": "SELECT * FROM events WHERE timestamp > now() - INTERVAL 1 DAY",
+        }
         with mock.patch.object(
             EndpointMaterializationService,
             "_enable_materialization_inner",
             side_effect=Exception("Temporal unavailable"),
         ):
             response = self.client.put(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
                 {"query": new_query},
                 format="json",
             )
@@ -1740,7 +1737,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             side_effect=Exception("Temporal unavailable"),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
                 {"is_materialized": True, "data_freshness_seconds": 86400},
                 format="json",
             )
@@ -1769,7 +1766,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             )
 
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
                 {"is_materialized": True, "data_freshness_seconds": 86400},
                 format="json",
             )
@@ -1825,7 +1822,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             side_effect=simulate_immediate_temporal_run,
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
                 {"is_materialized": True, "data_freshness_seconds": 86400},
                 format="json",
             )
@@ -1860,7 +1857,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             side_effect=capture_node_state,
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
                 {"is_materialized": True, "data_freshness_seconds": 86400},
                 format="json",
             )
@@ -1893,7 +1890,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         ):
             with self.captureOnCommitCallbacks(execute=True):
                 response = self.client.patch(
-                    f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+                    f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
                     {"is_materialized": True, "data_freshness_seconds": 86400},
                     format="json",
                 )
@@ -1904,7 +1901,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             mock_client.start_workflow.reset_mock()
             with self.captureOnCommitCallbacks(execute=True):
                 response = self.client.patch(
-                    f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+                    f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
                     {"description": "metadata only"},
                     format="json",
                 )
@@ -1929,7 +1926,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             side_effect=UnsatisfiableFrequencyError("target 0:15:00 is fresher than its sources deliver (6:00:00)"),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
                 {"is_materialized": True, "data_freshness_seconds": 900},
                 format="json",
             )
@@ -1966,7 +1963,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         version.save(update_fields=["optional_breakdown_properties"])
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_materialized": True, "data_freshness_seconds": 43200},
             format="json",
         )
@@ -1999,7 +1996,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             EndpointExecutionService, "_execute_query_and_respond", return_value=Response({})
         ) as mock_exec:
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
                 {},
                 format="json",
             )
@@ -2022,7 +2019,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             EndpointExecutionService, "_execute_query_and_respond", return_value=Response({})
         ) as mock_exec:
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
                 {"variables": {"$browser": "Chrome"}},
                 format="json",
             )
@@ -2042,7 +2039,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
             {},
             format="json",
         )
@@ -2065,7 +2062,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
             EndpointExecutionService, "_execute_query_and_respond", return_value=Response({})
         ) as mock_exec:
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
                 {"variables": {"$os": "Mac OS X"}},
                 format="json",
             )
@@ -2089,7 +2086,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run",
             {},
             format="json",
         )
@@ -2128,7 +2125,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # Create v2 by changing the query
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"query": {"kind": "InsightsQLQuery", "query": "SELECT event FROM events LIMIT 5"}},
             format="json",
         )
@@ -2136,7 +2133,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # Materialize v2 (the current version)
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_materialized": True},
             format="json",
         )
@@ -2146,7 +2143,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
 
         # Deactivate v1 only
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_active": False, "version": 1},
             format="json",
         )
@@ -2174,7 +2171,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_materialized": True},
             format="json",
         )
@@ -2184,7 +2181,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         saved_query_id = v1.saved_query_id
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_active": False, "version": 1},
             format="json",
         )
@@ -2208,12 +2205,12 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         # Materialize v1 (current), then bump to v2 via a query change and materialize it too —
         # leaving both versions materialized at once.
         self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_materialized": True},
             format="json",
         )
         self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"query": {"kind": "InsightsQLQuery", "query": "SELECT event FROM events LIMIT 5"}},
             format="json",
         )
@@ -2225,7 +2222,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         v2_saved_query_id = v2.saved_query_id
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_active": False},
             format="json",
         )
@@ -2259,7 +2256,7 @@ class TestEndpointMaterialization(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_materialized": True},
             format="json",
         )

@@ -66,7 +66,7 @@ async function consumeProgressStream(
     handlers: StreamHandlers
 ): Promise<void> {
     // Plain GET so read-only users can stream too (api.createResponse POSTs, which is blocked for them).
-    const response = await fetch(`/api/projects/${teamId}/vision/observations/${observationId}/progress/`, {
+    const response = await fetch(`/v1/projects/${teamId}/vision/observations/${observationId}/progress/`, {
         method: 'GET',
         headers: { Accept: 'text/event-stream' },
         credentials: 'same-origin',

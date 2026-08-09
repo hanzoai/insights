@@ -25,7 +25,7 @@ describe('logsFilterVolumePreviewLogic', () => {
         sparklineFails = false
         useMocks({
             post: {
-                '/api/environments/:team_id/logs/sparkline/': async ({ request }) => {
+                '/v1/environments/:team_id/logs/sparkline/': async ({ request }) => {
                     sparklineCalls += 1
                     const body = (await request.clone().json()) as { query?: { sparklineRankBy?: string } }
                     rankBysSeen.push(body?.query?.sparklineRankBy)

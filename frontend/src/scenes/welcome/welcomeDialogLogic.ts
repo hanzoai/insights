@@ -304,7 +304,7 @@ export const welcomeDialogLogic = kea<welcomeDialogLogicType>([
             {
                 loadWelcomeData: async () => {
                     try {
-                        return await api.get<WelcomePayload>('api/organizations/@current/welcome/current/')
+                        return await api.get<WelcomePayload>('v1/organizations/@current/welcome/current/')
                     } catch (error) {
                         const status =
                             typeof error === 'object' && error !== null && 'status' in error

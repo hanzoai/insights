@@ -21,7 +21,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             post: {
-                'api/environments/:team_id/insights/funnel/correlation/': funnelCorrelation,
+                'v1/environments/:team_id/insights/funnel/correlation/': funnelCorrelation,
             },
         }),
     ],

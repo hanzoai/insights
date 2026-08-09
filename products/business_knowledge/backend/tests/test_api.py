@@ -18,7 +18,7 @@ from products.business_knowledge.backend.models import KnowledgeChunk, Knowledge
 class TestKnowledgeSourceAPI(APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/api/projects/{self.team.id}/business_knowledge/sources/"
+        self.url = f"/v1/projects/{self.team.id}/business_knowledge/sources/"
 
     def test_create_text_source_and_chunks(self, _ff) -> None:
         response = self.client.post(
@@ -144,7 +144,7 @@ class TestKnowledgeSourceAPI(APIBaseTest):
 class TestEmbeddingStatusAPI(APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/api/projects/{self.team.id}/business_knowledge/sources/"
+        self.url = f"/v1/projects/{self.team.id}/business_knowledge/sources/"
 
     def _create_source(self) -> str:
         response = self.client.post(self.url, {"name": "Docs", "text": "Some content."}, format="json")
@@ -193,7 +193,7 @@ class TestEmbeddingStatusAPI(APIBaseTest):
 class TestKnowledgeDocumentWindowAPI(APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.base = f"/api/projects/{self.team.id}/business_knowledge/documents"
+        self.base = f"/v1/projects/{self.team.id}/business_knowledge/documents"
 
     def _ready_safe_document(self, *, paragraphs: int = 10, team=None) -> KnowledgeDocument:
         """Create a READY text source with exactly `paragraphs` chunks, all SAFE."""
@@ -295,7 +295,7 @@ class TestKnowledgeDocumentWindowScopes(APIBaseTest):
         source = logic.create_text_source(team_id=self.team.id, created_by_id=self.user.id, name="Docs", text=text)
         KnowledgeDocument.objects.unscoped().filter(source_id=source.id).update(safety_verdict=SafetyVerdict.SAFE)
         self.doc = KnowledgeDocument.objects.unscoped().get(source_id=source.id)
-        self.url = f"/api/projects/{self.team.id}/business_knowledge/documents/{self.doc.id}/window/?around_ordinal=2"
+        self.url = f"/v1/projects/{self.team.id}/business_knowledge/documents/{self.doc.id}/window/?around_ordinal=2"
 
     def _auth_with_pak(self, scopes: list[str]) -> None:
         key = self.create_personal_api_key_with_scopes(scopes)
@@ -322,7 +322,7 @@ class TestKnowledgeDocumentWindowScopes(APIBaseTest):
 class TestKnowledgeDocumentSearchAPI(APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/api/projects/{self.team.id}/business_knowledge/documents/search/"
+        self.url = f"/v1/projects/{self.team.id}/business_knowledge/documents/search/"
 
     def _ready_safe_source(self, *, name: str = "Docs", text: str | None = None, team=None) -> KnowledgeSource:
         team = team or self.team
@@ -433,7 +433,7 @@ class TestKnowledgeDocumentSearchScopes(APIBaseTest):
         text = "\n\n".join(f"Paragraph {i}: {filler}" for i in range(3))
         source = logic.create_text_source(team_id=self.team.id, created_by_id=self.user.id, name="Docs", text=text)
         KnowledgeDocument.objects.unscoped().filter(source_id=source.id).update(safety_verdict=SafetyVerdict.SAFE)
-        self.url = f"/api/projects/{self.team.id}/business_knowledge/documents/search/?query=lorem"
+        self.url = f"/v1/projects/{self.team.id}/business_knowledge/documents/search/?query=lorem"
 
     def _auth_with_pak(self, scopes: list[str]) -> None:
         key = self.create_personal_api_key_with_scopes(scopes)
@@ -472,7 +472,7 @@ class TestDeriveScopeGlobs(BaseTest):
 class TestCrawlSourceAutoScope(APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.api_url = f"/api/projects/{self.team.id}/business_knowledge/sources/"
+        self.api_url = f"/v1/projects/{self.team.id}/business_knowledge/sources/"
 
     @patch("products.business_knowledge.backend.api.views.KnowledgeSourceViewSet._start_background_ingest")
     @patch("products.business_knowledge.backend.api.views.logic.claim_url_source")

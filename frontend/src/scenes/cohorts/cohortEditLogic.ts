@@ -994,7 +994,7 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
                                 kind: NodeKind.InsightsQLQuery,
                                 query: `SELECT person_id FROM ${sourceTable} WHERE cohort_id = ${values.cohort.id}`,
                             }
-                            cohort = await api.create('api/cohort', {
+                            cohort = await api.create('v1/cohort', {
                                 is_static: true,
                                 name: `${values.cohort.name} (static copy)`,
                                 query,

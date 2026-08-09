@@ -31,7 +31,7 @@ describe('insightsTableDataLogic', () => {
                 get: {
                     // insightLogic mounts alongside and fetches its insight by short_id; without
                     // a match it errors with "Insight ... not found"
-                    '/api/environments/:team_id/insights/': ({ request }: { request: Request }) => [
+                    '/v1/environments/:team_id/insights/': ({ request }: { request: Request }) => [
                         200,
                         {
                             results: [

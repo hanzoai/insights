@@ -78,7 +78,7 @@ class TestInsightResponseParity(DatastoreTestMixin, APIBaseTest):
     def _materialize_endpoint(self, endpoint):
         """Enable materialization and set up a completed saved query with table."""
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"is_materialized": True, "data_freshness_seconds": 86400},
             format="json",
         )
@@ -103,7 +103,7 @@ class TestInsightResponseParity(DatastoreTestMixin, APIBaseTest):
 
     def _run_endpoint(self, endpoint, **kwargs):
         return self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {"refresh": "force", **kwargs},
             format="json",
         )

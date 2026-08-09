@@ -10,6 +10,7 @@ from parameterized import parameterized
 from rest_framework import status
 
 from insights.constants import AvailableFeature
+from insights.models.ee_models import AccessControl
 from insights.models.organization import OrganizationMembership
 from insights.models.personal_api_key import PersonalAPIKey
 from insights.models.team import Team
@@ -26,8 +27,6 @@ from products.data_catalog.backend.presentation.serializers import (
 )
 from products.product_analytics.backend.models.insight import Insight
 
-from insights.models.ee_models import AccessControl
-
 _INSIGHTSQL = {"kind": "InsightsQLQuery", "query": "select count() from events"}
 _PROCESS_QUERY = "products.data_catalog.backend.logic.execution.process_query_dict"
 
@@ -35,7 +34,7 @@ _PROCESS_QUERY = "products.data_catalog.backend.logic.execution.process_query_di
 class TestMetricAPI(APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/api/projects/{self.team.id}/data_catalog/metrics/"
+        self.url = f"/v1/projects/{self.team.id}/data_catalog/metrics/"
 
     def test_create_lands_proposed(self) -> None:
         response = self.client.post(self.url, {"name": "mrr", "description": "Monthly revenue"}, format="json")
@@ -127,7 +126,7 @@ class TestMetricAPI(APIBaseTest):
 class TestMetricLifecycleAPI(APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/api/projects/{self.team.id}/data_catalog/metrics/"
+        self.url = f"/v1/projects/{self.team.id}/data_catalog/metrics/"
 
     def _insight(self, query: dict | None = None) -> Insight:
         return Insight.objects.create(team=self.team, created_by=self.user, query=query or _INSIGHTSQL)
@@ -344,7 +343,7 @@ class TestMetricLifecycleAPI(APIBaseTest):
 class TestMetricRunThrottles(APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/api/projects/{self.team.id}/data_catalog/metrics/"
+        self.url = f"/v1/projects/{self.team.id}/data_catalog/metrics/"
 
     def _denied(self, throttle_class: type) -> tuple:
         return (

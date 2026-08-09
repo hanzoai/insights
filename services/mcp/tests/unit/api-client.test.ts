@@ -279,7 +279,7 @@ describe('ApiClient', () => {
 
             expect(mockFetch).toHaveBeenCalledTimes(1)
             const [url] = mockFetch.mock.calls[0]!
-            expect(url).toContain('/api/projects/1/insights/?short_id=abc12345')
+            expect(url).toContain('/v1/projects/1/insights/?short_id=abc12345')
             expect(result.success).toBe(true)
 
             vi.unstubAllGlobals()
@@ -300,7 +300,7 @@ describe('ApiClient', () => {
             // and applies overrides from query_params, so a single hop suffices.
             expect(mockFetch).toHaveBeenCalledTimes(1)
             const [url] = mockFetch.mock.calls[0]!
-            expect(url).toContain('/api/projects/1/insights/?')
+            expect(url).toContain('/v1/projects/1/insights/?')
             expect(url).toContain('short_id=abc12345')
             expect(url).toContain(`variables_override=${encodeURIComponent(variablesOverride)}`)
             expect(url).not.toContain('filters_override')

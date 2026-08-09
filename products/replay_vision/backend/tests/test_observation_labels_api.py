@@ -86,7 +86,7 @@ class TestObservationLabels(_VisionAPITestCase):
             side_effect=lambda obj, required_level=None, **_: not isinstance(obj, ReplayScanner),
         ):
             resp = self.client.post(
-                f"/api/environments/{self.team.id}/vision/observations/{self.observation.id}/label/",
+                f"/v1/environments/{self.team.id}/vision/observations/{self.observation.id}/label/",
                 {"is_correct": True},
                 format="json",
             )

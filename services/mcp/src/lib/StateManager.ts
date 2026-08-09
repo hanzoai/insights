@@ -17,7 +17,7 @@ import type { CachedOrg, CachedProject, CachedUser, State } from '@/tools/types'
 const CACHE_TTL_MS = 10 * 60 * 1000 // 10 minutes
 
 // Entitlement-related fields shared by both org shapes we read from — the
-// standalone org endpoint and the org embedded in `/api/users/@me/`.
+// standalone org endpoint and the org embedded in `/v1/users/@me/`.
 type OrgEntitlementFields = {
     is_ai_data_processing_approved?: boolean | null
     available_product_features?: Array<{ key: string }> | null
@@ -334,7 +334,7 @@ export class StateManager {
 
     async getCachedOrFetchOrg(): Promise<CachedOrg | undefined> {
         const apiKey = await this.getApiKey()
-        // `/api/organizations/{id}/` is not project-nested. Backend permission
+        // `/v1/organizations/{id}/` is not project-nested. Backend permission
         // checks reject project-scoped tokens there even when they carry
         // `organization:read` or `*`, so skip the best-effort fetch entirely.
         if (apiKey.scoped_teams.length > 0 || !hasScope(apiKey.scopes, 'organization:read')) {
@@ -429,10 +429,10 @@ export class StateManager {
     /**
      * Resolve a field from the active organization, failing closed to `undefined`.
      *
-     * Tries `/api/organizations/{id}/` first. Team-scoped tokens (e.g. sandbox
+     * Tries `/v1/organizations/{id}/` first. Team-scoped tokens (e.g. sandbox
      * OAuth tokens) can never fetch that endpoint — see the guard in
      * getCachedOrFetchOrg — so fall back to the org embedded in
-     * `/api/users/@me/` (exempt from team scoping). That embedded org is the
+     * `/v1/users/@me/` (exempt from team scoping). That embedded org is the
      * user's *current* org, which isn't necessarily the one owning the scoped
      * project, so only trust it when it matches the active project's owning org.
      * Any failure resolves to `undefined` so callers keep failing closed.

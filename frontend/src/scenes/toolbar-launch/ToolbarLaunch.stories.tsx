@@ -25,7 +25,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             post: {
-                '/api/environments/:environment_id/query/:kind/': () => [
+                '/v1/environments/:environment_id/query/:kind/': () => [
                     200,
                     {
                         results: [
@@ -69,7 +69,7 @@ export const NoUrlsTemplate: Story = {
 export const NoSuggestionsTemplate: Story = {
     render: () => {
         useStorybookMocks({
-            post: { '/api/environments/:environment_id/query/:kind/': () => [200, { results: [] }] },
+            post: { '/v1/environments/:environment_id/query/:kind/': () => [200, { results: [] }] },
         })
 
         useOnMountEffect(() => router.actions.push(urls.dashboards()))
@@ -89,7 +89,7 @@ export const EmptyStateTemplate: Story = {
         })
 
         useStorybookMocks({
-            post: { '/api/environments/:environment_id/query/:kind/': () => [200, { results: [] }] },
+            post: { '/v1/environments/:environment_id/query/:kind/': () => [200, { results: [] }] },
         })
 
         useOnMountEffect(() => router.actions.push(urls.dashboards()))

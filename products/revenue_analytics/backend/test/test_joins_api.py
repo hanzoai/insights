@@ -20,7 +20,7 @@ pytestmark = [pytest.mark.django_db]
 class TestRevenueAnalyticsPersonJoinsAPI(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.url = f"/api/environments/{self.team.pk}/revenue_analytics/joins/"
+        self.url = f"/v1/environments/{self.team.pk}/revenue_analytics/joins/"
 
     def _create_stripe_source(self, prefix="") -> ExternalDataSource:
         return ExternalDataSource.objects.create(
@@ -72,7 +72,7 @@ class TestRevenueAnalyticsPersonJoinsAPI(APIBaseTest):
     def test_cannot_change_joins_for_another_team(self, enabled: bool):
         other_org = Organization.objects.create(name="Other Org")
         other_team = Team.objects.create(organization=other_org, name="Other Project")
-        other_url = f"/api/environments/{other_team.pk}/revenue_analytics/joins/"
+        other_url = f"/v1/environments/{other_team.pk}/revenue_analytics/joins/"
 
         response = self.client.post(other_url, data={"enabled": enabled})
 

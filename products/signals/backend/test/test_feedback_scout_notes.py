@@ -26,7 +26,7 @@ SCOUT_SKILL = "signals-scout-error-tracking"
 
 class TestFeedbackScoutNotes(APIBaseTest):
     def _feedback_url(self, report_id: str, team_id: int | None = None) -> str:
-        return f"/api/projects/{team_id or self.team.id}/signals/reports/{report_id}/feedback/"
+        return f"/v1/projects/{team_id or self.team.id}/signals/reports/{report_id}/feedback/"
 
     def _create_report(self, title: str = "Checkout errors spiked") -> SignalReport:
         return SignalReport.objects.create(

@@ -59,7 +59,7 @@ class TestTraceSpansSparkline(_TraceSpansTestBase):
         if root_spans is not None:
             query["rootSpans"] = root_spans
         response = self.client.post(
-            f"/api/projects/{self.team.id}/tracing/spans/sparkline/",
+            f"/v1/projects/{self.team.id}/tracing/spans/sparkline/",
             {"query": query},
             format="json",
         )

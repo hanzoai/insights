@@ -248,7 +248,7 @@ export type NotebookLogicProps = {
     /**
      * Pre-loaded notebook payload for shared/exported views. When set, `loadNotebook`
      * short-circuits and uses this value instead of calling the API — anonymous shared
-     * viewers can't reach `/api/projects/.../notebooks/<short_id>/`.
+     * viewers can't reach `/v1/projects/.../notebooks/<short_id>/`.
      */
     cachedNotebook?: NotebookType
     /**

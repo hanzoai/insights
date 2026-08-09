@@ -72,11 +72,11 @@ function createMockFetch(): typeof fetch {
         const path = new URL(url).pathname
 
         let body: unknown = {}
-        if (path.includes('/api/users/@me')) {
+        if (path.includes('/v1/users/@me')) {
             body = mockUserResponse
-        } else if (path.includes('/api/organizations')) {
+        } else if (path.includes('/v1/organizations')) {
             body = mockOrgsResponse
-        } else if (path.includes('/api/projects') || path.includes('/api/environments')) {
+        } else if (path.includes('/v1/projects') || path.includes('/v1/environments')) {
             body = mockProjectsResponse
         } else if (path.includes('/decide')) {
             body = { featureFlags: {} }

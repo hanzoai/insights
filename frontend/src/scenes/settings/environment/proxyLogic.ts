@@ -442,12 +442,12 @@ export const proxyLogic = kea<proxyLogicType>([
         proxyRecords: {
             __default: [] as ProxyRecord[],
             loadRecords: async () => {
-                const response = await api.get(`api/organizations/${values.currentOrganizationId}/proxy_records`)
+                const response = await api.get(`v1/organizations/${values.currentOrganizationId}/proxy_records`)
                 actions.setMaxProxyRecords(response.max_proxy_records)
                 return response.results
             },
             createRecord: async ({ domain }: { domain: string }) => {
-                const response = await api.create(`api/organizations/${values.currentOrganizationId}/proxy_records`, {
+                const response = await api.create(`v1/organizations/${values.currentOrganizationId}/proxy_records`, {
                     domain,
                 })
                 toast.success('Record created')
@@ -455,7 +455,7 @@ export const proxyLogic = kea<proxyLogicType>([
                 return [response, ...values.proxyRecords]
             },
             deleteRecord: async (id: ProxyRecord['id']) => {
-                void api.delete(`api/organizations/${values.currentOrganizationId}/proxy_records/${id}`)
+                void api.delete(`v1/organizations/${values.currentOrganizationId}/proxy_records/${id}`)
                 const newRecords = [...values.proxyRecords].map((r) => ({
                     ...r,
                     status: r.id === id ? 'deleting' : r.status,
@@ -463,7 +463,7 @@ export const proxyLogic = kea<proxyLogicType>([
                 return newRecords
             },
             retryRecord: async (id: ProxyRecord['id']) => {
-                await api.create(`api/organizations/${values.currentOrganizationId}/proxy_records/${id}/retry`)
+                await api.create(`v1/organizations/${values.currentOrganizationId}/proxy_records/${id}/retry`)
                 toast.success('Retry initiated')
                 return values.proxyRecords.map((r) => ({
                     ...r,
@@ -520,7 +520,7 @@ export const proxyLogic = kea<proxyLogicType>([
         diagnose: async ({ id }) => {
             try {
                 const report = (await api.create(
-                    `api/organizations/${values.currentOrganizationId}/proxy_records/${id}/diagnose`
+                    `v1/organizations/${values.currentOrganizationId}/proxy_records/${id}/diagnose`
                 )) as DiagnosticReport
                 actions.diagnoseSuccess(id, report)
             } catch (e) {

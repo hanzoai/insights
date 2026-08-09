@@ -20,7 +20,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/ingestion_warnings/': () => {
+                '/v1/projects/:team_id/ingestion_warnings/': () => {
                     return [200, ingestionWarningsResponse(dayjs('2023-02-15T16:00:00.000Z'))]
                 },
             },
