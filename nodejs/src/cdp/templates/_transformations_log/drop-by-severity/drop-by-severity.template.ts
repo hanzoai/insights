@@ -8,7 +8,7 @@ export const template: InsightsFunctionTemplate = {
     name: 'Drop logs by severity',
     description:
         'Drop noisy log records at the configured severity levels (for example debug and trace). Dropped records still count toward ingestion billing.',
-    icon_url: '/static/mascot/builder-script-01.png',
+    icon_url: '/static/script/builder-script-01.png',
     category: ['Custom'],
     code_language: 'script',
     code: `
