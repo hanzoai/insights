@@ -227,7 +227,7 @@ from products.signals.backend.temporal import (
     ACTIVITIES as SIGNALS_PRODUCT_ACTIVITIES,
     WORKFLOWS as SIGNALS_PRODUCT_WORKFLOWS,
 )
-from products.stamp.backend.facade.temporal import (
+from products.stamphog.backend.facade.temporal import (
     ACTIVITIES as STAMPFN_ACTIVITIES,
     WORKFLOWS as STAMPFN_WORKFLOWS,
 )

@@ -13,8 +13,8 @@ sys.path.insert(0, str(_ENGINE_DIR))
 import gates  # noqa: E402
 import policy  # noqa: E402
 
-from products.stamp.backend.temporal.activities import _effective_policy_files, _inject_policy_files  # noqa: E402
-from products.stamp.backend.temporal.constants import (  # noqa: E402
+from products.stamphog.backend.temporal.activities import _effective_policy_files, _inject_policy_files  # noqa: E402
+from products.stamphog.backend.temporal.constants import (  # noqa: E402
     STAMPFN_POLICY_ENTRYPOINT,
     STAMPFN_REVIEW_GUIDANCE_PATH,
     STAMPFN_STEERING_PATH,

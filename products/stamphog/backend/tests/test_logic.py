@@ -9,16 +9,16 @@ from django.test import SimpleTestCase, override_settings
 import jwt
 from parameterized import parameterized
 
-from products.stamp.backend.logic.digest import DigestPRSummary, DigestSummary
-from products.stamp.backend.logic.digest_config import load_repo_digest_config
-from products.stamp.backend.logic.github_client import StampGitHubClient, StampGitHubError, _build_app_jwt
-from products.stamp.backend.logic.reviewer import build_reviewer_invocation, parse_reviewer_output
-from products.stamp.backend.logic.slack_digest import _build_blocks, _build_fallback_text
-from products.stamp.backend.models import StampRepoConfig
-from products.stamp.backend.temporal import activities as activities_module
-from products.stamp.backend.temporal.registry import ACTIVITIES
-from products.stamp.backend.tests import fakes
-from products.stamp.backend.tests.conftest import _generate_app_private_key
+from products.stamphog.backend.logic.digest import DigestPRSummary, DigestSummary
+from products.stamphog.backend.logic.digest_config import load_repo_digest_config
+from products.stamphog.backend.logic.github_client import StampGitHubClient, StampGitHubError, _build_app_jwt
+from products.stamphog.backend.logic.reviewer import build_reviewer_invocation, parse_reviewer_output
+from products.stamphog.backend.logic.slack_digest import _build_blocks, _build_fallback_text
+from products.stamphog.backend.models import StampRepoConfig
+from products.stamphog.backend.temporal import activities as activities_module
+from products.stamphog.backend.temporal.registry import ACTIVITIES
+from products.stamphog.backend.tests import fakes
+from products.stamphog.backend.tests.conftest import _generate_app_private_key
 
 # The gate/policy engine now lives in tools/pr-approval-agent and is covered by its
 # own suite (test_gates.py, test_policy.py); it runs inside the sandbox rather than
@@ -164,13 +164,13 @@ class DigestConfigFetchTests(SimpleTestCase):
         # instead of the declared channel. Only confirmed absence (404 -> None inside the client) may
         # yield None; a blip must raise so the merge-record Celery task retries the delivery.
         config = StampRepoConfig(repository="o/r", installation_id="1")
-        with patch("products.stamp.backend.logic.digest_config.StampGitHubClient") as client_cls:
+        with patch("products.stamphog.backend.logic.digest_config.StampGitHubClient") as client_cls:
             client_cls.return_value.get_default_branch_file.side_effect = StampGitHubError("503 from GitHub")
             with pytest.raises(StampGitHubError):
                 load_repo_digest_config(config)
 
 
-_GH = "products.stamp.backend.logic.github_client"
+_GH = "products.stamphog.backend.logic.github_client"
 
 
 class GetPrReviewThreadsTests(SimpleTestCase):

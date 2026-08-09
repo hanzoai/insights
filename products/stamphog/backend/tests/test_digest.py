@@ -13,17 +13,17 @@ from django.utils import timezone
 
 from insights.models.scoping import team_scope
 
-from products.stamp.backend.facade.enums import DigestRunStatus
-from products.stamp.backend.logic.digest import DigestSummary, summarize_merged_prs
-from products.stamp.backend.models import DigestChannel, DigestRun, PullRequest, StampRepoConfig
-from products.stamp.backend.tasks.digest import (
+from products.stamphog.backend.facade.enums import DigestRunStatus
+from products.stamphog.backend.logic.digest import DigestSummary, summarize_merged_prs
+from products.stamphog.backend.models import DigestChannel, DigestRun, PullRequest, StampRepoConfig
+from products.stamphog.backend.tasks.digest import (
     DIGEST_LOOKBACK_DAYS,
     STALE_PENDING_RUN_MINUTES,
     _previous_run_slot,
     _reclaim_stale_pending_runs,
     send_digest_for_channel,
 )
-from products.stamp.backend.tests.conftest import PRODUCT_DATABASES
+from products.stamphog.backend.tests.conftest import PRODUCT_DATABASES
 
 REPO = "acme/widgets"
 AUDIENCE = "team-devex"
@@ -106,9 +106,9 @@ def test_proof_of_post_persists_metadata_for_reclaim(team) -> None:
         return real_atomic(*args, **kwargs)
 
     with (
-        patch("products.stamp.backend.tasks.digest.summarize_merged_prs", side_effect=_summary),
-        patch("products.stamp.backend.tasks.digest.post_digest", return_value="1234.5"),
-        patch("products.stamp.backend.tasks.digest.transaction.atomic", side_effect=_dying_atomic),
+        patch("products.stamphog.backend.tasks.digest.summarize_merged_prs", side_effect=_summary),
+        patch("products.stamphog.backend.tasks.digest.post_digest", return_value="1234.5"),
+        patch("products.stamphog.backend.tasks.digest.transaction.atomic", side_effect=_dying_atomic),
     ):
         with pytest.raises(RuntimeError):
             send_digest_for_channel(digest_channel_id=channel_id, team_id=team.id)
@@ -155,9 +155,9 @@ def test_proof_of_post_write_retries_transient_db_error(team, fail_times: int, e
     post = MagicMock(return_value="1234.5")
     sleeps: list[float] = []
     with (
-        patch("products.stamp.backend.tasks.digest.post_digest", post),
-        patch("products.stamp.backend.tasks.digest.summarize_merged_prs", side_effect=_summary),
-        patch("products.stamp.backend.tasks.digest.time.sleep", side_effect=lambda s: sleeps.append(s)),
+        patch("products.stamphog.backend.tasks.digest.post_digest", post),
+        patch("products.stamphog.backend.tasks.digest.summarize_merged_prs", side_effect=_summary),
+        patch("products.stamphog.backend.tasks.digest.time.sleep", side_effect=lambda s: sleeps.append(s)),
         patch.object(QuerySet, "update", flaky_update),
     ):
         if expect_raise:
@@ -199,8 +199,8 @@ def test_concurrent_runs_for_one_channel_post_to_slack_once(team) -> None:
         return f"ts-{len(posts)}"
 
     with (
-        patch("products.stamp.backend.tasks.digest.post_digest", side_effect=reentrant_post),
-        patch("products.stamp.backend.tasks.digest.summarize_merged_prs", side_effect=_summary),
+        patch("products.stamphog.backend.tasks.digest.post_digest", side_effect=reentrant_post),
+        patch("products.stamphog.backend.tasks.digest.summarize_merged_prs", side_effect=_summary),
     ):
         send_digest_for_channel(digest_channel_id=channel_id, team_id=team.id)
 
@@ -224,9 +224,9 @@ def test_claim_is_capped_per_run_and_backlog_drains_across_runs(team) -> None:
         return DigestSummary(intro="x", prs=[])
 
     with (
-        patch("products.stamp.backend.tasks.digest.DIGEST_MAX_PRS_PER_RUN", 2),
-        patch("products.stamp.backend.tasks.digest.post_digest", return_value="ts-1"),
-        patch("products.stamp.backend.tasks.digest.summarize_merged_prs", side_effect=sized_summary),
+        patch("products.stamphog.backend.tasks.digest.DIGEST_MAX_PRS_PER_RUN", 2),
+        patch("products.stamphog.backend.tasks.digest.post_digest", return_value="ts-1"),
+        patch("products.stamphog.backend.tasks.digest.summarize_merged_prs", side_effect=sized_summary),
     ):
         send_digest_for_channel(digest_channel_id=channel_id, team_id=team.id)
         send_digest_for_channel(digest_channel_id=channel_id, team_id=team.id)
@@ -244,8 +244,8 @@ def test_failed_slack_post_leaves_prs_retryable_next_run(team) -> None:
     channel_id = _seed_channel_and_prs(team.id)
 
     with (
-        patch("products.stamp.backend.tasks.digest.post_digest", side_effect=RuntimeError("slack down")),
-        patch("products.stamp.backend.tasks.digest.summarize_merged_prs", side_effect=_summary),
+        patch("products.stamphog.backend.tasks.digest.post_digest", side_effect=RuntimeError("slack down")),
+        patch("products.stamphog.backend.tasks.digest.summarize_merged_prs", side_effect=_summary),
     ):
         send_digest_for_channel(digest_channel_id=channel_id, team_id=team.id)
 
@@ -255,8 +255,8 @@ def test_failed_slack_post_leaves_prs_retryable_next_run(team) -> None:
         assert PullRequest.objects.filter(digest_run__isnull=True).count() == 2  # unlinked, retryable
 
     with (
-        patch("products.stamp.backend.tasks.digest.post_digest", return_value="ts-ok"),
-        patch("products.stamp.backend.tasks.digest.summarize_merged_prs", side_effect=_summary),
+        patch("products.stamphog.backend.tasks.digest.post_digest", return_value="ts-ok"),
+        patch("products.stamphog.backend.tasks.digest.summarize_merged_prs", side_effect=_summary),
     ):
         send_digest_for_channel(digest_channel_id=channel_id, team_id=team.id)
 
@@ -324,8 +324,8 @@ def test_digest_claim_floor(team, has_history: bool, claimed_offset: timedelta, 
         )
 
     with (
-        patch("products.stamp.backend.tasks.digest.post_digest", return_value="ts-ok"),
-        patch("products.stamp.backend.tasks.digest.summarize_merged_prs", side_effect=_summary),
+        patch("products.stamphog.backend.tasks.digest.post_digest", return_value="ts-ok"),
+        patch("products.stamphog.backend.tasks.digest.summarize_merged_prs", side_effect=_summary),
     ):
         send_digest_for_channel(digest_channel_id=str(channel.id), team_id=team.id)
 
@@ -374,7 +374,7 @@ def test_same_pr_number_across_repos_both_survive_summarization() -> None:
         {"intro": "two", "prs": [{"index": 0, "summary": "repo a change"}, {"index": 1, "summary": "repo b change"}]}
     )
 
-    with patch("products.stamp.backend.logic.digest.get_llm_client", return_value=_fake_llm_client(content)):
+    with patch("products.stamphog.backend.logic.digest.get_llm_client", return_value=_fake_llm_client(content)):
         summary = summarize_merged_prs(prs)
 
     assert len(summary.prs) == 2

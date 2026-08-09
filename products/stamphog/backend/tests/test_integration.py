@@ -17,20 +17,20 @@ from insights.models.instance_setting import override_instance_config
 from insights.models.integration import Integration
 
 from products.signals.backend.models import SignalReport
-from products.stamp.backend.facade.enums import (
+from products.stamphog.backend.facade.enums import (
     ChannelResolutionSource,
     DigestRunStatus,
     ReviewMode,
     ReviewRunStatus,
     ReviewVerdict,
 )
-from products.stamp.backend.logic.channel_resolution import auto_provision_channel
-from products.stamp.backend.logic.github_client import STICKY_COMMENT_MARKER
-from products.stamp.backend.models import DigestChannel, DigestRun, PullRequest, ReviewRun, StampRepoConfig
-from products.stamp.backend.tasks.digest import send_daily_digests
-from products.stamp.backend.tasks.tasks import process_inbox_pr_review
-from products.stamp.backend.temporal import activities
-from products.stamp.backend.temporal.activities import (
+from products.stamphog.backend.logic.channel_resolution import auto_provision_channel
+from products.stamphog.backend.logic.github_client import STICKY_COMMENT_MARKER
+from products.stamphog.backend.models import DigestChannel, DigestRun, PullRequest, ReviewRun, StampRepoConfig
+from products.stamphog.backend.tasks.digest import send_daily_digests
+from products.stamphog.backend.tasks.tasks import process_inbox_pr_review
+from products.stamphog.backend.temporal import activities
+from products.stamphog.backend.temporal.activities import (
     MarkReviewFailedInput,
     StampReviewInput,
     dismiss_stale_approvals,
@@ -39,9 +39,9 @@ from products.stamp.backend.temporal.activities import (
     mark_review_failed,
     post_verdict,
 )
-from products.stamp.backend.temporal.constants import STAMPFN_SANDBOX_CONTEXT_PATH, STAMPFN_SANDBOX_REPO_DIR
-from products.stamp.backend.tests import fakes
-from products.stamp.backend.tests.conftest import PRODUCT_DATABASES, StampChain, _run_activity
+from products.stamphog.backend.temporal.constants import STAMPFN_SANDBOX_CONTEXT_PATH, STAMPFN_SANDBOX_REPO_DIR
+from products.stamphog.backend.tests import fakes
+from products.stamphog.backend.tests.conftest import PRODUCT_DATABASES, StampChain, _run_activity
 from products.tasks.backend.models import Task, TaskRun
 
 REPO = "acme/widgets"
@@ -770,7 +770,7 @@ def test_mark_review_failed_captures_failure_event(team, raw_error, expected_sto
     # ph_scoped_capture is a context manager yielding the capture callable, so the patch
     # provides a context manager whose __enter__ returns the mock to assert against.
     capture_fn = MagicMock()
-    with patch("products.stamp.backend.temporal.activities.ph_scoped_capture") as mock_capture_cm:
+    with patch("products.stamphog.backend.temporal.activities.ph_scoped_capture") as mock_capture_cm:
         mock_capture_cm.return_value.__enter__.return_value = capture_fn
         mock_capture_cm.return_value.__exit__.return_value = False
         _run_activity(mark_review_failed, MarkReviewFailedInput(str(run.id), team.id, raw_error))
@@ -982,7 +982,7 @@ def test_mark_review_failed_dismisses_an_orphaned_approval(team, stamp_chain: St
         output={"own_eyes_reaction_id": 777},
     )
 
-    with patch("products.stamp.backend.temporal.activities.ph_scoped_capture") as mock_capture_cm:
+    with patch("products.stamphog.backend.temporal.activities.ph_scoped_capture") as mock_capture_cm:
         mock_capture_cm.return_value.__enter__.return_value = MagicMock()
         mock_capture_cm.return_value.__exit__.return_value = False
         _run_activity(mark_review_failed, MarkReviewFailedInput(str(run.id), team.id, "terminal save kept failing"))
@@ -1012,7 +1012,7 @@ def test_mark_review_failed_never_rewrites_a_terminal_run(team) -> None:
         verdict=ReviewVerdict.APPROVED,
     )
 
-    with patch("products.stamp.backend.temporal.activities.ph_scoped_capture"):
+    with patch("products.stamphog.backend.temporal.activities.ph_scoped_capture"):
         _run_activity(mark_review_failed, MarkReviewFailedInput(str(run.id), team.id, "late digest stamp blew up"))
 
     run.refresh_from_db()
@@ -1531,7 +1531,7 @@ def test_inbox_review_approves_a_selfdriving_draft_pr_end_to_end(team, stamp_cha
         override_instance_config("GITHUB_APP_SLUG", "insights-code"),
         # An opted-in reviewer for the execution-time re-check (fail-closed when unregistered).
         patch(
-            "products.stamp.backend.facade.inbox_hooks._inbox_acting_reviewer_resolver",
+            "products.stamphog.backend.facade.inbox_hooks._inbox_acting_reviewer_resolver",
             lambda team_id, report_id, created_by: 777,
         ),
     ):

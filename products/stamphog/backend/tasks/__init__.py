@@ -4,4 +4,4 @@ Import the task-defining submodules here so Celery's ``autodiscover_tasks`` (whi
 app's ``tasks`` package) registers every ``@shared_task`` on workers and beat.
 """
 
-from products.stamp.backend.tasks import digest, tasks  # noqa: F401
+from products.stamphog.backend.tasks import digest, tasks  # noqa: F401

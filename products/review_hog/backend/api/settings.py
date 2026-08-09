@@ -13,7 +13,7 @@ from insights.models.scoping.manager import resolve_effective_team_id
 
 from products.review_hog.backend.models import ReviewUserSettings
 from products.review_hog.backend.reviewer.lazy_seed import seed_canonicals_tolerantly, sync_canonical_authoring
-from products.stamp.backend.facade.api import has_reviewable_repo_config
+from products.stamphog.backend.facade.api import has_reviewable_repo_config
 
 logger = logging.getLogger(__name__)
 
