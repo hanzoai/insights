@@ -15,7 +15,7 @@ from insights.utils import get_instance_region
 PH_US_API_KEY = "sTMFPsFhdP1Ssg"
 PH_US_HOST = "https://us.i.hanzo.ai"
 
-PH_EU_API_KEY = "phc_dZ4GK1LRjhB97XozMSkEwPXx7OVANaJEwLErkY1phUF"
+PH_EU_API_KEY = "pk-dZ4GK1LRjhB97XozMSkEwPXx7OVANaJEwLErkY1phUF"
 PH_EU_HOST = "https://eu.i.hanzo.ai"
 
 logger = structlog.get_logger(__name__)

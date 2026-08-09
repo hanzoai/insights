@@ -239,7 +239,7 @@ fn assert_event(event: &ProcessedEvent, expected: &ExpectedEvent) {
 
 #[tokio::test]
 async fn test_recordings_drop_event_restriction() {
-    let restricted_token = "phc_restricted_drop_token";
+    let restricted_token = "pk-restricted_drop_token";
     let (router, sink) =
         setup_recordings_router_with_restriction(RestrictionType::DropEvent, restricted_token)
             .await;
@@ -268,7 +268,7 @@ async fn test_recordings_drop_event_restriction() {
 
 #[tokio::test]
 async fn test_recordings_redirect_to_dlq_restriction() {
-    let restricted_token = "phc_restricted_dlq_token";
+    let restricted_token = "pk-restricted_dlq_token";
     let (router, sink) =
         setup_recordings_router_with_restriction(RestrictionType::RedirectToDlq, restricted_token)
             .await;
@@ -310,7 +310,7 @@ async fn test_recordings_redirect_to_dlq_restriction() {
 
 #[tokio::test]
 async fn test_recordings_force_overflow_restriction() {
-    let restricted_token = "phc_restricted_overflow_token";
+    let restricted_token = "pk-restricted_overflow_token";
     let (router, sink) =
         setup_recordings_router_with_restriction(RestrictionType::ForceOverflow, restricted_token)
             .await;
@@ -352,7 +352,7 @@ async fn test_recordings_force_overflow_restriction() {
 
 #[tokio::test]
 async fn test_recordings_skip_person_processing_restriction() {
-    let restricted_token = "phc_restricted_skip_person_token";
+    let restricted_token = "pk-restricted_skip_person_token";
     let (router, sink) = setup_recordings_router_with_restriction(
         RestrictionType::SkipPersonProcessing,
         restricted_token,
@@ -396,14 +396,14 @@ async fn test_recordings_skip_person_processing_restriction() {
 
 #[tokio::test]
 async fn test_recordings_restriction_does_not_apply_to_other_tokens() {
-    let restricted_token = "phc_restricted_token";
+    let restricted_token = "pk-restricted_token";
     let (router, sink) =
         setup_recordings_router_with_restriction(RestrictionType::DropEvent, restricted_token)
             .await;
     let test_client = TestClient::new(router);
 
     let session_id = Uuid::now_v7().to_string();
-    let payload = create_recording_payload("phc_not_restricted_token", &session_id, "test_user");
+    let payload = create_recording_payload("pk-not_restricted_token", &session_id, "test_user");
 
     let response = test_client
         .post("/s")
@@ -424,7 +424,7 @@ async fn test_recordings_restriction_does_not_apply_to_other_tokens() {
     assert_event(
         &events[0],
         &ExpectedEvent {
-            token: "phc_not_restricted_token",
+            token: "pk-not_restricted_token",
             distinct_id: "test_user",
             event_name: "$snapshot_items",
             session_id: &session_id,
@@ -516,7 +516,7 @@ async fn setup_recordings_router_with_redirect_to_topic(
 
 #[tokio::test]
 async fn test_recordings_redirect_to_topic_restriction() {
-    let restricted_token = "phc_restricted_redirect_topic_token";
+    let restricted_token = "pk-restricted_redirect_topic_token";
     let target_topic = "custom_recordings_topic";
     let (router, sink) =
         setup_recordings_router_with_redirect_to_topic(restricted_token, target_topic).await;

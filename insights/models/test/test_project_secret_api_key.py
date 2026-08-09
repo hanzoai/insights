@@ -6,7 +6,7 @@ from insights.models.utils import hash_key_value
 
 class TestFindProjectSecretAPIKey(BaseTest):
     def test_match(self):
-        token = "phs_" + "m" * 35
+        token = "sk-" + "m" * 35
         psak = ProjectSecretAPIKey.objects.create(
             team=self.team,
             label="lookup",
@@ -19,11 +19,11 @@ class TestFindProjectSecretAPIKey(BaseTest):
         self.assertEqual(found.pk, psak.pk)
 
     def test_no_match(self):
-        self.assertIsNone(find_project_secret_api_key("phs_" + "q" * 35))
+        self.assertIsNone(find_project_secret_api_key("sk-" + "q" * 35))
 
     def test_hash_isolation(self):
-        token_a = "phs_" + "a" * 35
-        token_b = "phs_" + "b" * 35
+        token_a = "sk-" + "a" * 35
+        token_b = "sk-" + "b" * 35
         psak_a = ProjectSecretAPIKey.objects.create(
             team=self.team,
             label="a",

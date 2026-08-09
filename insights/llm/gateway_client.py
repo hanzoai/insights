@@ -215,7 +215,7 @@ def ai_product_headers(ai_product: str | None) -> dict[str, str] | None:
     """X-Insights-Properties header tagging the captured generation with its AIO product.
 
     The slugless Go gateway has no product route, so callers pass the product here to keep
-    per-product attribution on the shared ``phs_`` token.
+    per-product attribution on the shared ``sk-`` token.
     """
     return _ai_property_headers(ai_product=ai_product)
 
@@ -258,7 +258,7 @@ def build_openai_client(product: Product, ai_product: str | None = None) -> Open
     else the Python LLM gateway via :func:`get_llm_client`.
 
     ``product`` names the Python-gateway route used in the fallback; the slugless Go gateway
-    derives the team from its ``phs_`` bearer and ignores it. ``ai_product`` tags the captured
+    derives the team from its ``sk-`` bearer and ignores it. ``ai_product`` tags the captured
     generation in gateway mode (the Python-gateway fallback derives the tag from ``product``).
     trust_env=False keeps the in-cluster call off the egress proxy.
     """
@@ -303,7 +303,7 @@ def build_async_anthropic_client(
     per-header form the Python gateway reads, so they would be dropped if passed that way.
     ``team_id`` is the customer team the generation is attributed to (the usage report reads it as
     a property); it does not change the event's owning project, which the gateway derives from the
-    ``phs_`` bearer. The Anthropic SDK appends ``/v1/messages``, so the client gets the gateway
+    ``sk-`` bearer. The Anthropic SDK appends ``/v1/messages``, so the client gets the gateway
     root rather than the ``/v1`` OpenAI base.
 
     ``use_bedrock_fallback`` only affects the Python-gateway fallback path; the Go gateway fails

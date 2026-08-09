@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 def _team() -> "Team":
     # The gate only reads api_token / organization_id, so a stub keeps these tests DB-free.
-    return cast("Team", SimpleNamespace(api_token="phc_token", organization_id="0195a000-0000-0000-0000-000000000000"))
+    return cast("Team", SimpleNamespace(api_token="pk-token", organization_id="0195a000-0000-0000-0000-000000000000"))
 
 
 @pytest.mark.parametrize(
@@ -24,23 +24,23 @@ def _team() -> "Team":
 )
 def test_reflects_quota_limiter(limited, expected):
     with patch("products.signals.backend.quota.is_team_signals_quota_limited", return_value=limited) as mock_limited:
-        assert is_team_signals_quota_limited("phc_token") is expected
+        assert is_team_signals_quota_limited("pk-token") is expected
     # Always queries the signals_credits resource for the given token.
     args = mock_limited.call_args.args
-    assert args[0] == "phc_token"
+    assert args[0] == "pk-token"
     assert args[1].value == "signals_credits"
 
 
 def test_fails_open_on_error():
     with patch("products.signals.backend.quota.is_team_signals_quota_limited", side_effect=RuntimeError("redis down")):
-        assert is_team_signals_quota_limited("phc_token") is False
+        assert is_team_signals_quota_limited("pk-token") is False
 
 
 def test_fail_open_metric_noops_outside_activity():
     # The fail-open counter only records inside a Temporal activity; outside one it must not raise.
     with patch("products.signals.backend.quota.is_team_signals_quota_limited", side_effect=RuntimeError("redis down")):
         with patch("products.signals.backend.quota.get_metric_meter") as mock_meter:
-            assert is_team_signals_quota_limited("phc_token") is False
+            assert is_team_signals_quota_limited("pk-token") is False
             mock_meter.assert_not_called()
 
 

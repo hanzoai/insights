@@ -81,7 +81,7 @@ def get_flags_from_service(
 
     Example:
         >>> response = get_flags_from_service(
-        ...     token="phc_abc123",
+        ...     token="pk-abc123",
         ...     distinct_id="user_123",
         ...     groups={"company": "acme"}
         ... )

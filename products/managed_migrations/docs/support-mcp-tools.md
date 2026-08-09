@@ -19,7 +19,7 @@ Everything below fails closed for non-staff users: the tools never appear in the
 The `batch_import_support:read` scope is **hidden from the key-creation UI** and can never be granted through OAuth,
 so minting takes two steps — create the key normally, then add the hidden scope via Django admin:
 
-1. In the Insights UI on the region you want to inspect, go to **Settings → Personal API keys** and create a key with the **User: Read** scope and **no organization/project restriction** (the endpoint rejects scoped keys). Copy the `phx_...` value — it is shown only once.
+1. In the Insights UI on the region you want to inspect, go to **Settings → Personal API keys** and create a key with the **User: Read** scope and **no organization/project restriction** (the endpoint rejects scoped keys). Copy the `sk-...` value — it is shown only once.
 2. In Django admin (`/admin/insights/personalapikey/`), open your new key and add `batch_import_support:read` to its `scopes` list, then save. Do this **before** first using the key with MCP — the MCP server caches a token's scopes on first use.
 
 <details>

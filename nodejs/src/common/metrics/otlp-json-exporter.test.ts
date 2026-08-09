@@ -30,7 +30,7 @@ describe('OtlpJsonMetricExporter', () => {
         reader = new PeriodicExportingMetricReader({
             exporter: new OtlpJsonMetricExporter({
                 url: 'http://capture-logs.local/v1/metrics',
-                headers: { Authorization: 'Bearer phc_test' },
+                headers: { Authorization: 'Bearer pk-test' },
             }),
             exportIntervalMillis: 60_000,
         })
@@ -53,7 +53,7 @@ describe('OtlpJsonMetricExporter', () => {
         const [url, init] = fetchMock.mock.calls[fetchMock.mock.calls.length - 1]
         expect(url).toBe('http://capture-logs.local/v1/metrics')
         expect(init?.headers).toMatchObject({
-            Authorization: 'Bearer phc_test',
+            Authorization: 'Bearer pk-test',
             'Content-Type': 'application/json',
         })
         return parseJSON(init?.body as string)

@@ -40169,12 +40169,12 @@ export namespace Schemas {
       /** Codex install command with a YOUR_PHS_TOKEN placeholder instead of a live token; always present. */
       codex_command_template: string;
       /**
-         * The raw read-only `phx_` credential. Returned once, only when minted or rotated; it cannot be retrieved again afterwards.
+         * The raw read-only `sk-` credential. Returned once, only when minted or rotated; it cannot be retrieved again afterwards.
          * @nullable
          */
       token: string | null;
       /**
-         * Masked preview of the existing credential (e.g. phx_...abcd).
+         * Masked preview of the existing credential (e.g. sk-...abcd).
          * @nullable
          */
       mask_value: string | null;
@@ -44720,7 +44720,7 @@ export namespace Schemas {
     export interface OrganizationPersonalAPIKey {
       /** The organization member who owns this key. */
       readonly owner: OrganizationPersonalAPIKeyOwner;
-      /** Masked, display-safe hint of the key value (e.g. 'phx_***1234'). Not the secret. The owner sees the same masked value in their own settings, so it can be used to identify a key. */
+      /** Masked, display-safe hint of the key value (e.g. 'sk-***1234'). Not the secret. The owner sees the same masked value in their own settings, so it can be used to identify a key. */
       readonly mask_value: string;
       /** API scopes granted to the key, e.g. 'insight:read'. A single '*' means full access. */
       readonly scopes: readonly string[];

@@ -27,7 +27,7 @@ const pathsWithoutProjectId = [
 // renaming this path affects them too.
 const exactPathsWithoutProjectId = ['/feature_flags/staff']
 
-const projectIdentifierInUrlRegex = /^\/project\/(\d+|phc_)/
+const projectIdentifierInUrlRegex = /^\/project\/(\d+|pk-)/
 
 function isPathWithoutProjectId(path: string): boolean {
     const pathname = path.split(/[?#]/)[0]

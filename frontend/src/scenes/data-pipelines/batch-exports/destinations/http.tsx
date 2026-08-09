@@ -21,7 +21,7 @@ export const httpDefinition: DestinationDefinition = {
                     />
                 </Field>
                 <Field name="token" label="Destination project token">
-                    <Input placeholder="e.g. phc_12345..." />
+                    <Input placeholder="e.g. pk-12345..." />
                 </Field>
             </>
         )

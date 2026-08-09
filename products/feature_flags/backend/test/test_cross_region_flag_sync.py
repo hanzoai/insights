@@ -23,7 +23,7 @@ def _mock_response(status_code: int, json_data: dict | list | None = None, json_
     return response
 
 
-@override_settings(CLOUD_DEPLOYMENT="EU", INSIGHTS_FLAGS_PROJECT_SECRET_TOKEN="phs_test_token")
+@override_settings(CLOUD_DEPLOYMENT="EU", INSIGHTS_FLAGS_PROJECT_SECRET_TOKEN="sk-test_token")
 class TestSyncCrossRegionFlags(BaseTest):
     def setUp(self):
         super().setUp()
@@ -64,7 +64,7 @@ class TestSyncCrossRegionFlags(BaseTest):
 
         url, kwargs = mock_get.call_args
         assert url[0] == "https://us.i.hanzo.ai/flags/definitions"
-        assert kwargs["headers"]["Authorization"] == "Bearer phs_test_token"
+        assert kwargs["headers"]["Authorization"] == "Bearer sk-test_token"
         assert kwargs["headers"]["If-None-Match"] == f'"{local_etag}"'
         # 304 means unchanged -- a write here would defeat the point of sending the etag.
         mock_set.assert_not_called()

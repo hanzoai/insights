@@ -265,7 +265,7 @@ describe('ApiClient fetchJson on 403 permission_denied', () => {
         vi.stubGlobal('fetch', mockFetch)
 
         const client = new ApiClient({
-            apiToken: 'phx_test',
+            apiToken: 'sk-test',
             baseUrl: 'https://us.hanzo.ai',
         })
 
@@ -301,7 +301,7 @@ describe('ApiClient fetchJson on 403 permission_denied', () => {
         vi.stubGlobal('fetch', mockFetch)
 
         const client = new ApiClient({
-            apiToken: 'phx_test',
+            apiToken: 'sk-test',
             baseUrl: 'https://us.hanzo.ai',
         })
 
@@ -328,7 +328,7 @@ describe('ApiClient fetchJson on 403 permission_denied', () => {
         vi.stubGlobal('fetch', mockFetch)
 
         const client = new ApiClient({
-            apiToken: 'phx_test',
+            apiToken: 'sk-test',
             baseUrl: 'https://us.hanzo.ai',
         })
 
@@ -355,7 +355,7 @@ describe('ApiClient fetchJson on 403 permission_denied', () => {
         vi.stubGlobal('fetch', mockFetch)
 
         const client = new ApiClient({
-            apiToken: 'phx_test',
+            apiToken: 'sk-test',
             baseUrl: 'https://us.hanzo.ai',
         })
 

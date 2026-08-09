@@ -874,7 +874,7 @@ class TestUtilities(TestCase):
         decoded = base64_decode(encoded_data)
         decoded_json = json.loads(decoded)
 
-        self.assertEqual(decoded_json["token"], "phc_G4AFfCmEbWIvWKNFZUKihi5tHhcISQXwlUazK2nLvA4")
+        self.assertEqual(decoded_json["token"], "pk-G4AFfCmEbWIvWKNFZUKihi5tHhcISQXwlUazK2nLvA4")
         self.assertEqual(decoded_json["distinct_id"], "01912bc1-bcfd-7046-9443-065cf8cc52c5")
         self.assertEqual(decoded_json["groups"], {})
 
@@ -882,7 +882,7 @@ class TestUtilities(TestCase):
         decoded = base64_decode(encoded_data)
         decoded_json = json.loads(decoded)
 
-        self.assertEqual(decoded_json["token"], "phc_I7xIcObtskp1VsaEcJOtHrq8kXlkuX7ljpvqVh3ICFz")
+        self.assertEqual(decoded_json["token"], "pk-I7xIcObtskp1VsaEcJOtHrq8kXlkuX7ljpvqVh3ICFz")
         self.assertEqual(decoded_json["distinct_id"], "01912e77-a260-795c-b0fc-e9a87291eb70")
         self.assertEqual(decoded_json["groups"], {})
 

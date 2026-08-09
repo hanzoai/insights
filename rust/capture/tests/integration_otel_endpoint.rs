@@ -81,7 +81,7 @@ impl Event for CapturingSink {
     }
 }
 
-const TOKEN: &str = "phc_VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3";
+const TOKEN: &str = "pk-VXRzc3poSG9GZm1JenRianJ6TTJFZGh4OWY2QXzx9f3";
 
 fn make_kv(key: &str, value: any_value::Value) -> KeyValue {
     KeyValue {
@@ -1091,7 +1091,7 @@ async fn test_invalid_token_returns_401() {
     let resp = client
         .post(ENDPOINT)
         .header("Content-Type", "application/x-protobuf")
-        .header("Authorization", "Bearer phx_personal_api_key_not_allowed")
+        .header("Authorization", "Bearer sk-personal_api_key_not_allowed")
         .body(request.encode_to_vec())
         .send()
         .await;

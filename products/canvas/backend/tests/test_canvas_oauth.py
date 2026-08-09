@@ -34,7 +34,7 @@ class TestCanvasOAuthAccess(APIBaseTest):
         token = OAuthAccessToken.objects.create(
             user=self.user,
             application=app,
-            token=f"pha_{scope.replace(':', '-').replace('*', 'star')}",
+            token=f"at-{scope.replace(':', '-').replace('*', 'star')}",
             scope=scope,
             expires=timezone.now() + timedelta(hours=1),
             scoped_teams=[],
