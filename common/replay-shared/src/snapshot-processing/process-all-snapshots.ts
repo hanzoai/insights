@@ -1,4 +1,4 @@
-import { EventType, eventWithTime, fullSnapshotEvent, IncrementalSource } from 'insights-js/rrweb-types'
+import { EventType, eventWithTime, fullSnapshotEvent, IncrementalSource } from '@hanzo/insights-rrweb-types'
 
 import { transformEventToWeb } from '../mobile'
 import { noOpTelemetry, ReplayTelemetry } from '../telemetry'
