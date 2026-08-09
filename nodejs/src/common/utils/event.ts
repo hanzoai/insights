@@ -4,40 +4,28 @@ import { DatastoreEvent, PipelineEvent, PostIngestionEvent, RawDatastoreEvent } 
 import { personInitialAndUTMProperties, sanitizeString } from './db/utils'
 import { chainToElements } from './elements-chain'
 import { parseJSON } from './json-parse'
-import { clickHouseTimestampToDateTime, normalizeSessionId } from './utils'
+import { datastoreTimestampToDateTime, normalizeSessionId } from './utils'
 
 /** Parse an event row SELECTed from Datastore into a more malleable form. */
 export function parseRawDatastoreEvent(rawEvent: RawDatastoreEvent): DatastoreEvent {
     return {
         ...rawEvent,
-        timestamp: clickHouseTimestampToDateTime(rawEvent.timestamp),
-        created_at: clickHouseTimestampToDateTime(rawEvent.created_at),
+        timestamp: datastoreTimestampToDateTime(rawEvent.timestamp),
+        created_at: datastoreTimestampToDateTime(rawEvent.created_at),
         properties: rawEvent.properties ? parseJSON(rawEvent.properties) : {},
         elements_chain: rawEvent.elements_chain ? chainToElements(rawEvent.elements_chain, rawEvent.team_id) : null,
-        person_created_at: rawEvent.person_created_at
-            ? clickHouseTimestampToDateTime(rawEvent.person_created_at)
-            : null,
+        person_created_at: rawEvent.person_created_at ? datastoreTimestampToDateTime(rawEvent.person_created_at) : null,
         person_properties: rawEvent.person_properties ? parseJSON(rawEvent.person_properties) : {},
         group0_properties: rawEvent.group0_properties ? parseJSON(rawEvent.group0_properties) : {},
         group1_properties: rawEvent.group1_properties ? parseJSON(rawEvent.group1_properties) : {},
         group2_properties: rawEvent.group2_properties ? parseJSON(rawEvent.group2_properties) : {},
         group3_properties: rawEvent.group3_properties ? parseJSON(rawEvent.group3_properties) : {},
         group4_properties: rawEvent.group4_properties ? parseJSON(rawEvent.group4_properties) : {},
-        group0_created_at: rawEvent.group0_created_at
-            ? clickHouseTimestampToDateTime(rawEvent.group0_created_at)
-            : null,
-        group1_created_at: rawEvent.group1_created_at
-            ? clickHouseTimestampToDateTime(rawEvent.group1_created_at)
-            : null,
-        group2_created_at: rawEvent.group2_created_at
-            ? clickHouseTimestampToDateTime(rawEvent.group2_created_at)
-            : null,
-        group3_created_at: rawEvent.group3_created_at
-            ? clickHouseTimestampToDateTime(rawEvent.group3_created_at)
-            : null,
-        group4_created_at: rawEvent.group4_created_at
-            ? clickHouseTimestampToDateTime(rawEvent.group4_created_at)
-            : null,
+        group0_created_at: rawEvent.group0_created_at ? datastoreTimestampToDateTime(rawEvent.group0_created_at) : null,
+        group1_created_at: rawEvent.group1_created_at ? datastoreTimestampToDateTime(rawEvent.group1_created_at) : null,
+        group2_created_at: rawEvent.group2_created_at ? datastoreTimestampToDateTime(rawEvent.group2_created_at) : null,
+        group3_created_at: rawEvent.group3_created_at ? datastoreTimestampToDateTime(rawEvent.group3_created_at) : null,
+        group4_created_at: rawEvent.group4_created_at ? datastoreTimestampToDateTime(rawEvent.group4_created_at) : null,
     }
 }
 
