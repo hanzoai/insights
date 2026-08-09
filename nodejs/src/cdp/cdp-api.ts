@@ -261,7 +261,7 @@ export class CdpApi {
             '/api/projects/:team_id/insights_functions/:id/rerun',
             asyncHandler(this.postRerunInvocations('insights_function'))
         )
-        router.post('/api/projects/:team_id/hog_flows/:id/rerun', asyncHandler(this.postRerunInvocations('hog_flow')))
+        router.post('/api/projects/:team_id/hog_flows/:id/rerun', asyncHandler(this.postRerunInvocations('flow')))
         router.get('/api/projects/:team_id/hog_flows/:id/in_flight_count', asyncHandler(this.getFlowInFlightCount))
         router.post(
             '/api/projects/:team_id/hog_flows/:id/reschedule_parked',
@@ -894,7 +894,7 @@ export class CdpApi {
     // picks it up, pages Datastore, rehydrates invocations onto the regular
     // queue, and commits progress back to the wrapper job's state.
     private postRerunInvocations =
-        (functionKind: 'insights_function' | 'hog_flow') =>
+        (functionKind: 'insights_function' | 'flow') =>
         async (req: ModifiedRequest, res: express.Response): Promise<any> => {
             try {
                 if (!this.rerunJobManager) {

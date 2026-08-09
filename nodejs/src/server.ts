@@ -313,7 +313,7 @@ export class PluginServer implements NodeServer {
             serviceLoaders.push(async () => {
                 const worker = new CdpRerunWorkerConsumer(this.config, cdpDeps!, {
                     insights_function: kafkaQueue,
-                    hog_flow: postgresV2Queue,
+                    flow: postgresV2Queue,
                 })
                 await worker.start()
                 return worker.service

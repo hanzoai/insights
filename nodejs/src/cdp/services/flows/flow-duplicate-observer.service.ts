@@ -10,7 +10,7 @@ import { mirrorCompare } from '../../utils/mirror-call'
 const DUPLICATE_OBSERVATION_TTL_SECONDS = 15 * 60
 
 const flowDuplicateInvocationDetectedTotal = new Counter({
-    name: 'hogflow_duplicate_invocation_detected_total',
+    name: 'flow_duplicate_invocation_detected_total',
     help: 'Fired once per action reached by a duplicate invocation of the same (workflow, event). Inflated by N actions per duplicate pair - treat as trend signal, not exact count.',
     labelNames: ['workflow_id'],
 })

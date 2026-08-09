@@ -814,8 +814,8 @@ describe('Cyclotron V2', () => {
 
                 const result = await job.bulkCreateAndCheckIn({
                     newJobs: [
-                        { teamId: 1, queueName: 'hogflow', parentRunId: parentId },
-                        { teamId: 1, queueName: 'hogflow', parentRunId: parentId },
+                        { teamId: 1, queueName: 'flow', parentRunId: parentId },
+                        { teamId: 1, queueName: 'flow', parentRunId: parentId },
                     ],
                     selfDisposition: { kind: 'reschedule', scheduledAt: future, state: newState },
                 })
@@ -836,7 +836,7 @@ describe('Cyclotron V2', () => {
                     [parentId]
                 )
                 expect(children.rows).toHaveLength(2)
-                expect(children.rows[0].queue_name).toBe('hogflow')
+                expect(children.rows[0].queue_name).toBe('flow')
                 expect(children.rows[0].status).toBe('available')
             })
 
@@ -844,7 +844,7 @@ describe('Cyclotron V2', () => {
                 const { id: parentId, job } = await seedAndDequeue()
 
                 await job.bulkCreateAndCheckIn({
-                    newJobs: [{ teamId: 1, queueName: 'hogflow', parentRunId: parentId }],
+                    newJobs: [{ teamId: 1, queueName: 'flow', parentRunId: parentId }],
                     selfDisposition: { kind: 'ack' },
                 })
 
@@ -907,7 +907,7 @@ describe('Cyclotron V2', () => {
                 // so the failure is pre-TX; verify self-state is untouched.)
                 await expect(
                     job.bulkCreateAndCheckIn({
-                        newJobs: [{ teamId: 'bad-type' as any, queueName: 'hogflow' }],
+                        newJobs: [{ teamId: 'bad-type' as any, queueName: 'flow' }],
                         selfDisposition: { kind: 'reschedule' },
                     })
                 ).rejects.toThrow()
@@ -928,8 +928,8 @@ describe('Cyclotron V2', () => {
                 await expect(
                     job.bulkCreateAndCheckIn({
                         newJobs: [
-                            { id: duplicateId, teamId: 1, queueName: 'hogflow' },
-                            { id: duplicateId, teamId: 1, queueName: 'hogflow' },
+                            { id: duplicateId, teamId: 1, queueName: 'flow' },
+                            { id: duplicateId, teamId: 1, queueName: 'flow' },
                         ],
                         selfDisposition: { kind: 'reschedule' },
                     })
@@ -966,7 +966,7 @@ describe('Cyclotron V2', () => {
 
                 await expect(
                     job.bulkCreateAndCheckIn({
-                        newJobs: [{ teamId: 1, queueName: 'hogflow', parentRunId: parentId }],
+                        newJobs: [{ teamId: 1, queueName: 'flow', parentRunId: parentId }],
                         selfDisposition: { kind: 'reschedule' },
                     })
                 ).rejects.toThrow()
@@ -1772,7 +1772,7 @@ describe('Cyclotron V2', () => {
                 // Default to a real invocation queue so a poisoned genuine invocation is recorded.
                 // The janitor only records give-ups on invocation queues; anything else is a
                 // wrapper/meta job that's dropped without a record (see WRAPPER drop tests below).
-                queue_name: 'hogflow',
+                queue_name: 'flow',
                 status: 'available',
                 priority: 0,
                 scheduled: new Date(),
@@ -1993,9 +1993,9 @@ describe('Cyclotron V2', () => {
         // record — else the autodrain replays a real flow with fabricated globals.
         // 'some_future_meta_queue' is an unknown, non-invocation queue: it guards the allow-list's
         // fail-safe. Under the old deny-list a queue nobody listed would be RECORDED as a replayable
-        // hog_flow (the autodrain would then replay a phantom flow) — with the allow-list any queue
+        // flow (the autodrain would then replay a phantom flow) — with the allow-list any queue
         // not in CYCLOTRON_INVOCATION_JOB_QUEUES is dropped without a record by default.
-        it.each(['rerun', 'hogflow_batch_resolve', 'some_future_meta_queue'])(
+        it.each(['rerun', 'flow_batch_resolve', 'some_future_meta_queue'])(
             'drops a poisoned %s wrapper without recording it, still records real invocations',
             async (wrapperQueue) => {
                 const staleHeartbeat = new Date(Date.now() - 60_000)
@@ -2026,7 +2026,7 @@ describe('Cyclotron V2', () => {
                 await janitor.stop()
 
                 // The wrapper is dropped with NO replay record — recording it would let
-                // the autodrain rediscover it as a hog_flow and replay a real flow with
+                // the autodrain rediscover it as a flow and replay a real flow with
                 // fabricated globals. Only the genuine invocation is recorded.
                 expect(recordTerminalFailureDurably).toHaveBeenCalledTimes(1)
                 expect(recordTerminalFailureDurably).toHaveBeenCalledWith(
@@ -2144,8 +2144,8 @@ describe('Cyclotron V2', () => {
             expect(stalled.status).toBe('available')
         })
 
-        it.each(['hogflow', 'email'])(
-            'builds and produces a valid failed hog_flow result for a poisoned %s-queue job',
+        it.each(['flow', 'email'])(
+            'builds and produces a valid failed flow result for a poisoned %s-queue job',
             async (queueName) => {
                 // Realistic parked-mid-flow state; the scheduled/created columns come
                 // back from pg as ISO strings — the give-up row build must parse them
@@ -2184,7 +2184,7 @@ describe('Cyclotron V2', () => {
                 expect(produce).toHaveBeenCalledTimes(1)
                 const row = parseProducedResult(produce)
                 expect(row.status).toBe('failed')
-                expect(row.function_kind).toBe('hog_flow')
+                expect(row.function_kind).toBe('flow')
                 expect(row.function_id).toBe(functionId)
                 expect(row.error_kind).toBe(JANITOR_POISON_PILL_ERROR_KIND)
                 // Timestamps must be real ISO microsecond strings, never NaN/"Invalid".

@@ -17,7 +17,7 @@ import { RerunPaginatorService } from './rerun-paginator.service'
 // would restart from the trigger and re-send emails that already went out. These
 // tests pin the fix: the rehydrated invocation carries `currentAction` forward,
 // so replay resumes after the already-completed actions.
-describe('RerunPaginatorService replay fidelity (hog_flow)', () => {
+describe('RerunPaginatorService replay fidelity (flow)', () => {
     const teamId = 42
     const functionId = 'flow-1'
 
@@ -53,14 +53,14 @@ describe('RerunPaginatorService replay fidelity (hog_flow)', () => {
             insightsFunctionManager,
             flowManager,
             lifecycle,
-            { insights_function: {} as unknown as JobQueue, hog_flow: flowQueue },
+            { insights_function: {} as unknown as JobQueue, flow: flowQueue },
             monitoring,
             10000
         )
     }
 
     const state: RerunJobState = {
-        function_kind: 'hog_flow',
+        function_kind: 'flow',
         function_id: functionId,
         request: { filter: { window_start: '2026-01-01T00:00:00Z', window_end: '2027-01-01T00:00:00Z' } },
         progress: { queued: 0, skipped: 0, done: false },

@@ -339,7 +339,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
             flow,
             person: invocationGlobals.person,
             filterGlobals,
-            queue: 'hogflow' as const,
+            queue: 'flow' as const,
             queuePriority: 1,
         }
         await flowQueue.queueInvocations([invocation])
@@ -430,7 +430,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
             await waitForExpect(() => {
                 const metrics = mockProducerObserver
                     .getProducedKafkaMessagesForTopic(KAFKA_APP_METRICS_2)
-                    .filter((m: any) => m.value.app_source === 'hog_flow')
+                    .filter((m: any) => m.value.app_source === 'flow')
                 expect(metrics.length).toBeGreaterThanOrEqual(1)
             }, 5000)
 
@@ -454,8 +454,8 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
             // The version-scoped series has to carry the whole run, not just the run-level outcome —
             // a per-version step funnel is only readable if every step's metric is mirrored.
             await waitForExpect(() => {
-                expect(namesFor('hog_flow', workflowId)).toContain('succeeded')
-                expect(namesFor('hog_flow_version', `${workflowId}/1`)).toEqual(namesFor('hog_flow', workflowId))
+                expect(namesFor('flow', workflowId)).toContain('succeeded')
+                expect(namesFor('flow_version', `${workflowId}/1`)).toEqual(namesFor('flow', workflowId))
             }, 10000)
         })
     })
@@ -764,7 +764,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
             await waitForExpect(() => {
                 const metricNames = mockProducerObserver
                     .getProducedKafkaMessagesForTopic(KAFKA_APP_METRICS_2)
-                    .filter((m: any) => m.value.app_source === 'hog_flow')
+                    .filter((m: any) => m.value.app_source === 'flow')
                     .map((m: any) => m.value.metric_name)
                 expect(metricNames).toContain('exited_workflow_changed')
                 expect(metricNames).not.toContain('failed')
@@ -1694,7 +1694,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
             const conversionCount = (): number =>
                 mockProducerObserver
                     .getProducedKafkaMessagesForTopic(KAFKA_APP_METRICS_2)
-                    .filter((m: any) => m.value.app_source === 'hog_flow')
+                    .filter((m: any) => m.value.app_source === 'flow')
                     .filter((m: any) => m.value.metric_name === 'conversion')
                     .reduce((sum: number, m: any) => sum + m.value.count, 0)
 
@@ -2428,7 +2428,7 @@ describe('Workflows E2E (email queue)', () => {
         })
         await Promise.all([kafkaQueue.startAsProducer(), eventsProducerQueue.startAsProducer()])
 
-        // Scriptflow worker polls jobs with queue_name='hogflow' and re-stamps email
+        // Scriptflow worker polls jobs with queue_name='flow' and re-stamps email
         // jobs to queue_name='email' so the email worker picks them up
         flowWorker = new CdpCyclotronWorkerFlow(hub, deps, flowConsumerQueue)
         await flowWorker.start()
@@ -2532,7 +2532,7 @@ describe('Workflows E2E (email queue)', () => {
             const sumCounts = (filter: (m: any) => boolean) =>
                 mockProducerObserver
                     .getProducedKafkaMessagesForTopic(KAFKA_APP_METRICS_2)
-                    .filter((m: any) => m.value.app_source === 'hog_flow')
+                    .filter((m: any) => m.value.app_source === 'flow')
                     .filter(filter)
                     .reduce((sum: number, m: any) => sum + m.value.count, 0)
 
@@ -2604,7 +2604,7 @@ describe('Workflows E2E (email queue)', () => {
             const sumCounts = (filter: (m: any) => boolean) =>
                 mockProducerObserver
                     .getProducedKafkaMessagesForTopic(KAFKA_APP_METRICS_2)
-                    .filter((m: any) => m.value.app_source === 'hog_flow')
+                    .filter((m: any) => m.value.app_source === 'flow')
                     .filter(filter)
                     .reduce((sum: number, m: any) => sum + m.value.count, 0)
 
@@ -2818,7 +2818,7 @@ describe('Workflows E2E (email queue)', () => {
             const sumCounts = (filter: (m: any) => boolean) =>
                 mockProducerObserver
                     .getProducedKafkaMessagesForTopic(KAFKA_APP_METRICS_2)
-                    .filter((m: any) => m.value.app_source === 'hog_flow')
+                    .filter((m: any) => m.value.app_source === 'flow')
                     .filter(filter)
                     .reduce((sum: number, m: any) => sum + m.value.count, 0)
 
@@ -2927,7 +2927,7 @@ describe('Workflows E2E (email queue)', () => {
             const sumCounts = (filter: (m: any) => boolean) =>
                 mockProducerObserver
                     .getProducedKafkaMessagesForTopic(KAFKA_APP_METRICS_2)
-                    .filter((m: any) => m.value.app_source === 'hog_flow')
+                    .filter((m: any) => m.value.app_source === 'flow')
                     .filter(filter)
                     .reduce((sum: number, m: any) => sum + m.value.count, 0)
 
@@ -3039,7 +3039,7 @@ describe('Workflows E2E (email queue)', () => {
             const sumCounts = (filter: (m: any) => boolean) =>
                 mockProducerObserver
                     .getProducedKafkaMessagesForTopic(KAFKA_APP_METRICS_2)
-                    .filter((m: any) => m.value.app_source === 'hog_flow')
+                    .filter((m: any) => m.value.app_source === 'flow')
                     .filter(filter)
                     .reduce((sum: number, m: any) => sum + m.value.count, 0)
             expect(sumCounts((m) => m.value.metric_name === 'email_sent')).toBe(1)
@@ -3132,7 +3132,7 @@ describe('Workflows E2E (email queue)', () => {
         const emailsSent = () =>
             mockProducerObserver
                 .getProducedKafkaMessagesForTopic(KAFKA_APP_METRICS_2)
-                .filter((m: any) => m.value.app_source === 'hog_flow')
+                .filter((m: any) => m.value.app_source === 'flow')
                 .filter((m: any) => m.value.metric_name === 'email_sent')
                 .reduce((sum: number, m: any) => sum + m.value.count, 0)
 
@@ -3242,7 +3242,7 @@ describe('Workflows E2E (email queue)', () => {
         await waitForExpect(() => {
             const emailSentCount = mockProducerObserver
                 .getProducedKafkaMessagesForTopic(KAFKA_APP_METRICS_2)
-                .filter((m: any) => m.value.app_source === 'hog_flow')
+                .filter((m: any) => m.value.app_source === 'flow')
                 .filter((m: any) => m.value.metric_name === 'email_sent')
                 .reduce((sum: number, m: any) => sum + m.value.count, 0)
             expect(emailSentCount).toBe(1)
@@ -3349,7 +3349,7 @@ describe('Workflows E2E (email queue)', () => {
         await waitForExpect(() => {
             const emailSentCount = mockProducerObserver
                 .getProducedKafkaMessagesForTopic(KAFKA_APP_METRICS_2)
-                .filter((m: any) => m.value.app_source === 'hog_flow')
+                .filter((m: any) => m.value.app_source === 'flow')
                 .filter((m: any) => m.value.metric_name === 'email_sent')
                 .reduce((sum: number, m: any) => sum + m.value.count, 0)
             expect(emailSentCount).toBe(3)
@@ -3496,7 +3496,7 @@ describe('Workflows E2E (email queue)', () => {
         await waitForExpect(() => {
             const emailSentCount = mockProducerObserver
                 .getProducedKafkaMessagesForTopic(KAFKA_APP_METRICS_2)
-                .filter((m: any) => m.value.app_source === 'hog_flow')
+                .filter((m: any) => m.value.app_source === 'flow')
                 .filter((m: any) => m.value.metric_name === 'email_sent')
                 .reduce((sum: number, m: any) => sum + m.value.count, 0)
             expect(emailSentCount).toBe(1)
@@ -3583,7 +3583,7 @@ describe('Workflows E2E (email queue)', () => {
 
                 const row = rows[0].value as Record<string, any>
                 expect(row.team_id).toBe(team.id)
-                expect(row.function_kind).toBe('hog_flow')
+                expect(row.function_kind).toBe('flow')
                 expect(row.kind).toBe('email')
                 expect(row.status).toBe('sent')
                 expect(row.action_id).toBe('email_1')
@@ -3798,7 +3798,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         }>(
             `SELECT id, queue_name, status::text AS status, parent_run_id, team_id, function_id, state
              FROM cyclotron_jobs
-             WHERE queue_name = 'hogflow_batch_resolve' AND parent_run_id = $1`,
+             WHERE queue_name = 'flow_batch_resolve' AND parent_run_id = $1`,
             [parentRunId]
         )
         expect(rows.rows).toHaveLength(1)
@@ -3919,7 +3919,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         expect(statusPuts[0]).toEqual({ status: 'completed' })
 
         const children = await cyclotronPool.query(
-            `SELECT id FROM cyclotron_jobs WHERE queue_name = 'hogflow' AND parent_run_id = $1`,
+            `SELECT id FROM cyclotron_jobs WHERE queue_name = 'flow' AND parent_run_id = $1`,
             [parentRunId]
         )
         expect(children.rows).toHaveLength(personIds.length)
@@ -3975,7 +3975,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         expect(statusPuts[0]).toEqual({ status: 'failed' })
 
         const children = await cyclotronPool.query(
-            `SELECT id FROM cyclotron_jobs WHERE queue_name = 'hogflow' AND parent_run_id = $1`,
+            `SELECT id FROM cyclotron_jobs WHERE queue_name = 'flow' AND parent_run_id = $1`,
             [parentRunId]
         )
         expect(children.rows).toHaveLength(0)
@@ -4035,7 +4035,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
 
         const rows = await cyclotronPool.query<{ status: string; state: Buffer | null }>(
             `SELECT status::text AS status, state FROM cyclotron_jobs
-             WHERE queue_name = 'hogflow_batch_resolve' AND parent_run_id = $1`,
+             WHERE queue_name = 'flow_batch_resolve' AND parent_run_id = $1`,
             [parentRunId]
         )
         expect(rows.rows).toHaveLength(1)
@@ -4073,7 +4073,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
 
         const rows = await cyclotronPool.query<{ status: string; state: Buffer | null }>(
             `SELECT status::text AS status, state FROM cyclotron_jobs
-             WHERE queue_name = 'hogflow_batch_resolve' AND parent_run_id = $1`,
+             WHERE queue_name = 'flow_batch_resolve' AND parent_run_id = $1`,
             [parentRunId]
         )
         expect(rows.rows).toHaveLength(1)
@@ -4090,7 +4090,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         expect(state.pendingTerminal).toBeUndefined()
 
         const children = await cyclotronPool.query(
-            `SELECT id FROM cyclotron_jobs WHERE queue_name = 'hogflow' AND parent_run_id = $1`,
+            `SELECT id FROM cyclotron_jobs WHERE queue_name = 'flow' AND parent_run_id = $1`,
             [parentRunId]
         )
         expect(children.rows).toHaveLength(0)
@@ -4132,7 +4132,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         })
         await batchResolverProducer.createJob({
             teamId: team.id,
-            queueName: 'hogflow_batch_resolve',
+            queueName: 'flow_batch_resolve',
             parentRunId,
             functionId: flow.id,
             state: cappedState,
@@ -4150,7 +4150,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
 
         // No children — the resolver short-circuited before audience fetch
         const children = await cyclotronPool.query(
-            `SELECT id FROM cyclotron_jobs WHERE queue_name = 'hogflow' AND parent_run_id = $1`,
+            `SELECT id FROM cyclotron_jobs WHERE queue_name = 'flow' AND parent_run_id = $1`,
             [parentRunId]
         )
         expect(children.rows).toHaveLength(0)
@@ -4216,7 +4216,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
 
         // No children enqueued — the resolver bailed before ever returning a page
         const children = await cyclotronPool.query(
-            `SELECT id FROM cyclotron_jobs WHERE queue_name = 'hogflow' AND parent_run_id = $1`,
+            `SELECT id FROM cyclotron_jobs WHERE queue_name = 'flow' AND parent_run_id = $1`,
             [parentRunId]
         )
         expect(children.rows).toHaveLength(0)
@@ -4274,7 +4274,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         await waitForExpect(async () => {
             const r = await cyclotronPool.query<{ status: string }>(
                 `SELECT status::text AS status FROM cyclotron_jobs
-                 WHERE queue_name = 'hogflow_batch_resolve' AND parent_run_id = $1`,
+                 WHERE queue_name = 'flow_batch_resolve' AND parent_run_id = $1`,
                 [parentRunId]
             )
             expect(r.rows[0]?.status).toBe('failed')
@@ -4339,7 +4339,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         expect(statusPuts[0]).toEqual({ status: 'completed' })
 
         const children = await cyclotronPool.query(
-            `SELECT id FROM cyclotron_jobs WHERE queue_name = 'hogflow' AND parent_run_id = $1`,
+            `SELECT id FROM cyclotron_jobs WHERE queue_name = 'flow' AND parent_run_id = $1`,
             [parentRunId]
         )
         // Hard cap: exactly 4 children, never 6
@@ -4356,7 +4356,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         const malformedState = Buffer.from(JSON.stringify({ not: 'a valid resolver state' }))
         await batchResolverProducer.createJob({
             teamId: team.id,
-            queueName: 'hogflow_batch_resolve',
+            queueName: 'flow_batch_resolve',
             parentRunId,
             functionId: new UUIDT().toString(),
             state: malformedState,
@@ -4372,7 +4372,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         await waitForExpect(async () => {
             const r = await cyclotronPool.query<{ status: string }>(
                 `SELECT status::text AS status FROM cyclotron_jobs
-                 WHERE queue_name = 'hogflow_batch_resolve' AND parent_run_id = $1`,
+                 WHERE queue_name = 'flow_batch_resolve' AND parent_run_id = $1`,
                 [parentRunId]
             )
             expect(r.rows[0]?.status).toBe('failed')
@@ -4380,7 +4380,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
 
         // No children, no Django PUT — the resolver failed before any work.
         const children = await cyclotronPool.query(
-            `SELECT id FROM cyclotron_jobs WHERE queue_name = 'hogflow' AND parent_run_id = $1`,
+            `SELECT id FROM cyclotron_jobs WHERE queue_name = 'flow' AND parent_run_id = $1`,
             [parentRunId]
         )
         expect(children.rows).toHaveLength(0)
@@ -4475,7 +4475,7 @@ describe('Workflows E2E (janitor poison-pill recovery, postgres-v2)', () => {
             `INSERT INTO cyclotron_jobs
                 (id, team_id, function_id, queue_name, status, priority, scheduled, created,
                  lock_id, last_heartbeat, janitor_touch_count, transition_count, last_transition, state)
-             VALUES ($1, $2, $3, 'hogflow', 'running'::CyclotronJobStatus, 0, NOW(), NOW(),
+             VALUES ($1, $2, $3, 'flow', 'running'::CyclotronJobStatus, 0, NOW(), NOW(),
                      $4, NOW() - INTERVAL '5 minutes', 5, 10, NOW(), $5)`,
             [id, team.id, new UUIDT().toString(), new UUIDT().toString(), state]
         )
@@ -4501,7 +4501,7 @@ describe('Workflows E2E (janitor poison-pill recovery, postgres-v2)', () => {
             .getProducedKafkaMessagesForTopic(KAFKA_FN_INVOCATION_RESULTS)
             .find((m: any) => m.value.invocation_id === id)!.value
         expect(row.status).toBe('failed')
-        expect(row.function_kind).toBe('hog_flow')
+        expect(row.function_kind).toBe('flow')
         expect(row.function_id).toBeTruthy()
         expect(row.error_kind).toBe(JANITOR_POISON_PILL_ERROR_KIND)
 

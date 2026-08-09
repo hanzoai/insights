@@ -32,10 +32,10 @@ export enum PluginServerMode {
     cdp_internal_events = 'cdp-internal-events',
     cdp_cyclotron_worker = 'cdp-cyclotron-worker',
     cdp_precalculated_filters = 'cdp-precalculated-filters',
-    cdp_hogflow_subscription_matcher = 'cdp-flow-subscription-matcher',
+    cdp_flow_subscription_matcher = 'cdp-flow-subscription-matcher',
     cdp_cohort_membership = 'cdp-cohort-membership',
-    cdp_cyclotron_worker_hogflow = 'cdp-cyclotron-worker-flow',
-    cdp_cyclotron_worker_hogflow_legacy_pg = 'cdp-cyclotron-worker-flow-legacy-pg',
+    cdp_cyclotron_worker_flow = 'cdp-cyclotron-worker-flow',
+    cdp_cyclotron_worker_flow_legacy_pg = 'cdp-cyclotron-worker-flow-legacy-pg',
     cdp_cyclotron_worker_email = 'cdp-cyclotron-worker-email',
     cdp_cyclotron_worker_email_legacy_pg = 'cdp-cyclotron-worker-email-legacy-pg',
     cdp_api = 'cdp-api',
@@ -50,7 +50,7 @@ export enum PluginServerMode {
     recording_api = 'recording-api',
     ingestion_v2_combined = 'ingestion-v2-combined',
     ingestion_traces = 'ingestion-traces',
-    cdp_hogflow_scheduler = 'cdp-flow-scheduler',
+    cdp_flow_scheduler = 'cdp-flow-scheduler',
     ingestion_api = 'ingestion-api',
 }
 

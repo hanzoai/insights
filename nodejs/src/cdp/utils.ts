@@ -112,7 +112,7 @@ export function convertBatchFlowRequestToInsightsFunctionInvocationGlobals({
             url: projectUrl,
         },
         event: {
-            event: '$batch_hog_flow_invocation',
+            event: '$batch_flow_invocation',
             properties: {},
             uuid: new UUIDT().toString(),
             distinct_id: '', // Not applicable for batch processing but left here for compatibility
@@ -146,7 +146,7 @@ export function convertAccountBatchFlowRequestToInsightsFunctionInvocationGlobal
             url: projectUrl,
         },
         event: {
-            event: '$batch_hog_flow_invocation',
+            event: '$batch_flow_invocation',
             // $groups drives the worker's group hydration, so account actions defaulting to
             // {groups.<type>.id} resolve without any account-specific plumbing.
             properties: { $groups: { [groupType]: externalId } },

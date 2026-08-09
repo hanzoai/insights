@@ -185,7 +185,7 @@ export function createAiIngestionPipeline<
             // fetch, emit) retry, matching the analytics per-distinct-id path.
             .pipe(createNormalizeProcessPersonFlagStep())
             .pipe(createScriptTransformEventStep(scriptTransformer), {
-                retry: { tries: 5, sleepMs: 100, name: 'hog_transform_event' },
+                retry: { tries: 5, sleepMs: 100, name: 'transform_event' },
                 topFn: [
                     sumOk(
                         'transformations_run',

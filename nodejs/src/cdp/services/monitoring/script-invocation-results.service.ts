@@ -19,18 +19,18 @@ import {
 } from '../../types'
 
 const counterScriptInvocationResultRowsProduced = new Counter({
-    name: 'cdp_hog_invocation_result_rows_produced',
+    name: 'cdp_invocation_result_rows_produced',
     help: 'Lifecycle rows queued for the hog_invocation_results Datastore table.',
     labelNames: ['function_kind', 'status'],
 })
 
 const counterScriptInvocationResultProduceFailed = new Counter({
-    name: 'cdp_hog_invocation_result_produce_failed',
+    name: 'cdp_invocation_result_produce_failed',
     help: 'Rows that failed to produce to Kafka.',
 })
 
 const scriptInvocationResultsPendingMessages = new Gauge({
-    name: 'cdp_hog_invocation_results_pending_messages',
+    name: 'cdp_invocation_results_pending_messages',
     help: 'Rows queued waiting to be flushed to Kafka.',
 })
 
@@ -50,7 +50,7 @@ export interface ScriptInvocationResultRow {
     // `*_rerun` kinds tag the wrapper row that drives a re-run, so the
     // Invocations list can surface in-flight re-runs alongside the function's
     // normal invocations. See `rerun-job.types.ts` for the helper.
-    function_kind: 'insights_function' | 'hog_flow' | 'insights_function_rerun' | 'hog_flow_rerun'
+    function_kind: 'insights_function' | 'flow' | 'insights_function_rerun' | 'flow_rerun'
     function_id: string
     invocation_id: string
     parent_run_id: string
@@ -308,8 +308,8 @@ export class ScriptInvocationResultsService {
         return invocation.functionId
     }
 
-    private functionKindFor(invocation: CyclotronJobInvocation): 'insights_function' | 'hog_flow' {
-        return isFlowInvocation(invocation) ? 'hog_flow' : 'insights_function'
+    private functionKindFor(invocation: CyclotronJobInvocation): 'insights_function' | 'flow' {
+        return isFlowInvocation(invocation) ? 'flow' : 'insights_function'
     }
 
     /**

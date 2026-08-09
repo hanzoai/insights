@@ -18,9 +18,9 @@ const DEFAULT_WAIT_DURATION_SECONDS = 10 * 60
 // Labelled by team and flow so a non-zero reading names the workflow still leaning on the poll; a
 // series only exists for flows that actually poll-advance, so cardinality tracks incidence.
 export const counterScriptflowWaitPollOnlyAdvance = new Counter({
-    name: 'cdp_hogflow_wait_poll_only_advance',
+    name: 'cdp_flow_wait_poll_only_advance',
     help: 'wait_until_condition advanced via the polling re-check, not the subscription matcher — a wake the streams missed.',
-    labelNames: ['team_id', 'hog_flow_id'],
+    labelNames: ['team_id', 'flow_id'],
 })
 
 // Outcome of a wait_until_condition re-check that ran because a person merge re-keyed the parked job
@@ -28,7 +28,7 @@ export const counterScriptflowWaitPollOnlyAdvance = new Counter({
 // 'reparked' = it didn't, so waking was wasted churn. A high reparked:advanced ratio means the wake
 // is firing on merges that don't satisfy the wait — signal to narrow when the matcher wakes.
 export const counterScriptflowRekeyWake = new Counter({
-    name: 'cdp_hogflow_matcher_rekey_wake_total',
+    name: 'cdp_flow_matcher_rekey_wake_total',
     help: 'wait_until_condition re-checks triggered by a merge re-key wake, by outcome.',
     labelNames: ['outcome'],
 })

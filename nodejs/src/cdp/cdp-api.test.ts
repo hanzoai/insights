@@ -1096,7 +1096,7 @@ describe('CDP API', () => {
                 const arg = createJobMock.mock.calls[0][0]
                 expect(arg).toMatchObject({
                     teamId: batchFlow.team_id,
-                    queueName: 'hogflow_batch_resolve',
+                    queueName: 'flow_batch_resolve',
                     parentRunId: 'job-789',
                     functionId: batchFlow.id,
                 })

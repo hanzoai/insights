@@ -49,7 +49,7 @@ describe('RerunPaginatorService queue routing', () => {
             {} as unknown as InsightsFunctionManagerService,
             {} as unknown as FlowManagerService,
             invocationResultsRowsService,
-            { insights_function: scriptQueue, hog_flow: flowQueue },
+            { insights_function: scriptQueue, flow: flowQueue },
             monitoringService,
             10000
         )
@@ -57,7 +57,7 @@ describe('RerunPaginatorService queue routing', () => {
 
     const buildState = (kind: RerunFunctionKind): RerunJobState => ({
         function_kind: kind,
-        function_id: kind === 'hog_flow' ? 'flow-1' : 'fn-1',
+        function_id: kind === 'flow' ? 'flow-1' : 'fn-1',
         request: { filter: { window_start: '2026-01-01T00:00:00Z', window_end: '2027-01-01T00:00:00Z' } },
         progress: { queued: 0, skipped: 0, done: false },
     })
@@ -88,10 +88,10 @@ describe('RerunPaginatorService queue routing', () => {
         expect(flowQueue.queueInvocations).not.toHaveBeenCalled()
     })
 
-    it('routes hog_flow reruns to the postgres-v2 (flow) queue with overwriteExisting', async () => {
+    it('routes flow reruns to the postgres-v2 (flow) queue with overwriteExisting', async () => {
         stubPage(['inv-1', 'inv-2'])
 
-        await runPage(buildState('hog_flow'))
+        await runPage(buildState('flow'))
 
         expect(flowQueue.queueInvocations).toHaveBeenCalledTimes(1)
         expect((flowQueue.queueInvocations.mock.calls[0][0] as any[]).map((i) => i.id)).toEqual(['inv-1', 'inv-2'])
@@ -133,7 +133,7 @@ describe('RerunPaginatorService queue routing', () => {
         // still active — the paginator logs + counts it as a skip, not a failure.
         flowQueue.queueInvocations.mockRejectedValueOnce(new CyclotronJobConflictError('inv-conflict'))
 
-        const { state: next } = await runPage(buildState('hog_flow'))
+        const { state: next } = await runPage(buildState('flow'))
 
         expect(next.progress.queued).toBe(0)
         expect(next.progress.skipped).toBe(1)
@@ -149,7 +149,7 @@ describe('RerunPaginatorService queue routing', () => {
             insightsFunctionManager,
             {} as unknown as FlowManagerService,
             {} as unknown as ScriptInvocationResultsService,
-            { insights_function: scriptQueue, hog_flow: flowQueue },
+            { insights_function: scriptQueue, flow: flowQueue },
             {} as unknown as InsightsFunctionMonitoringService,
             10000
         )

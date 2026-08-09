@@ -40,10 +40,10 @@ export type MonitoringOutput = AppMetricsOutput | LogEntriesOutput
 // `app_metrics2` has no version column, and it can't gain one: it's an AggregatingMergeTree whose sort
 // key is its aggregation key, so a new dimension would have to join the ORDER BY and re-key existing
 // parts. Instead, every script flow metric that knows its workflow version is written twice — once under
-// `hog_flow` (the version-agnostic series everything already reads) and once under this app source with
+// `flow` (the version-agnostic series everything already reads) and once under this app source with
 // the version appended to the flow id. Same instance_id/kind/name semantics on both, so a
 // version-scoped read is the existing query with two substituted parameters.
-export const FN_FLOW_VERSION_APP_SOURCE = 'hog_flow_version'
+export const FN_FLOW_VERSION_APP_SOURCE = 'flow_version'
 
 // This key format is the contract for anything that reads the versioned series — see
 // "Metrics and version attribution" in products/workflows/CONTRIBUTING.md. Always the flow id, never
@@ -119,7 +119,7 @@ export class InsightsFunctionMonitoringService {
 
         // Guarded on the type rather than truthiness: a flow loaded without its `version` column would
         // otherwise key every mirrored row under a literal `.../undefined`.
-        if (source === 'hog_flow' && typeof metric.app_source_version?.version === 'number') {
+        if (source === 'flow' && typeof metric.app_source_version?.version === 'number') {
             this.appMetricsAggregator.queue({
                 team_id: metric.team_id,
                 app_source: FN_FLOW_VERSION_APP_SOURCE,
@@ -153,7 +153,7 @@ export class InsightsFunctionMonitoringService {
 
     queueInvocationResults(results: CyclotronJobInvocationResult[]): void {
         for (const result of results) {
-            const source = 'insightsFunction' in result.invocation ? 'insights_function' : 'hog_flow'
+            const source = 'insightsFunction' in result.invocation ? 'insights_function' : 'flow'
             const logSourceId = result.invocation.parentRunId
                 ? result.invocation.parentRunId
                 : result.invocation.functionId

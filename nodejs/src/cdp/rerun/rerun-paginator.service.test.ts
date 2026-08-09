@@ -265,7 +265,7 @@ describe('RerunPaginatorService integration', () => {
             insightsFunctionManager,
             flowManager,
             paginatorLifecycleService,
-            { insights_function: scriptQueue, hog_flow: flowQueue },
+            { insights_function: scriptQueue, flow: flowQueue },
             paginatorMonitoringService,
             10000
         )
@@ -622,7 +622,7 @@ describe('RerunPaginatorService integration', () => {
                 insightsFunctionManager,
                 flowManager,
                 paginatorLifecycleService,
-                { insights_function: scriptQueue, hog_flow: flowQueue },
+                { insights_function: scriptQueue, flow: flowQueue },
                 paginatorMonitoringService,
                 10000
             )

@@ -5,7 +5,7 @@ import { PipelineResult, ok } from '~/ingestion/framework/results'
 import { ProcessingStep } from '~/ingestion/framework/steps'
 
 const backgroundTaskScriptTransformerDuration = new Histogram({
-    name: 'ingestion_background_task_hog_transformer_duration_seconds',
+    name: 'ingestion_background_task_transformer_duration_seconds',
     help: 'Time waiting for script transformer invocation results in the background task',
     buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
 })

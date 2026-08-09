@@ -34,34 +34,34 @@ export interface ScriptTransformerConfig {
 }
 
 export const scriptTransformationDroppedEvents = new Counter({
-    name: 'hog_transformation_dropped_events',
+    name: 'transformation_dropped_events',
     help: 'Indicates how many events are dropped by script transformations',
 })
 
 export const scriptTransformationInvocations = new Counter({
-    name: 'hog_transformation_invocations_total',
+    name: 'transformation_invocations_total',
     help: 'Number of times transformEvent was called directly',
 })
 
 export const scriptTransformationAttempts = new Counter({
-    name: 'hog_transformation_attempts_total',
+    name: 'transformation_attempts_total',
     help: 'Number of transformation attempts before any processing',
     labelNames: ['type'],
 })
 
 export const scriptTransformationCompleted = new Counter({
-    name: 'hog_transformation_completed_total',
+    name: 'transformation_completed_total',
     help: 'Number of successfully completed transformations',
     labelNames: ['type'],
 })
 
 export const scriptTransformationPendingInvocationResults = new Gauge({
-    name: 'hog_transformation_pending_invocation_results',
+    name: 'transformation_pending_invocation_results',
     help: 'Number of invocation results accumulated and waiting to be processed. High values indicate memory accumulation.',
 })
 
 export const scriptTransformationUnexpectedErrors = new Counter({
-    name: 'hog_transformation_unexpected_errors_total',
+    name: 'transformation_unexpected_errors_total',
     help: 'Number of unexpected errors during transformation execution. Any occurrence should trigger an alert as the transformation is skipped.',
 })
 

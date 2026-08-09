@@ -20,7 +20,7 @@ describe('buildAccountFlowInvocation', () => {
 
         const state = invocation.state as CyclotronJobInvocationFlow['state']
 
-        expect(state.event.event).toEqual('$batch_hog_flow_invocation')
+        expect(state.event.event).toEqual('$batch_flow_invocation')
         // distinct_id doubles as the per-account key for invocation_results; it must NOT
         // resolve to a person (the flow worker skips the lookup for account audiences).
         expect(state.event.distinct_id).toEqual('acme-1')
@@ -34,7 +34,7 @@ describe('buildAccountFlowInvocation', () => {
         expect(state.flowVersion).toBe(4)
         expect(state.variables).toEqual({ greeting: 'hi' })
         expect(invocation.parentRunId).toEqual('batch-job-1')
-        expect(invocation.queue).toEqual('hogflow')
+        expect(invocation.queue).toEqual('flow')
         expect((invocation as any).person).toBeUndefined()
     })
 })

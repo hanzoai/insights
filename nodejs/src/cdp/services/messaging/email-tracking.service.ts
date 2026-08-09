@@ -37,7 +37,7 @@ const emailTrackingErrorsCounter = new Counter({
     labelNames: ['error_type', 'source'],
 })
 
-// Skips here are expected (e.g. SES webhook for a insights_function rather than a hog_flow),
+// Skips here are expected (e.g. SES webhook for a insights_function rather than a flow),
 // kept separate so alerts on `email_tracking_errors_total` don't fire on normal traffic.
 const emailTrackingLogSkipsCounter = new Counter({
     name: 'email_tracking_log_skips_total',
@@ -217,7 +217,7 @@ export class EmailTrackingService {
                 app_source_version:
                     flow && workflowVersion !== undefined ? { id: flow.id, version: workflowVersion } : undefined,
             },
-            flow ? 'hog_flow' : 'insights_function'
+            flow ? 'flow' : 'insights_function'
         )
 
         const eventName = METRIC_NAME_TO_EVENT_NAME[metricName]
@@ -269,7 +269,7 @@ export class EmailTrackingService {
             flows = await this.flowManager.getFlows(uniqueFunctionIds)
         } catch (error) {
             logger.error('[EmailTrackingService] trackLogs: Failed to load script flows', { error })
-            emailTrackingErrorsCounter.inc({ error_type: 'hog_flow_lookup_failed', source: 'ses' })
+            emailTrackingErrorsCounter.inc({ error_type: 'flow_lookup_failed', source: 'ses' })
             return
         }
 
@@ -293,7 +293,7 @@ export class EmailTrackingService {
 
             logEntries.push({
                 team_id: flow.team_id,
-                log_source: 'hog_flow',
+                log_source: 'flow',
                 // Batch-triggered runs log under the batch run id (parentRunId); mirror the metrics path.
                 log_source_id: entry.parentRunId ?? flow.id,
                 instance_id: entry.invocationId,
@@ -307,7 +307,7 @@ export class EmailTrackingService {
             return
         }
 
-        this.insightsFunctionMonitoringService.queueLogs(logEntries, 'hog_flow')
+        this.insightsFunctionMonitoringService.queueLogs(logEntries, 'flow')
         await this.insightsFunctionMonitoringService.flush()
     }
 

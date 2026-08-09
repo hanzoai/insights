@@ -20,7 +20,7 @@ const buildInvocation = (overrides: { id?: string; functionId?: string; eventUui
 const buildAction = (id: string) => ({ id, type: 'function' }) as any
 
 const dupCounterValue = async (workflowId: string): Promise<number> => {
-    const metric = register.getSingleMetric('hogflow_duplicate_invocation_detected_total') as any
+    const metric = register.getSingleMetric('flow_duplicate_invocation_detected_total') as any
     const data = await metric.get()
     const found = data.values.find((v: any) => v.labels.workflow_id === workflowId)
     return found?.value ?? 0

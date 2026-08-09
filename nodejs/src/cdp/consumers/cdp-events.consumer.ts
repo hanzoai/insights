@@ -102,10 +102,10 @@ export class CdpEventsConsumer<
         return {
             // This is all IO so we can set them off in the background and start processing the next batch
             backgroundTask: Promise.all([
-                instrumentFn({ key: 'cdp.background_task.queue_hog_invocations', sendException: false }, () =>
+                instrumentFn({ key: 'cdp.background_task.queue_invocations', sendException: false }, () =>
                     this.scriptQueue.queueInvocations(scriptInvocations)
                 ),
-                instrumentFn({ key: 'cdp.background_task.queue_hogflow_invocations', sendException: false }, () =>
+                instrumentFn({ key: 'cdp.background_task.queue_flow_invocations', sendException: false }, () =>
                     this.flowQueue.queueInvocations(flowInvocations)
                 ),
                 instrumentFn({ key: 'cdp.background_task.monitoring_flush', sendException: false }, async () => {

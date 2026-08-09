@@ -676,7 +676,7 @@ describe('script flow processing', () => {
                     id: flow.id,
                 },
                 id: expect.any(String),
-                queue: 'hogflow',
+                queue: 'flow',
                 queuePriority: 1,
                 state: {
                     event: globals.event,
@@ -799,7 +799,7 @@ describe('script flow processing', () => {
                 expect.arrayContaining([
                     expect.objectContaining({
                         value: expect.objectContaining({
-                            app_source: 'hog_flow',
+                            app_source: 'flow',
                             app_source_id: flow.id,
                             metric_kind: 'failure',
                             metric_name: 'quota_limited',
