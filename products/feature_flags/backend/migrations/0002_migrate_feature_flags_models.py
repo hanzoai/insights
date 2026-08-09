@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import migrations, models
 
 import insights.models.utils
+from insights.migration_helpers import CreateTableIfNotExists
 
 import products.feature_flags.backend.models.feature_flag
 
@@ -432,6 +433,19 @@ class Migration(migrations.Migration):
             ],
             database_operations=[
                 # No database operations - table already exists with this name
+            ],
+        ),
+        # Absent on a fresh install, where no `insights` migration ever created them.
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                CreateTableIfNotExists(model_name="featureflaghashkeyoverride"),
+                CreateTableIfNotExists(model_name="evaluationcontext"),
+                CreateTableIfNotExists(model_name="featureflag"),
+                CreateTableIfNotExists(model_name="featureflagdashboards"),
+                CreateTableIfNotExists(model_name="featureflagevaluationcontext"),
+                CreateTableIfNotExists(model_name="featureflagoverride"),
+                CreateTableIfNotExists(model_name="scheduledchange"),
+                CreateTableIfNotExists(model_name="teamdefaultevaluationcontext"),
             ],
         ),
     ]

@@ -6,6 +6,7 @@ from django.db import migrations, models
 
 import insights.models.utils
 import insights.helpers.encrypted_fields
+from insights.migration_helpers import CreateTableIfNotExists
 
 
 class Migration(migrations.Migration):
@@ -448,5 +449,18 @@ class Migration(migrations.Migration):
                 ),
             ],
             database_operations=[],
+        ),
+        # Absent on a fresh install, where no `insights` migration ever created them.
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                CreateTableIfNotExists(model_name="insightsfunctiontemplate"),
+                CreateTableIfNotExists(model_name="hook"),
+                CreateTableIfNotExists(model_name="plugin"),
+                CreateTableIfNotExists(model_name="pluginconfig"),
+                CreateTableIfNotExists(model_name="pluginattachment"),
+                CreateTableIfNotExists(model_name="pluginsourcefile"),
+                CreateTableIfNotExists(model_name="pluginstorage"),
+                CreateTableIfNotExists(model_name="insightsfunction"),
+            ],
         ),
     ]

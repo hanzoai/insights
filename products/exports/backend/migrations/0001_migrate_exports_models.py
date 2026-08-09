@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import migrations, models
 
 import insights.models.utils
+from insights.migration_helpers import CreateTableIfNotExists
 
 import products.exports.backend.models.exported_asset
 
@@ -316,6 +317,14 @@ class Migration(migrations.Migration):
             ],
             database_operations=[
                 # No database operations - table already exists with this name
+            ],
+        ),
+        # Absent on a fresh install, where no `insights` migration ever created them.
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                CreateTableIfNotExists(model_name="exportedasset"),
+                CreateTableIfNotExists(model_name="subscription"),
+                CreateTableIfNotExists(model_name="subscriptiondelivery"),
             ],
         ),
     ]
