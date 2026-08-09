@@ -228,6 +228,65 @@ jobs:
                   docker push "$IMAGE"
                   echo "built $IMAGE (revision ${GITHUB_SHA})"
 
+            # The static tree has to reach the origin BEFORE the pin below points
+            # production at this image, and the order is not a preference.
+            # insights.hanzo.ai/static/* is served from s3://cdn/insights by the
+            # ingress, and that middleware is terminal — a key it cannot find is a
+            # 404, not a fall-through to the pod. Pin first and there is a window
+            # where pods run a build whose chunks nobody has published yet, which
+            # is a harder failure than the one this whole arrangement removes.
+            # So: build, publish, then pin. If this step fails the release stops
+            # here, with the image pushed and production still on the last one.
+            #
+            # Cheap after the first run despite the size. bin/publish-static
+            # writes a content-hashed key ONCE — same name means same bytes — so a
+            # build only uploads what it actually changed; the 2.7 GB first
+            # publish is the floor, not the per-build cost.
+            #
+            # The script runs inside the image that was just built, because that
+            # image already carries python, boto3 and the tree itself at
+            # /code/staticfiles, so what gets published is exactly what the pods
+            # will serve. It arrives on stdin rather than a bind mount: this
+            # runner talks to a dind sidecar, so a -v path would resolve against
+            # the daemon's filesystem and silently mount an empty directory.
+            - name: Publish static to the origin
+              env:
+                  KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
+                  KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
+                  KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://api.hanzo.ai' }}
+                  KMS_SECRET_ENV: ${{ vars.KMS_SECRET_ENV || 'prod' }}
+              run: |
+                  set -euo pipefail
+                  VERSION="${{ steps.ver.outputs.version }}"
+                  IMAGE="ghcr.io/hanzoai/insights:${VERSION}"
+
+                  KMS_CURL=(curl -fsS --retry 5 --retry-delay 2 --retry-connrefused --max-time 30)
+
+                  KMS_TOKEN=$("${KMS_CURL[@]}" "${KMS_ENDPOINT}/v1/kms/auth/login" \
+                    -H 'Content-Type: application/json' \
+                    -d "{\"clientId\":\"${KMS_CLIENT_ID}\",\"clientSecret\":\"${KMS_CLIENT_SECRET}\"}" \
+                    | jq -r '.accessToken // empty')
+                  [ -n "$KMS_TOKEN" ] || { echo "::error::KMS login failed at ${KMS_ENDPOINT}"; exit 1; }
+
+                  kms() {
+                    "${KMS_CURL[@]}" "${KMS_ENDPOINT}/v1/kms/secrets/storage/$1?env=${KMS_SECRET_ENV}" \
+                      -H "Authorization: Bearer ${KMS_TOKEN}" | jq -r '.value // empty'
+                  }
+                  S3_KEY=$(kms S3_ROOT_USER)
+                  S3_SECRET=$(kms S3_ROOT_PASSWORD)
+                  [ -n "$S3_KEY" ] && [ -n "$S3_SECRET" ] || {
+                    echo "::error::S3 credentials missing in KMS at storage/ (env ${KMS_SECRET_ENV})"; exit 1; }
+                  echo "::add-mask::${S3_SECRET}"
+
+                  docker run --rm -i \
+                    -e S3_ENDPOINT=https://s3.hanzo.ai \
+                    -e S3_BUCKET=cdn \
+                    -e S3_PREFIX=insights \
+                    -e VERSION="$VERSION" \
+                    -e AWS_ACCESS_KEY_ID="$S3_KEY" \
+                    -e AWS_SECRET_ACCESS_KEY="$S3_SECRET" \
+                    "$IMAGE" python - /code/staticfiles < bin/publish-static
+
             # THE DEPLOY. Everything above this PUBLISHES an image; this is the step
             # that makes production run it.
             #
