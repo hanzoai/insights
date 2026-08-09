@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db import migrations, models
 
 import insights.models.utils
+from insights.migration_helpers import CreateTableIfNotExists
 
 
 class Migration(migrations.Migration):
@@ -193,5 +194,14 @@ class Migration(migrations.Migration):
                 ),
             ],
             database_operations=[],
+        ),
+        # Absent on a fresh install, where no `insights` migration ever created them.
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                CreateTableIfNotExists(model_name="datawarehousejoin"),
+                CreateTableIfNotExists(model_name="datawarehouseviewlink"),
+                CreateTableIfNotExists(model_name="datawarehousesavedqueryfolder"),
+                CreateTableIfNotExists(model_name="querytabstate"),
+            ],
         ),
     ]

@@ -6,6 +6,7 @@ import django.contrib.postgres.fields
 from django.db import migrations, models
 
 import insights.models.utils
+from insights.migration_helpers import CreateTableIfNotExists
 
 
 class Migration(migrations.Migration):
@@ -469,5 +470,15 @@ class Migration(migrations.Migration):
                 ),
             ],
             database_operations=[],
+        ),
+        # Absent on a fresh install, where no `insights` migration ever created them.
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                CreateTableIfNotExists(model_name="buttontile"),
+                CreateTableIfNotExists(model_name="dashboard"),
+                CreateTableIfNotExists(model_name="text"),
+                CreateTableIfNotExists(model_name="dashboardtile"),
+                CreateTableIfNotExists(model_name="dashboardtemplate"),
+            ],
         ),
     ]
