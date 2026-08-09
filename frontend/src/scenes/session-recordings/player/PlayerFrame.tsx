@@ -4,7 +4,7 @@ import './PlayerFrameLLMHighlight.scss'
 import useSize from '@react-hook/size'
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import { Handler, viewportResizeDimension } from 'insights-js/rrweb-types'
+import { Handler, viewportResizeDimension } from '@hanzo/insights-rrweb-types'
 import { useCallback, useEffect, useRef } from 'react'
 
 import { sessionRecordingPlayerLogic } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'

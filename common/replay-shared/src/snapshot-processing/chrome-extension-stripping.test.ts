@@ -1,4 +1,4 @@
-import { NodeType, serializedNodeWithId } from 'insights-js/rrweb-types'
+import { NodeType, serializedNodeWithId } from '@hanzo/insights-rrweb-types'
 
 import { CHROME_EXTENSION_DENY_LIST, stripChromeExtensionDataFromNode } from './chrome-extension-stripping'
 

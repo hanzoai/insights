@@ -1,7 +1,7 @@
 import { router } from 'kea-router'
 import { expectLogic } from 'kea-test-utils'
 import insights from 'insights-js'
-import { EventType, IncrementalSource, eventWithTime } from 'insights-js/rrweb-types'
+import { EventType, IncrementalSource, eventWithTime } from '@hanzo/insights-rrweb-types'
 
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { playerSettingsLogic } from 'scenes/session-recordings/player/playerSettingsLogic'
