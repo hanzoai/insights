@@ -71,7 +71,7 @@ export function ScopeIcon(props: { scope: APIScopeObject }): JSX.Element | null 
             return <IconToggle />
         case 'heatmap':
             return <IconCursorClick />
-        case 'hog_flow':
+        case 'script_flow':
             return <IconDecisionTree />
         case 'insight':
             return <IconTrends />

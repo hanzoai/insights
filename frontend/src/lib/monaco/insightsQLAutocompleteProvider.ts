@@ -6,7 +6,7 @@ import type { codeEditorLogicType } from 'lib/monaco/codeEditorLogic'
 import { performQuery } from '~/queries/query'
 import {
     AutocompleteCompletionItemKind,
-    HogLanguage,
+    ScriptLanguage,
     InsightsQLAutocomplete,
     NodeKind,
 } from '~/queries/schema/schema-general'
@@ -92,7 +92,7 @@ const emptyCompletionList = (): languages.CompletionList => ({
     incomplete: false,
 })
 
-export const insightsQLAutocompleteProvider = (type: HogLanguage): languages.CompletionItemProvider => ({
+export const insightsQLAutocompleteProvider = (type: ScriptLanguage): languages.CompletionItemProvider => ({
     triggerCharacters: [' ', ',', '.', '{'],
     provideCompletionItems: async (model, position) => {
         const logic: BuiltLogic<codeEditorLogicType> | undefined = (model as any).codeEditorLogic

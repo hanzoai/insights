@@ -8,7 +8,7 @@ import { InsightsCaptureOnViewed } from '@hanzo/react'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { LiveRecordingsCount } from 'lib/components/LiveUserCount'
-import { WarningHog } from 'lib/components/mascots'
+import { WarningScript } from 'lib/components/mascots'
 import { Shortcut } from 'lib/components/Shortcuts/Shortcut'
 import { keyBinds } from 'lib/components/Shortcuts/shortcuts'
 import { Banner } from 'lib/elements/Banner'
@@ -164,7 +164,7 @@ function Warnings(): JSX.Element {
                 <Banner type="info" hideIcon={true}>
                     <div className="flex gap-8 p-8 md:flex-row justify-center flex-wrap">
                         <div className="flex justify-center items-center w-full md:w-50">
-                            <WarningHog className="w-full h-auto md:h-[200px] md:w-[200px] max-w-50" />
+                            <WarningScript className="w-full h-auto md:h-[200px] md:w-[200px] max-w-50" />
                         </div>
                         <div className="flex flex-col gap-2 flex-shrink max-w-180">
                             <h2 className="text-lg font-semibold">

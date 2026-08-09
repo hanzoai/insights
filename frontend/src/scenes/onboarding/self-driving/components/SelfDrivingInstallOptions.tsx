@@ -46,13 +46,13 @@ export function SelfDrivingInstallOptions({ onContinue }: { onContinue: () => vo
                 Run this in your project. It sets everything up and hands back an inbox that's already working.
             </p>
             <WizardInstallOptions
-                hideHog
+                hideScript
                 offerCloudRun={false}
                 onQueued={onContinue}
                 onModeSelected={reportSelfDrivingOnboardingInstallModeSelected}
                 localBlock={
                     <WizardCommandBlock
-                        hideHog
+                        hideScript
                         subcommand="self-driving"
                         description="Takes about ten minutes. It'll ask you a few things along the way."
                     />

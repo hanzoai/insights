@@ -166,7 +166,7 @@ const meta: Meta<OverviewTabProps> = {
                                         '',
                                         'mascot.io',
                                         'Spikeville',
-                                        'Hogington',
+                                        'Scriptington',
                                         'https://mascot.io/entry-page',
                                     ],
                                 ],

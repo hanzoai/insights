@@ -5,7 +5,7 @@ import { combineUrl, router } from 'kea-router'
 
 import { Banner, Dialog, Input, Select } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { Shortcut } from 'lib/components/Shortcuts/Shortcut'
@@ -38,7 +38,7 @@ import {
     PropertyOperator,
 } from '~/types'
 
-const MascotGreek = pngHoggie()
+const MascotGreek = pngMascot()
 
 export const scene: SceneExport = {
     component: Cohorts,
@@ -309,7 +309,7 @@ export function Cohorts(): JSX.Element {
                 isEmpty={shouldShowEmptyState}
                 docsURL="https://hanzo.ai/docs/data/cohorts"
                 action={() => router.actions.push(urls.cohort('new'))}
-                customHog={MascotGreek}
+                customScript={MascotGreek}
                 mcpSurfaceKey="cohorts.create"
             />
 

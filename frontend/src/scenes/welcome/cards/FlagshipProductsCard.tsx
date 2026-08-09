@@ -1,6 +1,6 @@
 import { useActions } from 'kea'
 
-import { ProductHogHero } from 'lib/components/NavPanelAdvertisement/navPanelAdShared'
+import { ProductScriptHero } from 'lib/components/NavPanelAdvertisement/navPanelAdShared'
 import { getProductPushDisplay } from 'lib/components/NavPanelAdvertisement/navPanelProductPushDisplay'
 import { Card } from 'lib/elements/Card'
 import { Link } from 'lib/elements/Link'
@@ -42,7 +42,7 @@ export function FlagshipProductsCard(): JSX.Element {
                             className="overflow-hidden rounded border bg-surface-primary text-xs shadow-sm transition-shadow hover:shadow-md"
                             data-attr={`welcome-flagship-${productKey}`}
                         >
-                            <ProductHogHero hero={display} title={meta.label} text={display.tagline} />
+                            <ProductScriptHero hero={display} title={meta.label} text={display.tagline} />
                         </Link>
                     )
                 })}

@@ -4,9 +4,9 @@ import { Form } from 'kea-forms'
 import { Button, FileInput, Input, Select, Link, Spinner, toast } from '@hanzo/elements'
 import { IconArrowRight, IconCheck, IconUpload, IconX } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { BillingUpgradeCTA } from 'lib/components/BillingUpgradeCTA'
-import { ClimberHog1, ClimberHog2 } from 'lib/components/mascots'
+import { ClimberScript1, ClimberScript2 } from 'lib/components/mascots'
 import { Banner } from 'lib/elements/Banner'
 import { CalendarSelectInput } from 'lib/elements/Calendar/CalendarSelect'
 import { Field } from 'lib/elements/Field'
@@ -23,7 +23,7 @@ import { BillingProductV2Type, StartupProgramLabel } from '~/types'
 import { RAISED_OPTIONS } from './constants'
 import { StartupProgramLogicProps, startupProgramLogic } from './startupProgramLogic'
 
-const MascotHogpatch = pngHoggie()
+const MascotScriptpatch = pngMascot()
 
 const YC_DEAL_BOOKFACE = 'https://bookface.ycombinator.com/deals/687'
 
@@ -170,7 +170,7 @@ export function StartupProgram(): JSX.Element {
                     <div className="flex flex-col items-center mt-8">
                         <div className="px-4 w-full max-w-100 mb-4">
                             <div className="relative">
-                                <MascotHogpatch className="h-auto w-full" />
+                                <MascotScriptpatch className="h-auto w-full" />
                             </div>
                         </div>
                         <div className="text-center">
@@ -187,7 +187,7 @@ export function StartupProgram(): JSX.Element {
                     <div className="flex items-center justify-center -mt-6 md:gap-8 mb-3">
                         <div className="flex items-end self-end">
                             <div className="relative w-35 min-w-18">
-                                <ClimberHog1 className="h-auto w-full" />
+                                <ClimberScript1 className="h-auto w-full" />
                             </div>
                         </div>
                         <div className="text-center">
@@ -203,7 +203,7 @@ export function StartupProgram(): JSX.Element {
                         </div>
                         <div className="flex items-center">
                             <div className="relative w-35 min-w-18">
-                                <ClimberHog2 className="h-auto w-full" />
+                                <ClimberScript2 className="h-auto w-full" />
                             </div>
                         </div>
                     </div>

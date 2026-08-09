@@ -743,7 +743,7 @@
         "feature": "workflows",
         "summary": "Enable workflow",
         "title": "Enable workflow",
-        "required_scopes": ["hog_flow:write"],
+        "required_scopes": ["script_flow:write"],
         "annotations": {
             "destructiveHint": true,
             "idempotentHint": true,
@@ -757,7 +757,7 @@
         "feature": "workflows",
         "summary": "Archive workflow",
         "title": "Archive workflow",
-        "required_scopes": ["hog_flow:write"],
+        "required_scopes": ["script_flow:write"],
         "annotations": {
             "destructiveHint": false,
             "idempotentHint": true,
@@ -771,7 +771,7 @@
         "feature": "workflows",
         "summary": "Size workflow audience",
         "title": "Size workflow audience",
-        "required_scopes": ["hog_flow:read", "person:read"],
+        "required_scopes": ["script_flow:read", "person:read"],
         "annotations": {
             "destructiveHint": false,
             "idempotentHint": true,
@@ -785,7 +785,7 @@
         "feature": "workflows",
         "summary": "Run batch workflow",
         "title": "Run batch workflow",
-        "required_scopes": ["hog_flow:write", "person:read"],
+        "required_scopes": ["script_flow:write", "person:read"],
         "annotations": {
             "destructiveHint": true,
             "idempotentHint": false,
@@ -799,7 +799,7 @@
         "feature": "workflows",
         "summary": "Schedule workflow runs",
         "title": "Schedule workflow runs",
-        "required_scopes": ["hog_flow:write", "person:read"],
+        "required_scopes": ["script_flow:write", "person:read"],
         "annotations": {
             "destructiveHint": true,
             "idempotentHint": false,

@@ -1,9 +1,9 @@
 import { ActivityScope, PropertyFilterType, PropertyOperator } from '~/types'
 
-import { advancedActivityFiltersToHogProperties } from './advancedActivityFilterTranslation'
+import { advancedActivityFiltersToScriptProperties } from './advancedActivityFilterTranslation'
 import { AdvancedActivityLogFilters, DEFAULT_START_DATE } from './advancedActivityLogsLogic'
 
-describe('advancedActivityFiltersToHogProperties', () => {
+describe('advancedActivityFiltersToScriptProperties', () => {
     const baseFilter = (overrides: Partial<AdvancedActivityLogFilters> = {}): AdvancedActivityLogFilters => ({
         start_date: DEFAULT_START_DATE,
         users: [],
@@ -34,7 +34,7 @@ describe('advancedActivityFiltersToHogProperties', () => {
     ] as const)(
         'maps $field to "$expectedKey" property filter with Exact operator',
         ({ field, values, expectedKey }) => {
-            const result = advancedActivityFiltersToHogProperties(
+            const result = advancedActivityFiltersToScriptProperties(
                 baseFilter({ [field]: values } as Partial<AdvancedActivityLogFilters>)
             )
             expect(result.properties).toEqual([
@@ -50,7 +50,7 @@ describe('advancedActivityFiltersToHogProperties', () => {
     )
 
     it('maps was_impersonated and is_system booleans', () => {
-        const result = advancedActivityFiltersToHogProperties(baseFilter({ was_impersonated: true, is_system: false }))
+        const result = advancedActivityFiltersToScriptProperties(baseFilter({ was_impersonated: true, is_system: false }))
         expect(result.properties).toEqual([
             {
                 key: 'was_impersonated',
@@ -68,7 +68,7 @@ describe('advancedActivityFiltersToHogProperties', () => {
     })
 
     it('maps whitelisted detail_filters (name, changes) with operator translation', () => {
-        const result = advancedActivityFiltersToHogProperties(
+        const result = advancedActivityFiltersToScriptProperties(
             baseFilter({
                 detail_filters: {
                     name: { operation: 'contains', value: 'foo' },
@@ -96,7 +96,7 @@ describe('advancedActivityFiltersToHogProperties', () => {
     })
 
     it('drops users, date ranges, and non-whitelisted detail_filter paths', () => {
-        const result = advancedActivityFiltersToHogProperties(
+        const result = advancedActivityFiltersToScriptProperties(
             baseFilter({
                 users: ['u1'],
                 start_date: DEFAULT_START_DATE,
@@ -119,7 +119,7 @@ describe('advancedActivityFiltersToHogProperties', () => {
     })
 
     it('returns an empty property list when no mappable filters are set', () => {
-        const result = advancedActivityFiltersToHogProperties(baseFilter())
+        const result = advancedActivityFiltersToScriptProperties(baseFilter())
         expect(result.properties).toEqual([])
         expect(result.droppedFields).toEqual([])
     })

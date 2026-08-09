@@ -1,19 +1,19 @@
 import { DateTime } from 'luxon'
 
-import { isHogDate, isHogDateTime } from '../objects'
-import { HogDate, HogDateTime } from '../types'
+import { isScriptDate, isScriptDateTime } from '../objects'
+import { ScriptDate, ScriptDateTime } from '../types'
 
-export function toHogDate(year: number, month: number, day: number): HogDate {
+export function toScriptDate(year: number, month: number, day: number): ScriptDate {
     return {
-        __hogDate__: true,
+        __scriptDate__: true,
         year: year,
         month: month,
         day: day,
     }
 }
 
-export function toHogDateTime(timestamp: number | HogDate, zone?: string): HogDateTime {
-    if (isHogDate(timestamp)) {
+export function toScriptDateTime(timestamp: number | ScriptDate, zone?: string): ScriptDateTime {
+    if (isScriptDate(timestamp)) {
         const dateTime = DateTime.fromObject(
             {
                 year: timestamp.year,
@@ -23,13 +23,13 @@ export function toHogDateTime(timestamp: number | HogDate, zone?: string): HogDa
             { zone: zone || 'UTC' }
         )
         return {
-            __hogDateTime__: true,
+            __scriptDateTime__: true,
             dt: dateTime.toSeconds(),
             zone: dateTime.zoneName || 'UTC',
         }
     }
     return {
-        __hogDateTime__: true,
+        __scriptDateTime__: true,
         dt: timestamp,
         zone: zone || 'UTC',
     }
@@ -37,53 +37,53 @@ export function toHogDateTime(timestamp: number | HogDate, zone?: string): HogDa
 
 // EXPORTED STL functions
 
-export function now(zone?: string): HogDateTime {
-    return toHogDateTime(Date.now() / 1000, zone)
+export function now(zone?: string): ScriptDateTime {
+    return toScriptDateTime(Date.now() / 1000, zone)
 }
 
-export function toUnixTimestamp(input: HogDateTime | HogDate | string, zone?: string): number {
-    if (isHogDateTime(input)) {
+export function toUnixTimestamp(input: ScriptDateTime | ScriptDate | string, zone?: string): number {
+    if (isScriptDateTime(input)) {
         return input.dt
     }
-    if (isHogDate(input)) {
-        return toHogDateTime(input).dt
+    if (isScriptDate(input)) {
+        return toScriptDateTime(input).dt
     }
     return DateTime.fromISO(input, { zone: zone || 'UTC' }).toSeconds()
 }
 
-export function fromUnixTimestamp(input: number): HogDateTime {
-    return toHogDateTime(input)
+export function fromUnixTimestamp(input: number): ScriptDateTime {
+    return toScriptDateTime(input)
 }
 
-export function toUnixTimestampMilli(input: HogDateTime | HogDate | string, zone?: string): number {
+export function toUnixTimestampMilli(input: ScriptDateTime | ScriptDate | string, zone?: string): number {
     return toUnixTimestamp(input, zone) * 1000
 }
 
-export function fromUnixTimestampMilli(input: number): HogDateTime {
-    return toHogDateTime(input / 1000)
+export function fromUnixTimestampMilli(input: number): ScriptDateTime {
+    return toScriptDateTime(input / 1000)
 }
 
-export function toTimeZone(input: HogDateTime, zone: string): HogDateTime | HogDate {
-    if (!isHogDateTime(input)) {
+export function toTimeZone(input: ScriptDateTime, zone: string): ScriptDateTime | ScriptDate {
+    if (!isScriptDateTime(input)) {
         throw new Error('Expected a DateTime')
     }
     return { ...input, zone }
 }
 
-export function toDate(input: string | number): HogDate {
+export function toDate(input: string | number): ScriptDate {
     const dt = typeof input === 'number' ? DateTime.fromSeconds(input) : DateTime.fromISO(input)
     return {
-        __hogDate__: true,
+        __scriptDate__: true,
         year: dt.year,
         month: dt.month,
         day: dt.day,
     }
 }
 
-export function toDateTime(input: string | number, zone?: string): HogDateTime {
+export function toDateTime(input: string | number, zone?: string): ScriptDateTime {
     const dt = typeof input === 'number' ? input : DateTime.fromISO(input, { zone: zone || 'UTC' }).toSeconds()
     return {
-        __hogDateTime__: true,
+        __scriptDateTime__: true,
         dt: dt,
         zone: zone || 'UTC',
     }
@@ -136,7 +136,7 @@ const tokenTranslations: Record<string, string> = {
     '%': '%',
 }
 export function formatDateTime(input: any, format: string, zone?: string): string {
-    if (!isHogDateTime(input)) {
+    if (!isScriptDateTime(input)) {
         throw new Error('Expected a DateTime')
     }
     if (!format) {

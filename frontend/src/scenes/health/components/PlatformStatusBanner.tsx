@@ -3,12 +3,12 @@ import { useValues } from 'kea'
 import { Banner } from '@hanzo/elements'
 import type { BannerProps } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { insightsStatusLogic } from 'lib/components/HelpMenu/insightsStatusLogic'
 import type { InsightsStatusBadgeStatus, InsightsStatusType } from 'lib/components/HelpMenu/insightsStatusLogic'
-import { HeartHog, WarningHog } from 'lib/components/mascots'
+import { HeartScript, WarningScript } from 'lib/components/mascots'
 
-const MascotDrivingHogzilla = pngHoggie()
+const MascotDrivingScriptzilla = pngMascot()
 
 const STATUS_CONFIG: Record<
     InsightsStatusBadgeStatus,
@@ -17,9 +17,9 @@ const STATUS_CONFIG: Record<
         Script: React.ComponentType<{ className?: string }>
     }
 > = {
-    success: { bannerType: 'success', Script: HeartHog },
-    warning: { bannerType: 'warning', Script: WarningHog },
-    danger: { bannerType: 'error', Script: MascotDrivingHogzilla },
+    success: { bannerType: 'success', Script: HeartScript },
+    warning: { bannerType: 'warning', Script: WarningScript },
+    danger: { bannerType: 'error', Script: MascotDrivingScriptzilla },
 }
 
 const STATUS_LABELS: Record<InsightsStatusType, string> = {

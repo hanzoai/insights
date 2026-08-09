@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { Divider } from 'lib/elements/Divider'
 import { Spinner } from 'lib/elements/Spinner'
 import { lazyWithRetry } from 'lib/utils/retryImport'
-import { HogDebug } from 'scenes/debug/HogDebug'
+import { ScriptDebug } from 'scenes/debug/ScriptDebug'
 import { MarketingAnalyticsOverview } from 'scenes/web-analytics/tabs/marketing-analytics/frontend/components/MarketingAnalyticsOverview/MarketingAnalyticsOverview'
 
 import { ErrorBoundary } from '~/layout/ErrorBoundary'
@@ -34,7 +34,7 @@ import {
     isDataVisualizationNode,
     isEndpointsUsageOverviewQuery,
     isEndpointsUsageTrendsQuery,
-    isHogQuery,
+    isScriptQuery,
     isInsightVizNode,
     isMarketingAnalyticsAggregatedQuery,
     isMetricsQuery,
@@ -249,9 +249,9 @@ export function Query<Q extends Node>(props: QueryProps<Q>): JSX.Element | null 
                 />
             </Suspense>
         )
-    } else if (isHogQuery(query)) {
+    } else if (isScriptQuery(query)) {
         component = (
-            <HogDebug
+            <ScriptDebug
                 attachTo={props.attachTo}
                 query={query}
                 setQuery={setQuery as (query: any) => void}

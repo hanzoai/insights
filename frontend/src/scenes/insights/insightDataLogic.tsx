@@ -45,7 +45,7 @@ import {
     isDataTableNode,
     isDataVisualizationNode,
     isInsightsQLQuery,
-    isHogQuery,
+    isScriptQuery,
     isInsightQueryNode,
     isInsightVizNode,
     isWebAnalyticsInsightQuery,
@@ -65,7 +65,7 @@ import type {
     InsightsQLAutocompleteResponse,
     InsightsQLMetadataResponse,
     InsightsQLQueryResponse,
-    HogQueryResponse,
+    ScriptQueryResponse,
     LogAttributesQueryResponse,
     LogValuesQueryResponse,
     LogsQueryResponse,
@@ -106,7 +106,7 @@ export interface insightDataLogicValues {
     insightDataLoading: boolean // dataNodeLogic
     insightDataRaw:
         | ErrorTrackingQueryResponse
-        | HogQueryResponse
+        | ScriptQueryResponse
         | InsightsQLAutocompleteResponse
         | InsightsQLMetadataResponse
         | InsightsQLQueryResponse<any[]>
@@ -169,7 +169,7 @@ export interface insightDataLogicActions {
     loadDataSuccess: (
         response:
             | ErrorTrackingQueryResponse
-            | HogQueryResponse
+            | ScriptQueryResponse
             | InsightsQLAutocompleteResponse
             | InsightsQLMetadataResponse
             | InsightsQLQueryResponse<any[]>
@@ -200,7 +200,7 @@ export interface insightDataLogicActions {
         }
         response:
             | ErrorTrackingQueryResponse
-            | HogQueryResponse
+            | ScriptQueryResponse
             | InsightsQLAutocompleteResponse
             | InsightsQLMetadataResponse
             | InsightsQLQueryResponse<any[]>
@@ -219,7 +219,7 @@ export interface insightDataLogicActions {
         response:
             | ErrorTrackingQueryResponse
             | EventsQueryResponse
-            | HogQueryResponse
+            | ScriptQueryResponse
             | InsightsQLAutocompleteResponse
             | InsightsQLMetadataResponse
             | InsightsQLQueryResponse<any[]>
@@ -236,7 +236,7 @@ export interface insightDataLogicActions {
     ) =>
         | ErrorTrackingQueryResponse
         | EventsQueryResponse
-        | HogQueryResponse
+        | ScriptQueryResponse
         | InsightsQLAutocompleteResponse
         | InsightsQLMetadataResponse
         | InsightsQLQueryResponse<any[]>
@@ -430,7 +430,7 @@ export interface insightDataLogicMeta {
         insightData: (
             insightDataRaw:
                 | ErrorTrackingQueryResponse
-                | HogQueryResponse
+                | ScriptQueryResponse
                 | InsightsQLAutocompleteResponse
                 | InsightsQLMetadataResponse
                 | InsightsQLQueryResponse<any[]>
@@ -647,7 +647,7 @@ export const insightDataLogic = kea<insightDataLogicType>([
                     savedOrDefaultQuery = getDefaultQuery(InsightType.SQL, filterTestAccountsDefault)
                 } else if (isDataTableNode(query)) {
                     savedOrDefaultQuery = getDefaultQuery(InsightType.JSON, filterTestAccountsDefault)
-                } else if (isHogQuery(query)) {
+                } else if (isScriptQuery(query)) {
                     savedOrDefaultQuery = getDefaultQuery(InsightType.HOG, filterTestAccountsDefault)
                 } else {
                     return false
@@ -667,7 +667,7 @@ export const insightDataLogic = kea<insightDataLogicType>([
                     | import('~/queries/schema/schema-general').InsightsQLAutocompleteResponse
                     | import('~/queries/schema/schema-general').InsightsQLMetadataResponse
                     | import('~/queries/schema/schema-general').InsightsQLQueryResponse<any[]>
-                    | import('~/queries/schema/schema-general').HogQueryResponse
+                    | import('~/queries/schema/schema-general').ScriptQueryResponse
                     | import('~/queries/schema/schema-general').LogAttributesQueryResponse
                     | import('~/queries/schema/schema-general').LogValuesQueryResponse
                     | import('~/queries/schema/schema-general').MetricsQueryResponse

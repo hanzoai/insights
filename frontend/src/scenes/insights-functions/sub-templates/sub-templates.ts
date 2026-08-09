@@ -17,7 +17,7 @@ import {
 // in one place so URL changes can't drift between the two surfaces.
 // encodeURLComponent mirrors JS encodeURIComponent, which leaves `(` and `)` unescaped — a `)` in a
 // fingerprint would close the surrounding markdown link `[text](url)` early, so encode them too.
-export const errorTrackingIssueLinkHogTemplate = (medium: string): string =>
+export const errorTrackingIssueLinkScriptTemplate = (medium: string): string =>
     `{project.url}/error_tracking/fingerprint/{replaceAll(replaceAll(encodeURLComponent(event.properties.fingerprint), '(', '%28'), ')', '%29')}?timestamp={event.properties.exception_timestamp}&utm_source=alert&utm_campaign=error_tracking_alert&utm_medium=${medium}`
 
 // In single-exec mode $mcp_tool_name is always the 'exec' dispatcher; the inner tool the agent
@@ -29,7 +29,7 @@ const MCP_EFFECTIVE_TOOL_EXPR =
 // a breakage that is still happening reappears in the channel.
 const MCP_ALERT_MASKING_TTL_SECONDS = 30 * 60
 
-// The masking key, which must never evaluate to an empty value: HogMaskerService skips masking
+// The masking key, which must never evaluate to an empty value: ScriptMaskerService skips masking
 // outright when the hash expression is falsy, so an event carrying neither tool-name property (the
 // filters only require $mcp_is_error, so anyone with the project token can send one) would
 // otherwise escape deduplication entirely. Nameless events all collapse into one bucket instead.
@@ -373,7 +373,7 @@ export type MCPMessageField = 'clientName' | 'serverName' | 'intent' | 'toolName
 type MCPFieldRenderer = (field: MCPMessageField) => string
 
 // Renders each field as an escaped, length-bounded Script interpolation.
-function hogFieldRenderer(escape: ChatEscaper): MCPFieldRenderer {
+function scriptFieldRenderer(escape: ChatEscaper): MCPFieldRenderer {
     return (field) => {
         switch (field) {
             case 'clientName':
@@ -426,8 +426,8 @@ export function mcpNotificationPreviewMessage(values: Record<MCPMessageField, st
     return mcpToolFailureMessage(field, '*')
 }
 
-const MCP_TOOL_ERROR_SLACK_MESSAGE = mcpToolFailureMessage(hogFieldRenderer(slackEscapeExpr), '*')
-const MCP_TOOL_ERROR_MARKDOWN_MESSAGE = mcpToolFailureMessage(hogFieldRenderer(markdownEscapeExpr), '**')
+const MCP_TOOL_ERROR_SLACK_MESSAGE = mcpToolFailureMessage(scriptFieldRenderer(slackEscapeExpr), '*')
+const MCP_TOOL_ERROR_MARKDOWN_MESSAGE = mcpToolFailureMessage(scriptFieldRenderer(markdownEscapeExpr), '**')
 
 const MCP_ENCODED_EFFECTIVE_TOOL_EXPR = `encodeURLComponent(concat(${MCP_EFFECTIVE_TOOL_EXPR}))`
 // Deep-links to the failing tool, falling back to the tool list when the encoded name would
@@ -857,7 +857,7 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
             description: 'Posts a message to Discord when an issue is created',
             inputs: {
                 content: {
-                    value: `**🔴 {event.properties.name} created:** {event.properties.description}\n\n[View in Insights](${errorTrackingIssueLinkHogTemplate('discord')})`,
+                    value: `**🔴 {event.properties.name} created:** {event.properties.description}\n\n[View in Insights](${errorTrackingIssueLinkScriptTemplate('discord')})`,
                 },
             },
         },
@@ -868,7 +868,7 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
             description: 'Posts a message to Microsoft Teams when an issue is created',
             inputs: {
                 text: {
-                    value: `**🔴 {event.properties.name} created:** {event.properties.description} (View in [Insights](${errorTrackingIssueLinkHogTemplate('microsoft_teams')}))`,
+                    value: `**🔴 {event.properties.name} created:** {event.properties.description} (View in [Insights](${errorTrackingIssueLinkScriptTemplate('microsoft_teams')}))`,
                 },
             },
         },
@@ -899,7 +899,7 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
                             type: 'actions',
                             elements: [
                                 {
-                                    url: errorTrackingIssueLinkHogTemplate('slack'),
+                                    url: errorTrackingIssueLinkScriptTemplate('slack'),
                                     text: { text: 'View Issue', type: 'plain_text' },
                                     type: 'button',
                                 },
@@ -928,7 +928,7 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
                     value: '{event.distinct_id}',
                 },
                 insights_issue_url: {
-                    value: errorTrackingIssueLinkHogTemplate('linear'),
+                    value: errorTrackingIssueLinkScriptTemplate('linear'),
                 },
             },
         },
@@ -948,7 +948,7 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
                     value: '{event.distinct_id}',
                 },
                 insights_issue_url: {
-                    value: errorTrackingIssueLinkHogTemplate('github'),
+                    value: errorTrackingIssueLinkScriptTemplate('github'),
                 },
             },
         },
@@ -968,7 +968,7 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
                     value: '{event.distinct_id}',
                 },
                 insights_issue_url: {
-                    value: errorTrackingIssueLinkHogTemplate('gitlab'),
+                    value: errorTrackingIssueLinkScriptTemplate('gitlab'),
                 },
             },
         },
@@ -987,7 +987,7 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
             description: 'Posts a message to Discord when an issue is reopened',
             inputs: {
                 content: {
-                    value: `**🔄 {event.properties.name} reopened:** {event.properties.description}\n\n[View in Insights](${errorTrackingIssueLinkHogTemplate('discord')})`,
+                    value: `**🔄 {event.properties.name} reopened:** {event.properties.description}\n\n[View in Insights](${errorTrackingIssueLinkScriptTemplate('discord')})`,
                 },
             },
         },
@@ -998,7 +998,7 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
             description: 'Posts a message to Microsoft Teams when an issue is reopened',
             inputs: {
                 text: {
-                    value: `**🔄 {event.properties.name} reopened:** {event.properties.description} (View in [Insights](${errorTrackingIssueLinkHogTemplate('microsoft_teams')}))`,
+                    value: `**🔄 {event.properties.name} reopened:** {event.properties.description} (View in [Insights](${errorTrackingIssueLinkScriptTemplate('microsoft_teams')}))`,
                 },
             },
         },
@@ -1029,7 +1029,7 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
                             type: 'actions',
                             elements: [
                                 {
-                                    url: errorTrackingIssueLinkHogTemplate('slack'),
+                                    url: errorTrackingIssueLinkScriptTemplate('slack'),
                                     text: { text: 'View Issue', type: 'plain_text' },
                                     type: 'button',
                                 },
@@ -1066,7 +1066,7 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
 **Project:** [{project.name}]({project.url})
 **Alert:** [{source.name}]({source.url})
 
-[View issue](${errorTrackingIssueLinkHogTemplate('discord')})`,
+[View issue](${errorTrackingIssueLinkScriptTemplate('discord')})`,
                 },
             },
         },
@@ -1077,7 +1077,7 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
             description: 'Posts a message to Microsoft Teams when an issue is spiking',
             inputs: {
                 text: {
-                    value: `**📈 Issue spiking: {event.properties.name}:** {event.properties.description}\n**Exceptions in last 5 minutes:** {event.properties.current_bucket_value} ({event.properties.computed_baseline > 0 ? concat(round(event.properties.current_bucket_value / event.properties.computed_baseline), 'x over baseline') : 'no baseline yet'}) (View in [Insights](${errorTrackingIssueLinkHogTemplate('microsoft_teams')}))`,
+                    value: `**📈 Issue spiking: {event.properties.name}:** {event.properties.description}\n**Exceptions in last 5 minutes:** {event.properties.current_bucket_value} ({event.properties.computed_baseline > 0 ? concat(round(event.properties.current_bucket_value / event.properties.computed_baseline), 'x over baseline') : 'no baseline yet'}) (View in [Insights](${errorTrackingIssueLinkScriptTemplate('microsoft_teams')}))`,
                 },
             },
         },
@@ -1113,7 +1113,7 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
                             type: 'actions',
                             elements: [
                                 {
-                                    url: errorTrackingIssueLinkHogTemplate('slack'),
+                                    url: errorTrackingIssueLinkScriptTemplate('slack'),
                                     text: { text: 'View Issue', type: 'plain_text' },
                                     type: 'button',
                                 },

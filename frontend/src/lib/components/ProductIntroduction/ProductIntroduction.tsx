@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 
 import { IconOpenSidebar, IconPlus, IconX } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { Button } from 'lib/elements/Button'
 import { cn } from 'lib/utils/css-classes'
 import { userLogic } from 'scenes/userLogic'
@@ -12,8 +12,8 @@ import { ProductKey } from '~/queries/schema/schema-general'
 import { MCPUseCaseCard } from '../MCPHint/MCPUseCaseCard'
 import type { SurfaceKey } from '../MCPHint/prompts'
 
-const MascotConstruction2 = pngHoggie()
-const MascotMagnifyingGlass = pngHoggie()
+const MascotConstruction2 = pngMascot()
+const MascotMagnifyingGlass = pngMascot()
 
 /**
  * A component to introduce new users to a product, and to show something
@@ -41,16 +41,16 @@ export type ProductIntroductionProps = {
     /** If you want to provide a custom action button instead of using the default one */
     actionElementOverride?: JSX.Element
     docsURL?: string
-    customHog?: React.ComponentType<{ className?: string }>
+    customScript?: React.ComponentType<{ className?: string }>
     className?: string
     /**
      * Default hides the script below `md`. Use `responsive` to keep the script visible on small screens with a vertical
      * layout (script above copy), switching to the horizontal layout from `md` up (or from `main-content` width when
      * `useMainContentContainerQueries` is set). Use `vertical` for always-stacked script-above-copy (e.g. narrow dashboard tiles).
      */
-    hogLayout?: 'default' | 'responsive' | 'vertical'
+    scriptLayout?: 'default' | 'responsive' | 'vertical'
     /**
-     * When set with `hogLayout="responsive"`, use the `main-content` container (see Navigation) instead of the
+     * When set with `scriptLayout="responsive"`, use the `main-content` container (see Navigation) instead of the
      * viewport for breakpoints so layout responds when the side panel narrows the main column.
      */
     useMainContentContainerQueries?: boolean
@@ -90,9 +90,9 @@ export const ProductIntroduction = ({
     disabledReason,
     actionElementOverride,
     docsURL,
-    customHog: CustomHog,
+    customScript: CustomScript,
     className,
-    hogLayout = 'default',
+    scriptLayout = 'default',
     useMainContentContainerQueries = false,
     contentClassName,
     mcpSurfaceKey,
@@ -110,10 +110,10 @@ export const ProductIntroduction = ({
     }
 
     const actionable = action || actionElementOverride
-    const isVerticalHogLayout = hogLayout === 'vertical'
-    const isResponsiveHogLayout = hogLayout === 'responsive'
+    const isVerticalScriptLayout = scriptLayout === 'vertical'
+    const isResponsiveScriptLayout = scriptLayout === 'responsive'
 
-    const HogComponent = CustomHog ? CustomHog : actionable ? MascotConstruction2 : MascotMagnifyingGlass
+    const ScriptComponent = CustomScript ? CustomScript : actionable ? MascotConstruction2 : MascotMagnifyingGlass
 
     return (
         <div
@@ -140,9 +140,9 @@ export const ProductIntroduction = ({
             <div
                 className={cn(
                     'flex w-full justify-center',
-                    isVerticalHogLayout
+                    isVerticalScriptLayout
                         ? 'flex-col items-center gap-6'
-                        : isResponsiveHogLayout
+                        : isResponsiveScriptLayout
                           ? useMainContentContainerQueries
                               ? 'flex-col @min-[48rem]/main-content:flex-row items-center gap-6 @min-[48rem]/main-content:gap-8'
                               : 'flex-col md:flex-row items-center gap-6 md:gap-8'
@@ -151,8 +151,8 @@ export const ProductIntroduction = ({
             >
                 <div
                     className={cn(
-                        isVerticalHogLayout && 'w-full flex justify-center',
-                        isResponsiveHogLayout &&
+                        isVerticalScriptLayout && 'w-full flex justify-center',
+                        isResponsiveScriptLayout &&
                             (useMainContentContainerQueries
                                 ? 'w-full @min-[48rem]/main-content:w-auto flex justify-center'
                                 : 'w-full md:w-auto flex justify-center')
@@ -161,23 +161,23 @@ export const ProductIntroduction = ({
                     <div
                         className={cn(
                             'mx-auto',
-                            isVerticalHogLayout
+                            isVerticalScriptLayout
                                 ? 'block w-56 sm:w-60 lg:w-70 mb-4'
-                                : isResponsiveHogLayout
+                                : isResponsiveScriptLayout
                                   ? useMainContentContainerQueries
                                       ? 'block w-56 sm:w-60 lg:w-70 mb-4 @min-[48rem]/main-content:mb-0'
                                       : 'block w-56 sm:w-60 lg:w-70 mb-4 md:mb-0'
                                   : 'w-60 lg:w-70 mb-4 hidden md:block'
                         )}
                     >
-                        <HogComponent className="w-full h-full" />
+                        <ScriptComponent className="w-full h-full" />
                     </div>
                 </div>
                 <div
                     className={cn(
                         'flex-shrink max-w-140',
-                        isVerticalHogLayout && 'w-full text-center',
-                        isResponsiveHogLayout &&
+                        isVerticalScriptLayout && 'w-full text-center',
+                        isResponsiveScriptLayout &&
                             (useMainContentContainerQueries
                                 ? 'w-full text-center @min-[48rem]/main-content:text-left'
                                 : 'w-full text-center md:text-left'),
@@ -207,8 +207,8 @@ export const ProductIntroduction = ({
                     <div
                         className={cn(
                             'flex items-center gap-x-4 gap-y-2 mt-6 flex-wrap',
-                            isVerticalHogLayout && 'justify-center',
-                            isResponsiveHogLayout &&
+                            isVerticalScriptLayout && 'justify-center',
+                            isResponsiveScriptLayout &&
                                 (useMainContentContainerQueries
                                     ? 'justify-center @min-[48rem]/main-content:justify-start'
                                     : 'justify-center md:justify-start')

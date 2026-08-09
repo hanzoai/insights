@@ -9,7 +9,7 @@ import api from 'lib/api'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { BulkUpdateTagsButton } from 'lib/components/BulkActions/BulkUpdateTagsButton'
-import { FeatureFlagHog } from 'lib/components/mascots'
+import { FeatureFlagScript } from 'lib/components/mascots'
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import PropertyFiltersDisplay from 'lib/components/PropertyFilters/components/PropertyFiltersDisplay'
@@ -566,7 +566,7 @@ export function OverviewTab({
                 docsURL="https://hanzo.ai/docs/feature-flags/manual"
                 action={() => router.actions.push(newFeatureFlagUrl)}
                 isEmpty={shouldShowEmptyState}
-                customHog={FeatureFlagHog}
+                customScript={FeatureFlagScript}
                 className={cn('my-0')}
                 mcpSurfaceKey="feature_flags.create"
             />

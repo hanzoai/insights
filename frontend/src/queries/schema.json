@@ -889,7 +889,7 @@
                     "$ref": "#/definitions/SessionsTimelineQuery"
                 },
                 {
-                    "$ref": "#/definitions/HogQuery"
+                    "$ref": "#/definitions/ScriptQuery"
                 },
                 {
                     "$ref": "#/definitions/InsightsQLQuery"
@@ -1236,7 +1236,7 @@
                     "type": "object"
                 },
                 {
-                    "$ref": "#/definitions/HogQueryResponse"
+                    "$ref": "#/definitions/ScriptQueryResponse"
                 },
                 {
                     "$ref": "#/definitions/InsightsQLQueryResponse"
@@ -4046,7 +4046,7 @@
                 "fix_insightsql_query",
                 "analyze_user_interviews",
                 "create_user_interview_topic",
-                "create_hog_transformation_function",
+                "create_script_transformation_function",
                 "create_insights_function_filters",
                 "create_insights_function_inputs",
                 "create_message_template",
@@ -4089,7 +4089,7 @@
                 "finalize_plan",
                 "call_mcp_server",
                 "search_llm_traces",
-                "run_hog_eval_test",
+                "run_script_eval_test",
                 "list_llm_skills",
                 "get_llm_skill",
                 "get_llm_skill_file",
@@ -24984,7 +24984,7 @@
                 "toolbar",
                 "visual_review",
                 "code_review",
-                "stamphog",
+                "stamp",
                 "settings",
                 "health",
                 "inbox",
@@ -26702,10 +26702,10 @@
             "type": "string"
         },
         "MascotActorSkinOption": {
-            "enum": ["default", "spiderhog", "robohog", "hogzilla", "ghost"],
+            "enum": ["default", "spiderscript", "roboscript", "scriptzilla", "ghost"],
             "type": "string"
         },
-        "HogCompileResponse": {
+        "ScriptCompileResponse": {
             "additionalProperties": false,
             "properties": {
                 "bytecode": {
@@ -26720,8 +26720,8 @@
             "required": ["bytecode", "locals"],
             "type": "object"
         },
-        "HogLanguage": {
-            "enum": ["script", "hogJson", "insightsQL", "insightsQLExpr", "hogTemplate", "liquid"],
+        "ScriptLanguage": {
+            "enum": ["script", "scriptJson", "insightsQL", "insightsQLExpr", "scriptTemplate", "liquid"],
             "type": "string"
         },
         "InsightsQLAlertConfig": {
@@ -26777,7 +26777,7 @@
                     "type": "string"
                 },
                 "language": {
-                    "$ref": "#/definitions/HogLanguage",
+                    "$ref": "#/definitions/ScriptLanguage",
                     "description": "Language to validate"
                 },
                 "modifiers": {
@@ -26884,7 +26884,7 @@
                     "type": "string"
                 },
                 "language": {
-                    "$ref": "#/definitions/HogLanguage",
+                    "$ref": "#/definitions/ScriptLanguage",
                     "description": "Language to validate"
                 },
                 "modifiers": {
@@ -27325,14 +27325,14 @@
             "required": ["variableId", "code_name"],
             "type": "object"
         },
-        "HogQuery": {
+        "ScriptQuery": {
             "additionalProperties": false,
             "properties": {
                 "code": {
                     "type": "string"
                 },
                 "kind": {
-                    "const": "HogQuery",
+                    "const": "ScriptQuery",
                     "type": "string"
                 },
                 "modifiers": {
@@ -27340,7 +27340,7 @@
                     "description": "Modifiers used when performing the query"
                 },
                 "response": {
-                    "$ref": "#/definitions/HogQueryResponse"
+                    "$ref": "#/definitions/ScriptQueryResponse"
                 },
                 "tags": {
                     "$ref": "#/definitions/QueryLogTags"
@@ -27353,7 +27353,7 @@
             "required": ["kind"],
             "type": "object"
         },
-        "HogQueryResponse": {
+        "ScriptQueryResponse": {
             "additionalProperties": false,
             "properties": {
                 "bytecode": {
@@ -34188,7 +34188,7 @@
                 "evaluation_type": {
                     "$ref": "#/definitions/EvaluationRuntime"
                 },
-                "hog_source": {
+                "script_source": {
                     "type": ["string", "null"]
                 },
                 "id": {
@@ -35301,7 +35301,7 @@
                 "EventsQuery",
                 "SessionsQuery",
                 "PersonsNode",
-                "HogQuery",
+                "ScriptQuery",
                 "InsightsQLQuery",
                 "InsightsQLMetadata",
                 "InsightsQLAutocomplete",
@@ -36551,7 +36551,7 @@
                 "product_tours",
                 "pulse",
                 "revenue_analytics",
-                "review_hog",
+                "review",
                 "session_replay",
                 "replay_vision",
                 "site_apps",
@@ -44622,7 +44622,7 @@
                     "$ref": "#/definitions/SessionsTimelineQuery"
                 },
                 {
-                    "$ref": "#/definitions/HogQuery"
+                    "$ref": "#/definitions/ScriptQuery"
                 },
                 {
                     "$ref": "#/definitions/InsightsQLQuery"

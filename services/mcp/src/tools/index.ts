@@ -124,7 +124,7 @@ export const TOOL_MAP: Record<string, () => ToolBase<ZodObjectAny>> = {
     'external-data-sources-jobs': externalDataSourcesJobs,
     'external-data-sync-logs': externalDataSyncLogs,
 
-    // Workflows lifecycle (thin wrappers over hog_flows_partial_update so MCP gets
+    // Workflows lifecycle (thin wrappers over script_flows_partial_update so MCP gets
     // an idiomatic enable/disable/archive surface without three new REST endpoints).
     'workflows-enable': workflowsEnable,
     'workflows-archive': workflowsArchive,

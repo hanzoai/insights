@@ -56,7 +56,7 @@ describe('newNotificationDialogLogic', () => {
         expect(masking.hash).toContain('$mcp_tool_name')
         expect(masking.hash).toContain('$mcp_exec_tool_call_name')
         // The filters only require $mcp_is_error, so an event can arrive with neither tool-name
-        // property. HogMaskerService skips masking when the hash evaluates falsy, so the expression
+        // property. ScriptMaskerService skips masking when the hash evaluates falsy, so the expression
         // has to yield a constant for those rather than an empty string.
         expect(masking.hash).toContain("!= ''")
         expect(masking.hash).toContain('unknown-tool')

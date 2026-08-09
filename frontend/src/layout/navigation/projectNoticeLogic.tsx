@@ -60,12 +60,12 @@ const FLAGSHIP_PRODUCT_KEYS = [
     'llm_analytics',
 ]
 
-/** Compact row of flagship-product hogs + labels, echoing the welcome dialog inside the banner. */
+/** Compact row of flagship-product scripts + labels, echoing the welcome dialog inside the banner. */
 function ProvisionedProductStrip(): JSX.Element {
     return (
         <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1 align-middle">
             {FLAGSHIP_PRODUCT_KEYS.map((productKey) => {
-                const { Hoggie } = getProductPushDisplay(productKey)
+                const { Mascot } = getProductPushDisplay(productKey)
                 const meta = brandingForProduct(productKey)
                 return (
                     <Link
@@ -76,7 +76,7 @@ function ProvisionedProductStrip(): JSX.Element {
                         className="inline-flex items-center gap-1"
                         data-attr={`provisioned-welcome-${productKey}`}
                     >
-                        <Hoggie className="h-6 w-auto" aria-hidden="true" />
+                        <Mascot className="h-6 w-auto" aria-hidden="true" />
                         <span className="text-xs font-medium">{meta.label}</span>
                     </Link>
                 )

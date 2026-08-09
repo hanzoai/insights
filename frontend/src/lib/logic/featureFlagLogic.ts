@@ -166,7 +166,7 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
             variants,
             payloads,
         }),
-        // Orthogonal to the flags themselves: "which flags are on" and "was anything
+        // Ortscriptonal to the flags themselves: "which flags are on" and "was anything
         // able to decide that" are different facts, and only one of them is a fault.
         setFlagsUnavailable: (reason: string) => ({ reason }),
     }),

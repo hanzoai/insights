@@ -16,7 +16,7 @@ import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { performQuery } from '~/queries/query'
 import {
     AnyDataNode,
-    HogLanguage,
+    ScriptLanguage,
     InsightsQLFilters,
     InsightsQLMetadata,
     InsightsQLMetadataResponse,
@@ -29,10 +29,10 @@ import type { FeatureFlagsSet } from '../logic/featureFlagLogic'
 import { getContextSourceQuery } from './sourceQueryUtils'
 
 const METADATA_LANGUAGES = [
-    HogLanguage.script,
-    HogLanguage.insightsQL,
-    HogLanguage.insightsQLExpr,
-    HogLanguage.hogTemplate,
+    ScriptLanguage.script,
+    ScriptLanguage.insightsQL,
+    ScriptLanguage.insightsQLExpr,
+    ScriptLanguage.scriptTemplate,
 ]
 const VIM_COMMAND_HISTORY_LIMIT = 50
 
@@ -158,7 +158,7 @@ export const codeEditorLogic = kea<codeEditorLogicType>([
             {
                 reloadMetadata: async (_, breakpoint) => {
                     const model = props.editor?.getModel()
-                    if (!model || !props.monaco || !METADATA_LANGUAGES.includes(props.language as HogLanguage)) {
+                    if (!model || !props.monaco || !METADATA_LANGUAGES.includes(props.language as ScriptLanguage)) {
                         props.onMetadata?.(null)
                         return null
                     }
@@ -183,7 +183,7 @@ export const codeEditorLogic = kea<codeEditorLogicType>([
                         setLatestVersionsOnQuery(
                             {
                                 kind: NodeKind.InsightsQLMetadata,
-                                language: props.language as HogLanguage,
+                                language: props.language as ScriptLanguage,
                                 query: query,
                                 filters: props.metadataFilters,
                                 globals: props.globals,

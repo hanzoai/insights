@@ -1,12 +1,12 @@
 // Mascot "casting a spell" wobble — played by remounting the <img> element
 // with a fresh key, so the animation runs from the start on every copy click.
 
-.WizardModeShell__hogCast {
-    animation: WizardModeShell-hogCast 500ms ease-out;
+.WizardModeShell__scriptCast {
+    animation: WizardModeShell-scriptCast 500ms ease-out;
 }
 
 /* stylelint-disable-next-line keyframes-name-pattern */
-@keyframes WizardModeShell-hogCast {
+@keyframes WizardModeShell-scriptCast {
     0% {
         transform: rotate(0deg);
     }

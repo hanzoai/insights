@@ -126,7 +126,7 @@ import type {
     InsightsQLAutocompleteResponse,
     InsightsQLMetadataResponse,
     InsightsQLQueryResponse,
-    HogQueryResponse,
+    ScriptQueryResponse,
     LifecycleFilter,
     LogAttributesQueryResponse,
     LogValuesQueryResponse,
@@ -273,7 +273,7 @@ export interface insightVizDataLogicActions {
         error: string;
         errorObject?: any;
     }; // insightDataLogic
-    loadDataSuccess: (response: ErrorTrackingQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null | undefined, payload?: {
+    loadDataSuccess: (response: ErrorTrackingQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null | undefined, payload?: {
         overrideQuery: DataNode<Record<string, any>> | undefined;
         pollOnly: boolean;
         queryId: string;
@@ -285,9 +285,9 @@ export interface insightVizDataLogicActions {
             queryId: string;
             refresh: RefreshType | undefined;
         };
-        response: ErrorTrackingQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null | undefined;
+        response: ErrorTrackingQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null | undefined;
     }; // insightDataLogic
-    setInsightData: (response: ErrorTrackingQueryResponse | EventsQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogsQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | TraceSpansTreeQueryResponse) => ErrorTrackingQueryResponse | EventsQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogsQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | TraceSpansTreeQueryResponse; // insightDataLogic
+    setInsightData: (response: ErrorTrackingQueryResponse | EventsQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogsQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | TraceSpansTreeQueryResponse) => ErrorTrackingQueryResponse | EventsQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogsQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | TraceSpansTreeQueryResponse; // insightDataLogic
     setQuery: (query: Node<Record<string, any>> | null, fromUrl?: boolean | undefined) => {
         fromUrl: boolean;
         query: Node<Record<string, any>> | null;

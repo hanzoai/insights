@@ -42,16 +42,16 @@ import { renderInsightsFunctionMessage } from '../logs/renderInsightsFunctionMes
 import {
     BulkRerunParams,
     INSIGHTS_INVOCATIONS_RERUN_MAX_COUNT,
-    HogInvocationRow,
-    HogInvocationsFilters,
-    HogInvocationsFunctionKind,
-    HogInvocationsLogicProps,
+    ScriptInvocationRow,
+    ScriptInvocationsFilters,
+    ScriptInvocationsFunctionKind,
+    ScriptInvocationsLogicProps,
     RunStatus,
     dateClauseFor,
-    hogInvocationsLogic,
+    scriptInvocationsLogic,
     isRerunnableInsightsFunctionType,
     isRerunWrapperKind,
-} from './hogInvocationsLogic'
+} from './scriptInvocationsLogic'
 import { InvocationsSparkline } from './InvocationsSparkline'
 
 const STATUS_OPTIONS: { value: RunStatus; label: string }[] = [
@@ -149,7 +149,7 @@ const shortPersonDisplay = (row: { person_id: string; distinct_id: string }): st
     return candidate
 }
 
-const rowRibbonColorFor = (row: HogInvocationRow): string | null => {
+const rowRibbonColorFor = (row: ScriptInvocationRow): string | null => {
     if (isRerunWrapperKind(row.function_kind)) {
         return 'var(--info)'
     }
@@ -171,7 +171,7 @@ const rowRibbonColorFor = (row: HogInvocationRow): string | null => {
  * (server-side ceiling, not a row filter).
  */
 async function countRerunMatches(
-    props: { id: string; functionKind: HogInvocationsFunctionKind },
+    props: { id: string; functionKind: ScriptInvocationsFunctionKind },
     params: BulkRerunParams
 ): Promise<number> {
     const statusClause = params.status?.length
@@ -186,7 +186,7 @@ async function countRerunMatches(
     const dateClause = dateClauseFor({
         date_from: params.date_from,
         date_to: params.date_to,
-    } as HogInvocationsFilters)
+    } as ScriptInvocationsFilters)
 
     const query = insightsql`
         SELECT count() FROM (
@@ -195,7 +195,7 @@ async function countRerunMatches(
                 argMax(status, version)     AS status,
                 argMax(error_kind, version) AS error_kind,
                 max(attempts)               AS attempts
-            FROM insights.hog_invocation_results
+            FROM insights.script_invocation_results
             WHERE function_kind = ${props.functionKind}
               AND function_id = ${props.id}
               ${dateClause}
@@ -207,14 +207,14 @@ async function countRerunMatches(
         )
     `
     const response = await api.queryInsightsQL(query, {
-        scene: 'HogInvocations',
+        scene: 'ScriptInvocations',
         productKey: 'pipeline_destinations',
     })
     const row = response.results?.[0]
     return Array.isArray(row) ? Number(row[0] ?? 0) : 0
 }
 
-export interface HogInvocationsProps extends HogInvocationsLogicProps {
+export interface ScriptInvocationsProps extends ScriptInvocationsLogicProps {
     /**
      * Override how a log message is rendered in the per-row expansion. Workflows
      * pass `renderWorkflowLogMessage` so event/person/action tokens become links,
@@ -240,7 +240,7 @@ export interface HogInvocationsProps extends HogInvocationsLogicProps {
  * Rerun is async — posting to `/rerun` enqueues a cyclotron wrapper job; new
  * lifecycle rows show up here once the worker drains it.
  */
-export function HogInvocations({
+export function ScriptInvocations({
     id,
     functionKind,
     renderLogMessage,
@@ -248,8 +248,8 @@ export function HogInvocations({
     parentRunId,
     defaultDateFrom,
     insightsFunctionType,
-}: HogInvocationsProps): JSX.Element | null {
-    const logic = hogInvocationsLogic({ id, functionKind, parentRunId, defaultDateFrom })
+}: ScriptInvocationsProps): JSX.Element | null {
+    const logic = scriptInvocationsLogic({ id, functionKind, parentRunId, defaultDateFrom })
     const {
         runs,
         runsLoading,
@@ -295,7 +295,7 @@ export function HogInvocations({
         return null
     }
 
-    const columns: TableColumns<HogInvocationRow> = [
+    const columns: TableColumns<ScriptInvocationRow> = [
         {
             title: (
                 <Checkbox
@@ -736,8 +736,8 @@ function RunDetail({
     insightsFunctionId,
     renderLogMessage,
 }: {
-    record: HogInvocationRow
-    functionKind: HogInvocationsLogicProps['functionKind']
+    record: ScriptInvocationRow
+    functionKind: ScriptInvocationsLogicProps['functionKind']
     insightsFunctionId: string
     renderLogMessage?: (message: string) => JSX.Element | string
 }): JSX.Element {
@@ -1072,8 +1072,8 @@ function Row({ label, help, children }: { label: string; help?: string; children
  * subquery against `persons` needed. Follows the same shape as the notification-panel picker
  * in `InsightsFlowEditorNotificationPanelTest.tsx`.
  */
-function PersonFilterPicker({ id, functionKind }: HogInvocationsLogicProps): JSX.Element {
-    const logic = hogInvocationsLogic({ id, functionKind })
+function PersonFilterPicker({ id, functionKind }: ScriptInvocationsLogicProps): JSX.Element {
+    const logic = scriptInvocationsLogic({ id, functionKind })
     const { pickedPerson, personSearchResults, personSearchResultsLoading, filters } = useValues(logic)
     const { setPickedPerson, searchPersons } = useActions(logic)
     const [open, setOpen] = useState(false)

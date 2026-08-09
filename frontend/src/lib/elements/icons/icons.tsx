@@ -121,8 +121,8 @@ export function IconBranch(props: IconProps): JSX.Element {
     )
 }
 
-// Stamphog product glyph: a robot head peeking out from behind a check-circle badge
-export function IconStamphog(props: IconProps): JSX.Element {
+// Stamp product glyph: a robot head peeking out from behind a check-circle badge
+export function IconStamp(props: IconProps): JSX.Element {
     return (
         <IconBase stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
             <path d="M13.5 7.7 V7.5 A2.5 2.5 0 0 0 11 5 H5.5 A2.5 2.5 0 0 0 3 7.5 V11.5 A2.5 2.5 0 0 0 5.5 14 H8.39" />

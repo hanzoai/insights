@@ -12,10 +12,10 @@ import {
     IconUpload,
 } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { SceneExport } from 'scenes/sceneTypes'
 
-const MascotExperiment = pngHoggie()
+const MascotExperiment = pngMascot()
 
 export const scene: SceneExport = {
     component: MoveToInsightsCloud,

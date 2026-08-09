@@ -30,7 +30,7 @@ export const appScenes: Record<Scene | string, () => any> = {
     [Scene.DeadLetterQueue]: () => import('./instance/DeadLetterQueue/DeadLetterQueue'),
     [Scene.QueryPerformance]: () => import('./instance/QueryPerformance/QueryPerformance'),
     [Scene.Destinations]: () => import('./data-pipelines/DestinationsScene'),
-    [Scene.DebugHog]: () => import('./debug/script/HogRepl'),
+    [Scene.DebugScript]: () => import('./debug/script/ScriptRepl'),
     [Scene.DebugQuery]: () => import('./debug/DebugScene'),
 
     [Scene.Error404]: () => ({ default: preloadedScenes[Scene.Error404].component }),

@@ -53,7 +53,7 @@ import {
     DataTableNode,
     DataVisualizationNode,
     DatabaseSchemaViewTable,
-    HogLanguage,
+    ScriptLanguage,
     InsightsQLFilters,
     InsightsQLMetadata,
     InsightsQLMetadataResponse,
@@ -3653,7 +3653,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
                 try {
                     const response = await performQuery<InsightsQLMetadata>({
                         kind: NodeKind.InsightsQLMetadata,
-                        language: HogLanguage.insightsQL,
+                        language: ScriptLanguage.insightsQL,
                         query: subqueryText,
                     })
                     const errors = response?.errors ?? []

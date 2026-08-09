@@ -36,7 +36,7 @@ import {
     EvaluationsPartialUpdateBody,
     EvaluationsPartialUpdateParams,
     EvaluationsRetrieveParams,
-    EvaluationsTestHogCreateBody,
+    EvaluationsTestScriptCreateBody,
     LlmAnalyticsClusteringConfigSetEventFiltersCreateBody,
     LlmAnalyticsClusteringJobsCreateBody,
     LlmAnalyticsClusteringJobsDestroyParams,
@@ -96,7 +96,7 @@ import {
     LlmPromptsNameRetrieveQueryParams,
     TaggersCreateBody,
     TaggersListQueryParams,
-    TaggersTestHogCreateBody,
+    TaggersTestScriptCreateBody,
 } from '@/generated/ai_observability/api'
 import { PromptListInputSchema, ScoreDefinitionConfigSchema } from '@/schema/tool-inputs'
 import { createQueryWrapper } from '@/tools/query-wrapper-factory'
@@ -1247,12 +1247,12 @@ const llmaEvaluationSummaryCreate = (): ToolBase<
     },
 })
 
-const LlmaEvaluationTestHogSchema = EvaluationsTestHogCreateBody
+const LlmaEvaluationTestScriptSchema = EvaluationsTestScriptCreateBody
 
-const llmaEvaluationTestHog = (): ToolBase<typeof LlmaEvaluationTestHogSchema, Schemas.TestHogResponse> => ({
+const llmaEvaluationTestScript = (): ToolBase<typeof LlmaEvaluationTestScriptSchema, Schemas.TestScriptResponse> => ({
     name: 'llma-evaluation-test-script',
-    schema: LlmaEvaluationTestHogSchema,
-    handler: async (context: Context, params: z.infer<typeof LlmaEvaluationTestHogSchema>) => {
+    schema: LlmaEvaluationTestScriptSchema,
+    handler: async (context: Context, params: z.infer<typeof LlmaEvaluationTestScriptSchema>) => {
         const projectId = await context.stateManager.getProjectId()
         const body: Record<string, unknown> = {}
         if (params.source !== undefined) {
@@ -1273,9 +1273,9 @@ const llmaEvaluationTestHog = (): ToolBase<typeof LlmaEvaluationTestHogSchema, S
         if (params.target_config !== undefined) {
             body['target_config'] = params.target_config
         }
-        const result = await context.api.request<Schemas.TestHogResponse>({
+        const result = await context.api.request<Schemas.TestScriptResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/evaluations/test_hog/`,
+            path: `/api/projects/${encodeURIComponent(String(projectId))}/evaluations/test_script/`,
             body,
         })
         return result
@@ -2052,12 +2052,12 @@ const llmaTaggerList = (): ToolBase<typeof LlmaTaggerListSchema, WithInsightsUrl
     },
 })
 
-const LlmaTaggerTestHogSchema = TaggersTestHogCreateBody
+const LlmaTaggerTestScriptSchema = TaggersTestScriptCreateBody
 
-const llmaTaggerTestHog = (): ToolBase<typeof LlmaTaggerTestHogSchema, Schemas.TestHogTaggerResponse> => ({
+const llmaTaggerTestScript = (): ToolBase<typeof LlmaTaggerTestScriptSchema, Schemas.TestScriptTaggerResponse> => ({
     name: 'llma-tagger-test-script',
-    schema: LlmaTaggerTestHogSchema,
-    handler: async (context: Context, params: z.infer<typeof LlmaTaggerTestHogSchema>) => {
+    schema: LlmaTaggerTestScriptSchema,
+    handler: async (context: Context, params: z.infer<typeof LlmaTaggerTestScriptSchema>) => {
         const projectId = await context.stateManager.getProjectId()
         const body: Record<string, unknown> = {}
         if (params.source !== undefined) {
@@ -2069,9 +2069,9 @@ const llmaTaggerTestHog = (): ToolBase<typeof LlmaTaggerTestHogSchema, Schemas.T
         if (params.tags !== undefined) {
             body['tags'] = params.tags
         }
-        const result = await context.api.request<Schemas.TestHogTaggerResponse>({
+        const result = await context.api.request<Schemas.TestScriptTaggerResponse>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/taggers/test_hog/`,
+            path: `/api/projects/${encodeURIComponent(String(projectId))}/taggers/test_script/`,
             body,
         })
         return result
@@ -2573,7 +2573,7 @@ export const GENERATED_TOOLS: Record<string, () => ToolBase<ZodObjectAny>> = {
     'llma-evaluation-report-update': llmaEvaluationReportUpdate,
     'llma-evaluation-run': llmaEvaluationRun,
     'llma-evaluation-summary-create': llmaEvaluationSummaryCreate,
-    'llma-evaluation-test-script': llmaEvaluationTestHog,
+    'llma-evaluation-test-script': llmaEvaluationTestScript,
     'llma-evaluation-update': llmaEvaluationUpdate,
     'llma-personal-spend': llmaPersonalSpend,
     'llma-prompt-create': llmaPromptCreate,
@@ -2603,7 +2603,7 @@ export const GENERATED_TOOLS: Record<string, () => ToolBase<ZodObjectAny>> = {
     'llma-summarization-create': llmaSummarizationCreate,
     'llma-tagger-create': llmaTaggerCreate,
     'llma-tagger-list': llmaTaggerList,
-    'llma-tagger-test-script': llmaTaggerTestHog,
+    'llma-tagger-test-script': llmaTaggerTestScript,
     'llma-trace-review-create': llmaTraceReviewCreate,
     'llma-trace-review-delete': llmaTraceReviewDelete,
     'llma-trace-review-get': llmaTraceReviewGet,

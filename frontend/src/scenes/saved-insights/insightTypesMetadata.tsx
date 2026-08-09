@@ -6,7 +6,7 @@ import {
     IconCursor,
     IconFlask,
     IconGraph,
-    IconHogQL as IconInsightsQL,
+    IconScriptQL as IconInsightsQL,
     IconLineGraph,
     IconLive,
     IconLlmAnalytics,
@@ -305,7 +305,7 @@ export const QUERY_TYPES_METADATA: Record<NodeKind, InsightTypeMetadata> = {
         icon: IconPieChart,
         inMenu: true,
     },
-    [NodeKind.HogQuery]: {
+    [NodeKind.ScriptQuery]: {
         name: 'Script',
         description: 'Script query.',
         icon: IconInsightsQL,

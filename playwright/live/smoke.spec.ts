@@ -159,8 +159,8 @@ test.describe('a deployed insights', () => {
 
     test('carries no upstream branding', async ({ page }) => {
         await open(page, '/')
-        // This is a Hanzo product. A visible PostHog string is a debrand miss.
+        // This is a Hanzo product. A visible PostScript string is a debrand miss.
         const body = await page.locator('body').innerText()
-        expect(body).not.toMatch(/PostHog/i)
+        expect(body).not.toMatch(/PostScript/i)
     })
 })

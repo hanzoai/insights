@@ -7,8 +7,8 @@ import {
     InsightsQLPrinter,
     VMState,
     ASTNode,
-    exec as hogExec,
-    execAsync as hogExecAsync,
+    exec as scriptExec,
+    execAsync as scriptExecAsync,
 } from '@hanzo/scriptvm'
 
 import { performQuery } from '~/queries/query'
@@ -41,15 +41,15 @@ const external = {
     },
 }
 
-export function execHog(code: any[] | VMState, options?: ExecOptions): ExecResult {
-    return hogExec(code, {
+export function execScript(code: any[] | VMState, options?: ExecOptions): ExecResult {
+    return scriptExec(code, {
         external,
         ...options,
     })
 }
 
-export function execHogAsync(code: any[] | VMState, options?: ExecOptions): Promise<ExecResult> {
-    return hogExecAsync(code, {
+export function execScriptAsync(code: any[] | VMState, options?: ExecOptions): Promise<ExecResult> {
+    return scriptExecAsync(code, {
         external,
         ...options,
         asyncFunctions: {

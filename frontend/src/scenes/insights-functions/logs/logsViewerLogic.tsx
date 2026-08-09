@@ -34,7 +34,7 @@ export type LogsViewerLogicProps = {
     logicKey?: string
     sourceType:
         | 'insights_function'
-        | 'hog_flow'
+        | 'script_flow'
         | 'batch_exports'
         | 'external_data_jobs'
         | 'data_modeling_run'

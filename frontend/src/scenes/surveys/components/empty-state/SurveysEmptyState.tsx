@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Button, TextArea } from '@hanzo/elements'
 import { IconArrowRight, IconSparkles } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { MCPUseCaseCard } from 'lib/components/MCPHint/MCPUseCaseCard'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -28,7 +28,7 @@ import {
 } from '../../constants'
 import { surveysLogic } from '../../surveysLogic'
 
-const MascotReporter = pngHoggie()
+const MascotReporter = pngMascot()
 
 const TEMPLATE_TYPES = [SurveyTemplateType.NPS, SurveyTemplateType.CSAT, SurveyTemplateType.PMF]
 

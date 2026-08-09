@@ -8,7 +8,7 @@ import { TextMorph } from 'torph/react'
 import { Button } from '@hanzo/elements'
 import { IconArchive, IconFunnels, IconInfo, IconPlusSmall, IconRefresh, IconWarning } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { MCPUseCaseCard } from 'lib/components/MCPHint/MCPUseCaseCard'
 import { supportLogic } from 'lib/components/Support/supportLogic'
@@ -54,7 +54,7 @@ import { insightVizDataLogic } from '../insightVizDataLogic'
 import { SampleDataState, SampleDataVariant } from './SampleDataState'
 import { sampleDataStateLogic } from './sampleDataStateLogic'
 
-const MascotConstruction2 = pngHoggie()
+const MascotConstruction2 = pngMascot()
 
 // Matches DatastoreQueryMemoryLimitExceeded.default_code on the backend. Keep the two in sync.
 const DATASTORE_MEMORY_LIMIT_ERROR_CODE = 'datastore_memory_limit_exceeded'
