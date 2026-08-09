@@ -2,11 +2,11 @@ import { COMMON_REPLAYER_CONFIG } from './index'
 
 // insights-js/* ships ESM that the test transform can't load directly; these values are
 // only used by sibling plugins, not by the config object under test.
-jest.mock('insights-js/rrweb', () => ({
+jest.mock('@hanzo/insights-rrweb', () => ({
     Replayer: jest.fn(),
     canvasMutation: jest.fn(),
 }))
-jest.mock('insights-js/rrweb-types', () => ({
+jest.mock('@hanzo/insights-rrweb-types', () => ({
     EventType: {},
     IncrementalSource: {},
 }))

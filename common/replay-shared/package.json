@@ -11,6 +11,8 @@
         "test": "jest"
     },
     "dependencies": {
+        "@hanzo/insights-rrweb": "0.0.26",
+        "@hanzo/insights-rrweb-types": "0.0.26",
         "fflate": "^0.8.2",
         "fzstd": "^0.1.1",
         "hls.js": "^1.5.7",
