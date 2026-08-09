@@ -4,5 +4,5 @@ from django.apps import AppConfig
 
 
 class StampConfig(AppConfig):
-    name = "products.stamp.backend"
+    name = "products.stamphog.backend"
     label = "stamp"

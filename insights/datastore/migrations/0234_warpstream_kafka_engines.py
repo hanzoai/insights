@@ -2,7 +2,7 @@ from insights.datastore.client.connection import NodeRole
 from insights.datastore.client.migration_tools import run_sql_with_exceptions
 from insights.datastore.log_entries import KAFKA_LOG_ENTRIES_WS_TABLE_SQL, LOG_ENTRIES_WS_MV_SQL
 from insights.models.app_metrics2.sql import APP_METRICS2_WS_MV_TABLE_SQL, KAFKA_APP_METRICS2_WS_TABLE_SQL
-from insights.models.tophog.sql import KAFKA_TOPFN_WS_TABLE_SQL, TOPFN_WS_MV_SQL
+from insights.models.topfn.sql import KAFKA_TOPFN_WS_TABLE_SQL, TOPFN_WS_MV_SQL
 
 # Migration to create WarpStream Kafka engine tables for log_entries, app_metrics2, and tophog.
 #

@@ -38,18 +38,18 @@ from insights.ph_client import ph_scoped_capture
 from insights.temporal.common.utils import asyncify
 from insights.temporal.oauth import create_oauth_access_token_for_user
 
-from products.stamp.backend.facade.enums import TERMINAL_STATUSES, ReviewMode, ReviewRunStatus, ReviewVerdict
-from products.stamp.backend.logic.approvals import dismiss_stale_approvals_for_head
-from products.stamp.backend.logic.audiences import resolve_audience_key
-from products.stamp.backend.logic.github_client import StampGitHubClient, expected_app_bot_login
-from products.stamp.backend.logic.reviewer import (
+from products.stamphog.backend.facade.enums import TERMINAL_STATUSES, ReviewMode, ReviewRunStatus, ReviewVerdict
+from products.stamphog.backend.logic.approvals import dismiss_stale_approvals_for_head
+from products.stamphog.backend.logic.audiences import resolve_audience_key
+from products.stamphog.backend.logic.github_client import StampGitHubClient, expected_app_bot_login
+from products.stamphog.backend.logic.reviewer import (
     ReviewerInvocation,
     ReviewerVerdict,
     build_reviewer_invocation,
     parse_reviewer_output,
 )
-from products.stamp.backend.models import PullRequest, ReviewRun, StampRepoConfig
-from products.stamp.backend.temporal.constants import (
+from products.stamphog.backend.models import PullRequest, ReviewRun, StampRepoConfig
+from products.stamphog.backend.temporal.constants import (
     STAMPFN_BOT_EYES_MAX_AGE_SECONDS,
     STAMPFN_OPTIONAL_POLICY_PATHS,
     STAMPFN_POLICY_ENTRYPOINT,
@@ -72,7 +72,7 @@ from products.tasks.backend.facade.sandbox import (
 # The Action's review engine on the server's own checkout. Read as data files at
 # runtime (never imported — the directory is hyphenated and lives outside the
 # import graph) and shipped into the sandbox checkout. activities.py is at
-# products/stamp/backend/temporal/activities.py, so the repo root is five parents up.
+# products/stamphog/backend/temporal/activities.py, so the repo root is five parents up.
 _SERVER_ENGINE_DIR = Path(__file__).resolve().parents[4] / "tools" / "pr-approval-agent"
 
 # Server-shipped default policy files, the base layer every repo's config sits on. Named by the

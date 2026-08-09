@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from django.test import RequestFactory, override_settings
 
-from products.stamp.backend.presentation.webhooks import stamp_github_webhook
+from products.stamphog.backend.presentation.webhooks import stamp_github_webhook
 
 WEBHOOK_SECRET = "test-webhook-secret"
 
@@ -26,7 +26,7 @@ def _request(body: bytes, *, event: str = "pull_request", delivery_id: str = "de
 
 
 @override_settings(STAMPFN_GITHUB_APP_WEBHOOK_SECRET=WEBHOOK_SECRET)
-@patch("products.stamp.backend.presentation.webhooks.process_pull_request_event.delay")
+@patch("products.stamphog.backend.presentation.webhooks.process_pull_request_event.delay")
 def test_valid_pull_request_event_enqueues_and_returns_202(mock_delay):
     body = json.dumps({"action": "opened"}).encode("utf-8")
     request = _request(body, signature=_signature(body, WEBHOOK_SECRET))
@@ -38,7 +38,7 @@ def test_valid_pull_request_event_enqueues_and_returns_202(mock_delay):
 
 
 @override_settings(STAMPFN_GITHUB_APP_WEBHOOK_SECRET=WEBHOOK_SECRET)
-@patch("products.stamp.backend.presentation.webhooks.process_pull_request_event.delay")
+@patch("products.stamphog.backend.presentation.webhooks.process_pull_request_event.delay")
 def test_non_pull_request_event_is_acked_without_enqueueing(mock_delay):
     body = json.dumps({"action": "created"}).encode("utf-8")
     request = _request(body, event="issue_comment", signature=_signature(body, WEBHOOK_SECRET))
@@ -55,7 +55,7 @@ def test_non_pull_request_event_is_acked_without_enqueueing(mock_delay):
     ids=["missing_signature", "wrong_signature"],
 )
 @override_settings(STAMPFN_GITHUB_APP_WEBHOOK_SECRET=WEBHOOK_SECRET)
-@patch("products.stamp.backend.presentation.webhooks.process_pull_request_event.delay")
+@patch("products.stamphog.backend.presentation.webhooks.process_pull_request_event.delay")
 def test_invalid_signature_is_rejected(mock_delay, signature):
     body = json.dumps({"action": "opened"}).encode("utf-8")
     request = _request(body, signature=signature)

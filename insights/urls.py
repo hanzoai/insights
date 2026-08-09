@@ -72,7 +72,7 @@ from products.slack_app.backend.views import (
     slack_user_link_authorize,
     slack_user_link_callback,
 )
-from products.stamp.backend.facade.webhooks import stamp_github_webhook
+from products.stamphog.backend.facade.webhooks import stamp_github_webhook
 from products.streamlit_apps.backend.presentation.bridge_views import StreamlitBridgeView
 from products.surveys.backend.api.survey import public_survey_page
 from products.tasks.backend.facade.agent_proxy import agent_proxy_callback

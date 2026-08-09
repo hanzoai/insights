@@ -7,8 +7,8 @@ from insights.models.scoping import reset_current_team_id, set_current_team_id
 from insights.models.scoping.manager import TeamScopeError
 from insights.models.team import Team
 
-from products.stamp.backend.models import PullRequest, ReviewRun, StampRepoConfig
-from products.stamp.backend.tests.conftest import PRODUCT_DATABASES, StampTeamScopedTestMixin
+from products.stamphog.backend.models import PullRequest, ReviewRun, StampRepoConfig
+from products.stamphog.backend.tests.conftest import PRODUCT_DATABASES, StampTeamScopedTestMixin
 
 
 def _make_repo_config(

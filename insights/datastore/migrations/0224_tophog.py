@@ -1,6 +1,6 @@
 from insights.datastore.client.connection import NodeRole
 from insights.datastore.client.migration_tools import run_sql_with_exceptions
-from insights.models.tophog.sql import (
+from insights.models.topfn.sql import (
     DISTRIBUTED_TOPFN_TABLE_SQL,
     KAFKA_TOPFN_TABLE_SQL,
     TOPFN_DATA_TABLE_SQL,
