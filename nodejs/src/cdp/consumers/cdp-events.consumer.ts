@@ -22,7 +22,7 @@ export class CdpEventsConsumer<
     protected name = 'CdpEventsConsumer'
     protected hogTypes: InsightsFunctionTypeType[] = ['destination']
     protected hogQueue: JobQueue
-    protected hogflowQueue: JobQueue
+    protected flowQueue: JobQueue
     protected kafkaConsumer: KafkaConsumerInterface
 
     private insightsFunctionPipeline: InsightsFunctionInvocationPipeline
@@ -31,13 +31,13 @@ export class CdpEventsConsumer<
     constructor(
         config: TConfig,
         deps: CdpConsumerBaseDeps,
-        jobQueues: { hogQueue: JobQueue; hogflowQueue: JobQueue },
+        jobQueues: { hogQueue: JobQueue; flowQueue: JobQueue },
         topic: string = KAFKA_EVENTS_JSON,
         groupId: string = 'cdp-processed-events-consumer'
     ) {
         super(config, deps)
         this.hogQueue = jobQueues.hogQueue
-        this.hogflowQueue = jobQueues.hogflowQueue
+        this.flowQueue = jobQueues.flowQueue
         this.kafkaConsumer = createKafkaConsumer({ groupId, topic })
         this.insightsFunctionPipeline = new InsightsFunctionInvocationPipeline(config, {
             insightsFunctionManager: this.insightsFunctionManager,
@@ -73,7 +73,7 @@ export class CdpEventsConsumer<
         // TODO: Add a helper to script functions to determine if they require groups or not and then only load those
         await this.groupsManager.addGroupsToGlobalsList(invocationGlobals)
 
-        const [hogInvocations, hogflowInvocations] = await Promise.all([
+        const [hogInvocations, flowInvocations] = await Promise.all([
             this.insightsFunctionPipeline.buildInvocations(invocationGlobals, {
                 hogTypes: this.hogTypes,
                 filterFn: (fn) => (fn.filters?.source ?? 'events') === 'events',
@@ -86,7 +86,7 @@ export class CdpEventsConsumer<
             }),
         ])
 
-        const invocationsToBeQueued = [...hogInvocations, ...hogflowInvocations]
+        const invocationsToBeQueued = [...hogInvocations, ...flowInvocations]
 
         // Emit a `running` lifecycle row for each freshly-created invocation.
         // This fires ONCE per invocation_id at creation — not on every dequeue
@@ -106,7 +106,7 @@ export class CdpEventsConsumer<
                     this.hogQueue.queueInvocations(hogInvocations)
                 ),
                 instrumentFn({ key: 'cdp.background_task.queue_hogflow_invocations', sendException: false }, () =>
-                    this.hogflowQueue.queueInvocations(hogflowInvocations)
+                    this.flowQueue.queueInvocations(flowInvocations)
                 ),
                 instrumentFn({ key: 'cdp.background_task.monitoring_flush', sendException: false }, async () => {
                     try {
@@ -120,7 +120,7 @@ export class CdpEventsConsumer<
                     this.invocationResultsService.invocationResultsRowsService.flush()
                 ),
             ]),
-            invocations: [...hogInvocations, ...hogflowInvocations],
+            invocations: [...hogInvocations, ...flowInvocations],
         }
     }
 
@@ -155,11 +155,11 @@ export class CdpEventsConsumer<
     }
 
     protected async startQueueProducers(): Promise<void> {
-        await Promise.all([this.hogQueue.startAsProducer(), this.hogflowQueue.startAsProducer()])
+        await Promise.all([this.hogQueue.startAsProducer(), this.flowQueue.startAsProducer()])
     }
 
     protected async stopQueueProducers(): Promise<void> {
-        await Promise.all([this.hogQueue.stopProducer(), this.hogflowQueue.stopProducer()])
+        await Promise.all([this.hogQueue.stopProducer(), this.flowQueue.stopProducer()])
     }
 
     public override async start(): Promise<void> {

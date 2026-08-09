@@ -189,7 +189,7 @@ describe('DWH source webhooks', () => {
         beforeEach(async () => {
             api = new CdpApi(hub, createCdpConsumerDeps(hub), {
                 hogQueue: createMockJobQueue(),
-                hogflowQueue: createMockJobQueue(),
+                flowQueue: createMockJobQueue(),
             })
             app = setupExpressApp()
             app.use('/', api.router())

@@ -118,7 +118,7 @@ describe('CDP Consumer loop', () => {
 
             eventsConsumer = new CdpEventsConsumer(hub, createCdpConsumerDeps(hub, kafkaProducer), {
                 hogQueue: kafkaQueue,
-                hogflowQueue: postgresV2Queue,
+                flowQueue: postgresV2Queue,
             })
             await eventsConsumer.start()
 
@@ -640,7 +640,7 @@ describe('CDP Consumer loop', () => {
 
             dwhConsumer = new CdpDatawarehouseEventsConsumer(hub, createCdpConsumerDeps(hub, kafkaProducer), {
                 hogQueue: kafkaQueue,
-                hogflowQueue: postgresV2Queue,
+                flowQueue: postgresV2Queue,
             })
             await dwhConsumer.start()
 
