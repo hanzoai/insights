@@ -707,9 +707,10 @@ def update_group_type_mapping_fields(
     """
     from insights.personinsights_client.proto import UpdateGroupTypeMappingRequest
 
-    client = require_personinsights_client()
-
     def _fn() -> None:
+        # Resolved in here, not above: outside personinsights_call the RuntimeError
+        # from a missing client is never converted and escapes as a 500.
+        client = require_personinsights_client()
         update_mask: list[str] = list(fields.keys())
         kwargs: dict[str, Any] = {
             "project_id": instance.project_id,
@@ -742,10 +743,10 @@ def delete_group_type_mapping(instance: GroupTypeMapping, *, caller_tag: str | N
     """Delete a GroupTypeMapping via personinsights."""
     from insights.personinsights_client.proto import DeleteGroupTypeMappingRequest
 
-    client = require_personinsights_client()
     personinsights_call(
         "delete_group_type_mapping",
-        lambda: client.delete_group_type_mapping(
+        # Inside the lambda: see update_group_type_mapping_fields above.
+        lambda: require_personinsights_client().delete_group_type_mapping(
             DeleteGroupTypeMappingRequest(
                 project_id=instance.project_id,
                 group_type_index=instance.group_type_index,
@@ -765,9 +766,9 @@ def clear_dashboard_from_group_type_mapping(
     """
     from insights.personinsights_client.proto import GetGroupTypeMappingByDashboardIdRequest, UpdateGroupTypeMappingRequest
 
-    client = require_personinsights_client()
-
     def _fn() -> None:
+        # Inside the closure: see update_group_type_mapping_fields above.
+        client = require_personinsights_client()
         resp = client.get_group_type_mapping_by_dashboard_id(
             GetGroupTypeMappingByDashboardIdRequest(team_id=team_id, dashboard_id=dashboard_id)
         )
