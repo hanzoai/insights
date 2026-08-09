@@ -1315,12 +1315,14 @@ ENGINE = re.compile(r"clickhouse", re.IGNORECASE)
 
 def check_engine(root: str) -> int:
     """Refuse the upstream engine's name in first-party code."""
-    text = subprocess.run(
-        ["git", "grep", "-lI", "-i", "clickhouse"], cwd=root, capture_output=True, text=True
-    ).stdout.split()
+    text = set(
+        subprocess.run(
+            ["git", "grep", "-lI", "-i", "clickhouse"], cwd=root, capture_output=True, text=True
+        ).stdout.split()
+    )
     leaked: list[tuple[str, int, str]] = []
     pending: set[str] = set()
-    for rel in sorted(set(text) - set(CONTENT_ALLOWLIST)):
+    for rel in sorted(text - set(CONTENT_ALLOWLIST)):
         if is_licence(rel):
             continue
         with open(os.path.join(root, rel), encoding="utf-8", errors="replace") as fh:
@@ -1343,7 +1345,7 @@ def check_engine(root: str) -> int:
         for p in subprocess.run(
             ["git", "grep", "-l", "-i", "clickhouse"], cwd=root, capture_output=True, text=True
         ).stdout.split()
-        if p not in set(text)
+        if p not in text
     ]
 
     if pending:
