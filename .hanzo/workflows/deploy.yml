@@ -349,41 +349,18 @@ jobs:
             - name: Wait for this commit to be the one serving
               id: rollout
               env:
-                  KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
-                  KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
-                  KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://api.hanzo.ai' }}
-                  KMS_ORG: ${{ vars.KMS_ORG || 'hanzo' }}
-                  KMS_SECRET_ENV: ${{ vars.KMS_SECRET_ENV || 'prod' }}
                   LIVE_URL: ${{ vars.INSIGHTS_LIVE_URL || 'https://insights.hanzo.ai' }}
               run: |
                   set -euo pipefail
 
-                  KMS_TOKEN=$(curl -fsS "${KMS_ENDPOINT}/v1/kms/auth/login" \
-                    -H 'Content-Type: application/json' \
-                    -d "{\"clientId\":\"${KMS_CLIENT_ID}\",\"clientSecret\":\"${KMS_CLIENT_SECRET}\"}" \
-                    | jq -r '.accessToken // empty')
-                  [ -n "$KMS_TOKEN" ] || { echo "::error::KMS login failed at ${KMS_ENDPOINT}"; exit 1; }
-
-                  # The e2e account's password lives in KMS and nowhere else. It is a real
-                  # account with a hashed password, not a shared human login.
-                  PW=$(curl -fsS \
-                    "${KMS_ENDPOINT}/v1/kms/secrets/insights/E2E_PASSWORD?env=${KMS_SECRET_ENV}" \
-                    -H "Authorization: Bearer ${KMS_TOKEN}" | jq -r '.value // empty' || true)
-                  [ -n "$PW" ] || { echo "::error::E2E_PASSWORD missing in KMS at ${KMS_ORG}/insights (env ${KMS_SECRET_ENV})"; exit 1; }
-                  echo "::add-mask::${PW}"
-                  echo "pw=${PW}" >> "$GITHUB_OUTPUT"
-
-                  # /_preflight/ reports insights_version as null, so the only honest
-                  # signal for "which code is live" is the git sha on instance_status,
-                  # which needs a session. Short sha: that is the form it reports.
+                  # Which commit is serving is not private, so this asks the unauthenticated
+                  # preflight rather than signing in. It used to POST /v1/login and read
+                  # instance_status with the session; local password auth is gone, so that
+                  # login could only fail, GOT was always empty, and this step spent twenty
+                  # minutes before blaming CD for a rollout that had already arrived.
                   WANT=$(printf '%s' "${GITHUB_SHA}" | cut -c1-10)
-                  JAR=$(mktemp)
                   for attempt in $(seq 1 60); do
-                    curl -fsS -c "$JAR" -o /dev/null -X POST "${LIVE_URL}/v1/login" \
-                      -H 'Content-Type: application/json' \
-                      -d "$(jq -n --arg p "$PW" '{email:"e2e@hanzo.ai",password:$p}')" || true
-                    GOT=$(curl -fsS -b "$JAR" "${LIVE_URL}/v1/instance_status" 2>/dev/null \
-                      | jq -r '.results.overview[]? | select(.key=="insights_git_sha") | .value' || true)
+                    GOT=$(curl -fsS "${LIVE_URL}/_preflight/" 2>/dev/null | jq -r '.git_sha // empty' || true)
                     if [ "$GOT" = "$WANT" ]; then
                       echo "serving ${GOT} after ~$((attempt * 20))s"; exit 0
                     fi
@@ -398,11 +375,31 @@ jobs:
 
             - name: Drive the product
               env:
+                  KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
+                  KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
+                  KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://api.hanzo.ai' }}
+                  KMS_SECRET_ENV: ${{ vars.KMS_SECRET_ENV || 'prod' }}
                   LIVE_URL: ${{ vars.INSIGHTS_LIVE_URL || 'https://insights.hanzo.ai' }}
                   LOGIN_USERNAME: e2e@hanzo.ai
-                  LOGIN_PASSWORD: ${{ steps.rollout.outputs.pw }}
               run: |
                   set -euo pipefail
+
+                  # The suite signs in through the IdP now (playwright/live/auth.setup.ts drives
+                  # /login -> /login/oidc/ -> hanzo.id -> /complete/oidc/), so this password is
+                  # the IAM account's, typed into hanzo.id's form. It is no longer an insights
+                  # local credential -- there is no such thing any more.
+                  KMS_TOKEN=$(curl -fsS --retry 5 --retry-delay 2 --max-time 30 "${KMS_ENDPOINT}/v1/kms/auth/login" \
+                    -H 'Content-Type: application/json' \
+                    -d "{\"clientId\":\"${KMS_CLIENT_ID}\",\"clientSecret\":\"${KMS_CLIENT_SECRET}\"}" \
+                    | jq -r '.accessToken // empty')
+                  [ -n "$KMS_TOKEN" ] || { echo "::error::KMS login failed at ${KMS_ENDPOINT}"; exit 1; }
+                  PW=$(curl -fsS --retry 5 --retry-delay 2 --max-time 30 \
+                    "${KMS_ENDPOINT}/v1/kms/secrets/insights/E2E_PASSWORD?env=${KMS_SECRET_ENV}" \
+                    -H "Authorization: Bearer ${KMS_TOKEN}" | jq -r '.value // empty' || true)
+                  [ -n "$PW" ] || { echo "::error::E2E_PASSWORD missing in KMS (insights, env ${KMS_SECRET_ENV})"; exit 1; }
+                  echo "::add-mask::${PW}"
+                  export LOGIN_PASSWORD="$PW"
+
                   corepack enable
                   # --no-frozen-lockfile, same as the image build one job up, and for a
                   # reason that predates this workflow: patchedDependencies is declared
