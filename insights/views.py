@@ -250,9 +250,15 @@ def preflight_check(request: HttpRequest) -> JsonResponse:
             if not in_cloud
             else None,
             "openai_available": bool(os.environ.get("OPENAI_API_KEY")),
-            # Max runs on Anthropic, so it needs its own signal — otherwise self-hosted instances
-            # render the assistant but fail at call time with no key configured.
-            "anthropic_available": bool(os.environ.get("ANTHROPIC_API_KEY")),
+            # Whether the assistant has somewhere to send a request, named for the
+            # question rather than for one vendor. It answered from ANTHROPIC_API_KEY
+            # alone, so an instance routed through our own gateway — which is what
+            # build_async_anthropic_client prefers, and what pays — reported the
+            # assistant as unavailable and told the user to go get a vendor key.
+            "assistant_available": bool(
+                (settings.AI_GATEWAY_URL and settings.AI_GATEWAY_API_KEY)
+                or os.environ.get("ANTHROPIC_API_KEY")
+            ),
             "site_url": settings.SITE_URL,
             "instance_preferences": settings.INSTANCE_PREFERENCES,
             "buffer_conversion_seconds": settings.BUFFER_CONVERSION_SECONDS,
