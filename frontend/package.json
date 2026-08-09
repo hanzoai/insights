@@ -128,7 +128,7 @@
         "@hanzo/products-session-summaries": "workspace:*",
         "@hanzo/products-signals": "workspace:*",
         "@hanzo/products-skills": "workspace:*",
-        "@hanzo/products-stamphog": "workspace:*",
+        "@hanzo/products-stamp": "workspace:*",
         "@hanzo/products-streamlit-apps": "workspace:*",
         "@hanzo/products-subscriptions": "workspace:*",
         "@hanzo/products-surveys": "workspace:*",
