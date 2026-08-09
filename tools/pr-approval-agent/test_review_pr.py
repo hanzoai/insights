@@ -194,7 +194,7 @@ def test_turn_limit_error_not_retried(monkeypatch: pytest.MonkeyPatch, gate_verd
 
 def test_bot_author_refuses_before_classification(monkeypatch: pytest.MonkeyPatch) -> None:
     """A bot-authored PR is hard-refused before any classification, gate, or
-    LLM call — a human applying the stamphog label can't make the agent review
+    LLM call — a human applying the stamp label can't make the agent review
     bot output."""
     monkeypatch.setattr(review_pr, "_INSIGHTS_AVAILABLE", False)
 
@@ -276,7 +276,7 @@ def test_waits_out_bot_eyes_race_then_proceeds(monkeypatch: pytest.MonkeyPatch) 
 
 
 def test_persistent_bot_eyes_yields_wait_not_refuse(monkeypatch: pytest.MonkeyPatch) -> None:
-    # WAIT keeps the stamphog label (workflow skips the label-strip for it),
+    # WAIT keeps the stamp label (workflow skips the label-strip for it),
     # so a slow bot review retries on the next push instead of demanding a
     # human re-label — a REFUSE here would reintroduce the race friction.
     monkeypatch.setattr(review_pr, "_INSIGHTS_AVAILABLE", False)
@@ -526,23 +526,23 @@ def test_capture_review_completed_includes_familiarity_and_provenance(
 
     props = fake_insights.capture.call_args.kwargs["properties"]
     if populated:
-        assert props["stamphog_owner_teams"] == ["@Insights/team-devex"]
-        assert props["stamphog_familiarity_band"] == "MODERATE"
-        assert props["stamphog_familiarity_blame_overlap_pct"] == 12.3
-        assert props["stamphog_familiarity_prior_prs_in_paths"] == 2
-        assert props["stamphog_familiarity_days_since_last_touch"] == 30
-        assert props["stamphog_agent_authored"] is True
-        assert props["stamphog_agent_commit_count"] == 2
-        assert props["stamphog_commit_count"] == 3
-        assert props["stamphog_generated_by"] == ["Insights Desktop"]
-        assert props["stamphog_task_ids"] == ["task-1", "task-2"]
+        assert props["stamp_owner_teams"] == ["@Insights/team-devex"]
+        assert props["stamp_familiarity_band"] == "MODERATE"
+        assert props["stamp_familiarity_blame_overlap_pct"] == 12.3
+        assert props["stamp_familiarity_prior_prs_in_paths"] == 2
+        assert props["stamp_familiarity_days_since_last_touch"] == 30
+        assert props["stamp_agent_authored"] is True
+        assert props["stamp_agent_commit_count"] == 2
+        assert props["stamp_commit_count"] == 3
+        assert props["stamp_generated_by"] == ["Insights Desktop"]
+        assert props["stamp_task_ids"] == ["task-1", "task-2"]
     else:
-        assert props["stamphog_owner_teams"] == []
-        assert props["stamphog_familiarity_band"] == ""
-        assert props["stamphog_familiarity_blame_overlap_pct"] is None
-        assert props["stamphog_agent_authored"] is None
-        assert props["stamphog_generated_by"] == []
-        assert props["stamphog_task_ids"] == []
+        assert props["stamp_owner_teams"] == []
+        assert props["stamp_familiarity_band"] == ""
+        assert props["stamp_familiarity_blame_overlap_pct"] is None
+        assert props["stamp_agent_authored"] is None
+        assert props["stamp_generated_by"] == []
+        assert props["stamp_task_ids"] == []
 
 
 def test_capture_review_completed_merges_server_extras_base_wins(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -550,7 +550,7 @@ def test_capture_review_completed_merges_server_extras_base_wins(monkeypatch: py
     # own props must win on collision so a stamped extra can never spoof e.g. the repo.
     monkeypatch.setenv(
         "STAMPFN_EXTRA_PROPERTIES",
-        '{"stamphog_runtime":"hosted","stamphog_repo":"spoofed/repo"}',
+        '{"stamp_runtime":"hosted","stamp_repo":"spoofed/repo"}',
     )
     fake_insights = MagicMock()
     monkeypatch.setattr(review_pr, "_INSIGHTS_AVAILABLE", True)
@@ -561,8 +561,8 @@ def test_capture_review_completed_merges_server_extras_base_wins(monkeypatch: py
     pipeline._capture_review_completed("PASSED", "APPROVE")
 
     props = fake_insights.capture.call_args.kwargs["properties"]
-    assert props["stamphog_runtime"] == "hosted"
-    assert props["stamphog_repo"] == "Insights/insights"
+    assert props["stamp_runtime"] == "hosted"
+    assert props["stamp_repo"] == "Insights/insights"
 
 
 @pytest.mark.parametrize(

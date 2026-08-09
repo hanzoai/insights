@@ -1,4 +1,4 @@
-# Stamphog merge-gate policy - see .stamphog/README.md for how changes are
+# Stamp merge-gate policy - see .stamp/README.md for how changes are
 # proposed and reviewed. Keep pattern scalars single-quoted so regex
 # backslashes survive YAML parsing.
 version: 1
@@ -115,15 +115,15 @@ deny:
                 - 'Dockerfile'
                 - '\.tool-versions'
                 - '\.nvmrc'
-    stamphog_policy:
-        description: "Stamphog's own policy files, engine, and gate inputs."
+    stamp_policy:
+        description: "Stamp's own policy files, engine, and gate inputs."
         rationale: "Changes to the merge gate's own policy or engine always require human review - the gate cannot be trusted to approve edits to itself. Ownership sources (CODEOWNERS, owners.yaml, product.yaml owners) are gate inputs: an ownership edit changes which team the reviewer treats as owning future PRs, and owners.yaml/product.yaml would otherwise ride the .yaml allow-list to a T0 auto-approve (Jul 2026 review finding)."
         match:
             paths:
-                - '\.stamphog/'
+                - '\.stamp/'
                 - 'AGENT_APPROVALS\.md'
                 - 'tools/pr-approval-agent/'
-                - 'products/stamphog/backend/logic/policy_defaults/'
+                - 'products/stamp/backend/logic/policy_defaults/'
                 - 'tools/owners/'
                 - 'CODEOWNERS'
                 - 'owners\.yaml'
@@ -210,7 +210,7 @@ familiarity:
 # Ownership sources feeding the reviewer's team context - advisory only, never a
 # gate. The insightscli-resolver source delegates to the shared insightscli OwnersResolver,
 # which walks the distributed owners.yaml / product.yaml files from the repo root
-# (the `path` locator) and merges nearest-file-wins, so stamphog reads the same
+# (the `path` locator) and merges nearest-file-wins, so stamp reads the same
 # view the reviewer auto-assigner builds. Sources are read from the master
 # checkout (the workflow pins ref: master), so a PR editing them cannot influence
 # its own review. Locators must stay repo-relative (no absolute paths, no '..').

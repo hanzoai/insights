@@ -2,7 +2,7 @@
 
 Reads the `Migration risk` GitHub check run posted on the head commit by CI.
 That check is a generic CI feature — humans see it in the PR UI and any tool
-that consumes check_runs can use it. Stamphog is one such consumer; nothing in
+that consumes check_runs can use it. Stamp is one such consumer; nothing in
 this module is specific to the analyzer's internals, only to the check's
 public conclusion plus a small marker the analyzer embeds in the summary.
 
@@ -18,8 +18,8 @@ only returns checks attached to the current head commit, so a stale check from
 an earlier commit can't be read here by construction.
 
 Bypass scoping: the analyzer only covers Django migrations and embeds the
-exact list of analyzed file paths in the summary as a `<!-- stamphog:v1 [...] -->`
-marker. Stamphog scopes its bypass to the intersection of (analyzed paths) and
+exact list of analyzed file paths in the summary as a `<!-- stamp:v1 [...] -->`
+marker. Stamp scopes its bypass to the intersection of (analyzed paths) and
 (PR diff). Files in directories that share the `migrations/` name but are
 managed by other systems (Datastore, async migrations, RBAC scripts) never
 appear in the analyzer's list and so always fall through to the deny-list.
@@ -31,7 +31,7 @@ from pathlib import Path
 
 CHECK_NAME = "Migration risk"
 
-_MARKER_RE = re.compile(r"<!--\s*stamphog:v1\s+(\[[^\]]*\])\s*-->")
+_MARKER_RE = re.compile(r"<!--\s*stamp:v1\s+(\[[^\]]*\])\s*-->")
 
 
 def safe_migration_files(check_runs: list[dict], pr_file_paths: list[str]) -> set[str]:
@@ -75,7 +75,7 @@ def migration_check_pending(check_runs: list[dict], pr_file_paths: list[str]) ->
 
 
 def _analyzed_paths_from_check(check_run: dict) -> set[str]:
-    """Parse the `<!-- stamphog:v1 [...] -->` marker out of the check's summary.
+    """Parse the `<!-- stamp:v1 [...] -->` marker out of the check's summary.
 
     The marker holds a JSON array of repo-relative file paths the analyzer
     classified. Returns an empty set when the marker is missing, malformed,

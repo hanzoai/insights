@@ -38,7 +38,7 @@ _OWNERSHIP_FORMATS = gates.OWNERSHIP_FORMAT_LOCATORS
 # pass silently. The first INTENTIONAL policy change must update the frozen copy
 # here in the same PR - that is by design: machine-policy edits always touch two
 # human-reviewed files. (The prose guidance file is deliberately NOT frozen -
-# wording changes are governed by human review via the stamphog_policy deny.)
+# wording changes are governed by human review via the stamp_policy deny.)
 
 OLD_DENY_PATTERN_DEFS = {
     "auth": {
@@ -158,8 +158,8 @@ OLD_DISMISS_GENERATED_RE = "(?:^|/)generated/.*\\.(ts|tsx|js|jsx|json|md|snap|py
 # ── 1. Equality snapshot: loaded policy matches pre-extraction literals ──
 
 
-def test_deny_defs_equal_pre_extraction_excluding_stamphog_policy() -> None:
-    live = {k: v for k, v in gates._DENY_PATTERN_DEFS.items() if k != "stamphog_policy"}
+def test_deny_defs_equal_pre_extraction_excluding_stamp_policy() -> None:
+    live = {k: v for k, v in gates._DENY_PATTERN_DEFS.items() if k != "stamp_policy"}
     assert live == OLD_DENY_PATTERN_DEFS
 
 
@@ -207,7 +207,7 @@ def _invalid_regex(d: dict) -> None:
 
 
 def _drop_self_governance(d: dict) -> None:
-    del d["deny"]["stamphog_policy"]
+    del d["deny"]["stamp_policy"]
 
 
 def _out_of_contract_delegation(d: dict) -> None:
@@ -288,7 +288,7 @@ _PROSE_ONLY_FM = "{}"
 
 
 def _grant(max_files: int) -> str:
-    return f"stamphog:\n  size_gate:\n    max_files: {max_files}"
+    return f"stamp:\n  size_gate:\n    max_files: {max_files}"
 
 
 def _multi_prose(*parts: tuple[str, str]) -> str:
@@ -317,7 +317,7 @@ def _scope(eff, path):
 
 
 def test_resolve_folder_override_budgets_its_own_files(fake_repo: Path) -> None:
-    _write_folder_policy(fake_repo, "stamphog:\n  size_gate:\n    max_files: 50")
+    _write_folder_policy(fake_repo, "stamp:\n  size_gate:\n    max_files: 50")
     eff = resolve(gates.POLICY, ["products/visual_review/a.py", "products/visual_review/sub/b.py"])
     vr = _scope(eff, _VISUAL_REVIEW_FILE)
     assert vr.max_files == 50
@@ -332,7 +332,7 @@ def test_resolve_mixed_pr_budgets_each_scope_separately(fake_repo: Path) -> None
     # Mixed leniency: the folder's files keep the folder ceiling, everything
     # else keeps the global ceiling. A stray root file no longer revokes the
     # override, it just has to fit the global budget itself.
-    _write_folder_policy(fake_repo, "stamphog:\n  size_gate:\n    max_files: 50")
+    _write_folder_policy(fake_repo, "stamp:\n  size_gate:\n    max_files: 50")
     eff = resolve(gates.POLICY, ["products/visual_review/a.py", "README.md"])
     assert _scope(eff, _VISUAL_REVIEW_FILE).max_files == 50
     assert _scope(eff, _VISUAL_REVIEW_FILE).files == ("products/visual_review/a.py",)
@@ -343,8 +343,8 @@ def test_resolve_mixed_pr_budgets_each_scope_separately(fake_repo: Path) -> None
 @pytest.mark.parametrize(
     "frontmatter",
     [
-        pytest.param("stamphog:\n  size_gate:\n    max_lines: 999", id="undelegated-key"),
-        pytest.param("stamphog:\n  size_gate:\n    max_files: 99", id="over-ceiling"),
+        pytest.param("stamp:\n  size_gate:\n    max_lines: 999", id="undelegated-key"),
+        pytest.param("stamp:\n  size_gate:\n    max_files: 99", id="over-ceiling"),
     ],
 )
 def test_resolve_invalid_folder_file_pools_files_into_global(fake_repo: Path, frontmatter: str) -> None:
@@ -376,7 +376,7 @@ def test_resolve_prose_only_folder_file_keeps_global_budget(fake_repo: Path) -> 
 
 
 def test_resolve_carries_sanitized_prose(fake_repo: Path) -> None:
-    _write_folder_policy(fake_repo, "stamphog:\n  size_gate:\n    max_files: 50", prose="keep\x07this")
+    _write_folder_policy(fake_repo, "stamp:\n  size_gate:\n    max_files: 50", prose="keep\x07this")
     eff = resolve(gates.POLICY, ["products/visual_review/a.py"])
     assert eff.folder_prose == "keepthis"
 
@@ -482,11 +482,11 @@ def test_resolve_invalid_child_rides_parent_grant(fake_repo: Path) -> None:
 
 @pytest.mark.parametrize(
     "path",
-    [".stamphog/policy.yml", "some/AGENT_APPROVALS.md", "tools/pr-approval-agent/review_pr.py"],
+    [".stamp/policy.yml", "some/AGENT_APPROVALS.md", "tools/pr-approval-agent/review_pr.py"],
 )
 def test_policy_file_only_pr_is_t2_never(path: str) -> None:
     deny = gates.detect_deny_categories([path])
-    assert deny == ["stamphog_policy"]
+    assert deny == ["stamp_policy"]
     tier = gates.assign_tier(
         deny_categories=deny,
         allow_listed_only=gates.is_allow_listed_only([path]),
@@ -504,7 +504,7 @@ def test_policy_file_only_pr_is_t2_never(path: str) -> None:
 
 
 def test_reviewer_system_composes_guidance_and_scaffold() -> None:
-    # Wording changes are governed by human review (stamphog_policy deny), not a
+    # Wording changes are governed by human review (stamp_policy deny), not a
     # frozen snapshot; this only guards the composition seam itself.
     guidance = policy.review_guidance_path().read_text()
     assert reviewer.REVIEWER_SYSTEM == guidance + reviewer._REVIEWER_SCAFFOLD_TAIL
@@ -512,12 +512,12 @@ def test_reviewer_system_composes_guidance_and_scaffold() -> None:
     assert "Verdicts:" in reviewer._REVIEWER_SCAFFOLD_TAIL
 
 
-# ── 6. Stamphog policy files are not trivial at dismiss time ──
+# ── 6. Stamp policy files are not trivial at dismiss time ──
 
 
 @pytest.mark.parametrize(
     "path",
-    ["products/visual_review/AGENT_APPROVALS.md", ".stamphog/policy.yml", "tools/pr-approval-agent/gates.py"],
+    ["products/visual_review/AGENT_APPROVALS.md", ".stamp/policy.yml", "tools/pr-approval-agent/gates.py"],
 )
 def test_policy_paths_not_trivial_at_dismiss_time(path: str) -> None:
     assert gates.is_trivial_at_dismiss_time(path) is False
