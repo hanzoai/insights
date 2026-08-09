@@ -180,10 +180,16 @@ SEPARATE step — `bin/docker-server` (web) does NOT migrate on boot; run
 
 ## Live deploy (do-sfo3-hanzo-k8s / ns hanzo)
 
-- `ghcr.io/hanzoai/insights:<FULL-40-CHAR-SHA>` — built by the NATIVE pipeline
-  in `.hanzo/workflows/deploy.yml` (git.hanzo.ai push → in-cluster act_runner →
-  docker build → GHCR), tagged by **commit sha only**, never semver: a re-pushed
-  tag means two digests behind one name. `container-images-cd.yml` is
+- `ghcr.io/hanzoai/insights:<semver>` — built by the NATIVE pipeline in
+  `.hanzo/workflows/deploy.yml` (git.hanzo.ai push → in-cluster act_runner →
+  docker build → GHCR), tagged **semver, never sha**. This file said the
+  opposite for a while; the pipeline's own header explains the reversal. The
+  hazard behind the old sha-only rule was real — a RE-PUSHED tag leaves two
+  digests behind one name — but that is caused by mutating a tag, not by
+  readable names, and the workflow now refuses to push a tag that already
+  exists. The next patch is derived from the REGISTRY, not from `git tag`,
+  because those two disagree here. The commit rides the image as
+  `org.opencontainers.image.revision`. `container-images-cd.yml` is
   neutralized; GitHub Actions is a mirror and builds nothing.
 - `insights-web` (Django) + `insights-worker` (Celery) — **LIVE** on
   `insights.hanzo.ai`. Operator App CRs in `hanzoai/universe`
@@ -201,6 +207,102 @@ SEPARATE step — `bin/docker-server` (web) does NOT migrate on boot; run
   `updatedReplicas == replicas` with the old ReplicaSet at zero, and exec a pod
   selected by its image. Reading a pod mid-rollout returns the OLD build and
   makes a shipped fix look absent (or an absent one look shipped).
+
+## `/static/*` is served from an object origin, not from the pods
+
+A content-hashed filename is a claim about bytes: `index-W7FGYMJN.js` names one
+byte sequence and only ever that one. Those files used to live only inside the
+pod that built them — WhiteNoise reading each pod's own `STATIC_ROOT` out of the
+image — so an asset died when its pod did. This repo ships every few minutes and
+rolls with `maxSurge: 1`, so two builds serve simultaneously for most of the day
+(measured: 11 ReplicaSets in two hours, three of them live). A browser therefore
+took `index.html` from one build and had roughly half its chunk requests answered
+by another that had never heard of that hash — **one url, 15 requests, 200×7 and
+404×8**. That was the "Insights failed to load. Reload the page to try again."
+
+So the tree is mirrored to `s3://cdn/insights/static/` and `insights.hanzo.ai`
+serves `/static/*` from there, via the ingress `staticFiles` middleware
+(`hanzoai/universe`, `infra/k8s/ingress/routes.yaml`, the `insights-static-*`
+middlewares). Rollout tweaks cannot substitute: `maxSurge`/session affinity only
+narrow the window, and a client still holding the old shell breaks _after_ the
+rollout finishes.
+
+- **The origin is flat and shared by every build**, which is only correct because
+  the names are content-addressed. Two builds emitting the same chunk write
+  identical bytes; two that differ emit different names. Collisions are
+  impossible by construction, which is also what makes retaining old builds
+  nearly free. `bin/publish-static` writes a hashed key ONCE and never rewrites
+  it, so a build uploads only what it changed — the 2.7 GB first publish is the
+  floor, not the per-build cost.
+- **1795 of the 12887 published names carry no hash**, and 129 of those are
+  `.js`. They are not incidental: `array.js`, `toolbar.js`, the recorders,
+  `surveys.js` are the SDK bundles customers load from their own pages by that
+  exact url, plus `staticfiles.json` and the hashless `index.js`/`index.css`
+  aliases `common/esbuilder/utils.mjs` re-emits every build. They keep
+  overwriting and must never be marked immutable — a year-long `immutable` on
+  `array.js` pins every customer's SDK with no way to recall it.
+- **Two routers, one origin.** `cacheControl` is keyed by EXTENSION, so "hashed
+  names are immutable" cannot be said in one map. The router discriminates
+  instead, on a `PathRegexp` of the two hash shapes the build emits — Django's
+  `name.<12 hex>.ext` and esbuild's `name-<8 base32>.ext`. A name the regex does
+  not recognise falls to the short-lived router, so the failure direction is
+  under-caching, never a permanently-stuck asset.
+- **The CORS header had to be restated.** `/static/*` answers
+  `Access-Control-Allow-Origin: *` from Django's corsheaders; serving from the
+  object store goes around Django and the header went with it. Set it with
+  `customResponseHeaders`, NOT `accessControlAllowOriginList` — the CORS branch
+  applies headers from a response modifier in the proxy's return path, which a
+  terminal middleware never reaches. `curl` reported 200 throughout; only loading
+  a font in a real browser surfaced it, as a bare `NetworkError`.
+- **`staticFiles` is terminal** — a key it cannot find is a 404, not a
+  fall-through to the pod. So the publish runs BETWEEN the build and the pin in
+  `deploy.yml`. Pin first and there is a window where pods serve a build whose
+  chunks nobody has published.
+- **A pin can still move without a publish, by hand, and that is now a
+  foot-gun.** `charts/app/pin.sh` checks semver, registry pullability, the
+  repository, and monotonicity — it does NOT check that the build's manifest
+  exists. `PIN_ROLLBACK=1` and a direct edit to
+  `charts/app/values/hanzo/insights-web.yaml` both bypass the workflow. That
+  used to be harmless because the image carried its own `STATIC_ROOT`; it is not
+  any more, because the ingress never reads the pod. **Rolling back to a build
+  older than the 30-day horizon will find its unique chunks pruned.** Check
+  `s3://cdn/insights-builds/` for that version before pinning backwards.
+- **Retention is 30 days**, held by `bin/prune-static` (weekly, in
+  `.hanzo/workflows/prune-static.yml`) and read from the per-build manifests in
+  `s3://cdn/insights-builds/`, never from object age: a chunk unchanged across
+  two hundred builds has the OLDEST `LastModified` in the bucket precisely
+  because it is the most stable thing in it, so an S3 lifecycle rule would delete
+  the load-bearing assets first and leave the churn.
+- **The prune deletes unattended, so it carries four guards** — all covered by
+  `bin/test/test_static_origin.py`, which runs in `ci-python`. A publish writes
+  its objects first and its manifest last, so a build finishing between the
+  manifest listing and the object listing looked present and unclaimed, and the
+  prune would delete the very build the pin was about to move to. Manifests are
+  re-read AFTER the object listing; nothing younger than a day is ever deleted
+  (age PROTECTS, never condemns); a floor of ten builds survives a wrong runner
+  clock; and an orphan set over a quarter of the tree refuses rather than
+  deletes. Do not remove one because the others look sufficient — the first two
+  cover different halves of the same race.
+- **The manifests are a SIBLING prefix, not `insights/.builds/`.** A
+  percent-encoded `../` reaches out of `static/` inside the middleware
+  (`/static/%2e%2e%2f.builds/<v>.txt` returned one, 200). It cannot climb past
+  the middleware's root, so only public filenames were ever reachable — but a
+  record of the tree does not belong inside the tree, and a sibling prefix puts
+  it out of reach by construction rather than by a path-cleaning rule.
+- **A version string does not name a tree.** Both forge mirrors run the deploy
+  workflow, the concurrency group is per-repo, and two builds routinely compute
+  the same next patch and push that tag with different digests — measured on
+  1.52.116 (`2453b673` ran while the registry resolved the tag to `81c09eaf`);
+  universe records the same for the plugin image. Manifests are therefore keyed
+  `<version>-<sha12 of the list>`, so two trees write two manifests instead of
+  one erasing the other's record and stranding its files for the prune.
+- **`analytics.hanzo.ai` and `sentry.hanzo.ai` are NOT part of this.** They share
+  the cloud _ingest_ routers with insights, but their `/static/` goes to entirely
+  different backends (`analytics.hanzo.svc` and `cloud-api-hanzo-ai`). Carving
+  `/static` on those hosts would hijack paths they serve themselves.
+- WhiteNoise is still in `MIDDLEWARE` and still serves the tree inside the pod.
+  It is the fallback, and leaving it is the safer order — remove it only as its
+  own change.
 
 ## Warehouse table names: no version suffixes, and a gate that can see them
 

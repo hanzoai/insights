@@ -1,0 +1,65 @@
+# Hold the static origin to its horizon.
+#
+# /static/* is served from s3://cdn/insights so an asset outlives the pod that
+# built it (see the deploy workflow's publish step). Keeping old builds is the
+# whole point of that, but "kept" has to mean a stated horizon rather than
+# forever-by-accident, or the origin grows without bound and nobody notices
+# until the bill does. bin/prune-static carries the horizon and the reasoning
+# for the number; this only decides how often it is checked.
+#
+# Weekly, because the horizon is 30 days. Checking daily would answer the same
+# question six extra times a week, and a slightly late prune is harmless while
+# an early one is not.
+name: prune-static
+
+on:
+    schedule:
+        - cron: '0 4 * * 0'
+    workflow_dispatch:
+
+jobs:
+    prune:
+        runs-on: hanzo-build-linux-amd64
+        timeout-minutes: 30
+        steps:
+            - uses: actions/checkout@v4
+
+            # boto3 on the runner rather than running inside the insights image,
+            # which is how the publish does it. The publish has to use the image
+            # because it needs the tree that image carries; a prune reads only
+            # the bucket, so pulling several GB to get an import would be paying
+            # for something it never opens.
+            - name: Prune to the horizon
+              env:
+                  KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
+                  KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
+                  KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://api.hanzo.ai' }}
+                  KMS_SECRET_ENV: ${{ vars.KMS_SECRET_ENV || 'prod' }}
+              run: |
+                  set -euo pipefail
+                  python3 -m pip install --quiet --disable-pip-version-check boto3
+
+                  KMS_CURL=(curl -fsS --retry 5 --retry-delay 2 --retry-connrefused --max-time 30)
+
+                  KMS_TOKEN=$("${KMS_CURL[@]}" "${KMS_ENDPOINT}/v1/kms/auth/login" \
+                    -H 'Content-Type: application/json' \
+                    -d "{\"clientId\":\"${KMS_CLIENT_ID}\",\"clientSecret\":\"${KMS_CLIENT_SECRET}\"}" \
+                    | jq -r '.accessToken // empty')
+                  [ -n "$KMS_TOKEN" ] || { echo "::error::KMS login failed at ${KMS_ENDPOINT}"; exit 1; }
+
+                  kms() {
+                    "${KMS_CURL[@]}" "${KMS_ENDPOINT}/v1/kms/secrets/storage/$1?env=${KMS_SECRET_ENV}" \
+                      -H "Authorization: Bearer ${KMS_TOKEN}" | jq -r '.value // empty'
+                  }
+                  S3_KEY=$(kms S3_ROOT_USER)
+                  S3_SECRET=$(kms S3_ROOT_PASSWORD)
+                  [ -n "$S3_KEY" ] && [ -n "$S3_SECRET" ] || {
+                    echo "::error::S3 credentials missing in KMS at storage/ (env ${KMS_SECRET_ENV})"; exit 1; }
+                  echo "::add-mask::${S3_SECRET}"
+
+                  S3_ENDPOINT=https://s3.hanzo.ai \
+                  S3_BUCKET=cdn \
+                  S3_PREFIX=insights \
+                  AWS_ACCESS_KEY_ID="$S3_KEY" \
+                  AWS_SECRET_ACCESS_KEY="$S3_SECRET" \
+                  python3 bin/prune-static --apply
