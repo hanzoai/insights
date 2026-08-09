@@ -3,7 +3,8 @@
     "version": "0.0.1",
     "description": "Node bindings for the session-replay anonymizer",
     "main": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "//types": "Types come from the source, runtime from the build, the same way @hanzo/replay-headless does it. This package is workspace-only, so src is always on disk, and a consumer typechecks without first running the cargo+tsc build that produces dist. Pointing at dist/index.d.ts instead makes every importer unresolvable on a fresh checkout.",
+    "types": "src/index.ts",
     "scripts": {
         "test": "cargo test -p insights-replay-anonymizer -p replay-anonymizer-node",
         "build": "pnpm run build:cargo --release && pnpm run build:move-lib && pnpm run build:typescript",

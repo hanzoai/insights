@@ -260,7 +260,7 @@ class AssistantNavigateUrl(StrEnum):
     ERROR_TRACKING = "errorTracking"
     EXPERIMENTS = "experiments"
     FEATURE_FLAGS = "featureFlags"
-    GAME368HEDGEHOGS = "game368mascots"
+    GAME368MASCOTS = "game368mascots"
     HEATMAPS = "heatmaps"
     INGESTION_WARNINGS = "ingestionWarnings"
     INSIGHTS = "insights"

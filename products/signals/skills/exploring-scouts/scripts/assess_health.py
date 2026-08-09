@@ -44,7 +44,7 @@ TIMEOUT_MINUTES = 20.0
 STALL_FACTOR = 2.0
 
 # the obligatory mascot
-HEDGEHOG = r"""
+MASCOT = r"""
          /////////,
        ///////////// .            Insights · Signals
      ///////////////  `.            health & performance
@@ -179,7 +179,7 @@ def assess_scout(name: str, runs: list[dict], interval: float | None, mem_count:
 def render(scouts: list[dict], window_note: str, has_mem: bool, *, art: bool = True) -> str:
     banner: list[str] = []
     if art:
-        banner = [HEDGEHOG.strip("\n"), ""]
+        banner = [MASCOT.strip("\n"), ""]
 
     if not scouts:
         return "\n".join([*banner, "SCOUT HEALTH", "",
