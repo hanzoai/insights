@@ -1,5 +1,5 @@
-import { ReplayPlugin, Replayer } from 'insights-js/rrweb'
-import { EventType, IncrementalSource, eventWithTime } from 'insights-js/rrweb-types'
+import { ReplayPlugin, Replayer } from '@hanzo/insights-rrweb'
+import { EventType, IncrementalSource, eventWithTime } from '@hanzo/insights-rrweb-types'
 
 export const AudioMuteReplayerPlugin = (isMuted: boolean): ReplayPlugin => {
     const applyMuteToMediaElement = (element: HTMLElement): void => {

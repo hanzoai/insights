@@ -81,7 +81,7 @@ describe('CDP script invocation rerun e2e', () => {
     let mockProducerObserver: KafkaProducerObserver
     let eventsConsumer: CdpEventsConsumer
     let cyclotronWorker: CdpCyclotronWorker
-    let hogflowWorker: CdpCyclotronWorkerFlow
+    let flowWorker: CdpCyclotronWorkerFlow
     let rerunManager: RerunJobManager
     let rerunWorker: CdpRerunWorkerConsumer
     let kafkaQueue: CyclotronJobQueueKafka
@@ -182,7 +182,7 @@ describe('CDP script invocation rerun e2e', () => {
 
         eventsConsumer = new CdpEventsConsumer(hub, cdpDeps, {
             hogQueue: kafkaQueue,
-            hogflowQueue: postgresV2Queue,
+            flowQueue: postgresV2Queue,
         })
         // We call processBatch directly — no need to actually join the kafka group.
         // Stubbing keeps the test off Redpanda's stale-group-protocol coordinator,
@@ -215,7 +215,7 @@ describe('CDP script invocation rerun e2e', () => {
         await Promise.all([
             eventsConsumer?.stop().catch(() => undefined),
             cyclotronWorker?.stop().catch(() => undefined),
-            hogflowWorker?.stop().catch(() => undefined),
+            flowWorker?.stop().catch(() => undefined),
             rerunWorker?.stop().catch(() => undefined),
             rerunManager?.disconnect().catch(() => undefined),
         ])
@@ -542,9 +542,9 @@ describe('CDP script invocation rerun e2e', () => {
         await insertFlow(hub.postgres, flow)
 
         // The script-flow worker polls the same postgres-v2 backend the events consumer
-        // routes flows to (hogflowQueue in beforeEach).
-        hogflowWorker = new CdpCyclotronWorkerFlow(hub, cdpDeps, postgresV2Queue)
-        await hogflowWorker.start()
+        // routes flows to (flowQueue in beforeEach).
+        flowWorker = new CdpCyclotronWorkerFlow(hub, cdpDeps, postgresV2Queue)
+        await flowWorker.start()
 
         // ── 1. Original flow runs to completion — fetch fires exactly once ──────────
         const { backgroundTask } = await eventsConsumer.processBatch([globals])

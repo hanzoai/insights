@@ -1,5 +1,5 @@
-import { Replayer, canvasMutation } from 'insights-js/rrweb'
-import { ReplayPlugin } from 'insights-js/rrweb'
+import { Replayer, canvasMutation } from '@hanzo/insights-rrweb'
+import { ReplayPlugin } from '@hanzo/insights-rrweb'
 import {
     CanvasArg,
     EventType,
@@ -7,7 +7,7 @@ import {
     canvasMutationData,
     canvasMutationParam,
     eventWithTime,
-} from 'insights-js/rrweb-types'
+} from '@hanzo/insights-rrweb-types'
 
 import { debounce } from '../utils'
 import { deserializeCanvasArg } from './deserialize-canvas-args'

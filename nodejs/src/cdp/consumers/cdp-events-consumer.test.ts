@@ -66,7 +66,7 @@ describe('CdpEventsConsumer', () => {
 
         processor = new CdpEventsConsumer(hub, createCdpConsumerDeps(hub), {
             hogQueue: mockJobQueue,
-            hogflowQueue: mockJobQueue,
+            flowQueue: mockJobQueue,
         })
 
         // NOTE: We don't want to actually connect to Kafka for these tests as it is slow and we are testing the core logic only
@@ -575,7 +575,7 @@ describe('script flow processing', () => {
 
         processor = new CdpEventsConsumer(hub, createCdpConsumerDeps(hub), {
             hogQueue: mockQueue,
-            hogflowQueue: mockQueue,
+            flowQueue: mockQueue,
         })
 
         // NOTE: We don't want to actually connect to Kafka for these tests as it is slow and we are testing the core logic only

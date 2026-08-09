@@ -1,5 +1,5 @@
 import type { Insights, PropertyMatchType, SupportedWebVitalsMetrics } from 'insights-js'
-import { eventWithTime } from 'insights-js/rrweb-types'
+import { eventWithTime } from '@hanzo/insights-rrweb-types'
 import { LogicWrapper } from 'kea'
 import { ReactNode } from 'react'
 import { LayoutItem } from 'react-grid-layout'
@@ -1513,7 +1513,7 @@ export type DurationType = 'duration' | 'active_seconds' | 'inactive_seconds'
 /** The console method a recorded log entry came from.
  *
  * Declared here rather than imported. It used to come from
- * `insights-js/rrweb-plugin-console-record`, and that specifier resolves to
+ * `@hanzo/insights-rrweb-plugin-console-record`, and that specifier resolves to
  * nothing: `insights-js` is not a dependency, it is absent from node_modules,
  * and the root tsconfig maps only two of the fork's subpaths — `rrweb-types`
  * and `rrweb` — because the SDK fork publishes those as sibling packages. There
