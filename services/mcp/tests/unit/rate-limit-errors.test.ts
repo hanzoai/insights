@@ -41,7 +41,7 @@ describe('outbound 429 handling', () => {
         it('includes the retry hint when seconds are known', () => {
             const error = new InsightsRateLimitError({
                 body: '{}',
-                url: 'https://us.hanzo.ai/api/environments/2/query/',
+                url: 'https://us.hanzo.ai/v1/environments/2/query/',
                 method: 'POST',
                 retryAfterSeconds: 12,
             })
@@ -55,7 +55,7 @@ describe('outbound 429 handling', () => {
         it('omits the retry hint when seconds are unknown', () => {
             const error = new InsightsRateLimitError({
                 body: '{}',
-                url: 'https://us.hanzo.ai/api/users/@me/',
+                url: 'https://us.hanzo.ai/v1/users/@me/',
                 method: 'GET',
                 retryAfterSeconds: null,
             })
@@ -171,7 +171,7 @@ describe('outbound 429 handling', () => {
         it('returns the retry hint to the agent without capturing an exception', () => {
             const error = new InsightsRateLimitError({
                 body: '{}',
-                url: 'https://us.hanzo.ai/api/environments/2/query/',
+                url: 'https://us.hanzo.ai/v1/environments/2/query/',
                 method: 'POST',
                 retryAfterSeconds: 12,
             })
