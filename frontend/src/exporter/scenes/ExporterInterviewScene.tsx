@@ -4,14 +4,14 @@ import { memo, type RefObject, useCallback, useEffect, useMemo, useRef, useState
 import { Button, Input } from '@hanzo/elements'
 
 import { Logo } from 'lib/brand'
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { uuid } from 'lib/utils/dom'
 import { fromParams } from 'lib/utils/url'
 
 import { InterviewExportPayload } from '../types'
 
-const MascotRobot = pngHoggie()
+const MascotRobot = pngMascot()
 
 // Fields a shared-link respondent sends to /start_call/. Empty {} for personalised links.
 interface StartCallBody {

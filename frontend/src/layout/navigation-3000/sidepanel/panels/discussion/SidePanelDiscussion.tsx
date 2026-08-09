@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { IconChat } from '@hanzo/icons'
 
 import { humanizeScope } from 'lib/components/ActivityLog/humanizeActivity'
-import { WarningHog } from 'lib/components/mascots'
+import { WarningScript } from 'lib/components/mascots'
 import { IconWithCount } from 'lib/elements/icons'
 import { CommentComposer } from 'scenes/comments/CommentComposer'
 import { CommentsList } from 'scenes/comments/CommentsList'
@@ -55,7 +55,7 @@ export const SidePanelDiscussion = (): JSX.Element => {
                 ) : (
                     <div className="mx-auto p-8 max-w-160 mt-8 ">
                         <div className="max-w-24 mx-auto">
-                            <WarningHog className="w-full h-full" />
+                            <WarningScript className="w-full h-full" />
                         </div>
                         <h2>Discussions aren't supported here yet...</h2>
                         <p>

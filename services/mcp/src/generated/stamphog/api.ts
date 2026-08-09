@@ -11,7 +11,7 @@ import * as zod from 'zod'
 /**
  * Per-audience Slack destinations for the daily merged-PR digest.
  */
-export const StamphogDigestChannelsListParams = /* @__PURE__ */ zod.object({
+export const StampDigestChannelsListParams = /* @__PURE__ */ zod.object({
     project_id: zod
         .string()
         .describe(
@@ -19,7 +19,7 @@ export const StamphogDigestChannelsListParams = /* @__PURE__ */ zod.object({
         ),
 })
 
-export const StamphogDigestChannelsListQueryParams = /* @__PURE__ */ zod.object({
+export const StampDigestChannelsListQueryParams = /* @__PURE__ */ zod.object({
     limit: zod.number().optional().describe('Number of results to return per page.'),
     offset: zod.number().optional().describe('The initial index from which to return the results.'),
 })
@@ -27,7 +27,7 @@ export const StamphogDigestChannelsListQueryParams = /* @__PURE__ */ zod.object(
 /**
  * Per-audience Slack destinations for the daily merged-PR digest.
  */
-export const StamphogDigestChannelsCreateParams = /* @__PURE__ */ zod.object({
+export const StampDigestChannelsCreateParams = /* @__PURE__ */ zod.object({
     project_id: zod
         .string()
         .describe(
@@ -35,34 +35,34 @@ export const StamphogDigestChannelsCreateParams = /* @__PURE__ */ zod.object({
         ),
 })
 
-export const stamphogDigestChannelsCreateBodyAudienceKeyMax = 255
+export const stampDigestChannelsCreateBodyAudienceKeyMax = 255
 
-export const stamphogDigestChannelsCreateBodySlackIntegrationIdMin = -2147483648
-export const stamphogDigestChannelsCreateBodySlackIntegrationIdMax = 2147483647
+export const stampDigestChannelsCreateBodySlackIntegrationIdMin = -2147483648
+export const stampDigestChannelsCreateBodySlackIntegrationIdMax = 2147483647
 
-export const stamphogDigestChannelsCreateBodySlackChannelIdMax = 64
+export const stampDigestChannelsCreateBodySlackChannelIdMax = 64
 
-export const stamphogDigestChannelsCreateBodySlackChannelNameMax = 255
+export const stampDigestChannelsCreateBodySlackChannelNameMax = 255
 
-export const StamphogDigestChannelsCreateBody = /* @__PURE__ */ zod.object({
+export const StampDigestChannelsCreateBody = /* @__PURE__ */ zod.object({
     audience_key: zod
         .string()
-        .max(stamphogDigestChannelsCreateBodyAudienceKeyMax)
+        .max(stampDigestChannelsCreateBodyAudienceKeyMax)
         .describe(
             "Opaque digest bucket this channel receives, e.g. 'repo:Insights\/insights'. Immutable after creation — it anchors the audience and its opt-out tombstone."
         ),
     slack_integration_id: zod
         .number()
-        .min(stamphogDigestChannelsCreateBodySlackIntegrationIdMin)
-        .max(stamphogDigestChannelsCreateBodySlackIntegrationIdMax)
+        .min(stampDigestChannelsCreateBodySlackIntegrationIdMin)
+        .max(stampDigestChannelsCreateBodySlackIntegrationIdMax)
         .describe("ID of the team's Slack integration used to post the digest."),
     slack_channel_id: zod
         .string()
-        .max(stamphogDigestChannelsCreateBodySlackChannelIdMax)
+        .max(stampDigestChannelsCreateBodySlackChannelIdMax)
         .describe("Slack channel ID to post the digest to, e.g. 'C012AB3CD'."),
     slack_channel_name: zod
         .string()
-        .max(stamphogDigestChannelsCreateBodySlackChannelNameMax)
+        .max(stampDigestChannelsCreateBodySlackChannelNameMax)
         .optional()
         .describe('Human-readable Slack channel name, for display only.'),
     enabled: zod.boolean().optional().describe('Whether this channel is included in the daily digest fan-out.'),
@@ -71,7 +71,7 @@ export const StamphogDigestChannelsCreateBody = /* @__PURE__ */ zod.object({
 /**
  * Per-audience Slack destinations for the daily merged-PR digest.
  */
-export const StamphogDigestChannelsDestroyParams = /* @__PURE__ */ zod.object({
+export const StampDigestChannelsDestroyParams = /* @__PURE__ */ zod.object({
     id: zod.string().describe('A UUID string identifying this digest channel.'),
     project_id: zod
         .string()
@@ -83,7 +83,7 @@ export const StamphogDigestChannelsDestroyParams = /* @__PURE__ */ zod.object({
 /**
  * Read-only history of posted (or attempted) digests, filterable by digest channel.
  */
-export const StamphogDigestRunsListParams = /* @__PURE__ */ zod.object({
+export const StampDigestRunsListParams = /* @__PURE__ */ zod.object({
     project_id: zod
         .string()
         .describe(
@@ -91,16 +91,16 @@ export const StamphogDigestRunsListParams = /* @__PURE__ */ zod.object({
         ),
 })
 
-export const StamphogDigestRunsListQueryParams = /* @__PURE__ */ zod.object({
+export const StampDigestRunsListQueryParams = /* @__PURE__ */ zod.object({
     digest_channel: zod.string().optional().describe('Filter by digest channel ID.'),
     limit: zod.number().optional().describe('Number of results to return per page.'),
     offset: zod.number().optional().describe('The initial index from which to return the results.'),
 })
 
 /**
- * Read-only pull requests stamphog knows about, filterable by PR number and merge state.
+ * Read-only pull requests stamp knows about, filterable by PR number and merge state.
  */
-export const StamphogPullRequestsListParams = /* @__PURE__ */ zod.object({
+export const StampPullRequestsListParams = /* @__PURE__ */ zod.object({
     project_id: zod
         .string()
         .describe(
@@ -108,7 +108,7 @@ export const StamphogPullRequestsListParams = /* @__PURE__ */ zod.object({
         ),
 })
 
-export const StamphogPullRequestsListQueryParams = /* @__PURE__ */ zod.object({
+export const StampPullRequestsListQueryParams = /* @__PURE__ */ zod.object({
     limit: zod.number().optional().describe('Number of results to return per page.'),
     merged: zod
         .boolean()
@@ -119,9 +119,9 @@ export const StamphogPullRequestsListQueryParams = /* @__PURE__ */ zod.object({
 })
 
 /**
- * Read-only pull requests stamphog knows about, filterable by PR number and merge state.
+ * Read-only pull requests stamp knows about, filterable by PR number and merge state.
  */
-export const StamphogPullRequestsRetrieveParams = /* @__PURE__ */ zod.object({
+export const StampPullRequestsRetrieveParams = /* @__PURE__ */ zod.object({
     id: zod.string().describe('A UUID string identifying this pull request.'),
     project_id: zod
         .string()
@@ -131,9 +131,9 @@ export const StamphogPullRequestsRetrieveParams = /* @__PURE__ */ zod.object({
 })
 
 /**
- * Per-repo stamphog settings — enable/disable review, GitHub App installation, policy overrides.
+ * Per-repo stamp settings — enable/disable review, GitHub App installation, policy overrides.
  */
-export const StamphogRepoConfigsListParams = /* @__PURE__ */ zod.object({
+export const StampRepoConfigsListParams = /* @__PURE__ */ zod.object({
     project_id: zod
         .string()
         .describe(
@@ -141,16 +141,16 @@ export const StamphogRepoConfigsListParams = /* @__PURE__ */ zod.object({
         ),
 })
 
-export const StamphogRepoConfigsListQueryParams = /* @__PURE__ */ zod.object({
+export const StampRepoConfigsListQueryParams = /* @__PURE__ */ zod.object({
     limit: zod.number().optional().describe('Number of results to return per page.'),
     offset: zod.number().optional().describe('The initial index from which to return the results.'),
 })
 
 /**
- * Per-repo stamphog settings — enable/disable review, GitHub App installation, policy overrides.
+ * Per-repo stamp settings — enable/disable review, GitHub App installation, policy overrides.
  */
-export const StamphogRepoConfigsRetrieveParams = /* @__PURE__ */ zod.object({
-    id: zod.string().describe('A UUID string identifying this stamphog repo config.'),
+export const StampRepoConfigsRetrieveParams = /* @__PURE__ */ zod.object({
+    id: zod.string().describe('A UUID string identifying this stamp repo config.'),
     project_id: zod
         .string()
         .describe(
@@ -159,10 +159,10 @@ export const StamphogRepoConfigsRetrieveParams = /* @__PURE__ */ zod.object({
 })
 
 /**
- * Per-repo stamphog settings — enable/disable review, GitHub App installation, policy overrides.
+ * Per-repo stamp settings — enable/disable review, GitHub App installation, policy overrides.
  */
-export const StamphogRepoConfigsDestroyParams = /* @__PURE__ */ zod.object({
-    id: zod.string().describe('A UUID string identifying this stamphog repo config.'),
+export const StampRepoConfigsDestroyParams = /* @__PURE__ */ zod.object({
+    id: zod.string().describe('A UUID string identifying this stamp repo config.'),
     project_id: zod
         .string()
         .describe(
@@ -171,9 +171,9 @@ export const StamphogRepoConfigsDestroyParams = /* @__PURE__ */ zod.object({
 })
 
 /**
- * Read-only history of stamphog review runs, filterable by repository, PR number, and status.
+ * Read-only history of stamp review runs, filterable by repository, PR number, and status.
  */
-export const StamphogReviewRunsListParams = /* @__PURE__ */ zod.object({
+export const StampReviewRunsListParams = /* @__PURE__ */ zod.object({
     project_id: zod
         .string()
         .describe(
@@ -181,7 +181,7 @@ export const StamphogReviewRunsListParams = /* @__PURE__ */ zod.object({
         ),
 })
 
-export const StamphogReviewRunsListQueryParams = /* @__PURE__ */ zod.object({
+export const StampReviewRunsListQueryParams = /* @__PURE__ */ zod.object({
     limit: zod.number().optional().describe('Number of results to return per page.'),
     offset: zod.number().optional().describe('The initial index from which to return the results.'),
     pr_number: zod.number().optional().describe('Filter by pull request number.'),
@@ -190,9 +190,9 @@ export const StamphogReviewRunsListQueryParams = /* @__PURE__ */ zod.object({
 })
 
 /**
- * Read-only history of stamphog review runs, filterable by repository, PR number, and status.
+ * Read-only history of stamp review runs, filterable by repository, PR number, and status.
  */
-export const StamphogReviewRunsRetrieveParams = /* @__PURE__ */ zod.object({
+export const StampReviewRunsRetrieveParams = /* @__PURE__ */ zod.object({
     id: zod.string().describe('A UUID string identifying this review run.'),
     project_id: zod
         .string()

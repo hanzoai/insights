@@ -38,26 +38,26 @@ export const InsightsFlowsCreateParams = /* @__PURE__ */ zod.object({
         ),
 })
 
-export const hogFlowsCreateBodyNameMax = 400
+export const flowsCreateBodyNameMax = 400
 
-export const hogFlowsCreateBodyDescriptionDefault = ``
-export const hogFlowsCreateBodyTriggerMaskingOneTtlMin = 60
-export const hogFlowsCreateBodyTriggerMaskingOneTtlMax = 94608000
+export const flowsCreateBodyDescriptionDefault = ``
+export const flowsCreateBodyTriggerMaskingOneTtlMin = 60
+export const flowsCreateBodyTriggerMaskingOneTtlMax = 94608000
 
-export const hogFlowsCreateBodyConversionOneEventsItemFiltersOneSourceDefault = `events`
-export const hogFlowsCreateBodyActionsItemIdMax = 200
+export const flowsCreateBodyConversionOneEventsItemFiltersOneSourceDefault = `events`
+export const flowsCreateBodyActionsItemIdMax = 200
 
-export const hogFlowsCreateBodyActionsItemNameMax = 400
+export const flowsCreateBodyActionsItemNameMax = 400
 
-export const hogFlowsCreateBodyActionsItemDescriptionDefault = ``
-export const hogFlowsCreateBodyActionsItemFiltersOneSourceDefault = `events`
-export const hogFlowsCreateBodyActionsItemConfigTwoConditionFiltersOneSourceDefault = `events`
-export const hogFlowsCreateBodyActionsItemConfigTwoEventsItemFiltersOneSourceDefault = `events`
+export const flowsCreateBodyActionsItemDescriptionDefault = ``
+export const flowsCreateBodyActionsItemFiltersOneSourceDefault = `events`
+export const flowsCreateBodyActionsItemConfigTwoConditionFiltersOneSourceDefault = `events`
+export const flowsCreateBodyActionsItemConfigTwoEventsItemFiltersOneSourceDefault = `events`
 
 export const InsightsFlowsCreateBody = /* @__PURE__ */ zod
     .object({
-        name: zod.string().max(hogFlowsCreateBodyNameMax).nullish().describe('Workflow name.'),
-        description: zod.string().default(hogFlowsCreateBodyDescriptionDefault).describe('Optional description.'),
+        name: zod.string().max(flowsCreateBodyNameMax).nullish().describe('Workflow name.'),
+        description: zod.string().default(flowsCreateBodyDescriptionDefault).describe('Optional description.'),
         status: zod
             .enum(['draft', 'active', 'archived'])
             .describe('\* `draft` - Draft\n\* `active` - Active\n\* `archived` - Archived')
@@ -70,8 +70,8 @@ export const InsightsFlowsCreateBody = /* @__PURE__ */ zod
                 zod.object({
                     ttl: zod
                         .number()
-                        .min(hogFlowsCreateBodyTriggerMaskingOneTtlMin)
-                        .max(hogFlowsCreateBodyTriggerMaskingOneTtlMax)
+                        .min(flowsCreateBodyTriggerMaskingOneTtlMin)
+                        .max(flowsCreateBodyTriggerMaskingOneTtlMax)
                         .nullish()
                         .describe('Seconds (60 to ~94M \/ 3y) to suppress repeat firings of the same hash.'),
                     threshold: zod
@@ -112,7 +112,7 @@ export const InsightsFlowsCreateBody = /* @__PURE__ */ zod
                                             .describe(
                                                 '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                             )
-                                            .default(hogFlowsCreateBodyConversionOneEventsItemFiltersOneSourceDefault),
+                                            .default(flowsCreateBodyConversionOneEventsItemFiltersOneSourceDefault),
                                         actions: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                         events: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                         data_warehouse: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
@@ -190,12 +190,12 @@ export const InsightsFlowsCreateBody = /* @__PURE__ */ zod
                 zod.object({
                     id: zod
                         .string()
-                        .max(hogFlowsCreateBodyActionsItemIdMax)
+                        .max(flowsCreateBodyActionsItemIdMax)
                         .describe('Unique node ID within the workflow.'),
-                    name: zod.string().max(hogFlowsCreateBodyActionsItemNameMax).describe('Display name.'),
+                    name: zod.string().max(flowsCreateBodyActionsItemNameMax).describe('Display name.'),
                     description: zod
                         .string()
-                        .default(hogFlowsCreateBodyActionsItemDescriptionDefault)
+                        .default(flowsCreateBodyActionsItemDescriptionDefault)
                         .describe('Optional description.'),
                     on_error: zod
                         .union([
@@ -216,7 +216,7 @@ export const InsightsFlowsCreateBody = /* @__PURE__ */ zod
                                     .describe(
                                         '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                     )
-                                    .default(hogFlowsCreateBodyActionsItemFiltersOneSourceDefault),
+                                    .default(flowsCreateBodyActionsItemFiltersOneSourceDefault),
                                 actions: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                 events: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                 data_warehouse: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
@@ -270,7 +270,7 @@ export const InsightsFlowsCreateBody = /* @__PURE__ */ zod
                                                                 '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                                             )
                                                             .default(
-                                                                hogFlowsCreateBodyActionsItemConfigTwoConditionFiltersOneSourceDefault
+                                                                flowsCreateBodyActionsItemConfigTwoConditionFiltersOneSourceDefault
                                                             ),
                                                         actions: zod
                                                             .array(zod.record(zod.string(), zod.unknown()))
@@ -317,7 +317,7 @@ export const InsightsFlowsCreateBody = /* @__PURE__ */ zod
                                                                     '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                                                 )
                                                                 .default(
-                                                                    hogFlowsCreateBodyActionsItemConfigTwoEventsItemFiltersOneSourceDefault
+                                                                    flowsCreateBodyActionsItemConfigTwoEventsItemFiltersOneSourceDefault
                                                                 ),
                                                             actions: zod
                                                                 .array(zod.record(zod.string(), zod.unknown()))
@@ -400,24 +400,24 @@ export const InsightsFlowsPartialUpdateParams = /* @__PURE__ */ zod.object({
         ),
 })
 
-export const hogFlowsPartialUpdateBodyNameMax = 400
+export const flowsPartialUpdateBodyNameMax = 400
 
-export const hogFlowsPartialUpdateBodyTriggerMaskingOneTtlMin = 60
-export const hogFlowsPartialUpdateBodyTriggerMaskingOneTtlMax = 94608000
+export const flowsPartialUpdateBodyTriggerMaskingOneTtlMin = 60
+export const flowsPartialUpdateBodyTriggerMaskingOneTtlMax = 94608000
 
-export const hogFlowsPartialUpdateBodyConversionOneEventsItemFiltersOneSourceDefault = `events`
+export const flowsPartialUpdateBodyConversionOneEventsItemFiltersOneSourceDefault = `events`
 
 export const InsightsFlowsPartialUpdateBody = /* @__PURE__ */ zod
     .object({
-        name: zod.string().max(hogFlowsPartialUpdateBodyNameMax).nullish().describe('Workflow name.'),
+        name: zod.string().max(flowsPartialUpdateBodyNameMax).nullish().describe('Workflow name.'),
         description: zod.string().optional().describe('Optional description.'),
         trigger_masking: zod
             .union([
                 zod.object({
                     ttl: zod
                         .number()
-                        .min(hogFlowsPartialUpdateBodyTriggerMaskingOneTtlMin)
-                        .max(hogFlowsPartialUpdateBodyTriggerMaskingOneTtlMax)
+                        .min(flowsPartialUpdateBodyTriggerMaskingOneTtlMin)
+                        .max(flowsPartialUpdateBodyTriggerMaskingOneTtlMax)
                         .nullish()
                         .describe('Seconds (60 to ~94M \/ 3y) to suppress repeat firings of the same hash.'),
                     threshold: zod
@@ -459,7 +459,7 @@ export const InsightsFlowsPartialUpdateBody = /* @__PURE__ */ zod
                                                 '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                             )
                                             .default(
-                                                hogFlowsPartialUpdateBodyConversionOneEventsItemFiltersOneSourceDefault
+                                                flowsPartialUpdateBodyConversionOneEventsItemFiltersOneSourceDefault
                                             ),
                                         actions: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                         events: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
@@ -732,16 +732,16 @@ export const InsightsFlowsInvocationResultsRetrieveParams = /* @__PURE__ */ zod.
         ),
 })
 
-export const hogFlowsInvocationResultsRetrieveQueryAfterDefault = `-7d`
+export const flowsInvocationResultsRetrieveQueryAfterDefault = `-7d`
 
-export const hogFlowsInvocationResultsRetrieveQueryLimitDefault = 50
-export const hogFlowsInvocationResultsRetrieveQueryLimitMax = 500
+export const flowsInvocationResultsRetrieveQueryLimitDefault = 50
+export const flowsInvocationResultsRetrieveQueryLimitMax = 500
 
 export const InsightsFlowsInvocationResultsRetrieveQueryParams = /* @__PURE__ */ zod.object({
     after: zod
         .string()
         .min(1)
-        .default(hogFlowsInvocationResultsRetrieveQueryAfterDefault)
+        .default(flowsInvocationResultsRetrieveQueryAfterDefault)
         .describe(
             "Start of the time range, matched on scheduled time. Relative ('-7d', '-24h') or ISO 8601. Defaults to -7d — bounds the Datastore partition scan, so widen it explicitly for older runs."
         ),
@@ -758,8 +758,8 @@ export const InsightsFlowsInvocationResultsRetrieveQueryParams = /* @__PURE__ */
     limit: zod
         .number()
         .min(1)
-        .max(hogFlowsInvocationResultsRetrieveQueryLimitMax)
-        .default(hogFlowsInvocationResultsRetrieveQueryLimitDefault)
+        .max(flowsInvocationResultsRetrieveQueryLimitMax)
+        .default(flowsInvocationResultsRetrieveQueryLimitDefault)
         .describe('Maximum number of invocations to return (1-500, default 50).'),
     status: zod
         .string()
@@ -787,8 +787,8 @@ export const InsightsFlowsInvocationsCreateParams = /* @__PURE__ */ zod.object({
         ),
 })
 
-export const hogFlowsInvocationsCreateBodyMockAsyncFunctionsDefault = true
-export const hogFlowsInvocationsCreateBodyUseDraftDefault = false
+export const flowsInvocationsCreateBodyMockAsyncFunctionsDefault = true
+export const flowsInvocationsCreateBodyUseDraftDefault = false
 
 export const InsightsFlowsInvocationsCreateBody = /* @__PURE__ */ zod.object({
     globals: zod
@@ -797,7 +797,7 @@ export const InsightsFlowsInvocationsCreateBody = /* @__PURE__ */ zod.object({
         .describe('Test trigger payload, typically {event, person, groups}.'),
     mock_async_functions: zod
         .boolean()
-        .default(hogFlowsInvocationsCreateBodyMockAsyncFunctionsDefault)
+        .default(flowsInvocationsCreateBodyMockAsyncFunctionsDefault)
         .describe('True (default) mocks HTTP\/email\/SMS. False fires real side effects.'),
     current_action_id: zod
         .string()
@@ -807,7 +807,7 @@ export const InsightsFlowsInvocationsCreateBody = /* @__PURE__ */ zod.object({
         ),
     use_draft: zod
         .boolean()
-        .default(hogFlowsInvocationsCreateBodyUseDraftDefault)
+        .default(flowsInvocationsCreateBodyUseDraftDefault)
         .describe(
             "Test the workflow's staged draft instead of its live config. Set this only when workflows-get returns a non-null 'draft'; it can't be combined with an explicit configuration override."
         ),
@@ -822,8 +822,8 @@ export const InsightsFlowsLogsRetrieveParams = /* @__PURE__ */ zod.object({
         ),
 })
 
-export const hogFlowsLogsRetrieveQueryLimitDefault = 50
-export const hogFlowsLogsRetrieveQueryLimitMax = 500
+export const flowsLogsRetrieveQueryLimitDefault = 50
+export const flowsLogsRetrieveQueryLimitMax = 500
 
 export const InsightsFlowsLogsRetrieveQueryParams = /* @__PURE__ */ zod.object({
     after: zod.iso.datetime({ offset: true }).optional().describe('Only return entries after this ISO 8601 timestamp.'),
@@ -842,8 +842,8 @@ export const InsightsFlowsLogsRetrieveQueryParams = /* @__PURE__ */ zod.object({
     limit: zod
         .number()
         .min(1)
-        .max(hogFlowsLogsRetrieveQueryLimitMax)
-        .default(hogFlowsLogsRetrieveQueryLimitDefault)
+        .max(flowsLogsRetrieveQueryLimitMax)
+        .default(flowsLogsRetrieveQueryLimitDefault)
         .describe('Maximum number of log entries to return (1-500, default 50).'),
     search: zod.string().min(1).optional().describe('Case-insensitive substring search across log messages.'),
 })
@@ -857,30 +857,30 @@ export const InsightsFlowsMetricsRetrieveParams = /* @__PURE__ */ zod.object({
         ),
 })
 
-export const hogFlowsMetricsRetrieveQueryAfterDefault = `-7d`
+export const flowsMetricsRetrieveQueryAfterDefault = `-7d`
 
-export const hogFlowsMetricsRetrieveQueryBreakdownByDefault = `kind`
-export const hogFlowsMetricsRetrieveQueryIntervalDefault = `day`
+export const flowsMetricsRetrieveQueryBreakdownByDefault = `kind`
+export const flowsMetricsRetrieveQueryIntervalDefault = `day`
 
 export const InsightsFlowsMetricsRetrieveQueryParams = /* @__PURE__ */ zod.object({
     after: zod
         .string()
         .min(1)
-        .default(hogFlowsMetricsRetrieveQueryAfterDefault)
+        .default(flowsMetricsRetrieveQueryAfterDefault)
         .describe(
             "Start of the time range. Accepts relative formats like '-7d', '-24h' or ISO 8601 timestamps. Defaults to '-7d'."
         ),
     before: zod.string().min(1).optional().describe("End of the time range. Same format as 'after'. Defaults to now."),
     breakdown_by: zod
         .enum(['name', 'kind'])
-        .default(hogFlowsMetricsRetrieveQueryBreakdownByDefault)
+        .default(flowsMetricsRetrieveQueryBreakdownByDefault)
         .describe(
             "Group the series by metric 'name' or 'kind'. Defaults to 'kind'.\n\n\* `name` - name\n\* `kind` - kind"
         ),
     instance_id: zod.string().min(1).optional().describe('Filter metrics to a specific execution instance.'),
     interval: zod
         .enum(['hour', 'day', 'week'])
-        .default(hogFlowsMetricsRetrieveQueryIntervalDefault)
+        .default(flowsMetricsRetrieveQueryIntervalDefault)
         .describe(
             "Time bucket size for the series. One of: hour, day, week. Defaults to 'day'.\n\n\* `hour` - hour\n\* `day` - day\n\* `week` - week"
         ),
@@ -897,12 +897,12 @@ export const InsightsFlowsPublishCreateParams = /* @__PURE__ */ zod.object({
         ),
 })
 
-export const hogFlowsPublishCreateBodyConfirmDefault = false
+export const flowsPublishCreateBodyConfirmDefault = false
 
 export const InsightsFlowsPublishCreateBody = /* @__PURE__ */ zod.object({
     confirm: zod
         .boolean()
-        .default(hogFlowsPublishCreateBodyConfirmDefault)
+        .default(flowsPublishCreateBodyConfirmDefault)
         .describe(
             'False (default) previews the publish: returns the impact on people in-flight without changing anything. True applies the staged draft to the live workflow.'
         ),
@@ -948,12 +948,12 @@ export const InsightsFlowsRevisionsRestoreCreateParams = /* @__PURE__ */ zod.obj
     version: zod.number().describe('Workflow version to restore.'),
 })
 
-export const hogFlowsRevisionsRestoreCreateBodyOverwriteDefault = false
+export const flowsRevisionsRestoreCreateBodyOverwriteDefault = false
 
 export const InsightsFlowsRevisionsRestoreCreateBody = /* @__PURE__ */ zod.object({
     overwrite: zod
         .boolean()
-        .default(hogFlowsRevisionsRestoreCreateBodyOverwriteDefault)
+        .default(flowsRevisionsRestoreCreateBodyOverwriteDefault)
         .describe(
             "Replace the open staged draft with this revision's content. Without it, restoring while a draft is open returns 409."
         ),
@@ -969,7 +969,7 @@ export const InsightsFlowsSchedulesPartialUpdateParams = /* @__PURE__ */ zod.obj
     schedule_id: zod.string(),
 })
 
-export const hogFlowsSchedulesPartialUpdateBodyTimezoneMax = 64
+export const flowsSchedulesPartialUpdateBodyTimezoneMax = 64
 
 export const InsightsFlowsSchedulesPartialUpdateBody = /* @__PURE__ */ zod.object({
     rrule: zod
@@ -981,7 +981,7 @@ export const InsightsFlowsSchedulesPartialUpdateBody = /* @__PURE__ */ zod.objec
     starts_at: zod.iso.datetime({ offset: true }).optional().describe('ISO 8601 datetime the schedule starts from.'),
     timezone: zod
         .string()
-        .max(hogFlowsSchedulesPartialUpdateBodyTimezoneMax)
+        .max(flowsSchedulesPartialUpdateBodyTimezoneMax)
         .optional()
         .describe("IANA timezone for interpreting the RRULE (default 'UTC')."),
     variables: zod
@@ -998,13 +998,13 @@ export const InsightsFlowsMetricsGlobalRetrieveParams = /* @__PURE__ */ zod.obje
         ),
 })
 
-export const hogFlowsMetricsGlobalRetrieveQueryAfterDefault = `-7d`
+export const flowsMetricsGlobalRetrieveQueryAfterDefault = `-7d`
 
 export const InsightsFlowsMetricsGlobalRetrieveQueryParams = /* @__PURE__ */ zod.object({
     after: zod
         .string()
         .min(1)
-        .default(hogFlowsMetricsGlobalRetrieveQueryAfterDefault)
+        .default(flowsMetricsGlobalRetrieveQueryAfterDefault)
         .describe(
             "Start of the window, matched on metric time. Relative ('-7d', '-24h') or ISO 8601. Defaults to -7d."
         ),

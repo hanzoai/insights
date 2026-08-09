@@ -21,7 +21,7 @@ export interface AdvancedActivityTranslationResult {
     droppedFields: string[]
 }
 
-export function advancedActivityFiltersToHogProperties(
+export function advancedActivityFiltersToScriptProperties(
     filters: AdvancedActivityLogFilters
 ): AdvancedActivityTranslationResult {
     const properties: CyclotronJobFilterPropertyFilter[] = []

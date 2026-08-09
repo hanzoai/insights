@@ -3,7 +3,7 @@ import { useState } from 'react'
 
 import { Table, Link } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { TZLabel } from 'lib/components/TZLabel'
 import { urls } from 'scenes/urls'
 
@@ -12,7 +12,7 @@ import { MessageAsset } from 'products/workflows/frontend/Workflows/messageAsset
 
 import { personPushNotificationsLogic } from './personPushNotificationsLogic'
 
-const MascotGreek = pngHoggie()
+const MascotGreek = pngMascot()
 
 interface PersonPushNotificationsTabProps {
     teamId: number

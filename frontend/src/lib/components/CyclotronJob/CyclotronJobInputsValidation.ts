@@ -22,14 +22,14 @@ const GLOBAL_REFERENCE = `\\b(${GLOBAL_ROOTS})\\s*[.\\[]`
 
 export const TEMPLATING_MISMATCH_WARNINGS = {
     // Script single-brace expression authored in a Liquid field — rendered literally.
-    hogSyntaxInLiquidField:
+    scriptSyntaxInLiquidField:
         'This looks like Script syntax ({…}), but the field uses Liquid templating which expects {{ … }}. It will be sent as literal text — switch the templating engine to Script, or use {{ … }}.',
     // Liquid double-brace expression authored in a Script field.
-    liquidSyntaxInHogField:
+    liquidSyntaxInScriptField:
         'This looks like Liquid syntax ({{ … }}), but the field uses Script templating which expects { … }. Switch the templating engine to Liquid, or use single braces.',
     // Bare global path with no braces at all — sent literally by either engine. The
     // suggested fix differs: Script wraps in { … }, Liquid in {{ … }}.
-    unbracedExpressionInHogField: (expression: string): string =>
+    unbracedExpressionInScriptField: (expression: string): string =>
         `This will be sent as literal text. Did you mean {${expression}}? Wrap it in braces to use the value.`,
     unbracedExpressionInLiquidField: (expression: string): string =>
         `This will be sent as literal text. Did you mean {{ ${expression} }}? Wrap it in braces to use the value.`,
@@ -51,7 +51,7 @@ const detectTemplatingMismatch = (value: unknown, language: 'script' | 'liquid')
     if (!value.includes('{') && new RegExp(`^(${GLOBAL_ROOTS})(\\.[\\w$]+|\\[[^\\]]+\\])+$`).test(value.trim())) {
         return language === 'liquid'
             ? TEMPLATING_MISMATCH_WARNINGS.unbracedExpressionInLiquidField(value.trim())
-            : TEMPLATING_MISMATCH_WARNINGS.unbracedExpressionInHogField(value.trim())
+            : TEMPLATING_MISMATCH_WARNINGS.unbracedExpressionInScriptField(value.trim())
     }
 
     if (language === 'liquid') {
@@ -59,7 +59,7 @@ const detectTemplatingMismatch = (value: unknown, language: 'script' | 'liquid')
         // single-brace expressions referencing a global — those render literally.
         const withoutLiquid = value.replace(/\{\{[\s\S]*?\}\}/g, '').replace(/\{%[\s\S]*?%\}/g, '')
         if (new RegExp(`\\{[^{}]*${GLOBAL_REFERENCE}[^{}]*\\}`).test(withoutLiquid)) {
-            return TEMPLATING_MISMATCH_WARNINGS.hogSyntaxInLiquidField
+            return TEMPLATING_MISMATCH_WARNINGS.scriptSyntaxInLiquidField
         }
         return
     }
@@ -72,7 +72,7 @@ const detectTemplatingMismatch = (value: unknown, language: 'script' | 'liquid')
         /\{\{[^{}]*\|[^{}]*\}\}/.test(value) ||
         /\{%[\s\S]*?%\}/.test(value)
     ) {
-        return TEMPLATING_MISMATCH_WARNINGS.liquidSyntaxInHogField
+        return TEMPLATING_MISMATCH_WARNINGS.liquidSyntaxInScriptField
     }
 }
 

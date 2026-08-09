@@ -3,12 +3,12 @@ import { useActions, useValues } from 'kea'
 import { Button, Link } from '@hanzo/elements'
 import { IconBell, IconGraph, IconRocket, IconTarget } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { LaunchSurveyButton } from 'scenes/surveys/components/LaunchSurveyButton'
 import { SurveyEditSection, surveyLogic } from 'scenes/surveys/surveyLogic'
 import { surveysLogic } from 'scenes/surveys/surveysLogic'
 
-const MascotEinstein = pngHoggie()
+const MascotEinstein = pngMascot()
 
 interface FirstSurveyHelperProps {
     onTabChange?: (tab: string) => void

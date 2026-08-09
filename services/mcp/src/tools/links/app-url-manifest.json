@@ -439,7 +439,7 @@
         "params": [],
         "scope": "global"
     },
-    "debugHog": {
+    "debugScript": {
         "template": "/debug/script",
         "params": [],
         "scope": "project"
@@ -594,8 +594,8 @@
         "params": [],
         "scope": "project"
     },
-    "flappyHog": {
-        "template": "/games/flappyhog",
+    "flappyScript": {
+        "template": "/games/flappyscript",
         "params": [],
         "scope": "project"
     },

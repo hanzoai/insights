@@ -3,12 +3,12 @@ import { useEffect } from 'react'
 
 import { Skeleton } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 
 import { CommentWithReplies } from './Comment'
 import { CommentsLogicProps, commentsLogic } from './commentsLogic'
 
-const MascotPhoneCall = pngHoggie()
+const MascotPhoneCall = pngMascot()
 
 export interface CommentsListProps extends CommentsLogicProps {
     noun?: string

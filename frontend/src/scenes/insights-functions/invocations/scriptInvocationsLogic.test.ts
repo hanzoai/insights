@@ -6,14 +6,14 @@ import { initKeaTests } from '~/test/init'
 
 import {
     buildSearchClause,
-    hogInvocationsLogic,
+    scriptInvocationsLogic,
     isRerunnableInsightsFunctionType,
     parentClauseFor,
-} from './hogInvocationsLogic'
+} from './scriptInvocationsLogic'
 
-describe('hogInvocationsLogic', () => {
+describe('scriptInvocationsLogic', () => {
     describe('buildSearchClause', () => {
-        const props = { id: 'flow-1', functionKind: 'hog_flow' as const }
+        const props = { id: 'flow-1', functionKind: 'script_flow' as const }
 
         it('returns an empty clause when no search is set', () => {
             // An empty clause when a search IS set (covered below) would silently show every run — the
@@ -80,7 +80,7 @@ describe('hogInvocationsLogic', () => {
     })
 
     describe('parentClauseFor', () => {
-        const base = { id: 'flow-1', functionKind: 'hog_flow' as const }
+        const base = { id: 'flow-1', functionKind: 'script_flow' as const }
 
         it('returns an empty clause when no parent run is scoped', () => {
             // Unscoped is the flat list. A non-empty clause here would wrongly filter the whole workflow's runs.
@@ -107,7 +107,7 @@ describe('hogInvocationsLogic', () => {
         it('does not write a scoped table filters to the shared URL', async () => {
             // Several per-job tables can mount on one scene; if a scoped one wrote inv_* params it would
             // clobber the flat list and its siblings. The parentRunId guard in actionToUrl prevents that.
-            const scoped = hogInvocationsLogic({ id: 'flow-1', functionKind: 'hog_flow', parentRunId: 'job-1' })
+            const scoped = scriptInvocationsLogic({ id: 'flow-1', functionKind: 'script_flow', parentRunId: 'job-1' })
             scoped.mount()
             const before = { ...router.values.searchParams }
             await expectLogic(scoped, () => {
@@ -118,7 +118,7 @@ describe('hogInvocationsLogic', () => {
         })
 
         it('the flat list still writes its filters to the URL', async () => {
-            const flat = hogInvocationsLogic({ id: 'flow-1', functionKind: 'hog_flow' })
+            const flat = scriptInvocationsLogic({ id: 'flow-1', functionKind: 'script_flow' })
             flat.mount()
             await expectLogic(flat, () => {
                 flat.actions.setFilters({ date_from: '-7d' })
@@ -129,9 +129,9 @@ describe('hogInvocationsLogic', () => {
 
         it('anchors the initial window to defaultDateFrom for a scoped table', () => {
             // A broadcast older than 24h would show no runs if the scoped table used the default -24h window.
-            const scoped = hogInvocationsLogic({
+            const scoped = scriptInvocationsLogic({
                 id: 'flow-1',
-                functionKind: 'hog_flow',
+                functionKind: 'script_flow',
                 parentRunId: 'job-1',
                 defaultDateFrom: '2026-01-01',
             })

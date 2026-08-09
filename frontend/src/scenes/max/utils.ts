@@ -261,14 +261,14 @@ export const evaluationToMaxContextPayload = (evaluation: {
     name?: string | null
     description?: string | null
     evaluation_type: EvaluationRuntime
-    hog_source?: string | null
+    script_source?: string | null
 }): MaxEvaluationContext => ({
     type: MaxContextType.EVALUATION,
     id: evaluation.id,
     name: evaluation.name,
     description: evaluation.description,
     evaluation_type: evaluation.evaluation_type,
-    hog_source: evaluation.hog_source,
+    script_source: evaluation.script_source,
 })
 
 /**
@@ -286,7 +286,7 @@ export interface MaxOpenContext {
         name?: string | null
         description?: string | null
         evaluation_type: EvaluationRuntime
-        hog_source?: string | null
+        script_source?: string | null
     }
 }
 

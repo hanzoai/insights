@@ -1,7 +1,7 @@
 import { DiffEditor } from '@monaco-editor/react'
 
 import 'lib/monaco/monacoEnvironment'
-import { initHogLanguage } from 'lib/monaco/languages/script'
+import { initScriptLanguage } from 'lib/monaco/languages/script'
 
 export interface DiffProps {
     before: string
@@ -18,7 +18,7 @@ export function Diff({ before, after, language }: DiffProps): JSX.Element {
             language={language ?? 'json'}
             onMount={(_, monaco) => {
                 if (language === 'script') {
-                    initHogLanguage(monaco)
+                    initScriptLanguage(monaco)
                 }
             }}
             options={{

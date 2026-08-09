@@ -75,7 +75,7 @@ test.describe('Workflows conditional branch property filter category dropdown', 
     })
 
     test.beforeEach(async ({ page, playwrightSetup }) => {
-        // Log in (sets the session + CSRF cookie the test needs to create a hog_flow) without
+        // Log in (sets the session + CSRF cookie the test needs to create a script_flow) without
         // navigating into the app, so the feature flag mock is installed before the editor loads.
         await playwrightSetup.login(page, workspace!)
         await mockFeatureFlags(page, {
@@ -97,12 +97,12 @@ test.describe('Workflows conditional branch property filter category dropdown', 
         if (!csrfToken) {
             throw new Error('CSRF cookie missing')
         }
-        const response = await page.request.post(`/v1/environments/${teamId}/hog_flows/`, {
+        const response = await page.request.post(`/v1/environments/${teamId}/script_flows/`, {
             data: workflowPayload,
             headers: { 'X-CSRFToken': decodeURIComponent(csrfToken) },
         })
         if (!response.ok()) {
-            throw new Error(`hog_flows POST failed: ${response.status()} ${await response.text()}`)
+            throw new Error(`script_flows POST failed: ${response.status()} ${await response.text()}`)
         }
         const workflowId: string = (await response.json()).id
 

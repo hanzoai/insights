@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { IconArrowRight } from '@hanzo/icons'
 import { Button, Spinner } from '@hanzo/elements'
 
-import { SupermanHog } from 'lib/components/mascots'
+import { SupermanScript } from 'lib/components/mascots'
 import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -101,7 +101,7 @@ const SubscribedCelebration = (): JSX.Element => {
 
             {/* Superman Script floating animation */}
             <div className="w-40 h-40 animate-float">
-                <SupermanHog className="w-full h-full object-contain" />
+                <SupermanScript className="w-full h-full object-contain" />
             </div>
 
             <h3 className="text-2xl font-bold mt-6">Go forth and build amazing products!</h3>
@@ -174,7 +174,7 @@ const PlatformPackagesUpsell = ({
 
             {/* Superman Script floating animation */}
             <div className="w-24 h-24 animate-float">
-                <SupermanHog className="w-full h-full object-contain" />
+                <SupermanScript className="w-full h-full object-contain" />
             </div>
 
             <div className="w-full max-w-4xl mt-2">

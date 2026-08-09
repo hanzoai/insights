@@ -17,13 +17,13 @@ import { logger } from './logging.js'
 import type { TaskRunRedisStream } from './redis-stream.js'
 import type { SideEffectKind } from './types.js'
 
-// ACP event field values (byte-identical to ee/hogai/sandbox/types.py)
+// ACP event field values (byte-identical to ee/scriptai/sandbox/types.py)
 const ACP_NOTIFICATION_TYPE = 'notification'
 const TURN_COMPLETE_METHOD = '_insights/turn_complete'
 const STOP_REASON_END_TURN = 'end_turn'
 const ACP_METHOD_SESSION_UPDATE = 'session/update'
 
-// isTurnComplete mirrors ee/hogai/sandbox/types.py:is_turn_complete exactly.
+// isTurnComplete mirrors ee/scriptai/sandbox/types.py:is_turn_complete exactly.
 // Matches both the raw ACP prompt response (result.stopReason == "end_turn")
 // and the synthetic _insights/turn_complete notification.
 export function isTurnComplete(event: Record<string, unknown>): boolean {

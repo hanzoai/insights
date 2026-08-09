@@ -35,7 +35,7 @@ import {
     GroupsQuery,
     InsightsQLMetadata,
     InsightsQLQuery,
-    HogQuery,
+    ScriptQuery,
     InsightActorsQuery,
     InsightFilter,
     InsightFilterProperty,
@@ -208,8 +208,8 @@ export function isInsightVizNode(node?: Record<string, any> | null): node is Ins
     return node?.kind === NodeKind.InsightVizNode
 }
 
-export function isHogQuery(node?: Record<string, any> | null): node is HogQuery {
-    return node?.kind === NodeKind.HogQuery
+export function isScriptQuery(node?: Record<string, any> | null): node is ScriptQuery {
+    return node?.kind === NodeKind.ScriptQuery
 }
 
 export function isInsightsQLQuery(node?: Record<string, any> | null): node is InsightsQLQuery {

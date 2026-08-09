@@ -7645,26 +7645,26 @@ export namespace Schemas {
       version?: number | null;
     }
 
-    export type HogQueryKind = typeof HogQueryKind[keyof typeof HogQueryKind];
+    export type ScriptQueryKind = typeof ScriptQueryKind[keyof typeof ScriptQueryKind];
 
 
-    export const HogQueryKind = {
-      HogQuery: 'HogQuery',
+    export const ScriptQueryKind = {
+      ScriptQuery: 'ScriptQuery',
     } as const;
 
-    export interface HogQueryResponse {
+    export interface ScriptQueryResponse {
       bytecode?: unknown[] | null;
       coloredBytecode?: unknown[] | null;
       results: unknown;
       stdout?: string | null;
     }
 
-    export interface HogQuery {
+    export interface ScriptQuery {
       code?: string | null;
-      kind: HogQueryKind;
+      kind: ScriptQueryKind;
       /** Modifiers used when performing the query */
       modifiers?: InsightsQLQueryModifiers | null;
-      response?: HogQueryResponse | null;
+      response?: ScriptQueryResponse | null;
       tags?: QueryLogTags | null;
       /** version of the node, used for schema migrations */
       version?: number | null;
@@ -7675,9 +7675,9 @@ export namespace Schemas {
      * - `InsightVizNode` — product analytics (trends, funnels, retention, paths, stickiness, lifecycle)
      * - `DataVisualizationNode` — SQL insights using InsightsQL
      * - `DataTableNode` — raw data tables
-     * - `HogQuery` — Script language queries
+     * - `ScriptQuery` — Script language queries
      */
-    export type _InsightQuerySchema = InsightVizNode | DataTableNode | DataVisualizationNode | HogQuery;
+    export type _InsightQuerySchema = InsightVizNode | DataTableNode | DataVisualizationNode | ScriptQuery;
 
     export interface DashboardTileBasic {
       readonly id: number;
@@ -9165,7 +9165,7 @@ export namespace Schemas {
       readonly created_by: UserBasic;
       /** Per-channel delivery rows, one per selected Slack channel. */
       readonly deliveries: readonly AnnouncementDelivery[];
-      /** Slack channel IDs to send to. Each must be a channel the SupportHog bot is a member of; names are resolved server-side. */
+      /** Slack channel IDs to send to. Each must be a channel the Support bot is a member of; names are resolved server-side. */
       channels: string[];
     }
 
@@ -9174,7 +9174,7 @@ export namespace Schemas {
       id: string;
       /** Slack channel display name (without the leading #). */
       name: string;
-      /** Whether the SupportHog bot is a member of this channel. */
+      /** Whether the Support bot is a member of this channel. */
       is_member: boolean;
       /**
          * Name of the customer account whose slack_channel_id points at this channel, or null if unmapped.
@@ -18016,9 +18016,9 @@ export namespace Schemas {
 
     export const MascotActorSkinOption = {
       Default: 'default',
-      Spiderhog: 'spiderhog',
-      Robohog: 'robohog',
-      Hogzilla: 'hogzilla',
+      Spiderscript: 'spiderscript',
+      Roboscript: 'roboscript',
+      Scriptzilla: 'scriptzilla',
       Ghost: 'ghost',
     } as const;
 
@@ -22742,7 +22742,7 @@ export namespace Schemas {
     /**
      * * `manual` - MANUAL
      * * `slack_name_match` - SLACK_NAME_MATCH
-     * * `stamphog_config` - STAMPFN_CONFIG
+     * * `stamp_config` - STAMPFN_CONFIG
      * * `owners_contact` - OWNERS_CONTACT
      */
     export type ResolutionSourceEnum = typeof ResolutionSourceEnum[keyof typeof ResolutionSourceEnum];
@@ -22751,7 +22751,7 @@ export namespace Schemas {
     export const ResolutionSourceEnum = {
       Manual: 'manual',
       SlackNameMatch: 'slack_name_match',
-      StamphogConfig: 'stamphog_config',
+      StampConfig: 'stamp_config',
       OwnersContact: 'owners_contact',
     } as const;
 
@@ -22778,11 +22778,11 @@ export namespace Schemas {
          * @maxLength 255
          */
       slack_channel_name?: string;
-      /** How this row was created: 'manual' (via this API), 'slack_name_match' (auto-provisioned because the workspace has a channel named exactly like the audience_key), 'stamphog_config' (auto-provisioned from the channel the repo declared under 'digest:' in .stamphog/policy.yml), or 'owners_contact' (reserved for the future owners.yaml contact.slack step, not implemented yet).
+      /** How this row was created: 'manual' (via this API), 'slack_name_match' (auto-provisioned because the workspace has a channel named exactly like the audience_key), 'stamp_config' (auto-provisioned from the channel the repo declared under 'digest:' in .stamp/policy.yml), or 'owners_contact' (reserved for the future owners.yaml contact.slack step, not implemented yet).
        *
        * * `manual` - MANUAL
        * * `slack_name_match` - SLACK_NAME_MATCH
-       * * `stamphog_config` - STAMPFN_CONFIG
+       * * `stamp_config` - STAMPFN_CONFIG
        * * `owners_contact` - OWNERS_CONTACT */
       readonly resolution_source: ResolutionSourceEnum;
       /** Whether this channel is included in the daily digest fan-out. */
@@ -27209,7 +27209,7 @@ export namespace Schemas {
      * * `provider_key_quota_exceeded` - Provider API key quota exceeded
      * * `provider_key_rate_limited` - Provider API key is rate limited
      * * `model_not_found` - Model not found
-     * * `hog_error` - Script evaluation code failed
+     * * `script_error` - Script evaluation code failed
      */
     export type StatusReasonEnum = typeof StatusReasonEnum[keyof typeof StatusReasonEnum];
 
@@ -27223,7 +27223,7 @@ export namespace Schemas {
       ProviderKeyQuotaExceeded: 'provider_key_quota_exceeded',
       ProviderKeyRateLimited: 'provider_key_rate_limited',
       ModelNotFound: 'model_not_found',
-      HogError: 'hog_error',
+      ScriptError: 'script_error',
     } as const;
 
     /**
@@ -35534,7 +35534,7 @@ export namespace Schemas {
        * * `failed` - Failed */
       status?: InsightsFlowBatchJobStatusEnum;
       /** ID of the workflow this batch run belongs to. */
-      hog_flow: string;
+      script_flow: string;
       /** Audience snapshot the run fanned out to, taken from the workflow's batch trigger filters. */
       readonly filters: unknown;
       /** Variable value overrides applied to this run. */
@@ -36259,10 +36259,10 @@ export namespace Schemas {
      * * `succeeded` - succeeded
      * * `failed` - failed
      */
-    export type HogInvocationRerunFilterStatusEnum = typeof HogInvocationRerunFilterStatusEnum[keyof typeof HogInvocationRerunFilterStatusEnum];
+    export type ScriptInvocationRerunFilterStatusEnum = typeof ScriptInvocationRerunFilterStatusEnum[keyof typeof ScriptInvocationRerunFilterStatusEnum];
 
 
-    export const HogInvocationRerunFilterStatusEnum = {
+    export const ScriptInvocationRerunFilterStatusEnum = {
       Running: 'running',
       Succeeded: 'succeeded',
       Failed: 'failed',
@@ -36271,13 +36271,13 @@ export namespace Schemas {
     /**
      * Filter shape for the rerun endpoint. `window_start`/`window_end` are required.
      */
-    export interface HogInvocationRerunFilter {
+    export interface ScriptInvocationRerunFilter {
       /** Inclusive lower bound on `scheduled_at` (UTC). */
       window_start: string;
       /** Exclusive upper bound on `scheduled_at` (UTC). */
       window_end: string;
       /** Restrict to invocations whose latest status is one of these. Defaults to ['failed']. */
-      status?: HogInvocationRerunFilterStatusEnum[];
+      status?: ScriptInvocationRerunFilterStatusEnum[];
       /** Restrict to invocations whose error_kind matches one of these (e.g. 'http_5xx', 'timeout'). */
       error_kind?: string[];
       /**
@@ -36302,9 +36302,9 @@ export namespace Schemas {
     /**
      * Rerun invocations of a script function or script flow from their stored payloads.
      */
-    export interface HogInvocationRerunRequest {
-      /** Required. `window_start` / `window_end` pin the query to a small set of date partitions on the `hog_invocation_results` table. Optional `invocation_ids` restricts to specific invocations within that window. */
-      filter: HogInvocationRerunFilter;
+    export interface ScriptInvocationRerunRequest {
+      /** Required. `window_start` / `window_end` pin the query to a small set of date partitions on the `script_invocation_results` table. Optional `invocation_ids` restricts to specific invocations within that window. */
+      filter: ScriptInvocationRerunFilter;
     }
 
     /**
@@ -36313,7 +36313,7 @@ export namespace Schemas {
      * re-enqueue work happens asynchronously in the `cdp-rerun-worker` service.
      * Use `rerun_job_id` to look up progress on the wrapper job later.
      */
-    export interface HogInvocationRerunResponse {
+    export interface ScriptInvocationRerunResponse {
       /** ID of the cyclotron wrapper job that will run the rerun. Use this to poll status. */
       rerun_job_id: string;
       /** Always 0 — rerun runs asynchronously. Kept for response shape stability. */
@@ -36322,7 +36322,7 @@ export namespace Schemas {
       skipped_count: number;
     }
 
-    export interface HogInvocationResult {
+    export interface ScriptInvocationResult {
       invocation_id: string;
       status: string;
       error_kind: string;
@@ -36343,11 +36343,11 @@ export namespace Schemas {
     /**
      * The triggering payload (event/person/groups) the run executed against, as a JSON object.
      */
-    export type HogInvocationResultDetailInvocationGlobals = { [key: string]: unknown };
+    export type ScriptInvocationResultDetailInvocationGlobals = { [key: string]: unknown };
 
-    export interface HogInvocationResultDetail {
+    export interface ScriptInvocationResultDetail {
       /** The triggering payload (event/person/groups) the run executed against, as a JSON object. */
-      invocation_globals: HogInvocationResultDetailInvocationGlobals;
+      invocation_globals: ScriptInvocationResultDetailInvocationGlobals;
       invocation_id: string;
       status: string;
       error_kind: string;
@@ -36365,15 +36365,15 @@ export namespace Schemas {
       is_retry: boolean;
     }
 
-    export type HogLanguage = typeof HogLanguage[keyof typeof HogLanguage];
+    export type ScriptLanguage = typeof ScriptLanguage[keyof typeof ScriptLanguage];
 
 
-    export const HogLanguage = {
+    export const ScriptLanguage = {
       Script: 'script',
-      HogJson: 'hogJson',
+      ScriptJson: 'scriptJson',
       InsightsQL: 'insightsQL',
       InsightsQLExpr: 'insightsQLExpr',
-      HogTemplate: 'hogTemplate',
+      ScriptTemplate: 'scriptTemplate',
       Liquid: 'liquid',
     } as const;
 
@@ -38430,14 +38430,14 @@ export namespace Schemas {
       globals?: InsightsQLMetadataGlobals;
       kind?: 'InsightsQLMetadata';
       /** Language to validate */
-      language: HogLanguage;
+      language: ScriptLanguage;
       /** Modifiers used when performing the query */
       modifiers?: InsightsQLQueryModifiers | null;
       /** Query to validate */
       query: string;
       response?: InsightsQLMetadataResponse | null;
       /** Query within which "expr" and "template" are validated. Defaults to "select * from events" */
-      sourceQuery?: EventsNode | ActionsNode | PersonsNode | EventsQuery | SessionsQuery | ActorsQuery | GroupsQuery | InsightActorsQuery | InsightActorsQueryOptions | SessionsTimelineQuery | HogQuery | InsightsQLQuery | InsightsQLMetadata | InsightsQLAutocomplete | MarketingAnalyticsTableQuery | MarketingAnalyticsAggregatedQuery | MarketingAnalyticsAttributionQuery | MarketingAnalyticsAttributionPathsQuery | NonIntegratedConversionsTableQuery | WebOverviewQuery | WebStatsTableQuery | WebExternalClicksTableQuery | WebBotsTableQuery | WebGoalsQuery | WebVitalsQuery | WebVitalsPathBreakdownQuery | WebPageURLSearchQuery | WebAnalyticsExternalSummaryQuery | WebNotableChangesQuery | SessionAttributionExplorerQuery | ErrorTrackingQuery | ErrorTrackingSimilarIssuesQuery | ErrorTrackingBreakdownsQuery | ErrorTrackingIssueCorrelationQuery | LogsQuery | LogAttributesQuery | LogValuesQuery | MetricsQuery | TraceSpansQuery | TraceSpansAggregationQuery | TraceSpansTreeQuery | TraceSpansAttributeBreakdownQuery | ExperimentFunnelsQuery | ExperimentTrendsQuery | CalendarHeatmapQuery | RecordingsQuery | TracesQuery | TraceQuery | SessionQuery | TraceNeighborsQuery | VectorSearchQuery | UsageMetricsQuery | AccountsQuery | EndpointsUsageOverviewQuery | EndpointsUsageTableQuery | EndpointsUsageTrendsQuery | MCPToolCallBreakdownQuery | MCPToolCallsAndErrorsQuery | MCPHarnessBreakdownQuery | MCPToolTopUsersQuery | MCPToolFailuresQuery | MCPToolFailureOccurrencesQuery | MCPToolStatsQuery | MCPToolDailyStatsQuery | MCPToolQualityRowsQuery | MCPToolQualityDailyStatsQuery | MCPToolCategoryCountsQuery | MCPToolCategoriesQuery | MCPToolDescriptionsQuery | MCPToolSampleIntentsQuery | MCPToolNeighborsQuery | null;
+      sourceQuery?: EventsNode | ActionsNode | PersonsNode | EventsQuery | SessionsQuery | ActorsQuery | GroupsQuery | InsightActorsQuery | InsightActorsQueryOptions | SessionsTimelineQuery | ScriptQuery | InsightsQLQuery | InsightsQLMetadata | InsightsQLAutocomplete | MarketingAnalyticsTableQuery | MarketingAnalyticsAggregatedQuery | MarketingAnalyticsAttributionQuery | MarketingAnalyticsAttributionPathsQuery | NonIntegratedConversionsTableQuery | WebOverviewQuery | WebStatsTableQuery | WebExternalClicksTableQuery | WebBotsTableQuery | WebGoalsQuery | WebVitalsQuery | WebVitalsPathBreakdownQuery | WebPageURLSearchQuery | WebAnalyticsExternalSummaryQuery | WebNotableChangesQuery | SessionAttributionExplorerQuery | ErrorTrackingQuery | ErrorTrackingSimilarIssuesQuery | ErrorTrackingBreakdownsQuery | ErrorTrackingIssueCorrelationQuery | LogsQuery | LogAttributesQuery | LogValuesQuery | MetricsQuery | TraceSpansQuery | TraceSpansAggregationQuery | TraceSpansTreeQuery | TraceSpansAttributeBreakdownQuery | ExperimentFunnelsQuery | ExperimentTrendsQuery | CalendarHeatmapQuery | RecordingsQuery | TracesQuery | TraceQuery | SessionQuery | TraceNeighborsQuery | VectorSearchQuery | UsageMetricsQuery | AccountsQuery | EndpointsUsageOverviewQuery | EndpointsUsageTableQuery | EndpointsUsageTrendsQuery | MCPToolCallBreakdownQuery | MCPToolCallsAndErrorsQuery | MCPHarnessBreakdownQuery | MCPToolTopUsersQuery | MCPToolFailuresQuery | MCPToolFailureOccurrencesQuery | MCPToolStatsQuery | MCPToolDailyStatsQuery | MCPToolQualityRowsQuery | MCPToolQualityDailyStatsQuery | MCPToolCategoryCountsQuery | MCPToolCategoriesQuery | MCPToolDescriptionsQuery | MCPToolSampleIntentsQuery | MCPToolNeighborsQuery | null;
       tags?: QueryLogTags | null;
       /** Variables to be subsituted into the query */
       variables?: InsightsQLMetadataVariables;
@@ -38456,14 +38456,14 @@ export namespace Schemas {
       globals?: InsightsQLAutocompleteGlobals;
       kind?: 'InsightsQLAutocomplete';
       /** Language to validate */
-      language: HogLanguage;
+      language: ScriptLanguage;
       /** Modifiers used when performing the query */
       modifiers?: InsightsQLQueryModifiers | null;
       /** Query to validate */
       query: string;
       response?: InsightsQLAutocompleteResponse | null;
       /** Query in whose context to validate. */
-      sourceQuery?: EventsNode | ActionsNode | PersonsNode | EventsQuery | SessionsQuery | ActorsQuery | GroupsQuery | InsightActorsQuery | InsightActorsQueryOptions | SessionsTimelineQuery | HogQuery | InsightsQLQuery | InsightsQLMetadata | InsightsQLAutocomplete | MarketingAnalyticsTableQuery | MarketingAnalyticsAggregatedQuery | MarketingAnalyticsAttributionQuery | MarketingAnalyticsAttributionPathsQuery | NonIntegratedConversionsTableQuery | WebOverviewQuery | WebStatsTableQuery | WebExternalClicksTableQuery | WebBotsTableQuery | WebGoalsQuery | WebVitalsQuery | WebVitalsPathBreakdownQuery | WebPageURLSearchQuery | WebAnalyticsExternalSummaryQuery | WebNotableChangesQuery | SessionAttributionExplorerQuery | ErrorTrackingQuery | ErrorTrackingSimilarIssuesQuery | ErrorTrackingBreakdownsQuery | ErrorTrackingIssueCorrelationQuery | LogsQuery | LogAttributesQuery | LogValuesQuery | MetricsQuery | TraceSpansQuery | TraceSpansAggregationQuery | TraceSpansTreeQuery | TraceSpansAttributeBreakdownQuery | ExperimentFunnelsQuery | ExperimentTrendsQuery | CalendarHeatmapQuery | RecordingsQuery | TracesQuery | TraceQuery | SessionQuery | TraceNeighborsQuery | VectorSearchQuery | UsageMetricsQuery | AccountsQuery | EndpointsUsageOverviewQuery | EndpointsUsageTableQuery | EndpointsUsageTrendsQuery | MCPToolCallBreakdownQuery | MCPToolCallsAndErrorsQuery | MCPHarnessBreakdownQuery | MCPToolTopUsersQuery | MCPToolFailuresQuery | MCPToolFailureOccurrencesQuery | MCPToolStatsQuery | MCPToolDailyStatsQuery | MCPToolQualityRowsQuery | MCPToolQualityDailyStatsQuery | MCPToolCategoryCountsQuery | MCPToolCategoriesQuery | MCPToolDescriptionsQuery | MCPToolSampleIntentsQuery | MCPToolNeighborsQuery | null;
+      sourceQuery?: EventsNode | ActionsNode | PersonsNode | EventsQuery | SessionsQuery | ActorsQuery | GroupsQuery | InsightActorsQuery | InsightActorsQueryOptions | SessionsTimelineQuery | ScriptQuery | InsightsQLQuery | InsightsQLMetadata | InsightsQLAutocomplete | MarketingAnalyticsTableQuery | MarketingAnalyticsAggregatedQuery | MarketingAnalyticsAttributionQuery | MarketingAnalyticsAttributionPathsQuery | NonIntegratedConversionsTableQuery | WebOverviewQuery | WebStatsTableQuery | WebExternalClicksTableQuery | WebBotsTableQuery | WebGoalsQuery | WebVitalsQuery | WebVitalsPathBreakdownQuery | WebPageURLSearchQuery | WebAnalyticsExternalSummaryQuery | WebNotableChangesQuery | SessionAttributionExplorerQuery | ErrorTrackingQuery | ErrorTrackingSimilarIssuesQuery | ErrorTrackingBreakdownsQuery | ErrorTrackingIssueCorrelationQuery | LogsQuery | LogAttributesQuery | LogValuesQuery | MetricsQuery | TraceSpansQuery | TraceSpansAggregationQuery | TraceSpansTreeQuery | TraceSpansAttributeBreakdownQuery | ExperimentFunnelsQuery | ExperimentTrendsQuery | CalendarHeatmapQuery | RecordingsQuery | TracesQuery | TraceQuery | SessionQuery | TraceNeighborsQuery | VectorSearchQuery | UsageMetricsQuery | AccountsQuery | EndpointsUsageOverviewQuery | EndpointsUsageTableQuery | EndpointsUsageTrendsQuery | MCPToolCallBreakdownQuery | MCPToolCallsAndErrorsQuery | MCPHarnessBreakdownQuery | MCPToolTopUsersQuery | MCPToolFailuresQuery | MCPToolFailureOccurrencesQuery | MCPToolStatsQuery | MCPToolDailyStatsQuery | MCPToolQualityRowsQuery | MCPToolQualityDailyStatsQuery | MCPToolCategoryCountsQuery | MCPToolCategoriesQuery | MCPToolDescriptionsQuery | MCPToolSampleIntentsQuery | MCPToolNeighborsQuery | null;
       /** Start position of the editor word */
       startPosition: number;
       tags?: QueryLogTags | null;
@@ -38484,7 +38484,7 @@ export namespace Schemas {
       description?: string;
     }
 
-    export interface HogTaggerConfig {
+    export interface ScriptTaggerConfig {
       /**
          * Script source code to classify a generation into tags.
          * @minLength 1
@@ -44749,8 +44749,8 @@ export namespace Schemas {
      * * `signal_report` - Signal Report
      * * `signals_scout` - Signals Scout
      * * `support_reply` - Support Reply
-     * * `hogdesk` - HogDesk
-     * * `review_hog` - ReviewHog
+     * * `desk` - Desk
+     * * `review` - Review
      * * `image_builder` - Image Builder
      * * `loop` - Loop
      * * `mcp_analytics` - MCP Analytics
@@ -44772,8 +44772,8 @@ export namespace Schemas {
       SignalReport: 'signal_report',
       SignalsScout: 'signals_scout',
       SupportReply: 'support_reply',
-      Hogdesk: 'hogdesk',
-      ReviewHog: 'review_hog',
+      Desk: 'desk',
+      Review: 'review',
       ImageBuilder: 'image_builder',
       Loop: 'loop',
       McpAnalytics: 'mcp_analytics',
@@ -47213,8 +47213,8 @@ export namespace Schemas {
      * must never read over the API. Only these derived, content-free fields are exposed.
      */
     export interface _ReviewOutputSummary {
-      /** Version of the stamphog engine that produced this review, if it reported one. */
-      readonly stamphog_version: string;
+      /** Version of the stamp engine that produced this review, if it reported one. */
+      readonly stamp_version: string;
       /** Exit code of the reviewer process in the sandbox, if the run reached the sandbox stage. */
       readonly reviewer_exit_code: number;
     }
@@ -47258,7 +47258,7 @@ export namespace Schemas {
       readonly verdict: ReviewRunVerdictEnum;
       /** Allowlisted deterministic gate outcome (gate_blocked, final_verdict). The nested gate, classification, and policy sub-objects are excluded — they carry changed-file paths and policy scopes, repository content a project member without repo access must not read. */
       readonly gate_result: _GateResultSummary;
-      /** Allowlisted, non-sensitive subset of the reviewer output blob (stamphog version, reviewer exit code). The raw reviewer stdout, PR payload, changed-file patches, and policy file contents are deliberately excluded — they carry repository content a project member without repo access must not read. */
+      /** Allowlisted, non-sensitive subset of the reviewer output blob (stamp version, reviewer exit code). The raw reviewer stdout, PR payload, changed-file patches, and policy file contents are deliberately excluded — they carry repository content a project member without repo access must not read. */
       readonly output: _ReviewOutputSummary;
       /** Error message if the run failed, blank otherwise. */
       readonly error: string;
@@ -48298,7 +48298,7 @@ export namespace Schemas {
       quarantined_count?: number;
     }
 
-    export interface StamphogPullRequest {
+    export interface StampPullRequest {
       readonly id: string;
       /** Full name of the repository this pull request belongs to. */
       readonly repository: string;
@@ -48340,13 +48340,13 @@ export namespace Schemas {
       readonly updated_at: string;
     }
 
-    export interface PaginatedStamphogPullRequestList {
+    export interface PaginatedStampPullRequestList {
       count: number;
       /** @nullable */
       next?: string | null;
       /** @nullable */
       previous?: string | null;
-      results: StamphogPullRequest[];
+      results: StampPullRequest[];
     }
 
     /**
@@ -48361,7 +48361,7 @@ export namespace Schemas {
       Label: 'label',
     } as const;
 
-    export interface StamphogRepoConfig {
+    export interface StampRepoConfig {
       readonly id: string;
       /**
          * SCM provider this config talks to. Defaults to 'github'.
@@ -48373,7 +48373,7 @@ export namespace Schemas {
          * @maxLength 255
          */
       repository: string;
-      /** Whether stamphog actively reviews pull requests for this repo. */
+      /** Whether stamp actively reviews pull requests for this repo. */
       enabled?: boolean;
       /** Provider app installation ID that authorizes API calls for this repo. Set only by the verified sync_installation flow; ignored on direct writes. */
       readonly installation_id: string;
@@ -48385,7 +48385,7 @@ export namespace Schemas {
        * * `label` - label */
       review_mode?: ReviewModeEnum;
       /**
-         * Pull request label that triggers a review when review_mode is 'label'. Defaults to 'stamphog'.
+         * Pull request label that triggers a review when review_mode is 'label'. Defaults to 'stamp'.
          * @maxLength 100
          */
       trigger_label?: string;
@@ -48393,13 +48393,13 @@ export namespace Schemas {
       readonly updated_at: string;
     }
 
-    export interface PaginatedStamphogRepoConfigList {
+    export interface PaginatedStampRepoConfigList {
       count: number;
       /** @nullable */
       next?: string | null;
       /** @nullable */
       previous?: string | null;
-      results: StamphogRepoConfig[];
+      results: StampRepoConfig[];
     }
 
     /**
@@ -49023,7 +49023,7 @@ export namespace Schemas {
       Script: 'script',
     } as const;
 
-    export type TaggerConfig = LLMTaggerConfig | HogTaggerConfig;
+    export type TaggerConfig = LLMTaggerConfig | ScriptTaggerConfig;
 
     export type TaggerConditionPropertiesItem = { [key: string]: unknown };
 
@@ -50563,7 +50563,7 @@ export namespace Schemas {
          * ID of the delivery flow provisioned for this action. Null until delivery is wired up.
          * @nullable
          */
-      readonly hog_flow_id: string | null;
+      readonly script_flow_id: string | null;
       readonly created_at: string;
       /** User who created the action. */
       readonly created_by: UserBasic | null;
@@ -52066,11 +52066,11 @@ export namespace Schemas {
          * @maxLength 255
          */
       slack_channel_name?: string;
-      /** How this row was created: 'manual' (via this API), 'slack_name_match' (auto-provisioned because the workspace has a channel named exactly like the audience_key), 'stamphog_config' (auto-provisioned from the channel the repo declared under 'digest:' in .stamphog/policy.yml), or 'owners_contact' (reserved for the future owners.yaml contact.slack step, not implemented yet).
+      /** How this row was created: 'manual' (via this API), 'slack_name_match' (auto-provisioned because the workspace has a channel named exactly like the audience_key), 'stamp_config' (auto-provisioned from the channel the repo declared under 'digest:' in .stamp/policy.yml), or 'owners_contact' (reserved for the future owners.yaml contact.slack step, not implemented yet).
        *
        * * `manual` - MANUAL
        * * `slack_name_match` - SLACK_NAME_MATCH
-       * * `stamphog_config` - STAMPFN_CONFIG
+       * * `stamp_config` - STAMPFN_CONFIG
        * * `owners_contact` - OWNERS_CONTACT */
       readonly resolution_source?: ResolutionSourceEnum;
       /** Whether this channel is included in the daily digest fan-out. */
@@ -56185,10 +56185,10 @@ export namespace Schemas {
     } as const;
 
     export interface PatchedReviewUserSettings {
-      /** Automatically review pull requests opened by self-driving implementations from the user's Inbox: ReviewHog reviews each one and posts its findings to the pull request. */
+      /** Automatically review pull requests opened by self-driving implementations from the user's Inbox: Review reviews each one and posts its findings to the pull request. */
       review_inbox_prs?: boolean;
-      /** Also have hosted Stamphog review those same Inbox pull requests: an approve-first review that posts a real GitHub approval when the change passes, and a comment when it doesn't. Only takes effect when the project has a synced, enabled Stamphog repository (see stamphog_connected). */
-      stamphog_review_inbox_prs?: boolean;
+      /** Also have hosted Stamp review those same Inbox pull requests: an approve-first review that posts a real GitHub approval when the change passes, and a comment when it doesn't. Only takes effect when the project has a synced, enabled Stamp repository (see stamp_connected). */
+      stamp_review_inbox_prs?: boolean;
       /** Review the user's pull requests when the trigger label is added on GitHub. On by default; turning it off makes the label trigger skip PRs this user authored. */
       review_labeled_prs?: boolean;
       /** Minimum priority a validated finding needs to be published: 'consider' (default) publishes everything, 'should_fix' drops consider-level findings, 'must_fix' publishes only blocking issues.
@@ -56197,10 +56197,10 @@ export namespace Schemas {
        * * `should_fix` - Should Fix
        * * `must_fix` - Must Fix */
       urgency_threshold?: UrgencyThresholdEnum;
-      /** Whether reviews can be started from this project's Code review page (the UI trigger is limited to the designated ReviewHog team while the product is in alpha). */
+      /** Whether reviews can be started from this project's Code review page (the UI trigger is limited to the designated Review team while the product is in alpha). */
       readonly can_trigger_reviews?: boolean;
-      /** Whether this project has at least one synced, enabled Stamphog repository. When false, the stamphog_review_inbox_prs toggle has nothing to act on and the UI renders it disabled with a pointer to connect the Stamphog GitHub App. */
-      readonly stamphog_connected?: boolean;
+      /** Whether this project has at least one synced, enabled Stamp repository. When false, the stamp_review_inbox_prs toggle has nothing to act on and the UI renders it disabled with a pointer to connect the Stamp GitHub App. */
+      readonly stamp_connected?: boolean;
     }
 
     export interface PatchedReviewValidatorConfigSelect {
@@ -56660,7 +56660,7 @@ export namespace Schemas {
       readonly status?: string | null;
     }
 
-    export interface PatchedStamphogRepoConfig {
+    export interface PatchedStampRepoConfig {
       readonly id?: string;
       /**
          * SCM provider this config talks to. Defaults to 'github'.
@@ -56672,7 +56672,7 @@ export namespace Schemas {
          * @maxLength 255
          */
       repository?: string;
-      /** Whether stamphog actively reviews pull requests for this repo. */
+      /** Whether stamp actively reviews pull requests for this repo. */
       enabled?: boolean;
       /** Provider app installation ID that authorizes API calls for this repo. Set only by the verified sync_installation flow; ignored on direct writes. */
       readonly installation_id?: string;
@@ -56684,7 +56684,7 @@ export namespace Schemas {
        * * `label` - label */
       review_mode?: ReviewModeEnum;
       /**
-         * Pull request label that triggers a review when review_mode is 'label'. Defaults to 'stamphog'.
+         * Pull request label that triggers a review when review_mode is 'label'. Defaults to 'stamp'.
          * @maxLength 100
          */
       trigger_label?: string;
@@ -57679,8 +57679,8 @@ export namespace Schemas {
        * * `signal_report` - Signal Report
        * * `signals_scout` - Signals Scout
        * * `support_reply` - Support Reply
-       * * `hogdesk` - HogDesk
-       * * `review_hog` - ReviewHog
+       * * `desk` - Desk
+       * * `review` - Review
        * * `image_builder` - Image Builder
        * * `loop` - Loop
        * * `mcp_analytics` - MCP Analytics */
@@ -58532,7 +58532,7 @@ export namespace Schemas {
          * ID of the delivery flow provisioned for this action. Null until delivery is wired up.
          * @nullable
          */
-      readonly hog_flow_id?: string | null;
+      readonly script_flow_id?: string | null;
       readonly created_at?: string;
       /** User who created the action. */
       readonly created_by?: UserBasic | null;
@@ -60418,7 +60418,7 @@ export namespace Schemas {
     }
 
     /**
-     * One row in `inventory.recent_hog_flows.recent`.
+     * One row in `inventory.recent_script_flows.recent`.
      */
     export interface RecentInsightsFlowEntry {
       /** Script flow UUID. */
@@ -60435,7 +60435,7 @@ export namespace Schemas {
     }
 
     /**
-     * `inventory.recent_hog_flows` — total + non-archived count, plus the 5 most recently modified.
+     * `inventory.recent_script_flows` — total + non-archived count, plus the 5 most recently modified.
      */
     export interface RecentInsightsFlows {
       /** Total script flows on the team. */
@@ -60599,7 +60599,7 @@ export namespace Schemas {
       /** Script function orientation: total + enabled count, plus the 5 most recently updated destinations / transformations the team has wired up via the CDP pipelines. */
       recent_insights_functions: RecentInsightsFunctions;
       /** Script flow orientation: total + non-archived count, plus the 5 most recently updated automation flows. */
-      recent_hog_flows: RecentInsightsFlows;
+      recent_script_flows: RecentInsightsFlows;
       /** Notebook orientation: total + the 5 most recently modified notebooks — useful signal for what the team has been investigating. */
       recent_notebooks: RecentNotebooks;
       /** Cohort orientation: total + the 5 most recently created cohorts on the team. */
@@ -61523,7 +61523,7 @@ export namespace Schemas {
        * ```
        *
        * For more details on InsightsQL queries, see the [Insights InsightsQL documentation](/docs/insightsql#api-access). */
-      query: EventsNode | ActionsNode | PersonsNode | DataWarehouseNode | FunnelsDataWarehouseNode | LifecycleDataWarehouseNode | EventsQuery | SessionsQuery | ActorsQuery | GroupsQuery | InsightActorsQuery | InsightActorsQueryOptions | SessionsTimelineQuery | HogQuery | InsightsQLQuery | InsightsQLMetadata | InsightsQLAutocomplete | SessionAttributionExplorerQuery | ErrorTrackingQuery | ErrorTrackingSimilarIssuesQuery | ErrorTrackingBreakdownsQuery | ErrorTrackingIssueCorrelationQuery | ExperimentFunnelsQuery | ExperimentTrendsQuery | ExperimentQuery | ExperimentExposureQuery | DocumentSimilarityQuery | WebOverviewQuery | WebStatsTableQuery | WebExternalClicksTableQuery | WebBotsTableQuery | WebGoalsQuery | WebVitalsQuery | WebVitalsPathBreakdownQuery | WebPageURLSearchQuery | WebAnalyticsExternalSummaryQuery | WebNotableChangesQuery | MarketingAnalyticsTableQuery | MarketingAnalyticsAggregatedQuery | MarketingAnalyticsAttributionQuery | MarketingAnalyticsAttributionPathsQuery | NonIntegratedConversionsTableQuery | DataVisualizationNode | DataTableNode | SavedInsightNode | InsightVizNode | TrendsQuery | FunnelsQuery | RetentionQuery | PathsQuery | StickinessQuery | LifecycleQuery | FunnelCorrelationQuery | DatabaseSchemaQuery | RecordingsQuery | LogsQuery | LogAttributesQuery | LogValuesQuery | MetricsQuery | TraceSpansQuery | TraceSpansAggregationQuery | TraceSpansTreeQuery | TraceSpansAttributeBreakdownQuery | SuggestedQuestionsQuery | TeamTaxonomyQuery | EventTaxonomyQuery | ActorsPropertyTaxonomyQuery | TracesQuery | TraceQuery | SessionQuery | TraceNeighborsQuery | VectorSearchQuery | UsageMetricsQuery | AccountsQuery | EndpointsUsageOverviewQuery | EndpointsUsageTableQuery | EndpointsUsageTrendsQuery | MCPToolCallBreakdownQuery | MCPToolCallsAndErrorsQuery | MCPHarnessBreakdownQuery | MCPToolTopUsersQuery | MCPToolFailuresQuery | MCPToolFailureOccurrencesQuery | MCPToolStatsQuery | MCPToolDailyStatsQuery | MCPToolQualityRowsQuery | MCPToolQualityDailyStatsQuery | MCPToolCategoryCountsQuery | MCPToolCategoriesQuery | MCPToolDescriptionsQuery | MCPToolSampleIntentsQuery | MCPToolNeighborsQuery | PropertyValuesQuery;
+      query: EventsNode | ActionsNode | PersonsNode | DataWarehouseNode | FunnelsDataWarehouseNode | LifecycleDataWarehouseNode | EventsQuery | SessionsQuery | ActorsQuery | GroupsQuery | InsightActorsQuery | InsightActorsQueryOptions | SessionsTimelineQuery | ScriptQuery | InsightsQLQuery | InsightsQLMetadata | InsightsQLAutocomplete | SessionAttributionExplorerQuery | ErrorTrackingQuery | ErrorTrackingSimilarIssuesQuery | ErrorTrackingBreakdownsQuery | ErrorTrackingIssueCorrelationQuery | ExperimentFunnelsQuery | ExperimentTrendsQuery | ExperimentQuery | ExperimentExposureQuery | DocumentSimilarityQuery | WebOverviewQuery | WebStatsTableQuery | WebExternalClicksTableQuery | WebBotsTableQuery | WebGoalsQuery | WebVitalsQuery | WebVitalsPathBreakdownQuery | WebPageURLSearchQuery | WebAnalyticsExternalSummaryQuery | WebNotableChangesQuery | MarketingAnalyticsTableQuery | MarketingAnalyticsAggregatedQuery | MarketingAnalyticsAttributionQuery | MarketingAnalyticsAttributionPathsQuery | NonIntegratedConversionsTableQuery | DataVisualizationNode | DataTableNode | SavedInsightNode | InsightVizNode | TrendsQuery | FunnelsQuery | RetentionQuery | PathsQuery | StickinessQuery | LifecycleQuery | FunnelCorrelationQuery | DatabaseSchemaQuery | RecordingsQuery | LogsQuery | LogAttributesQuery | LogValuesQuery | MetricsQuery | TraceSpansQuery | TraceSpansAggregationQuery | TraceSpansTreeQuery | TraceSpansAttributeBreakdownQuery | SuggestedQuestionsQuery | TeamTaxonomyQuery | EventTaxonomyQuery | ActorsPropertyTaxonomyQuery | TracesQuery | TraceQuery | SessionQuery | TraceNeighborsQuery | VectorSearchQuery | UsageMetricsQuery | AccountsQuery | EndpointsUsageOverviewQuery | EndpointsUsageTableQuery | EndpointsUsageTrendsQuery | MCPToolCallBreakdownQuery | MCPToolCallsAndErrorsQuery | MCPHarnessBreakdownQuery | MCPToolTopUsersQuery | MCPToolFailuresQuery | MCPToolFailureOccurrencesQuery | MCPToolStatsQuery | MCPToolDailyStatsQuery | MCPToolQualityRowsQuery | MCPToolQualityDailyStatsQuery | MCPToolCategoryCountsQuery | MCPToolCategoriesQuery | MCPToolDescriptionsQuery | MCPToolSampleIntentsQuery | MCPToolNeighborsQuery | PropertyValuesQuery;
       /** Whether results should be calculated sync or async, and how much to rely on the cache:
        * - `'blocking'` - calculate synchronously (returning only when the query is done), UNLESS there are very fresh results in the cache
        * - `'async'` - kick off background calculation (returning immediately with a query status), UNLESS there are very fresh results in the cache
@@ -63934,11 +63934,11 @@ export namespace Schemas {
     }
 
     export interface QueryUpgradeRequest {
-      query: EventsNode | ActionsNode | PersonsNode | DataWarehouseNode | FunnelsDataWarehouseNode | LifecycleDataWarehouseNode | EventsQuery | SessionsQuery | ActorsQuery | GroupsQuery | InsightActorsQuery | InsightActorsQueryOptions | SessionsTimelineQuery | HogQuery | InsightsQLQuery | InsightsQLMetadata | InsightsQLAutocomplete | SessionAttributionExplorerQuery | ErrorTrackingQuery | ErrorTrackingSimilarIssuesQuery | ErrorTrackingBreakdownsQuery | ErrorTrackingIssueCorrelationQuery | ExperimentFunnelsQuery | ExperimentTrendsQuery | ExperimentQuery | ExperimentExposureQuery | DocumentSimilarityQuery | WebOverviewQuery | WebStatsTableQuery | WebExternalClicksTableQuery | WebBotsTableQuery | WebGoalsQuery | WebVitalsQuery | WebVitalsPathBreakdownQuery | WebPageURLSearchQuery | WebAnalyticsExternalSummaryQuery | WebNotableChangesQuery | MarketingAnalyticsTableQuery | MarketingAnalyticsAggregatedQuery | MarketingAnalyticsAttributionQuery | MarketingAnalyticsAttributionPathsQuery | NonIntegratedConversionsTableQuery | DataVisualizationNode | DataTableNode | SavedInsightNode | InsightVizNode | TrendsQuery | FunnelsQuery | RetentionQuery | PathsQuery | StickinessQuery | LifecycleQuery | FunnelCorrelationQuery | DatabaseSchemaQuery | RecordingsQuery | LogsQuery | LogAttributesQuery | LogValuesQuery | MetricsQuery | TraceSpansQuery | TraceSpansAggregationQuery | TraceSpansTreeQuery | TraceSpansAttributeBreakdownQuery | SuggestedQuestionsQuery | TeamTaxonomyQuery | EventTaxonomyQuery | ActorsPropertyTaxonomyQuery | TracesQuery | TraceQuery | SessionQuery | TraceNeighborsQuery | VectorSearchQuery | UsageMetricsQuery | AccountsQuery | EndpointsUsageOverviewQuery | EndpointsUsageTableQuery | EndpointsUsageTrendsQuery | MCPToolCallBreakdownQuery | MCPToolCallsAndErrorsQuery | MCPHarnessBreakdownQuery | MCPToolTopUsersQuery | MCPToolFailuresQuery | MCPToolFailureOccurrencesQuery | MCPToolStatsQuery | MCPToolDailyStatsQuery | MCPToolQualityRowsQuery | MCPToolQualityDailyStatsQuery | MCPToolCategoryCountsQuery | MCPToolCategoriesQuery | MCPToolDescriptionsQuery | MCPToolSampleIntentsQuery | MCPToolNeighborsQuery | PropertyValuesQuery;
+      query: EventsNode | ActionsNode | PersonsNode | DataWarehouseNode | FunnelsDataWarehouseNode | LifecycleDataWarehouseNode | EventsQuery | SessionsQuery | ActorsQuery | GroupsQuery | InsightActorsQuery | InsightActorsQueryOptions | SessionsTimelineQuery | ScriptQuery | InsightsQLQuery | InsightsQLMetadata | InsightsQLAutocomplete | SessionAttributionExplorerQuery | ErrorTrackingQuery | ErrorTrackingSimilarIssuesQuery | ErrorTrackingBreakdownsQuery | ErrorTrackingIssueCorrelationQuery | ExperimentFunnelsQuery | ExperimentTrendsQuery | ExperimentQuery | ExperimentExposureQuery | DocumentSimilarityQuery | WebOverviewQuery | WebStatsTableQuery | WebExternalClicksTableQuery | WebBotsTableQuery | WebGoalsQuery | WebVitalsQuery | WebVitalsPathBreakdownQuery | WebPageURLSearchQuery | WebAnalyticsExternalSummaryQuery | WebNotableChangesQuery | MarketingAnalyticsTableQuery | MarketingAnalyticsAggregatedQuery | MarketingAnalyticsAttributionQuery | MarketingAnalyticsAttributionPathsQuery | NonIntegratedConversionsTableQuery | DataVisualizationNode | DataTableNode | SavedInsightNode | InsightVizNode | TrendsQuery | FunnelsQuery | RetentionQuery | PathsQuery | StickinessQuery | LifecycleQuery | FunnelCorrelationQuery | DatabaseSchemaQuery | RecordingsQuery | LogsQuery | LogAttributesQuery | LogValuesQuery | MetricsQuery | TraceSpansQuery | TraceSpansAggregationQuery | TraceSpansTreeQuery | TraceSpansAttributeBreakdownQuery | SuggestedQuestionsQuery | TeamTaxonomyQuery | EventTaxonomyQuery | ActorsPropertyTaxonomyQuery | TracesQuery | TraceQuery | SessionQuery | TraceNeighborsQuery | VectorSearchQuery | UsageMetricsQuery | AccountsQuery | EndpointsUsageOverviewQuery | EndpointsUsageTableQuery | EndpointsUsageTrendsQuery | MCPToolCallBreakdownQuery | MCPToolCallsAndErrorsQuery | MCPHarnessBreakdownQuery | MCPToolTopUsersQuery | MCPToolFailuresQuery | MCPToolFailureOccurrencesQuery | MCPToolStatsQuery | MCPToolDailyStatsQuery | MCPToolQualityRowsQuery | MCPToolQualityDailyStatsQuery | MCPToolCategoryCountsQuery | MCPToolCategoriesQuery | MCPToolDescriptionsQuery | MCPToolSampleIntentsQuery | MCPToolNeighborsQuery | PropertyValuesQuery;
     }
 
     export interface QueryUpgradeResponse {
-      query: EventsNode | ActionsNode | PersonsNode | DataWarehouseNode | FunnelsDataWarehouseNode | LifecycleDataWarehouseNode | EventsQuery | SessionsQuery | ActorsQuery | GroupsQuery | InsightActorsQuery | InsightActorsQueryOptions | SessionsTimelineQuery | HogQuery | InsightsQLQuery | InsightsQLMetadata | InsightsQLAutocomplete | SessionAttributionExplorerQuery | ErrorTrackingQuery | ErrorTrackingSimilarIssuesQuery | ErrorTrackingBreakdownsQuery | ErrorTrackingIssueCorrelationQuery | ExperimentFunnelsQuery | ExperimentTrendsQuery | ExperimentQuery | ExperimentExposureQuery | DocumentSimilarityQuery | WebOverviewQuery | WebStatsTableQuery | WebExternalClicksTableQuery | WebBotsTableQuery | WebGoalsQuery | WebVitalsQuery | WebVitalsPathBreakdownQuery | WebPageURLSearchQuery | WebAnalyticsExternalSummaryQuery | WebNotableChangesQuery | MarketingAnalyticsTableQuery | MarketingAnalyticsAggregatedQuery | MarketingAnalyticsAttributionQuery | MarketingAnalyticsAttributionPathsQuery | NonIntegratedConversionsTableQuery | DataVisualizationNode | DataTableNode | SavedInsightNode | InsightVizNode | TrendsQuery | FunnelsQuery | RetentionQuery | PathsQuery | StickinessQuery | LifecycleQuery | FunnelCorrelationQuery | DatabaseSchemaQuery | RecordingsQuery | LogsQuery | LogAttributesQuery | LogValuesQuery | MetricsQuery | TraceSpansQuery | TraceSpansAggregationQuery | TraceSpansTreeQuery | TraceSpansAttributeBreakdownQuery | SuggestedQuestionsQuery | TeamTaxonomyQuery | EventTaxonomyQuery | ActorsPropertyTaxonomyQuery | TracesQuery | TraceQuery | SessionQuery | TraceNeighborsQuery | VectorSearchQuery | UsageMetricsQuery | AccountsQuery | EndpointsUsageOverviewQuery | EndpointsUsageTableQuery | EndpointsUsageTrendsQuery | MCPToolCallBreakdownQuery | MCPToolCallsAndErrorsQuery | MCPHarnessBreakdownQuery | MCPToolTopUsersQuery | MCPToolFailuresQuery | MCPToolFailureOccurrencesQuery | MCPToolStatsQuery | MCPToolDailyStatsQuery | MCPToolQualityRowsQuery | MCPToolQualityDailyStatsQuery | MCPToolCategoryCountsQuery | MCPToolCategoriesQuery | MCPToolDescriptionsQuery | MCPToolSampleIntentsQuery | MCPToolNeighborsQuery | PropertyValuesQuery;
+      query: EventsNode | ActionsNode | PersonsNode | DataWarehouseNode | FunnelsDataWarehouseNode | LifecycleDataWarehouseNode | EventsQuery | SessionsQuery | ActorsQuery | GroupsQuery | InsightActorsQuery | InsightActorsQueryOptions | SessionsTimelineQuery | ScriptQuery | InsightsQLQuery | InsightsQLMetadata | InsightsQLAutocomplete | SessionAttributionExplorerQuery | ErrorTrackingQuery | ErrorTrackingSimilarIssuesQuery | ErrorTrackingBreakdownsQuery | ErrorTrackingIssueCorrelationQuery | ExperimentFunnelsQuery | ExperimentTrendsQuery | ExperimentQuery | ExperimentExposureQuery | DocumentSimilarityQuery | WebOverviewQuery | WebStatsTableQuery | WebExternalClicksTableQuery | WebBotsTableQuery | WebGoalsQuery | WebVitalsQuery | WebVitalsPathBreakdownQuery | WebPageURLSearchQuery | WebAnalyticsExternalSummaryQuery | WebNotableChangesQuery | MarketingAnalyticsTableQuery | MarketingAnalyticsAggregatedQuery | MarketingAnalyticsAttributionQuery | MarketingAnalyticsAttributionPathsQuery | NonIntegratedConversionsTableQuery | DataVisualizationNode | DataTableNode | SavedInsightNode | InsightVizNode | TrendsQuery | FunnelsQuery | RetentionQuery | PathsQuery | StickinessQuery | LifecycleQuery | FunnelCorrelationQuery | DatabaseSchemaQuery | RecordingsQuery | LogsQuery | LogAttributesQuery | LogValuesQuery | MetricsQuery | TraceSpansQuery | TraceSpansAggregationQuery | TraceSpansTreeQuery | TraceSpansAttributeBreakdownQuery | SuggestedQuestionsQuery | TeamTaxonomyQuery | EventTaxonomyQuery | ActorsPropertyTaxonomyQuery | TracesQuery | TraceQuery | SessionQuery | TraceNeighborsQuery | VectorSearchQuery | UsageMetricsQuery | AccountsQuery | EndpointsUsageOverviewQuery | EndpointsUsageTableQuery | EndpointsUsageTrendsQuery | MCPToolCallBreakdownQuery | MCPToolCallsAndErrorsQuery | MCPHarnessBreakdownQuery | MCPToolTopUsersQuery | MCPToolFailuresQuery | MCPToolFailureOccurrencesQuery | MCPToolStatsQuery | MCPToolDailyStatsQuery | MCPToolQualityRowsQuery | MCPToolQualityDailyStatsQuery | MCPToolCategoryCountsQuery | MCPToolCategoriesQuery | MCPToolDescriptionsQuery | MCPToolSampleIntentsQuery | MCPToolNeighborsQuery | PropertyValuesQuery;
     }
 
     export interface QuotaResourceLimit {
@@ -64026,7 +64026,7 @@ export namespace Schemas {
     }
 
     export interface RecapPersona {
-      /** Stable persona identifier. One of: just_getting_started, conversion_machine, traffic_magnet, crowd_favorite, search_hog, word_of_mouth, loyal_following, rising_star, steady_hog. */
+      /** Stable persona identifier. One of: just_getting_started, conversion_machine, traffic_magnet, crowd_favorite, search_script, word_of_mouth, loyal_following, rising_star, steady_script. */
       id: string;
       /** Display name for the persona, e.g. 'Traffic Magnet'. */
       name: string;
@@ -65267,10 +65267,10 @@ export namespace Schemas {
     }
 
     export interface ReviewUserSettings {
-      /** Automatically review pull requests opened by self-driving implementations from the user's Inbox: ReviewHog reviews each one and posts its findings to the pull request. */
+      /** Automatically review pull requests opened by self-driving implementations from the user's Inbox: Review reviews each one and posts its findings to the pull request. */
       review_inbox_prs?: boolean;
-      /** Also have hosted Stamphog review those same Inbox pull requests: an approve-first review that posts a real GitHub approval when the change passes, and a comment when it doesn't. Only takes effect when the project has a synced, enabled Stamphog repository (see stamphog_connected). */
-      stamphog_review_inbox_prs?: boolean;
+      /** Also have hosted Stamp review those same Inbox pull requests: an approve-first review that posts a real GitHub approval when the change passes, and a comment when it doesn't. Only takes effect when the project has a synced, enabled Stamp repository (see stamp_connected). */
+      stamp_review_inbox_prs?: boolean;
       /** Review the user's pull requests when the trigger label is added on GitHub. On by default; turning it off makes the label trigger skip PRs this user authored. */
       review_labeled_prs?: boolean;
       /** Minimum priority a validated finding needs to be published: 'consider' (default) publishes everything, 'should_fix' drops consider-level findings, 'must_fix' publishes only blocking issues.
@@ -65279,10 +65279,10 @@ export namespace Schemas {
        * * `should_fix` - Should Fix
        * * `must_fix` - Must Fix */
       urgency_threshold?: UrgencyThresholdEnum;
-      /** Whether reviews can be started from this project's Code review page (the UI trigger is limited to the designated ReviewHog team while the product is in alpha). */
+      /** Whether reviews can be started from this project's Code review page (the UI trigger is limited to the designated Review team while the product is in alpha). */
       readonly can_trigger_reviews: boolean;
-      /** Whether this project has at least one synced, enabled Stamphog repository. When false, the stamphog_review_inbox_prs toggle has nothing to act on and the UI renders it disabled with a pointer to connect the Stamphog GitHub App. */
-      readonly stamphog_connected: boolean;
+      /** Whether this project has at least one synced, enabled Stamp repository. When false, the stamp_review_inbox_prs toggle has nothing to act on and the UI renders it disabled with a pointer to connect the Stamp GitHub App. */
+      readonly stamp_connected: boolean;
     }
 
     export interface ReviewValidatorConfig {
@@ -71718,7 +71718,7 @@ export namespace Schemas {
     /**
      * One installation of the App the authorizing user can reach, offered for an explicit pick.
      */
-    export interface StamphogDiscoveredInstallation {
+    export interface StampDiscoveredInstallation {
       /** GitHub installation id, as a string. */
       readonly id: string;
       /** Login of the org or user account the installation lives on. */
@@ -71728,8 +71728,8 @@ export namespace Schemas {
     /**
      * Static info the frontend needs to render the 'Connect a repository' button.
      */
-    export interface StamphogInstallInfo {
-      /** URL-friendly slug of the dedicated Stamphog GitHub App, or blank if unconfigured. */
+    export interface StampInstallInfo {
+      /** URL-friendly slug of the dedicated Stamp GitHub App, or blank if unconfigured. */
       readonly app_slug: string;
       /** GitHub install URL (github.com/apps/<slug>/installations/new) the user opens to install the App, or blank if the App slug is unconfigured. Used for the genuinely-not-installed case; the primary 'Connect' button uses authorize_url instead. */
       readonly install_url: string;
@@ -71746,7 +71746,7 @@ export namespace Schemas {
      * installations are discovered server-side from the code, so the client never has to supply a
      * forgeable id.
      */
-    export interface StamphogSyncInstallationRequest {
+    export interface StampSyncInstallationRequest {
       /** GitHub App installation ID from the fresh-install Setup URL redirect. Optional: absent or blank means discover the caller's installations from the OAuth code instead (authorize-first flow). The id is not trusted on its own — ownership is always proven via the code. */
       installation_id?: string;
       /** GitHub user-to-server OAuth code from the post-install redirect (present when the App has 'Request user authorization during installation' enabled). Exchanged server-side to prove the caller owns the installation before its repos are bound. */
@@ -71758,15 +71758,15 @@ export namespace Schemas {
     /**
      * Result of syncing an installation: rows created/kept for this team, plus conflicting repos skipped.
      */
-    export interface StamphogSyncInstallationResponse {
+    export interface StampSyncInstallationResponse {
       /** Repo configs now bound to this team for the installation (created this call or already present). */
-      readonly synced: readonly StamphogRepoConfig[];
+      readonly synced: readonly StampRepoConfig[];
       /** Repository full names skipped because another team already owns them under this installation. */
       readonly skipped: readonly string[];
       /** True only on the discovery path (no installation_id) when the caller can reach no installation of this App — it isn't installed anywhere they can see. The frontend should route the user to the GitHub install page (install_url). Always false on the explicit installation_id path. */
       readonly app_not_installed: boolean;
       /** Populated only on the discovery path when the caller can reach MORE than one installation of this App: nothing was bound, and the user must pick which installation to connect. The frontend re-runs the authorize flow and calls back with the chosen installation_id, which the explicit path verifies. Empty whenever a bind happened (or nothing was found). */
-      readonly installations: readonly StamphogDiscoveredInstallation[];
+      readonly installations: readonly StampDiscoveredInstallation[];
     }
 
     /**
@@ -72796,8 +72796,8 @@ export namespace Schemas {
        * * `signal_report` - Signal Report
        * * `signals_scout` - Signals Scout
        * * `support_reply` - Support Reply
-       * * `hogdesk` - HogDesk
-       * * `review_hog` - ReviewHog
+       * * `desk` - Desk
+       * * `review` - Review
        * * `image_builder` - Image Builder
        * * `loop` - Loop
        * * `mcp_analytics` - MCP Analytics */
@@ -73885,8 +73885,8 @@ export namespace Schemas {
        * * `signal_report` - Signal Report
        * * `signals_scout` - Signals Scout
        * * `support_reply` - Support Reply
-       * * `hogdesk` - HogDesk
-       * * `review_hog` - ReviewHog
+       * * `desk` - Desk
+       * * `review` - Review
        * * `image_builder` - Image Builder
        * * `loop` - Loop
        * * `mcp_analytics` - MCP Analytics */
@@ -74254,9 +74254,9 @@ export namespace Schemas {
       /** Emails sent in the last 30 days. */
       readonly emails_sent: number;
       /** The workflow these rates are for. */
-      readonly hog_flow_id: string;
+      readonly script_flow_id: string;
       /** Display name of the workflow; empty for unnamed workflows. */
-      readonly hog_flow_name: string;
+      readonly script_flow_name: string;
     }
 
     export interface TeamEmailReputationResponse {
@@ -74332,9 +74332,9 @@ export namespace Schemas {
       has_membership_data: boolean;
     }
 
-    export type TestHogRequestConditionsItem = { [key: string]: unknown };
+    export type TestScriptRequestConditionsItem = { [key: string]: unknown };
 
-    export interface TestHogTargetConfig {
+    export interface TestScriptTargetConfig {
       /**
          * Aggregation window for trace samples, in seconds.
          * @minimum 10
@@ -74349,7 +74349,7 @@ export namespace Schemas {
       quiet_period_seconds?: number;
     }
 
-    export interface TestHogRequest {
+    export interface TestScriptRequest {
       /**
          * Script source code to test. Must return a boolean (true = pass, false = fail) or null for N/A.
          * @minLength 1
@@ -74364,7 +74364,7 @@ export namespace Schemas {
       /** Whether the evaluation can return N/A for non-applicable generations. */
       allows_na?: boolean;
       /** Optional trigger conditions to filter which events are sampled. */
-      conditions?: TestHogRequestConditionsItem[];
+      conditions?: TestScriptRequestConditionsItem[];
       /** What the evaluation runs against: 'generation' samples individual generations, 'trace' samples whole traces, and 'session' samples whole sessions that have gone quiet. Each target runs against the same globals it would run against online.
        *
        * * `generation` - Generation
@@ -74372,10 +74372,10 @@ export namespace Schemas {
        * * `session` - Session */
       target?: EvaluationTargetEnum;
       /** Target-specific preview settings. For a trace target, set window_seconds between 10 and 7200. */
-      target_config?: TestHogTargetConfig;
+      target_config?: TestScriptTargetConfig;
     }
 
-    export interface TestHogResultItem {
+    export interface TestScriptResultItem {
       /** Stable identifier for the sampled generation, trace, or session. */
       sample_id: string;
       /** Type of sampled unit: generation, trace, or session.
@@ -74415,13 +74415,13 @@ export namespace Schemas {
       error: string | null;
     }
 
-    export interface TestHogResponse {
-      results: TestHogResultItem[];
+    export interface TestScriptResponse {
+      results: TestScriptResultItem[];
       /** Optional message, e.g. when no recent events were found. */
       message?: string;
     }
 
-    export interface TestHogTaggerTag {
+    export interface TestScriptTaggerTag {
       /**
          * Tag identifier to allow in Script test results.
          * @maxLength 100
@@ -74434,7 +74434,7 @@ export namespace Schemas {
       description?: string;
     }
 
-    export interface TestHogTaggerRequest {
+    export interface TestScriptTaggerRequest {
       /**
          * Script source code to test. Return a tag name string, a list of tag name strings, or null.
          * @minLength 1
@@ -74447,10 +74447,10 @@ export namespace Schemas {
          */
       sample_count?: number;
       /** Optional tag whitelist. Returned tags outside this list are filtered out. */
-      tags?: TestHogTaggerTag[];
+      tags?: TestScriptTaggerTag[];
     }
 
-    export interface TestHogTaggerResultItem {
+    export interface TestScriptTaggerResultItem {
       /** UUID of the sampled $ai_generation event. */
       event_uuid: string;
       /**
@@ -74473,9 +74473,9 @@ export namespace Schemas {
       error?: string | null;
     }
 
-    export interface TestHogTaggerResponse {
+    export interface TestScriptTaggerResponse {
       /** Per-event Script tagger test results. */
-      results: TestHogTaggerResultItem[];
+      results: TestScriptTaggerResultItem[];
       /** Optional message, for example when no recent AI events were found. */
       message?: string;
     }
@@ -84986,7 +84986,7 @@ export namespace Schemas {
     offset?: number;
     };
 
-    export type ReviewHogReviewsListParams = {
+    export type ReviewReviewsListParams = {
     /**
      * Maximum rows to return. The list grows this instead of paging by offset — in-progress rows reorder the list between refreshes, so offset pages would shift under the reader.
      * @minimum 1
@@ -85000,18 +85000,18 @@ export namespace Schemas {
      * * `everyone` - everyone
      * @minLength 1
      */
-    scope?: ReviewHogReviewsListScope;
+    scope?: ReviewReviewsListScope;
     };
 
-    export type ReviewHogReviewsListScope = typeof ReviewHogReviewsListScope[keyof typeof ReviewHogReviewsListScope];
+    export type ReviewReviewsListScope = typeof ReviewReviewsListScope[keyof typeof ReviewReviewsListScope];
 
 
-    export const ReviewHogReviewsListScope = {
+    export const ReviewReviewsListScope = {
       Mine: 'mine',
       Everyone: 'everyone',
     } as const;
 
-    export type ReviewHogReviewsPerspectiveStatsRetrieveParams = {
+    export type ReviewReviewsPerspectiveStatsRetrieveParams = {
     /**
      * Whose reviews to aggregate: `mine` (the default) for reviews the requesting user ran plus reviews of pull requests they authored (matched via their linked GitHub login), `everyone` for every review on this project.
      *
@@ -85019,13 +85019,13 @@ export namespace Schemas {
      * * `everyone` - everyone
      * @minLength 1
      */
-    scope?: ReviewHogReviewsPerspectiveStatsRetrieveScope;
+    scope?: ReviewReviewsPerspectiveStatsRetrieveScope;
     };
 
-    export type ReviewHogReviewsPerspectiveStatsRetrieveScope = typeof ReviewHogReviewsPerspectiveStatsRetrieveScope[keyof typeof ReviewHogReviewsPerspectiveStatsRetrieveScope];
+    export type ReviewReviewsPerspectiveStatsRetrieveScope = typeof ReviewReviewsPerspectiveStatsRetrieveScope[keyof typeof ReviewReviewsPerspectiveStatsRetrieveScope];
 
 
-    export const ReviewHogReviewsPerspectiveStatsRetrieveScope = {
+    export const ReviewReviewsPerspectiveStatsRetrieveScope = {
       Mine: 'mine',
       Everyone: 'everyone',
     } as const;
@@ -85160,7 +85160,7 @@ export namespace Schemas {
      * * `property_definition` - property_definition
      * * `survey` - survey
      * * `early_access_feature` - early_access_feature
-     * * `hog_flow` - hog_flow
+     * * `script_flow` - script_flow
      */
     export type SearchListEntitiesItem = typeof SearchListEntitiesItem[keyof typeof SearchListEntitiesItem];
 
@@ -85177,7 +85177,7 @@ export namespace Schemas {
       PropertyDefinition: 'property_definition',
       Survey: 'survey',
       EarlyAccessFeature: 'early_access_feature',
-      InsightsFlow: 'hog_flow',
+      InsightsFlow: 'script_flow',
     } as const;
 
     export type SessionGroupSummariesListParams = {
@@ -85535,7 +85535,7 @@ export namespace Schemas {
       Unknown: 'unknown',
     } as const;
 
-    export type StamphogDigestChannelsListParams = {
+    export type StampDigestChannelsListParams = {
     /**
      * Number of results to return per page.
      */
@@ -85546,7 +85546,7 @@ export namespace Schemas {
     offset?: number;
     };
 
-    export type StamphogDigestRunsListParams = {
+    export type StampDigestRunsListParams = {
     /**
      * Filter by digest channel ID.
      */
@@ -85561,7 +85561,7 @@ export namespace Schemas {
     offset?: number;
     };
 
-    export type StamphogPullRequestsListParams = {
+    export type StampPullRequestsListParams = {
     /**
      * Number of results to return per page.
      */
@@ -85580,7 +85580,7 @@ export namespace Schemas {
     pr_number?: number;
     };
 
-    export type StamphogRepoConfigsListParams = {
+    export type StampRepoConfigsListParams = {
     /**
      * Number of results to return per page.
      */
@@ -85591,7 +85591,7 @@ export namespace Schemas {
     offset?: number;
     };
 
-    export type StamphogReviewRunsListParams = {
+    export type StampReviewRunsListParams = {
     /**
      * Number of results to return per page.
      */

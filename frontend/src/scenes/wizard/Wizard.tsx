@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { pngHoggie } from 'lib/brand/hoggies'
-import { HeartHog } from 'lib/components/mascots'
+import { pngMascot } from 'lib/brand/mascot'
+import { HeartScript } from 'lib/components/mascots'
 import { Button } from 'lib/elements/Button'
 import { Select } from 'lib/elements/Select'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
@@ -9,7 +9,7 @@ import { SceneExport } from 'scenes/sceneTypes'
 
 import { wizardLogic } from './wizardLogic'
 
-const MascotShocked = pngHoggie()
+const MascotShocked = pngMascot()
 
 export const scene: SceneExport = {
     component: Wizard,
@@ -69,7 +69,7 @@ export function Wizard(): JSX.Element {
                     <>
                         <h1 className="text-3xl font-bold">Success!</h1>
                         <div className="max-w-60 mb-12">
-                            <HeartHog className="w-48 h-48" />
+                            <HeartScript className="w-48 h-48" />
                         </div>
                         <p className="text-lg">You're all set! You can return to the Insights setup wizard.</p>
                     </>

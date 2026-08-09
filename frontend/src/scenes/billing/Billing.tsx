@@ -9,8 +9,8 @@ import { useEffect } from 'react'
 import { Button, Divider, Input, Link } from '@hanzo/elements'
 import { IconDocument } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
-import { StarHog } from 'lib/components/mascots'
+import { pngMascot } from 'lib/brand/mascot'
+import { StarScript } from 'lib/components/mascots'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { supportLogic } from 'lib/components/Support/supportLogic'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -39,7 +39,7 @@ import { CreditCTAHero } from './CreditCTAHero'
 import { StripePortalButton } from './StripePortalButton'
 import { UnsubscribeCard } from './UnsubscribeCard'
 
-const MascotJudge = pngHoggie()
+const MascotJudge = pngMascot()
 
 export const scene: SceneExport = {
     component: Billing,
@@ -206,7 +206,7 @@ export function Billing(): JSX.Element {
                 <div className="mt-6 max-w-300">
                     <Banner type="info" hideIcon>
                         <div className="flex items-center gap-4">
-                            <StarHog className="w-16 h-16 flex-shrink-0" />
+                            <StarScript className="w-16 h-16 flex-shrink-0" />
                             <div>
                                 <p className="font-semibold mb-2">You have active coupons!</p>
                                 <ul className="list-disc list-inside space-y-1">

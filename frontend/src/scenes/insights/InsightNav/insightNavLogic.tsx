@@ -54,7 +54,7 @@ import {
     isEventsQuery,
     isFunnelsQuery,
     isFunnelsDataWarehouseNode,
-    isHogQuery,
+    isScriptQuery,
     isInsightQueryWithBreakdown,
     isInsightVizNode,
     isLifecycleDataWarehouseNode,
@@ -482,7 +482,7 @@ export const insightNavLogic = kea<insightNavLogicType>([
                     return InsightType.JSON
                 } else if (containsInsightsQLQuery(query)) {
                     return InsightType.SQL
-                } else if (isHogQuery(query)) {
+                } else if (isScriptQuery(query)) {
                     return InsightType.HOG
                 } else if (isInsightVizNode(query)) {
                     // Check for Web Analytics queries first before using the mapping

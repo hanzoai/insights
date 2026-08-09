@@ -16,7 +16,7 @@ import {
     Tooltip,
 } from '@hanzo/elements'
 
-import { HeartHog } from 'lib/components/mascots'
+import { HeartScript } from 'lib/components/mascots'
 import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { supportLogic } from 'lib/components/Support/supportLogic'
 import { inStorybook, inStorybookTestRunner } from 'lib/utils/dom'
@@ -84,7 +84,7 @@ export const UnsubscribeSurveyModal = ({
                 <h3 className="text-lg mb-2">How about now? Was that enough mascots?</h3>
                 <p className="text-secondary mb-4">Look at all these adorable mascots dancing just for you! ◆✨</p>
                 <div className="flex justify-center items-center">
-                    <HeartHog width="100" height="100" />
+                    <HeartScript width="100" height="100" />
                 </div>
             </div>
             <div className="flex gap-2 justify-center">

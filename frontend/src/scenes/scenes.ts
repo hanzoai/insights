@@ -155,7 +155,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
         activityScope: ActivityScope.INSIGHTS_FUNCTION,
         iconType: 'data_pipeline',
     },
-    [Scene.DebugHog]: { projectBased: true, name: 'Script Repl' },
+    [Scene.DebugScript]: { projectBased: true, name: 'Script Repl' },
     [Scene.DebugQuery]: { projectBased: true },
 
     [Scene.Error404]: { name: 'Not found', projectBased: true },
@@ -879,7 +879,7 @@ export const routes: Record<string, [Scene | string, string]> = {
     [urls.integration(':slug')]: [Scene.IntegrationsLanding, 'integrationsLanding'],
     [urls.stripeConfirmInstall()]: [Scene.StripeConfirmInstall, 'stripeConfirmInstall'],
     [urls.debugQuery()]: [Scene.DebugQuery, 'debugQuery'],
-    [urls.debugHog()]: [Scene.DebugHog, 'debugHog'],
+    [urls.debugScript()]: [Scene.DebugScript, 'debugScript'],
 
     [urls.notebook(':shortId')]: [Scene.Notebook, 'notebook'],
     [urls.notebooks()]: [Scene.Notebooks, 'notebooks'],

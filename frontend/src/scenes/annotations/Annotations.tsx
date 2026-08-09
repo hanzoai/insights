@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { Select, Link } from '@hanzo/elements'
 import { IconPencil } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { TextContent } from 'lib/components/Cards/TextCard/TextCard'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { Shortcut } from 'lib/components/Shortcuts/Shortcut'
@@ -32,7 +32,7 @@ import { AnnotationModal } from './AnnotationModal'
 import { annotationModalLogic, annotationScopeToLevel, annotationScopeToName } from './annotationModalLogic'
 import { annotationScopesMenuOptions, annotationsLogic } from './annotationsLogic'
 
-const MascotReporter = pngHoggie()
+const MascotReporter = pngMascot()
 
 export const scene: SceneExport = {
     component: Annotations,
@@ -197,7 +197,7 @@ export function Annotations(): JSX.Element {
                         docsURL="https://hanzo.ai/docs/data/annotations"
                         action={() => openModalToCreateAnnotation()}
                         isEmpty={shouldShowEmptyState}
-                        customHog={MascotReporter}
+                        customScript={MascotReporter}
                         mcpSurfaceKey="annotations.create"
                     />
                 </div>

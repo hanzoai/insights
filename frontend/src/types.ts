@@ -297,7 +297,7 @@ export enum AccessControlResourceType {
     McpAnalytics = 'mcp_analytics',
     Metrics = 'metrics',
     Endpoint = 'endpoint',
-    Workflow = 'hog_flow',
+    Workflow = 'script_flow',
     EarlyAccessFeature = 'early_access_feature',
     ProductTour = 'product_tour',
     Experiment = 'experiment',
@@ -1703,7 +1703,7 @@ export type SearchableEntity =
     | 'event_definition'
     | 'experiment'
     | 'feature_flag'
-    | 'hog_flow'
+    | 'script_flow'
     | 'notebook'
     | 'property_definition'
     | 'survey'
@@ -5786,7 +5786,7 @@ export const API_SCOPE_OBJECTS = [
     'group',
     'health_issue',
     'heatmap',
-    'hog_flow',
+    'script_flow',
     'insights_function',
     'ingestion_warning',
     'insight',
@@ -5822,7 +5822,7 @@ export const API_SCOPE_OBJECTS = [
     'query',
     'query_performance',
     'replay_scanner',
-    'review_hog',
+    'review',
     'revenue_analytics',
     'session_recording',
     'session_recording_playlist',
@@ -5830,7 +5830,7 @@ export const API_SCOPE_OBJECTS = [
     'signal_scout',
     'signal_scout_internal',
     'signal_scout_report',
-    'stamphog',
+    'stamp',
     'streamlit_app',
     'subscription',
     'survey',
@@ -7121,7 +7121,7 @@ export type OnboardingProduct = {
     capabilities?: string[]
     /** Title + problem pairs shown in the post-onboarding modal. Falls back to capabilities if absent. */
     valueProps?: { title: string; problem: string }[]
-    /** Mascot illustration for the post-onboarding modal. Falls back to SupermanHog if absent. */
+    /** Mascot illustration for the post-onboarding modal. Falls back to SupermanScript if absent. */
     mascot?: React.ComponentType<{ className?: string }>
 }
 
@@ -7348,7 +7348,7 @@ export type InsightsFunctionIconResponse = {
     url: string
 }
 
-export enum HogWatcherState {
+export enum ScriptWatcherState {
     healthy = 1,
     overflowed = 2,
     disabled = 3,
@@ -7357,7 +7357,7 @@ export enum HogWatcherState {
 }
 
 export type InsightsFunctionStatus = {
-    state: HogWatcherState
+    state: ScriptWatcherState
     tokens: number
 }
 

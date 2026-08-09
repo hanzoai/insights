@@ -112,7 +112,7 @@ test.describe('Workflows hidden built-in templates load', () => {
                 if (!csrfToken) {
                     throw new Error('CSRF cookie missing')
                 }
-                const response = await fetch(`/v1/environments/${teamId}/hog_flows/`, {
+                const response = await fetch(`/v1/environments/${teamId}/script_flows/`, {
                     method: 'POST',
                     credentials: 'include',
                     headers: {
@@ -122,7 +122,7 @@ test.describe('Workflows hidden built-in templates load', () => {
                     body: JSON.stringify(payload),
                 })
                 if (!response.ok) {
-                    throw new Error(`hog_flows POST failed: ${response.status} ${await response.text()}`)
+                    throw new Error(`script_flows POST failed: ${response.status} ${await response.text()}`)
                 }
                 const data = await response.json()
                 return data.id as string

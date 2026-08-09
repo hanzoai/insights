@@ -515,7 +515,7 @@ export const INSIGHT_TYPE_URLS: Record<InsightType | string, string> = {
     [InsightType.PATHS]: urls.insightNew({ type: InsightType.PATHS }),
     [InsightType.WEB_ANALYTICS]: urls.insightNew({ type: InsightType.WEB_ANALYTICS }),
     JSON: urls.insightNew({ query: examples.EventsTableFull }),
-    HOG: urls.insightNew({ query: examples.Hoggonacci }),
+    HOG: urls.insightNew({ query: examples.Scriptgonacci }),
     SQL: urls.sqlEditor({ query: (examples.InsightsQLForDataVisualization as InsightsQLQuery)['query'] }),
 }
 
@@ -828,7 +828,7 @@ export function getInsightIconTypeFromQuery(query: any): FileSystemIconType {
         [NodeKind.PathsQuery]: 'insight/paths',
         [NodeKind.StickinessQuery]: 'insight/stickiness',
         [NodeKind.LifecycleQuery]: 'insight/lifecycle',
-        [NodeKind.HogQuery]: 'insight/script',
+        [NodeKind.ScriptQuery]: 'insight/script',
         [NodeKind.InsightsQLQuery]: 'insight/script',
         [NodeKind.DataVisualizationNode]: 'insight/script',
         [NodeKind.DataTableNode]: 'insight/script',

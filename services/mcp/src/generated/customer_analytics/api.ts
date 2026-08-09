@@ -429,7 +429,7 @@ export const AnnouncementsCreateBody = /* @__PURE__ */ zod.object({
     channels: zod
         .array(zod.string())
         .describe(
-            'Slack channel IDs to send to. Each must be a channel the SupportHog bot is a member of; names are resolved server-side.'
+            'Slack channel IDs to send to. Each must be a channel the Support bot is a member of; names are resolved server-side.'
         ),
 })
 
@@ -443,7 +443,7 @@ export const AnnouncementsRetrieveParams = /* @__PURE__ */ zod.object({
 })
 
 /**
- * Slack channels the SupportHog bot can post to, labeled by customer account name.
+ * Slack channels the Support bot can post to, labeled by customer account name.
  */
 export const AnnouncementsChannelsListParams = /* @__PURE__ */ zod.object({
     project_id: zod

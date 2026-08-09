@@ -163,7 +163,7 @@ const getItemTypeDisplayName = (type: string | null | undefined): string | null 
         logs: 'Logs',
         alert: 'Alert',
         folder: 'Folder',
-        hog_flow: 'Workflow',
+        script_flow: 'Workflow',
     }
     return fallbackDisplayNames[type] ?? null
 }
@@ -176,7 +176,7 @@ const getIconForItem = (item: SearchItem): ReactNode => {
     // Normalize types for icon lookup
     if (itemType === 'person') {
         itemType = 'persons'
-    } else if (itemType === 'hog_flow') {
+    } else if (itemType === 'script_flow') {
         itemType = 'workflows'
     }
     if (itemType) {

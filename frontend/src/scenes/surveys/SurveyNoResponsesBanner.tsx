@@ -3,11 +3,11 @@ import { ComponentType } from 'react'
 
 import { Button } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
-import { WavingHog } from 'lib/components/mascots'
+import { pngMascot } from 'lib/brand/mascot'
+import { WavingScript } from 'lib/components/mascots'
 
-const MascotMagnifyingGlass = pngHoggie()
-const MascotShocked = pngHoggie()
+const MascotMagnifyingGlass = pngMascot()
+const MascotShocked = pngMascot()
 
 interface Props {
     type: 'question' | 'survey'
@@ -27,8 +27,8 @@ interface BannerConfig {
     description: string
     bubbleText: string
     Script: ComponentType<{ className?: string }>
-    hogDuration: number
-    hogAnimation: Record<string, number[]>
+    scriptDuration: number
+    scriptAnimation: Record<string, number[]>
 }
 
 function getBannerConfig(
@@ -43,17 +43,17 @@ function getBannerConfig(
                 description: 'Try adjusting your filters to see matching responses.',
                 bubbleText: getFilterBubbleText(activeFilterTypes),
                 Script: MascotMagnifyingGlass,
-                hogDuration: 1.2,
-                hogAnimation: { x: [0, -24, 0, 24, 0], y: [0, -3, 0, -3, 0], rotate: [0, -2, 0, 2, 0] },
+                scriptDuration: 1.2,
+                scriptAnimation: { x: [0, -24, 0, 24, 0], y: [0, -3, 0, -3, 0], rotate: [0, -2, 0, 2, 0] },
             }
         case 'live':
             return {
                 title: 'Your survey is live. Results will show up soon.',
                 description: 'As soon as people answer this survey, you will see results here. Check back soon.',
                 bubbleText: 'Waiting for first replies',
-                Script: WavingHog,
-                hogDuration: 1.1,
-                hogAnimation: { y: [0, -5, 0, -3, 0], rotate: [0, -4, 0, 2, 0] },
+                Script: WavingScript,
+                scriptDuration: 1.1,
+                scriptAnimation: { y: [0, -5, 0, -3, 0], rotate: [0, -4, 0, 2, 0] },
             }
         case 'empty':
             return {
@@ -61,8 +61,8 @@ function getBannerConfig(
                 description: `Once people start responding to your ${type}, their answers will appear here.`,
                 bubbleText: 'No answers collected yet',
                 Script: MascotShocked,
-                hogDuration: 1.1,
-                hogAnimation: { y: [0, -5, 0, -3, 0], rotate: [0, -4, 0, 2, 0] },
+                scriptDuration: 1.1,
+                scriptAnimation: { y: [0, -5, 0, -3, 0], rotate: [0, -4, 0, 2, 0] },
             }
     }
 }
@@ -89,16 +89,16 @@ export function SurveyNoResponsesBanner({
     activeFilterTypes,
 }: Props): JSX.Element {
     const variant: BannerVariant = isFiltered ? 'filtered' : type === 'survey' ? 'live' : 'empty'
-    const { title, description, bubbleText, Script, hogDuration, hogAnimation } = getBannerConfig(
+    const { title, description, bubbleText, Script, scriptDuration, scriptAnimation } = getBannerConfig(
         variant,
         type,
         activeFilterTypes
     )
 
-    const baseTransition = { duration: hogDuration, ease: 'easeInOut' }
+    const baseTransition = { duration: scriptDuration, ease: 'easeInOut' }
     const delayedTransition = { ...baseTransition, delay: 0.1 }
     const yTransition = isFiltered ? baseTransition : delayedTransition
-    const hogTransition = {
+    const scriptTransition = {
         ...(isFiltered ? { x: baseTransition } : {}),
         y: yTransition,
         rotate: yTransition,
@@ -114,7 +114,7 @@ export function SurveyNoResponsesBanner({
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{
                         duration: 0.3,
-                        delay: hogDuration + 0.2,
+                        delay: scriptDuration + 0.2,
                         ease: 'easeOut',
                     }}
                 >
@@ -134,8 +134,8 @@ export function SurveyNoResponsesBanner({
                     className="absolute bottom-1 left-1/2"
                     style={{ marginLeft: '-4.5rem' }}
                     initial={{ x: 0, y: 0, rotate: 0, opacity: 1 }}
-                    animate={hogAnimation}
-                    transition={hogTransition as React.ComponentProps<typeof motion.div>['transition']}
+                    animate={scriptAnimation}
+                    transition={scriptTransition as React.ComponentProps<typeof motion.div>['transition']}
                 >
                     <Script className="size-36 block" />
                 </motion.div>

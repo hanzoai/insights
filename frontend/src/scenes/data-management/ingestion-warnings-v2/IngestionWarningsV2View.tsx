@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { Button, Input, SegmentedButton, Tag } from '@hanzo/elements'
 import { IconOpenSidebar, IconRefresh } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { JSONViewer } from 'lib/components/JSONViewer'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
@@ -35,7 +35,7 @@ import {
     ingestionWarningsV2Logic,
 } from './ingestionWarningsV2Logic'
 
-const MascotReadingIsMagic = pngHoggie()
+const MascotReadingIsMagic = pngMascot()
 
 const SEVERITY_TO_TAG_TYPE: Record<string, TagType> = {
     error: 'danger',
@@ -196,7 +196,7 @@ export function IngestionWarningsV2View(): JSX.Element {
                     titleOverride={`Nice! No ingestion warnings in the past ${filters.window}`}
                     description="Your incoming events look clean. If we detect any issues with your data, we'll show them here."
                     docsURL="https://hanzo.ai/docs/data/data-management#ingestion-warnings"
-                    customHog={MascotReadingIsMagic}
+                    customScript={MascotReadingIsMagic}
                     actionElementOverride={
                         <Button
                             type="primary"

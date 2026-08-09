@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { IconTrash } from '@hanzo/icons'
 import { Button, Divider, Select, Switch, Tag } from '@hanzo/elements'
 
-import { SupermanHog } from 'lib/components/mascots'
+import { SupermanScript } from 'lib/components/mascots'
 import { Modal } from 'lib/elements/Modal'
 import { preflightLogic } from 'lib/logic/preflightLogic'
 import { maxGlobalLogic } from 'scenes/max/maxGlobalLogic'
@@ -64,7 +64,7 @@ function SuperpowersContent(): JSX.Element {
         <div className="space-y-4">
             {/* Hero section */}
             <div className="flex items-center gap-4 -mt-2">
-                <SupermanHog className="w-24 h-24 shrink-0" />
+                <SupermanScript className="w-24 h-24 shrink-0" />
                 <div>
                     <h2 className="text-xl font-bold mb-1">Super Script Powers</h2>
                     <p className="text-secondary text-sm">

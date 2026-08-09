@@ -5,7 +5,7 @@ import { useEffect } from 'react'
 import { Banner } from '@hanzo/elements'
 
 import { approvalsGateLogic } from 'lib/approvals/approvalsGateLogic'
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { bannerLogic } from 'lib/elements/Banner/bannerLogic'
 import { Button } from 'lib/elements/Button'
 import { organizationLogic } from 'scenes/organizationLogic'
@@ -14,7 +14,7 @@ import { userLogic } from 'scenes/userLogic'
 
 import { AvailableFeature } from '~/types'
 
-const MascotJudge = pngHoggie()
+const MascotJudge = pngMascot()
 
 const DISMISS_KEY = 'feature-flags-approvals-promo'
 

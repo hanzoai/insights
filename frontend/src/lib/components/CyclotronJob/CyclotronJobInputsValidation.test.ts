@@ -400,13 +400,13 @@ describe('CyclotronJobInputsValidation', () => {
                     name: 'script field, bare global path → suggests single braces',
                     value: 'person.properties.email',
                     templating: 'script',
-                    expected: W.unbracedExpressionInHogField('person.properties.email'),
+                    expected: W.unbracedExpressionInScriptField('person.properties.email'),
                 },
                 {
                     name: 'templating unset (defaults to script), bare global path',
                     value: 'person.properties.email',
                     templating: undefined,
-                    expected: W.unbracedExpressionInHogField('person.properties.email'),
+                    expected: W.unbracedExpressionInScriptField('person.properties.email'),
                 },
                 {
                     name: 'liquid field, bare global path → suggests double braces',
@@ -419,43 +419,43 @@ describe('CyclotronJobInputsValidation', () => {
                     name: 'script field, liquid double-brace syntax',
                     value: '{{ person.properties.email }}',
                     templating: 'script',
-                    expected: W.liquidSyntaxInHogField,
+                    expected: W.liquidSyntaxInScriptField,
                 },
                 {
                     name: 'script field, liquid pipe filter without a global reference',
                     value: '{{ user.name | upcase }}',
                     templating: 'script',
-                    expected: W.liquidSyntaxInHogField,
+                    expected: W.liquidSyntaxInScriptField,
                 },
                 {
                     name: 'script field, liquid pipe filter embedded in literal text',
                     value: 'Cart abandoned by {{ email | default: "someone" }}',
                     templating: 'script',
-                    expected: W.liquidSyntaxInHogField,
+                    expected: W.liquidSyntaxInScriptField,
                 },
                 {
                     name: 'script field, liquid tag syntax',
                     value: '{% if abandoned %}Reminder{% endif %}',
                     templating: 'script',
-                    expected: W.liquidSyntaxInHogField,
+                    expected: W.liquidSyntaxInScriptField,
                 },
                 {
                     name: 'liquid field, script single-brace syntax referencing a global',
                     value: '{person.properties.email}',
                     templating: 'liquid',
-                    expected: W.hogSyntaxInLiquidField,
+                    expected: W.scriptSyntaxInLiquidField,
                 },
                 {
                     name: 'liquid field, embedded script template in literal text',
                     value: 'email: {person.properties.email}',
                     templating: 'liquid',
-                    expected: W.hogSyntaxInLiquidField,
+                    expected: W.scriptSyntaxInLiquidField,
                 },
                 {
                     name: 'liquid field, real script reference inside a JSON-like value',
                     value: '{"id": {person.properties.email}}',
                     templating: 'liquid',
-                    expected: W.hogSyntaxInLiquidField,
+                    expected: W.scriptSyntaxInLiquidField,
                 },
                 // Valid values — no warning.
                 {
@@ -551,7 +551,7 @@ describe('CyclotronJobInputsValidation', () => {
                 )
 
                 expect(result.warnings.attributes).toBe(
-                    TEMPLATING_MISMATCH_WARNINGS.unbracedExpressionInHogField('person.properties.email')
+                    TEMPLATING_MISMATCH_WARNINGS.unbracedExpressionInScriptField('person.properties.email')
                 )
             })
         })

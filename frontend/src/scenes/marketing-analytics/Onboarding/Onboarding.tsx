@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { Button, Card, Link } from '@hanzo/elements'
 import { IconArrowRight } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
@@ -20,7 +20,7 @@ import { AddSourceStep } from './AddSourceStep'
 import { MarketingOnboardingStep, marketingOnboardingLogic } from './marketingOnboardingLogic'
 import { MarketingWizardStepper } from './MarketingWizardStepper'
 
-const MascotMoney = pngHoggie()
+const MascotMoney = pngMascot()
 
 interface OnboardingProps {
     completeOnboarding: () => void
@@ -107,7 +107,7 @@ function WelcomeStep({ onContinue }: { onContinue: () => void }): JSX.Element {
             }
             isEmpty={true}
             docsURL="https://hanzo.ai/docs/web-analytics/marketing-analytics"
-            customHog={MascotMoney}
+            customScript={MascotMoney}
         />
     )
 }

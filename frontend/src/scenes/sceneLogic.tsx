@@ -110,7 +110,7 @@ const pathPrefixesOnboardingNotRequiredFor = [
     '/instance',
     urls.moveToInsightsCloud(),
     urls.unsubscribe(),
-    urls.debugHog(),
+    urls.debugScript(),
     urls.debugQuery(),
     urls.activity(),
     // /integrations/* — OAuth + third-party round-trips: must complete (callback/landing effects)
@@ -131,9 +131,9 @@ const pathPrefixesOnboardingNotRequiredFor = [
     '/agentic',
     // /cli/authorize, /cli/live (CLI auth round-trip).
     '/cli',
-    // /stamphog/install/callback — GitHub App install round-trip carrying a one-time OAuth code;
+    // /stamp/install/callback — GitHub App install round-trip carrying a one-time OAuth code;
     // if /onboarding swallows it the installation completes on GitHub but no repos ever connect.
-    '/stamphog/install/callback',
+    '/stamp/install/callback',
     '/startups',
     '/coupons',
     '/legal',

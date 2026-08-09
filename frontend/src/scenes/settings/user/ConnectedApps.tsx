@@ -4,13 +4,13 @@ import { useState } from 'react'
 
 import { Button, Dialog, Table, Tag } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { IconKey } from 'lib/elements/icons'
 import { humanFriendlyDetailedTime } from 'lib/utils/datetime'
 
 import { connectedAppsLogic, ConnectedApp } from './connectedAppsLogic'
 
-const MascotMagnifyingGlass = pngHoggie()
+const MascotMagnifyingGlass = pngMascot()
 
 function sortScopesWriteFirst(scopes: string[]): string[] {
     return [...scopes].sort((a, b) => {

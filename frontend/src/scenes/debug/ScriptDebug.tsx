@@ -13,17 +13,17 @@ import { CodeEditor } from 'lib/monaco/CodeEditor'
 import { DataNodeLogicProps, dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
 import { ElapsedTime } from '~/queries/nodes/DataNode/ElapsedTime'
 import { Reload } from '~/queries/nodes/DataNode/Reload'
-import { InsightsQLQueryModifiers, HogQuery, HogQueryResponse } from '~/queries/schema/schema-general'
+import { InsightsQLQueryModifiers, ScriptQuery, ScriptQueryResponse } from '~/queries/schema/schema-general'
 
-export interface HogQueryEditorProps {
-    query: HogQuery
-    setQuery?: (query: HogQuery) => void
+export interface ScriptQueryEditorProps {
+    query: ScriptQuery
+    setQuery?: (query: ScriptQuery) => void
     queryKey?: string
 }
 
 let uniqueNode = 0
 
-export function HogQueryEditor(props: HogQueryEditorProps): JSX.Element {
+export function ScriptQueryEditor(props: ScriptQueryEditorProps): JSX.Element {
     // Using useRef, not useState, as we don't want to reload the component when this changes.
     const monacoDisposables = useRef([] as IDisposable[])
     useOnMountEffect(() => {
@@ -105,16 +105,16 @@ export function HogQueryEditor(props: HogQueryEditorProps): JSX.Element {
     )
 }
 
-interface HogDebugProps {
+interface ScriptDebugProps {
     queryKey: string
-    query: HogQuery
-    setQuery: (query: HogQuery) => void
+    query: ScriptQuery
+    setQuery: (query: ScriptQuery) => void
     debug?: boolean
     modifiers?: InsightsQLQueryModifiers
     attachTo?: LogicWrapper | BuiltLogic
 }
 
-export function HogDebug({ query, setQuery, queryKey, debug, modifiers, attachTo }: HogDebugProps): JSX.Element {
+export function ScriptDebug({ query, setQuery, queryKey, debug, modifiers, attachTo }: ScriptDebugProps): JSX.Element {
     const dataNodeLogicProps: DataNodeLogicProps = {
         query,
         key: queryKey,
@@ -123,7 +123,7 @@ export function HogDebug({ query, setQuery, queryKey, debug, modifiers, attachTo
     }
     const { dataLoading, response: _response } = useValues(dataNodeLogic(dataNodeLogicProps))
     useAttachedLogic(dataNodeLogic(dataNodeLogicProps), attachTo)
-    const response = _response as HogQueryResponse | null
+    const response = _response as ScriptQueryResponse | null
     const [tab, setTab] = useState('results' as 'results' | 'bytecode' | 'coloredBytecode' | 'stdout')
 
     return (
@@ -131,7 +131,7 @@ export function HogDebug({ query, setQuery, queryKey, debug, modifiers, attachTo
             <div className="deprecated-space-y-2">
                 {setQuery ? (
                     <>
-                        <HogQueryEditor query={query} setQuery={setQuery} queryKey={queryKey} />
+                        <ScriptQueryEditor query={query} setQuery={setQuery} queryKey={queryKey} />
                         <Divider className="my-4" />
                         <div className="flex gap-2">
                             <Reload />

@@ -140,7 +140,7 @@ describe('Modifiers', () => {
             <Provider>
                 <Modifiers
                     setQuery={setQuery}
-                    query={{ kind: NodeKind.HogQuery, code: 'return 1', modifiers: {} }}
+                    query={{ kind: NodeKind.ScriptQuery, code: 'return 1', modifiers: {} }}
                     response={null}
                 />
             </Provider>
