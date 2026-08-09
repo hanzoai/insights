@@ -4,8 +4,8 @@ import { AppMetricsOutput, LOG_ENTRIES_OUTPUT, LogEntriesOutput } from '~/common
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
 import { AppMetricsAggregator } from '~/common/services/app-metrics-aggregator'
 import { safeDatastoreString } from '~/common/utils/db/utils'
-import { logger } from '~/common/utils/logger'
 import { captureException } from '~/common/utils/insights'
+import { logger } from '~/common/utils/logger'
 
 import {
     CyclotronJobInvocationInsightsFlow,

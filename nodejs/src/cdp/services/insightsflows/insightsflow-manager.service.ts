@@ -1,11 +1,11 @@
 import { Counter } from 'prom-client'
 
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { InsightsFlow } from '~/cdp/schema/insightsflow'
 import { PostgresRouter, PostgresUse } from '~/common/utils/db/postgres'
+import { captureException } from '~/common/utils/insights'
 import { parseJSON } from '~/common/utils/json-parse'
 import { DEFAULT_LOADER_RETRY, LazyLoader } from '~/common/utils/lazy-loader'
 import { logger } from '~/common/utils/logger'
-import { captureException } from '~/common/utils/insights'
 import { PubSub } from '~/common/utils/pubsub'
 import { Team } from '~/types'
 
@@ -224,9 +224,13 @@ export class InsightsFlowManagerService {
                 // The blob is dropped below and the flow runs without its secrets (fail-open, matching
                 // InsightsFunctionManagerService). The counter makes the failure alertable - the most likely
                 // cause is Fernet key skew between Django and the workers.
-                logger.warn('[InsightsFlowManager]', 'Could not decrypt encrypted inputs - flow will run without them', {
-                    error: error instanceof Error ? error.message : 'Unknown error',
-                })
+                logger.warn(
+                    '[InsightsFlowManager]',
+                    'Could not decrypt encrypted inputs - flow will run without them',
+                    {
+                        error: error instanceof Error ? error.message : 'Unknown error',
+                    }
+                )
                 counterEncryptedInputsDecryptFailed.inc()
                 captureException(error)
             }

@@ -3,8 +3,8 @@ import { Counter } from 'prom-client'
 
 import { InternalFetchService } from '~/common/services/internal-fetch'
 import { instrumentFn } from '~/common/tracing/tracing-utils'
-import { logger, serializeError } from '~/common/utils/logger'
 import { captureException } from '~/common/utils/insights'
+import { logger, serializeError } from '~/common/utils/logger'
 import { UUIDT } from '~/common/utils/utils'
 
 import { HealthCheckResult, HealthCheckResultError, HealthCheckResultOk, PluginsServerConfig, Team } from '../../types'
@@ -15,7 +15,7 @@ import {
     deserializeResolverState,
     serializeResolverState,
 } from '../services/insightsflows/batch-resolver.types'
-import { InsightsFlowBatchPersonQueryService } from '../services/insightsflows/hogflow-batch-person-query.service'
+import { InsightsFlowBatchPersonQueryService } from '../services/insightsflows/insightsflow-batch-person-query.service'
 import { invocationToV2JobInit } from '../services/job-queue/job-queue-postgres-v2'
 import { CyclotronJobInvocation } from '../types'
 import {
@@ -186,7 +186,9 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
                 hogFlowId: state.hogFlowId,
                 batchJobId: state.batchJobId,
             })
-            counterBatchInsightsFlowTriggerFailed.labels({ hog_flow_id: state.hogFlowId, reason: 'missing_entity' }).inc()
+            counterBatchInsightsFlowTriggerFailed
+                .labels({ hog_flow_id: state.hogFlowId, reason: 'missing_entity' })
+                .inc()
             await this.transitionToFailedTerminal(job, state, 'Workflow or team was deleted mid-run')
             return
         }

@@ -1,7 +1,7 @@
 import { createMockJobQueue } from '../../../tests/helpers/mocks/job-queue.mock'
 import { mockProducerObserver } from '../../../tests/helpers/mocks/producer.mock'
 
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { InsightsFlow } from '~/cdp/schema/insightsflow'
 import { GroupReadRepository } from '~/common/groups/repositories/group-repository.interface'
 import { closeHub, createHub } from '~/common/utils/db/hub'
 
@@ -15,7 +15,7 @@ import {
     updateOrganizationAvailableFeatures,
 } from '../../../tests/helpers/sql'
 import { Hub, Team } from '../../types'
-import { FixtureInsightsFlowBuilder } from '../_tests/builders/hogflow.builder'
+import { FixtureInsightsFlowBuilder } from '../_tests/builders/insightsflow.builder'
 import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
     insertInsightsFunction as _insertInsightsFunction,
@@ -154,7 +154,10 @@ describe('CdpEventsConsumer', () => {
                 })
             })
 
-            const matchInvocation = (insightsFunction: InsightsFunctionType, globals: InsightsFunctionInvocationGlobals) => {
+            const matchInvocation = (
+                insightsFunction: InsightsFunctionType,
+                globals: InsightsFunctionInvocationGlobals
+            ) => {
                 return {
                     insightsFunction: {
                         id: insightsFunction.id,
@@ -698,8 +701,7 @@ describe('script flow processing', () => {
 
             await (processor as any)['hogFlowPipeline']['buildInvocations']([globals])
 
-            const producedMetrics =
-                mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
+            const producedMetrics = mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
             expect(producedMetrics).not.toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({
@@ -792,8 +794,7 @@ describe('script flow processing', () => {
             await processor['insightsFunctionMonitoringService'].flush()
 
             // Should have queued a quota limited metric
-            const producedMetrics =
-                mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
+            const producedMetrics = mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
             expect(producedMetrics).toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({

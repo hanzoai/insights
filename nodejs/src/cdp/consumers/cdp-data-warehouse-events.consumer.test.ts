@@ -1,13 +1,13 @@
 import { createMockJobQueue } from '../../../tests/helpers/mocks/job-queue.mock'
 import { mockProducerObserver } from '../../../tests/helpers/mocks/producer.mock'
 
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { InsightsFlow } from '~/cdp/schema/insightsflow'
 import { closeHub, createHub } from '~/common/utils/db/hub'
 
 import { createCdpConsumerDeps } from '../../../tests/helpers/cdp'
 import { createOrganization, createTeam, getFirstTeam, getTeam, resetTestDatabase } from '../../../tests/helpers/sql'
 import { Hub, Team } from '../../types'
-import { FixtureInsightsFlowBuilder } from '../_tests/builders/hogflow.builder'
+import { FixtureInsightsFlowBuilder } from '../_tests/builders/insightsflow.builder'
 import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../_tests/examples'
 import { insertInsightsFunction as _insertInsightsFunction, createKafkaMessage } from '../_tests/fixtures'
 import { insertInsightsFlow as _insertInsightsFlow } from '../_tests/fixtures-insightsflows'
@@ -296,38 +296,36 @@ describe('CdpDatawarehouseEventsConsumer', () => {
 
             expect(invocations).toHaveLength(1)
 
-            expect(mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')).toMatchObject(
-                [
-                    {
-                        key: null,
-                        topic: 'datastore_app_metrics2_test',
-                        value: {
-                            app_source: 'insights_function',
-                            app_source_id: fnFetchNoFilters.id,
-                            count: 1,
-                            metric_kind: 'other',
-                            metric_name: 'triggered',
-                            team_id: team.id,
-                            timestamp: expect.any(String),
-                        },
+            expect(mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')).toMatchObject([
+                {
+                    key: null,
+                    topic: 'datastore_app_metrics2_test',
+                    value: {
+                        app_source: 'insights_function',
+                        app_source_id: fnFetchNoFilters.id,
+                        count: 1,
+                        metric_kind: 'other',
+                        metric_name: 'triggered',
+                        team_id: team.id,
+                        timestamp: expect.any(String),
                     },
-                    // Billing is per-event, not per-destination
-                    {
-                        key: null,
-                        topic: 'datastore_app_metrics2_test',
-                        value: {
-                            app_source: 'insights_function',
-                            app_source_id: '_event_trigger',
-                            instance_id: globals.event.uuid,
-                            count: 1,
-                            metric_kind: 'billing',
-                            metric_name: 'billable_invocation',
-                            team_id: team.id,
-                            timestamp: expect.any(String),
-                        },
+                },
+                // Billing is per-event, not per-destination
+                {
+                    key: null,
+                    topic: 'datastore_app_metrics2_test',
+                    value: {
+                        app_source: 'insights_function',
+                        app_source_id: '_event_trigger',
+                        instance_id: globals.event.uuid,
+                        count: 1,
+                        metric_kind: 'billing',
+                        metric_name: 'billable_invocation',
+                        team_id: team.id,
+                        timestamp: expect.any(String),
                     },
-                ]
-            )
+                },
+            ])
         })
 
         it('should queue a running lifecycle row for each invocation so the runs UI shows in-flight work', async () => {

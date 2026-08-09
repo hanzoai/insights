@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { InsightsFlow } from '~/cdp/schema/insightsflow'
 import type { ModifiedRequest } from '~/common/api/router'
 import { instrumented } from '~/common/tracing/tracing-utils'
 import { logger } from '~/common/utils/logger'
@@ -8,8 +8,8 @@ import { PromiseScheduler } from '~/common/utils/promise-scheduler'
 import { UUID, UUIDT } from '~/common/utils/utils'
 
 import { HealthCheckResult, HealthCheckResultOk, PluginsServerConfig } from '../../types'
-import { createInsightsFlowInvocation } from '../services/insightsflows/hogflow-executor.service'
-import { actionIdForLogging } from '../services/insightsflows/hogflow-utils'
+import { createInsightsFlowInvocation } from '../services/insightsflows/insightsflow-executor.service'
+import { actionIdForLogging } from '../services/insightsflows/insightsflow-utils'
 import { JobQueue } from '../services/job-queue/job-queue.interface'
 import { HogWatcherFunctionState, HogWatcherState } from '../services/monitoring/script-watcher.service'
 import {
@@ -100,7 +100,9 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<PluginsServerConf
         this.hogflowQueue = jobQueues.hogflowQueue
     }
 
-    public async getWebhook(webhookId: string): Promise<{ hogFlow?: InsightsFlow; insightsFunction: InsightsFunctionType } | null> {
+    public async getWebhook(
+        webhookId: string
+    ): Promise<{ hogFlow?: InsightsFlow; insightsFunction: InsightsFunctionType } | null> {
         if (!UUID.validateString(webhookId, false)) {
             return null
         }
@@ -111,7 +113,11 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<PluginsServerConf
             return { insightsFunction }
         }
 
-        if (insightsFunction?.type === 'warehouse_source_webhook' && insightsFunction.enabled && !insightsFunction.deleted) {
+        if (
+            insightsFunction?.type === 'warehouse_source_webhook' &&
+            insightsFunction.enabled &&
+            !insightsFunction.deleted
+        ) {
             const templateId = insightsFunction.template_id ?? 'template-warehouse-source-default'
             const template = await this.insightsFunctionTemplateManager.getInsightsFunctionTemplate(templateId)
             if (template) {
@@ -137,7 +143,10 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<PluginsServerConf
         return null
     }
 
-    private buildRequestGlobals(insightsFunction: InsightsFunctionType, req: ModifiedRequest): InsightsFunctionInvocationGlobals {
+    private buildRequestGlobals(
+        insightsFunction: InsightsFunctionType,
+        req: ModifiedRequest
+    ): InsightsFunctionInvocationGlobals {
         const body: Record<string, any> = req.body
 
         const ipValue = getFirstHeaderValue(req.headers['x-forwarded-for']) || req.socket.remoteAddress || req.ip
@@ -272,7 +281,8 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<PluginsServerConf
                 // For workflows, the captured event is only used as trigger data and not to actually capture the event
                 // Remove the execution count property to allow workflow actions to capture events without
                 // triggering the infinite loop protection.
-                const { $insights_function_execution_count, ...cleanProperties } = capturedInsightsEvent.properties || {}
+                const { $insights_function_execution_count, ...cleanProperties } =
+                    capturedInsightsEvent.properties || {}
 
                 // Invoke the hogflow
                 const triggerGlobals: InsightsFunctionInvocationGlobals = {

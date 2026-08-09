@@ -29,7 +29,12 @@ class TestInsightsQLDefinitionDirectDispatch(BaseTest):
     @parameterized.expand(
         [
             ("synced_datastore", ExternalDataSourceType.DATASTORE, "warehouse", InsightsQLDataWarehouseTable),
-            ("synced_datastore_cloud", ExternalDataSourceType.DATASTORECLOUD, "warehouse", InsightsQLDataWarehouseTable),
+            (
+                "synced_datastore_cloud",
+                ExternalDataSourceType.DATASTORECLOUD,
+                "warehouse",
+                InsightsQLDataWarehouseTable,
+            ),
             ("direct_datastore", ExternalDataSourceType.DATASTORE, "direct", DirectDatastoreTable),
         ]
     )
@@ -185,7 +190,7 @@ class TestRunChdbQuery:
         assert DataWarehouseTable()._is_suppressed_chdb_error(exc_info.value)
 
 
-class TestGetHogqlFieldForColumn(SimpleTestCase):
+class TestGetInsightsqlFieldForColumn(SimpleTestCase):
     @parameterized.expand(
         [
             # Old-style metadata is just the Datastore type string, resolved through a mapping

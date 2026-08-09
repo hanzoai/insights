@@ -69,7 +69,7 @@ export function TaxonomicBreakdownFilter({
         hasGlobalBreakdownOptions,
     } = useValues(taxonomicBreakdownFilterLogic(logicProps))
     const { toggleBreakdownOptions } = useActions(taxonomicBreakdownFilterLogic(logicProps))
-    const { hogQL, canEditInSqlEditor } = useValues(insightDataLogic(insightProps))
+    const { insightsQL, canEditInSqlEditor } = useValues(insightDataLogic(insightProps))
 
     const breakdownDocsUrl =
         taxonomicBreakdownType === TaxonomicFilterGroupType.CohortsWithAllUsers
@@ -96,7 +96,7 @@ export function TaxonomicBreakdownFilter({
                     <span>
                         Need more flexibility?{' '}
                         <Link
-                            to={urls.sqlEditor({ query: hogQL ?? undefined })}
+                            to={urls.sqlEditor({ query: insightsQL ?? undefined })}
                             data-attr="breakdown-limit-edit-sql"
                             className="font-semibold inline-flex items-center gap-1"
                         >

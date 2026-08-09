@@ -26,12 +26,12 @@ from insightscli_commands.doctor import (
     _format_kv_block,
     _generated_config_path,
     _get_process_cwds,
+    _insights_shaped_projects,
     _is_excluded,
     _normalize_arch,
     _phrocs_info,
     _phrocs_runtime_pairs,
     _phrocs_socket_path,
-    _insights_shaped_projects,
     _probe_command_imports,
     _run_ok,
     _sanitize_compose_name,
@@ -361,12 +361,12 @@ def test_phrocs_info_flags_broken_binary(monkeypatch: pytest.MonkeyPatch) -> Non
 
 
 def test_generated_config_path_honors_override(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    monkeypatch.setenv("HOGLI_MPROCS_PATH", "/custom/mprocs.yaml")
+    monkeypatch.setenv("INSIGHTSCLI_MPROCS_PATH", "/custom/mprocs.yaml")
     assert _generated_config_path(tmp_path) == Path("/custom/mprocs.yaml")
 
 
 def test_generated_config_path_default(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    monkeypatch.delenv("HOGLI_MPROCS_PATH", raising=False)
+    monkeypatch.delenv("INSIGHTSCLI_MPROCS_PATH", raising=False)
     assert _generated_config_path(tmp_path) == tmp_path / ".insights" / ".generated" / "mprocs.yaml"
 
 

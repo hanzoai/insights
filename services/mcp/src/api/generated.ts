@@ -967,7 +967,7 @@ export namespace Schemas {
       LogEntry: 'log_entry',
       Behavioral: 'behavioral',
       Session: 'session',
-      Hogql: 'insightsql',
+      Insightsql: 'insightsql',
       DataWarehouse: 'data_warehouse',
       DataWarehousePersonProperty: 'data_warehouse_person_property',
       ErrorTrackingIssue: 'error_tracking_issue',
@@ -1771,7 +1771,7 @@ export namespace Schemas {
       Avg: 'avg',
       Dau: 'dau',
       UniqueGroup: 'unique_group',
-      Hogql: 'insightsql',
+      Insightsql: 'insightsql',
     } as const;
 
     export type CalendarHeatmapMathType = typeof CalendarHeatmapMathType[keyof typeof CalendarHeatmapMathType];
@@ -2478,7 +2478,7 @@ export namespace Schemas {
       EventMetadata: 'event_metadata',
       Group: 'group',
       Session: 'session',
-      Hogql: 'insightsql',
+      Insightsql: 'insightsql',
       DataWarehouse: 'data_warehouse',
       DataWarehousePersonProperty: 'data_warehouse_person_property',
       RevenueAnalytics: 'revenue_analytics',
@@ -2493,7 +2493,7 @@ export namespace Schemas {
       EventMetadata: 'event_metadata',
       Group: 'group',
       Session: 'session',
-      Hogql: 'insightsql',
+      Insightsql: 'insightsql',
       Cohort: 'cohort',
       RevenueAnalytics: 'revenue_analytics',
       DataWarehouse: 'data_warehouse',
@@ -3449,7 +3449,7 @@ export namespace Schemas {
       Pageview: '$pageview',
       Screen: '$screen',
       CustomEvent: 'custom_event',
-      Hogql: 'insightsql',
+      Insightsql: 'insightsql',
     } as const;
 
     export interface PathCleaningFilter {
@@ -5971,7 +5971,7 @@ export namespace Schemas {
       Dashboards: 'dashboards',
       NameGroups: 'name_groups',
       SessionProperties: 'session_properties',
-      HogqlExpression: 'insightsql_expression',
+      InsightsqlExpression: 'insightsql_expression',
       Notebooks: 'notebooks',
       LogEntries: 'log_entries',
       ErrorTrackingIssues: 'error_tracking_issues',
@@ -10486,7 +10486,7 @@ export namespace Schemas {
      * * `events` - Events
      * * `persons` - Persons
      * * `sessions` - Sessions
-     * * `insightsql` - Hogql
+     * * `insightsql` - Insightsql
      */
     export type ModelEnum = typeof ModelEnum[keyof typeof ModelEnum];
 
@@ -10495,7 +10495,7 @@ export namespace Schemas {
       Events: 'events',
       Persons: 'persons',
       Sessions: 'sessions',
-      Hogql: 'insightsql',
+      Insightsql: 'insightsql',
     } as const;
 
     /**
@@ -10877,7 +10877,7 @@ export namespace Schemas {
        * * `events` - Events
        * * `persons` - Persons
        * * `sessions` - Sessions
-       * * `insightsql` - Hogql */
+       * * `insightsql` - Insightsql */
       model?: ModelEnum | BlankEnum | null;
       /** Destination configuration (type, config, and optional integration). */
       destination: BatchExportDestination;
@@ -11725,7 +11725,7 @@ export namespace Schemas {
        * * `events` - Events
        * * `persons` - Persons
        * * `sessions` - Sessions
-       * * `insightsql` - Hogql */
+       * * `insightsql` - Insightsql */
       model?: ModelEnum;
       /** Destination configuration. Required integration_id is enforced per destination type. */
       destination: BatchExportDestinationRequest;
@@ -16025,7 +16025,7 @@ export namespace Schemas {
 
 
     export const FileDownloadInsightsQLRequestModel = {
-      Hogql: 'insightsql',
+      Insightsql: 'insightsql',
     } as const;
 
     /**
@@ -33685,7 +33685,7 @@ export namespace Schemas {
       Events: 'events',
       Persons: 'persons',
       Sessions: 'sessions',
-      Hogql: 'insightsql',
+      Insightsql: 'insightsql',
     } as const;
 
     /**
@@ -33721,7 +33721,7 @@ export namespace Schemas {
 
 
     export const FileDownloadInsightsQLRequestModelEnum = {
-      Hogql: 'insightsql',
+      Insightsql: 'insightsql',
     } as const;
 
     /**
@@ -36371,8 +36371,8 @@ export namespace Schemas {
     export const HogLanguage = {
       Script: 'script',
       HogJson: 'hogJson',
-      InsightsQL: 'hogQL',
-      InsightsQLExpr: 'hogQLExpr',
+      InsightsQL: 'insightsQL',
+      InsightsQLExpr: 'insightsQLExpr',
       HogTemplate: 'hogTemplate',
       Liquid: 'liquid',
     } as const;
@@ -43839,7 +43839,7 @@ export namespace Schemas {
 
 
     export const NotebookSQLV2NodeTypeEnum = {
-      Hogql: 'insightsql',
+      Insightsql: 'insightsql',
       Python: 'python',
     } as const;
 
@@ -43851,7 +43851,7 @@ export namespace Schemas {
 
 
     export const NotebookSQLV2RefKindEnum = {
-      Hogql: 'insightsql',
+      Insightsql: 'insightsql',
       Local: 'local',
     } as const;
 
@@ -51205,7 +51205,7 @@ export namespace Schemas {
        * * `events` - Events
        * * `persons` - Persons
        * * `sessions` - Sessions
-       * * `insightsql` - Hogql */
+       * * `insightsql` - Insightsql */
       model?: ModelEnum;
       /** Destination configuration. Required integration_id is enforced per destination type. */
       destination?: BatchExportDestinationRequest;
@@ -81517,7 +81517,7 @@ export namespace Schemas {
     offset?: number;
     };
 
-    export type FixHogqlListParams = {
+    export type FixInsightsqlListParams = {
     /**
      * Number of results to return per page.
      */

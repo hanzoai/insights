@@ -10,10 +10,10 @@ import { escapeDottedInsightsQLIdentifier } from '~/queries/utils'
 import { InsightsQLEditor } from '../InsightsQLEditor/InsightsQLEditor'
 
 export const InsightsQLDropdown = ({
-    hogQLValue,
+    insightsQLValue,
     onInsightsQLValueChange,
     tableName,
-    hogQLEditorPlaceholder,
+    insightsQLEditorPlaceholder,
     className = '',
     size,
     connectionId,
@@ -24,11 +24,11 @@ export const InsightsQLDropdown = ({
     visible,
     onVisibilityChange,
 }: {
-    hogQLValue: string
+    insightsQLValue: string
     tableName: string
     connectionId?: string
     className?: string
-    hogQLEditorPlaceholder?: string
+    insightsQLEditorPlaceholder?: string
     size?: 'small' | 'medium'
     buttonIcon?: JSX.Element
     buttonLabel?: ReactNode
@@ -36,7 +36,7 @@ export const InsightsQLDropdown = ({
     buttonAriaLabel?: string
     visible?: boolean
     onVisibilityChange?: (visible: boolean) => void
-    onInsightsQLValueChange: (hogQLValue: string) => void
+    onInsightsQLValueChange: (insightsQLValue: string) => void
 }): JSX.Element => {
     const [internalVisibility, setInternalVisibility] = useState(false)
     const isInsightsQLDropdownVisible = visible ?? internalVisibility
@@ -55,7 +55,7 @@ export const InsightsQLDropdown = ({
                     // eslint-disable-next-line react/forbid-dom-props
                     <div className="w-120" style={{ maxWidth: 'max(60vw, 20rem)' }}>
                         <InsightsQLEditor
-                            value={hogQLValue}
+                            value={insightsQLValue}
                             metadataSource={{
                                 kind: NodeKind.InsightsQLQuery,
                                 query: `SELECT * FROM ${escapeDottedInsightsQLIdentifier(tableName)}`,
@@ -65,7 +65,7 @@ export const InsightsQLDropdown = ({
                                 onInsightsQLValueChange(currentValue)
                                 setIsInsightsQLDropdownVisible(false)
                             }}
-                            placeholder={hogQLEditorPlaceholder}
+                            placeholder={insightsQLEditorPlaceholder}
                         />
                     </div>
                 }
@@ -79,7 +79,7 @@ export const InsightsQLDropdown = ({
                     aria-label={buttonAriaLabel}
                     onClick={() => setIsInsightsQLDropdownVisible(!isInsightsQLDropdownVisible)}
                 >
-                    {buttonLabel ?? <code>{hogQLValue}</code>}
+                    {buttonLabel ?? <code>{insightsQLValue}</code>}
                 </Button>
             </Dropdown>
         </div>

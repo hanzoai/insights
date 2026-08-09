@@ -13,7 +13,7 @@ export interface DestinationContext {
 // Overrides applied to the events table preview shown in the InsightsQL model picker.
 // `includeGenericPersonFields: false` opts out of the default set/set_once/site_url/ip/elements_chain block.
 export interface EventTableOverrides {
-    teamIdHogql?: string
+    teamIdInsightsql?: string
     setName?: string
     setOnceName?: string
     includeGenericPersonFields?: boolean

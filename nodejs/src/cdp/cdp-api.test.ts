@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken'
 import supertest from 'supertest'
 import express from 'ultimate-express'
 
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { InsightsFlow } from '~/cdp/schema/insightsflow'
 import { setupExpressApp } from '~/common/api/router'
 import { deleteKeysWithPrefix } from '~/common/redis/_tests/redis'
 import { createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'
@@ -18,7 +18,7 @@ import { createCdpConsumerDeps } from '../../tests/helpers/cdp'
 import { forSnapshot } from '../../tests/helpers/snapshots'
 import { createTeam, getFirstTeam, resetTestDatabase } from '../../tests/helpers/sql'
 import { Hub, Team } from '../types'
-import { FixtureInsightsFlowBuilder } from './_tests/builders/hogflow.builder'
+import { FixtureInsightsFlowBuilder } from './_tests/builders/insightsflow.builder'
 import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from './_tests/examples'
 import {
     insertInsightsFunction as _insertInsightsFunction,
@@ -1037,7 +1037,9 @@ describe('CDP API', () => {
         it('errors if missing script flow', async () => {
             const nonExistentUuid = new UUIDT().toString()
             const res = await supertest(app)
-                .post(`/api/projects/${batchInsightsFlow.team_id}/hog_flows/${nonExistentUuid}/batch_invocations/job-123`)
+                .post(
+                    `/api/projects/${batchInsightsFlow.team_id}/hog_flows/${nonExistentUuid}/batch_invocations/job-123`
+                )
                 .send({})
 
             expect(res.status).toEqual(404)
@@ -1310,7 +1312,9 @@ describe('CDP API', () => {
         it('errors if missing script flow', async () => {
             const nonExistentUuid = new UUIDT().toString()
             const res = await supertest(app)
-                .post(`/api/projects/${scheduleInsightsFlow.team_id}/hog_flows/${nonExistentUuid}/scheduled_invocations`)
+                .post(
+                    `/api/projects/${scheduleInsightsFlow.team_id}/hog_flows/${nonExistentUuid}/scheduled_invocations`
+                )
                 .send({})
 
             expect(res.status).toEqual(404)
@@ -1333,7 +1337,9 @@ describe('CDP API', () => {
             })
 
             const res = await supertest(app)
-                .post(`/api/projects/${eventInsightsFlow.team_id}/hog_flows/${eventInsightsFlow.id}/scheduled_invocations`)
+                .post(
+                    `/api/projects/${eventInsightsFlow.team_id}/hog_flows/${eventInsightsFlow.id}/scheduled_invocations`
+                )
                 .send({})
 
             expect(res.status).toEqual(400)
@@ -1342,7 +1348,9 @@ describe('CDP API', () => {
 
         it('queues invocation and returns queued status', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${scheduleInsightsFlow.team_id}/hog_flows/${scheduleInsightsFlow.id}/scheduled_invocations`)
+                .post(
+                    `/api/projects/${scheduleInsightsFlow.team_id}/hog_flows/${scheduleInsightsFlow.id}/scheduled_invocations`
+                )
                 .send({ variables: { greeting: 'Hello' } })
 
             expect(res.status).toEqual(200)
@@ -1353,7 +1361,9 @@ describe('CDP API', () => {
 
         it('queues invocation with empty variables when none provided', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${scheduleInsightsFlow.team_id}/hog_flows/${scheduleInsightsFlow.id}/scheduled_invocations`)
+                .post(
+                    `/api/projects/${scheduleInsightsFlow.team_id}/hog_flows/${scheduleInsightsFlow.id}/scheduled_invocations`
+                )
                 .send({})
 
             expect(res.status).toEqual(200)
@@ -1491,7 +1501,9 @@ describe('CDP API', () => {
 
         it('runs a sweep slice and returns the bounds for follow-up slices', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${rescheduleInsightsFlow.team_id}/hog_flows/${rescheduleInsightsFlow.id}/reschedule_parked`)
+                .post(
+                    `/api/projects/${rescheduleInsightsFlow.team_id}/hog_flows/${rescheduleInsightsFlow.id}/reschedule_parked`
+                )
                 .set(authFor(rescheduleInsightsFlow.team_id, rescheduleInsightsFlow.id))
                 .send({ action_ids: ['delay_1', 'wait_1'] })
 
@@ -1514,7 +1526,9 @@ describe('CDP API', () => {
 
         it('parses passed-through bounds into dates', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${rescheduleInsightsFlow.team_id}/hog_flows/${rescheduleInsightsFlow.id}/reschedule_parked`)
+                .post(
+                    `/api/projects/${rescheduleInsightsFlow.team_id}/hog_flows/${rescheduleInsightsFlow.id}/reschedule_parked`
+                )
                 .set(authFor(rescheduleInsightsFlow.team_id, rescheduleInsightsFlow.id))
                 .send({
                     action_ids: ['delay_1'],
@@ -1543,7 +1557,9 @@ describe('CDP API', () => {
             ],
         ])('rejects a bad body: %s', async (_desc, body) => {
             const res = await supertest(app)
-                .post(`/api/projects/${rescheduleInsightsFlow.team_id}/hog_flows/${rescheduleInsightsFlow.id}/reschedule_parked`)
+                .post(
+                    `/api/projects/${rescheduleInsightsFlow.team_id}/hog_flows/${rescheduleInsightsFlow.id}/reschedule_parked`
+                )
                 .set(authFor(rescheduleInsightsFlow.team_id, rescheduleInsightsFlow.id))
                 .send(body)
 
@@ -1573,15 +1589,21 @@ describe('CDP API', () => {
             ],
             [
                 "another workflow's token",
-                () => ({ Authorization: `Bearer ${mintToken(rescheduleInsightsFlow.team_id, new UUIDT().toString())}` }),
+                () => ({
+                    Authorization: `Bearer ${mintToken(rescheduleInsightsFlow.team_id, new UUIDT().toString())}`,
+                }),
             ],
             [
                 "another team's token",
-                () => ({ Authorization: `Bearer ${mintToken(rescheduleInsightsFlow.team_id + 1, rescheduleInsightsFlow.id)}` }),
+                () => ({
+                    Authorization: `Bearer ${mintToken(rescheduleInsightsFlow.team_id + 1, rescheduleInsightsFlow.id)}`,
+                }),
             ],
         ])('rejects a request with %s', async (_desc, headers) => {
             const res = await supertest(app)
-                .post(`/api/projects/${rescheduleInsightsFlow.team_id}/hog_flows/${rescheduleInsightsFlow.id}/reschedule_parked`)
+                .post(
+                    `/api/projects/${rescheduleInsightsFlow.team_id}/hog_flows/${rescheduleInsightsFlow.id}/reschedule_parked`
+                )
                 .set(headers())
                 .send({ action_ids: ['delay_1'] })
 
@@ -1611,7 +1633,9 @@ describe('CDP API', () => {
             api['batchResolverProducer'] = null
 
             const res = await supertest(app)
-                .post(`/api/projects/${rescheduleInsightsFlow.team_id}/hog_flows/${rescheduleInsightsFlow.id}/reschedule_parked`)
+                .post(
+                    `/api/projects/${rescheduleInsightsFlow.team_id}/hog_flows/${rescheduleInsightsFlow.id}/reschedule_parked`
+                )
                 .send({ action_ids: ['delay_1'] })
 
             expect(res.status).toEqual(503)

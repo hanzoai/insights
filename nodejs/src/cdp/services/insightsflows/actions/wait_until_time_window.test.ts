@@ -1,10 +1,10 @@
 import { DateTime } from 'luxon'
 
-import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/hogflow.builder'
-import { InsightsFlowAction } from '~/cdp/schema/hogflow'
+import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/insightsflow.builder'
+import { InsightsFlowAction } from '~/cdp/schema/insightsflow'
 import { CyclotronPerson } from '~/cdp/types'
 
-import { findActionByType } from '../hogflow-utils'
+import { findActionByType } from '../insightsflow-utils'
 import { getWaitUntilTime, resolveTimezone } from './wait_until_time_window'
 
 describe('InsightsFlowActionRunnerWaitUntilTimeWindow', () => {

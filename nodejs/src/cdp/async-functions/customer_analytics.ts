@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 
 import { CyclotronInvocationQueueParametersFetchSchema } from '~/cdp/schema/cyclotron'
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { InsightsFlow } from '~/cdp/schema/insightsflow'
 import { captureException } from '~/common/utils/insights'
 import { Team } from '~/types'
 

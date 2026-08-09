@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 
-import { InsightsFlowAction } from '~/cdp/schema/hogflow'
+import { InsightsFlowAction } from '~/cdp/schema/insightsflow'
 
 import { CyclotronJobInvocationInsightsFlow, CyclotronJobInvocationResult } from '../../../types'
 import { HogExecutorExecuteAsyncOptions } from '../../script-executor-async.service'

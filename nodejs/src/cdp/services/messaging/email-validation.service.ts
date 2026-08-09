@@ -3,7 +3,7 @@ import { Resolver } from 'node:dns/promises'
 import { domainToASCII } from 'node:url'
 import { Counter } from 'prom-client'
 
-import { InsightsFlowAction } from '~/cdp/schema/hogflow'
+import { InsightsFlowAction } from '~/cdp/schema/insightsflow'
 import { RedisV2 } from '~/common/redis/redis-v2'
 
 import { CyclotronJobInvocationInsightsFunction } from '../../types'

@@ -14,11 +14,11 @@ import {
 import { convertToInsightsFunctionInvocationGlobals } from '../utils'
 import { createInvocation } from '../utils/invocation-utils'
 import { mirrorCall } from '../utils/mirror-call'
-import { HogExecutorAsyncService } from './script-executor-async.service'
 import { InvocationResultsService } from './invocation-results.service'
 import { GroupsManagerService } from './managers/groups-manager.service'
 import { InsightsFunctionManagerService } from './managers/script-function-manager.service'
 import { HogWatcherService } from './monitoring/script-watcher.service'
+import { HogExecutorAsyncService } from './script-executor-async.service'
 
 // TODO: This might be too strict so we need to validate that it matches well what we would expect to get from batch exports
 const batchExportRequestBodySchema = z.object({
@@ -86,7 +86,10 @@ export class BatchExportInsightsFunctionService {
         const globals = this.buildRequestGlobals(datastore_event as RawDatastoreEvent, insightsFunction, team)
         await this.groupsManager.addGroupsToGlobals(globals)
 
-        const globalsWithInputs = await this.hogExecutorAsync.hogExecutor.buildInputsWithGlobals(insightsFunction, globals)
+        const globalsWithInputs = await this.hogExecutorAsync.hogExecutor.buildInputsWithGlobals(
+            insightsFunction,
+            globals
+        )
         const invocation = createInvocation(globalsWithInputs, insightsFunction)
         invocation.id = invocationId.toString()
 

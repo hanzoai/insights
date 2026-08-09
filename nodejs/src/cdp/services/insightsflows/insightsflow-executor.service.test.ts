@@ -1,11 +1,14 @@
 // sort-imports-ignore
 import { DateTime, Duration } from 'luxon'
 
-import { FixtureInsightsFlowBuilder, SimpleInsightsFlowRepresentation } from '~/cdp/_tests/builders/hogflow.builder'
+import {
+    FixtureInsightsFlowBuilder,
+    SimpleInsightsFlowRepresentation,
+} from '~/cdp/_tests/builders/insightsflow.builder'
 import { createHogExecutionGlobals, insertInsightsFunctionTemplate, insertIntegration } from '~/cdp/_tests/fixtures'
 import { compileHog } from '~/cdp/templates/compiler'
 import { template as insightsCaptureTemplate } from '~/cdp/templates/_destinations/insights_capture/insights-capture.template'
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { InsightsFlow } from '~/cdp/schema/insightsflow'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { fetch } from '~/common/utils/request'
@@ -26,8 +29,8 @@ import { TeamWorkflowsConfigService } from '../managers/team-workflows-config.se
 import { EmailSuppressionService, emailSuppressionConfigFromEnv } from '../messaging/email-suppression.service'
 import { EmailValidationService } from '../messaging/email-validation.service'
 import { RecipientPreferencesService } from '../messaging/recipient-preferences.service'
-import { InsightsFlowExecutorService, createInsightsFlowInvocation } from './hogflow-executor.service'
-import { InsightsFlowFunctionsService } from './hogflow-functions.service'
+import { InsightsFlowExecutorService, createInsightsFlowInvocation } from './insightsflow-executor.service'
+import { InsightsFlowFunctionsService } from './insightsflow-functions.service'
 
 // Mock before importing fetch
 jest.mock('~/common/utils/request', () => {
@@ -1480,7 +1483,9 @@ describe('Hogflow Executor', () => {
                 expect(result.metrics.filter((m) => m.metric_name === 'conversion')).toHaveLength(1)
                 expect(invocation.state.conversionCounted).toBe(true)
                 // The conversion is also surfaced as a billable $workflows_conversion event exactly once.
-                const conversionEvents = result.capturedInsightsEvents.filter((e) => e.event === '$workflows_conversion')
+                const conversionEvents = result.capturedInsightsEvents.filter(
+                    (e) => e.event === '$workflows_conversion'
+                )
                 expect(conversionEvents).toHaveLength(1)
                 expect(conversionEvents[0]).toMatchObject({
                     distinct_id: 'distinct_id',

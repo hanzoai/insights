@@ -1,11 +1,11 @@
 import { DateTime } from 'luxon'
 import { Counter, Histogram } from 'prom-client'
 
-import { InsightsFlowAction } from '~/cdp/schema/hogflow'
+import { InsightsFlowAction } from '~/cdp/schema/insightsflow'
 import { CyclotronJobInvocationInsightsFlow, CyclotronJobInvocationResult } from '~/cdp/types'
 import { logger } from '~/common/utils/logger'
 
-import { actionIdForLogging } from './hogflow-utils'
+import { actionIdForLogging } from './insightsflow-utils'
 
 // Deliberately unlabelled: the metric answers "how common are variable misses fleet-wide" (it
 // sizes the publish-time lint work); which flow/step/variable missed is in the warn log, where

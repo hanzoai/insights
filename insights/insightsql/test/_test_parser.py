@@ -3166,7 +3166,9 @@ def parser_test_factory(backend: InsightsQLParserBackend):
             assert isinstance(table_node, ast.InsightsQLXTag)
             assert table_node == ast.InsightsQLXTag(
                 kind="InsightsQLQuery",
-                attributes=[ast.InsightsQLXAttribute(name="query", value=ast.Constant(value="select event from events"))],
+                attributes=[
+                    ast.InsightsQLXAttribute(name="query", value=ast.Constant(value="select event from events"))
+                ],
             )
 
             node2 = self._select("select event from (<InsightsQLQuery query='select event from events' />)")
@@ -3241,7 +3243,10 @@ def parser_test_factory(backend: InsightsQLParserBackend):
                 self._select(
                     "select event from <OuterQuery q='b'><InsightsQLQuery query='select event from events' /></InsightsQLQuery>"
                 )
-            assert str(e.exception) == "Opening and closing InsightsQLX tags must match. Got OuterQuery and InsightsQLQuery"
+            assert (
+                str(e.exception)
+                == "Opening and closing InsightsQLX tags must match. Got OuterQuery and InsightsQLQuery"
+            )
 
             # With mismatched closing tag
             with self.assertRaises(ExposedInsightsQLError) as e:
@@ -3259,7 +3264,9 @@ def parser_test_factory(backend: InsightsQLParserBackend):
             assert isinstance(table_node, ast.InsightsQLXTag)
             assert table_node == ast.InsightsQLXTag(
                 kind="InsightsQLQuery",
-                attributes=[ast.InsightsQLXAttribute(name="query", value=ast.Constant(value="select event from events"))],
+                attributes=[
+                    ast.InsightsQLXAttribute(name="query", value=ast.Constant(value="select event from events"))
+                ],
             )
             assert alias == "a"
 
@@ -6540,7 +6547,7 @@ def parser_test_factory(backend: InsightsQLParserBackend):
                 self._assert_ast(src, "program")
 
         def test_insightsqlx_drops_whitespace_only_children_containing_newline(self):
-            # `HogqlxTagElementNested` drops child text runs that are all-whitespace AND contain a newline (so pretty-printed INSIGHTSQLX has no spurious Constant children).
+            # `InsightsqlxTagElementNested` drops child text runs that are all-whitespace AND contain a newline (so pretty-printed INSIGHTSQLX has no spurious Constant children).
             for src in (
                 "<a>\n</a>",
                 "<a>\r\n</a>",

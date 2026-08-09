@@ -1,4 +1,4 @@
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { InsightsFlow } from '~/cdp/schema/insightsflow'
 import { PostgresRouter } from '~/common/utils/db/postgres'
 import { UUIDT } from '~/common/utils/utils'
 import { insertRow } from '~/tests/helpers/sql'

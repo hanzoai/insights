@@ -1,9 +1,9 @@
 import { DateTime } from 'luxon'
 
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { InsightsFlow } from '~/cdp/schema/insightsflow'
 import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
-import { logger } from '~/common/utils/logger'
 import { captureException } from '~/common/utils/insights'
+import { logger } from '~/common/utils/logger'
 
 import { RedisV2 } from '../../common/redis/redis-v2'
 import { KeyedRateLimitRequest, KeyedRateLimiterService } from '../../common/services/keyed-rate-limiter.service'
@@ -18,9 +18,9 @@ import {
     MinimalAppMetric,
 } from '../types'
 import { mirrorCompare } from '../utils/mirror-call'
-import { InsightsFlowExecutorService } from './insightsflows/hogflow-executor.service'
-import { InsightsFlowManagerService } from './insightsflows/hogflow-manager.service'
-import { shouldBlockInsightsFlowDueToQuota } from './insightsflows/hogflow-quota-limiting'
+import { InsightsFlowExecutorService } from './insightsflows/insightsflow-executor.service'
+import { InsightsFlowManagerService } from './insightsflows/insightsflow-manager.service'
+import { shouldBlockInsightsFlowDueToQuota } from './insightsflows/insightsflow-quota-limiting'
 import { InsightsFunctionMonitoringService } from './monitoring/script-function-monitoring.service'
 import { HogMaskerService } from './monitoring/script-masker.service'
 import { HogWatcherService, HogWatcherState } from './monitoring/script-watcher.service'

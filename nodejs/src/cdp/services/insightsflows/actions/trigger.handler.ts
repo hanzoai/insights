@@ -1,7 +1,7 @@
-import { InsightsFlowAction } from '~/cdp/schema/hogflow'
+import { InsightsFlowAction } from '~/cdp/schema/insightsflow'
 import { filterFunctionInstrumented } from '~/cdp/utils/script-function-filtering'
 
-import { findContinueAction } from '../hogflow-utils'
+import { findContinueAction } from '../insightsflow-utils'
 import { ActionHandler, ActionHandlerOptions, ActionHandlerResult } from './action.interface'
 
 // NOTE: This is not an actively used action as the triggering is done by the scheduler

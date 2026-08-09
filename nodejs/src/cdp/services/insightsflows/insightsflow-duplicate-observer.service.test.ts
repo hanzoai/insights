@@ -6,7 +6,7 @@ import { closeHub, createHub } from '~/common/utils/db/hub'
 import { Hub } from '~/types'
 
 import { CyclotronJobInvocationInsightsFlow } from '../../types'
-import { InsightsFlowDuplicateObserverService } from './hogflow-duplicate-observer.service'
+import { InsightsFlowDuplicateObserverService } from './insightsflow-duplicate-observer.service'
 
 const KEY_PREFIX = 'hogflow:observe:'
 

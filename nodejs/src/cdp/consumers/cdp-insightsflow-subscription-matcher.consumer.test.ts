@@ -1,11 +1,11 @@
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { InsightsFlow } from '~/cdp/schema/insightsflow'
+import * as insightsUtils from '~/common/utils/insights'
 import { parseJSON } from '~/common/utils/json-parse'
 import { logger } from '~/common/utils/logger'
-import * as insightsUtils from '~/common/utils/insights'
 
 import { InsightsFunctionInvocationGlobals } from '../types'
 import * as hogExec from '../utils/script-exec'
-import { CdpHogflowSubscriptionMatcherConsumer } from './cdp-hogflow-subscription-matcher.consumer'
+import { CdpHogflowSubscriptionMatcherConsumer } from './cdp-insightsflow-subscription-matcher.consumer'
 
 jest.mock('./cdp-base.consumer', () => {
     return {

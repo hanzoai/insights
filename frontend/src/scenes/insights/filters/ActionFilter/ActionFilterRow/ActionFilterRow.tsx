@@ -4,8 +4,8 @@ import { DraggableSyntheticListeners } from '@dnd-kit/core'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import clsx from 'clsx'
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useCallback } from 'react'
 
 import { IconCopy, IconFilter, IconGroupIntersect, IconPencil, IconTrash } from '@hanzo/icons'
@@ -21,8 +21,8 @@ import {
     quickFilterToPropertyFilters,
 } from 'lib/components/TaxonomicFilter/types'
 import { TaxonomicPopover, TaxonomicPopoverProps } from 'lib/components/TaxonomicPopover/TaxonomicPopover'
-import { IconWithCount, SortableDragIcon } from 'lib/elements/icons'
 import { Button } from 'lib/elements/Button'
+import { IconWithCount, SortableDragIcon } from 'lib/elements/icons'
 import { getEventNamesForAction } from 'lib/utils/events'
 import { databaseTableListLogic } from 'scenes/data-management/database/databaseTableListLogic'
 import { funnelDataLogic } from 'scenes/funnels/funnelDataLogic'
@@ -109,7 +109,7 @@ export function ActionFilterRow({
     addFilterDocLink,
     excludedProperties,
     allowNonCapturedEvents,
-    hogQLGlobals,
+    insightsQLGlobals,
     inlineEventsDocLink,
     definitionPopoverRenderer,
     operatorAllowlist,
@@ -725,7 +725,7 @@ export function ActionFilterRow({
                         dataWarehouseTableName={isDataWarehouseFilter ? (filter.name ?? undefined) : undefined}
                         addFilterDocLink={addFilterDocLink}
                         excludedProperties={excludedProperties}
-                        hogQLGlobals={hogQLGlobals}
+                        insightsQLGlobals={insightsQLGlobals}
                         operatorAllowlist={operatorAllowlist}
                         triggerVariant="input"
                     />

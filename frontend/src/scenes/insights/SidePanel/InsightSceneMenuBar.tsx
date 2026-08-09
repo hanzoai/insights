@@ -89,8 +89,15 @@ function InsightSceneMenuBarInner({ insightLogicProps }: { insightLogicProps: In
     const { duplicateInsight, deleteInsight, setInsightMetadata } = useActions(theInsightLogic)
 
     const theInsightDataLogic = insightDataLogic(insightProps)
-    const { query, hogQL, exportContext, hogQLVariables, canEditInSqlEditor, showQueryEditor, showDebugPanel } =
-        useValues(theInsightDataLogic)
+    const {
+        query,
+        insightsQL,
+        exportContext,
+        insightsQLVariables,
+        canEditInSqlEditor,
+        showQueryEditor,
+        showDebugPanel,
+    } = useValues(theInsightDataLogic)
     const { toggleQueryEditorPanel, toggleDebugPanel } = useActions(theInsightDataLogic)
 
     const { insightMode, dashboardId } = useValues(insightSceneLogic)
@@ -123,7 +130,7 @@ function InsightSceneMenuBarInner({ insightLogicProps }: { insightLogicProps: In
     const isSavedInsight = hasDashboardItemId && !!insight?.id && !!insight?.short_id
     const canExport = exportContext != null && insight.short_id != null
     const showCohort =
-        hogQL != null &&
+        insightsQL != null &&
         (isDataTableNode(query) || isDataVisualizationNode(query) || isInsightsQLQuery(query) || isEventsQuery(query))
     const canShowDebugPanel = isSavedInsight && (user?.is_staff || user?.is_impersonated || preflight?.is_debug)
     const showMetalytics =
@@ -207,7 +214,7 @@ function InsightSceneMenuBarInner({ insightLogicProps }: { insightLogicProps: In
                                     <SceneMenuBarItem
                                         opensFloatingUi
                                         onClick={() =>
-                                            openSaveAsCohortDialog(createStaticCohort, hogQL!, hogQLVariables)
+                                            openSaveAsCohortDialog(createStaticCohort, insightsQL!, insightsQLVariables)
                                         }
                                         data-attr={`${RESOURCE_TYPE}-menubar-create-cohort`}
                                     >
@@ -347,7 +354,7 @@ function InsightSceneMenuBarInner({ insightLogicProps }: { insightLogicProps: In
                     </SceneMenuBarItem>
                     {canEditInSqlEditor && (
                         <SceneMenuBarItem
-                            onClick={() => push(urls.sqlEditor({ query: hogQL ?? undefined }))}
+                            onClick={() => push(urls.sqlEditor({ query: insightsQL ?? undefined }))}
                             data-attr={`${RESOURCE_TYPE}-menubar-edit-sql`}
                         >
                             <IconPencil />

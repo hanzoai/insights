@@ -13,12 +13,12 @@ import { closeHub, createHub } from '~/common/utils/db/hub'
 import { createCdpConsumerDeps } from '~/tests/helpers/cdp'
 import { Datastore } from '~/tests/helpers/datastore'
 import { waitForExpect } from '~/tests/helpers/expectations'
-import { waitForHogInvocationResultsMvReady } from '~/tests/helpers/script-invocation-results'
 import { TEST_KAFKA_TOPICS, ensureKafkaTopics } from '~/tests/helpers/kafka'
+import { waitForHogInvocationResultsMvReady } from '~/tests/helpers/script-invocation-results'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { Hub, Team } from '../../types'
-import { FixtureInsightsFlowBuilder } from '../_tests/builders/hogflow.builder'
+import { FixtureInsightsFlowBuilder } from '../_tests/builders/insightsflow.builder'
 import { INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
     insertInsightsFunction as _insertInsightsFunction,
@@ -27,7 +27,7 @@ import {
 } from '../_tests/fixtures'
 import { insertInsightsFlow } from '../_tests/fixtures-insightsflows'
 import { CdpConsumerBaseDeps } from '../consumers/cdp-base.consumer'
-import { CdpCyclotronWorkerInsightsFlow } from '../consumers/cdp-cyclotron-worker-hogflow.consumer'
+import { CdpCyclotronWorkerInsightsFlow } from '../consumers/cdp-cyclotron-worker-insightsflow.consumer'
 import { CdpCyclotronWorker } from '../consumers/cdp-cyclotron-worker.consumer'
 import { CdpEventsConsumer } from '../consumers/cdp-events.consumer'
 import { CdpRerunWorkerConsumer } from '../consumers/cdp-rerun-worker.consumer'

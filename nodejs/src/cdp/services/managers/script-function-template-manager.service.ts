@@ -4,7 +4,16 @@ import { logger } from '~/common/utils/logger'
 
 import { DBInsightsFunctionTemplate } from '../../types'
 
-const INSIGHTS_FUNCTION_TEMPLATE_FIELDS = ['id', 'template_id', 'sha', 'name', 'inputs_schema', 'bytecode', 'type', 'free']
+const INSIGHTS_FUNCTION_TEMPLATE_FIELDS = [
+    'id',
+    'template_id',
+    'sha',
+    'name',
+    'inputs_schema',
+    'bytecode',
+    'type',
+    'free',
+]
 
 export class InsightsFunctionTemplateManagerService {
     private lazyLoader: LazyLoader<DBInsightsFunctionTemplate>
@@ -29,7 +38,9 @@ export class InsightsFunctionTemplateManagerService {
 
     // public async stop(): Promise<void> {}
 
-    public async getInsightsFunctionTemplate(id: DBInsightsFunctionTemplate['id']): Promise<DBInsightsFunctionTemplate | null> {
+    public async getInsightsFunctionTemplate(
+        id: DBInsightsFunctionTemplate['id']
+    ): Promise<DBInsightsFunctionTemplate | null> {
         return (await this.lazyLoader.get(id)) ?? null
     }
 
@@ -40,7 +51,9 @@ export class InsightsFunctionTemplateManagerService {
     }
 
     // NOTE: Currently this essentially loads the "latest" template each time. We may need to swap this to using a specific version
-    private async fetchInsightsFunctionTemplates(ids: string[]): Promise<Record<string, DBInsightsFunctionTemplate | undefined>> {
+    private async fetchInsightsFunctionTemplates(
+        ids: string[]
+    ): Promise<Record<string, DBInsightsFunctionTemplate | undefined>> {
         logger.info('[InsightsFunctionTemplateManager]', 'Fetching script function templates', { ids })
 
         const response = await this.postgres.query<DBInsightsFunctionTemplate>(

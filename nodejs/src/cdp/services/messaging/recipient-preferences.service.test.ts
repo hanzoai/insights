@@ -1,6 +1,6 @@
-import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/hogflow.builder'
+import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/insightsflow.builder'
 import { createExampleInvocation } from '~/cdp/_tests/fixtures'
-import { InsightsFlowAction } from '~/cdp/schema/hogflow'
+import { InsightsFlowAction } from '~/cdp/schema/insightsflow'
 import { CyclotronJobInvocationInsightsFunction } from '~/cdp/types'
 import { closeHub, createHub } from '~/common/utils/db/hub'
 import { PostgresUse } from '~/common/utils/db/postgres'

@@ -1,7 +1,7 @@
-import { InsightsFlowAction } from '~/cdp/schema/hogflow'
+import { InsightsFlowAction } from '~/cdp/schema/insightsflow'
 import { CyclotronJobInvocationInsightsFlow } from '~/cdp/types'
 
-import { findNextAction } from '../hogflow-utils'
+import { findNextAction } from '../insightsflow-utils'
 import { ActionHandler, ActionHandlerOptions, ActionHandlerResult } from './action.interface'
 
 type Action = Extract<InsightsFlowAction, { type: 'random_cohort_branch' }>

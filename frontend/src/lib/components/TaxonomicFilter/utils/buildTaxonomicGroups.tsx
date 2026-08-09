@@ -167,7 +167,7 @@ export interface BuildTaxonomicGroupsContext {
     maxContextOptions: MaxContextTaxonomicFilterOption[]
     hideBehavioralCohorts: boolean
     endpointFilters: Record<string, any> | undefined
-    hogQLExpressionComponentProps: {
+    insightsQLExpressionComponentProps: {
         globals?: Record<string, any>
         showBreakdownLabelHint: boolean
     }
@@ -192,7 +192,7 @@ export function buildTaxonomicGroups(ctx: BuildTaxonomicGroupsContext): Taxonomi
         maxContextOptions,
         hideBehavioralCohorts,
         endpointFilters,
-        hogQLExpressionComponentProps,
+        insightsQLExpressionComponentProps,
         featureFlags,
     } = ctx
     const { id: teamId } = currentTeam
@@ -998,7 +998,7 @@ export function buildTaxonomicGroups(ctx: BuildTaxonomicGroupsContext): Taxonomi
             // silently dropped on save.
             getValue: (option) => (option as { value?: TaxonomicFilterValue }).value ?? option.name,
             getPopoverHeader: () => 'SQL expression',
-            componentProps: { metadataSource, ...hogQLExpressionComponentProps },
+            componentProps: { metadataSource, ...insightsQLExpressionComponentProps },
         },
         {
             name: 'Replay',
