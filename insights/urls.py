@@ -355,7 +355,7 @@ def root(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
     whatever the catch-all already did, so the split cannot change it.
 
     The CTAs point at surfaces that actually work. Plans deliberately leave for
-    hanzo.ai/pricing rather than this app's own billing pages: `/api/billing` is
+    hanzo.ai/pricing rather than this app's own billing pages: `/v1/billing` is
     not served here, so an in-app upgrade funnel would dead-end.
     """
     if request.user.is_authenticated:
@@ -379,7 +379,7 @@ def root(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
 
 _CONNECT_REDIRECT_ALLOWED_KINDS = {"github", "slack", "linear"}
 # Surfaces allowed to start a connect flow and be returned to afterwards (see
-# insights/api/github_callback/types.py APP_CONNECT_FROM_VALUES, plus Slack).
+# insights/v1/github_callback/types.py APP_CONNECT_FROM_VALUES, plus Slack).
 _CONNECT_REDIRECT_ALLOWED_SURFACES = {"insights_code", "insights_mobile", "slack"}
 
 
@@ -401,7 +401,7 @@ def integration_connect_redirect(request: HttpRequest, kind: str) -> HttpRespons
     next_path = "/account-connected/{}-integration?{}".format(
         kind, urlencode({"provider": kind, "project_id": project_id, "connect_from": connect_from})
     )
-    authorize_url = "/api/projects/{}/integrations/authorize/?{}".format(
+    authorize_url = "/v1/projects/{}/integrations/authorize/?{}".format(
         project_id, urlencode({"kind": kind, "next": next_path})
     )
     return HttpResponseRedirect(authorize_url)
@@ -465,21 +465,21 @@ def authorize_and_redirect(request: HttpRequest) -> HttpResponse:
             "email": request.user,
             "domain": redirect_url.hostname,
             "redirect_url": request.GET["redirect"],
-            "authorization_url": f"/api/user/redirect_to_site/?{urlencode({'appUrl': request.GET['redirect']})}",
+            "authorization_url": f"/v1/user/redirect_to_site/?{urlencode({'appUrl': request.GET['redirect']})}",
         },
     )
 
 
 urlpatterns = [
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("v1/schema/", SpectacularAPIView.as_view(), name="schema"),
     # Optional UI:
     path(
-        "api/schema/swagger-ui/",
+        "v1/schema/swagger-ui/",
         SpectacularSwaggerView.as_view(url_name="schema"),
         name="swagger-ui",
     ),
     path(
-        "api/schema/redoc/",
+        "v1/schema/redoc/",
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
@@ -492,97 +492,74 @@ urlpatterns = [
     opt_slash_path("_preflight", preflight_check),
     # ee
     # api
-    path("api/unsubscribe", unsubscribe.unsubscribe),
-    path("api/alerts/github", github.SecretAlert.as_view()),
+    path("v1/unsubscribe", unsubscribe.unsubscribe),
+    path("v1/alerts/github", github.SecretAlert.as_view()),
     path(
-        "api/legal_documents/pandadoc",
+        "v1/legal_documents/pandadoc",
         csrf_exempt(legal_document_pandadoc_webhook),
         name="legal_document_pandadoc_webhook",
     ),
     path(
-        "api/users/<str:user_id>/signal_autonomy/",
+        "v1/users/<str:user_id>/signal_autonomy/",
         signals_user_autonomy_view.as_view(),
         name="user_signal_autonomy",
     ),
-    path("api/projects/<int:team_id>/messaging/customerio/webhook/", csrf_exempt(CustomerIOWebhookView.as_view())),
+    path("v1/projects/<int:team_id>/messaging/customerio/webhook/", csrf_exempt(CustomerIOWebhookView.as_view())),
     path(
-        "api/user_interviews/vapi_webhook/",
+        "v1/user_interviews/vapi_webhook/",
         csrf_exempt(vapi_webhook),
         name="user_interviews_vapi_webhook",
     ),
     path(
-        "api/user_interviews/share/<str:access_token>/start_call/",
+        "v1/user_interviews/share/<str:access_token>/start_call/",
         csrf_exempt(user_interviews_start_call),
         name="user_interviews_start_call",
     ),
-    path("api/sdk_health/", sdk_health),
-    path("api/conversations/", include("products.conversations.backend.api.urls")),
-    path("api/customer_analytics/", include("products.customer_analytics.backend.presentation.views.urls")),
+    path("v1/sdk_health/", sdk_health),
+    path("v1/conversations/", include("products.conversations.backend.api.urls")),
+    path("v1/customer_analytics/", include("products.customer_analytics.backend.presentation.views.urls")),
     path(
-        "api/projects/<int:parent_lookup_team_id>/mcp_analytics/",
+        "v1/projects/<int:parent_lookup_team_id>/mcp_analytics/",
         include("products.mcp_analytics.backend.presentation.urls"),
     ),
     path(
-        "api/projects/<int:parent_lookup_team_id>/property_access_controls/",
+        "v1/projects/<int:parent_lookup_team_id>/property_access_controls/",
         include("products.access_control.backend.presentation.urls"),
     ),
-    opt_slash_path("api/support/ensure-zendesk-organization", csrf_exempt(ensure_zendesk_organization)),
+    opt_slash_path("v1/support/ensure-zendesk-organization", csrf_exempt(ensure_zendesk_organization)),
     path(
-        "api/streamlit_bridge/query/",
+        "v1/streamlit_bridge/query/",
         csrf_exempt(StreamlitBridgeView.as_view()),
         name="streamlit_bridge_query",
     ),
-    # ONE router, mounted twice, because the prefix is moving and a hard cutover
-    # would be a 404 for anything missed.
-    #
-    # `/v1/` is the destination: the host is already api.*, so `/api/` on the path
-    # says the same thing twice. `/api/` stays mounted while the callers move --
-    # 163 registered viewsets, ~525 call sites in the frontend, and the plugin
-    # server's IAM team-access gate keys on `/api/projects/:team_id/` paths, so
-    # they cannot all move in one commit. Nothing here is duplicated: the same
-    # router object answers both, so a route added once is served at both prefixes
-    # and they cannot drift.
-    #
-    # `/api/` comes out when the last caller is gone -- frontend, plugin server and
-    # any external key holder -- and not before.
-    # `v1/` is listed FIRST so that `api/` wins reverse(), which reads backwards
-    # until you know why. Both mounts register the same URL names.
-    # URLResolver._populate() walks `reversed(self.url_patterns)` and reverse()
-    # returns the first match it finds, so the LAST mount listed is the one
-    # reverse() answers with. Listing `api/` first — which is what "keep today's
-    # behaviour" looks like — silently made every reverse() emit `/v1/`.
-    #
-    # Resolution is unaffected by the order: both prefixes serve every route
-    # either way. Only reverse() output changes, and it must keep saying `/api/`
-    # while callers still live there — the plugin server's IAM team-access gate
-    # keys on `/api/projects/:team_id/` paths.
+    # The API is mounted here and nowhere else. The host is already api.*, so `/v1/` on
+    # the path said the same thing twice; requests still arriving that way are rewritten
+    # to `/v1/` by insights.middleware.ApiRewriteMiddleware before anything routes.
     path("v1/", include(router.urls)),
-    path("api/", include(router.urls)),
-    # The assistant was built at /v1/ from the start, so it has no `api/` twin.
     path("v1/", include("products.insights_ai.backend.api.urls")),
-    opt_slash_path("api/user/prepare_toolbar_preloaded_flags", user.prepare_toolbar_preloaded_flags),
-    opt_slash_path("api/user/get_toolbar_preloaded_flags", user.get_toolbar_preloaded_flags),
-    opt_slash_path("api/user/toolbar_oauth_refresh", user.toolbar_oauth_refresh),
+    opt_slash_path("v1/user/prepare_toolbar_preloaded_flags", user.prepare_toolbar_preloaded_flags),
+    opt_slash_path("v1/user/get_toolbar_preloaded_flags", user.get_toolbar_preloaded_flags),
+    opt_slash_path("v1/user/toolbar_oauth_refresh", user.toolbar_oauth_refresh),
     path("toolbar_oauth/authorize/", login_required(user.toolbar_oauth_authorize)),
     path("toolbar_oauth/callback", user.toolbar_oauth_callback),
     path("toolbar_oauth/check", user.toolbar_oauth_check),
-    opt_slash_path("api/user/redirect_to_site", user.redirect_to_site),
-    opt_slash_path("api/early_access_features", early_access_features),
-    opt_slash_path("api/web_experiments", web_experiments),
-    opt_slash_path("api/push_subscriptions", push_subscriptions),
-    opt_slash_path("api/product_tours", product_tours),
+    opt_slash_path("v1/user/redirect_to_site", user.redirect_to_site),
+    opt_slash_path("v1/early_access_features", early_access_features),
+    opt_slash_path("v1/web_experiments", web_experiments),
+    opt_slash_path("v1/push_subscriptions", push_subscriptions),
+    opt_slash_path("v1/product_tours", product_tours),
     re_path(r"^external_surveys/(?P<survey_id>[^/]+)/?$", public_survey_page),
-    opt_slash_path("api/social_signup", signup.SocialSignupViewset.as_view()),
+    opt_slash_path("v1/social_signup", signup.SocialSignupViewset.as_view()),
     opt_slash_path(
-        "api/public_insights_function_templates",
+        "v1/public_insights_function_templates",
         insights_function_template.PublicInsightsFunctionTemplateViewSet.as_view({"get": "list"}),
     ),
     opt_slash_path(
-        "api/public_insights_flow_templates",
+        "v1/public_insights_flow_templates",
         insights_flow_template.PublicInsightsFlowTemplateViewSet.as_view({"get": "list"}),
     ),
     opt_slash_path(
-        "api/public_source_configs",
+        "v1/public_source_configs",
         PublicSourceConfigViewSet.as_view({"get": "list"}),
     ),
     # Internal agent-proxy side-effect callback (auth: sandbox event ingest JWT)
@@ -606,37 +583,37 @@ urlpatterns = [
     ),
     # Internal service-to-service endpoints (authenticated with INSIGHTS_INTERNAL_SERVICE_TOKEN)
     path(
-        "api/projects/<str:team_id>/internal/insights_flows/user_blast_radius",
+        "v1/projects/<str:team_id>/internal/insights_flows/user_blast_radius",
         csrf_exempt(insights_flow.InternalInsightsFlowViewSet.as_view({"post": "internal_user_blast_radius"})),
     ),
     path(
-        "api/projects/<str:team_id>/internal/insights_flows/user_blast_radius_persons",
+        "v1/projects/<str:team_id>/internal/insights_flows/user_blast_radius_persons",
         csrf_exempt(insights_flow.InternalInsightsFlowViewSet.as_view({"post": "internal_user_blast_radius_persons"})),
     ),
     path(
-        "api/projects/<str:team_id>/internal/insights_flows/account_audience",
+        "v1/projects/<str:team_id>/internal/insights_flows/account_audience",
         csrf_exempt(insights_flow.InternalInsightsFlowViewSet.as_view({"post": "internal_account_audience"})),
     ),
     path(
-        "api/internal/insights_flows/process_due_schedules",
+        "v1/internal/insights_flows/process_due_schedules",
         csrf_exempt(insights_flow.InternalInsightsFlowViewSet.as_view({"post": "internal_process_due_schedules"})),
     ),
     path(
-        "api/projects/<str:team_id>/internal/insights_flows/batch_jobs/<str:batch_job_id>/status",
+        "v1/projects/<str:team_id>/internal/insights_flows/batch_jobs/<str:batch_job_id>/status",
         csrf_exempt(insights_flow.InternalInsightsFlowViewSet.as_view({"put": "internal_update_batch_job_status"})),
     ),
     path(
-        "api/projects/<str:team_id>/internal/signals/emit",
+        "v1/projects/<str:team_id>/internal/signals/emit",
         csrf_exempt(signals_views.InternalSignalViewSet.as_view({"post": "emit"})),
     ),
     # Test setup endpoint (only available in TEST mode)
-    path("api/setup_test/<str:test_name>/", csrf_exempt(playwright_setup.setup_test)),
+    path("v1/setup_test/<str:test_name>/", csrf_exempt(playwright_setup.setup_test)),
     opt_slash_path(
-        "api/oauth/connected-apps",
+        "v1/oauth/connected-apps",
         ConnectedAppsViewSet.as_view({"get": "list"}),
     ),
     path(
-        "api/oauth/connected-apps/<uuid:pk>/revoke/",
+        "v1/oauth/connected-apps/<uuid:pk>/revoke/",
         ConnectedAppsViewSet.as_view({"post": "revoke"}),
     ),
     path(
@@ -649,7 +626,7 @@ urlpatterns = [
         RaycastClientMetadataView.as_view(),
         name="raycast-client-metadata",
     ),
-    re_path(r"^api.+", api_not_found),
+    re_path(r"^v1.+", api_not_found),
     # This deployment's own flag door: the signed-in user's verdict, evaluated by
     # Hanzo cloud (`/v1/flags`, the native Go engine) and relayed over the session
     # the browser already has. Registered ahead of the SPA catch-all, which would
@@ -665,7 +642,7 @@ urlpatterns = [
     # view, which answered every SDK POST with a 403 CSRF page. That reads as an
     # auth/CSRF fault and sent us hunting through trusted origins; the truth is
     # simply that the endpoint is not here. Say so, in the same JSON shape unknown
-    # /api/ paths use. csrf_exempt because the SDK posts cross-origin with an API
+    # /v1/ paths use. csrf_exempt because the SDK posts cross-origin with an API
     # key and no session token, so without it the CSRF middleware would answer 403
     # before this view could answer 404.
     opt_slash_path("flags", csrf_exempt(api_not_found)),
@@ -740,7 +717,7 @@ if settings.CLOUD_DEPLOYMENT == "EU":
     urlpatterns.insert(
         0,
         path(
-            "api/llm_analytics/@me/spend/",
+            "v1/llm_analytics/@me/spend/",
             PersonalSpendEUProxyViewSet.as_view({"get": "list"}),
             name="personal_spend_eu",
         ),

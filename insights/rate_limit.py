@@ -70,9 +70,9 @@ def is_rate_limit_enabled(_ttl: int) -> bool:
     return get_instance_setting("RATE_LIMIT_ENABLED")
 
 
-path_by_env_pattern = re.compile(r"^/api/environments/(\d+)/")
-path_by_team_pattern = re.compile(r"^/api/projects/(\d+)/")
-path_by_org_pattern = re.compile(r"^/api/organizations/(.+?)/")  # .+? is non-greedy match, bit faster here
+path_by_env_pattern = re.compile(r"^/v1/environments/(\d+)/")
+path_by_team_pattern = re.compile(r"^/v1/projects/(\d+)/")
+path_by_org_pattern = re.compile(r"^/v1/organizations/(.+?)/")  # .+? is non-greedy match, bit faster here
 
 
 @patchable
@@ -110,7 +110,7 @@ def replace_with_param_names(route_pattern):
     route_id = route_param_pattern.sub(lambda m: "/" + extract_param_name(m) + "/", route_pattern)
     if route_id.startswith("^"):
         route_id = route_id[1:]
-    if route_id.startswith("api/"):
+    if route_id.startswith("v1/"):
         route_id = "/" + route_id
     if route_id.endswith("$"):
         route_id = route_id[:-1]
@@ -134,9 +134,9 @@ def get_route_from_path(path: str | None) -> str:
         if route_pattern:
             return replace_with_param_names(route_pattern)
 
-    route_id = path_by_env_pattern.sub("/api/environments/TEAM_ID/", path)
-    route_id = path_by_team_pattern.sub("/api/projects/TEAM_ID/", route_id)
-    return path_by_org_pattern.sub("/api/organizations/ORG_ID/", route_id)
+    route_id = path_by_env_pattern.sub("/v1/environments/TEAM_ID/", path)
+    route_id = path_by_team_pattern.sub("/v1/projects/TEAM_ID/", route_id)
+    return path_by_org_pattern.sub("/v1/organizations/ORG_ID/", route_id)
 
 
 class PersonalApiKeyRateThrottle(SimpleRateThrottle):

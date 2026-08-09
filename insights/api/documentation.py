@@ -48,21 +48,21 @@ _SHARED_PATH_PARAMS: dict[str, dict[str, Any]] = {
         "name": "project_id",
         "required": True,
         "schema": {"type": "string"},
-        "description": "Project ID of the project you're trying to access. To find the ID of the project, make a call to /api/projects/.",
+        "description": "Project ID of the project you're trying to access. To find the ID of the project, make a call to /v1/projects/.",
     },
     "EnvironmentIdPath": {
         "in": "path",
         "name": "environment_id",
         "required": True,
         "schema": {"type": "string"},
-        "description": "Deprecated. Use /api/projects/{project_id}/ instead.",
+        "description": "Deprecated. Use /v1/projects/{project_id}/ instead.",
     },
     "OrganizationIdPath": {
         "in": "path",
         "name": "organization_id",
         "required": True,
         "schema": {"type": "string"},
-        "description": "ID of the organization you're trying to access. To find the ID of the organization, make a call to /api/organizations/.",
+        "description": "ID of the organization you're trying to access. To find the ID of the organization, make a call to /v1/organizations/.",
     },
 }
 
@@ -636,7 +636,7 @@ math_help_text = """How to aggregate results, shown as \"counted by\" in the int
 - `dau`: count by unique users. Despite the name, if you select the `interval` to be weekly or monthly, this will show weekly or monthly active users respectively
 - `weekly_active`: rolling average of users of the last 7 days.
 - `monthly_active`: rolling average of users of the last month.
-- `unique_group`: count by group. Requires `math_group_type_index` to be sent. You can get the index by hitting `/api/projects/@current/groups_types/`.
+- `unique_group`: count by group. Requires `math_group_type_index` to be sent. You can get the index by hitting `/v1/projects/@current/groups_types/`.
 
 All of the below are property aggregations, and require `math_property` to be sent with an event property.
 - `sum`: sum of a numeric property.
@@ -675,26 +675,26 @@ class FilterActionSerializer(serializers.Serializer):
 # Global mapping of (path, method) → product folder, populated during preprocessing
 _endpoint_product_mapping: dict[tuple[str, str], str] = {}
 
-# Set of (path, method) for org-level paths that duplicate a /api/projects/ path.
+# Set of (path, method) for org-level paths that duplicate a /v1/projects/ path.
 # These get marked deprecated and prefixed with "org_" in postprocessing.
 _org_paths_with_project_dup: set[tuple[str, str]] = set()
 
 # Prefix used to identify deprecated environment duplicates in postprocessing.
-# Only env paths that duplicate a /api/projects/ path get this prefix (via {environment_id}).
-_DEPRECATED_ENV_PREFIX = "/api/environments/{environment_id}/"
+# Only env paths that duplicate a /v1/projects/ path get this prefix (via {environment_id}).
+_DEPRECATED_ENV_PREFIX = "/v1/environments/{environment_id}/"
 
-# Match any /api/{root}/{parent_lookup_*}/ prefix regardless of the lookup variable name.
+# Match any /v1/{root}/{parent_lookup_*}/ prefix regardless of the lookup variable name.
 # This handles registrations that use team_id, project_id, organization_id, etc.
-_PROJECTS_PREFIX_RE = re.compile(r"^/api/projects/\{parent_lookup_\w+\}/")
-_ENVIRONMENTS_PREFIX_RE = re.compile(r"^/api/environments/\{parent_lookup_\w+\}/")
-_ORG_PREFIX_RE = re.compile(r"^/api/organizations/\{parent_lookup_\w+\}/")
+_PROJECTS_PREFIX_RE = re.compile(r"^/v1/projects/\{parent_lookup_\w+\}/")
+_ENVIRONMENTS_PREFIX_RE = re.compile(r"^/v1/environments/\{parent_lookup_\w+\}/")
+_ORG_PREFIX_RE = re.compile(r"^/v1/organizations/\{parent_lookup_\w+\}/")
 
 _OPERATION_ID_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _HTTP_METHODS = frozenset({"get", "put", "post", "delete", "options", "head", "patch", "trace"})
 
 # Match finalized paths (after {parent_lookup_*} substitution) for postprocessing.
-_ORG_PROJECTS_FINAL_RE = re.compile(r"^/api/organizations/[^/]+/projects/")
-_PROJECT_ENVS_FINAL_RE = re.compile(r"^/api/projects/[^/]+/environments/")
+_ORG_PROJECTS_FINAL_RE = re.compile(r"^/v1/organizations/[^/]+/projects/")
+_PROJECT_ENVS_FINAL_RE = re.compile(r"^/v1/projects/[^/]+/environments/")
 
 
 def _get_product_from_module(module: str) -> str | None:
@@ -707,7 +707,7 @@ def _get_product_from_module(module: str) -> str | None:
 
 
 def _extract_root_suffix(prefix_re: re.Pattern, path: str) -> str | None:
-    """Extract the resource suffix after the root /api/{resource}/{lookup}/ prefix, or None."""
+    """Extract the resource suffix after the root /v1/{resource}/{lookup}/ prefix, or None."""
     m = prefix_re.match(path)
     return path[m.end() :] if m else None
 
@@ -717,10 +717,10 @@ def preprocess_exclude_path_format(endpoints, **kwargs):
     preprocessing hook that filters out {format} suffixed paths, in case
     format_suffix_patterns is used and {format} path params are unwanted.
 
-    Also tracks endpoints registered under both /api/environments/ and
-    /api/projects/ so that environment duplicates can be marked deprecated in
-    postprocessing.  Also detects /api/organizations/ paths that duplicate a
-    /api/projects/ path (same resource suffix) for the same treatment.
+    Also tracks endpoints registered under both /v1/environments/ and
+    /v1/projects/ so that environment duplicates can be marked deprecated in
+    postprocessing.  Also detects /v1/organizations/ paths that duplicate a
+    /v1/projects/ path (same resource suffix) for the same treatment.
 
     Uses regex-based prefix matching so it works regardless of which
     {parent_lookup_*} variable name a registration chose (team_id vs project_id
@@ -734,8 +734,8 @@ def preprocess_exclude_path_format(endpoints, **kwargs):
     _org_paths_with_project_dup.clear()
 
     # Pass 1: collect all included endpoints and build a set of suffixes that
-    # exist under /api/projects/ so we can identify /api/environments/ and
-    # /api/organizations/ duplicates.
+    # exist under /v1/projects/ so we can identify /v1/environments/ and
+    # /v1/organizations/ duplicates.
     included: list[tuple[str, str, str, Any]] = []
     projects_suffixes: set[tuple[str, str]] = set()
 
@@ -768,9 +768,9 @@ def preprocess_exclude_path_format(endpoints, **kwargs):
         is_org_duplicate = org_suffix is not None and (org_suffix, method) in projects_suffixes
 
         if is_env_duplicate:
-            path = _ENVIRONMENTS_PREFIX_RE.sub("/api/environments/{environment_id}/", path, count=1)
+            path = _ENVIRONMENTS_PREFIX_RE.sub("/v1/environments/{environment_id}/", path, count=1)
         elif _ENVIRONMENTS_PREFIX_RE.match(path):
-            path = _ENVIRONMENTS_PREFIX_RE.sub("/api/environments/{project_id}/", path, count=1)
+            path = _ENVIRONMENTS_PREFIX_RE.sub("/v1/environments/{project_id}/", path, count=1)
         else:
             # For projects/org paths, {parent_lookup_team_id} → {project_id} (legacy convention).
             path = path.replace("{parent_lookup_team_id}", "{project_id}")
@@ -1149,7 +1149,7 @@ def custom_postprocessing_hook(result, generator, request, public):
                 definition["tags"] = [swagger_tag]
             else:
                 match = re.search(
-                    r"((\/api\/(organizations|projects|environments)/{(.*?)}\/)|(\/api\/))(?P<one>[a-zA-Z0-9-_]*)\/",
+                    r"((\/v1\/(organizations|projects|environments)/{(.*?)}\/)|(\/v1\/))(?P<one>[a-zA-Z0-9-_]*)\/",
                     path,
                 )
                 if match:
@@ -1163,11 +1163,11 @@ def custom_postprocessing_hook(result, generator, request, public):
             # - Deprecated env paths keep their environments_ prefix (distinguishes them from the
             #   canonical project version that Orval will use).
             # - Org paths that duplicate a project path get an org_ prefix and are marked deprecated.
-            # - /api/organizations/{id}/projects/… paths must NOT have projects_ stripped — that
+            # - /v1/organizations/{id}/projects/… paths must NOT have projects_ stripped — that
             #   segment is the resource name, not a router namespace, and stripping it collapses
             #   everything to e.g. "list"/"create" which then collides with top-level org paths.
-            # - /api/projects/{id}/environments/… paths must NOT have environments_ stripped for the
-            #   same reason — those are sub-resources, not the main /api/environments/ router.
+            # - /v1/projects/{id}/environments/… paths must NOT have environments_ stripped for the
+            #   same reason — those are sub-resources, not the main /v1/environments/ router.
             # - Everything else: strip projects_/environments_ (router-namespace noise).
             is_org_dup = (path, method.upper()) in _org_paths_with_project_dup
             is_org_projects = bool(_ORG_PROJECTS_FINAL_RE.match(path))
