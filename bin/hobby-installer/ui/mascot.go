@@ -23,7 +23,7 @@ var mascotMessages = []string{
 	"The mascot seems happy!",
 	"You've pet the mascot %d times",
 	"The mascot really likes you!",
-	"🎉 You unlocked: SUPER HEDGEHOG MODE! 🎉",
+	"🎉 You unlocked: SUPER MASCOT MODE! 🎉",
 	"Best friends! (%d pets)",
 }
 
