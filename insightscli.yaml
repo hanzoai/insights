@@ -972,7 +972,7 @@ tools:
         hidden: true
     sync:storage:
         bin_script: sync-storage
-        description: 'TODO: add description for sync-storage'
+        description: 'Sync object storage between MinIO and SeaweedFS, per service or all of them'
         hidden: true
     tool:check_ducklake_up:
         bin_script: check_ducklake_up
@@ -999,7 +999,7 @@ tools:
         needs_secrets: true
     generate_personinsights_proto:
         bin_script: generate_personinsights_proto.sh
-        description: 'TODO: add description for generate_personinsights_proto.sh'
+        description: 'Regenerate the personinsights protobuf clients from proto/ into the generated package'
         hidden: true
     phrocs:build:
         cmd: cd tools/phrocs && make build
