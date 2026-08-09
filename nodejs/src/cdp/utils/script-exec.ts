@@ -9,7 +9,7 @@ import { Semaphore } from './sempahore'
 
 const semaphore = new Semaphore(1)
 
-export async function execHog(
+export async function execScript(
     bytecode: any,
     options?: ExecOptions
 ): Promise<{
@@ -19,12 +19,12 @@ export async function execHog(
 }> {
     return await semaphore.run(async () => {
         return await instrumentFn(`script-exec`, async () => {
-            return await yieldEventLoopIfNeeded('script-exec', () => execHogImmediate(bytecode, options))
+            return await yieldEventLoopIfNeeded('script-exec', () => execScriptImmediate(bytecode, options))
         })
     })
 }
 
-export function execHogImmediate(
+export function execScriptImmediate(
     bytecode: any,
     options?: ExecOptions
 ): {

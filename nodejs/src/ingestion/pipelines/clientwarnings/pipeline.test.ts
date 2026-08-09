@@ -12,7 +12,7 @@ import { UUIDT } from '~/common/utils/utils'
 import { EventFilterManager } from '~/ingestion/common/event-filters'
 import { createOkContext } from '~/ingestion/framework/helpers'
 import { createTestTeam } from '~/tests/helpers/team'
-import { createNoopTopHog } from '~/tests/helpers/tophog'
+import { createNoopTopFn } from '~/tests/helpers/topfn'
 
 import { ClientWarningsPipelineConfig, createClientWarningsPipeline } from './pipeline'
 
@@ -122,7 +122,7 @@ describe('ClientWarningsPipeline', () => {
                 ),
                 [TOPFN_OUTPUT]: new SingleIngestionOutput(TOPFN_OUTPUT, 'tophog_test', mockKafkaProducer, 'test'),
             }),
-            topHog: createNoopTopHog(),
+            topFn: createNoopTopFn(),
             teamManager: mockTeamManager,
             eventIngestionRestrictionManager: mockEventIngestionRestrictionManager,
             eventFilterManager: mockEventFilterManager,

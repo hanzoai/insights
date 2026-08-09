@@ -1,7 +1,7 @@
 import { Message } from 'node-rdkafka'
 
 import { ReadOnlyGroupTypeManager } from '~/common/groups/readonly-group-type-manager'
-import { HogTransformer } from '~/common/script-transformations/script-transformer.interface'
+import { ScriptTransformer } from '~/common/script-transformations/script-transformer.interface'
 import { AppMetricsOutput, DlqOutput, IngestionWarningsOutput, OverflowOutput } from '~/common/outputs'
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
 import { PersonReadRepository } from '~/common/persons/repositories/person-repository'
@@ -36,8 +36,8 @@ import { createCreateEventStep } from '~/ingestion/common/steps/event-processing
 import { createDropOldEventsStep } from '~/ingestion/common/steps/event-processing/drop-old-events-step'
 import { createEmitEventStep } from '~/ingestion/common/steps/event-processing/emit-event-step'
 import { createFetchPersonChunkStep } from '~/ingestion/common/steps/event-processing/fetch-person-chunk-step'
-import { createFlushHogTransformerStep } from '~/ingestion/common/steps/event-processing/flush-script-transformer-step'
-import { createHogTransformEventStep } from '~/ingestion/common/steps/event-processing/script-transform-event-step'
+import { createFlushScriptTransformerStep } from '~/ingestion/common/steps/event-processing/flush-script-transformer-step'
+import { createScriptTransformEventStep } from '~/ingestion/common/steps/event-processing/script-transform-event-step'
 import { createNormalizeEventStep } from '~/ingestion/common/steps/event-processing/normalize-event-step'
 import { createNormalizeProcessPersonFlagStep } from '~/ingestion/common/steps/event-processing/normalize-process-person-flag-step'
 import { createPrepareEventStep } from '~/ingestion/common/steps/event-processing/prepare-event-step'
@@ -47,7 +47,7 @@ import { createStripPersonUpdatePropertiesStep } from '~/ingestion/common/steps/
 import { createRecordIngestionLagStep } from '~/ingestion/common/steps/record-ingestion-lag'
 import { AI_EVENT_TYPES } from '~/ingestion/common/subpipelines/ai-event-types'
 import { IngestionOverflowMode } from '~/ingestion/config'
-import { TopHogRegistry, sum, sumOk, sumResult } from '~/ingestion/framework/extensions/tophog'
+import { TopFnRegistry, sum, sumOk, sumResult } from '~/ingestion/framework/extensions/topfn'
 import { isDropResult } from '~/ingestion/framework/results'
 
 import { BlobStore } from './blob-offload/blob-store'
@@ -70,7 +70,7 @@ export interface AiIngestionPipelineConfig {
     eventFilterManager: EventFilterManager
     cookielessManager: CookielessManager
     promiseScheduler: PromiseScheduler
-    hogTransformer: HogTransformer
+    scriptTransformer: ScriptTransformer
     // Read-only person/group access — the AI pipeline never writes persons or groups.
     personRepository: PersonReadRepository
     groupTypeManager: ReadOnlyGroupTypeManager
@@ -81,7 +81,7 @@ export interface AiIngestionPipelineConfig {
     concurrentBatches: number
     eventSchemaEnforcementEnabled: boolean
     eventSchemaEnforcementManager: EventSchemaEnforcementManager
-    topHog: TopHogRegistry
+    topFn: TopFnRegistry
     aiBlobStore: BlobStore | null
     aiBlobOffloadConfig: OffloadAiBlobsConfig
 }
@@ -119,7 +119,7 @@ export function createAiIngestionPipeline<
         eventFilterManager,
         cookielessManager,
         promiseScheduler,
-        hogTransformer,
+        scriptTransformer,
         personRepository,
         groupTypeManager,
         overflowMode,
@@ -129,7 +129,7 @@ export function createAiIngestionPipeline<
         concurrentBatches,
         eventSchemaEnforcementEnabled,
         eventSchemaEnforcementManager,
-        topHog,
+        topFn,
         aiBlobStore,
         aiBlobOffloadConfig,
     } = config
@@ -140,7 +140,7 @@ export function createAiIngestionPipeline<
             outputs,
             promiseScheduler,
             concurrentBatches,
-            topHog,
+            topFn,
         })
             .beforeBatch((b) => b.pipe(createEventFiltersBatchAppMetricsBeforeBatchStep(outputs)))
             // Header-only steps: allow only AI events, apply token restrictions.
@@ -184,9 +184,9 @@ export function createAiIngestionPipeline<
             // that do transient-failure-prone I/O (script transform, group-type
             // fetch, emit) retry, matching the analytics per-distinct-id path.
             .pipe(createNormalizeProcessPersonFlagStep())
-            .pipe(createHogTransformEventStep(hogTransformer), {
+            .pipe(createScriptTransformEventStep(scriptTransformer), {
                 retry: { tries: 5, sleepMs: 100, name: 'hog_transform_event' },
-                topHog: [
+                topFn: [
                     sumOk(
                         'transformations_run',
                         (output) => ({ team_id: String(output.team.id) }),
@@ -248,7 +248,7 @@ export function createAiIngestionPipeline<
             .pipe(createSplitAiEventsStep())
             .pipe(createEmitEventStep({ outputs }), {
                 retry: { tries: 5, sleepMs: 100, name: 'emit_event' },
-                topHog: [
+                topFn: [
                     sum(
                         'emitted_events',
                         (input) => ({ team_id: String(input.teamId) }),
@@ -269,7 +269,7 @@ export function createAiIngestionPipeline<
                 b
                     .pipe(createFlushEventFiltersBatchAppMetricsStep())
                     // Drain script transformer invocation results once per batch.
-                    .pipe(createFlushHogTransformerStep(hogTransformer))
+                    .pipe(createFlushScriptTransformerStep(scriptTransformer))
             )
             .build()
     )

@@ -280,7 +280,7 @@ describe('InsightsFunctionManager', () => {
     })
 })
 
-describe('Hogfunction Manager - Execution Order', () => {
+describe('Scriptfunction Manager - Execution Order', () => {
     let hub: Hub
     let manager: InsightsFunctionManagerService
     let insightsFunctions: InsightsFunctionType[]

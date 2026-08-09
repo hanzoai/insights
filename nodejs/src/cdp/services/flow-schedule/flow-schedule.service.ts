@@ -191,7 +191,7 @@ export class FlowScheduleService {
 
     get service(): PluginServerService {
         return {
-            id: 'cdp-hogflow-scheduler',
+            id: 'cdp-flow-scheduler',
             onShutdown: () => this.stop(),
             healthcheck: () => this.isHealthy(),
         }

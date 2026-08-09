@@ -3,12 +3,12 @@ import { RedisClientPipeline, RedisV2 } from '~/common/redis/redis-v2'
 import { createExampleInvocation } from '../../_tests/fixtures'
 import { CyclotronJobInvocationInsightsFunction, CyclotronJobInvocationResult } from '../../types'
 import { createInvocationResult } from '../../utils/invocation-utils'
-import { HogWatcherConfig, HogWatcherService } from './script-watcher.service'
+import { ScriptWatcherConfig, ScriptWatcherService } from './script-watcher.service'
 
-const WATCHER_CONFIG: HogWatcherConfig = {
-    hogCostTimingLowerMs: 50,
-    hogCostTimingUpperMs: 550,
-    hogCostTiming: 100,
+const WATCHER_CONFIG: ScriptWatcherConfig = {
+    scriptCostTimingLowerMs: 50,
+    scriptCostTimingUpperMs: 550,
+    scriptCostTiming: 100,
     asyncCostTimingLowerMs: 100,
     asyncCostTimingUpperMs: 5000,
     asyncCostTiming: 20,
@@ -52,13 +52,13 @@ const createClusterRedisStub = (): RedisV2 => ({
     }),
 })
 
-describe('HogWatcherService unit behavior', () => {
+describe('ScriptWatcherService unit behavior', () => {
     afterEach(() => {
         jest.useRealTimers()
     })
 
     it('observes multiple functions without issuing cross-slot commands', async () => {
-        const watcher = new HogWatcherService({} as any, WATCHER_CONFIG, createClusterRedisStub())
+        const watcher = new ScriptWatcherService({} as any, WATCHER_CONFIG, createClusterRedisStub())
 
         await expect(watcher.observeResults([createResult('first'), createResult('second')])).resolves.toBeUndefined()
     })
@@ -70,7 +70,7 @@ describe('HogWatcherService unit behavior', () => {
             useClient: jest.fn(),
             usePipeline: jest.fn().mockResolvedValue([[commandError, undefined]]),
         }
-        const watcher = new HogWatcherService({} as any, WATCHER_CONFIG, writer, reader)
+        const watcher = new ScriptWatcherService({} as any, WATCHER_CONFIG, writer, reader)
 
         await expect(watcher.observeResults([createResult('first'), createResult('second')])).resolves.toBeUndefined()
         expect(writer.usePipeline).toHaveBeenCalledWith(
@@ -81,7 +81,7 @@ describe('HogWatcherService unit behavior', () => {
 
     it('rejects buffered callers when a timer-triggered flush fails', async () => {
         jest.useFakeTimers()
-        const watcher = new HogWatcherService({} as any, WATCHER_CONFIG, createClusterRedisStub())
+        const watcher = new ScriptWatcherService({} as any, WATCHER_CONFIG, createClusterRedisStub())
         const error = new Error("CROSSSLOT Keys in request don't hash to the same slot")
         jest.spyOn(watcher, 'observeResults').mockRejectedValue(error)
 

@@ -1,8 +1,8 @@
-import { convertHogToJS } from '@hanzo/scriptvm'
+import { convertScriptToJS } from '@hanzo/scriptvm'
 
 import type { InsightsFunctionType } from '~/cdp/types'
 import { sanitizeLogMessage } from '~/cdp/utils'
-import { execHogImmediate } from '~/cdp/utils/script-exec'
+import { execScriptImmediate } from '~/cdp/utils/script-exec'
 import { parseJSON } from '~/common/utils/json-parse'
 
 import type { LogRecord } from '../log-record-avro'
@@ -355,7 +355,7 @@ export function resolveLogTransformationInputs(
                 execResult,
                 error,
                 durationMs: execMs,
-            } = execHogImmediate(input.bytecode, {
+            } = execScriptImmediate(input.bytecode, {
                 globals: { ...globals, inputs },
                 timeout: timeoutMs,
                 maxAsyncSteps: 0,
@@ -367,7 +367,7 @@ export function resolveLogTransformationInputs(
             }
             // Script objects surface as Maps; convert like the body's result so inputs
             // hold plain JS values for globals, encoders, and redaction.
-            inputs[key] = convertHogToJS(execResult.result)
+            inputs[key] = convertScriptToJS(execResult.result)
         } else {
             inputs[key] = input?.value
         }
@@ -396,7 +396,7 @@ export function executeLogTransformation(
     const timeoutMs = options.timeoutMs ?? DEFAULT_LOG_TRANSFORMATION_TIMEOUT_MS
     const logs: string[] = []
 
-    const { execResult, error, durationMs } = execHogImmediate(bytecode, {
+    const { execResult, error, durationMs } = execScriptImmediate(bytecode, {
         globals,
         timeout: timeoutMs,
         maxAsyncSteps: 0,
@@ -423,7 +423,7 @@ export function executeLogTransformation(
     // Redact secrets from the returned record before it's applied: a transformation
     // can copy a decrypted input into a writable field, and Logs readers must not be
     // able to recover encrypted input values that way.
-    const converted = redactSensitiveStrings(convertHogToJS(execResult.result), options.sensitiveValues)
+    const converted = redactSensitiveStrings(convertScriptToJS(execResult.result), options.sensitiveValues)
     const applied = applyTransformResult(record, converted)
 
     if (applied === 'invalid') {

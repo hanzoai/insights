@@ -2,13 +2,13 @@ import { create } from '@bufbuild/protobuf'
 import { Code, ConnectError, createRouterTransport } from '@connectrpc/connect'
 import { DateTime } from 'luxon'
 
-import { PersonHogService } from '~/common/generated/personinsights/personinsights/service/v1/service_pb'
+import { PersonFnService } from '~/common/generated/personinsights/personinsights/service/v1/service_pb'
 import { PersonSchema } from '~/common/generated/personinsights/personinsights/types/v1/person_pb'
 import { InternalPersonWithDistinctId, PersonRepository } from '~/common/persons/repositories/person-repository'
 import { InternalPerson, TeamId } from '~/types'
 
-import { PersonHogClient } from './client'
-import { PersonHogPersonRepository } from './personinsights-person-repository'
+import { PersonFnClient } from './client'
+import { PersonFnPersonRepository } from './personinsights-person-repository'
 
 jest.mock('~/common/utils/logger')
 
@@ -98,14 +98,14 @@ type ServiceHandlers = {
     getPersonsByUuids: jest.Mock
 }
 
-function createGrpcClient(): { client: PersonHogClient; handlers: ServiceHandlers } {
+function createGrpcClient(): { client: PersonFnClient; handlers: ServiceHandlers } {
     const handlers: ServiceHandlers = {
         getPersonsByDistinctIds: jest.fn(() => ({ results: [] })),
         getPersonsByUuids: jest.fn(() => ({ persons: [], missingIds: [] })),
     }
 
     const transport = createRouterTransport(({ service }) => {
-        service(PersonHogService, {
+        service(PersonFnService, {
             ...handlers,
             // no-op defaults for RPCs not under test
             getPerson: () => ({}),
@@ -135,12 +135,12 @@ function createGrpcClient(): { client: PersonHogClient; handlers: ServiceHandler
         })
     })
 
-    return { client: PersonHogClient.fromTransport(transport), handlers }
+    return { client: PersonFnClient.fromTransport(transport), handlers }
 }
 
-describe('PersonHogPersonRepository', () => {
+describe('PersonFnPersonRepository', () => {
     let mockPostgres: jest.Mocked<PersonRepository>
-    let grpcClient: PersonHogClient
+    let grpcClient: PersonFnClient
     let handlers: ServiceHandlers
 
     beforeEach(() => {
@@ -150,8 +150,8 @@ describe('PersonHogPersonRepository', () => {
         handlers = grpc.handlers
     })
 
-    function createRepo(grpcPercentage: number, rolloutTeamIds: Set<number> = new Set()): PersonHogPersonRepository {
-        return new PersonHogPersonRepository(mockPostgres, grpcClient, grpcPercentage, rolloutTeamIds, 'test')
+    function createRepo(grpcPercentage: number, rolloutTeamIds: Set<number> = new Set()): PersonFnPersonRepository {
+        return new PersonFnPersonRepository(mockPostgres, grpcClient, grpcPercentage, rolloutTeamIds, 'test')
     }
 
     describe.each([
@@ -378,7 +378,7 @@ describe('PersonHogPersonRepository', () => {
                     })
                     pg.fetchPerson.mockResolvedValue(TEST_PERSON)
                     return {
-                        call: (repo: PersonHogPersonRepository) =>
+                        call: (repo: PersonFnPersonRepository) =>
                             repo.fetchPerson(TEAM_ID, 'user-123', { useReadReplica: true }),
                         expected: TEST_PERSON,
                     }
@@ -392,7 +392,7 @@ describe('PersonHogPersonRepository', () => {
                     })
                     pg.fetchPersonsByDistinctIds.mockResolvedValue([TEST_PERSON_WITH_DISTINCT_ID])
                     return {
-                        call: (repo: PersonHogPersonRepository) =>
+                        call: (repo: PersonFnPersonRepository) =>
                             repo.fetchPersonsByDistinctIds([{ teamId: TEAM_ID, distinctId: 'user-123' }], true),
                         expected: [TEST_PERSON_WITH_DISTINCT_ID],
                     }
@@ -406,7 +406,7 @@ describe('PersonHogPersonRepository', () => {
                     })
                     pg.fetchPersonsByPersonIds.mockResolvedValue([TEST_PERSON])
                     return {
-                        call: (repo: PersonHogPersonRepository) =>
+                        call: (repo: PersonFnPersonRepository) =>
                             repo.fetchPersonsByPersonIds([{ teamId: TEAM_ID, personId: TEST_PERSON.uuid }], true),
                         expected: [TEST_PERSON],
                     }
@@ -419,7 +419,7 @@ describe('PersonHogPersonRepository', () => {
                 setup: (
                     h: ServiceHandlers,
                     pg: jest.Mocked<PersonRepository>
-                ) => { call: (repo: PersonHogPersonRepository) => Promise<unknown>; expected: unknown }
+                ) => { call: (repo: PersonFnPersonRepository) => Promise<unknown>; expected: unknown }
             ) => {
                 const { call, expected } = setup(handlers, mockPostgres)
                 const repo = createRepo(100)

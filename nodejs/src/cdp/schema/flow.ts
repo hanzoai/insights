@@ -22,7 +22,7 @@ const _commonActionFields = {
     created_at: z.number(),
     updated_at: z.number(),
     filters: z.any(), // TODO: Correct to the right type
-    output_variable: z // The Hogflow-level variable to store the output of this action into
+    output_variable: z // The Scriptflow-level variable to store the output of this action into
         .union([
             FlowOutputVariableSchema,
             z.array(z.union([FlowOutputVariableSchema, legacyStringOutputVariable])),
@@ -94,7 +94,7 @@ export const FlowActionSchema = z.discriminatedUnion('type', [
         ..._commonActionFields,
         type: z.literal('trigger'),
         config: FlowTriggerSchema,
-        // A trigger's event filters are stored on the top-level Hogflow object
+        // A trigger's event filters are stored on the top-level Scriptflow object
     }),
     // Branching
     z.object({

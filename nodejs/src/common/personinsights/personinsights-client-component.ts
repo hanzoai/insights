@@ -1,20 +1,20 @@
-import { PersonHogClient } from './client'
-import { PersonHogConfig, createPersonHogClient } from './index'
+import { PersonFnClient } from './client'
+import { PersonFnConfig, createPersonFnClient } from './index'
 
 /**
- * Scope owner for a PersonHog gRPC client: builds the client on `start()` and
+ * Scope owner for a PersonFn gRPC client: builds the client on `start()` and
  * closes the connection on `stop()`, so its lifetime is tied to the owning
  * scope. Throws if personinsights isn't configured — read-only lanes (AI, error
  * tracking) read person and group data through it.
  */
-export class PersonHogClientComponent {
-    constructor(private readonly config: PersonHogConfig) {}
+export class PersonFnClientComponent {
+    constructor(private readonly config: PersonFnConfig) {}
 
-    start(): Promise<{ value: PersonHogClient; stop: () => Promise<void> }> {
-        const client = createPersonHogClient(this.config)
+    start(): Promise<{ value: PersonFnClient; stop: () => Promise<void> }> {
+        const client = createPersonFnClient(this.config)
         if (!client) {
             throw new Error(
-                'PersonHog client is required but not configured — set PERSONFN_ENABLED=true and PERSONFN_ADDR'
+                'PersonFn client is required but not configured — set PERSONFN_ENABLED=true and PERSONFN_ADDR'
             )
         }
         return Promise.resolve({

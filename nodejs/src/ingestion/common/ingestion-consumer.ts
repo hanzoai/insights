@@ -1,7 +1,7 @@
 import { Message } from 'node-rdkafka'
 import { Gauge } from 'prom-client'
 
-import { TophogOutput } from '~/common/outputs'
+import { TopFnOutput } from '~/common/outputs'
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
 import { instrumentFn } from '~/common/tracing/tracing-utils'
 import { logger } from '~/common/utils/logger'
@@ -9,7 +9,7 @@ import { IngestionConsumerConfig } from '~/ingestion/config'
 import { BatchResult, FeedResult } from '~/ingestion/framework/batching-pipeline'
 import { createKafkaDebugContext, createOkContext } from '~/ingestion/framework/helpers'
 import { OkResultWithContext } from '~/ingestion/framework/pipeline.interface'
-import { TopHog, TopHogComponent } from '~/ingestion/framework/tophog'
+import { TopFn, TopFnComponent } from '~/ingestion/framework/topfn'
 import { HealthCheckResult, PluginServerService } from '~/types'
 
 import { Scope, extend } from './scopes'
@@ -65,32 +65,32 @@ const latestOffsetTimestampGauge = new Gauge({
  * started handle.
  */
 export class CommonIngestionConsumerScope<
-    S extends ContainerWithPromiseScheduler & { outputs: IngestionOutputs<TophogOutput> },
+    S extends ContainerWithPromiseScheduler & { outputs: IngestionOutputs<TopFnOutput> },
 > {
-    private readonly innerScope: Scope<S & { topHog: TopHog } & { kafkaConsumer: KafkaConsumerInterface }>
+    private readonly innerScope: Scope<S & { topFn: TopFn } & { kafkaConsumer: KafkaConsumerInterface }>
 
     constructor(
         private readonly name: string,
         config: CommonIngestionConsumerConfig,
         scope: Scope<S>,
-        pipelineFactory: PipelineFactory<S & { topHog: TopHog }>
+        pipelineFactory: PipelineFactory<S & { topFn: TopFn }>
     ) {
         const consumerName = this.name
-        // Every consumer gets a topHog registry scoped to its own outputs and
+        // Every consumer gets a topFn registry scoped to its own outputs and
         // pipeline/lane labels. It lives one scope above the consumer so its
         // started value is in the container when the pipeline factory runs —
         // and so its flush loop starts before, and stops after, the consumer.
-        const scopeWithTopHog = extend(scope, `${consumerName}-tophog`, (container, builder) =>
+        const scopeWithTopFn = extend(scope, `${consumerName}-topfn`, (container, builder) =>
             builder.add(
-                'topHog',
-                new TopHogComponent({
+                'topFn',
+                new TopFnComponent({
                     outputs: container.outputs,
                     pipeline: config.INGESTION_PIPELINE ?? 'unknown',
                     lane: config.INGESTION_LANE ?? 'unknown',
                 })
             )
         )
-        this.innerScope = extend(scopeWithTopHog, `${consumerName}-consumer`, (container, builder) => {
+        this.innerScope = extend(scopeWithTopFn, `${consumerName}-consumer`, (container, builder) => {
             const pipeline = pipelineFactory({ container })
             const handler = new KafkaBatchHandler(config, consumerName, pipeline, container.promiseScheduler)
             return builder.add(

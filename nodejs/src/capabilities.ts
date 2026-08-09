@@ -28,8 +28,8 @@ export const CAPABILITIES_CDP_WORKFLOWS: PluginServerCapabilities = {
     cdpCyclotronWorkerFlow: true,
     cdpCyclotronWorkerEmail: true,
     cdpCyclotronV2Janitor: isDevEnv(),
-    cdpHogflowScheduler: isDevEnv(),
-    cdpHogflowSubscriptionMatcher: isDevEnv(),
+    cdpScriptflowScheduler: isDevEnv(),
+    cdpScriptflowSubscriptionMatcher: isDevEnv(),
 }
 
 /** Realtime Cohorts - precalculated filters and cohort membership */
@@ -146,7 +146,7 @@ export function getPluginServerCapabilities(
             }
         case PluginServerMode.cdp_hogflow_subscription_matcher:
             return {
-                cdpHogflowSubscriptionMatcher: true,
+                cdpScriptflowSubscriptionMatcher: true,
             }
         case PluginServerMode.cdp_cohort_membership:
             return {
@@ -197,7 +197,7 @@ export function getPluginServerCapabilities(
             throw new Error(`Mode ${mode} is handled by IngestionApiServer, not PluginServer`)
         case PluginServerMode.cdp_hogflow_scheduler:
             return {
-                cdpHogflowScheduler: true,
+                cdpScriptflowScheduler: true,
             }
         case PluginServerMode.recordings_blob_ingestion_v2:
         case PluginServerMode.recordings_blob_ingestion_v2_overflow:

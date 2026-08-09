@@ -8,15 +8,15 @@ import { TeamManager } from '~/common/utils/team-manager'
 import { createExampleInvocation } from '../../_tests/fixtures'
 import { CyclotronJobInvocationInsightsFunction, CyclotronJobInvocationResult } from '../../types'
 import { createInvocationResult } from '../../utils/invocation-utils'
-import { BASE_REDIS_KEY, HogWatcherConfig, HogWatcherService } from './script-watcher.service'
+import { BASE_REDIS_KEY, ScriptWatcherConfig, ScriptWatcherService } from './script-watcher.service'
 
 const host = process.env.CDP_VALKEY_HOST ?? '127.0.0.1'
 const port = Number(process.env.CDP_VALKEY_PORT ?? 6390)
 
-const WATCHER_CONFIG: HogWatcherConfig = {
-    hogCostTimingLowerMs: 50,
-    hogCostTimingUpperMs: 550,
-    hogCostTiming: 100,
+const WATCHER_CONFIG: ScriptWatcherConfig = {
+    scriptCostTimingLowerMs: 50,
+    scriptCostTimingUpperMs: 550,
+    scriptCostTiming: 100,
     asyncCostTimingLowerMs: 100,
     asyncCostTimingUpperMs: 5000,
     asyncCostTiming: 20,
@@ -37,7 +37,7 @@ const createResult = (id: string): CyclotronJobInvocationResult<CyclotronJobInvo
     return createInvocationResult(invocation, {}, { finished: true })
 }
 
-describe('HogWatcher on Valkey Cluster', () => {
+describe('ScriptWatcher on Valkey Cluster', () => {
     let valkey: Redis.Redis
     let valkeyPool: RedisV2
 
@@ -68,7 +68,7 @@ describe('HogWatcher on Valkey Cluster', () => {
         expect(slots[0]).not.toEqual(slots[1])
         await expect(valkey.mget(...stateKeys)).rejects.toThrow('CROSSSLOT')
 
-        const watcher = new HogWatcherService({} as TeamManager, WATCHER_CONFIG, valkeyPool)
+        const watcher = new ScriptWatcherService({} as TeamManager, WATCHER_CONFIG, valkeyPool)
         await expect(watcher.observeResults(functionIds.map(createResult))).resolves.toBeUndefined()
     })
 

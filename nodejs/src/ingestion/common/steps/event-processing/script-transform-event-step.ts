@@ -1,16 +1,16 @@
-import { HogTransformer } from '~/common/script-transformations/script-transformer.interface'
+import { ScriptTransformer } from '~/common/script-transformations/script-transformer.interface'
 import { PipelineWarning } from '~/ingestion/framework/pipeline.interface'
 import { drop, ok } from '~/ingestion/framework/results'
 import { ProcessingStep } from '~/ingestion/framework/steps'
 import { PluginEvent } from '~/plugin-scaffold'
 import { Team } from '~/types'
 
-export interface HogTransformEventInput {
+export interface ScriptTransformEventInput {
     event: PluginEvent
     team: Pick<Team, 'id'>
 }
 
-export interface HogTransformEventOutput {
+export interface ScriptTransformEventOutput {
     transformationsRun: number
 }
 
@@ -22,18 +22,18 @@ export interface HogTransformEventOutput {
  *
  * If a transformation drops the event (returns null), this step returns a `drop` result.
  */
-export function createHogTransformEventStep<T extends HogTransformEventInput>(
-    hogTransformer: Pick<HogTransformer, 'transformEventAndProduceMessages'> | null
-): ProcessingStep<T, T & HogTransformEventOutput> {
-    return async function hogTransformEventStep(input) {
+export function createScriptTransformEventStep<T extends ScriptTransformEventInput>(
+    scriptTransformer: Pick<ScriptTransformer, 'transformEventAndProduceMessages'> | null
+): ProcessingStep<T, T & ScriptTransformEventOutput> {
+    return async function scriptTransformEventStep(input) {
         const { event } = input
 
         // If no transformer configured, pass through unchanged
-        if (!hogTransformer) {
+        if (!scriptTransformer) {
             return ok({ ...input, transformationsRun: 0 })
         }
 
-        const result = await hogTransformer.transformEventAndProduceMessages(event)
+        const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
         // If transformation dropped the event, return drop result with a warning
         // so the user can see which transformation dropped it

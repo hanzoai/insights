@@ -1,4 +1,4 @@
-import { TOPFN_OUTPUT, TophogOutput } from '~/common/outputs'
+import { TOPFN_OUTPUT, TopFnOutput } from '~/common/outputs'
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
 import { logger } from '~/common/utils/logger'
 import { Component, Started } from '~/ingestion/common/scopes/component'
@@ -10,13 +10,13 @@ export interface MetricConfig {
     maxKeys?: number
 }
 
-export interface TopHogRequiredConfig {
-    outputs: IngestionOutputs<TophogOutput>
+export interface TopFnRequiredConfig {
+    outputs: IngestionOutputs<TopFnOutput>
     pipeline: string
     lane: string
 }
 
-export interface TopHogOptionalConfig {
+export interface TopFnOptionalConfig {
     flushIntervalMs: number
     defaultTopN: number
     maxKeys: number
@@ -27,14 +27,14 @@ const DEFAULT_FLUSH_INTERVAL_MS = 60_000
 const DEFAULT_TOP_N = 10
 const DEFAULT_MAX_KEYS = 1_000
 
-export class TopHog {
+export class TopFn {
     private summingTrackers: Map<string, SummingMetricTracker> = new Map()
     private maxTrackers: Map<string, MaxMetricTracker> = new Map()
     private averageTrackers: Map<string, AverageMetricTracker> = new Map()
     private flushInterval: ReturnType<typeof setInterval> | null = null
-    private readonly config: TopHogRequiredConfig & TopHogOptionalConfig
+    private readonly config: TopFnRequiredConfig & TopFnOptionalConfig
 
-    constructor(options: TopHogRequiredConfig & Partial<TopHogOptionalConfig>) {
+    constructor(options: TopFnRequiredConfig & Partial<TopFnOptionalConfig>) {
         this.config = {
             flushIntervalMs: DEFAULT_FLUSH_INTERVAL_MS,
             defaultTopN: DEFAULT_TOP_N,
@@ -118,7 +118,7 @@ export class TopHog {
         }
         this.flushInterval = setInterval(() => {
             void this.flush().catch((error) => {
-                logger.error('TopHog flush failed', { error })
+                logger.error('TopFn flush failed', { error })
             })
         }, this.config.flushIntervalMs)
     }
@@ -139,20 +139,20 @@ export class TopHog {
 }
 
 /**
- * Lifecycle component for a consumer's TopHog registry: starts the flush loop
+ * Lifecycle component for a consumer's TopFn registry: starts the flush loop
  * with the scope, drains and stops it on teardown.
  *
- * TopHog is deliberately per-consumer, not process-shared: an instance bakes
+ * TopFn is deliberately per-consumer, not process-shared: an instance bakes
  * in the pipeline/lane labels its rows are stamped with and flushes through
  * that consumer's outputs, and one server process can run several consumers
  * off the same shared services scope.
  */
-export class TopHogComponent implements Component<TopHog> {
-    constructor(private readonly config: TopHogRequiredConfig & Partial<TopHogOptionalConfig>) {}
+export class TopFnComponent implements Component<TopFn> {
+    constructor(private readonly config: TopFnRequiredConfig & Partial<TopFnOptionalConfig>) {}
 
-    start(): Promise<Started<TopHog>> {
-        const topHog = new TopHog(this.config)
-        topHog.start()
-        return Promise.resolve({ value: topHog, stop: () => topHog.stop() })
+    start(): Promise<Started<TopFn>> {
+        const topFn = new TopFn(this.config)
+        topFn.start()
+        return Promise.resolve({ value: topFn, stop: () => topFn.stop() })
     }
 }

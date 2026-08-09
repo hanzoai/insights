@@ -1,7 +1,7 @@
 import { Counter, Gauge } from 'prom-client'
 
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
-import { HogTransformationResult, HogTransformer } from '~/common/script-transformations/script-transformer.interface'
+import { ScriptTransformationResult, ScriptTransformer } from '~/common/script-transformations/script-transformer.interface'
 import { instrumentFn } from '~/common/tracing/tracing-utils'
 import { PostgresRouter } from '~/common/utils/db/postgres'
 import { GeoIPService, GeoIp } from '~/common/utils/geoip'
@@ -19,58 +19,58 @@ import {
     InsightsFunctionMonitoringService,
     MonitoringOutput,
 } from '../services/monitoring/script-function-monitoring.service'
-import { HogExecutorService } from '../services/script-executor.service'
-import { HogInputsService } from '../services/script-inputs.service'
+import { ScriptExecutorService } from '../services/script-executor.service'
+import { ScriptInputsService } from '../services/script-inputs.service'
 import { EncryptedFields } from '../utils/encryption-utils'
 import { createInvocation } from '../utils/invocation-utils'
 import { convertToInsightsFunctionFilterGlobal, filterFunctionInstrumented } from '../utils/script-function-filtering'
 import { RustVmExecutor } from './rust-vm-executor'
 import { getTransformationFunctions } from './transformation-functions'
 
-export interface HogTransformerConfig {
+export interface ScriptTransformerConfig {
     siteUrl: string
-    hogRustVmExecutionEnabled: boolean
+    scriptRustVmExecutionEnabled: boolean
     mmdbFileLocation: string
 }
 
-export const hogTransformationDroppedEvents = new Counter({
+export const scriptTransformationDroppedEvents = new Counter({
     name: 'hog_transformation_dropped_events',
     help: 'Indicates how many events are dropped by script transformations',
 })
 
-export const hogTransformationInvocations = new Counter({
+export const scriptTransformationInvocations = new Counter({
     name: 'hog_transformation_invocations_total',
     help: 'Number of times transformEvent was called directly',
 })
 
-export const hogTransformationAttempts = new Counter({
+export const scriptTransformationAttempts = new Counter({
     name: 'hog_transformation_attempts_total',
     help: 'Number of transformation attempts before any processing',
     labelNames: ['type'],
 })
 
-export const hogTransformationCompleted = new Counter({
+export const scriptTransformationCompleted = new Counter({
     name: 'hog_transformation_completed_total',
     help: 'Number of successfully completed transformations',
     labelNames: ['type'],
 })
 
-export const hogTransformationPendingInvocationResults = new Gauge({
+export const scriptTransformationPendingInvocationResults = new Gauge({
     name: 'hog_transformation_pending_invocation_results',
     help: 'Number of invocation results accumulated and waiting to be processed. High values indicate memory accumulation.',
 })
 
-export const hogTransformationUnexpectedErrors = new Counter({
+export const scriptTransformationUnexpectedErrors = new Counter({
     name: 'hog_transformation_unexpected_errors_total',
     help: 'Number of unexpected errors during transformation execution. Any occurrence should trigger an alert as the transformation is skipped.',
 })
 
-export interface TransformationResult extends HogTransformationResult {
+export interface TransformationResult extends ScriptTransformationResult {
     event: PluginEvent | null
     invocationResults: CyclotronJobInvocationResult[]
 }
 
-export class HogTransformerService implements HogTransformer {
+export class ScriptTransformerService implements ScriptTransformer {
     private invocationResults: CyclotronJobInvocationResult[] = []
     private cachedGeoIp?: GeoIp
     private cachedTransformationFunctions?: ReturnType<typeof getTransformationFunctions>
@@ -78,13 +78,13 @@ export class HogTransformerService implements HogTransformer {
 
     constructor(
         private insightsFunctionManager: InsightsFunctionManagerService,
-        private hogExecutor: HogExecutorService,
+        private scriptExecutor: ScriptExecutorService,
         private insightsFunctionMonitoringService: InsightsFunctionMonitoringService,
         private pluginExecutor: LegacyPluginExecutorService,
         private geoipService: GeoIPService,
-        private config: HogTransformerConfig
+        private config: ScriptTransformerConfig
     ) {
-        this.rustVmExecutor = config.hogRustVmExecutionEnabled
+        this.rustVmExecutor = config.scriptRustVmExecutionEnabled
             ? new RustVmExecutor({ mmdbPath: config.mmdbFileLocation })
             : null
     }
@@ -98,7 +98,7 @@ export class HogTransformerService implements HogTransformer {
     public async processInvocationResults(): Promise<void> {
         const results = [...this.invocationResults]
         this.invocationResults = []
-        hogTransformationPendingInvocationResults.set(0)
+        scriptTransformationPendingInvocationResults.set(0)
 
         this.insightsFunctionMonitoringService.queueInvocationResults(results)
 
@@ -133,7 +133,7 @@ export class HogTransformerService implements HogTransformer {
     }
 
     private async transformEventAndProduceMessagesImpl(event: PluginEvent): Promise<TransformationResult> {
-        hogTransformationAttempts.inc({ type: 'with_messages' })
+        scriptTransformationAttempts.inc({ type: 'with_messages' })
 
         const teamInsightsFunctions = await this.insightsFunctionManager.getInsightsFunctionsForTeam(event.team_id, [
             'transformation',
@@ -144,16 +144,16 @@ export class HogTransformerService implements HogTransformer {
         for (const result of transformationResult.invocationResults) {
             this.invocationResults.push(result)
         }
-        hogTransformationPendingInvocationResults.set(this.invocationResults.length)
+        scriptTransformationPendingInvocationResults.set(this.invocationResults.length)
 
-        hogTransformationCompleted.inc({ type: 'with_messages' })
+        scriptTransformationCompleted.inc({ type: 'with_messages' })
         return {
             ...transformationResult,
         }
     }
 
     public transformEventAndProduceMessages(event: PluginEvent): Promise<TransformationResult> {
-        return instrumentFn(`hogTransformer.transformEventAndProduceMessages`, () =>
+        return instrumentFn(`scriptTransformer.transformEventAndProduceMessages`, () =>
             this.transformEventAndProduceMessagesImpl(event)
         )
     }
@@ -162,7 +162,7 @@ export class HogTransformerService implements HogTransformer {
         event: PluginEvent,
         teamInsightsFunctions: InsightsFunctionType[]
     ): Promise<TransformationResult> {
-        hogTransformationInvocations.inc()
+        scriptTransformationInvocations.inc()
 
         // Early return if no transformations to run
         if (teamInsightsFunctions.length === 0) {
@@ -209,7 +209,7 @@ export class HogTransformerService implements HogTransformer {
             try {
                 result = await this.executeInsightsFunction(insightsFunction, globals)
             } catch (err) {
-                hogTransformationUnexpectedErrors.inc()
+                scriptTransformationUnexpectedErrors.inc()
                 logger.error('⚠️', 'Unexpected error executing transformation', {
                     function_id: insightsFunction.id,
                     team_id: event.team_id,
@@ -237,7 +237,7 @@ export class HogTransformerService implements HogTransformer {
             }
 
             if (!result.execResult) {
-                hogTransformationDroppedEvents.inc()
+                scriptTransformationDroppedEvents.inc()
                 this.insightsFunctionMonitoringService.queueAppMetric(
                     {
                         team_id: event.team_id,
@@ -344,7 +344,7 @@ export class HogTransformerService implements HogTransformer {
             }
         }
 
-        return instrumentFn(`hogTransformer.transformEvent`, () =>
+        return instrumentFn(`scriptTransformer.transformEvent`, () =>
             this.transformEventImpl(event, teamInsightsFunctions)
         )
     }
@@ -354,7 +354,7 @@ export class HogTransformerService implements HogTransformer {
         globals: InsightsFunctionInvocationGlobals
     ): Promise<CyclotronJobInvocationResult> {
         const transformationFunctions = await this.getTransformationFunctions()
-        const globalsWithInputs = await this.hogExecutor.buildInputsWithGlobals(insightsFunction, globals)
+        const globalsWithInputs = await this.scriptExecutor.buildInputsWithGlobals(insightsFunction, globals)
 
         const invocation = createInvocation(globalsWithInputs, insightsFunction)
 
@@ -363,7 +363,7 @@ export class HogTransformerService implements HogTransformer {
         }
 
         if (this.rustVmExecutor) {
-            const sensitiveValues = this.hogExecutor.getSensitiveValues(insightsFunction, globalsWithInputs.inputs)
+            const sensitiveValues = this.scriptExecutor.getSensitiveValues(insightsFunction, globalsWithInputs.inputs)
             const rustResult = this.rustVmExecutor.execute(invocation, sensitiveValues)
             // Null means the Rust VM can't run this program (addon not built, unsupported host
             // function): fall through to the Node VM.
@@ -372,17 +372,17 @@ export class HogTransformerService implements HogTransformer {
             }
         }
 
-        return await this.hogExecutor.execute(invocation, { functions: transformationFunctions })
+        return await this.scriptExecutor.execute(invocation, { functions: transformationFunctions })
     }
 }
 
-/** Config read by createHogTransformerService when running inside ingestion. */
-export type HogTransformerServiceConfig = Pick<
+/** Config read by createScriptTransformerService when running inside ingestion. */
+export type ScriptTransformerServiceConfig = Pick<
     CommonConfig,
     'SITE_URL' | 'CDP_FN_RUST_VM_EXECUTION_ENABLED' | 'MMDB_FILE_LOCATION' | 'TRANSFORMATIONS_FN_TIMEOUT_MS'
 >
 
-export interface HogTransformerServiceDeps {
+export interface ScriptTransformerServiceDeps {
     geoipService: GeoIPService
     postgres: PostgresRouter
     pubSub: PubSub
@@ -394,29 +394,29 @@ export interface HogTransformerServiceDeps {
 /**
  * Keep this factory's config and dependencies intentionally minimal. Transformations run only the synchronous Script
  * execution core and must not inherit Redis, fetch, email, push, or other CDP delivery infrastructure just to satisfy
- * a shared service constructor. Anything that needs those belongs in HogExecutorAsyncService, not in HogExecutorService.
+ * a shared service constructor. Anything that needs those belongs in ScriptExecutorAsyncService, not in ScriptExecutorService.
  */
-export function createHogTransformerService(
-    config: HogTransformerServiceConfig,
-    deps: HogTransformerServiceDeps
-): HogTransformerService {
+export function createScriptTransformerService(
+    config: ScriptTransformerServiceConfig,
+    deps: ScriptTransformerServiceDeps
+): ScriptTransformerService {
     const insightsFunctionManager = new InsightsFunctionManagerService(deps.postgres, deps.pubSub, deps.encryptedFields)
-    const hogInputsService = new HogInputsService(deps.integrationManager, undefined, deps.encryptedFields)
-    const hogExecutor = new HogExecutorService(
+    const scriptInputsService = new ScriptInputsService(deps.integrationManager, undefined, deps.encryptedFields)
+    const scriptExecutor = new ScriptExecutorService(
         { executionTimeoutMs: config.TRANSFORMATIONS_FN_TIMEOUT_MS },
-        hogInputsService
+        scriptInputsService
     )
     const pluginExecutor = new LegacyPluginExecutorService(deps.postgres, deps.geoipService)
     const insightsFunctionMonitoringService = new InsightsFunctionMonitoringService(deps.monitoringOutputs)
-    return new HogTransformerService(
+    return new ScriptTransformerService(
         insightsFunctionManager,
-        hogExecutor,
+        scriptExecutor,
         insightsFunctionMonitoringService,
         pluginExecutor,
         deps.geoipService,
         {
             siteUrl: config.SITE_URL,
-            hogRustVmExecutionEnabled: config.CDP_FN_RUST_VM_EXECUTION_ENABLED,
+            scriptRustVmExecutionEnabled: config.CDP_FN_RUST_VM_EXECUTION_ENABLED,
             mmdbFileLocation: config.MMDB_FILE_LOCATION,
         }
     )

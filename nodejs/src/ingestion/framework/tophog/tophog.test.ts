@@ -1,17 +1,17 @@
-import { TOPFN_OUTPUT, TophogOutput } from '~/common/outputs'
+import { TOPFN_OUTPUT, TopFnOutput } from '~/common/outputs'
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
 import { parseJSON } from '~/common/utils/json-parse'
 
-import { TopHog, TopHogOptionalConfig, TopHogRequiredConfig } from './tophog'
+import { TopFn, TopFnOptionalConfig, TopFnRequiredConfig } from './topfn'
 
-describe('TopHog', () => {
+describe('TopFn', () => {
     let mockQueueMessages: jest.Mock
-    let mockOutputs: IngestionOutputs<TophogOutput>
+    let mockOutputs: IngestionOutputs<TopFnOutput>
 
     beforeEach(() => {
         jest.useFakeTimers({ now: new Date('2025-01-15T10:30:00.000Z') })
         mockQueueMessages = jest.fn().mockResolvedValue(undefined)
-        mockOutputs = { queueMessages: mockQueueMessages } as unknown as IngestionOutputs<TophogOutput>
+        mockOutputs = { queueMessages: mockQueueMessages } as unknown as IngestionOutputs<TopFnOutput>
     })
 
     afterEach(() => {
@@ -19,8 +19,8 @@ describe('TopHog', () => {
     })
 
     function createOptions(
-        overrides: Partial<TopHogRequiredConfig & TopHogOptionalConfig> = {}
-    ): TopHogRequiredConfig & Partial<TopHogOptionalConfig> {
+        overrides: Partial<TopFnRequiredConfig & TopFnOptionalConfig> = {}
+    ): TopFnRequiredConfig & Partial<TopFnOptionalConfig> {
         return {
             outputs: mockOutputs,
             pipeline: 'test_pipeline',
@@ -40,44 +40,44 @@ describe('TopHog', () => {
 
     describe('tracker registry', () => {
         it('should return the same sum tracker instance for the same name', () => {
-            const tophog = new TopHog(createOptions())
-            const a = tophog.registerSum('events')
-            const b = tophog.registerSum('events')
+            const topfn = new TopFn(createOptions())
+            const a = topfn.registerSum('events')
+            const b = topfn.registerSum('events')
             expect(a).toBe(b)
         })
 
         it('should return different tracker instances for different names', () => {
-            const tophog = new TopHog(createOptions())
-            const a = tophog.registerSum('events')
-            const b = tophog.registerSum('heatmaps')
+            const topfn = new TopFn(createOptions())
+            const a = topfn.registerSum('events')
+            const b = topfn.registerSum('heatmaps')
             expect(a).not.toBe(b)
         })
 
         it('should store metric name as given', () => {
-            const tophog = new TopHog(createOptions())
-            expect(tophog.registerSum('events').metricName).toBe('events')
-            expect(tophog.registerSum('latency').metricName).toBe('latency')
+            const topfn = new TopFn(createOptions())
+            expect(topfn.registerSum('events').metricName).toBe('events')
+            expect(topfn.registerSum('latency').metricName).toBe('latency')
         })
 
         it('should return the same average tracker instance for the same name', () => {
-            const tophog = new TopHog(createOptions())
-            const a = tophog.registerAverage('latency')
-            const b = tophog.registerAverage('latency')
+            const topfn = new TopFn(createOptions())
+            const a = topfn.registerAverage('latency')
+            const b = topfn.registerAverage('latency')
             expect(a).toBe(b)
         })
 
         it('should return the same max tracker instance for the same name', () => {
-            const tophog = new TopHog(createOptions())
-            const a = tophog.registerMax('max_size')
-            const b = tophog.registerMax('max_size')
+            const topfn = new TopFn(createOptions())
+            const a = topfn.registerMax('max_size')
+            const b = topfn.registerMax('max_size')
             expect(a).toBe(b)
         })
 
         it('should return independent trackers for the same name across different types', () => {
-            const tophog = new TopHog(createOptions())
-            const sum = tophog.registerSum('latency')
-            const max = tophog.registerMax('latency')
-            const avg = tophog.registerAverage('latency')
+            const topfn = new TopFn(createOptions())
+            const sum = topfn.registerSum('latency')
+            const max = topfn.registerMax('latency')
+            const avg = topfn.registerAverage('latency')
             expect(sum).not.toBe(max)
             expect(sum).not.toBe(avg)
             expect(max).not.toBe(avg)
@@ -86,10 +86,10 @@ describe('TopHog', () => {
 
     describe('flush collects from all trackers', () => {
         it('should produce messages from trackers', async () => {
-            const tophog = new TopHog(createOptions())
-            tophog.registerSum('events').record({ team_id: '42' }, 5)
+            const topfn = new TopFn(createOptions())
+            topfn.registerSum('events').record({ team_id: '42' }, 5)
 
-            await tophog.flush()
+            await topfn.flush()
 
             expect(getProducedMessages()).toEqual([
                 {
@@ -107,10 +107,10 @@ describe('TopHog', () => {
         })
 
         it('should include type=sum for sum trackers', async () => {
-            const tophog = new TopHog(createOptions())
-            tophog.registerSum('events').record({ team_id: '1' }, 5)
+            const topfn = new TopFn(createOptions())
+            topfn.registerSum('events').record({ team_id: '1' }, 5)
 
-            await tophog.flush()
+            await topfn.flush()
 
             const msg = getProducedMessages()[0]
             expect(msg.type).toBe('sum')
@@ -119,10 +119,10 @@ describe('TopHog', () => {
         })
 
         it('should include type=max for max trackers', async () => {
-            const tophog = new TopHog(createOptions())
-            tophog.registerMax('max_size').record({ team_id: '1' }, 100)
+            const topfn = new TopFn(createOptions())
+            topfn.registerMax('max_size').record({ team_id: '1' }, 100)
 
-            await tophog.flush()
+            await topfn.flush()
 
             const msg = getProducedMessages()[0]
             expect(msg.type).toBe('max')
@@ -131,12 +131,12 @@ describe('TopHog', () => {
         })
 
         it('should include type=avg for average trackers', async () => {
-            const tophog = new TopHog(createOptions())
-            const tracker = tophog.registerAverage('latency')
+            const topfn = new TopFn(createOptions())
+            const tracker = topfn.registerAverage('latency')
             tracker.record({ team_id: '1' }, 10)
             tracker.record({ team_id: '1' }, 30)
 
-            await tophog.flush()
+            await topfn.flush()
 
             const msg = getProducedMessages()[0]
             expect(msg.type).toBe('avg')
@@ -145,12 +145,12 @@ describe('TopHog', () => {
         })
 
         it('should collect entries from mixed tracker types in a single flush', async () => {
-            const tophog = new TopHog(createOptions())
-            tophog.registerSum('events').record({ team_id: '1' }, 10)
-            tophog.registerMax('max_size').record({ team_id: '1' }, 500)
-            tophog.registerAverage('avg_latency').record({ team_id: '1' }, 30)
+            const topfn = new TopFn(createOptions())
+            topfn.registerSum('events').record({ team_id: '1' }, 10)
+            topfn.registerMax('max_size').record({ team_id: '1' }, 500)
+            topfn.registerAverage('avg_latency').record({ team_id: '1' }, 30)
 
-            await tophog.flush()
+            await topfn.flush()
 
             const messages = getProducedMessages()
             expect(messages).toHaveLength(3)
@@ -160,15 +160,15 @@ describe('TopHog', () => {
         })
 
         it('should flush same-named metrics across different types independently', async () => {
-            const tophog = new TopHog(createOptions())
-            tophog.registerSum('latency').record({ team_id: '1' }, 10)
-            tophog.registerSum('latency').record({ team_id: '1' }, 20)
-            tophog.registerMax('latency').record({ team_id: '1' }, 10)
-            tophog.registerMax('latency').record({ team_id: '1' }, 20)
-            tophog.registerAverage('latency').record({ team_id: '1' }, 10)
-            tophog.registerAverage('latency').record({ team_id: '1' }, 20)
+            const topfn = new TopFn(createOptions())
+            topfn.registerSum('latency').record({ team_id: '1' }, 10)
+            topfn.registerSum('latency').record({ team_id: '1' }, 20)
+            topfn.registerMax('latency').record({ team_id: '1' }, 10)
+            topfn.registerMax('latency').record({ team_id: '1' }, 20)
+            topfn.registerAverage('latency').record({ team_id: '1' }, 10)
+            topfn.registerAverage('latency').record({ team_id: '1' }, 20)
 
-            await tophog.flush()
+            await topfn.flush()
 
             const messages = getProducedMessages()
             expect(messages).toHaveLength(3)
@@ -178,48 +178,48 @@ describe('TopHog', () => {
         })
 
         it('should not produce when there is no data', async () => {
-            const tophog = new TopHog(createOptions())
+            const topfn = new TopFn(createOptions())
 
-            await tophog.flush()
+            await topfn.flush()
 
             expect(mockQueueMessages).not.toHaveBeenCalled()
         })
 
         it('should clear all trackers after flush', async () => {
-            const tophog = new TopHog(createOptions())
-            tophog.registerSum('events').record({ team_id: '1' }, 10)
+            const topfn = new TopFn(createOptions())
+            topfn.registerSum('events').record({ team_id: '1' }, 10)
 
-            await tophog.flush()
-            await tophog.flush()
+            await topfn.flush()
+            await topfn.flush()
 
             expect(mockQueueMessages).toHaveBeenCalledTimes(1)
         })
 
         it('should include labels in flushed messages', async () => {
-            const tophog = new TopHog(createOptions({ labels: { hostname: 'worker-1', region: 'us-east' } }))
-            tophog.registerSum('events').record({ team_id: '1' }, 1)
+            const topfn = new TopFn(createOptions({ labels: { hostname: 'worker-1', region: 'us-east' } }))
+            topfn.registerSum('events').record({ team_id: '1' }, 1)
 
-            await tophog.flush()
+            await topfn.flush()
 
             expect(getProducedMessages()[0].labels).toEqual({ hostname: 'worker-1', region: 'us-east' })
         })
 
         it('should include pipeline and lane in every message', async () => {
-            const tophog = new TopHog(createOptions({ pipeline: 'analytics', lane: 'heatmap' }))
-            tophog.registerSum('events').record({ team_id: '1' }, 1)
+            const topfn = new TopFn(createOptions({ pipeline: 'analytics', lane: 'heatmap' }))
+            topfn.registerSum('events').record({ team_id: '1' }, 1)
 
-            await tophog.flush()
+            await topfn.flush()
 
             const messages = getProducedMessages()
             expect(messages[0].pipeline).toBe('analytics')
             expect(messages[0].lane).toBe('heatmap')
         })
 
-        it('should produce to the tophog output', async () => {
-            const tophog = new TopHog(createOptions())
-            tophog.registerSum('events').record({ team_id: '1' }, 1)
+        it('should produce to the topfn output', async () => {
+            const topfn = new TopFn(createOptions())
+            topfn.registerSum('events').record({ team_id: '1' }, 1)
 
-            await tophog.flush()
+            await topfn.flush()
 
             expect(mockQueueMessages).toHaveBeenCalledWith(TOPFN_OUTPUT, expect.any(Array))
         })
@@ -227,68 +227,68 @@ describe('TopHog', () => {
 
     describe('start and stop', () => {
         it('should flush periodically after start', async () => {
-            const tophog = new TopHog(createOptions({ flushIntervalMs: 1000 }))
-            tophog.start()
+            const topfn = new TopFn(createOptions({ flushIntervalMs: 1000 }))
+            topfn.start()
 
-            tophog.registerSum('metric').record({ id: 'k' }, 1)
+            topfn.registerSum('metric').record({ id: 'k' }, 1)
             jest.advanceTimersByTime(1000)
 
             expect(mockQueueMessages).toHaveBeenCalledTimes(1)
 
-            tophog.registerSum('metric').record({ id: 'k' }, 2)
+            topfn.registerSum('metric').record({ id: 'k' }, 2)
             jest.advanceTimersByTime(1000)
 
             expect(mockQueueMessages).toHaveBeenCalledTimes(2)
 
-            await tophog.stop()
+            await topfn.stop()
         })
 
         it('should perform a final flush on stop', async () => {
-            const tophog = new TopHog(createOptions({ flushIntervalMs: 60_000 }))
-            tophog.start()
-            tophog.registerSum('metric').record({ id: 'k' }, 5)
+            const topfn = new TopFn(createOptions({ flushIntervalMs: 60_000 }))
+            topfn.start()
+            topfn.registerSum('metric').record({ id: 'k' }, 5)
 
-            await tophog.stop()
+            await topfn.stop()
 
             expect(mockQueueMessages).toHaveBeenCalledTimes(1)
         })
 
         it('should not flush periodically after stop', async () => {
-            const tophog = new TopHog(createOptions({ flushIntervalMs: 1000 }))
-            tophog.start()
-            await tophog.stop()
+            const topfn = new TopFn(createOptions({ flushIntervalMs: 1000 }))
+            topfn.start()
+            await topfn.stop()
 
-            tophog.registerSum('metric').record({ id: 'k' }, 1)
+            topfn.registerSum('metric').record({ id: 'k' }, 1)
             jest.advanceTimersByTime(5000)
 
             expect(mockQueueMessages).toHaveBeenCalledTimes(0)
         })
 
         it('should not start multiple intervals', () => {
-            const tophog = new TopHog(createOptions({ flushIntervalMs: 1000 }))
-            tophog.start()
-            tophog.start()
+            const topfn = new TopFn(createOptions({ flushIntervalMs: 1000 }))
+            topfn.start()
+            topfn.start()
 
-            tophog.registerSum('metric').record({ id: 'k' }, 1)
+            topfn.registerSum('metric').record({ id: 'k' }, 1)
             jest.advanceTimersByTime(1000)
 
             expect(mockQueueMessages).toHaveBeenCalledTimes(1)
         })
 
         it('should work without calling start (manual flush only)', async () => {
-            const tophog = new TopHog(createOptions())
-            tophog.registerSum('metric').record({ id: 'k' }, 1)
+            const topfn = new TopFn(createOptions())
+            topfn.registerSum('metric').record({ id: 'k' }, 1)
 
-            await tophog.flush()
+            await topfn.flush()
 
             expect(mockQueueMessages).toHaveBeenCalledTimes(1)
         })
 
         it('should flush on stop even if start was never called', async () => {
-            const tophog = new TopHog(createOptions())
-            tophog.registerSum('metric').record({ id: 'k' }, 1)
+            const topfn = new TopFn(createOptions())
+            topfn.registerSum('metric').record({ id: 'k' }, 1)
 
-            await tophog.stop()
+            await topfn.stop()
 
             expect(mockQueueMessages).toHaveBeenCalledTimes(1)
         })

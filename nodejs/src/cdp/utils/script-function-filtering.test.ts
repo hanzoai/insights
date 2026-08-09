@@ -361,7 +361,7 @@ describe('script-function-filtering', () => {
         describe('SQL date comparison trigger filter', () => {
             // Regression: a hand-written SQL trigger filter like `timestamp > toDateTime('2024-01-01')`
             // only wraps the RHS in toDateTime, so the VM compares the filter globals' plain ISO
-            // `timestamp` against a HogDateTime object. Before the fix in
+            // `timestamp` against a ScriptDateTime object. Before the fix in
             // common/scriptvm/typescript/src/utils.ts, that comparison was always false and the trigger
             // silently never fired for any live event.
             const timestampAfterJan2024 = [

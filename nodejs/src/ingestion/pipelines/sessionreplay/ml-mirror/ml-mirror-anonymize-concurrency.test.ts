@@ -4,7 +4,7 @@ import { Message } from 'node-rdkafka'
 import { EventIngestionRestrictionManager } from '~/common/utils/event-ingestion-restrictions'
 import { PromiseScheduler } from '~/common/utils/promise-scheduler'
 import { createApplyEventRestrictionsStep, createParseHeadersStep } from '~/ingestion/common/steps/event-preprocessing'
-import { TopHogRegistry } from '~/ingestion/framework/extensions/tophog'
+import { TopFnRegistry } from '~/ingestion/framework/extensions/topfn'
 import { ok } from '~/ingestion/framework/results'
 import { runSessionReplayPipeline } from '~/ingestion/pipelines/sessionreplay'
 import { ParsedMessageData } from '~/ingestion/pipelines/sessionreplay/kafka/types'
@@ -141,11 +141,11 @@ describe('ml-mirror anonymize concurrency', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog: {
+                topFn: {
                     registerSum: jest.fn().mockReturnValue({ record: jest.fn() }),
                     registerMax: jest.fn().mockReturnValue({ record: jest.fn() }),
                     registerAverage: jest.fn().mockReturnValue({ record: jest.fn() }),
-                } as unknown as TopHogRegistry,
+                } as unknown as TopFnRegistry,
                 isDebugLoggingEnabled: () => false,
             },
             { anonymizeMaxConcurrency: 2 }

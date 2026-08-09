@@ -22,8 +22,8 @@ import { FlowExecutorService } from './flows/flow-executor.service'
 import { FlowManagerService } from './flows/flow-manager.service'
 import { shouldBlockFlowDueToQuota } from './flows/flow-quota-limiting'
 import { InsightsFunctionMonitoringService } from './monitoring/script-function-monitoring.service'
-import { HogMaskerService } from './monitoring/script-masker.service'
-import { HogWatcherService, HogWatcherState } from './monitoring/script-watcher.service'
+import { ScriptMaskerService } from './monitoring/script-masker.service'
+import { ScriptWatcherService, ScriptWatcherState } from './monitoring/script-watcher.service'
 
 export interface FlowInvocationPipelineConfig {
     CDP_RATE_LIMITER_BUCKET_SIZE: number
@@ -34,9 +34,9 @@ export interface FlowInvocationPipelineConfig {
 export interface FlowInvocationPipelineDeps {
     flowManager: FlowManagerService
     flowExecutor: FlowExecutorService
-    hogWatcher: HogWatcherService
-    hogWatcherMirror: HogWatcherService | null
-    hogMasker: HogMaskerService
+    scriptWatcher: ScriptWatcherService
+    scriptWatcherMirror: ScriptWatcherService | null
+    scriptMasker: ScriptMaskerService
     insightsFunctionMonitoringService: InsightsFunctionMonitoringService
     quotaLimiting: QuotaLimiting
     redis: RedisV2
@@ -50,8 +50,8 @@ export interface FlowInvocationPipelineDeps {
  * Consumers compose this service rather than inheriting it.
  */
 export class FlowInvocationPipeline {
-    private hogRateLimiter: KeyedRateLimiterService
-    private hogRateLimiterMirror: KeyedRateLimiterService | null
+    private scriptRateLimiter: KeyedRateLimiterService
+    private scriptRateLimiterMirror: KeyedRateLimiterService | null
 
     constructor(
         private config: FlowInvocationPipelineConfig,
@@ -63,8 +63,8 @@ export class FlowInvocationPipeline {
             refillRate: config.CDP_RATE_LIMITER_REFILL_RATE,
             ttlSeconds: config.CDP_RATE_LIMITER_TTL,
         }
-        this.hogRateLimiter = new KeyedRateLimiterService(rateLimiterConfig, deps.redis)
-        this.hogRateLimiterMirror = deps.valkeyShadow
+        this.scriptRateLimiter = new KeyedRateLimiterService(rateLimiterConfig, deps.redis)
+        this.scriptRateLimiterMirror = deps.valkeyShadow
             ? new KeyedRateLimiterService(rateLimiterConfig, deps.valkeyShadow.writer)
             : null
     }
@@ -82,13 +82,13 @@ export class FlowInvocationPipeline {
         }
     ): Promise<CyclotronJobInvocation[]> {
         const teamsToLoad = [...new Set(invocationGlobals.map((x) => x.project.id))]
-        const hogFlowsByTeam = await this.deps.flowManager.getFlowsForTeams(teamsToLoad)
+        const flowsByTeam = await this.deps.flowManager.getFlowsForTeams(teamsToLoad)
         const eligibilityFn = options?.eligibilityFn
 
         const possibleInvocations = (
             await Promise.all(
                 invocationGlobals.map(async (globals) => {
-                    const teamFlows = hogFlowsByTeam[globals.project.id]
+                    const teamFlows = flowsByTeam[globals.project.id]
                     const eligibleFlows = eligibilityFn
                         ? teamFlows.filter((flow) => eligibilityFn(flow, globals))
                         : teamFlows
@@ -110,10 +110,10 @@ export class FlowInvocationPipeline {
         const states = await mirrorCompare(
             'script-watcher.getEffectiveStates',
             () =>
-                instrumentFn('cdpConsumer.handleEachBatch.hogWatcher.getEffectiveStates', async () => {
-                    return await this.deps.hogWatcher.getEffectiveStates(flowIds)
+                instrumentFn('cdpConsumer.handleEachBatch.scriptWatcher.getEffectiveStates', async () => {
+                    return await this.deps.scriptWatcher.getEffectiveStates(flowIds)
                 }),
-            () => this.deps.hogWatcherMirror?.getEffectiveStates(flowIds)
+            () => this.deps.scriptWatcherMirror?.getEffectiveStates(flowIds)
         )
 
         const rateLimitInputs: KeyedRateLimitRequest[] = possibleInvocations.map((x) => ({
@@ -123,10 +123,10 @@ export class FlowInvocationPipeline {
         const rateLimits = await mirrorCompare(
             'script-rate-limiter.rateLimitGrouped',
             () =>
-                instrumentFn('cdpConsumer.handleEachBatch.hogRateLimiter.rateLimitGrouped', async () => {
-                    return await this.hogRateLimiter.rateLimitGrouped(rateLimitInputs)
+                instrumentFn('cdpConsumer.handleEachBatch.scriptRateLimiter.rateLimitGrouped', async () => {
+                    return await this.scriptRateLimiter.rateLimitGrouped(rateLimitInputs)
                 }),
-            () => this.hogRateLimiterMirror?.rateLimitGrouped(rateLimitInputs),
+            () => this.scriptRateLimiterMirror?.rateLimitGrouped(rateLimitInputs),
             (primary, mirror) =>
                 primary.every(([, result], index) => result.isRateLimited === mirror[index]?.[1].isRateLimited)
         )
@@ -164,7 +164,7 @@ export class FlowInvocationPipeline {
                         }
                         this.deps.insightsFunctionMonitoringService.queueLogs([logEntry], 'hog_flow')
 
-                        logger.warn('⚠️', 'Hogflow invocation rate limited', {
+                        logger.warn('⚠️', 'Scriptflow invocation rate limited', {
                             teamId: item.teamId,
                             flowId: item.functionId,
                             flowName: item.flow.name,
@@ -190,7 +190,7 @@ export class FlowInvocationPipeline {
                 }
 
                 const state = states[item.flow.id].state
-                if (state === HogWatcherState.disabled) {
+                if (state === ScriptWatcherState.disabled) {
                     this.deps.insightsFunctionMonitoringService.queueAppMetric(
                         {
                             team_id: item.teamId,
@@ -205,7 +205,7 @@ export class FlowInvocationPipeline {
                     return
                 }
 
-                if (state === HogWatcherState.degraded) {
+                if (state === ScriptWatcherState.degraded) {
                     item.queuePriority = 2
                 }
 
@@ -213,7 +213,7 @@ export class FlowInvocationPipeline {
             })
         )
 
-        const { masked, notMasked: notMaskedInvocations } = await this.deps.hogMasker.filterByMasking(validInvocations)
+        const { masked, notMasked: notMaskedInvocations } = await this.deps.scriptMasker.filterByMasking(validInvocations)
 
         this.deps.insightsFunctionMonitoringService.queueAppMetrics(
             masked.map((item) => ({

@@ -1,4 +1,4 @@
-import { compileHog } from '~/cdp/templates/compiler'
+import { compileScript } from '~/cdp/templates/compiler'
 
 import { BENCH_LOG_RECORDS, BENCH_PROGRAMS, buildBenchGlobals } from './fixtures'
 import { execBenchProgram } from './scriptvm-exec'
@@ -34,7 +34,7 @@ function percentile(sorted: number[], p: number): number {
 async function main(): Promise<void> {
     console.info(`Compiling ${BENCH_PROGRAMS.length} Script programs via bin/script...`)
     const compiled = await Promise.all(
-        BENCH_PROGRAMS.map(async (program) => ({ program, bytecode: await compileHog(program.script) }))
+        BENCH_PROGRAMS.map(async (program) => ({ program, bytecode: await compileScript(program.script) }))
     )
 
     const allStats: BenchStats[] = []

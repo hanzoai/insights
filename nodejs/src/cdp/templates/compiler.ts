@@ -7,18 +7,18 @@ import path from 'path'
 import { parseJSON } from '~/common/utils/json-parse'
 import { UUIDT } from '~/common/utils/utils'
 
-import { HogBytecode } from '../types'
+import { ScriptBytecode } from '../types'
 import { Semaphore } from '../utils/sempahore'
 
 const ROOT_DIR = path.join(__dirname, '..', '..', '..', '..')
 const CACHE_FILE = path.join(__dirname, '.tmp/cache.json')
 
-let CACHE: Record<string, HogBytecode> | null = null
+let CACHE: Record<string, ScriptBytecode> | null = null
 const CONCURRENT_WORKERS = 10
 
 const semaphore = new Semaphore(CONCURRENT_WORKERS)
 
-export async function compileHog(script: string): Promise<HogBytecode> {
+export async function compileScript(script: string): Promise<ScriptBytecode> {
     return semaphore.run(async () => {
         if (CACHE === null) {
             mkdirSync(path.dirname(CACHE_FILE), { recursive: true })

@@ -7,7 +7,7 @@ import { EventIngestionRestrictionManager } from '~/common/utils/event-ingestion
 import { parseJSON } from '~/common/utils/json-parse'
 import { PromiseScheduler } from '~/common/utils/promise-scheduler'
 import { createApplyEventRestrictionsStep, createParseHeadersStep } from '~/ingestion/common/steps/event-preprocessing'
-import { TopHogRegistry } from '~/ingestion/framework/extensions/tophog'
+import { TopFnRegistry } from '~/ingestion/framework/extensions/topfn'
 import { drop, ok, redirect } from '~/ingestion/framework/results'
 import { SessionBatchRecorder } from '~/ingestion/pipelines/sessionreplay/sessions/session-batch-recorder'
 import { SessionFilter } from '~/ingestion/pipelines/sessionreplay/sessions/session-filter'
@@ -43,13 +43,13 @@ interface MockRecorder {
     record: jest.Mock
 }
 
-interface MockTopHogRegistry extends TopHogRegistry {
+interface MockTopFnRegistry extends TopFnRegistry {
     sumRecorders: Map<string, MockRecorder>
     maxRecorders: Map<string, MockRecorder>
     averageRecorders: Map<string, MockRecorder>
 }
 
-function createMockTopHog(): MockTopHogRegistry {
+function createMockTopFn(): MockTopFnRegistry {
     const sumRecorders = new Map<string, MockRecorder>()
     const maxRecorders = new Map<string, MockRecorder>()
     const averageRecorders = new Map<string, MockRecorder>()
@@ -81,7 +81,7 @@ describe('session-replay-pipeline', () => {
     let mockTeamService: TeamService
     let mockBatchRecorder: jest.Mocked<SessionBatchRecorder>
     let promiseScheduler: PromiseScheduler
-    let topHog: MockTopHogRegistry
+    let topFn: MockTopFnRegistry
     let outputs: jest.Mocked<
         IngestionOutputs<typeof DLQ_OUTPUT | typeof OVERFLOW_OUTPUT | typeof INGESTION_WARNINGS_OUTPUT>
     >
@@ -182,7 +182,7 @@ describe('session-replay-pipeline', () => {
         } as unknown as TeamService
 
         mockBatchRecorder = createMockBatchRecorder()
-        topHog = createMockTopHog()
+        topFn = createMockTopFn()
 
         promiseScheduler = new PromiseScheduler()
 
@@ -289,7 +289,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -328,7 +328,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -372,7 +372,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -422,7 +422,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -500,7 +500,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -539,7 +539,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -581,7 +581,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -634,7 +634,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -687,7 +687,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -735,7 +735,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -772,7 +772,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -824,7 +824,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -863,7 +863,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -910,7 +910,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -944,7 +944,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -975,7 +975,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -1018,7 +1018,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -1042,7 +1042,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -1066,7 +1066,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -1111,7 +1111,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -1143,7 +1143,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -1173,7 +1173,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -1207,7 +1207,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -1225,7 +1225,7 @@ describe('session-replay-pipeline', () => {
             expect(maxOffsets).toEqual(new Map([[0, 1]]))
         })
 
-        it('records parse time metric via TopHog', async () => {
+        it('records parse time metric via TopFn', async () => {
             const pipeline = createSessionReplayPipeline({
                 outputs,
                 eventIngestionRestrictionManager: mockRestrictionManager,
@@ -1237,7 +1237,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -1246,7 +1246,7 @@ describe('session-replay-pipeline', () => {
             await runSessionReplayPipeline(pipeline, messages, mockBatchRecorder, promiseScheduler)
 
             // Verify parse time metric was registered and recorded
-            const parseTimeRecorder = topHog.sumRecorders.get('parse_time_ms_by_session_id')
+            const parseTimeRecorder = topFn.sumRecorders.get('parse_time_ms_by_session_id')
             expect(parseTimeRecorder).toBeDefined()
             expect(parseTimeRecorder!.record).toHaveBeenCalledTimes(1)
             expect(parseTimeRecorder!.record).toHaveBeenCalledWith(
@@ -1255,7 +1255,7 @@ describe('session-replay-pipeline', () => {
             )
         })
 
-        it('records message size metric via TopHog', async () => {
+        it('records message size metric via TopFn', async () => {
             const pipeline = createSessionReplayPipeline({
                 outputs,
                 eventIngestionRestrictionManager: mockRestrictionManager,
@@ -1267,7 +1267,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -1276,7 +1276,7 @@ describe('session-replay-pipeline', () => {
             await runSessionReplayPipeline(pipeline, messages, mockBatchRecorder, promiseScheduler)
 
             // Verify message size metric was registered and recorded
-            const messageSizeRecorder = topHog.sumRecorders.get('message_size_by_session_id')
+            const messageSizeRecorder = topFn.sumRecorders.get('message_size_by_session_id')
             expect(messageSizeRecorder).toBeDefined()
             expect(messageSizeRecorder!.record).toHaveBeenCalledTimes(1)
             expect(messageSizeRecorder!.record).toHaveBeenCalledWith(
@@ -1285,7 +1285,7 @@ describe('session-replay-pipeline', () => {
             )
         })
 
-        it('records consume time metric via TopHog', async () => {
+        it('records consume time metric via TopFn', async () => {
             const pipeline = createSessionReplayPipeline({
                 outputs,
                 eventIngestionRestrictionManager: mockRestrictionManager,
@@ -1297,7 +1297,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -1306,7 +1306,7 @@ describe('session-replay-pipeline', () => {
             await runSessionReplayPipeline(pipeline, messages, mockBatchRecorder, promiseScheduler)
 
             // Verify consume time metric was registered and recorded
-            const consumeTimeRecorder = topHog.sumRecorders.get('consume_time_ms_by_session_id')
+            const consumeTimeRecorder = topFn.sumRecorders.get('consume_time_ms_by_session_id')
             expect(consumeTimeRecorder).toBeDefined()
             expect(consumeTimeRecorder!.record).toHaveBeenCalledTimes(1)
             expect(consumeTimeRecorder!.record).toHaveBeenCalledWith(
@@ -1315,7 +1315,7 @@ describe('session-replay-pipeline', () => {
             )
         })
 
-        it('records TopHog metrics for multiple messages', async () => {
+        it('records TopFn metrics for multiple messages', async () => {
             const pipeline = createSessionReplayPipeline({
                 outputs,
                 eventIngestionRestrictionManager: mockRestrictionManager,
@@ -1327,7 +1327,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -1340,13 +1340,13 @@ describe('session-replay-pipeline', () => {
             await runSessionReplayPipeline(pipeline, messages, mockBatchRecorder, promiseScheduler)
 
             // Verify all three messages were recorded for each metric
-            const parseTimeRecorder = topHog.sumRecorders.get('parse_time_ms_by_session_id')
+            const parseTimeRecorder = topFn.sumRecorders.get('parse_time_ms_by_session_id')
             expect(parseTimeRecorder!.record).toHaveBeenCalledTimes(3)
 
-            const messageSizeRecorder = topHog.sumRecorders.get('message_size_by_session_id')
+            const messageSizeRecorder = topFn.sumRecorders.get('message_size_by_session_id')
             expect(messageSizeRecorder!.record).toHaveBeenCalledTimes(3)
 
-            const consumeTimeRecorder = topHog.sumRecorders.get('consume_time_ms_by_session_id')
+            const consumeTimeRecorder = topFn.sumRecorders.get('consume_time_ms_by_session_id')
             expect(consumeTimeRecorder!.record).toHaveBeenCalledTimes(3)
 
             // Verify different session_ids and tokens are recorded
@@ -1364,7 +1364,7 @@ describe('session-replay-pipeline', () => {
             )
         })
 
-        it('does not record TopHog metrics for dropped messages', async () => {
+        it('does not record TopFn metrics for dropped messages', async () => {
             mockCreateApplyEventRestrictionsStep.mockReturnValue(() => Promise.resolve(drop('dropped')))
 
             const pipeline = createSessionReplayPipeline({
@@ -1378,7 +1378,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -1387,9 +1387,9 @@ describe('session-replay-pipeline', () => {
             await runSessionReplayPipeline(pipeline, messages, mockBatchRecorder, promiseScheduler)
 
             // Metrics should not be recorded for dropped messages since they never reach the steps
-            const parseTimeRecorder = topHog.sumRecorders.get('parse_time_ms_by_session_id')
-            const messageSizeRecorder = topHog.sumRecorders.get('message_size_by_session_id')
-            const consumeTimeRecorder = topHog.sumRecorders.get('consume_time_ms_by_session_id')
+            const parseTimeRecorder = topFn.sumRecorders.get('parse_time_ms_by_session_id')
+            const messageSizeRecorder = topFn.sumRecorders.get('message_size_by_session_id')
+            const consumeTimeRecorder = topFn.sumRecorders.get('consume_time_ms_by_session_id')
 
             // Recorders might not even be created if no messages reach the step
             if (parseTimeRecorder) {
@@ -1403,7 +1403,7 @@ describe('session-replay-pipeline', () => {
             }
         })
 
-        it('uses "unknown" token in TopHog metrics when token header is missing', async () => {
+        it('uses "unknown" token in TopFn metrics when token header is missing', async () => {
             // Override parse headers to not include token in parsed headers, but still have it in message headers
             mockCreateParseHeadersStep.mockReturnValue(
                 (input: { message: Message; headers?: Record<string, string> }) => {
@@ -1428,7 +1428,7 @@ describe('session-replay-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled,
             })
 
@@ -1448,7 +1448,7 @@ describe('session-replay-pipeline', () => {
             await runSessionReplayPipeline(pipeline, [messageWithoutToken], mockBatchRecorder, promiseScheduler)
 
             // The parsed message should have token from Kafka headers
-            const messageSizeRecorder = topHog.sumRecorders.get('message_size_by_session_id')
+            const messageSizeRecorder = topFn.sumRecorders.get('message_size_by_session_id')
             expect(messageSizeRecorder).toBeDefined()
             expect(messageSizeRecorder!.record).toHaveBeenCalledWith(
                 { org: 'test-token', session_id: 'session-1' },

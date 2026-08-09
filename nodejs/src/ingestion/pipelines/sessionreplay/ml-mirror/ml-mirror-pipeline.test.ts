@@ -8,7 +8,7 @@ import { parseJSON } from '~/common/utils/json-parse'
 import { logger } from '~/common/utils/logger'
 import { PromiseScheduler } from '~/common/utils/promise-scheduler'
 import { createApplyEventRestrictionsStep, createParseHeadersStep } from '~/ingestion/common/steps/event-preprocessing'
-import { TopHogRegistry } from '~/ingestion/framework/extensions/tophog'
+import { TopFnRegistry } from '~/ingestion/framework/extensions/topfn'
 import { ok } from '~/ingestion/framework/results'
 import { runSessionReplayPipeline } from '~/ingestion/pipelines/sessionreplay'
 import { defaultAllowLists } from '~/ingestion/pipelines/sessionreplay/anonymize/default-dict'
@@ -48,20 +48,20 @@ try {
 }
 const itAddon = rustAddon ? it : it.skip
 
-function createMockTopHog(): TopHogRegistry {
+function createMockTopFn(): TopFnRegistry {
     const recorder = { record: jest.fn() }
     return {
         registerSum: jest.fn().mockReturnValue(recorder),
         registerMax: jest.fn().mockReturnValue(recorder),
         registerAverage: jest.fn().mockReturnValue(recorder),
-    } as unknown as TopHogRegistry
+    } as unknown as TopFnRegistry
 }
 
 describe('ml-mirror-pipeline', () => {
     let recordMock: jest.Mock
     let mockBatchRecorder: jest.Mocked<SessionBatchRecorder>
     let mockTeamService: TeamService
-    let topHog: TopHogRegistry
+    let topFn: TopFnRegistry
     let promiseScheduler: PromiseScheduler
     let outputs: jest.Mocked<
         IngestionOutputs<typeof DLQ_OUTPUT | typeof OVERFLOW_OUTPUT | typeof INGESTION_WARNINGS_OUTPUT>
@@ -112,7 +112,7 @@ describe('ml-mirror-pipeline', () => {
             getRetention: jest.fn().mockReturnValue(undefined),
         } as unknown as jest.Mocked<SessionBatchRecorder>
 
-        topHog = createMockTopHog()
+        topFn = createMockTopFn()
         promiseScheduler = new PromiseScheduler()
 
         mockCreateParseHeadersStep.mockReturnValue((input: { message: Message }) => {
@@ -140,7 +140,7 @@ describe('ml-mirror-pipeline', () => {
                 sessionFilter,
                 keyStore,
                 sessionKeyResolutionMaxConcurrency: 20,
-                topHog,
+                topFn,
                 isDebugLoggingEnabled: () => false,
             },
             { anonymizeMaxConcurrency: 4 }

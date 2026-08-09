@@ -29,15 +29,15 @@ import {
     InsightsFunctionWebhookResult,
     SourceWebhookError,
 } from './consumers/cdp-source-webhooks.consumer'
-import { HogTransformerService, createHogTransformerService } from './script-transformations/script-transformer.service'
+import { ScriptTransformerService, createScriptTransformerService } from './script-transformations/script-transformer.service'
 import { RerunJobManager } from './rerun/rerun-job.manager'
 import { RerunRequest } from './rerun/rerun-job.types'
 import { FlowAction } from './schema/flow'
 import { BatchExportInsightsFunctionService, NotFoundError, ParseError } from './services/batch-export-script-function.service'
 import type { CyclotronV2JobProducer } from './services/cyclotron-v2'
-import { HogExecutorAsyncService, HogExecutorExecuteAsyncOptions } from './services/script-executor-async.service'
+import { ScriptExecutorAsyncService, ScriptExecutorExecuteAsyncOptions } from './services/script-executor-async.service'
 import { MAX_ASYNC_STEPS } from './services/script-executor.service'
-import { HogInputsService } from './services/script-inputs.service'
+import { ScriptInputsService } from './services/script-inputs.service'
 import {
     BatchResolverState,
     FLOW_BATCH_RESOLVE_QUEUE,
@@ -53,7 +53,7 @@ import { InsightsFunctionManagerService } from './services/managers/script-funct
 import { EmailTrackingService } from './services/messaging/email-tracking.service'
 import { EmailTrackingCodeSigner } from './services/messaging/helpers/tracking-code'
 import { RecipientTokensService } from './services/messaging/recipient-tokens.service'
-import { HogWatcherService, HogWatcherState } from './services/monitoring/script-watcher.service'
+import { ScriptWatcherService, ScriptWatcherState } from './services/monitoring/script-watcher.service'
 import { NativeDestinationExecutorService } from './services/native-destination-executor.service'
 import { SegmentDestinationExecutorService } from './services/segment-destination-executor.service'
 import { INSIGHTS_FUNCTION_TEMPLATES } from './templates'
@@ -116,8 +116,8 @@ export type CdpApiConfig = PluginsServerConfig
 export type CdpApiDeps = CdpConsumerBaseDeps
 
 export class CdpApi {
-    private hogExecutorAsync: HogExecutorAsyncService
-    private hogInputsService: HogInputsService
+    private scriptExecutorAsync: ScriptExecutorAsyncService
+    private scriptInputsService: ScriptInputsService
     private nativeDestinationExecutorService: NativeDestinationExecutorService
     private segmentDestinationExecutorService: SegmentDestinationExecutorService
 
@@ -125,13 +125,13 @@ export class CdpApi {
     private flowManager: FlowManagerService
 
     private flowExecutor: FlowExecutorService
-    private hogWatcher: HogWatcherService
-    private hogWatcherMirror: HogWatcherService | null
-    private hogTransformer: HogTransformerService
+    private scriptWatcher: ScriptWatcherService
+    private scriptWatcherMirror: ScriptWatcherService | null
+    private scriptTransformer: ScriptTransformerService
     private invocationResultsService: InvocationResultsService
     private rerunJobManager: RerunJobManager | null = null
     private cdpSourceWebhooksConsumer: CdpSourceWebhooksConsumer
-    private hogQueue: JobQueue
+    private scriptQueue: JobQueue
     private flowQueue: JobQueue
     private emailTrackingService: EmailTrackingService
     private recipientTokensService: RecipientTokensService
@@ -146,7 +146,7 @@ export class CdpApi {
     constructor(
         private config: PluginsServerConfig,
         private deps: CdpApiDeps,
-        jobQueues: { hogQueue: JobQueue; flowQueue: JobQueue },
+        jobQueues: { scriptQueue: JobQueue; flowQueue: JobQueue },
         batchResolverProducer: CyclotronV2JobProducer | null = null
     ) {
         const services = createCdpCoreServices(config, deps, 'cdp-api-redis')
@@ -154,22 +154,22 @@ export class CdpApi {
         this.insightsFunctionManager = services.insightsFunctionManager
         this.flowManager = services.flowManager
         this.recipientTokensService = services.recipientTokensService
-        this.hogExecutorAsync = services.hogExecutorAsync
-        this.hogInputsService = services.hogInputsService
+        this.scriptExecutorAsync = services.scriptExecutorAsync
+        this.scriptInputsService = services.scriptInputsService
         this.flowExecutor = services.flowExecutor
         this.nativeDestinationExecutorService = services.nativeDestinationExecutorService
         this.segmentDestinationExecutorService = services.segmentDestinationExecutorService
-        this.hogWatcher = services.hogWatcher
-        this.hogWatcherMirror = services.hogWatcherMirror
+        this.scriptWatcher = services.scriptWatcher
+        this.scriptWatcherMirror = services.scriptWatcherMirror
         this.invocationResultsService = services.invocationResultsService
 
         // API-only services. The script-transformer's monitoring service reuses the same
         // resolved outputs registry as the core CDP services — no separate construction.
-        this.hogTransformer = createHogTransformerService(config, {
+        this.scriptTransformer = createScriptTransformerService(config, {
             ...deps,
             monitoringOutputs: services.outputs,
         })
-        this.hogQueue = jobQueues.hogQueue
+        this.scriptQueue = jobQueues.scriptQueue
         this.flowQueue = jobQueues.flowQueue
         this.cdpSourceWebhooksConsumer = new CdpSourceWebhooksConsumer(config, deps, jobQueues)
         this.emailTrackingService = new EmailTrackingService(
@@ -187,10 +187,10 @@ export class CdpApi {
             deps.teamManager,
             this.groupsManager,
             this.insightsFunctionManager,
-            this.hogExecutorAsync,
-            this.hogWatcher,
+            this.scriptExecutorAsync,
+            this.scriptWatcher,
             this.invocationResultsService,
-            this.hogWatcherMirror
+            this.scriptWatcherMirror
         )
         this.batchResolverProducer = batchResolverProducer
         this.rescheduleJwt = config.WORKFLOWS_RESCHEDULE_JWT_SECRET
@@ -311,8 +311,8 @@ export class CdpApi {
             const { id } = req.params
             const summary = await mirrorCompare(
                 'script-watcher.getPersistedState',
-                () => this.hogWatcher.getPersistedState(id),
-                () => this.hogWatcherMirror?.getPersistedState(id)
+                () => this.scriptWatcher.getPersistedState(id),
+                () => this.scriptWatcherMirror?.getPersistedState(id)
             )
 
             res.json(summary)
@@ -325,15 +325,15 @@ export class CdpApi {
             const { state } = req.body
 
             // Check that state is valid
-            if (!Object.values(HogWatcherState).includes(state)) {
+            if (!Object.values(ScriptWatcherState).includes(state)) {
                 res.status(400).json({ error: 'Invalid state' })
                 return
             }
 
             const summary = await mirrorCompare(
                 'script-watcher.getPersistedState',
-                () => this.hogWatcher.getPersistedState(id),
-                () => this.hogWatcherMirror?.getPersistedState(id)
+                () => this.scriptWatcher.getPersistedState(id),
+                () => this.scriptWatcherMirror?.getPersistedState(id)
             )
             const insightsFunction = await this.insightsFunctionManager.fetchInsightsFunction(id)
 
@@ -346,9 +346,9 @@ export class CdpApi {
 
             if (summary.state !== state) {
                 await Promise.all([
-                    this.hogWatcher.forceStateChange(insightsFunction, state),
+                    this.scriptWatcher.forceStateChange(insightsFunction, state),
                     mirrorCall('script-watcher.forceStateChange', () =>
-                        this.hogWatcherMirror?.forceStateChange(insightsFunction, state)
+                        this.scriptWatcherMirror?.forceStateChange(insightsFunction, state)
                     ),
                 ])
             }
@@ -359,8 +359,8 @@ export class CdpApi {
             res.json(
                 await mirrorCompare(
                     'script-watcher.getPersistedState',
-                    () => this.hogWatcher.getPersistedState(id),
-                    () => this.hogWatcherMirror?.getPersistedState(id)
+                    () => this.scriptWatcher.getPersistedState(id),
+                    () => this.scriptWatcherMirror?.getPersistedState(id)
                 )
             )
         }
@@ -371,15 +371,15 @@ export class CdpApi {
             try {
                 const allStates = await mirrorCompare(
                     'script-watcher.getAllFunctionStates',
-                    () => this.hogWatcher.getAllFunctionStates(),
-                    () => this.hogWatcherMirror?.getAllFunctionStates()
+                    () => this.scriptWatcher.getAllFunctionStates(),
+                    () => this.scriptWatcherMirror?.getAllFunctionStates()
                 )
 
                 // Transform the data for better consumption by Grafana and sort by tokens ascending
                 const statesArray = Object.entries(allStates)
                     .map(([functionId, state]) => ({
                         function_id: functionId,
-                        state: HogWatcherState[state.state], // Convert numeric state to readable string
+                        state: ScriptWatcherState[state.state], // Convert numeric state to readable string
                         tokens: state.tokens,
                         state_numeric: state.state,
                     }))
@@ -488,7 +488,7 @@ export class CdpApi {
                     invocations,
                     logs: filterLogs,
                     metrics: filterMetrics,
-                } = await buildInsightsFunctionInvocations(this.hogInputsService, [compoundConfiguration], triggerGlobals)
+                } = await buildInsightsFunctionInvocations(this.scriptInputsService, [compoundConfiguration], triggerGlobals)
 
                 // Add metrics to the logs
                 filterMetrics.forEach((metric) => {
@@ -508,11 +508,11 @@ export class CdpApi {
                 for (const invocation of invocations) {
                     invocation.id = invocationID
 
-                    const sensitiveValues = this.hogExecutorAsync.hogExecutor.getSensitiveValues(
+                    const sensitiveValues = this.scriptExecutorAsync.scriptExecutor.getSensitiveValues(
                         invocation.insightsFunction,
                         invocation.state.globals.inputs ?? {}
                     )
-                    const options: HogExecutorExecuteAsyncOptions = buildHogExecutorAsyncOptions(
+                    const options: ScriptExecutorExecuteAsyncOptions = buildScriptExecutorAsyncOptions(
                         mock_async_functions,
                         logs,
                         sensitiveValues
@@ -525,7 +525,7 @@ export class CdpApi {
                     } else if (isSegmentPluginInsightsFunction(compoundConfiguration)) {
                         response = await this.segmentDestinationExecutorService.execute(invocation)
                     } else {
-                        response = await this.hogExecutorAsync.executeWithAsyncFunctions(invocation, options)
+                        response = await this.scriptExecutorAsync.executeWithAsyncFunctions(invocation, options)
                     }
 
                     logs = logs.concat(response.logs)
@@ -556,7 +556,7 @@ export class CdpApi {
                     team_id: triggerGlobals.project.id,
                     now: '',
                 }
-                const response = await this.hogTransformer.transformEvent(pluginEvent, [compoundConfiguration])
+                const response = await this.scriptTransformer.transformEvent(pluginEvent, [compoundConfiguration])
 
                 result = response.event
 
@@ -613,12 +613,12 @@ export class CdpApi {
                     bytes_uncompressed: null,
                 }
 
-                const hogGlobals = buildLogRecordGlobals(record, triggerGlobals.project, {})
+                const scriptGlobals = buildLogRecordGlobals(record, triggerGlobals.project, {})
 
                 try {
-                    hogGlobals.inputs = resolveLogTransformationInputs(
+                    scriptGlobals.inputs = resolveLogTransformationInputs(
                         compoundConfiguration,
-                        hogGlobals,
+                        scriptGlobals,
                         DEFAULT_LOG_TRANSFORMATION_TIMEOUT_MS
                     ).inputs
                 } catch (e) {
@@ -633,12 +633,12 @@ export class CdpApi {
                 // Derive from the resolved inputs (which merge inputs + encrypted_inputs) like the
                 // destination test path does — Django resolves stored secrets into `inputs`, so
                 // collecting from `encrypted_inputs` alone would leave them unredacted in test logs.
-                const sensitiveValues = this.hogExecutorAsync.hogExecutor.getSensitiveValues(
+                const sensitiveValues = this.scriptExecutorAsync.scriptExecutor.getSensitiveValues(
                     compoundConfiguration,
-                    (hogGlobals.inputs ?? {}) as Record<string, any>
+                    (scriptGlobals.inputs ?? {}) as Record<string, any>
                 )
 
-                const outcome = executeLogTransformation(compoundConfiguration.bytecode, record, hogGlobals, {
+                const outcome = executeLogTransformation(compoundConfiguration.bytecode, record, scriptGlobals, {
                     sensitiveValues,
                 })
 
@@ -689,7 +689,7 @@ export class CdpApi {
             const { datastore_event, configuration, invocation_id, current_action_id, mock_async_functions } = req.body
 
             // Redact configuration: it carries action inputs (auth headers, API keys) that must not land in logs
-            logger.info('⚡️', 'Received hogflow invocation', {
+            logger.info('⚡️', 'Received flow invocation', {
                 id,
                 team_id,
                 body: { ...req.body, configuration: configuration ? '[redacted]' : undefined },
@@ -806,13 +806,13 @@ export class CdpApi {
             // Redact the flow's decrypted secret inputs from the mocked async-function logs, so a test
             // run can't echo a stored credential (e.g. an Authorization header) back to the caller.
             const sensitiveValues = await this.flowExecutor.getSensitiveValues(compoundConfiguration)
-            const options: HogExecutorExecuteAsyncOptions = buildHogExecutorAsyncOptions(
+            const options: ScriptExecutorExecuteAsyncOptions = buildScriptExecutorAsyncOptions(
                 mock_async_functions,
                 logs,
                 sensitiveValues
             )
             options.isTest = true
-            const result = await this.flowExecutor.executeCurrentAction(invocation, { hogExecutorOptions: options })
+            const result = await this.flowExecutor.executeCurrentAction(invocation, { scriptExecutorOptions: options })
 
             res.json({
                 nextActionId: result.invocation.state.currentAction?.id,
@@ -833,7 +833,7 @@ export class CdpApi {
             const { id, team_id } = req.params
             const { variables } = req.body
 
-            logger.info('⚡️', 'Received hogflow scheduled invocation', { id, team_id })
+            logger.info('⚡️', 'Received flow scheduled invocation', { id, team_id })
 
             const team = await this.deps.teamManager.getTeam(parseInt(team_id)).catch(() => null)
             if (!team) {
@@ -884,7 +884,7 @@ export class CdpApi {
 
             res.json({ status: 'queued', invocation_id: invocation.id })
         } catch (e) {
-            logger.error('Error handling hogflow scheduled invocation', { error: e })
+            logger.error('Error handling flow scheduled invocation', { error: e })
             res.status(500).json({ error: [e.message] })
         }
     }
@@ -1102,7 +1102,7 @@ export class CdpApi {
         try {
             const { id, team_id, parent_run_id } = req.params
 
-            logger.info('⚡️', 'Received hogflow batch invocation', { id, team_id, parent_run_id })
+            logger.info('⚡️', 'Received flow batch invocation', { id, team_id, parent_run_id })
 
             const team = await this.deps.teamManager.getTeam(parseInt(team_id)).catch(() => null)
 
@@ -1172,7 +1172,7 @@ export class CdpApi {
 
             res.json({ status: 'queued' })
         } catch (e) {
-            logger.error('Error handling hogflow batch invocation', { error: e })
+            logger.error('Error handling flow batch invocation', { error: e })
             res.status(500).json({ error: [e.message] })
         }
     }
@@ -1347,11 +1347,11 @@ export class CdpApi {
         }
 }
 
-const buildHogExecutorAsyncOptions = (
+const buildScriptExecutorAsyncOptions = (
     mockAsyncFunctions: boolean,
     logs: MinimalLogEntry[],
     sensitiveValues?: string[]
-): HogExecutorExecuteAsyncOptions => {
+): ScriptExecutorExecuteAsyncOptions => {
     let mockFunctions: Record<string, (...args: any[]) => any> | undefined
 
     if (mockAsyncFunctions) {

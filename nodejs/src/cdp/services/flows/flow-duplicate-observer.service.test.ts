@@ -8,7 +8,7 @@ import { Hub } from '~/types'
 import { CyclotronJobInvocationFlow } from '../../types'
 import { FlowDuplicateObserverService } from './flow-duplicate-observer.service'
 
-const KEY_PREFIX = 'hogflow:observe:'
+const KEY_PREFIX = 'flow:observe:'
 
 const buildInvocation = (overrides: { id?: string; functionId?: string; eventUuid?: string | null } = {}) =>
     ({
@@ -75,7 +75,7 @@ describe('FlowDuplicateObserverService', () => {
         const observer = new FlowDuplicateObserverService(redis)
         await observer.observe(buildInvocation({ id: 'inv-A' }), buildAction('action-1'))
 
-        const stored = await readKey('hogflow:observe:workflow-1:event-1:action-1')
+        const stored = await readKey('flow:observe:workflow-1:event-1:action-1')
         expect(stored).toBe('inv-A')
         expect(await dupCounterValue('workflow-1')).toBe(0)
     })
@@ -95,7 +95,7 @@ describe('FlowDuplicateObserverService', () => {
         await observer.observe(buildInvocation({ id: 'inv-B' }), buildAction('action-1'))
 
         // The second observation must NOT overwrite the first (NX) — verifies single-call atomicity.
-        expect(await readKey('hogflow:observe:workflow-1:event-1:action-1')).toBe('inv-A')
+        expect(await readKey('flow:observe:workflow-1:event-1:action-1')).toBe('inv-A')
         expect(await dupCounterValue('workflow-1')).toBe(1)
     })
 
@@ -109,7 +109,7 @@ describe('FlowDuplicateObserverService', () => {
 
         expect(mirror.useClient).toHaveBeenCalledTimes(1)
         expect((mirror.useClient as jest.Mock).mock.calls[0][0]).toMatchObject({
-            name: 'hogflow-observe-mirror',
+            name: 'flow-observe-mirror',
             failOpen: true,
         })
     })
@@ -122,6 +122,6 @@ describe('FlowDuplicateObserverService', () => {
         const observer = new FlowDuplicateObserverService(redis, mirror)
         await observer.observe(buildInvocation({ id: 'inv-A' }), buildAction('action-1'))
 
-        expect(await readKey('hogflow:observe:workflow-1:event-1:action-1')).toBe('inv-A')
+        expect(await readKey('flow:observe:workflow-1:event-1:action-1')).toBe('inv-A')
     })
 })

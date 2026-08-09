@@ -22,11 +22,11 @@ describe('buildAccountFlowInvocation', () => {
 
         expect(state.event.event).toEqual('$batch_hog_flow_invocation')
         // distinct_id doubles as the per-account key for invocation_results; it must NOT
-        // resolve to a person (the hogflow worker skips the lookup for account audiences).
+        // resolve to a person (the flow worker skips the lookup for account audiences).
         expect(state.event.distinct_id).toEqual('acme-1')
         expect(state.event.properties['$groups']).toEqual({ customer: 'acme-1' })
         expect(state.personId).toBeUndefined()
-        // The stamp is what the hogflow worker trusts when the live trigger has been
+        // The stamp is what the flow worker trusts when the live trigger has been
         // edited to a person audience while these children were still queued.
         expect(state.accountAudience).toBe(true)
         // Account broadcasts convert long after the send, so the run has to carry the version

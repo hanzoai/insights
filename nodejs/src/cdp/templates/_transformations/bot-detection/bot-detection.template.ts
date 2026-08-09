@@ -8,7 +8,7 @@ export const template: InsightsFunctionTemplate = {
     name: 'Filter Bot Events',
     description:
         'Filters out events from known bot user agents. This transformation will drop the event if a bot is detected.',
-    icon_url: 'https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/builder_hog_01_955c082cad.png',
+    icon_url: 'https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/builder_script_01_955c082cad.png',
     category: ['Custom'],
     code_language: 'script',
     code: `

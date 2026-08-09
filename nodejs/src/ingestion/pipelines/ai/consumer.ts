@@ -1,6 +1,6 @@
 import { buildIntegerMatcher } from '~/common/config/config'
 import { ReadOnlyGroupTypeManager } from '~/common/groups/readonly-group-type-manager'
-import { HogTransformer } from '~/common/script-transformations/script-transformer.interface'
+import { ScriptTransformer } from '~/common/script-transformations/script-transformer.interface'
 import {
     AiEventOutput,
     AppMetricsOutput,
@@ -8,14 +8,14 @@ import {
     EventOutput,
     IngestionWarningsOutput,
     OverflowOutput,
-    TophogOutput,
+    TopFnOutput,
 } from '~/common/outputs'
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
 import { KafkaProducerRegistry } from '~/common/outputs/kafka-producer-registry'
-import { PersonHogConfig } from '~/common/personinsights'
-import { PersonHogClientComponent } from '~/common/personinsights/personinsights-client-component'
-import { PersonHogGroupReadRepository } from '~/common/personinsights/personinsights-group-read-repository'
-import { PersonHogPersonReadRepository } from '~/common/personinsights/personinsights-person-read-repository'
+import { PersonFnConfig } from '~/common/personinsights'
+import { PersonFnClientComponent } from '~/common/personinsights/personinsights-client-component'
+import { PersonFnGroupReadRepository } from '~/common/personinsights/personinsights-group-read-repository'
+import { PersonFnPersonReadRepository } from '~/common/personinsights/personinsights-person-read-repository'
 import { PostgresRouter } from '~/common/utils/db/postgres'
 import { EventIngestionRestrictionManagerComponent } from '~/common/utils/event-ingestion-restrictions'
 import { EventSchemaEnforcementManager } from '~/common/utils/event-schema-enforcement-manager'
@@ -40,7 +40,7 @@ import { createAiIngestionPipeline } from './pipeline'
 
 export type AiConsumerConfig = CommonIngestionConsumerConfig &
     IngestionOutputsConfig &
-    PersonHogConfig &
+    PersonFnConfig &
     Pick<
         IngestionConsumerConfig,
         | 'INGESTION_OVERFLOW_MODE'
@@ -72,7 +72,7 @@ export type AiConsumerConfig = CommonIngestionConsumerConfig &
 /** Outputs the AI pipeline emits to. The same instance backs the script transformer's
  * monitoring (app_metrics + log_entries), wired up server-side. */
 export type AiOutputs = IngestionOutputs<
-    EventOutput | AiEventOutput | IngestionWarningsOutput | DlqOutput | OverflowOutput | AppMetricsOutput | TophogOutput
+    EventOutput | AiEventOutput | IngestionWarningsOutput | DlqOutput | OverflowOutput | AppMetricsOutput | TopFnOutput
 >
 
 /**
@@ -88,7 +88,7 @@ export type AiSharedScope = Scope<{
     teamManager: TeamManager
     cookielessManager: CookielessManager
     producerRegistry: KafkaProducerRegistry<ProducerName>
-    hogTransformer: HogTransformer
+    scriptTransformer: ScriptTransformer
     outputs: AiOutputs
 }>
 
@@ -152,8 +152,8 @@ export function createAiConsumer(config: AiConsumerConfig, sharedScope: AiShared
                       })
                     : new DisabledOverflowRedirectComponent()
             )
-            // Personhog client owned by the AI scope (created from common, torn down with it).
-            .add('personinsightsClient', new PersonHogClientComponent(config))
+            // Personscript client owned by the AI scope (created from common, torn down with it).
+            .add('personinsightsClient', new PersonFnClientComponent(config))
             // Owned by the scope so the store's startup healthcheck runs at
             // scope start, before any traffic is consumed.
             .add('aiBlobStore', new AiBlobStoreComponent(config))
@@ -183,11 +183,11 @@ export function createAiConsumer(config: AiConsumerConfig, sharedScope: AiShared
             eventFilterManager: container.eventFilterManager,
             cookielessManager: container.cookielessManager,
             promiseScheduler: container.promiseScheduler,
-            hogTransformer: container.hogTransformer,
+            scriptTransformer: container.scriptTransformer,
             // Read-only person/group access — read through personinsights, never written.
-            personRepository: new PersonHogPersonReadRepository(container.personinsightsClient, clientLabel),
+            personRepository: new PersonFnPersonReadRepository(container.personinsightsClient, clientLabel),
             groupTypeManager: new ReadOnlyGroupTypeManager(
-                new PersonHogGroupReadRepository(container.personinsightsClient, clientLabel)
+                new PersonFnGroupReadRepository(container.personinsightsClient, clientLabel)
             ),
             overflowMode,
             preservePartitionLocality,
@@ -200,7 +200,7 @@ export function createAiConsumer(config: AiConsumerConfig, sharedScope: AiShared
             eventSchemaEnforcementManager: new EventSchemaEnforcementManager(container.postgres, {
                 loaderRetry: DEFAULT_LOADER_RETRY,
             }),
-            topHog: container.topHog,
+            topFn: container.topFn,
             aiBlobStore: container.aiBlobStore.store,
             aiBlobOffloadConfig,
         })

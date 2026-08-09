@@ -35,7 +35,7 @@ export class FlowDuplicateObserverService {
         if (!this.redis || !eventUuid) {
             return { duplicate: false }
         }
-        const key = `hogflow:observe:${invocation.functionId}:${eventUuid}:${currentAction.id}`
+        const key = `flow:observe:${invocation.functionId}:${eventUuid}:${currentAction.id}`
 
         // SET ... NX GET (Redis 7+ / Valkey 7.2+) sets the key when absent and returns the
         // existing value when present — one round-trip instead of GET-then-SETNX. ioredis 4.x
@@ -49,8 +49,8 @@ export class FlowDuplicateObserverService {
         try {
             const existingId = await mirrorCompare(
                 'script-flow-duplicate-observer.observe',
-                () => this.redis!.useClient({ name: 'hogflow-observe', failOpen: true }, setNxGet),
-                () => this.redisMirror?.useClient({ name: 'hogflow-observe-mirror', failOpen: true }, setNxGet),
+                () => this.redis!.useClient({ name: 'flow-observe', failOpen: true }, setNxGet),
+                () => this.redisMirror?.useClient({ name: 'flow-observe-mirror', failOpen: true }, setNxGet),
                 (primary, mirror) => Boolean(primary) === Boolean(mirror)
             )
             if (existingId && existingId !== invocation.id) {

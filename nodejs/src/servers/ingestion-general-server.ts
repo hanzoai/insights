@@ -14,9 +14,9 @@ import {
 import { GroupTypeManager } from '~/common/groups/group-type-manager'
 import { DatastoreGroupRepository } from '~/common/groups/repositories/datastore-group-repository'
 import { PostgresGroupRepository } from '~/common/groups/repositories/postgres-group-repository'
-import { HogTransformerComponent } from '~/common/script-transformations/script-transformer-component'
+import { ScriptTransformerComponent } from '~/common/script-transformations/script-transformer-component'
 import { IngestionOutputsComponent } from '~/common/outputs/ingestion-outputs'
-import { PersonHogConfig, buildGroupRepository, buildPersonRepository, createPersonHogClient } from '~/common/personinsights'
+import { PersonFnConfig, buildGroupRepository, buildPersonRepository, createPersonFnClient } from '~/common/personinsights'
 import { PostgresPersonRepository } from '~/common/persons/repositories/postgres-person-repository'
 import { ServerCommands } from '~/common/utils/commands'
 import { PostgresRouter, PostgresRouterComponent } from '~/common/utils/db/postgres'
@@ -41,9 +41,9 @@ import { createClientWarningsConsumer } from '~/ingestion/pipelines/clientwarnin
 import { createHeatmapsConsumer } from '~/ingestion/pipelines/heatmaps'
 
 import {
-    HogTransformerServiceConfig,
-    HogTransformerServiceDeps,
-    createHogTransformerService,
+    ScriptTransformerServiceConfig,
+    ScriptTransformerServiceDeps,
+    createScriptTransformerService,
 } from '../cdp/script-transformations/script-transformer.service'
 import { EncryptedFields } from '../cdp/utils/encryption-utils'
 import { CommonConfig, PluginServerMode } from '../common/config'
@@ -69,7 +69,7 @@ import { BaseServerConfig, CleanupResources, NodeServer, ServerLifecycle } from 
  * This is the union of:
  * - BaseServerConfig: HTTP server, profiling, pod termination lifecycle
  * - IngestionConsumerConfig: ingestion pipeline, person/group processing, overflow, cookieless, etc.
- * - HogTransformerServiceConfig: the transformation-only keys the in-process script transformer reads.
+ * - ScriptTransformerServiceConfig: the transformation-only keys the in-process script transformer reads.
  *   No CDP delivery config (Redis, watcher, SES, fetch) - transformations run the synchronous
  *   Script core alone, so those keys are deliberately absent rather than inherited.
  * - Infrastructure configs: Kafka broker, Postgres, Redis, consumer tuning
@@ -79,7 +79,7 @@ import { BaseServerConfig, CleanupResources, NodeServer, ServerLifecycle } from 
  */
 export type IngestionGeneralServerConfig = BaseServerConfig &
     IngestionConsumerConfig &
-    HogTransformerServiceConfig &
+    ScriptTransformerServiceConfig &
     KafkaBrokerConfig &
     KafkaUpstreamProducerEnvConfig &
     KafkaDownstreamProducerEnvConfig &
@@ -87,7 +87,7 @@ export type IngestionGeneralServerConfig = BaseServerConfig &
     DatabaseConnectionConfig &
     RedisConnectionsConfig &
     KafkaConsumerBaseConfig &
-    PersonHogConfig &
+    PersonFnConfig &
     Pick<
         CommonConfig,
         | 'LOG_LEVEL'
@@ -214,7 +214,7 @@ export class IngestionGeneralServer implements NodeServer {
         const geoipService = new GeoIPService(this.config.MMDB_FILE_LOCATION)
         await geoipService.get()
 
-        const personinsightsClient = createPersonHogClient(this.config)
+        const personinsightsClient = createPersonFnClient(this.config)
         const clientLabel = this.config.PLUGIN_SERVER_MODE ?? 'unknown'
 
         const postgresPersonRepository = new PostgresPersonRepository(this.postgres, {
@@ -260,7 +260,7 @@ export class IngestionGeneralServer implements NodeServer {
         const ingestionOutputs = createOutputsRegistry().build(ingestionProducerRegistry, this.config)
         const datastoreGroupRepository = new DatastoreGroupRepository(ingestionOutputs)
 
-        const hogTransformerDeps: HogTransformerServiceDeps = {
+        const scriptTransformerDeps: ScriptTransformerServiceDeps = {
             geoipService,
             postgres: this.postgres,
             pubSub: this.pubsub,
@@ -280,7 +280,7 @@ export class IngestionGeneralServer implements NodeServer {
             datastoreGroupRepository,
             personRepository,
             cookielessManager,
-            hogTransformer: createHogTransformerService(this.config, hogTransformerDeps),
+            scriptTransformer: createScriptTransformerService(this.config, scriptTransformerDeps),
             aiSubpipelineFactory: createAiEventSubpipeline,
         }
 
@@ -331,10 +331,10 @@ export class IngestionGeneralServer implements NodeServer {
                 const aiSharedScope = extend(sharedServicesScope, 'ai-shared', (_container, builder) =>
                     builder
                         .add(
-                            'hogTransformer',
-                            new HogTransformerComponent(() =>
-                                createHogTransformerService(this.config, {
-                                    ...hogTransformerDeps,
+                            'scriptTransformer',
+                            new ScriptTransformerComponent(() =>
+                                createScriptTransformerService(this.config, {
+                                    ...scriptTransformerDeps,
                                     monitoringOutputs: aiOutputs,
                                 })
                             )

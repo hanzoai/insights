@@ -19,9 +19,9 @@ import { buildInsightsFunctionInvocations } from '../utils/invocation-utils'
 import { mirrorCompare } from '../utils/mirror-call'
 import { InsightsFunctionManagerService } from './managers/script-function-manager.service'
 import { InsightsFunctionMonitoringService } from './monitoring/script-function-monitoring.service'
-import { HogMaskerService } from './monitoring/script-masker.service'
-import { HogWatcherService, HogWatcherState } from './monitoring/script-watcher.service'
-import { HogInputsService } from './script-inputs.service'
+import { ScriptMaskerService } from './monitoring/script-masker.service'
+import { ScriptWatcherService, ScriptWatcherState } from './monitoring/script-watcher.service'
+import { ScriptInputsService } from './script-inputs.service'
 
 export interface InsightsFunctionInvocationPipelineConfig {
     CDP_RATE_LIMITER_BUCKET_SIZE: number
@@ -32,10 +32,10 @@ export interface InsightsFunctionInvocationPipelineConfig {
 
 export interface InsightsFunctionInvocationPipelineDeps {
     insightsFunctionManager: InsightsFunctionManagerService
-    hogInputsService: HogInputsService
-    hogWatcher: HogWatcherService
-    hogWatcherMirror: HogWatcherService | null
-    hogMasker: HogMaskerService
+    scriptInputsService: ScriptInputsService
+    scriptWatcher: ScriptWatcherService
+    scriptWatcherMirror: ScriptWatcherService | null
+    scriptMasker: ScriptMaskerService
     insightsFunctionMonitoringService: InsightsFunctionMonitoringService
     quotaLimiting: QuotaLimiting
     redis: RedisV2
@@ -43,7 +43,7 @@ export interface InsightsFunctionInvocationPipelineDeps {
 }
 
 export interface BuildInsightsFunctionInvocationsOptions {
-    hogTypes: InsightsFunctionTypeType[]
+    scriptTypes: InsightsFunctionTypeType[]
     filterFn: (fn: InsightsFunctionType) => boolean
 }
 
@@ -54,8 +54,8 @@ export interface BuildInsightsFunctionInvocationsOptions {
  * Consumers compose this service rather than inheriting it.
  */
 export class InsightsFunctionInvocationPipeline {
-    private hogRateLimiter: KeyedRateLimiterService
-    private hogRateLimiterMirror: KeyedRateLimiterService | null
+    private scriptRateLimiter: KeyedRateLimiterService
+    private scriptRateLimiterMirror: KeyedRateLimiterService | null
 
     constructor(
         private config: InsightsFunctionInvocationPipelineConfig,
@@ -67,8 +67,8 @@ export class InsightsFunctionInvocationPipeline {
             refillRate: config.CDP_RATE_LIMITER_REFILL_RATE,
             ttlSeconds: config.CDP_RATE_LIMITER_TTL,
         }
-        this.hogRateLimiter = new KeyedRateLimiterService(rateLimiterConfig, deps.redis)
-        this.hogRateLimiterMirror = deps.valkeyShadow
+        this.scriptRateLimiter = new KeyedRateLimiterService(rateLimiterConfig, deps.redis)
+        this.scriptRateLimiterMirror = deps.valkeyShadow
             ? new KeyedRateLimiterService(rateLimiterConfig, deps.valkeyShadow.writer)
             : null
     }
@@ -81,7 +81,7 @@ export class InsightsFunctionInvocationPipeline {
         const teamsToLoad = [...new Set(invocationGlobals.map((x) => x.project.id))]
         const insightsFunctionsByTeam = await this.deps.insightsFunctionManager.getInsightsFunctionsForTeams(
             teamsToLoad,
-            opts.hogTypes,
+            opts.scriptTypes,
             opts.filterFn
         )
 
@@ -91,7 +91,7 @@ export class InsightsFunctionInvocationPipeline {
                     const teamInsightsFunctions = insightsFunctionsByTeam[globals.project.id]
 
                     const { invocations, metrics, logs } = await buildInsightsFunctionInvocations(
-                        this.deps.hogInputsService,
+                        this.deps.scriptInputsService,
                         teamInsightsFunctions,
                         globals
                     )
@@ -108,10 +108,10 @@ export class InsightsFunctionInvocationPipeline {
         const states = await mirrorCompare(
             'script-watcher.getEffectiveStates',
             () =>
-                instrumentFn('cdpConsumer.handleEachBatch.hogWatcher.getEffectiveStates', async () => {
-                    return await this.deps.hogWatcher.getEffectiveStates(insightsFunctionIds)
+                instrumentFn('cdpConsumer.handleEachBatch.scriptWatcher.getEffectiveStates', async () => {
+                    return await this.deps.scriptWatcher.getEffectiveStates(insightsFunctionIds)
                 }),
-            () => this.deps.hogWatcherMirror?.getEffectiveStates(insightsFunctionIds)
+            () => this.deps.scriptWatcherMirror?.getEffectiveStates(insightsFunctionIds)
         )
 
         const rateLimitInputs: KeyedRateLimitRequest[] = possibleInvocations.map((x) => ({
@@ -121,10 +121,10 @@ export class InsightsFunctionInvocationPipeline {
         const rateLimits = await mirrorCompare(
             'script-rate-limiter.rateLimitGrouped',
             () =>
-                instrumentFn('cdpConsumer.handleEachBatch.hogRateLimiter.rateLimitGrouped', async () => {
-                    return await this.hogRateLimiter.rateLimitGrouped(rateLimitInputs)
+                instrumentFn('cdpConsumer.handleEachBatch.scriptRateLimiter.rateLimitGrouped', async () => {
+                    return await this.scriptRateLimiter.rateLimitGrouped(rateLimitInputs)
                 }),
-            () => this.hogRateLimiterMirror?.rateLimitGrouped(rateLimitInputs),
+            () => this.scriptRateLimiterMirror?.rateLimitGrouped(rateLimitInputs),
             (primary, mirror) =>
                 primary.every(([, result], index) => result.isRateLimited === mirror[index]?.[1].isRateLimited)
         )
@@ -157,12 +157,12 @@ export class InsightsFunctionInvocationPipeline {
 
                 counterInsightsFunctionStateOnEvent
                     .labels({
-                        state: HogWatcherState[state],
+                        state: ScriptWatcherState[state],
                         kind: item.insightsFunction.type,
                     })
                     .inc()
 
-                if (state === HogWatcherState.disabled) {
+                if (state === ScriptWatcherState.disabled) {
                     this.deps.insightsFunctionMonitoringService.queueAppMetric(
                         {
                             team_id: item.teamId,
@@ -176,7 +176,7 @@ export class InsightsFunctionInvocationPipeline {
                     return
                 }
 
-                if (state === HogWatcherState.degraded) {
+                if (state === ScriptWatcherState.degraded) {
                     item.queuePriority = 2
                     if (this.config.CDP_OVERFLOW_QUEUE_ENABLED) {
                         item.queue = 'hogoverflow'
@@ -187,7 +187,7 @@ export class InsightsFunctionInvocationPipeline {
             })
         )
 
-        const { masked, notMasked: notMaskedInvocations } = await this.deps.hogMasker.filterByMasking(validInvocations)
+        const { masked, notMasked: notMaskedInvocations } = await this.deps.scriptMasker.filterByMasking(validInvocations)
 
         this.deps.insightsFunctionMonitoringService.queueAppMetrics(
             masked.map((item) => ({

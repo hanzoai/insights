@@ -11,18 +11,18 @@ import { createCdpConsumerDeps } from '~/tests/helpers/cdp'
 import { Datastore } from '~/tests/helpers/datastore'
 import { waitForExpect } from '~/tests/helpers/expectations'
 import { TEST_KAFKA_TOPICS, ensureKafkaTopics } from '~/tests/helpers/kafka'
-import { waitForHogInvocationResultsMvReady } from '~/tests/helpers/script-invocation-results'
+import { waitForScriptInvocationResultsMvReady } from '~/tests/helpers/script-invocation-results'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { Hub, Team } from '../../types'
-import { insertInsightsFunction as _insertInsightsFunction, createHogExecutionGlobals } from '../_tests/fixtures'
+import { insertInsightsFunction as _insertInsightsFunction, createScriptExecutionGlobals } from '../_tests/fixtures'
 import { createCdpOutputsRegistry } from '../outputs/registry'
 import { FlowManagerService } from '../services/flows/flow-manager.service'
 import { CyclotronJobQueuePostgresV2 } from '../services/job-queue/job-queue-postgres-v2'
 import { JobQueue } from '../services/job-queue/job-queue.interface'
 import { InsightsFunctionManagerService } from '../services/managers/script-function-manager.service'
 import { InsightsFunctionMonitoringService } from '../services/monitoring/script-function-monitoring.service'
-import { HogInvocationResultsService } from '../services/monitoring/script-invocation-results.service'
+import { ScriptInvocationResultsService } from '../services/monitoring/script-invocation-results.service'
 import {
     CyclotronJobInvocationInsightsFunction,
     InsightsFunctionInvocationGlobals,
@@ -37,7 +37,7 @@ const ActualKafkaProducerWrapper = jest.requireActual('~/common/kafka/producer')
  * Integration test for RerunPaginatorService.
  *
  * Instead of mocking the Datastore client, this test seeds real lifecycle rows
- * through `HogInvocationResultsService.queueLifecycleRow` → Kafka → Datastore
+ * through `ScriptInvocationResultsService.queueLifecycleRow` → Kafka → Datastore
  * Kafka MV → `hog_invocation_results`, then runs the paginator against the real
  * data. Only the side effects the paginator emits (the running lifecycle row +
  * the cyclotron re-enqueue) are mocked, so we can assert what got produced.
@@ -54,13 +54,13 @@ describe('RerunPaginatorService integration', () => {
     let team: Team
     let datastore: Datastore
     let insightsFunction: InsightsFunctionType
-    let seedingService: HogInvocationResultsService
+    let seedingService: ScriptInvocationResultsService
     let chClient: DatastoreClient
     let paginator: RerunPaginatorService
     // script functions re-enqueue to the kafka queue, script flows to postgres-v2.
-    let hogQueue: jest.Mocked<JobQueue>
+    let scriptQueue: jest.Mocked<JobQueue>
     let flowQueue: jest.Mocked<CyclotronJobQueuePostgresV2>
-    let paginatorLifecycleService: jest.Mocked<HogInvocationResultsService>
+    let paginatorLifecycleService: jest.Mocked<ScriptInvocationResultsService>
     let paginatorMonitoringService: jest.Mocked<InsightsFunctionMonitoringService>
     let insightsFunctionManager: InsightsFunctionManagerService
     let flowManager: jest.Mocked<FlowManagerService>
@@ -96,7 +96,7 @@ describe('RerunPaginatorService integration', () => {
         }>
     ): Promise<void> => {
         for (const r of rows) {
-            const globals = createHogExecutionGlobals({
+            const globals = createScriptExecutionGlobals({
                 project: { id: team.id } as any,
                 event: {
                     uuid: `evt-${r.invocation_id}`,
@@ -198,7 +198,7 @@ describe('RerunPaginatorService integration', () => {
         // MV needs but the shared set does not cover.
         await ensureKafkaTopics([...TEST_KAFKA_TOPICS, KAFKA_FN_INVOCATION_RESULTS])
         await datastore.truncate('hog_invocation_results_data')
-        await waitForHogInvocationResultsMvReady(datastore)
+        await waitForScriptInvocationResultsMvReady(datastore)
     })
 
     beforeEach(async () => {
@@ -216,7 +216,7 @@ describe('RerunPaginatorService integration', () => {
             ...hub,
             INSIGHTS_INVOCATION_RESULTS_TOPIC: KAFKA_FN_INVOCATION_RESULTS,
         } as any)
-        seedingService = new HogInvocationResultsService(outputs, { INSIGHTS_INVOCATION_RESULTS_ENABLED: true })
+        seedingService = new ScriptInvocationResultsService(outputs, { INSIGHTS_INVOCATION_RESULTS_ENABLED: true })
 
         insightsFunction = await _insertInsightsFunction(hub.postgres, team.id, {
             type: 'destination',
@@ -237,7 +237,7 @@ describe('RerunPaginatorService integration', () => {
             getFlow: jest.fn().mockResolvedValue(null),
         } as unknown as jest.Mocked<FlowManagerService>
 
-        hogQueue = {
+        scriptQueue = {
             queueInvocations: jest.fn().mockResolvedValue(undefined),
         } as unknown as jest.Mocked<JobQueue>
         flowQueue = {
@@ -253,7 +253,7 @@ describe('RerunPaginatorService integration', () => {
             queueRerunWrapperRow: jest.fn(),
             flush: jest.fn().mockResolvedValue(undefined),
             dropQueuedRowsFor: jest.fn(),
-        } as unknown as jest.Mocked<HogInvocationResultsService>
+        } as unknown as jest.Mocked<ScriptInvocationResultsService>
 
         paginatorMonitoringService = {
             queueLogs: jest.fn(),
@@ -265,7 +265,7 @@ describe('RerunPaginatorService integration', () => {
             insightsFunctionManager,
             flowManager,
             paginatorLifecycleService,
-            { insights_function: hogQueue, hog_flow: flowQueue },
+            { insights_function: scriptQueue, hog_flow: flowQueue },
             paginatorMonitoringService,
             10000
         )
@@ -309,8 +309,8 @@ describe('RerunPaginatorService integration', () => {
                 createdAt: DateTime.now(),
             })
 
-            expect(hogQueue.queueInvocations).toHaveBeenCalledTimes(1)
-            const enqueued = hogQueue.queueInvocations.mock.calls[0][0] as CyclotronJobInvocationInsightsFunction[]
+            expect(scriptQueue.queueInvocations).toHaveBeenCalledTimes(1)
+            const enqueued = scriptQueue.queueInvocations.mock.calls[0][0] as CyclotronJobInvocationInsightsFunction[]
             const enqueuedIds = enqueued.map((i) => i.id).sort()
             expect(enqueuedIds).toEqual(['inv-a', 'inv-c'])
 
@@ -349,7 +349,7 @@ describe('RerunPaginatorService integration', () => {
                 createdAt: DateTime.now(),
             })
 
-            const enqueued = hogQueue.queueInvocations.mock.calls[0][0] as CyclotronJobInvocationInsightsFunction[]
+            const enqueued = scriptQueue.queueInvocations.mock.calls[0][0] as CyclotronJobInvocationInsightsFunction[]
             expect(enqueued.map((i) => i.id)).toEqual(['inv-real'])
             // by-ids mode marks done once remaining_ids is drained, regardless of
             // whether every id had a matching CH row.
@@ -374,7 +374,7 @@ describe('RerunPaginatorService integration', () => {
             // The re-enqueued invocation carries no resolved `inputs` — the
             // executor rebuilds them from the current script function config at
             // run time, so the rerun never trusts a stored snapshot.
-            const enqueued = hogQueue.queueInvocations.mock.calls[0][0] as CyclotronJobInvocationInsightsFunction[]
+            const enqueued = scriptQueue.queueInvocations.mock.calls[0][0] as CyclotronJobInvocationInsightsFunction[]
             expect(enqueued).toHaveLength(1)
             expect(enqueued[0].state.globals).not.toHaveProperty('inputs')
         })
@@ -399,7 +399,7 @@ describe('RerunPaginatorService integration', () => {
             })
 
             // The undecodable record is skipped, not fatal — the good one still re-enqueues.
-            const enqueued = hogQueue.queueInvocations.mock.calls.flatMap(
+            const enqueued = scriptQueue.queueInvocations.mock.calls.flatMap(
                 (c) => c[0] as CyclotronJobInvocationInsightsFunction[]
             )
             expect(enqueued.map((i) => i.id)).toEqual(['inv-good'])
@@ -427,7 +427,7 @@ describe('RerunPaginatorService integration', () => {
                 createdAt: DateTime.now(),
             })
 
-            const enqueued = hogQueue.queueInvocations.mock.calls[0][0] as CyclotronJobInvocationInsightsFunction[]
+            const enqueued = scriptQueue.queueInvocations.mock.calls[0][0] as CyclotronJobInvocationInsightsFunction[]
             const ids = enqueued.map((i) => i.id).sort()
             expect(ids).toEqual(['fail-1', 'fail-2'])
             expect(next.progress.queued).toBe(2)
@@ -453,7 +453,7 @@ describe('RerunPaginatorService integration', () => {
                 jobId: 'test-rerun-job',
                 createdAt: DateTime.now(),
             })
-            const enqueued = hogQueue.queueInvocations.mock.calls[0]?.[0] as
+            const enqueued = scriptQueue.queueInvocations.mock.calls[0]?.[0] as
                 | CyclotronJobInvocationInsightsFunction[]
                 | undefined
             expect(enqueued?.map((i) => i.id)).toEqual(['inv-500'])
@@ -500,7 +500,7 @@ describe('RerunPaginatorService integration', () => {
             })
             expect(next.progress.queued).toBe(0)
             expect(next.progress.done).toBe(true)
-            expect(hogQueue.queueInvocations).not.toHaveBeenCalled()
+            expect(scriptQueue.queueInvocations).not.toHaveBeenCalled()
         })
     })
 
@@ -553,7 +553,7 @@ describe('RerunPaginatorService integration', () => {
             expect(next.progress.last_error).toBeUndefined()
 
             // Under the cap is re-enqueued; over the cap is filtered by the HAVING clause.
-            const enqueued = hogQueue.queueInvocations.mock.calls[0]?.[0] as
+            const enqueued = scriptQueue.queueInvocations.mock.calls[0]?.[0] as
                 | CyclotronJobInvocationInsightsFunction[]
                 | undefined
             expect(enqueued?.map((i) => i.id)).toEqual(['pp-under-cap'])
@@ -606,7 +606,7 @@ describe('RerunPaginatorService integration', () => {
             })
             expect(next.progress.queued).toBe(0)
             expect(next.progress.skipped).toBe(1)
-            expect(hogQueue.queueInvocations).not.toHaveBeenCalled()
+            expect(scriptQueue.queueInvocations).not.toHaveBeenCalled()
         })
     })
 
@@ -622,7 +622,7 @@ describe('RerunPaginatorService integration', () => {
                 insightsFunctionManager,
                 flowManager,
                 paginatorLifecycleService,
-                { insights_function: hogQueue, hog_flow: flowQueue },
+                { insights_function: scriptQueue, hog_flow: flowQueue },
                 paginatorMonitoringService,
                 10000
             )
@@ -644,7 +644,7 @@ describe('RerunPaginatorService integration', () => {
             })
             expect(next.progress.done).toBe(false)
             expect(next.progress.last_error).toContain('datastore boom')
-            expect(hogQueue.queueInvocations).not.toHaveBeenCalled()
+            expect(scriptQueue.queueInvocations).not.toHaveBeenCalled()
         })
     })
 
@@ -701,7 +701,7 @@ describe('RerunPaginatorService integration', () => {
                 createdAt: DateTime.now(),
             })
 
-            const enqueued = hogQueue.queueInvocations.mock.calls[0][0] as CyclotronJobInvocationInsightsFunction[]
+            const enqueued = scriptQueue.queueInvocations.mock.calls[0][0] as CyclotronJobInvocationInsightsFunction[]
             expect(enqueued).toHaveLength(1)
             // CH returns DateTime64 as 'YYYY-MM-DD HH:MM:SS.ffffff' — just check
             // the date portion matches the original scheduled time. The exact

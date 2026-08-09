@@ -3,7 +3,7 @@ import { Counter, Summary } from 'prom-client'
 
 import { Flow, FlowAction } from '~/cdp/schema/flow'
 import { CyclotronJobInvocationFlow, CyclotronJobInvocationResult, InsightsFunctionFilterGlobals } from '~/cdp/types'
-import { execHog } from '~/cdp/utils/script-exec'
+import { execScript } from '~/cdp/utils/script-exec'
 import { filterFunctionInstrumented } from '~/cdp/utils/script-function-filtering'
 import { logger } from '~/common/utils/logger'
 import { captureException } from '~/common/utils/insights'
@@ -139,7 +139,7 @@ export function isEvaluableCondition(condition?: {
     )
 }
 
-const counterHogflowFilterBytecodeError = new Counter({
+const counterScriptflowFilterBytecodeError = new Counter({
     name: 'cdp_hogflow_matcher_bytecode_error',
     help: 'A wait_until_condition or conversion-goal filter threw during evaluation. Filter is treated as non-matching, so the workflow falls through to its timeout branch.',
 })
@@ -172,14 +172,14 @@ export async function runFilterBytecode(
         return false
     }
     try {
-        const result = await execHog(bytecode, { globals: filterGlobals })
+        const result = await execScript(bytecode, { globals: filterGlobals })
         return result.execResult?.result === true
     } catch (err) {
         // A broken filter silently never matches and the workflow falls through to its
         // timeout branch, which is usually the wrong outcome. Surface loudly so we notice.
         logger.error('🔴', 'Bytecode evaluation error', { ...context, err })
         captureException(err, { extra: { ...context } })
-        counterHogflowFilterBytecodeError.inc()
+        counterScriptflowFilterBytecodeError.inc()
         return false
     }
 }

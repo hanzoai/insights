@@ -7,9 +7,9 @@ import {
 } from '~/common/config/redis-pools'
 import { ReadOnlyGroupTypeManager } from '~/common/groups/readonly-group-type-manager'
 import { KafkaProducerRegistry } from '~/common/outputs/kafka-producer-registry'
-import { PersonHogConfig, createPersonHogClient } from '~/common/personinsights'
-import { PersonHogGroupReadRepository } from '~/common/personinsights/personinsights-group-read-repository'
-import { PersonHogPersonReadRepository } from '~/common/personinsights/personinsights-person-read-repository'
+import { PersonFnConfig, createPersonFnClient } from '~/common/personinsights'
+import { PersonFnGroupReadRepository } from '~/common/personinsights/personinsights-group-read-repository'
+import { PersonFnPersonReadRepository } from '~/common/personinsights/personinsights-person-read-repository'
 import { ServerCommands } from '~/common/utils/commands'
 import { PostgresRouter } from '~/common/utils/db/postgres'
 import { createRedisPoolFromConfig } from '~/common/utils/db/redis'
@@ -37,9 +37,9 @@ import { ErrorTrackingConsumer } from '~/ingestion/pipelines/errortracking/error
 import { createOutputsRegistry } from '~/ingestion/pipelines/errortracking/outputs/registry'
 
 import {
-    HogTransformerServiceConfig,
-    HogTransformerServiceDeps,
-    createHogTransformerService,
+    ScriptTransformerServiceConfig,
+    ScriptTransformerServiceDeps,
+    createScriptTransformerService,
 } from '../cdp/script-transformations/script-transformer.service'
 import { EncryptedFields } from '../cdp/utils/encryption-utils'
 import { CommonConfig } from '../common/config'
@@ -59,7 +59,7 @@ import { BaseServerConfig, CleanupResources, NodeServer, ServerLifecycle } from 
  * This is the union of:
  * - BaseServerConfig: HTTP server, profiling, pod termination lifecycle
  * - ErrorTrackingConsumerConfig: error tracking pipeline, cymbal, overflow
- * - HogTransformerServiceConfig: the transformation-only keys the in-process script transformer reads.
+ * - ScriptTransformerServiceConfig: the transformation-only keys the in-process script transformer reads.
  *   No CDP delivery config (Redis, watcher, SES, fetch) - transformations run the synchronous
  *   Script core alone, so those keys are deliberately absent rather than inherited.
  * - Infrastructure configs: Kafka broker, Postgres, Redis, consumer tuning
@@ -67,7 +67,7 @@ import { BaseServerConfig, CleanupResources, NodeServer, ServerLifecycle } from 
  */
 export type ErrorTrackingServerConfig = BaseServerConfig &
     ErrorTrackingConsumerConfig &
-    HogTransformerServiceConfig &
+    ScriptTransformerServiceConfig &
     KafkaBrokerConfig &
     KafkaUpstreamProducerEnvConfig &
     KafkaDownstreamProducerEnvConfig &
@@ -75,7 +75,7 @@ export type ErrorTrackingServerConfig = BaseServerConfig &
     DatabaseConnectionConfig &
     RedisConnectionsConfig &
     KafkaConsumerBaseConfig &
-    PersonHogConfig &
+    PersonFnConfig &
     CookielessServerConfig &
     Pick<
         CommonConfig,
@@ -164,25 +164,25 @@ export class ErrorTrackingServer implements NodeServer {
 
         const teamManager = new TeamManager(this.postgres, { loaderRetry: DEFAULT_LOADER_RETRY })
 
-        // 2. Services needed by ErrorTrackingConsumer and HogTransformer
+        // 2. Services needed by ErrorTrackingConsumer and ScriptTransformer
         const geoipService = new GeoIPService(this.config.MMDB_FILE_LOCATION)
         await geoipService.get()
 
-        const personinsightsClient = createPersonHogClient(this.config)
+        const personinsightsClient = createPersonFnClient(this.config)
         const clientLabel = this.config.PLUGIN_SERVER_MODE ?? 'unknown'
 
         if (!personinsightsClient) {
             throw new Error(
-                'PersonHog client is required for error tracking — set PERSONFN_ENABLED=true and PERSONFN_ADDR'
+                'PersonFn client is required for error tracking — set PERSONFN_ENABLED=true and PERSONFN_ADDR'
             )
         }
 
-        const personRepository = new PersonHogPersonReadRepository(personinsightsClient, clientLabel)
-        const groupRepository = new PersonHogGroupReadRepository(personinsightsClient, clientLabel)
+        const personRepository = new PersonFnPersonReadRepository(personinsightsClient, clientLabel)
+        const groupRepository = new PersonFnGroupReadRepository(personinsightsClient, clientLabel)
         const encryptedFields = new EncryptedFields(this.config.ENCRYPTION_SALT_KEYS)
         const integrationManager = new IntegrationManagerService(this.pubsub, this.postgres, encryptedFields)
 
-        const hogTransformerDeps: HogTransformerServiceDeps = {
+        const scriptTransformerDeps: ScriptTransformerServiceDeps = {
             geoipService,
             postgres: this.postgres,
             pubSub: this.pubsub,
@@ -215,7 +215,7 @@ export class ErrorTrackingServer implements NodeServer {
                 {
                     outputs,
                     teamManager,
-                    hogTransformer: createHogTransformerService(this.config, hogTransformerDeps),
+                    scriptTransformer: createScriptTransformerService(this.config, scriptTransformerDeps),
                     groupTypeManager: new ReadOnlyGroupTypeManager(groupRepository, {
                         loaderRetry: DEFAULT_LOADER_RETRY,
                     }),

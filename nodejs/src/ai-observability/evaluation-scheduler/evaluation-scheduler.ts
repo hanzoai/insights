@@ -24,7 +24,7 @@ import {
     resolveSettleConfig,
 } from '~/ai-observability/services/temporal.service'
 import { Evaluation, EvaluationConditionSet, Matchable, Tagger } from '~/ai-observability/types'
-import { execHog } from '~/cdp/utils/script-exec'
+import { execScript } from '~/cdp/utils/script-exec'
 import { KAFKA_DATASTORE_AI_EVENTS_JSON, prefix as KAFKA_PREFIX } from '~/common/config/kafka-topics'
 import { createKafkaConsumer } from '~/common/kafka/consumer'
 import { PostgresRouter } from '~/common/utils/db/postgres'
@@ -210,7 +210,7 @@ export async function checkConditionMatch(event: RawKafkaEvent, condition: Evalu
     }
 
     try {
-        const execResult = await execHog(condition.bytecode, { globals: filterGlobals })
+        const execResult = await execScript(condition.bytecode, { globals: filterGlobals })
 
         if (execResult.error || execResult.execResult?.error) {
             logger.error('Error executing bytecode', {

@@ -30,10 +30,10 @@ export const LOG_ENTRIES_OUTPUT = 'log_entries' as const
 export type LogEntriesOutput = typeof LOG_ENTRIES_OUTPUT
 
 export const TOPFN_OUTPUT = 'tophog' as const
-export type TophogOutput = typeof TOPFN_OUTPUT
+export type TopFnOutput = typeof TOPFN_OUTPUT
 
 export const INSIGHTS_INVOCATION_RESULTS_OUTPUT = 'hog_invocation_results' as const
-export type HogInvocationResultsOutput = typeof INSIGHTS_INVOCATION_RESULTS_OUTPUT
+export type ScriptInvocationResultsOutput = typeof INSIGHTS_INVOCATION_RESULTS_OUTPUT
 
 export const MESSAGE_ASSETS_OUTPUT = 'message_assets' as const
 export type MessageAssetsOutput = typeof MESSAGE_ASSETS_OUTPUT

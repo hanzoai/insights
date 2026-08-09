@@ -5,7 +5,7 @@ import { findContinueAction } from '../flow-utils'
 import { ActionHandler, ActionHandlerOptions, ActionHandlerResult } from './action.interface'
 
 // NOTE: This is not an actively used action as the triggering is done by the scheduler
-// but useful for testing the hogflow executor
+// but useful for testing the flow executor
 export class TriggerHandler implements ActionHandler {
     async execute({
         invocation,

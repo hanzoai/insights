@@ -1,6 +1,6 @@
 import { FlowActionSchema, FlowSchema } from './flow'
 
-describe('hogflow schema', () => {
+describe('flow schema', () => {
     const commonActionFields = {
         id: 'action-1',
         name: 'Wait',

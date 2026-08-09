@@ -1,7 +1,7 @@
 import { configureEventLoopYield, getEventLoopYieldThresholdMs } from '~/common/utils/event-loop-yield'
 
-import { compileHog } from '../templates/compiler'
-import { execHog } from './script-exec'
+import { compileScript } from '../templates/compiler'
+import { execScript } from './script-exec'
 
 describe('script-exec', () => {
     describe('thread relief', () => {
@@ -33,7 +33,7 @@ describe('script-exec', () => {
         })
 
         it('should process batches in a way that does not block the main thread', async () => {
-            const evilFunctionCode = await compileHog(`
+            const evilFunctionCode = await compileScript(`
                 fn fibonacci(number) {
                     print('I AM FIBONACCI. ')
                     if (number < 2) {
@@ -49,7 +49,7 @@ describe('script-exec', () => {
 
             const results = await Promise.all(
                 Array.from({ length: numberToTest }, () =>
-                    execHog(evilFunctionCode, {
+                    execScript(evilFunctionCode, {
                         timeout: blockTime,
                         functions: {
                             print: () => {},

@@ -1,4 +1,4 @@
-import { AppMetricsOutput, HogInvocationResultsOutput, LogEntriesOutput } from '~/common/outputs'
+import { AppMetricsOutput, ScriptInvocationResultsOutput, LogEntriesOutput } from '~/common/outputs'
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
 import { KafkaProducerRegistry } from '~/common/outputs/kafka-producer-registry'
 import { RedisV2, createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'
@@ -19,9 +19,9 @@ import {
 import { CdpProducerName } from './outputs/producers'
 import { createCdpOutputsRegistry } from './outputs/registry'
 import { CapturedEventsService } from './services/captured-events/captured-events.service'
-import { HogExecutorAsyncService } from './services/script-executor-async.service'
-import { HogExecutorService } from './services/script-executor.service'
-import { HogInputsService } from './services/script-inputs.service'
+import { ScriptExecutorAsyncService } from './services/script-executor-async.service'
+import { ScriptExecutorService } from './services/script-executor.service'
+import { ScriptInputsService } from './services/script-inputs.service'
 import { FlowDuplicateObserverService } from './services/flows/flow-duplicate-observer.service'
 import { FlowExecutorService } from './services/flows/flow-executor.service'
 import { FlowFunctionsService } from './services/flows/flow-functions.service'
@@ -41,8 +41,8 @@ import { PushNotificationService } from './services/messaging/push-notification.
 import { RecipientPreferencesService } from './services/messaging/recipient-preferences.service'
 import { RecipientTokensService } from './services/messaging/recipient-tokens.service'
 import { InsightsFunctionMonitoringService } from './services/monitoring/script-function-monitoring.service'
-import { HogInvocationResultsService } from './services/monitoring/script-invocation-results.service'
-import { HogWatcherService } from './services/monitoring/script-watcher.service'
+import { ScriptInvocationResultsService } from './services/monitoring/script-invocation-results.service'
+import { ScriptWatcherService } from './services/monitoring/script-watcher.service'
 import { NativeDestinationExecutorService } from './services/native-destination-executor.service'
 import { SegmentDestinationExecutorService } from './services/segment-destination-executor.service'
 import { WarehouseWebhooksService } from './services/warehouse/warehouse-webhooks.service'
@@ -53,7 +53,7 @@ import { EncryptedFields } from './utils/encryption-utils'
 export type CdpOutput =
     | AppMetricsOutput
     | LogEntriesOutput
-    | HogInvocationResultsOutput
+    | ScriptInvocationResultsOutput
     | PrefilteredEventsOutput
     | PrecalculatedPersonPropertiesOutput
     | WarehouseSourceWebhooksOutput
@@ -71,24 +71,24 @@ export interface CdpCoreServices {
      * Shadow Valkey pools used for dual-write/read load testing. Null when
      * CDP_VALKEY_DUAL_ENABLED is false or CDP_VALKEY_HOST is unset. Consumers
      * that build their own redis-backed services (e.g. CdpEventsConsumer's
-     * HogRateLimiterService) read this to construct mirror instances bound
+     * ScriptRateLimiterService) read this to construct mirror instances bound
      * to the shadow Valkey.
      */
     valkeyShadow: CdpValkeyShadowPools | null
     insightsFunctionManager: InsightsFunctionManagerService
     flowManager: FlowManagerService
-    hogWatcher: HogWatcherService
+    scriptWatcher: ScriptWatcherService
     /**
-     * Mirror HogWatcherService bound to the shadow Valkey pool. Null when
-     * shadow mode is disabled. Use at call sites alongside `hogWatcher` (via
+     * Mirror ScriptWatcherService bound to the shadow Valkey pool. Null when
+     * shadow mode is disabled. Use at call sites alongside `scriptWatcher` (via
      * `mirrorCall`) to load-test the new infrastructure. Constructed with
      * `sendEvents: false` so it never emits duplicate billable team events.
      */
-    hogWatcherMirror: HogWatcherService | null
-    /** Script execution with async functions (fetch, email, push). Its `hogExecutor` is the synchronous core. */
-    hogExecutorAsync: HogExecutorAsyncService
+    scriptWatcherMirror: ScriptWatcherService | null
+    /** Script execution with async functions (fetch, email, push). Its `scriptExecutor` is the synchronous core. */
+    scriptExecutorAsync: ScriptExecutorAsyncService
     /** Rebuilds the templated/resolved input bundle for a script function — used by the rerun path to re-derive `inputs` after they're stripped from the persisted payload. */
-    hogInputsService: HogInputsService
+    scriptInputsService: ScriptInputsService
     insightsFunctionTemplateManager: InsightsFunctionTemplateManagerService
     flowFunctionsService: FlowFunctionsService
     recipientsManager: RecipientsManagerService
@@ -99,7 +99,7 @@ export interface CdpCoreServices {
     insightsFunctionMonitoringService: InsightsFunctionMonitoringService
     capturedEventsService: CapturedEventsService
     /** Per-invocation lifecycle row producer for the new runs/invocations UI + rerun path. */
-    hogInvocationResultsService: HogInvocationResultsService
+    scriptInvocationResultsService: ScriptInvocationResultsService
     /** Fans `CyclotronJobInvocationResult` batches across monitoring / warehouse / captured-events. */
     invocationResultsService: InvocationResultsService
     nativeDestinationExecutorService: NativeDestinationExecutorService
@@ -186,7 +186,7 @@ export interface CdpCoreServicesDeps {
     internalCaptureService: InternalCaptureService
     /**
      * SES Valkey pool shared with the SES rate limiter, opened only on pods whose
-     * capabilities actually execute email actions (hogflow/email cyclotron workers).
+     * capabilities actually execute email actions (flow/email cyclotron workers).
      * `null` on every other CDP consumer and on cdp-api so idle pods don't hold
      * open connections against the SES Valkey instance.
      */
@@ -364,10 +364,10 @@ export function createCdpCoreServices(
     const insightsFunctionManager = new InsightsFunctionManagerService(deps.postgres, deps.pubSub, deps.encryptedFields)
     const flowManager = new FlowManagerService(deps.postgres, deps.pubSub, deps.encryptedFields)
 
-    const hogWatcherConfig = {
-        hogCostTimingLowerMs: config.CDP_WATCHER_FN_COST_TIMING_LOWER_MS,
-        hogCostTimingUpperMs: config.CDP_WATCHER_FN_COST_TIMING_UPPER_MS,
-        hogCostTiming: config.CDP_WATCHER_FN_COST_TIMING,
+    const scriptWatcherConfig = {
+        scriptCostTimingLowerMs: config.CDP_WATCHER_FN_COST_TIMING_LOWER_MS,
+        scriptCostTimingUpperMs: config.CDP_WATCHER_FN_COST_TIMING_UPPER_MS,
+        scriptCostTiming: config.CDP_WATCHER_FN_COST_TIMING,
         asyncCostTimingLowerMs: config.CDP_WATCHER_ASYNC_COST_TIMING_LOWER_MS,
         asyncCostTimingUpperMs: config.CDP_WATCHER_ASYNC_COST_TIMING_UPPER_MS,
         asyncCostTiming: config.CDP_WATCHER_ASYNC_COST_TIMING,
@@ -382,16 +382,16 @@ export function createCdpCoreServices(
         observeResultsBufferMaxResults: config.CDP_WATCHER_OBSERVE_RESULTS_BUFFER_MAX_RESULTS,
     }
 
-    const hogWatcher = new HogWatcherService(deps.teamManager, hogWatcherConfig, redis, redisReader)
+    const scriptWatcher = new ScriptWatcherService(deps.teamManager, scriptWatcherConfig, redis, redisReader)
 
-    // Mirror HogWatcherService bound to the shadow Valkey pool. `sendEvents: false`
+    // Mirror ScriptWatcherService bound to the shadow Valkey pool. `sendEvents: false`
     // so it never emits duplicate billable team events on state transitions; the
     // Prom counter `cdp_insights_function_state_change` may double-emit when both pools
     // detect the same transition — rare, accepted during dual-write mode.
-    const hogWatcherMirror: HogWatcherService | null = valkeyShadow
-        ? new HogWatcherService(
+    const scriptWatcherMirror: ScriptWatcherService | null = valkeyShadow
+        ? new ScriptWatcherService(
               deps.teamManager,
-              { ...hogWatcherConfig, sendEvents: false },
+              { ...scriptWatcherConfig, sendEvents: false },
               valkeyShadow.writer,
               valkeyShadow.reader
           )
@@ -428,7 +428,7 @@ export function createCdpCoreServices(
         messageAssetsService
     )
     const recipientTokensService = new RecipientTokensService(config.ENCRYPTION_SALT_KEYS, config.SITE_URL)
-    const hogInputsService = new HogInputsService(deps.integrationManager, recipientTokensService, deps.encryptedFields)
+    const scriptInputsService = new ScriptInputsService(deps.integrationManager, recipientTokensService, deps.encryptedFields)
     const pushNotificationService = new PushNotificationService(
         deps.integrationManager,
         deps.encryptedFields,
@@ -444,8 +444,8 @@ export function createCdpCoreServices(
         valkeyShadow?.writer ?? null
     )
 
-    const hogExecutorAsync = new HogExecutorAsyncService(
-        new HogExecutorService({ executionTimeoutMs: config.CDP_WATCHER_FN_COST_TIMING_UPPER_MS }, hogInputsService),
+    const scriptExecutorAsync = new ScriptExecutorAsyncService(
+        new ScriptExecutorService({ executionTimeoutMs: config.CDP_WATCHER_FN_COST_TIMING_UPPER_MS }, scriptInputsService),
         {
             googleAdwordsDeveloperToken: config.CDP_GOOGLE_ADWORDS_DEVELOPER_TOKEN,
             fetchRetries: config.CDP_FETCH_RETRIES,
@@ -455,7 +455,7 @@ export function createCdpCoreServices(
         },
         {
             teamManager: deps.teamManager,
-            hogInputsService,
+            scriptInputsService,
             emailService,
             recipientTokensService,
             pushNotificationService,
@@ -466,7 +466,7 @@ export function createCdpCoreServices(
     const flowFunctionsService = new FlowFunctionsService(
         config.SITE_URL,
         insightsFunctionTemplateManager,
-        hogExecutorAsync
+        scriptExecutorAsync
     )
 
     const recipientPreferencesService = new RecipientPreferencesService(recipientsManager, emailSuppressionService)
@@ -485,12 +485,12 @@ export function createCdpCoreServices(
     )
 
     const insightsFunctionMonitoringService = new InsightsFunctionMonitoringService(outputs)
-    const hogInvocationResultsService = new HogInvocationResultsService(outputs, config)
+    const scriptInvocationResultsService = new ScriptInvocationResultsService(outputs, config)
     const warehouseWebhooksService = new WarehouseWebhooksService(outputs)
     const capturedEventsService = new CapturedEventsService(deps.internalCaptureService, deps.teamManager)
     const invocationResultsService = new InvocationResultsService(
         insightsFunctionMonitoringService,
-        hogInvocationResultsService,
+        scriptInvocationResultsService,
         warehouseWebhooksService,
         capturedEventsService,
         messageAssetsService
@@ -504,10 +504,10 @@ export function createCdpCoreServices(
         valkeyShadow,
         insightsFunctionManager,
         flowManager,
-        hogWatcher,
-        hogWatcherMirror,
-        hogExecutorAsync,
-        hogInputsService,
+        scriptWatcher,
+        scriptWatcherMirror,
+        scriptExecutorAsync,
+        scriptInputsService,
         insightsFunctionTemplateManager,
         flowFunctionsService,
         recipientsManager,
@@ -517,7 +517,7 @@ export function createCdpCoreServices(
         flowExecutor,
         insightsFunctionMonitoringService,
         capturedEventsService,
-        hogInvocationResultsService,
+        scriptInvocationResultsService,
         invocationResultsService,
         nativeDestinationExecutorService,
         segmentDestinationExecutorService,

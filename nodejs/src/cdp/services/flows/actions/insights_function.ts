@@ -9,7 +9,7 @@ import {
     CyclotronJobInvocationResult,
     MinimalLogEntry,
 } from '../../../types'
-import { HogExecutorExecuteAsyncOptions } from '../../script-executor-async.service'
+import { ScriptExecutorExecuteAsyncOptions } from '../../script-executor-async.service'
 import { EmailValidationService } from '../../messaging/email-validation.service'
 import { RecipientPreferencesService } from '../../messaging/recipient-preferences.service'
 import { trackFlowBillableInvocation } from '../billing-utils'
@@ -34,7 +34,7 @@ export class InsightsFunctionHandler implements ActionHandler {
         invocation,
         action,
         result,
-        hogExecutorOptions,
+        scriptExecutorOptions,
     }: ActionHandlerOptions<Action>): Promise<ActionHandlerResult> {
         // Inputs are rendered once, on fresh entry into the action (continuations reuse the
         // rendered state in insightsFunctionState) - so this also fires at most once per step per run
@@ -42,7 +42,7 @@ export class InsightsFunctionHandler implements ActionHandler {
             observeMissingVariableReferences(invocation, action, result)
         }
 
-        const functionResult = await this.executeInsightsFunction(invocation, action, hogExecutorOptions)
+        const functionResult = await this.executeInsightsFunction(invocation, action, scriptExecutorOptions)
 
         // Add all logs
         functionResult.logs.forEach((log: MinimalLogEntry) => {
@@ -73,7 +73,7 @@ export class InsightsFunctionHandler implements ActionHandler {
             // Routing-only reschedule signature: the queue changed AND no explicit
             // `queueScheduledAt` was set. That's the shape produced by `routeEmailToQueue`
             // and `routeToQueue` in script-executor.service.ts when moving a job between the
-            // hogflow and email queues — the next dequeue continues the same action on the
+            // flow and email queues — the next dequeue continues the same action on the
             // new queue. Tag the action state so the executor can suppress the redundant
             // "Resuming..." / "Workflow will pause until..." pair on the next dequeue.
             //
@@ -116,7 +116,7 @@ export class InsightsFunctionHandler implements ActionHandler {
     private async executeInsightsFunction(
         invocation: CyclotronJobInvocationFlow,
         action: Action,
-        hogExecutorOptions?: HogExecutorExecuteAsyncOptions
+        scriptExecutorOptions?: ScriptExecutorExecuteAsyncOptions
     ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction> & { skipped?: boolean }> {
         const insightsFunction = await instrumentFn(
             { key: 'flow.action.insightsFunction.buildInsightsFunction', sendException: false },
@@ -201,7 +201,7 @@ export class InsightsFunctionHandler implements ActionHandler {
         }
 
         return instrumentFn({ key: 'flow.action.insightsFunction.executeWithAsyncFunctions', sendException: false }, () =>
-            this.flowFunctionsService.executeWithAsyncFunctions(insightsFunctionInvocation, hogExecutorOptions)
+            this.flowFunctionsService.executeWithAsyncFunctions(insightsFunctionInvocation, scriptExecutorOptions)
         )
     }
 }

@@ -4,8 +4,8 @@ import { logger } from '~/common/utils/logger'
 import * as insightsUtils from '~/common/utils/insights'
 
 import { InsightsFunctionInvocationGlobals } from '../types'
-import * as hogExec from '../utils/script-exec'
-import { CdpHogflowSubscriptionMatcherConsumer } from './cdp-flow-subscription-matcher.consumer'
+import * as scriptExec from '../utils/script-exec'
+import { CdpScriptflowSubscriptionMatcherConsumer } from './cdp-flow-subscription-matcher.consumer'
 
 jest.mock('./cdp-base.consumer', () => {
     return {
@@ -105,7 +105,7 @@ interface QueryCall {
     params: any[]
 }
 
-class MatcherUnderTest extends CdpHogflowSubscriptionMatcherConsumer {
+class MatcherUnderTest extends CdpScriptflowSubscriptionMatcherConsumer {
     public calls: QueryCall[] = []
     public findRows: MockRow[] = []
     public wakeRows: MockRow[] = []
@@ -192,7 +192,7 @@ class MatcherUnderTest extends CdpHogflowSubscriptionMatcherConsumer {
 
 const stateBuffer = (state: any): Buffer => Buffer.from(JSON.stringify({ state }))
 
-describe('CdpHogflowSubscriptionMatcherConsumer', () => {
+describe('CdpScriptflowSubscriptionMatcherConsumer', () => {
     let matcher: MatcherUnderTest
 
     beforeEach(() => {
@@ -208,7 +208,7 @@ describe('CdpHogflowSubscriptionMatcherConsumer', () => {
         })
 
         it('passes both distinct_ids and person_ids to the lookup query', async () => {
-            // Need a qualifying hogflow on the team or the team-level early-out skips findParkedJobs.
+            // Need a qualifying flow on the team or the team-level early-out skips findParkedJobs.
             matcher.setFlows({ 'flow-1': makeFlow({ id: 'flow-1' }) })
             await matcher.runWake([
                 makeGlobals({}),
@@ -229,9 +229,9 @@ describe('CdpHogflowSubscriptionMatcherConsumer', () => {
         })
 
         it('does not constrain the lookup by queue_name so waits parked on any queue are found', async () => {
-            // A wait that follows an email step parks on the email queue, not hogflow. The lookup
+            // A wait that follows an email step parks on the email queue, not flow. The lookup
             // must not filter queue_name or it would silently miss those parked jobs; function_id
-            // already scopes the results to hogflow jobs.
+            // already scopes the results to flow jobs.
             matcher.setFlows({ 'flow-1': makeFlow({ id: 'flow-1' }) })
             await matcher.runWake([makeGlobals({})])
             const lookup = matcher.calls.find((c) => c.sql.includes('SELECT id, team_id, function_id'))!
@@ -368,9 +368,9 @@ describe('CdpHogflowSubscriptionMatcherConsumer', () => {
             expect(newState.state.conversionMatched).toBeUndefined()
         })
 
-        it('logs the hogflow id alongside the action id when wait-step bytecode evaluation throws', async () => {
+        it('logs the flow id alongside the action id when wait-step bytecode evaluation throws', async () => {
             const errorSpy = jest.spyOn(logger, 'error').mockReturnValue(undefined as any)
-            const execSpy = jest.spyOn(hogExec, 'execHog').mockRejectedValue(new Error('boom'))
+            const execSpy = jest.spyOn(scriptExec, 'execScript').mockRejectedValue(new Error('boom'))
             const captureSpy = jest.spyOn(insightsUtils, 'captureException').mockReturnValue(undefined as any)
 
             try {
@@ -1034,7 +1034,7 @@ describe('CdpHogflowSubscriptionMatcherConsumer', () => {
             expect(update).toBeUndefined()
         })
 
-        it('skips candidates whose hogflow is not in cache', async () => {
+        it('skips candidates whose flow is not in cache', async () => {
             matcher.findRows = [
                 {
                     id: 'job-1',
@@ -1076,7 +1076,7 @@ describe('CdpHogflowSubscriptionMatcherConsumer', () => {
         })
 
         it('returns no candidates when lookup query returns empty', async () => {
-            // Team has a qualifying hogflow, so the team-level early-out doesn't fire and we
+            // Team has a qualifying flow, so the team-level early-out doesn't fire and we
             // do hit cyclotron — but the lookup itself returns no rows, so no UPDATE follows.
             matcher.findRows = []
             matcher.setFlows({ 'flow-1': makeFlow({ id: 'flow-1' }) })
@@ -1143,7 +1143,7 @@ describe('CdpHogflowSubscriptionMatcherConsumer', () => {
             // gate then crashes the pod and replays — the SELECT is read-only and the UPDATE
             // is guarded by `status = 'available'`, so replay is idempotent.
             const failure = new Error('connection refused')
-            // Need a qualifying hogflow so the team-level early-out doesn't skip the cyclotron
+            // Need a qualifying flow so the team-level early-out doesn't skip the cyclotron
             // call we want to see fail.
             matcher.setFlows({ 'flow-1': makeFlow({ id: 'flow-1' }) })
             ;(matcher as any).cyclotronPool.query = jest.fn().mockRejectedValue(failure)
@@ -1568,7 +1568,7 @@ describe('CdpHogflowSubscriptionMatcherConsumer', () => {
             // Waking it here is the point: it re-checks against the now-resolvable person immediately, and
             // re-parks with an anchor that later person updates can address.
             expect(update!.sql).toContain('scheduled = NOW()')
-            // Not attributed as a merge re-key: counterHogflowRekeyWake measures whether waking on a merge
+            // Not attributed as a merge re-key: counterScriptflowRekeyWake measures whether waking on a merge
             // is wasted churn, so a first-mapping fill must stay out of that ratio.
             expect(newState.state.currentAction?.rekeyWake).toBeUndefined()
         })

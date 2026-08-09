@@ -16,13 +16,13 @@ import {
     TeamId,
 } from '~/types'
 
-import { PersonHogClient, shouldUseGrpcForTeam, shouldUseGrpcForTeamItems } from './client'
+import { PersonFnClient, shouldUseGrpcForTeam, shouldUseGrpcForTeamItems } from './client'
 import { timedGrpc, timedPostgres } from './metrics'
 
-export class PersonHogPersonRepository implements PersonRepository {
+export class PersonFnPersonRepository implements PersonRepository {
     constructor(
         private postgres: PersonRepository,
-        private grpcClient: PersonHogClient,
+        private grpcClient: PersonFnClient,
         private grpcPercentage: number,
         private rolloutTeamIds: ReadonlySet<number>,
         private clientLabel: string
@@ -55,7 +55,7 @@ export class PersonHogPersonRepository implements PersonRepository {
             }
             return results[0]
         } catch (error) {
-            logger.warn('[PersonHog] gRPC fetchPerson failed, falling back to Postgres', {
+            logger.warn('[PersonFn] gRPC fetchPerson failed, falling back to Postgres', {
                 teamId,
                 error: String(error),
             })
@@ -85,7 +85,7 @@ export class PersonHogPersonRepository implements PersonRepository {
                 this.grpcClient.persons.fetchPersonsByDistinctIds(teamPersons, callerTag)
             )
         } catch (error) {
-            logger.warn('[PersonHog] gRPC fetchPersonsByDistinctIds failed, falling back to Postgres', {
+            logger.warn('[PersonFn] gRPC fetchPersonsByDistinctIds failed, falling back to Postgres', {
                 count: teamPersons.length,
                 error: String(error),
             })
@@ -115,7 +115,7 @@ export class PersonHogPersonRepository implements PersonRepository {
                 this.grpcClient.persons.fetchPersonsByPersonIds(teamPersons, callerTag)
             )
         } catch (error) {
-            logger.warn('[PersonHog] gRPC fetchPersonsByPersonIds failed, falling back to Postgres', {
+            logger.warn('[PersonFn] gRPC fetchPersonsByPersonIds failed, falling back to Postgres', {
                 count: teamPersons.length,
                 error: String(error),
             })
@@ -152,7 +152,7 @@ export class PersonHogPersonRepository implements PersonRepository {
                 this.grpcClient.persons.getDistinctIdsForPersons(teamId, personIntIds, options?.limitPerPerson)
             )
         } catch (error) {
-            logger.warn('[PersonHog] gRPC fetchDistinctIdsForPersons failed, falling back to Postgres', {
+            logger.warn('[PersonFn] gRPC fetchDistinctIdsForPersons failed, falling back to Postgres', {
                 count: personIntIds.length,
                 error: String(error),
             })

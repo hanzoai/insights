@@ -181,7 +181,7 @@ describe('EmailTrackingService', () => {
 
         beforeEach(async () => {
             api = new CdpApi(hub, createCdpConsumerDeps(hub), {
-                hogQueue: createMockJobQueue(),
+                scriptQueue: createMockJobQueue(),
                 flowQueue: createMockJobQueue(),
             })
             app = setupExpressApp()
@@ -443,7 +443,7 @@ describe('EmailTrackingService', () => {
             hub.EMAIL_SUPPRESSION_TRANSIENT_BOUNCE_THRESHOLD = 1
 
             api = new CdpApi(hub, createCdpConsumerDeps(hub), {
-                hogQueue: createMockJobQueue(),
+                scriptQueue: createMockJobQueue(),
                 flowQueue: createMockJobQueue(),
             })
             app = setupExpressApp()

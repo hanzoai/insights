@@ -17,7 +17,7 @@ const DEFAULT_WAIT_DURATION_SECONDS = 10 * 60
 // person/event/internal streams cover every wake and polling is provably redundant.
 // Labelled by team and flow so a non-zero reading names the workflow still leaning on the poll; a
 // series only exists for flows that actually poll-advance, so cardinality tracks incidence.
-export const counterHogflowWaitPollOnlyAdvance = new Counter({
+export const counterScriptflowWaitPollOnlyAdvance = new Counter({
     name: 'cdp_hogflow_wait_poll_only_advance',
     help: 'wait_until_condition advanced via the polling re-check, not the subscription matcher — a wake the streams missed.',
     labelNames: ['team_id', 'hog_flow_id'],
@@ -27,7 +27,7 @@ export const counterHogflowWaitPollOnlyAdvance = new Counter({
 // onto the survivor and woke it (scheduled=now). 'advanced' = the merge made the condition match;
 // 'reparked' = it didn't, so waking was wasted churn. A high reparked:advanced ratio means the wake
 // is firing on merges that don't satisfy the wait — signal to narrow when the matcher wakes.
-export const counterHogflowRekeyWake = new Counter({
+export const counterScriptflowRekeyWake = new Counter({
     name: 'cdp_hogflow_matcher_rekey_wake_total',
     help: 'wait_until_condition re-checks triggered by a merge re-key wake, by outcome.',
     labelNames: ['outcome'],
@@ -87,19 +87,19 @@ export class ConditionalBranchHandler implements ActionHandler {
                 invocation.state.currentAction.pollReparked = true
             }
             if (rekeyWoken) {
-                counterHogflowRekeyWake.labels('reparked').inc()
+                counterScriptflowRekeyWake.labels('reparked').inc()
             }
             return { scheduledAt: conditionResult.scheduledAt, result: { conditionResult } }
         } else if (conditionResult.nextAction) {
             // Poll-only advance: a wait whose condition matched on a re-check (not via the matcher's
             // eventMatched short-circuit above, and not on entry). This is the wake the streams missed.
             if (isWait && invocation.state.currentAction?.pollReparked === true) {
-                counterHogflowWaitPollOnlyAdvance
+                counterScriptflowWaitPollOnlyAdvance
                     .labels({ team_id: invocation.flow.team_id, hog_flow_id: invocation.flow.id })
                     .inc()
             }
             if (rekeyWoken) {
-                counterHogflowRekeyWake.labels('advanced').inc()
+                counterScriptflowRekeyWake.labels('advanced').inc()
             }
             return { nextAction: conditionResult.nextAction, result: { conditionResult } }
         }

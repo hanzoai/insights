@@ -21,7 +21,7 @@ import {
 } from '../../types'
 import { convertToInsightsFunctionFilterGlobal, filterFunctionInstrumented } from '../../utils/script-function-filtering'
 import { createInvocationResult } from '../../utils/invocation-utils'
-import { HogExecutorExecuteAsyncOptions } from '../script-executor-async.service'
+import { ScriptExecutorExecuteAsyncOptions } from '../script-executor-async.service'
 import { EmailValidationService } from '../messaging/email-validation.service'
 import { RecipientPreferencesService } from '../messaging/recipient-preferences.service'
 import { ActionHandler } from './actions/action.interface'
@@ -318,7 +318,7 @@ export class FlowExecutorService {
     }
 
     /**
-     * Determines if the invocation should exit early based on the hogflow's exit condition
+     * Determines if the invocation should exit early based on the flow's exit condition
      */
     private async shouldExitEarly(
         invocation: CyclotronJobInvocationFlow,
@@ -464,7 +464,7 @@ export class FlowExecutorService {
     public async executeCurrentAction(
         invocation: CyclotronJobInvocationFlow,
         options?: {
-            hogExecutorOptions?: HogExecutorExecuteAsyncOptions
+            scriptExecutorOptions?: ScriptExecutorExecuteAsyncOptions
         }
     ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationFlow>> {
         const result = createInvocationResult<CyclotronJobInvocationFlow>(invocation)
@@ -516,7 +516,7 @@ export class FlowExecutorService {
                     invocation,
                     action: currentAction,
                     result,
-                    hogExecutorOptions: options?.hogExecutorOptions,
+                    scriptExecutorOptions: options?.scriptExecutorOptions,
                 })
 
                 if (handlerResult.error) {
