@@ -1,7 +1,5 @@
 import { urls } from 'scenes/urls'
 
-import { ProductItemCategory, ProductKey } from '~/queries/schema/schema-general'
-
 import { FileSystemIconColor, ProductManifest } from '../../frontend/src/types'
 import type { WorkflowsSceneTab } from './frontend/WorkflowsScene'
 
@@ -59,16 +57,16 @@ export const manifest: ProductManifest = {
             filterKey: 'workflows',
         },
     },
-    treeItemsProducts: [
-        {
-            path: 'Workflows',
-            intents: [ProductKey.WORKFLOWS],
-            href: urls.workflows(),
-            type: 'workflows',
-            category: ProductItemCategory.TOOLS,
-            iconType: 'workflows',
-            iconColor: ['var(--color-product-workflows-light)'] as FileSystemIconColor,
-            sceneKey: 'Workflows',
-        },
-    ],
+    // No nav entry. Automations is the automation graph — one engine, on Go
+    // tasks, at /v1/automations. This product is the upstream one, and it is not
+    // merely redundant: its model reads `db_table = "insights_hogflow"`, a table
+    // that does not exist in the database, so listing flows answers 500. Showing
+    // an entry that can only fail is worse than showing none, and pointing it at
+    // Automations would be a second door onto the same idea.
+    //
+    // The routes stay registered for now. Nothing reaches them without this
+    // entry, and the removal migration has to wait: the migration chain is wedged
+    // on batch_exports.0005 (`insights_batchexportondemand` missing), and adding
+    // drops behind a stuck chain compounds it. Retire the code once that is green.
+    treeItemsProducts: [],
 }

@@ -28,6 +28,9 @@ DEFAULT_PRODUCT_PATHS = [
     "Web analytics",
     "Error tracking",
     "Session replay",
+    "Feature flags",
+    "SQL editor",
+    "Surveys",
 ]
 
 
