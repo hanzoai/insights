@@ -3,7 +3,7 @@
  *
  * These tests exercise the full hogflow lifecycle:
  *   event → CdpEventsConsumer → CyclotronJobQueuePostgresV2 (produces to v2 DB)
- *   → CdpCyclotronWorkerInsightsFlow (polls v2 DB) → InsightsFlowExecutorService
+ *   → CdpCyclotronWorkerFlow (polls v2 DB) → FlowExecutorService
  *   → results written back to v2 DB → logs/metrics to Kafka
  *
  * Only `fetch` is mocked. Everything else is real: v2 database, Kafka
@@ -21,7 +21,7 @@ import { register } from 'prom-client'
 import supertest from 'supertest'
 import express from 'ultimate-express'
 
-import { InsightsFlow } from '~/cdp/schema/insightsflow'
+import { Flow } from '~/cdp/schema/flow'
 import { setupExpressApp } from '~/common/api/router'
 import {
     KAFKA_APP_METRICS_2,
@@ -44,17 +44,17 @@ import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { Hub, Team } from '../../src/types'
 import { createRedisV2PoolFromConfig } from '../common/redis/redis-v2'
-import { FixtureInsightsFlowBuilder } from './_tests/builders/insightsflow.builder'
+import { FixtureFlowBuilder } from './_tests/builders/flow.builder'
 import { INSIGHTS_FILTERS_EXAMPLES } from './_tests/examples'
 import { createHogExecutionGlobals, insertInsightsFunctionTemplate, insertIntegration } from './_tests/fixtures'
-import { insertInsightsFlow } from './_tests/fixtures-insightsflows'
+import { insertFlow } from './_tests/fixtures-flows'
 import { CdpApi } from './cdp-api'
 import { CdpCyclotronWorkerBatchResolve } from './consumers/cdp-cyclotron-worker-batch-resolve.consumer'
 import { CdpCyclotronWorkerEmail } from './consumers/cdp-cyclotron-worker-email.consumer'
-import { CdpCyclotronWorkerInsightsFlow } from './consumers/cdp-cyclotron-worker-insightsflow.consumer'
+import { CdpCyclotronWorkerFlow } from './consumers/cdp-cyclotron-worker-flow.consumer'
 import { CdpDatawarehouseEventsConsumer } from './consumers/cdp-data-warehouse-events.consumer'
 import { CdpEventsConsumer } from './consumers/cdp-events.consumer'
-import { CdpHogflowSubscriptionMatcherConsumer } from './consumers/cdp-insightsflow-subscription-matcher.consumer'
+import { CdpHogflowSubscriptionMatcherConsumer } from './consumers/cdp-flow-subscription-matcher.consumer'
 import { createCdpOutputsRegistry } from './outputs/registry'
 import {
     CyclotronV2Janitor,
@@ -63,11 +63,11 @@ import {
     JANITOR_POISON_PILL_ERROR_KIND,
 } from './services/cyclotron-v2'
 import {
-    HOGFLOW_BATCH_RESOLVE_QUEUE,
+    FLOW_BATCH_RESOLVE_QUEUE,
     MAX_RESOLVER_ATTEMPTS,
     serializeResolverState,
-} from './services/insightsflows/batch-resolver.types'
-import { InsightsFlowBatchPersonQueryService } from './services/insightsflows/insightsflow-batch-person-query.service'
+} from './services/flows/batch-resolver.types'
+import { FlowBatchPersonQueryService } from './services/flows/flow-batch-person-query.service'
 import { CyclotronJobQueueKafka } from './services/job-queue/job-queue-kafka'
 import { CyclotronJobQueuePostgres } from './services/job-queue/job-queue-postgres'
 import { CyclotronJobQueuePostgresV2 } from './services/job-queue/job-queue-postgres-v2'
@@ -76,7 +76,7 @@ import { JobQueue } from './services/job-queue/job-queue.interface'
 import { HogInvocationResultsService } from './services/monitoring/script-invocation-results.service'
 import { RateLimiterService } from './services/rate-limiter/rate-limiter.service'
 import { InsightsFunctionInvocationGlobals } from './types'
-import { convertBatchInsightsFlowRequestToInsightsFunctionInvocationGlobals } from './utils'
+import { convertBatchFlowRequestToInsightsFunctionInvocationGlobals } from './utils'
 import { convertToInsightsFunctionFilterGlobal } from './utils/script-function-filtering'
 
 const ActualKafkaProducerWrapper = jest.requireActual('~/common/kafka/producer').KafkaProducerWrapper
@@ -108,7 +108,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
 
     let eventsConsumer: CdpEventsConsumer
     let dwhConsumer: CdpDatawarehouseEventsConsumer
-    let hogflowWorker: CdpCyclotronWorkerInsightsFlow
+    let hogflowWorker: CdpCyclotronWorkerFlow
     let hogflowQueue: JobQueue
 
     let hub: Hub
@@ -199,7 +199,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
         await Promise.all([kafkaQueue.startAsProducer(), hogflowQueue.startAsProducer()])
 
         // Start hogflow worker (consumer side — polls from the mode's backend)
-        hogflowWorker = new CdpCyclotronWorkerInsightsFlow(hub, deps, hogflowQueue)
+        hogflowWorker = new CdpCyclotronWorkerFlow(hub, deps, hogflowQueue)
         await hogflowWorker.start()
 
         mockFetch.mockResolvedValue({
@@ -286,23 +286,19 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
 
     /** Insert an active hogflow for the current team */
     async function createWorkflow(
-        workflow: Parameters<FixtureInsightsFlowBuilder['withWorkflow']>[0],
+        workflow: Parameters<FixtureFlowBuilder['withWorkflow']>[0],
         opts?: { name?: string }
     ): Promise<string> {
         const flow = await createWorkflowFlow(workflow, opts)
         return flow.id
     }
 
-    /** Same as createWorkflow but returns the full InsightsFlow object (useful for hand-built invocations) */
+    /** Same as createWorkflow but returns the full Flow object (useful for hand-built invocations) */
     async function createWorkflowFlow(
-        workflow: Parameters<FixtureInsightsFlowBuilder['withWorkflow']>[0],
-        opts?: {
-            name?: string
-            conversion?: InsightsFlow['conversion']
-            exitCondition?: InsightsFlow['exit_condition']
-        }
-    ): Promise<InsightsFlow> {
-        const builder = new FixtureInsightsFlowBuilder().withTeamId(team.id).withStatus('active').withWorkflow(workflow)
+        workflow: Parameters<FixtureFlowBuilder['withWorkflow']>[0],
+        opts?: { name?: string; conversion?: Flow['conversion']; exitCondition?: Flow['exit_condition'] }
+    ): Promise<Flow> {
+        const builder = new FixtureFlowBuilder().withTeamId(team.id).withStatus('active').withWorkflow(workflow)
         if (opts?.name) {
             builder.withName(opts.name)
         }
@@ -313,17 +309,17 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
             builder.withExitCondition(opts.exitCondition)
         }
         const flow = builder.build()
-        await insertInsightsFlow(hub.postgres, flow)
+        await insertFlow(hub.postgres, flow)
         return flow
     }
 
     /**
      * Construct and enqueue a batch-shaped CyclotronJobInvocation directly, mimicking what
-     * the batch resolver's buildInsightsFlowInvocation would produce. Skips the blast-radius API
+     * the batch resolver's buildFlowInvocation would produce. Skips the blast-radius API
      * call so tests don't need to stand up the Django side.
      */
-    async function triggerBatchWorkflow(hogFlow: InsightsFlow, personUuid: string): Promise<void> {
-        const invocationGlobals = convertBatchInsightsFlowRequestToInsightsFunctionInvocationGlobals({
+    async function triggerBatchWorkflow(hogFlow: Flow, personUuid: string): Promise<void> {
+        const invocationGlobals = convertBatchFlowRequestToInsightsFunctionInvocationGlobals({
             team,
             personId: personUuid,
             siteUrl: hub.SITE_URL,
@@ -371,7 +367,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
 
     const exitAction = () => ({ type: 'exit' as const, config: {} })
 
-    // Mirrors what InsightsFlowSerializer compiles for {events: [{id: <name>}]}: a single
+    // Mirrors what FlowSerializer compiles for {events: [{id: <name>}]}: a single
     // equality check on the `event` global. The matcher is fail-closed when bytecode
     // is absent, so fixtures must supply it the same way Django would on save.
     const eventNameBytecode = (eventName: string): any[] => ['_H', 1, 32, eventName, 32, 'event', 1, 1, 11]
@@ -562,10 +558,10 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
     })
 
     describe('workflow disabled mid-execution', () => {
-        let hogFlowId: string
+        let flowId: string
 
         beforeEach(async () => {
-            hogFlowId = await createWorkflow({
+            flowId = await createWorkflow({
                 actions: {
                     trigger: trigger(),
                     delay_1: delayAction('1s'),
@@ -594,12 +590,12 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
                 `UPDATE insights_hogflow SET status = 'archived' WHERE id = $1`,
-                [hogFlowId],
-                'archiveInsightsFlow'
+                [flowId],
+                'archiveFlow'
             )
 
             // Force the hogflow manager to reload
-            ;(hogflowWorker as any).hogFlowManager.lazyLoader.markForRefresh(hogFlowId)
+            ;(hogflowWorker as any).flowManager.lazyLoader.markForRefresh(flowId)
 
             // Wait for the delayed job to be picked up and canceled
             await waitForExpect(async () => {
@@ -627,14 +623,14 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
         }
 
         /** Persist an edited actions/edges graph and bust the worker's config cache, like Django's save + pub/sub would */
-        async function applyLiveEdit(flow: InsightsFlow): Promise<void> {
+        async function applyLiveEdit(flow: Flow): Promise<void> {
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
                 `UPDATE insights_hogflow SET actions = $2, edges = $3, updated_at = NOW() WHERE id = $1`,
                 [flow.id, JSON.stringify(flow.actions), JSON.stringify(flow.edges)],
-                'liveEditInsightsFlow'
+                'liveEditFlow'
             )
-            ;(hogflowWorker as any).hogFlowManager.lazyLoader.markForRefresh(flow.id)
+            ;(hogflowWorker as any).flowManager.lazyLoader.markForRefresh(flow.id)
         }
 
         /** Pull parked jobs' scheduled time forward so the worker picks them up now */
@@ -645,7 +641,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
         }
 
         /** Shorten the flow's delay so the woken run advances instead of re-parking */
-        function shortenDelay(flow: InsightsFlow, actionId: string): void {
+        function shortenDelay(flow: Flow, actionId: string): void {
             const delay = flow.actions.find((a) => a.id === actionId)!
             ;(delay.config as any).delay_duration = '1s'
         }
@@ -1931,7 +1927,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
         // templates defaulting to {event.distinct_id} would silently mint new person profiles.
         const personUuid = 'aaaaaaaa-1111-1111-1111-111111111111'
         const personDistinctId = 'batch-person-distinct-id'
-        let hogFlow: InsightsFlow
+        let hogFlow: Flow
 
         beforeEach(async () => {
             const person = {
@@ -2141,7 +2137,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
                 ],
             })
 
-            const hogFlow = new FixtureInsightsFlowBuilder()
+            const hogFlow = new FixtureFlowBuilder()
                 .withTeamId(team.id)
                 .withStatus('active')
                 .withWorkflow({
@@ -2194,13 +2190,13 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
                 })
                 .build()
             // Workflow-defined variable with a default — populated into state.variables
-            // by createInsightsFlowInvocation, so the function action sees it via globals.variables.
+            // by createFlowInvocation, so the function action sees it via globals.variables.
             // In a real workflow the value would be set by an earlier `Get ticket` action's
             // output_variable; for this test we pre-seed via the default to keep it focused.
             hogFlow.variables = [
                 { key: 'zendesk_ticketid', type: 'string', label: 'Zendesk ticket id', default: '12345' },
             ]
-            await insertInsightsFlow(hub.postgres, hogFlow)
+            await insertFlow(hub.postgres, hogFlow)
 
             globals = createGlobals()
         })
@@ -2238,7 +2234,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
                 // Default is 10s — nothing would fire in a test.
                 await hogflowWorker.stop()
                 hub.CDP_CYCLOTRON_HEARTBEAT_INTERVAL_MS = 100
-                hogflowWorker = new CdpCyclotronWorkerInsightsFlow(hub, deps, hogflowQueue)
+                hogflowWorker = new CdpCyclotronWorkerFlow(hub, deps, hogflowQueue)
                 await hogflowWorker.start()
 
                 // Aggressive stall/poison thresholds so the test observes the
@@ -2330,7 +2326,7 @@ describe('Workflows E2E (email queue)', () => {
     jest.setTimeout(30000)
 
     let eventsConsumer: CdpEventsConsumer
-    let hogflowWorker: CdpCyclotronWorkerInsightsFlow
+    let hogflowWorker: CdpCyclotronWorkerFlow
     let emailWorker: CdpCyclotronWorkerEmail
     let matcher: CdpHogflowSubscriptionMatcherConsumer | undefined
 
@@ -2434,7 +2430,7 @@ describe('Workflows E2E (email queue)', () => {
 
         // Hogflow worker polls jobs with queue_name='hogflow' and re-stamps email
         // jobs to queue_name='email' so the email worker picks them up
-        hogflowWorker = new CdpCyclotronWorkerInsightsFlow(hub, deps, hogflowConsumerQueue)
+        hogflowWorker = new CdpCyclotronWorkerFlow(hub, deps, hogflowConsumerQueue)
         await hogflowWorker.start()
 
         // Email worker polls jobs with queue_name='email', sends via EmailService,
@@ -2478,14 +2474,14 @@ describe('Workflows E2E (email queue)', () => {
         })
     }
 
-    // Mirrors what InsightsFlowSerializer compiles for {events: [{id: <name>}]}: a single
+    // Mirrors what FlowSerializer compiles for {events: [{id: <name>}]}: a single
     // equality check on the `event` global. The matcher fails closed without bytecode.
     const eventNameFilter = (eventName: string) => ({
         filters: { events: [{ id: eventName }], bytecode: ['_H', 1, 32, eventName, 32, 'event', 1, 1, 11] as any[] },
     })
 
     it('routes the email through the dedicated queue and continues the workflow', async () => {
-        const hogFlow = new FixtureInsightsFlowBuilder()
+        const hogFlow = new FixtureFlowBuilder()
             .withTeamId(team.id)
             .withStatus('active')
             .withExitCondition('exit_only_at_end')
@@ -2520,7 +2516,7 @@ describe('Workflows E2E (email queue)', () => {
                 ],
             })
             .build()
-        await insertInsightsFlow(hub.postgres, hogFlow)
+        await insertFlow(hub.postgres, hogFlow)
 
         // Trigger the workflow via the events consumer (real Kafka producer + v2 queue)
         const { backgroundTask } = await eventsConsumer.processBatch([createGlobals()])
@@ -2544,7 +2540,7 @@ describe('Workflows E2E (email queue)', () => {
             expect(sumCounts((m) => m.value.metric_name === 'email_sent')).toBe(1)
             // The exit action's 'succeeded' metric has nothing to do with the email
             // pipeline — including it locks down that the doubling isn't email-specific.
-            // (The instance_id matches the action key from FixtureInsightsFlowBuilder.)
+            // (The instance_id matches the action key from FixtureFlowBuilder.)
             expect(sumCounts((m) => m.value.metric_name === 'succeeded' && m.value.instance_id === 'exit')).toBe(1)
         }, 15000)
 
@@ -2564,7 +2560,7 @@ describe('Workflows E2E (email queue)', () => {
         // recipient must produce no email_queued/email_sent, no billable_invocation,
         // exactly one email_bounce_prevented, and a workflow that still runs to exit
         // instead of wedging on the email queue.
-        const hogFlow = new FixtureInsightsFlowBuilder()
+        const hogFlow = new FixtureFlowBuilder()
             .withTeamId(team.id)
             .withStatus('active')
             .withExitCondition('exit_only_at_end')
@@ -2599,7 +2595,7 @@ describe('Workflows E2E (email queue)', () => {
                 ],
             })
             .build()
-        await insertInsightsFlow(hub.postgres, hogFlow)
+        await insertFlow(hub.postgres, hogFlow)
 
         const { backgroundTask } = await eventsConsumer.processBatch([createGlobals()])
         await backgroundTask
@@ -2643,7 +2639,7 @@ describe('Workflows E2E (email queue)', () => {
         // is the regression guard: trigger → email → exit should produce exactly one trigger
         // log, one "Executing action [Action:email_1]" line, one "Email sent" line, and no
         // routing-flavored pause / resume noise.
-        const hogFlow = new FixtureInsightsFlowBuilder()
+        const hogFlow = new FixtureFlowBuilder()
             .withTeamId(team.id)
             .withStatus('active')
             .withExitCondition('exit_only_at_end')
@@ -2678,7 +2674,7 @@ describe('Workflows E2E (email queue)', () => {
                 ],
             })
             .build()
-        await insertInsightsFlow(hub.postgres, hogFlow)
+        await insertFlow(hub.postgres, hogFlow)
 
         const { backgroundTask } = await eventsConsumer.processBatch([createGlobals()])
         await backgroundTask
@@ -2767,7 +2763,7 @@ describe('Workflows E2E (email queue)', () => {
             },
         })
 
-        const hogFlow = new FixtureInsightsFlowBuilder()
+        const hogFlow = new FixtureFlowBuilder()
             .withTeamId(team.id)
             .withStatus('active')
             .withExitCondition('exit_only_at_end')
@@ -2799,7 +2795,7 @@ describe('Workflows E2E (email queue)', () => {
                 ],
             })
             .build()
-        await insertInsightsFlow(hub.postgres, hogFlow)
+        await insertFlow(hub.postgres, hogFlow)
 
         const { backgroundTask } = await eventsConsumer.processBatch([createGlobals()])
         await backgroundTask
@@ -2888,7 +2884,7 @@ describe('Workflows E2E (email queue)', () => {
             },
         })
 
-        const hogFlow = new FixtureInsightsFlowBuilder()
+        const hogFlow = new FixtureFlowBuilder()
             .withTeamId(team.id)
             .withStatus('active')
             .withExitCondition('exit_only_at_end')
@@ -2920,7 +2916,7 @@ describe('Workflows E2E (email queue)', () => {
                 ],
             })
             .build()
-        await insertInsightsFlow(hub.postgres, hogFlow)
+        await insertFlow(hub.postgres, hogFlow)
 
         const { backgroundTask } = await eventsConsumer.processBatch([createGlobals()])
         await backgroundTask
@@ -2997,7 +2993,7 @@ describe('Workflows E2E (email queue)', () => {
         //   2. The email action returns no `queueScheduledAt` (routing-only — must be
         //      silent in both directions).
         // If the fix over-reaches and suppresses real delay pauses, this test fails.
-        const hogFlow = new FixtureInsightsFlowBuilder()
+        const hogFlow = new FixtureFlowBuilder()
             .withTeamId(team.id)
             .withStatus('active')
             .withExitCondition('exit_only_at_end')
@@ -3034,7 +3030,7 @@ describe('Workflows E2E (email queue)', () => {
                 ],
             })
             .build()
-        await insertInsightsFlow(hub.postgres, hogFlow)
+        await insertFlow(hub.postgres, hogFlow)
 
         const { backgroundTask } = await eventsConsumer.processBatch([createGlobals()])
         await backgroundTask
@@ -3097,7 +3093,7 @@ describe('Workflows E2E (email queue)', () => {
             },
         })
 
-        const hogFlow = new FixtureInsightsFlowBuilder()
+        const hogFlow = new FixtureFlowBuilder()
             .withTeamId(team.id)
             .withStatus('active')
             .withExitCondition('exit_only_at_end')
@@ -3131,7 +3127,7 @@ describe('Workflows E2E (email queue)', () => {
                 ],
             })
             .build()
-        await insertInsightsFlow(hub.postgres, hogFlow)
+        await insertFlow(hub.postgres, hogFlow)
 
         const emailsSent = () =>
             mockProducerObserver
@@ -3202,7 +3198,7 @@ describe('Workflows E2E (email queue)', () => {
         emailWorker = new CdpCyclotronWorkerEmail(hub, deps, rateLimitedQueue)
         await emailWorker.start()
 
-        const hogFlow = new FixtureInsightsFlowBuilder()
+        const hogFlow = new FixtureFlowBuilder()
             .withTeamId(team.id)
             .withStatus('active')
             .withExitCondition('exit_only_at_end')
@@ -3237,7 +3233,7 @@ describe('Workflows E2E (email queue)', () => {
                 ],
             })
             .build()
-        await insertInsightsFlow(hub.postgres, hogFlow)
+        await insertFlow(hub.postgres, hogFlow)
 
         const { backgroundTask } = await eventsConsumer.processBatch([createGlobals()])
         await backgroundTask
@@ -3306,7 +3302,7 @@ describe('Workflows E2E (email queue)', () => {
         }
         const deniedBefore = await readDeniedCount()
 
-        const hogFlow = new FixtureInsightsFlowBuilder()
+        const hogFlow = new FixtureFlowBuilder()
             .withTeamId(team.id)
             .withStatus('active')
             .withExitCondition('exit_only_at_end')
@@ -3341,7 +3337,7 @@ describe('Workflows E2E (email queue)', () => {
                 ],
             })
             .build()
-        await insertInsightsFlow(hub.postgres, hogFlow)
+        await insertFlow(hub.postgres, hogFlow)
 
         // Three distinct events → three email jobs queued near-simultaneously.
         const events = Array.from({ length: 3 }, () => createGlobals({ uuid: new UUIDT().toString() }))
@@ -3456,7 +3452,7 @@ describe('Workflows E2E (email queue)', () => {
         emailWorker = new CdpCyclotronWorkerEmail(hub, deps, rateLimitedQueue)
         await emailWorker.start()
 
-        const hogFlow = new FixtureInsightsFlowBuilder()
+        const hogFlow = new FixtureFlowBuilder()
             .withTeamId(team.id)
             .withStatus('active')
             .withExitCondition('exit_only_at_end')
@@ -3491,7 +3487,7 @@ describe('Workflows E2E (email queue)', () => {
                 ],
             })
             .build()
-        await insertInsightsFlow(hub.postgres, hogFlow)
+        await insertFlow(hub.postgres, hogFlow)
 
         // Exactly ONE event → one email job — the sparse-traffic scenario.
         const { backgroundTask } = await eventsConsumer.processBatch([createGlobals({ uuid: new UUIDT().toString() })])
@@ -3525,7 +3521,7 @@ describe('Workflows E2E (email queue)', () => {
     // multiple emails produces all rows.
     describe('message_assets bulk capture', () => {
         const buildEmailWorkflow = (subject: string) =>
-            new FixtureInsightsFlowBuilder()
+            new FixtureFlowBuilder()
                 .withTeamId(team.id)
                 .withStatus('active')
                 .withExitCondition('exit_only_at_end')
@@ -3566,7 +3562,7 @@ describe('Workflows E2E (email queue)', () => {
 
         it('produces one message_assets row per workflow email with the rendered HTML and metadata', async () => {
             const hogFlow = buildEmailWorkflow('Asset bulk-capture single')
-            await insertInsightsFlow(hub.postgres, hogFlow)
+            await insertFlow(hub.postgres, hogFlow)
 
             const { backgroundTask } = await eventsConsumer.processBatch([createGlobals()])
             await backgroundTask
@@ -3604,7 +3600,7 @@ describe('Workflows E2E (email queue)', () => {
             // Use distinct subjects so we can assert on row content regardless of the
             // partition-level ordering the Kafka producer chooses.
             const hogFlow = buildEmailWorkflow('Bulk asset capture')
-            await insertInsightsFlow(hub.postgres, hogFlow)
+            await insertFlow(hub.postgres, hogFlow)
 
             // Three globals dispatched in one `processBatch` call — they go through the
             // events consumer together. Each fires its own workflow run, each emits one
@@ -3740,16 +3736,16 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
     function buildResolverConsumer(): CdpCyclotronWorkerBatchResolve {
         const cyclotronWorker = new CyclotronV2Worker({
             pool: { dbUrl: CYCLOTRON_NODE_DB_URL, maxConnections: 10 },
-            queueName: HOGFLOW_BATCH_RESOLVE_QUEUE,
+            queueName: FLOW_BATCH_RESOLVE_QUEUE,
             pollDelayMs: 100,
         })
         const internalFetchService = new InternalFetchService(hub.INTERNAL_API_BASE_URL, hub.INTERNAL_API_SECRET)
-        const queryService = new InsightsFlowBatchPersonQueryService(internalFetchService)
+        const queryService = new FlowBatchPersonQueryService(internalFetchService)
         return new CdpCyclotronWorkerBatchResolve(hub, deps, cyclotronWorker, queryService, internalFetchService)
     }
 
-    async function insertActiveBatchFlow(): Promise<InsightsFlow> {
-        const flow = new FixtureInsightsFlowBuilder()
+    async function insertActiveBatchFlow(): Promise<Flow> {
+        const flow = new FixtureFlowBuilder()
             .withTeamId(team.id)
             .withStatus('active')
             .withWorkflow({
@@ -3772,7 +3768,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
                 edges: [{ from: 'trigger', to: 'function_1', type: 'continue' }],
             })
             .build()
-        return await insertInsightsFlow(hub.postgres, flow)
+        return await insertFlow(hub.postgres, flow)
     }
 
     it('POST /batch_invocations with flag on creates a resolver cyclotron job with the right shape', async () => {
@@ -3816,7 +3812,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         expect(state).toMatchObject({
             batchJobId: parentRunId,
             teamId: team.id,
-            hogFlowId: flow.id,
+            flowId: flow.id,
             maxAudienceSize: 750,
             variables: { greeting: 'hi' },
             groupTypeIndex: 2,
@@ -3828,7 +3824,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
     })
 
     it('rejects with 400 when the workflow is not a batch trigger', async () => {
-        const flow = new FixtureInsightsFlowBuilder()
+        const flow = new FixtureFlowBuilder()
             .withTeamId(team.id)
             .withStatus('active')
             .withWorkflow({
@@ -3848,7 +3844,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
                 edges: [{ from: 'trigger', to: 'function_1', type: 'continue' }],
             })
             .build()
-        const inserted = await insertInsightsFlow(hub.postgres, flow)
+        const inserted = await insertFlow(hub.postgres, flow)
         const parentRunId = new UUIDT().toString()
 
         await supertest(app)
@@ -3965,7 +3961,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
             [flow.id],
             'delete-hogflow-for-test'
         )
-        // The consumer we're about to build will have its own hogFlowManager
+        // The consumer we're about to build will have its own flowManager
         // with an empty cache, so refresh isn't strictly needed — but be
         // explicit so the test isn't sensitive to cache lifecycle changes.
 
@@ -4124,7 +4120,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         const cappedState = serializeResolverState({
             batchJobId: parentRunId,
             teamId: team.id,
-            hogFlowId: flow.id,
+            flowId: flow.id,
             filters: { properties: [], filter_test_accounts: false },
             variables: {},
             maxAudienceSize: 100,
@@ -4190,7 +4186,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         const seededState = serializeResolverState({
             batchJobId: parentRunId,
             teamId: team.id,
-            hogFlowId: flow.id,
+            flowId: flow.id,
             filters: { properties: [], filter_test_accounts: false },
             variables: {},
             maxAudienceSize: 1000,
@@ -4202,7 +4198,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         })
         await batchResolverProducer.createJob({
             teamId: team.id,
-            queueName: HOGFLOW_BATCH_RESOLVE_QUEUE,
+            queueName: FLOW_BATCH_RESOLVE_QUEUE,
             parentRunId,
             functionId: flow.id,
             state: seededState,
@@ -4253,7 +4249,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         const pendingState = serializeResolverState({
             batchJobId: parentRunId,
             teamId: team.id,
-            hogFlowId: flow.id,
+            flowId: flow.id,
             filters: { properties: [], filter_test_accounts: false },
             variables: {},
             maxAudienceSize: 1000,
@@ -4266,7 +4262,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         })
         await batchResolverProducer.createJob({
             teamId: team.id,
-            queueName: HOGFLOW_BATCH_RESOLVE_QUEUE,
+            queueName: FLOW_BATCH_RESOLVE_QUEUE,
             parentRunId,
             functionId: flow.id,
             state: pendingState,

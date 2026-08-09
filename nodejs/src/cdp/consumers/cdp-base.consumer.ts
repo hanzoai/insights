@@ -15,9 +15,11 @@ import {
     createCdpCoreServices,
 } from '../cdp-services'
 import type { CdpConfig } from '../config'
-import { InsightsFlowExecutorService } from '../services/insightsflows/insightsflow-executor.service'
-import { InsightsFlowFunctionsService } from '../services/insightsflows/insightsflow-functions.service'
-import { InsightsFlowManagerService } from '../services/insightsflows/insightsflow-manager.service'
+import { HogExecutorAsyncService } from '../services/script-executor-async.service'
+import { HogInputsService } from '../services/script-inputs.service'
+import { FlowExecutorService } from '../services/flows/flow-executor.service'
+import { FlowFunctionsService } from '../services/flows/flow-functions.service'
+import { FlowManagerService } from '../services/flows/flow-manager.service'
 import { InvocationResultsService } from '../services/invocation-results.service'
 import { LegacyPluginExecutorService } from '../services/legacy-plugin-executor.service'
 import { GroupsManagerService } from '../services/managers/groups-manager.service'
@@ -31,8 +33,6 @@ import { InsightsFunctionMonitoringService } from '../services/monitoring/script
 import { HogMaskerService } from '../services/monitoring/script-masker.service'
 import { HogWatcherService } from '../services/monitoring/script-watcher.service'
 import { NativeDestinationExecutorService } from '../services/native-destination-executor.service'
-import { HogExecutorAsyncService } from '../services/script-executor-async.service'
-import { HogInputsService } from '../services/script-inputs.service'
 import { SegmentDestinationExecutorService } from '../services/segment-destination-executor.service'
 
 export type CdpConsumerBaseConfig = CdpCoreServicesConfig &
@@ -58,16 +58,16 @@ export abstract class CdpConsumerBase<TConfig extends CdpConsumerBaseConfig = Cd
 
     hogExecutorAsync: HogExecutorAsyncService
     hogInputsService: HogInputsService
-    hogFlowExecutor: InsightsFlowExecutorService
+    flowExecutor: FlowExecutorService
     hogMasker: HogMaskerService
     hogWatcher: HogWatcherService
     hogWatcherMirror: HogWatcherService | null
 
     groupsManager: GroupsManagerService
-    hogFlowManager: InsightsFlowManagerService
+    flowManager: FlowManagerService
     insightsFunctionManager: InsightsFunctionManagerService
     insightsFunctionTemplateManager: InsightsFunctionTemplateManagerService
-    hogFlowFunctionsService: InsightsFlowFunctionsService
+    flowFunctionsService: FlowFunctionsService
     personsManager: PersonsManagerService
     recipientsManager: RecipientsManagerService
 
@@ -91,16 +91,16 @@ export abstract class CdpConsumerBase<TConfig extends CdpConsumerBaseConfig = Cd
         this.redis = services.redis
         this.valkeyShadow = services.valkeyShadow
         this.insightsFunctionManager = services.insightsFunctionManager
-        this.hogFlowManager = services.hogFlowManager
+        this.flowManager = services.flowManager
         this.hogWatcher = services.hogWatcher
         this.hogWatcherMirror = services.hogWatcherMirror
         this.hogExecutorAsync = services.hogExecutorAsync
         this.hogInputsService = services.hogInputsService
         this.insightsFunctionTemplateManager = services.insightsFunctionTemplateManager
-        this.hogFlowFunctionsService = services.hogFlowFunctionsService
+        this.flowFunctionsService = services.flowFunctionsService
         this.recipientsManager = services.recipientsManager
         this.recipientPreferencesService = services.recipientPreferencesService
-        this.hogFlowExecutor = services.hogFlowExecutor
+        this.flowExecutor = services.flowExecutor
         this.emailService = services.emailService
         this.insightsFunctionMonitoringService = services.insightsFunctionMonitoringService
         this.invocationResultsService = services.invocationResultsService

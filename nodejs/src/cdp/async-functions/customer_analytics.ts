@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 
 import { CyclotronInvocationQueueParametersFetchSchema } from '~/cdp/schema/cyclotron'
-import { InsightsFlow } from '~/cdp/schema/insightsflow'
+import { Flow } from '~/cdp/schema/flow'
 import { captureException } from '~/common/utils/insights'
 import { Team } from '~/types'
 
@@ -102,9 +102,9 @@ registerAsyncFunction('insightsUpdateAccount', {
             Authorization: `Bearer ${team.secret_api_token}`,
         }
 
-        const hogFlow = (context.invocation as { hogFlow?: InsightsFlow }).hogFlow
-        if (hogFlow?.id) {
-            headers['X-Insights-Script-Flow-Id'] = hogFlow.id
+        const flow = (context.invocation as { flow?: Flow }).flow
+        if (flow?.id) {
+            headers['X-Insights-Script-Flow-Id'] = flow.id
         }
 
         result.invocation.queueParameters = CyclotronInvocationQueueParametersFetchSchema.parse({
@@ -152,9 +152,9 @@ registerAsyncFunction('insightsSetAccountProperties', {
             Authorization: `Bearer ${team.secret_api_token}`,
         }
 
-        const hogFlow = (context.invocation as { hogFlow?: InsightsFlow }).hogFlow
-        if (hogFlow?.id) {
-            headers['X-Insights-Script-Flow-Id'] = hogFlow.id
+        const flow = (context.invocation as { flow?: Flow }).flow
+        if (flow?.id) {
+            headers['X-Insights-Script-Flow-Id'] = flow.id
         }
 
         result.invocation.queueParameters = CyclotronInvocationQueueParametersFetchSchema.parse({
@@ -201,9 +201,9 @@ registerAsyncFunction('insightsCreateAccount', {
             Authorization: `Bearer ${team.secret_api_token}`,
         }
 
-        const hogFlow = (context.invocation as { hogFlow?: InsightsFlow }).hogFlow
-        if (hogFlow?.id) {
-            headers['X-Insights-Script-Flow-Id'] = hogFlow.id
+        const flow = (context.invocation as { flow?: Flow }).flow
+        if (flow?.id) {
+            headers['X-Insights-Script-Flow-Id'] = flow.id
         }
 
         result.invocation.queueParameters = CyclotronInvocationQueueParametersFetchSchema.parse({

@@ -1,4 +1,4 @@
-import { InsightsFlow } from '~/cdp/schema/insightsflow'
+import { Flow } from '~/cdp/schema/flow'
 import { deleteKeysWithPrefix } from '~/common/redis/_tests/redis'
 import { RedisV2, createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'
 import { closeHub, createHub } from '~/common/utils/db/hub'
@@ -7,7 +7,7 @@ import { Hub } from '~/types'
 
 import { INSIGHTS_FLOW_MASK_EXAMPLES, INSIGHTS_MASK_EXAMPLES } from '../../_tests/examples'
 import { createExampleInvocation, createHogExecutionGlobals, createInsightsFunction } from '../../_tests/fixtures'
-import { createExampleInsightsFlowInvocation } from '../../_tests/fixtures-insightsflows'
+import { createExampleFlowInvocation } from '../../_tests/fixtures-flows'
 import { CyclotronJobInvocationInsightsFunction, InsightsFunctionType } from '../../types'
 import { BASE_REDIS_KEY, HogMaskerService } from './script-masker.service'
 
@@ -66,7 +66,7 @@ describe('HogMasker', () => {
         })
 
         it('supports script flow invocations without trigger_masking', async () => {
-            const hogFlow: InsightsFlow = {
+            const flow: Flow = {
                 id: 'flow_1',
                 team_id: 1,
                 name: 'Test Flow',
@@ -83,7 +83,7 @@ describe('HogMasker', () => {
                 exit_condition: 'exit_only_at_end',
                 edges: [],
             }
-            const invocation = createExampleInsightsFlowInvocation(hogFlow)
+            const invocation = createExampleFlowInvocation(flow)
             const res = await masker.filterByMasking([invocation])
             expect(res.notMasked).toHaveLength(1)
             expect(res.masked).toHaveLength(0)
@@ -366,7 +366,7 @@ describe('HogMasker', () => {
                 })
 
                 describe('script flows', () => {
-                    const createFlowWithTtl = (ttl: number | null): InsightsFlow => ({
+                    const createFlowWithTtl = (ttl: number | null): Flow => ({
                         id: `flow_${ttl}`,
                         team_id: 1,
                         name: 'Test Flow',
@@ -388,26 +388,26 @@ describe('HogMasker', () => {
                     })
 
                     it('should default to 3 years when ttl is null', async () => {
-                        const hogFlow = createFlowWithTtl(null)
-                        await masker.filterByMasking([createExampleInsightsFlowInvocation(hogFlow)])
+                        const flow = createFlowWithTtl(null)
+                        await masker.filterByMasking([createExampleFlowInvocation(flow)])
                         expectTtlNear(await getRedisKeyTtl(), threeYearsSeconds)
                     })
 
                     it('should cap at 3 years when set to a higher value', async () => {
-                        const hogFlow = createFlowWithTtl(60 * 60 * 24 * 365 * 10) // 10 years
-                        await masker.filterByMasking([createExampleInsightsFlowInvocation(hogFlow)])
+                        const flow = createFlowWithTtl(60 * 60 * 24 * 365 * 10) // 10 years
+                        await masker.filterByMasking([createExampleFlowInvocation(flow)])
                         expectTtlNear(await getRedisKeyTtl(), threeYearsSeconds)
                     })
                 })
             })
 
             describe('script flow trigger masking', () => {
-                let hogFlowEvery: InsightsFlow
-                let hogFlowOncePer: InsightsFlow
-                let hogFlowOnceEver: InsightsFlow
+                let flowEvery: Flow
+                let flowOncePer: Flow
+                let flowOnceEver: Flow
 
                 beforeEach(() => {
-                    const base: Partial<InsightsFlow> = {
+                    const base: Partial<Flow> = {
                         team_id: 1,
                         name: 'Mask Flow',
                         version: 1,
@@ -423,27 +423,27 @@ describe('HogMasker', () => {
                         edges: [],
                     }
 
-                    hogFlowEvery = {
+                    flowEvery = {
                         ...base,
                         id: 'hf_every',
                         trigger_masking: { ...INSIGHTS_FLOW_MASK_EXAMPLES.everyTime.trigger_masking },
-                    } as InsightsFlow
-                    hogFlowOncePer = {
+                    } as Flow
+                    flowOncePer = {
                         ...base,
                         id: 'hf_once_per',
                         trigger_masking: { ...INSIGHTS_FLOW_MASK_EXAMPLES.oncePerTimePeriod.trigger_masking, ttl: 1 },
-                    } as InsightsFlow
-                    hogFlowOnceEver = {
+                    } as Flow
+                    flowOnceEver = {
                         ...base,
                         id: 'hf_once_ever',
                         trigger_masking: { ...INSIGHTS_FLOW_MASK_EXAMPLES.onceEver.trigger_masking },
-                    } as InsightsFlow
+                    } as Flow
                 })
 
                 it('allows only one script flow invocation per masking hash per ttl', async () => {
-                    const inv1 = createExampleInsightsFlowInvocation(hogFlowEvery)
-                    const inv2 = createExampleInsightsFlowInvocation(hogFlowEvery)
-                    const inv3 = createExampleInsightsFlowInvocation(hogFlowEvery)
+                    const inv1 = createExampleFlowInvocation(flowEvery)
+                    const inv2 = createExampleFlowInvocation(flowEvery)
+                    const inv3 = createExampleFlowInvocation(flowEvery)
                     const batch = [inv1, inv2, inv3]
                     const res = await masker.filterByMasking(batch)
                     expect(res.notMasked).toHaveLength(1)
@@ -451,7 +451,7 @@ describe('HogMasker', () => {
                 })
 
                 it('resets after ttl for script flow trigger masking', async () => {
-                    const inv = createExampleInsightsFlowInvocation(hogFlowOncePer)
+                    const inv = createExampleFlowInvocation(flowOncePer)
                     expect((await masker.filterByMasking([inv])).notMasked).toHaveLength(1)
                     expect((await masker.filterByMasking([inv])).masked).toHaveLength(1)
                     await reallyAdvanceTime(1000)
@@ -460,14 +460,14 @@ describe('HogMasker', () => {
                 })
 
                 it('uses threshold for onceEver flow trigger masking', async () => {
-                    const inv = createExampleInsightsFlowInvocation(hogFlowOnceEver)
+                    const inv = createExampleFlowInvocation(flowOnceEver)
                     expect((await masker.filterByMasking([inv])).notMasked).toHaveLength(1)
                     expect((await masker.filterByMasking([inv])).masked).toHaveLength(1)
                     expect((await masker.filterByMasking([inv])).masked).toHaveLength(1)
                 })
 
                 it('deduplicates script flow per calendar day and resets on next day', async () => {
-                    const base: Partial<InsightsFlow> = {
+                    const base: Partial<Flow> = {
                         team_id: 1,
                         name: 'Calendar Day Flow',
                         version: 1,
@@ -477,13 +477,13 @@ describe('HogMasker', () => {
                         exit_condition: 'exit_only_at_end',
                         edges: [],
                     }
-                    const hogFlowPerDay = {
+                    const flowPerDay = {
                         ...base,
                         id: 'hf_per_day',
                         trigger_masking: { ...INSIGHTS_FLOW_MASK_EXAMPLES.oncePerCalendarDay.trigger_masking },
-                    } as InsightsFlow
+                    } as Flow
 
-                    const inv = createExampleInsightsFlowInvocation(hogFlowPerDay)
+                    const inv = createExampleFlowInvocation(flowPerDay)
 
                     // Day 1: should fire
                     expect((await masker.filterByMasking([inv])).notMasked).toHaveLength(1)

@@ -6,8 +6,8 @@ import { logger } from '~/common/utils/logger'
 
 import { InsightsFunctionInvocationGlobalsSchema } from '../schema/cyclotron'
 import { CyclotronJobConflictError } from '../services/cyclotron-v2'
-import { createInsightsFlowInvocation } from '../services/insightsflows/insightsflow-executor.service'
-import { InsightsFlowManagerService } from '../services/insightsflows/insightsflow-manager.service'
+import { createFlowInvocation } from '../services/flows/flow-executor.service'
+import { FlowManagerService } from '../services/flows/flow-manager.service'
 import { CyclotronJobQueuePostgresV2 } from '../services/job-queue/job-queue-postgres-v2'
 import { JobQueue } from '../services/job-queue/job-queue.interface'
 import { InsightsFunctionManagerService } from '../services/managers/script-function-manager.service'
@@ -18,7 +18,7 @@ import {
 } from '../services/monitoring/script-invocation-results.service'
 import {
     CyclotronJobInvocation,
-    CyclotronJobInvocationInsightsFlow,
+    CyclotronJobInvocationFlow,
     CyclotronJobInvocationInsightsFunction,
     InsightsFunctionFilterGlobals,
     InsightsFunctionInvocationGlobalsWithInputs,
@@ -110,7 +110,7 @@ export class RerunPaginatorService {
     constructor(
         private datastore: DatastoreClient,
         private insightsFunctionManager: InsightsFunctionManagerService,
-        private hogFlowManager: InsightsFlowManagerService,
+        private flowManager: FlowManagerService,
         private invocationResultsRowsService: HogInvocationResultsService,
         // Re-enqueue targets keyed by function kind — see RerunJobQueues.
         private jobQueues: RerunJobQueues,
@@ -654,8 +654,8 @@ export class RerunPaginatorService {
         }
 
         if (functionKind === 'hog_flow') {
-            const hogFlow = await this.hogFlowManager.getInsightsFlow(functionId)
-            if (!hogFlow || hogFlow.team_id !== teamId) {
+            const flow = await this.flowManager.getFlow(functionId)
+            if (!flow || flow.team_id !== teamId) {
                 return null
             }
             const persistedState = parsedGlobals as Record<string, any>
@@ -667,7 +667,7 @@ export class RerunPaginatorService {
                 variables: persistedState.variables ?? {},
             } as any)
 
-            const invocation: CyclotronJobInvocationInsightsFlow = createInsightsFlowInvocation(
+            const invocation: CyclotronJobInvocationFlow = createFlowInvocation(
                 {
                     project: { id: teamId, name: '', url: '' },
                     event: eventForFilter,
@@ -676,7 +676,7 @@ export class RerunPaginatorService {
                     variables: persistedState.variables ?? {},
                     source: { name: '', url: '' },
                 } as any,
-                hogFlow,
+                flow,
                 filterGlobals
             )
             invocation.id = row.invocation_id

@@ -1,11 +1,11 @@
 import { QuotaLimiting } from '../../common/services/quota-limiting.service'
 import { InsightsFunctionInvocationGlobals } from '../types'
-import { InsightsFlowExecutorService } from './insightsflows/insightsflow-executor.service'
-import { InsightsFlowManagerService } from './insightsflows/insightsflow-manager.service'
+import { FlowInvocationPipeline } from './script-flow-invocation-pipeline.service'
+import { FlowExecutorService } from './flows/flow-executor.service'
+import { FlowManagerService } from './flows/flow-manager.service'
 import { InsightsFunctionMonitoringService } from './monitoring/script-function-monitoring.service'
 import { HogMaskerService } from './monitoring/script-masker.service'
 import { HogWatcherService, HogWatcherState } from './monitoring/script-watcher.service'
-import { InsightsFlowInvocationPipeline } from './script-flow-invocation-pipeline.service'
 
 jest.mock('../../common/services/keyed-rate-limiter.service', () => ({
     KeyedRateLimiterService: jest.fn().mockImplementation(() => ({
@@ -19,15 +19,15 @@ const config = {
     CDP_RATE_LIMITER_TTL: 60,
 }
 
-function makeInsightsFlowInvocation(hogFlowId = 'flow-1', overrides: { billable_action_types?: string[] } = {}) {
+function makeFlowInvocation(flowId = 'flow-1', overrides: { billable_action_types?: string[] } = {}) {
     return {
-        id: `inv-${hogFlowId}`,
+        id: `inv-${flowId}`,
         teamId: 1,
-        functionId: hogFlowId,
+        functionId: flowId,
         queue: 'hogflow',
         queuePriority: 0,
-        hogFlow: {
-            id: hogFlowId,
+        flow: {
+            id: flowId,
             name: 'test flow',
             version: 5,
             billable_action_types: overrides.billable_action_types ?? [],
@@ -41,24 +41,24 @@ function makeGlobals(teamId = 1): InsightsFunctionInvocationGlobals {
     return { project: { id: teamId } } as InsightsFunctionInvocationGlobals
 }
 
-describe('InsightsFlowInvocationPipeline', () => {
-    let hogFlowManager: jest.Mocked<InsightsFlowManagerService>
-    let hogFlowExecutor: jest.Mocked<InsightsFlowExecutorService>
+describe('FlowInvocationPipeline', () => {
+    let flowManager: jest.Mocked<FlowManagerService>
+    let flowExecutor: jest.Mocked<FlowExecutorService>
     let hogWatcher: jest.Mocked<HogWatcherService>
     let hogMasker: jest.Mocked<HogMaskerService>
     let insightsFunctionMonitoringService: jest.Mocked<InsightsFunctionMonitoringService>
     let quotaLimiting: jest.Mocked<QuotaLimiting>
-    let pipeline: InsightsFlowInvocationPipeline
+    let pipeline: FlowInvocationPipeline
     let rateLimitGroupedMock: jest.Mock
 
     beforeEach(() => {
-        hogFlowManager = {
-            getInsightsFlowsForTeams: jest.fn().mockResolvedValue({}),
-        } as unknown as jest.Mocked<InsightsFlowManagerService>
+        flowManager = {
+            getFlowsForTeams: jest.fn().mockResolvedValue({}),
+        } as unknown as jest.Mocked<FlowManagerService>
 
-        hogFlowExecutor = {
-            buildInsightsFlowInvocations: jest.fn().mockResolvedValue({ invocations: [], metrics: [], logs: [] }),
-        } as unknown as jest.Mocked<InsightsFlowExecutorService>
+        flowExecutor = {
+            buildFlowInvocations: jest.fn().mockResolvedValue({ invocations: [], metrics: [], logs: [] }),
+        } as unknown as jest.Mocked<FlowExecutorService>
 
         hogWatcher = {
             getEffectiveStates: jest.fn().mockResolvedValue({}),
@@ -78,9 +78,9 @@ describe('InsightsFlowInvocationPipeline', () => {
             isTeamQuotaLimited: jest.fn().mockResolvedValue(false),
         } as unknown as jest.Mocked<QuotaLimiting>
 
-        pipeline = new InsightsFlowInvocationPipeline(config, {
-            hogFlowManager,
-            hogFlowExecutor,
+        pipeline = new FlowInvocationPipeline(config, {
+            flowManager,
+            flowExecutor,
             hogWatcher,
             hogWatcherMirror: null,
             hogMasker,
@@ -94,16 +94,16 @@ describe('InsightsFlowInvocationPipeline', () => {
         rateLimitGroupedMock.mockResolvedValue([])
     })
 
-    it('returns empty when no insightsflows match', async () => {
+    it('returns empty when no flows match', async () => {
         const result = await pipeline.buildInvocations([makeGlobals()])
         expect(result).toEqual([])
-        expect(hogFlowManager.getInsightsFlowsForTeams).toHaveBeenCalledWith([1])
+        expect(flowManager.getFlowsForTeams).toHaveBeenCalledWith([1])
     })
 
-    it('returns invocations for matching insightsflows and queues triggered metric', async () => {
-        const inv = makeInsightsFlowInvocation()
-        hogFlowExecutor.buildInsightsFlowInvocations.mockResolvedValue({ invocations: [inv], metrics: [], logs: [] })
-        hogWatcher.getEffectiveStates.mockResolvedValue({ [inv.hogFlow.id]: { state: HogWatcherState.healthy } } as any)
+    it('returns invocations for matching flows and queues triggered metric', async () => {
+        const inv = makeFlowInvocation()
+        flowExecutor.buildFlowInvocations.mockResolvedValue({ invocations: [inv], metrics: [], logs: [] })
+        hogWatcher.getEffectiveStates.mockResolvedValue({ [inv.flow.id]: { state: HogWatcherState.healthy } } as any)
         rateLimitGroupedMock.mockResolvedValue([[null, { isRateLimited: false }]])
 
         const result = await pipeline.buildInvocations([makeGlobals()])
@@ -121,9 +121,9 @@ describe('InsightsFlowInvocationPipeline', () => {
     })
 
     it('drops rate-limited invocations with metric + log', async () => {
-        const inv = makeInsightsFlowInvocation()
-        hogFlowExecutor.buildInsightsFlowInvocations.mockResolvedValue({ invocations: [inv], metrics: [], logs: [] })
-        hogWatcher.getEffectiveStates.mockResolvedValue({ [inv.hogFlow.id]: { state: HogWatcherState.healthy } } as any)
+        const inv = makeFlowInvocation()
+        flowExecutor.buildFlowInvocations.mockResolvedValue({ invocations: [inv], metrics: [], logs: [] })
+        hogWatcher.getEffectiveStates.mockResolvedValue({ [inv.flow.id]: { state: HogWatcherState.healthy } } as any)
         rateLimitGroupedMock.mockResolvedValue([[null, { isRateLimited: true }]])
 
         const result = await pipeline.buildInvocations([makeGlobals()])
@@ -138,9 +138,9 @@ describe('InsightsFlowInvocationPipeline', () => {
 
     it('drops quota-limited invocations', async () => {
         // hogflow quota helper short-circuits when billable_action_types is empty
-        const inv = makeInsightsFlowInvocation('flow-1', { billable_action_types: ['function_email'] })
-        hogFlowExecutor.buildInsightsFlowInvocations.mockResolvedValue({ invocations: [inv], metrics: [], logs: [] })
-        hogWatcher.getEffectiveStates.mockResolvedValue({ [inv.hogFlow.id]: { state: HogWatcherState.healthy } } as any)
+        const inv = makeFlowInvocation('flow-1', { billable_action_types: ['function_email'] })
+        flowExecutor.buildFlowInvocations.mockResolvedValue({ invocations: [inv], metrics: [], logs: [] })
+        hogWatcher.getEffectiveStates.mockResolvedValue({ [inv.flow.id]: { state: HogWatcherState.healthy } } as any)
         rateLimitGroupedMock.mockResolvedValue([[null, { isRateLimited: false }]])
         quotaLimiting.isTeamQuotaLimited.mockResolvedValue(true)
 
@@ -148,11 +148,11 @@ describe('InsightsFlowInvocationPipeline', () => {
         expect(result).toEqual([])
     })
 
-    it('drops invocations for disabled insightsflows', async () => {
-        const inv = makeInsightsFlowInvocation()
-        hogFlowExecutor.buildInsightsFlowInvocations.mockResolvedValue({ invocations: [inv], metrics: [], logs: [] })
+    it('drops invocations for disabled flows', async () => {
+        const inv = makeFlowInvocation()
+        flowExecutor.buildFlowInvocations.mockResolvedValue({ invocations: [inv], metrics: [], logs: [] })
         hogWatcher.getEffectiveStates.mockResolvedValue({
-            [inv.hogFlow.id]: { state: HogWatcherState.disabled },
+            [inv.flow.id]: { state: HogWatcherState.disabled },
         } as any)
         rateLimitGroupedMock.mockResolvedValue([[null, { isRateLimited: false }]])
 
@@ -165,11 +165,11 @@ describe('InsightsFlowInvocationPipeline', () => {
         )
     })
 
-    it('sets queuePriority=2 for degraded insightsflows but does not change queue', async () => {
-        const inv = makeInsightsFlowInvocation()
-        hogFlowExecutor.buildInsightsFlowInvocations.mockResolvedValue({ invocations: [inv], metrics: [], logs: [] })
+    it('sets queuePriority=2 for degraded flows but does not change queue', async () => {
+        const inv = makeFlowInvocation()
+        flowExecutor.buildFlowInvocations.mockResolvedValue({ invocations: [inv], metrics: [], logs: [] })
         hogWatcher.getEffectiveStates.mockResolvedValue({
-            [inv.hogFlow.id]: { state: HogWatcherState.degraded },
+            [inv.flow.id]: { state: HogWatcherState.degraded },
         } as any)
         rateLimitGroupedMock.mockResolvedValue([[null, { isRateLimited: false }]])
 
@@ -181,9 +181,9 @@ describe('InsightsFlowInvocationPipeline', () => {
     })
 
     it('drops masked invocations', async () => {
-        const inv = makeInsightsFlowInvocation()
-        hogFlowExecutor.buildInsightsFlowInvocations.mockResolvedValue({ invocations: [inv], metrics: [], logs: [] })
-        hogWatcher.getEffectiveStates.mockResolvedValue({ [inv.hogFlow.id]: { state: HogWatcherState.healthy } } as any)
+        const inv = makeFlowInvocation()
+        flowExecutor.buildFlowInvocations.mockResolvedValue({ invocations: [inv], metrics: [], logs: [] })
+        hogWatcher.getEffectiveStates.mockResolvedValue({ [inv.flow.id]: { state: HogWatcherState.healthy } } as any)
         rateLimitGroupedMock.mockResolvedValue([[null, { isRateLimited: false }]])
         hogMasker.filterByMasking.mockResolvedValue({ masked: [inv], notMasked: [] })
 

@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 
-import { InsightsFlow } from '~/cdp/schema/insightsflow'
+import { Flow } from '~/cdp/schema/flow'
 import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
 import { captureException } from '~/common/utils/insights'
 import { logger } from '~/common/utils/logger'
@@ -12,28 +12,28 @@ import { CdpValkeyShadowPools } from '../cdp-services'
 import { counterRateLimited } from '../consumers/metrics'
 import {
     CyclotronJobInvocation,
-    CyclotronJobInvocationInsightsFlow,
+    CyclotronJobInvocationFlow,
     InsightsFunctionInvocationGlobals,
     LogEntry,
     MinimalAppMetric,
 } from '../types'
 import { mirrorCompare } from '../utils/mirror-call'
-import { InsightsFlowExecutorService } from './insightsflows/insightsflow-executor.service'
-import { InsightsFlowManagerService } from './insightsflows/insightsflow-manager.service'
-import { shouldBlockInsightsFlowDueToQuota } from './insightsflows/insightsflow-quota-limiting'
+import { FlowExecutorService } from './flows/flow-executor.service'
+import { FlowManagerService } from './flows/flow-manager.service'
+import { shouldBlockFlowDueToQuota } from './flows/flow-quota-limiting'
 import { InsightsFunctionMonitoringService } from './monitoring/script-function-monitoring.service'
 import { HogMaskerService } from './monitoring/script-masker.service'
 import { HogWatcherService, HogWatcherState } from './monitoring/script-watcher.service'
 
-export interface InsightsFlowInvocationPipelineConfig {
+export interface FlowInvocationPipelineConfig {
     CDP_RATE_LIMITER_BUCKET_SIZE: number
     CDP_RATE_LIMITER_REFILL_RATE: number
     CDP_RATE_LIMITER_TTL: number
 }
 
-export interface InsightsFlowInvocationPipelineDeps {
-    hogFlowManager: InsightsFlowManagerService
-    hogFlowExecutor: InsightsFlowExecutorService
+export interface FlowInvocationPipelineDeps {
+    flowManager: FlowManagerService
+    flowExecutor: FlowExecutorService
     hogWatcher: HogWatcherService
     hogWatcherMirror: HogWatcherService | null
     hogMasker: HogMaskerService
@@ -45,17 +45,17 @@ export interface InsightsFlowInvocationPipelineDeps {
 
 /**
  * Encapsulates the pipeline that turns event globals into script flow invocations:
- * load insightsflows → execute filters → watcher state → rate limit → quota → masking → metrics.
+ * load flows → execute filters → watcher state → rate limit → quota → masking → metrics.
  *
  * Consumers compose this service rather than inheriting it.
  */
-export class InsightsFlowInvocationPipeline {
+export class FlowInvocationPipeline {
     private hogRateLimiter: KeyedRateLimiterService
     private hogRateLimiterMirror: KeyedRateLimiterService | null
 
     constructor(
-        private config: InsightsFlowInvocationPipelineConfig,
-        private deps: InsightsFlowInvocationPipelineDeps
+        private config: FlowInvocationPipelineConfig,
+        private deps: FlowInvocationPipelineDeps
     ) {
         const rateLimiterConfig = {
             name: 'script-rate-limiter',
@@ -78,22 +78,22 @@ export class InsightsFlowInvocationPipeline {
             // knows its own source (events consumer → event triggers; DWH consumer → matching
             // warehouse-table triggers). Flows that fail the predicate are skipped without
             // touching the executor.
-            eligibilityFn?: (hogFlow: InsightsFlow, globals: InsightsFunctionInvocationGlobals) => boolean
+            eligibilityFn?: (hogFlow: Flow, globals: InsightsFunctionInvocationGlobals) => boolean
         }
     ): Promise<CyclotronJobInvocation[]> {
         const teamsToLoad = [...new Set(invocationGlobals.map((x) => x.project.id))]
-        const hogFlowsByTeam = await this.deps.hogFlowManager.getInsightsFlowsForTeams(teamsToLoad)
+        const hogFlowsByTeam = await this.deps.flowManager.getFlowsForTeams(teamsToLoad)
         const eligibilityFn = options?.eligibilityFn
 
         const possibleInvocations = (
             await Promise.all(
                 invocationGlobals.map(async (globals) => {
-                    const teamInsightsFlows = hogFlowsByTeam[globals.project.id]
+                    const teamFlows = hogFlowsByTeam[globals.project.id]
                     const eligibleFlows = eligibilityFn
-                        ? teamInsightsFlows.filter((flow) => eligibilityFn(flow, globals))
-                        : teamInsightsFlows
+                        ? teamFlows.filter((flow) => eligibilityFn(flow, globals))
+                        : teamFlows
 
-                    const { invocations, metrics, logs } = await this.deps.hogFlowExecutor.buildInsightsFlowInvocations(
+                    const { invocations, metrics, logs } = await this.deps.flowExecutor.buildFlowInvocations(
                         eligibleFlows,
                         globals
                     )
@@ -106,14 +106,14 @@ export class InsightsFlowInvocationPipeline {
             )
         ).flat()
 
-        const hogFlowIds = possibleInvocations.map((x) => x.hogFlow.id)
+        const flowIds = possibleInvocations.map((x) => x.hogFlow.id)
         const states = await mirrorCompare(
             'script-watcher.getEffectiveStates',
             () =>
                 instrumentFn('cdpConsumer.handleEachBatch.hogWatcher.getEffectiveStates', async () => {
-                    return await this.deps.hogWatcher.getEffectiveStates(hogFlowIds)
+                    return await this.deps.hogWatcher.getEffectiveStates(flowIds)
                 }),
-            () => this.deps.hogWatcherMirror?.getEffectiveStates(hogFlowIds)
+            () => this.deps.hogWatcherMirror?.getEffectiveStates(flowIds)
         )
 
         const rateLimitInputs: KeyedRateLimitRequest[] = possibleInvocations.map((x) => ({
@@ -130,7 +130,7 @@ export class InsightsFlowInvocationPipeline {
             (primary, mirror) =>
                 primary.every(([, result], index) => result.isRateLimited === mirror[index]?.[1].isRateLimited)
         )
-        const validInvocations: CyclotronJobInvocationInsightsFlow[] = []
+        const validInvocations: CyclotronJobInvocationFlow[] = []
 
         await Promise.all(
             possibleInvocations.map(async (item, index) => {
@@ -166,8 +166,8 @@ export class InsightsFlowInvocationPipeline {
 
                         logger.warn('⚠️', 'Hogflow invocation rate limited', {
                             teamId: item.teamId,
-                            hogFlowId: item.functionId,
-                            hogFlowName: item.hogFlow.name,
+                            flowId: item.functionId,
+                            flowName: item.hogFlow.name,
                             eventUuid,
                             personId,
                         })
@@ -180,7 +180,7 @@ export class InsightsFlowInvocationPipeline {
                 }
 
                 // Check quota limits for workflow actions
-                const isQuotaLimited = await shouldBlockInsightsFlowDueToQuota(item, {
+                const isQuotaLimited = await shouldBlockFlowDueToQuota(item, {
                     quotaLimiting: this.deps.quotaLimiting,
                     insightsFunctionMonitoringService: this.deps.insightsFunctionMonitoringService,
                 })

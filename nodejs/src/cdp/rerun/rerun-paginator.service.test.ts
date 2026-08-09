@@ -17,7 +17,7 @@ import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '../../types'
 import { insertInsightsFunction as _insertInsightsFunction, createHogExecutionGlobals } from '../_tests/fixtures'
 import { createCdpOutputsRegistry } from '../outputs/registry'
-import { InsightsFlowManagerService } from '../services/insightsflows/insightsflow-manager.service'
+import { FlowManagerService } from '../services/flows/flow-manager.service'
 import { CyclotronJobQueuePostgresV2 } from '../services/job-queue/job-queue-postgres-v2'
 import { JobQueue } from '../services/job-queue/job-queue.interface'
 import { InsightsFunctionManagerService } from '../services/managers/script-function-manager.service'
@@ -63,7 +63,7 @@ describe('RerunPaginatorService integration', () => {
     let paginatorLifecycleService: jest.Mocked<HogInvocationResultsService>
     let paginatorMonitoringService: jest.Mocked<InsightsFunctionMonitoringService>
     let insightsFunctionManager: InsightsFunctionManagerService
-    let hogFlowManager: jest.Mocked<InsightsFlowManagerService>
+    let flowManager: jest.Mocked<FlowManagerService>
 
     beforeAll(() => {
         datastore = Datastore.create()
@@ -233,9 +233,9 @@ describe('RerunPaginatorService integration', () => {
         // Script flow manager stays mocked — this suite focuses on the script-function
         // path and the CH query/rehydrate logic. Script flow rehydration is
         // exercised structurally (rest of the same code path) but not end-to-end here.
-        hogFlowManager = {
-            getInsightsFlow: jest.fn().mockResolvedValue(null),
-        } as unknown as jest.Mocked<InsightsFlowManagerService>
+        flowManager = {
+            getFlow: jest.fn().mockResolvedValue(null),
+        } as unknown as jest.Mocked<FlowManagerService>
 
         hogQueue = {
             queueInvocations: jest.fn().mockResolvedValue(undefined),
@@ -263,7 +263,7 @@ describe('RerunPaginatorService integration', () => {
         paginator = new RerunPaginatorService(
             chClient,
             insightsFunctionManager,
-            hogFlowManager,
+            flowManager,
             paginatorLifecycleService,
             { insights_function: hogQueue, hog_flow: hogflowQueue },
             paginatorMonitoringService,
@@ -620,7 +620,7 @@ describe('RerunPaginatorService integration', () => {
             const brokenPaginator = new RerunPaginatorService(
                 brokenChClient,
                 insightsFunctionManager,
-                hogFlowManager,
+                flowManager,
                 paginatorLifecycleService,
                 { insights_function: hogQueue, hog_flow: hogflowQueue },
                 paginatorMonitoringService,

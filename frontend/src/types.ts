@@ -372,7 +372,6 @@ export interface UserType extends UserBaseType {
     realm?: Realm
     is_email_verified?: boolean | null
     pending_email?: string | null
-    is_2fa_enabled: boolean
     has_social_auth: boolean
     has_sso_enforcement: boolean
     shortcut_position: UserShortcutPosition
@@ -627,14 +626,12 @@ export interface BaseMemberType {
     last_login: string | null
     joined_at: string
     updated_at: string
-    is_2fa_enabled: boolean
     has_social_auth: boolean
 }
 
 export interface OrganizationMemberType extends BaseMemberType {
     /** Level at which the user is in the organization. */
     level: OrganizationMembershipLevel
-    is_2fa_enabled: boolean
 }
 
 export interface OrganizationMemberScopedApiKeysResponse {

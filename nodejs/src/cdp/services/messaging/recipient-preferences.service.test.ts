@@ -1,6 +1,6 @@
-import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/insightsflow.builder'
+import { FixtureFlowBuilder } from '~/cdp/_tests/builders/flow.builder'
 import { createExampleInvocation } from '~/cdp/_tests/fixtures'
-import { InsightsFlowAction } from '~/cdp/schema/insightsflow'
+import { FlowAction } from '~/cdp/schema/flow'
 import { CyclotronJobInvocationInsightsFunction } from '~/cdp/types'
 import { closeHub, createHub } from '~/common/utils/db/hub'
 import { PostgresUse } from '~/common/utils/db/postgres'
@@ -67,9 +67,9 @@ describe('RecipientPreferencesService', () => {
     })
 
     const createFunctionStepInvocation = (
-        action: Extract<InsightsFlowAction, { type: 'function' | 'function_email' | 'function_sms' | 'function_push' }>
+        action: Extract<FlowAction, { type: 'function' | 'function_email' | 'function_sms' | 'function_push' }>
     ): CyclotronJobInvocationInsightsFunction => {
-        const hogFlow = new FixtureInsightsFlowBuilder()
+        const flow = new FixtureFlowBuilder()
             .withTeamId(team.id)
             .withWorkflow({
                 actions: {
@@ -98,8 +98,8 @@ describe('RecipientPreferencesService', () => {
             {} as Record<string, any>
         )
 
-        // InsightsFlow only overlaps InsightsFunctionType structurally; updated_at diverges (Date|number vs string)
-        return createExampleInvocation(hogFlow as unknown as Parameters<typeof createExampleInvocation>[0], {
+        // Flow only overlaps InsightsFunctionType structurally; updated_at diverges (Date|number vs string)
+        return createExampleInvocation(flow as unknown as Parameters<typeof createExampleInvocation>[0], {
             inputs,
         })
     }
@@ -110,7 +110,7 @@ describe('RecipientPreferencesService', () => {
                 to: string = 'test@example.com',
                 categoryId: string,
                 categoryType?: 'marketing' | 'transactional'
-            ): Extract<InsightsFlowAction, { type: 'function_email' }> => ({
+            ): Extract<FlowAction, { type: 'function_email' }> => ({
                 id: 'email',
                 name: 'Send email',
                 description: 'Send an email to the recipient',
@@ -449,7 +449,7 @@ describe('RecipientPreferencesService', () => {
             const createSmsAction = (
                 toNumber: string = '+1234567890',
                 categoryId: string
-            ): Extract<InsightsFlowAction, { type: 'function_sms' }> => ({
+            ): Extract<FlowAction, { type: 'function_sms' }> => ({
                 id: 'sms',
                 name: 'Send SMS',
                 description: 'Send an SMS to the recipient',
@@ -552,7 +552,7 @@ describe('RecipientPreferencesService', () => {
             const createPushAction = (
                 categoryId: string,
                 categoryType?: 'marketing' | 'transactional'
-            ): Extract<InsightsFlowAction, { type: 'function_push' }> => ({
+            ): Extract<FlowAction, { type: 'function_push' }> => ({
                 id: 'push',
                 name: 'Send push',
                 description: 'Send a push notification to the recipient',
@@ -634,7 +634,7 @@ describe('RecipientPreferencesService', () => {
 
         describe('for other action types', () => {
             it('should return false for function actions', async () => {
-                const action: Extract<InsightsFlowAction, { type: 'function' }> = {
+                const action: Extract<FlowAction, { type: 'function' }> = {
                     id: 'function',
                     name: 'Execute function',
                     description: 'Execute a custom script function',

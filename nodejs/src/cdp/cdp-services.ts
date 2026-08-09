@@ -19,10 +19,13 @@ import {
 import { CdpProducerName } from './outputs/producers'
 import { createCdpOutputsRegistry } from './outputs/registry'
 import { CapturedEventsService } from './services/captured-events/captured-events.service'
-import { InsightsFlowDuplicateObserverService } from './services/insightsflows/insightsflow-duplicate-observer.service'
-import { InsightsFlowExecutorService } from './services/insightsflows/insightsflow-executor.service'
-import { InsightsFlowFunctionsService } from './services/insightsflows/insightsflow-functions.service'
-import { InsightsFlowManagerService } from './services/insightsflows/insightsflow-manager.service'
+import { HogExecutorAsyncService } from './services/script-executor-async.service'
+import { HogExecutorService } from './services/script-executor.service'
+import { HogInputsService } from './services/script-inputs.service'
+import { FlowDuplicateObserverService } from './services/flows/flow-duplicate-observer.service'
+import { FlowExecutorService } from './services/flows/flow-executor.service'
+import { FlowFunctionsService } from './services/flows/flow-functions.service'
+import { FlowManagerService } from './services/flows/flow-manager.service'
 import { InvocationResultsService } from './services/invocation-results.service'
 import { IntegrationManagerService } from './services/managers/integration-manager.service'
 import { RecipientsManagerService } from './services/managers/recipients-manager.service'
@@ -41,9 +44,6 @@ import { InsightsFunctionMonitoringService } from './services/monitoring/script-
 import { HogInvocationResultsService } from './services/monitoring/script-invocation-results.service'
 import { HogWatcherService } from './services/monitoring/script-watcher.service'
 import { NativeDestinationExecutorService } from './services/native-destination-executor.service'
-import { HogExecutorAsyncService } from './services/script-executor-async.service'
-import { HogExecutorService } from './services/script-executor.service'
-import { HogInputsService } from './services/script-inputs.service'
 import { SegmentDestinationExecutorService } from './services/segment-destination-executor.service'
 import { WarehouseWebhooksService } from './services/warehouse/warehouse-webhooks.service'
 import { MAX_FETCH_TIMEOUT_MS, cdpTrackedFetch } from './utils/cdp-fetch'
@@ -76,7 +76,7 @@ export interface CdpCoreServices {
      */
     valkeyShadow: CdpValkeyShadowPools | null
     insightsFunctionManager: InsightsFunctionManagerService
-    hogFlowManager: InsightsFlowManagerService
+    flowManager: FlowManagerService
     hogWatcher: HogWatcherService
     /**
      * Mirror HogWatcherService bound to the shadow Valkey pool. Null when
@@ -90,12 +90,12 @@ export interface CdpCoreServices {
     /** Rebuilds the templated/resolved input bundle for a script function — used by the rerun path to re-derive `inputs` after they're stripped from the persisted payload. */
     hogInputsService: HogInputsService
     insightsFunctionTemplateManager: InsightsFunctionTemplateManagerService
-    hogFlowFunctionsService: InsightsFlowFunctionsService
+    flowFunctionsService: FlowFunctionsService
     recipientsManager: RecipientsManagerService
     recipientPreferencesService: RecipientPreferencesService
     emailSuppressionService: EmailSuppressionService
     teamWorkflowsConfigService: TeamWorkflowsConfigService
-    hogFlowExecutor: InsightsFlowExecutorService
+    flowExecutor: FlowExecutorService
     insightsFunctionMonitoringService: InsightsFunctionMonitoringService
     capturedEventsService: CapturedEventsService
     /** Per-invocation lifecycle row producer for the new runs/invocations UI + rerun path. */
@@ -362,7 +362,7 @@ export function createCdpCoreServices(
     const valkeyShadow = createCdpValkeyShadowPools(config, redisName)
 
     const insightsFunctionManager = new InsightsFunctionManagerService(deps.postgres, deps.pubSub, deps.encryptedFields)
-    const hogFlowManager = new InsightsFlowManagerService(deps.postgres, deps.pubSub, deps.encryptedFields)
+    const flowManager = new FlowManagerService(deps.postgres, deps.pubSub, deps.encryptedFields)
 
     const hogWatcherConfig = {
         hogCostTimingLowerMs: config.CDP_WATCHER_FN_COST_TIMING_LOWER_MS,
@@ -463,7 +463,7 @@ export function createCdpCoreServices(
     )
 
     const insightsFunctionTemplateManager = new InsightsFunctionTemplateManagerService(deps.postgres)
-    const hogFlowFunctionsService = new InsightsFlowFunctionsService(
+    const flowFunctionsService = new FlowFunctionsService(
         config.SITE_URL,
         insightsFunctionTemplateManager,
         hogExecutorAsync
@@ -476,12 +476,12 @@ export function createCdpCoreServices(
     // and EmailValidationService degrades to the local cache + DNS.
     const emailValidationService = new EmailValidationService(deps.emailValidationValkey)
     // Observer mirrors writes to Valkey (load-only); only the primary path drives metrics.
-    const hogFlowDuplicateObserver = new InsightsFlowDuplicateObserverService(redis, valkeyShadow?.writer ?? null)
-    const hogFlowExecutor = new InsightsFlowExecutorService(
-        hogFlowFunctionsService,
+    const flowDuplicateObserver = new FlowDuplicateObserverService(redis, valkeyShadow?.writer ?? null)
+    const flowExecutor = new FlowExecutorService(
+        flowFunctionsService,
         recipientPreferencesService,
         emailValidationService,
-        hogFlowDuplicateObserver
+        flowDuplicateObserver
     )
 
     const insightsFunctionMonitoringService = new InsightsFunctionMonitoringService(outputs)
@@ -503,18 +503,18 @@ export function createCdpCoreServices(
         redis,
         valkeyShadow,
         insightsFunctionManager,
-        hogFlowManager,
+        flowManager,
         hogWatcher,
         hogWatcherMirror,
         hogExecutorAsync,
         hogInputsService,
         insightsFunctionTemplateManager,
-        hogFlowFunctionsService,
+        flowFunctionsService,
         recipientsManager,
         recipientPreferencesService,
         emailSuppressionService,
         teamWorkflowsConfigService,
-        hogFlowExecutor,
+        flowExecutor,
         insightsFunctionMonitoringService,
         capturedEventsService,
         hogInvocationResultsService,
