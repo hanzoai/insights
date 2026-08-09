@@ -9,7 +9,7 @@ import express from 'ultimate-express'
 
 import { insertInsightsFunction, insertInsightsFunctionTemplate } from '~/cdp/_tests/fixtures'
 import { CdpApi } from '~/cdp/cdp-api'
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { Flow } from '~/cdp/schema/flow'
 import { template as pixelTemplate } from '~/cdp/templates/_sources/pixel/pixel.template'
 import { template as incomingWebhookTemplate } from '~/cdp/templates/_sources/webhook/incoming_webhook.template'
 import { CyclotronJobInvocationInsightsFunction, CyclotronJobInvocationResult, InsightsFunctionType } from '~/cdp/types'
@@ -21,8 +21,8 @@ import { forSnapshot } from '~/tests/helpers/snapshots'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '~/types'
 
-import { FixtureInsightsFlowBuilder } from '../_tests/builders/hogflow.builder'
-import { insertInsightsFlow } from '../_tests/fixtures-insightsflows'
+import { FixtureFlowBuilder } from '../_tests/builders/flow.builder'
+import { insertFlow } from '../_tests/fixtures-flows'
 import { getCustomHttpResponse } from '../consumers/cdp-source-webhooks.consumer'
 import { HogWatcherState } from '../services/monitoring/script-watcher.service'
 import { compileHog } from '../templates/compiler'
@@ -455,11 +455,11 @@ describe('SourceWebhooksConsumer', () => {
         })
 
         describe('script flow processing', () => {
-            let hogFlow: InsightsFlow
+            let flow: Flow
 
             beforeEach(async () => {
                 const template = await insertInsightsFunctionTemplate(hub.postgres, incomingWebhookTemplate)
-                hogFlow = new FixtureInsightsFlowBuilder()
+                flow = new FixtureFlowBuilder()
                     .withTeamId(team.id)
                     .withSimpleWorkflow({
                         trigger: {
@@ -482,7 +482,7 @@ describe('SourceWebhooksConsumer', () => {
                         },
                     })
                     .build()
-                await insertInsightsFlow(hub.postgres, hogFlow)
+                await insertFlow(hub.postgres, flow)
             })
 
             it('should 404 if the script flow does not exist', async () => {
@@ -494,7 +494,7 @@ describe('SourceWebhooksConsumer', () => {
 
             it('should invoke a workflow with the parsed inputs', async () => {
                 const res = await doPostRequest({
-                    webhookId: hogFlow.id,
+                    webhookId: flow.id,
                     body: {
                         event: 'my-event',
                         distinct_id: 'test-distinct-id',
@@ -508,12 +508,12 @@ describe('SourceWebhooksConsumer', () => {
                 expect(mockQueueHogflowInvocationsSpy).toHaveBeenCalledTimes(1)
                 const call = mockQueueHogflowInvocationsSpy.mock.calls[0][0][0]
                 expect(call.queue).toEqual('hogflow')
-                expect(call.hogFlow).toMatchObject(hogFlow)
+                expect(call.flow).toMatchObject(flow)
             })
 
             it('should add logs and metrics', async () => {
                 const res = await doPostRequest({
-                    webhookId: hogFlow.id,
+                    webhookId: flow.id,
                     body: {
                         event: 'my-event',
                         distinct_id: 'test-distinct-id',
@@ -544,7 +544,7 @@ describe('SourceWebhooksConsumer', () => {
                 )
 
                 const res = await doPostRequest({
-                    webhookId: hogFlow.id,
+                    webhookId: flow.id,
                     body: {
                         event: 'my-event',
                         distinct_id: 'test-distinct-id',
@@ -577,7 +577,7 @@ describe('SourceWebhooksConsumer', () => {
 
             it('should add logs and metrics for a controlled failed script flow', async () => {
                 const res = await doPostRequest({
-                    webhookId: hogFlow.id,
+                    webhookId: flow.id,
                     body: {
                         event: 'my-event',
                         missing_distinct_id: 'test-distinct-id',
@@ -599,7 +599,7 @@ describe('SourceWebhooksConsumer', () => {
 
             it('should add logs and metrics for an uncontrolled failed script flow', async () => {
                 // Hacky but otherwise its quite hard to trigger an uncontrolled error
-                hogFlow = new FixtureInsightsFlowBuilder()
+                flow = new FixtureFlowBuilder()
                     .withTeamId(team.id)
                     .withSimpleWorkflow({
                         trigger: {
@@ -614,10 +614,10 @@ describe('SourceWebhooksConsumer', () => {
                         },
                     })
                     .build()
-                await insertInsightsFlow(hub.postgres, hogFlow)
+                await insertFlow(hub.postgres, flow)
 
                 const res = await doPostRequest({
-                    webhookId: hogFlow.id,
+                    webhookId: flow.id,
                     body: {
                         event: 'my-event',
                         missing_distinct_id: 'test-distinct-id',
