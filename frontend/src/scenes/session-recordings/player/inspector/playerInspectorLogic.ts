@@ -21,7 +21,7 @@ import {
     eventWithTime,
     fullSnapshotEvent,
     pluginEvent,
-} from 'insights-js/rrweb-types'
+} from '@hanzo/insights-rrweb-types'
 
 import api from 'lib/api'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'

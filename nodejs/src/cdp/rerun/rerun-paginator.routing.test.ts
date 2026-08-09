@@ -21,14 +21,14 @@ import { RerunPaginatorService } from './rerun-paginator.service'
  */
 describe('RerunPaginatorService queue routing', () => {
     let hogQueue: jest.Mocked<JobQueue>
-    let hogflowQueue: jest.Mocked<CyclotronJobQueuePostgresV2>
+    let flowQueue: jest.Mocked<CyclotronJobQueuePostgresV2>
     let paginator: RerunPaginatorService
 
     beforeEach(() => {
         hogQueue = {
             queueInvocations: jest.fn().mockResolvedValue(undefined),
         } as unknown as jest.Mocked<JobQueue>
-        hogflowQueue = {
+        flowQueue = {
             queueInvocations: jest.fn().mockResolvedValue(undefined),
         } as unknown as jest.Mocked<CyclotronJobQueuePostgresV2>
 
@@ -49,7 +49,7 @@ describe('RerunPaginatorService queue routing', () => {
             {} as unknown as InsightsFunctionManagerService,
             {} as unknown as FlowManagerService,
             invocationResultsRowsService,
-            { insights_function: hogQueue, hog_flow: hogflowQueue },
+            { insights_function: hogQueue, hog_flow: flowQueue },
             monitoringService,
             10000
         )
@@ -85,7 +85,7 @@ describe('RerunPaginatorService queue routing', () => {
 
         expect(hogQueue.queueInvocations).toHaveBeenCalledTimes(1)
         expect((hogQueue.queueInvocations.mock.calls[0][0] as any[]).map((i) => i.id)).toEqual(['inv-1', 'inv-2'])
-        expect(hogflowQueue.queueInvocations).not.toHaveBeenCalled()
+        expect(flowQueue.queueInvocations).not.toHaveBeenCalled()
     })
 
     it('routes hog_flow reruns to the postgres-v2 (hogflow) queue with overwriteExisting', async () => {
@@ -93,11 +93,11 @@ describe('RerunPaginatorService queue routing', () => {
 
         await runPage(buildState('hog_flow'))
 
-        expect(hogflowQueue.queueInvocations).toHaveBeenCalledTimes(1)
-        expect((hogflowQueue.queueInvocations.mock.calls[0][0] as any[]).map((i) => i.id)).toEqual(['inv-1', 'inv-2'])
+        expect(flowQueue.queueInvocations).toHaveBeenCalledTimes(1)
+        expect((flowQueue.queueInvocations.mock.calls[0][0] as any[]).map((i) => i.id)).toEqual(['inv-1', 'inv-2'])
         // postgres-v2 re-enqueue re-uses the original invocation_id, so it must
         // upsert over the prior terminal row.
-        expect(hogflowQueue.queueInvocations.mock.calls[0][1]).toEqual({ overwriteExisting: true })
+        expect(flowQueue.queueInvocations.mock.calls[0][1]).toEqual({ overwriteExisting: true })
         expect(hogQueue.queueInvocations).not.toHaveBeenCalled()
     })
 
@@ -131,7 +131,7 @@ describe('RerunPaginatorService queue routing', () => {
         stubPage(['inv-conflict'])
         // The postgres-v2 upsert raises a conflict when the existing row is
         // still active — the paginator logs + counts it as a skip, not a failure.
-        hogflowQueue.queueInvocations.mockRejectedValueOnce(new CyclotronJobConflictError('inv-conflict'))
+        flowQueue.queueInvocations.mockRejectedValueOnce(new CyclotronJobConflictError('inv-conflict'))
 
         const { state: next } = await runPage(buildState('hog_flow'))
 
@@ -149,7 +149,7 @@ describe('RerunPaginatorService queue routing', () => {
             insightsFunctionManager,
             {} as unknown as FlowManagerService,
             {} as unknown as HogInvocationResultsService,
-            { insights_function: hogQueue, hog_flow: hogflowQueue },
+            { insights_function: hogQueue, hog_flow: flowQueue },
             {} as unknown as InsightsFunctionMonitoringService,
             10000
         )

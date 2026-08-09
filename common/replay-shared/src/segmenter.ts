@@ -1,4 +1,4 @@
-import { EventType, IncrementalSource, eventWithTime } from 'insights-js/rrweb-types'
+import { EventType, IncrementalSource, eventWithTime } from '@hanzo/insights-rrweb-types'
 
 import { RecordingSegment, RecordingSnapshot } from './types'
 

@@ -1,5 +1,5 @@
 import { CapturedNetworkRequest } from 'insights-js'
-import { eventWithTime } from 'insights-js/rrweb-types'
+import { eventWithTime } from '@hanzo/insights-rrweb-types'
 
 import { getSeriesBackgroundColor, getSeriesColor } from 'lib/colors'
 import { assignField, isKeyOf } from 'lib/utils/guards'

@@ -1,4 +1,4 @@
-import { Insights } from 'insights-node'
+import { PostHog as Insights } from 'insights-node'
 
 import { Team } from '~/types'
 

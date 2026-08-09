@@ -14,7 +14,7 @@ import {
 } from 'kea'
 import { subscriptions } from 'kea-subscriptions'
 import insights from 'insights-js'
-import { EventType, customEvent, eventWithTime } from 'insights-js/rrweb-types'
+import { EventType, customEvent, eventWithTime } from '@hanzo/insights-rrweb-types'
 
 import {
     getHrefFromSnapshot,
