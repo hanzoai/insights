@@ -236,6 +236,22 @@ jobs:
               run: |
                   pytest bin/test/test_find_python_dependencies.py -v --junitxml=junit-dependency-detection.xml
 
+            # Guards the two scripts behind the /static origin. The prune deletes
+            # unattended on a weekly cron, so the case that matters is a publish
+            # landing mid-run: without the guard it removes the assets of the very
+            # build production is about to serve.
+            #
+            # Skipped when the file is absent so that adding this step does not
+            # fail every open PR that has not rebased onto it yet.
+            - name: Run static origin script tests
+              shell: bash
+              run: |
+                  if [ -f bin/test/test_static_origin.py ]; then
+                      pytest bin/test/test_static_origin.py -v --junitxml=junit-static-origin.xml
+                  else
+                      echo "bin/test/test_static_origin.py is not on this branch yet — skipping"
+                  fi
+
             - name: Upload test results for dependency detection
               uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
               if: always()
