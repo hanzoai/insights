@@ -711,7 +711,7 @@ urlpatterns = [
 
 # Personal LLM spend data only lives in Insights Cloud US — EU forwards its product
 # LLM telemetry over — so the EU view proxies the query to US server-side. Must be
-# inserted *before* the `^api.+` catch-all above; otherwise the catch-all matches
+# inserted *before* the `^v1.+` catch-all above; otherwise the catch-all matches
 # first and the view is unreachable.
 if settings.CLOUD_DEPLOYMENT == "EU":
     urlpatterns.insert(
