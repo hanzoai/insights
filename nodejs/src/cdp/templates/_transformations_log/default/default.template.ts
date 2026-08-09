@@ -7,7 +7,7 @@ export const template: InsightsFunctionTemplate = {
     id: 'template-log-transformation-default',
     name: 'Custom log transformation',
     description: 'Start from scratch. Mutate the log record and return it, or return null to drop it.',
-    icon_url: '/static/mascot/builder-script-01.png',
+    icon_url: '/static/script/builder-script-01.png',
     category: ['Custom'],
     code_language: 'script',
     code: `

@@ -9,7 +9,7 @@ import { captureException } from '~/common/utils/insights'
 
 import { convertToInsightsFunctionInvocationGlobals } from '../../cdp/utils'
 import { HealthCheckResult, PluginsServerConfig, RawDatastoreEvent } from '../../types'
-import { InsightsFlowInvocationPipeline } from '../services/script-flow-invocation-pipeline.service'
+import { FlowInvocationPipeline } from '../services/script-flow-invocation-pipeline.service'
 import { InsightsFunctionInvocationPipeline } from '../services/script-function-invocation-pipeline.service'
 import { JobQueue } from '../services/job-queue/job-queue.interface'
 import { CyclotronJobInvocation, InsightsFunctionInvocationGlobals, InsightsFunctionTypeType } from '../types'
@@ -26,7 +26,7 @@ export class CdpEventsConsumer<
     protected kafkaConsumer: KafkaConsumerInterface
 
     private insightsFunctionPipeline: InsightsFunctionInvocationPipeline
-    private hogFlowPipeline: InsightsFlowInvocationPipeline
+    private flowPipeline: FlowInvocationPipeline
 
     constructor(
         config: TConfig,
@@ -50,9 +50,9 @@ export class CdpEventsConsumer<
             redis: this.redis,
             valkeyShadow: this.valkeyShadow,
         })
-        this.hogFlowPipeline = new InsightsFlowInvocationPipeline(config, {
-            hogFlowManager: this.hogFlowManager,
-            hogFlowExecutor: this.hogFlowExecutor,
+        this.flowPipeline = new FlowInvocationPipeline(config, {
+            flowManager: this.flowManager,
+            flowExecutor: this.flowExecutor,
             hogWatcher: this.hogWatcher,
             hogWatcherMirror: this.hogWatcherMirror,
             hogMasker: this.hogMasker,
@@ -81,7 +81,7 @@ export class CdpEventsConsumer<
             // Source-compatibility lives in the consumer. The events consumer matches event-triggered
             // flows only; other trigger types (data-warehouse-table, batch, schedule, webhook, manual)
             // are dispatched from their respective consumers and never reach the executor from here.
-            this.hogFlowPipeline.buildInvocations(invocationGlobals, {
+            this.flowPipeline.buildInvocations(invocationGlobals, {
                 eligibilityFn: (flow) => flow.trigger.type === 'event',
             }),
         ])
@@ -133,13 +133,13 @@ export class CdpEventsConsumer<
                 try {
                     const clickHouseEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
 
-                    const [teamInsightsFunctions, teamInsightsFlows, team] = await Promise.all([
+                    const [teamInsightsFunctions, teamFlows, team] = await Promise.all([
                         this.insightsFunctionManager.getInsightsFunctionsForTeam(clickHouseEvent.team_id, this.hogTypes),
-                        this.hogFlowManager.getInsightsFlowsForTeam(clickHouseEvent.team_id),
+                        this.flowManager.getFlowsForTeam(clickHouseEvent.team_id),
                         this.deps.teamManager.getTeam(clickHouseEvent.team_id),
                     ])
 
-                    if ((!teamInsightsFunctions.length && !teamInsightsFlows.length) || !team) {
+                    if ((!teamInsightsFunctions.length && !teamFlows.length) || !team) {
                         return
                     }
 
