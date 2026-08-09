@@ -264,6 +264,16 @@ rollout finishes.
   two hundred builds has the OLDEST `LastModified` in the bucket precisely
   because it is the most stable thing in it, so an S3 lifecycle rule would delete
   the load-bearing assets first and leave the churn.
+- **The prune deletes unattended, so it carries four guards** — all covered by
+  `bin/test/test_static_origin.py`, which runs in `ci-python`. A publish writes
+  its objects first and its manifest last, so a build finishing between the
+  manifest listing and the object listing looked present and unclaimed, and the
+  prune would delete the very build the pin was about to move to. Manifests are
+  re-read AFTER the object listing; nothing younger than a day is ever deleted
+  (age PROTECTS, never condemns); a floor of ten builds survives a wrong runner
+  clock; and an orphan set over a quarter of the tree refuses rather than
+  deletes. Do not remove one because the others look sufficient — the first two
+  cover different halves of the same race.
 - **The manifests are a SIBLING prefix, not `insights/.builds/`.** A
   percent-encoded `../` reaches out of `static/` inside the middleware
   (`/static/%2e%2e%2f.builds/<v>.txt` returned one, 200). It cannot climb past
