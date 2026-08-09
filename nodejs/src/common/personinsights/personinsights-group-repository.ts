@@ -12,13 +12,13 @@ import { logger } from '~/common/utils/logger'
 import { Properties } from '~/plugin-scaffold'
 import { Group, GroupTypeIndex, ProjectId, PropertiesLastOperation, PropertiesLastUpdatedAt, TeamId } from '~/types'
 
-import { PersonHogClient, shouldUseGrpc, shouldUseGrpcForTeam, shouldUseGrpcForTeams } from './client'
+import { PersonFnClient, shouldUseGrpc, shouldUseGrpcForTeam, shouldUseGrpcForTeams } from './client'
 import { timedGrpc, timedPostgres } from './metrics'
 
-export class PersonHogGroupRepository implements GroupRepository {
+export class PersonFnGroupRepository implements GroupRepository {
     constructor(
         private postgres: GroupRepository,
-        private grpcClient: PersonHogClient,
+        private grpcClient: PersonFnClient,
         private grpcPercentage: number,
         private rolloutTeamIds: ReadonlySet<number>,
         private clientLabel: string
@@ -47,7 +47,7 @@ export class PersonHogGroupRepository implements GroupRepository {
                 this.grpcClient.groups.fetchGroup(teamId, groupTypeIndex, groupKey, options?.callerTag)
             )
         } catch (error) {
-            logger.warn('[PersonHog] gRPC fetchGroup failed, falling back to Postgres', {
+            logger.warn('[PersonFn] gRPC fetchGroup failed, falling back to Postgres', {
                 teamId,
                 groupTypeIndex,
                 error: String(error),
@@ -88,7 +88,7 @@ export class PersonHogGroupRepository implements GroupRepository {
                 )
             )
         } catch (error) {
-            logger.warn('[PersonHog] gRPC fetchGroupsByKeys failed, falling back to Postgres', {
+            logger.warn('[PersonFn] gRPC fetchGroupsByKeys failed, falling back to Postgres', {
                 count: keys.length,
                 error: String(error),
             })
@@ -113,7 +113,7 @@ export class PersonHogGroupRepository implements GroupRepository {
                 this.grpcClient.groups.fetchGroupTypesByTeamIds(teamIds, callerTag)
             )
         } catch (error) {
-            logger.warn('[PersonHog] gRPC fetchGroupTypesByTeamIds failed, falling back to Postgres', {
+            logger.warn('[PersonFn] gRPC fetchGroupTypesByTeamIds failed, falling back to Postgres', {
                 count: teamIds.length,
                 error: String(error),
             })
@@ -138,7 +138,7 @@ export class PersonHogGroupRepository implements GroupRepository {
                 this.grpcClient.groups.fetchGroupTypesByProjectIds(projectIds, callerTag)
             )
         } catch (error) {
-            logger.warn('[PersonHog] gRPC fetchGroupTypesByProjectIds failed, falling back to Postgres', {
+            logger.warn('[PersonFn] gRPC fetchGroupTypesByProjectIds failed, falling back to Postgres', {
                 count: projectIds.length,
                 error: String(error),
             })

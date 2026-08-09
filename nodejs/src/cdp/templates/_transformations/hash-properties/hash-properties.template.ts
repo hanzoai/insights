@@ -8,7 +8,7 @@ export const template: InsightsFunctionTemplate = {
     name: 'Hash properties',
     description:
         'Hashes sensitive fields with SHA256 using a salt. This helps protect user privacy while maintaining data consistency.',
-    icon_url: 'https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/police_hog_b9b79e7c20.png',
+    icon_url: 'https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/police_script_b9b79e7c20.png',
     category: ['Custom'],
     code_language: 'script',
     code: `

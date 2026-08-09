@@ -17,7 +17,7 @@ export interface FlowQuotaLimitResult {
 }
 
 /**
- * Checks if a hogflow is quota limited based on its billable action types.
+ * Checks if a flow is quota limited based on its billable action types.
  * Uses the pre-computed billable_action_types field for efficient quota checking.
  */
 export async function checkFlowQuotaLimits(

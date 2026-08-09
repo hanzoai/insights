@@ -3,12 +3,12 @@ import { Interceptor, Transport, createClient } from '@connectrpc/connect'
 import { Http2SessionManager, createGrpcTransport } from '@connectrpc/connect-node'
 import { DateTime } from 'luxon'
 
-import { PersonHogService } from '~/common/generated/personinsights/personinsights/service/v1/service_pb'
+import { PersonFnService } from '~/common/generated/personinsights/personinsights/service/v1/service_pb'
 import { ConsistencyLevel, ReadOptionsSchema } from '~/common/generated/personinsights/personinsights/types/v1/common_pb'
 import { parseJSON } from '~/common/utils/json-parse'
 
-import { PersonHogGroupOperations } from './groups'
-import { PersonHogPersonOperations } from './persons'
+import { PersonFnGroupOperations } from './groups'
+import { PersonFnPersonOperations } from './persons'
 import { SessionStateMonitor } from './session-state-monitor'
 
 const textDecoder = new TextDecoder()
@@ -111,7 +111,7 @@ export function resolveConsistencyHeader(message: unknown): 'strong' | 'eventual
     return readOptions?.consistency === ConsistencyLevel.STRONG ? 'strong' : 'eventual'
 }
 
-export interface PersonHogClientConfig {
+export interface PersonFnClientConfig {
     /** Host and port of the personinsights gRPC server, e.g. "localhost:50051". */
     addr: string
     /** Identifier sent in the x-client-name header so the server can distinguish callers. */
@@ -171,24 +171,24 @@ export interface PersonHogClientConfig {
     stateMonitorPollIntervalMs?: number
 }
 
-export class PersonHogClient {
-    readonly groups: PersonHogGroupOperations
-    readonly persons: PersonHogPersonOperations
+export class PersonFnClient {
+    readonly groups: PersonFnGroupOperations
+    readonly persons: PersonFnPersonOperations
 
     private stateMonitor: SessionStateMonitor | undefined
 
     private constructor(transport: Transport, stateMonitor?: SessionStateMonitor) {
-        const client = createClient(PersonHogService, transport)
-        this.groups = new PersonHogGroupOperations(client)
-        this.persons = new PersonHogPersonOperations(client)
+        const client = createClient(PersonFnService, transport)
+        this.groups = new PersonFnGroupOperations(client)
+        this.persons = new PersonFnPersonOperations(client)
         this.stateMonitor = stateMonitor
     }
 
-    static fromTransport(transport: Transport): PersonHogClient {
-        return new PersonHogClient(transport)
+    static fromTransport(transport: Transport): PersonFnClient {
+        return new PersonFnClient(transport)
     }
 
-    static fromConfig(config: PersonHogClientConfig): PersonHogClient {
+    static fromConfig(config: PersonFnClientConfig): PersonFnClient {
         const scheme = config.useTls ? 'https' : 'http'
         const interceptors: Interceptor[] = []
         if (config.clientName) {
@@ -233,7 +233,7 @@ export class PersonHogClient {
             sessionManager: stateMonitor,
             interceptors,
         })
-        return new PersonHogClient(transport, stateMonitor)
+        return new PersonFnClient(transport, stateMonitor)
     }
 
     close(): void {

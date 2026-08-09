@@ -52,7 +52,7 @@ function createMockPersonReadRepository(
     }
 }
 
-describe('CdpCyclotronWorkerFlow with PersonHog', () => {
+describe('CdpCyclotronWorkerFlow with PersonFn', () => {
     let hub: Hub
     let team: Team
     let flow: Flow

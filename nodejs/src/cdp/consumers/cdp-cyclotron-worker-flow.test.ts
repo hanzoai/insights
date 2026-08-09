@@ -403,7 +403,7 @@ describe('CdpCyclotronWorkerFlow', () => {
                 'disableFlow'
             )
 
-            // Mark the hogflow for refresh so it fetches fresh data
+            // Mark the flow for refresh so it fetches fresh data
             ;(processor['flowManager'] as any)['lazyLoader'].markForRefresh(flow.id)
 
             // Mock cancelInvocations to track what gets skipped

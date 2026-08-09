@@ -3,12 +3,12 @@ import { PluginEvent } from '~/plugin-scaffold'
 /**
  * Contract for the script transformation service, consumed by ingestion.
  *
- * The concrete implementation (`HogTransformerService`) lives in cdp because it depends on the
+ * The concrete implementation (`ScriptTransformerService`) lives in cdp because it depends on the
  * full script execution machinery (executor, managers, templates, plugins). Ingestion depends only
  * on this interface and receives an instance by injection from the server wiring layer, so
  * ingestion never imports cdp.
  */
-export interface HogTransformationResult {
+export interface ScriptTransformationResult {
     event: PluginEvent | null
     // Opaque to ingestion (it only reads `.length`); cdp narrows this to its concrete result type.
     invocationResults: unknown[]
@@ -16,11 +16,11 @@ export interface HogTransformationResult {
     droppedBy?: { id: string; name: string }
 }
 
-export interface HogTransformer {
+export interface ScriptTransformer {
     start(): Promise<void>
     stop(): Promise<void>
     processInvocationResults(): Promise<void>
-    transformEventAndProduceMessages(event: PluginEvent): Promise<HogTransformationResult>
+    transformEventAndProduceMessages(event: PluginEvent): Promise<ScriptTransformationResult>
     // Refresh cached transformation script-function states for the given teams (used by the ingestion
     // prefetch step). Encapsulates the script-function-manager lookup ingestion would otherwise reach into.
 }

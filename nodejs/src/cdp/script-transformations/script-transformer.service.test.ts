@@ -8,7 +8,7 @@ import { PluginEvent } from '~/plugin-scaffold'
 import { insightsFilterOutPlugin } from '../../../src/cdp/legacy-plugins/_transformations/insights-filter-out-plugin/template'
 import { template as defaultTemplate } from '../../../src/cdp/templates/_transformations/default/default.template'
 import { template as geoipTemplate } from '../../../src/cdp/templates/_transformations/geoip/geoip.template'
-import { compileHog } from '../../../src/cdp/templates/compiler'
+import { compileScript } from '../../../src/cdp/templates/compiler'
 import { createTestMonitoringOutputs } from '../../../tests/helpers/ingestion-outputs'
 import { forSnapshot } from '../../../tests/helpers/snapshots'
 import { getFirstTeam, resetTestDatabase } from '../../../tests/helpers/sql'
@@ -18,8 +18,8 @@ import { insightsPluginGeoip } from '../legacy-plugins/_transformations/insights
 import { propertyFilterPlugin } from '../legacy-plugins/_transformations/property-filter-plugin/template'
 import { InsightsFunctionTemplate } from '../types'
 import { resetScriptvmNodeModuleCacheForTests, type ScriptvmNodeModule } from './rust-vm'
-import type { HogTransformerServiceConfig } from './script-transformer.service'
-import { HogTransformerService, createHogTransformerService } from './script-transformer.service'
+import type { ScriptTransformerServiceConfig } from './script-transformer.service'
+import { ScriptTransformerService, createScriptTransformerService } from './script-transformer.service'
 
 jest.mock('@hanzo/scriptvm-node', () => ({
     init: jest.fn(),
@@ -43,9 +43,9 @@ const createPluginEvent = (event: Partial<PluginEvent> = {}, teamId: number = 1)
     }
 }
 
-describe('HogTransformer', () => {
+describe('ScriptTransformer', () => {
     let hub: Hub
-    let hogTransformer: HogTransformerService
+    let scriptTransformer: ScriptTransformerService
     let teamId: number
 
     beforeEach(async () => {
@@ -59,7 +59,7 @@ describe('HogTransformer', () => {
         const team = await getFirstTeam(hub.postgres)
         teamId = team.id
 
-        hogTransformer = createHogTransformerService(hub, {
+        scriptTransformer = createScriptTransformerService(hub, {
             ...hub,
             monitoringOutputs: createTestMonitoringOutputs(mockProducer),
         })
@@ -68,11 +68,11 @@ describe('HogTransformer', () => {
     afterEach(async () => {
         await closeHub(hub)
 
-        jest.spyOn(hogTransformer['pluginExecutor'], 'execute')
+        jest.spyOn(scriptTransformer['pluginExecutor'], 'execute')
     })
 
     it('constructs the synchronous executor from only transformation config', async () => {
-        const config: HogTransformerServiceConfig = {
+        const config: ScriptTransformerServiceConfig = {
             SITE_URL: hub.SITE_URL,
             CDP_FN_RUST_VM_EXECUTION_ENABLED: false,
             MMDB_FILE_LOCATION: hub.MMDB_FILE_LOCATION,
@@ -80,13 +80,13 @@ describe('HogTransformer', () => {
             // through rather than hardcoded in the factory.
             TRANSFORMATIONS_FN_TIMEOUT_MS: 123,
         }
-        const transformer = createHogTransformerService(config, {
+        const transformer = createScriptTransformerService(config, {
             ...hub,
             monitoringOutputs: createTestMonitoringOutputs(mockProducer),
         })
 
-        expect(transformer['hogExecutor']['hogInputsService']['recipientTokensService']).toBeUndefined()
-        expect(transformer['hogExecutor']['config'].executionTimeoutMs).toBe(123)
+        expect(transformer['scriptExecutor']['scriptInputsService']['recipientTokensService']).toBeUndefined()
+        expect(transformer['scriptExecutor']['config'].executionTimeoutMs).toBe(123)
 
         await transformer.stop()
     })
@@ -94,22 +94,22 @@ describe('HogTransformer', () => {
     describe('transformEvent', () => {
         it('handles geoip lookup transformation', async () => {
             // Setup the script function
-            const hogByteCode = await compileHog(geoipTemplate.code)
+            const scriptByteCode = await compileScript(geoipTemplate.code)
             const geoIpFunction = createInsightsFunction({
                 type: 'transformation',
                 name: geoipTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: hogByteCode,
+                bytecode: scriptByteCode,
                 execution_order: 1,
                 id: 'd77e792e-0f35-431b-a983-097534aa4767',
             })
             await insertInsightsFunction(hub.postgres, teamId, geoIpFunction)
 
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [geoIpFunction.id])
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [geoIpFunction.id])
 
             const event: PluginEvent = createPluginEvent({}, teamId)
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
+            const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
             expect(result.event?.properties).toMatchInlineSnapshot(`
                 {
@@ -185,9 +185,9 @@ describe('HogTransformer', () => {
                     return returnEvent
                 `,
             })
-            fn.bytecode = await compileHog(fn.script)
+            fn.bytecode = await compileScript(fn.script)
             await insertInsightsFunction(hub.postgres, teamId, fn)
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [fn.id])
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [fn.id])
 
             const event: PluginEvent = createPluginEvent(
                 {
@@ -199,7 +199,7 @@ describe('HogTransformer', () => {
                 },
                 teamId
             )
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
+            const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
             expect(result.event?.event).toBe('button_click')
         })
@@ -223,12 +223,12 @@ describe('HogTransformer', () => {
                     return returnEvent
                 `,
             })
-            fn.bytecode = await compileHog(fn.script)
+            fn.bytecode = await compileScript(fn.script)
             await insertInsightsFunction(hub.postgres, teamId, fn)
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [fn.id])
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [fn.id])
 
             const event: PluginEvent = createPluginEvent({}, teamId)
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
+            const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
             expect(result.event).toMatchInlineSnapshot(`
                 {
@@ -269,7 +269,7 @@ describe('HogTransformer', () => {
                 inputs_schema: [],
             }
 
-            const geoTransformationIpByteCode = await compileHog(geoipTemplate.code)
+            const geoTransformationIpByteCode = await compileScript(geoipTemplate.code)
             const geoIpTransformationFunction = createInsightsFunction({
                 type: 'transformation',
                 name: geoipTemplate.name,
@@ -279,7 +279,7 @@ describe('HogTransformer', () => {
                 execution_order: 1,
             })
 
-            const defaultTransformationByteCode = await compileHog(defaultTemplate.code)
+            const defaultTransformationByteCode = await compileScript(defaultTemplate.code)
             const defaultTransformationFunction = createInsightsFunction({
                 type: 'transformation',
                 name: defaultTemplate.name,
@@ -289,7 +289,7 @@ describe('HogTransformer', () => {
                 execution_order: 2,
             })
 
-            const testTransformationByteCode = await compileHog(testTemplate.code)
+            const testTransformationByteCode = await compileScript(testTemplate.code)
             const testTransformationFunction = createInsightsFunction({
                 type: 'transformation',
                 name: testTemplate.name,
@@ -303,13 +303,13 @@ describe('HogTransformer', () => {
             await insertInsightsFunction(hub.postgres, teamId, defaultTransformationFunction)
             await insertInsightsFunction(hub.postgres, teamId, geoIpTransformationFunction)
 
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
                 geoIpTransformationFunction.id,
                 defaultTransformationFunction.id,
                 testTransformationFunction.id,
             ])
 
-            const executeInsightsFunctionSpy = jest.spyOn(hogTransformer as any, 'executeInsightsFunction')
+            const executeInsightsFunctionSpy = jest.spyOn(scriptTransformer as any, 'executeInsightsFunction')
 
             const event: PluginEvent = {
                 ip: '89.160.20.129',
@@ -323,7 +323,7 @@ describe('HogTransformer', () => {
                 timestamp: '2024-01-01T00:00:00Z',
             }
 
-            await hogTransformer.transformEventAndProduceMessages(event)
+            await scriptTransformer.transformEventAndProduceMessages(event)
 
             expect(executeInsightsFunctionSpy).toHaveBeenCalledTimes(3)
             expect(executeInsightsFunctionSpy.mock.calls[0][0]).toMatchObject({ execution_order: 1 })
@@ -331,7 +331,7 @@ describe('HogTransformer', () => {
             expect(executeInsightsFunctionSpy.mock.calls[2][0]).toMatchObject({ execution_order: 3 })
             expect(event.properties?.test_property).toEqual('test_value')
 
-            await hogTransformer.processInvocationResults()
+            await scriptTransformer.processInvocationResults()
 
             const messages = mockProducerObserver.getProducedKafkaMessages()
             // Replace certain messages that have changeable values
@@ -386,7 +386,7 @@ describe('HogTransformer', () => {
                 name: addingTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileHog(addingTemplate.code),
+                bytecode: await compileScript(addingTemplate.code),
                 execution_order: 1,
             })
 
@@ -395,19 +395,19 @@ describe('HogTransformer', () => {
                 name: deletingTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileHog(deletingTemplate.code),
+                bytecode: await compileScript(deletingTemplate.code),
                 execution_order: 2,
             })
 
             await insertInsightsFunction(hub.postgres, teamId, deletingTransformationFunction)
             await insertInsightsFunction(hub.postgres, teamId, addingTransformationFunction)
 
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
                 addingTransformationFunction.id,
                 deletingTransformationFunction.id,
             ])
 
-            const executeInsightsFunctionSpy = jest.spyOn(hogTransformer as any, 'executeInsightsFunction')
+            const executeInsightsFunctionSpy = jest.spyOn(scriptTransformer as any, 'executeInsightsFunction')
 
             const event: PluginEvent = {
                 ip: '89.160.20.129',
@@ -421,7 +421,7 @@ describe('HogTransformer', () => {
                 timestamp: '2024-01-01T00:00:00Z',
             }
 
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
+            const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
             /*
              * First call is the adding the test property
@@ -475,7 +475,7 @@ describe('HogTransformer', () => {
                 name: firstTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileHog(firstTemplate.code),
+                bytecode: await compileScript(firstTemplate.code),
                 execution_order: 1,
             })
 
@@ -484,19 +484,19 @@ describe('HogTransformer', () => {
                 name: secondTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileHog(secondTemplate.code),
+                bytecode: await compileScript(secondTemplate.code),
                 execution_order: 2,
             })
 
             await insertInsightsFunction(hub.postgres, teamId, firstTransformationFunction)
             await insertInsightsFunction(hub.postgres, teamId, secondTransformationFunction)
 
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
                 firstTransformationFunction.id,
                 secondTransformationFunction.id,
             ])
 
-            const executeInsightsFunctionSpy = jest.spyOn(hogTransformer as any, 'executeInsightsFunction')
+            const executeInsightsFunctionSpy = jest.spyOn(scriptTransformer as any, 'executeInsightsFunction')
 
             const event: PluginEvent = {
                 ip: '89.160.20.129',
@@ -510,7 +510,7 @@ describe('HogTransformer', () => {
                 timestamp: '2024-01-01T00:00:00Z',
             }
 
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
+            const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
             expect(executeInsightsFunctionSpy).toHaveBeenCalledTimes(2)
             expect(result?.event?.properties?.added_by_first).toEqual('value_from_first')
@@ -564,7 +564,7 @@ describe('HogTransformer', () => {
                 inputs_schema: [],
             }
 
-            const firstTransformationByteCode = await compileHog(firstTemplate.code)
+            const firstTransformationByteCode = await compileScript(firstTemplate.code)
             const firstTransformationFunction = createInsightsFunction({
                 type: 'transformation',
                 name: firstTemplate.name,
@@ -574,7 +574,7 @@ describe('HogTransformer', () => {
                 execution_order: 1,
             })
 
-            const secondTransformationByteCode = await compileHog(secondTemplate.code)
+            const secondTransformationByteCode = await compileScript(secondTemplate.code)
             const secondTransformationFunction = createInsightsFunction({
                 type: 'transformation',
                 name: secondTemplate.name,
@@ -584,7 +584,7 @@ describe('HogTransformer', () => {
                 execution_order: 2,
             })
 
-            const thirdTransformationByteCode = await compileHog(thirdTemplate.code)
+            const thirdTransformationByteCode = await compileScript(thirdTemplate.code)
             const thirdTransformationFunction = createInsightsFunction({
                 type: 'transformation',
                 name: thirdTemplate.name,
@@ -598,13 +598,13 @@ describe('HogTransformer', () => {
             await insertInsightsFunction(hub.postgres, teamId, secondTransformationFunction)
             await insertInsightsFunction(hub.postgres, teamId, firstTransformationFunction)
 
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
                 thirdTransformationFunction.id,
                 secondTransformationFunction.id,
                 firstTransformationFunction.id,
             ])
 
-            const executeInsightsFunctionSpy = jest.spyOn(hogTransformer as any, 'executeInsightsFunction')
+            const executeInsightsFunctionSpy = jest.spyOn(scriptTransformer as any, 'executeInsightsFunction')
 
             const event: PluginEvent = {
                 ip: '89.160.20.129',
@@ -618,7 +618,7 @@ describe('HogTransformer', () => {
                 timestamp: '2024-01-01T00:00:00Z',
             }
 
-            await hogTransformer.transformEventAndProduceMessages(event)
+            await scriptTransformer.transformEventAndProduceMessages(event)
             expect(executeInsightsFunctionSpy).toHaveBeenCalledTimes(3)
             expect(executeInsightsFunctionSpy.mock.calls[0][0]).toMatchObject({ execution_order: 1 })
             expect(executeInsightsFunctionSpy.mock.calls[1][0]).toMatchObject({ execution_order: 2 })
@@ -661,7 +661,7 @@ describe('HogTransformer', () => {
                 inputs_schema: [],
             }
 
-            const successByteCode = await compileHog(successTemplate.code)
+            const successByteCode = await compileScript(successTemplate.code)
             const successFunction = createInsightsFunction({
                 type: 'transformation',
                 name: successTemplate.name,
@@ -671,7 +671,7 @@ describe('HogTransformer', () => {
                 execution_order: 1,
             })
 
-            const failByteCode = await compileHog(failingTemplate.code)
+            const failByteCode = await compileScript(failingTemplate.code)
             const failFunction = createInsightsFunction({
                 type: 'transformation',
                 name: failingTemplate.name,
@@ -684,7 +684,7 @@ describe('HogTransformer', () => {
             await insertInsightsFunction(hub.postgres, teamId, successFunction)
             await insertInsightsFunction(hub.postgres, teamId, failFunction)
 
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
                 successFunction.id,
                 failFunction.id,
             ])
@@ -697,7 +697,7 @@ describe('HogTransformer', () => {
                 teamId
             )
 
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
+            const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
             // Verify the event has both success and failure tracking
             expect(result.event?.properties).toEqual({
@@ -729,7 +729,7 @@ describe('HogTransformer', () => {
                 inputs_schema: [],
             }
 
-            const inputSetterByteCode = await compileHog(inputSetter.code)
+            const inputSetterByteCode = await compileScript(inputSetter.code)
 
             const inputSetterFunction = createInsightsFunction({
                 type: 'transformation',
@@ -751,14 +751,14 @@ describe('HogTransformer', () => {
                 inputs: {
                     not_encrypted: {
                         value: 'from not encrypted: {event.event}',
-                        bytecode: await compileHog("return f'from not encrypted: {event.event}'"),
+                        bytecode: await compileScript("return f'from not encrypted: {event.event}'"),
                     },
                 },
                 encrypted_inputs: hub.encryptedFields.encrypt(
                     JSON.stringify({
                         encrypted: {
                             value: 'from encrypted: {event.event}',
-                            bytecode: await compileHog("return f'from encrypted: {event.event}'"),
+                            bytecode: await compileScript("return f'from encrypted: {event.event}'"),
                         },
                     })
                 ) as any,
@@ -774,7 +774,7 @@ describe('HogTransformer', () => {
                 teamId
             )
 
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
+            const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
             // Verify the event has both success and failure tracking
             expect(result.event?.properties?.inputs).toMatchObject({
@@ -792,7 +792,7 @@ describe('HogTransformer', () => {
                 teamId
             )
 
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
+            const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
             // Verify the event properties are unchanged
             expect(result.event?.properties).toEqual({
@@ -820,7 +820,7 @@ describe('HogTransformer', () => {
                 inputs_schema: [],
             }
 
-            const successByteCode = await compileHog(successTemplate.code)
+            const successByteCode = await compileScript(successTemplate.code)
             const successFunction = createInsightsFunction({
                 type: 'transformation',
                 name: successTemplate.name,
@@ -832,7 +832,7 @@ describe('HogTransformer', () => {
 
             await insertInsightsFunction(hub.postgres, teamId, successFunction)
 
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [successFunction.id])
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [successFunction.id])
 
             const event = createPluginEvent(
                 {
@@ -845,7 +845,7 @@ describe('HogTransformer', () => {
                 teamId
             )
 
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
+            const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
             // Verify new results are appended to existing ones
             expect(result?.event?.properties?.$transformations_succeeded).toEqual([
@@ -876,9 +876,9 @@ describe('HogTransformer', () => {
                 name: filterTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileHog(filterTemplate.script),
+                bytecode: await compileScript(filterTemplate.script),
                 filters: {
-                    bytecode: await compileHog(`
+                    bytecode: await compileScript(`
                         return event = 'match-me'
                     `),
                     events: [{ id: 'match-me', name: 'match-me', type: 'events', order: 0 }],
@@ -886,7 +886,7 @@ describe('HogTransformer', () => {
             })
 
             await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
 
             const event = createPluginEvent(
                 {
@@ -898,7 +898,7 @@ describe('HogTransformer', () => {
                 teamId
             )
 
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
+            const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
             // Verify transformation was skipped and tracked
             expect(result.event?.properties?.should_not_be_set).toBeUndefined()
@@ -933,7 +933,7 @@ describe('HogTransformer', () => {
                 name: 'Broken Template',
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileHog('return event'),
+                bytecode: await compileScript('return event'),
                 execution_order: 1,
             })
 
@@ -942,27 +942,27 @@ describe('HogTransformer', () => {
                 name: successTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileHog(successTemplate.code),
+                bytecode: await compileScript(successTemplate.code),
                 execution_order: 2,
             })
 
             await insertInsightsFunction(hub.postgres, teamId, brokenFunction)
             await insertInsightsFunction(hub.postgres, teamId, successFunction)
 
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
                 brokenFunction.id,
                 successFunction.id,
             ])
 
-            const executeInsightsFunctionSpy = jest.spyOn(hogTransformer as any, 'executeInsightsFunction')
+            const executeInsightsFunctionSpy = jest.spyOn(scriptTransformer as any, 'executeInsightsFunction')
             executeInsightsFunctionSpy.mockRejectedValueOnce(
                 new Error('Could not execute bytecode for input field: person_id')
             )
 
-            const queueAppMetricSpy = jest.spyOn(hogTransformer['insightsFunctionMonitoringService'], 'queueAppMetric')
+            const queueAppMetricSpy = jest.spyOn(scriptTransformer['insightsFunctionMonitoringService'], 'queueAppMetric')
 
             const event = createPluginEvent({ event: 'test', properties: {} }, teamId)
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
+            const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
             expect(result.event?.properties?.$transformations_failed).toEqual([
                 `Broken Template (${brokenFunction.id})`,
@@ -1025,7 +1025,7 @@ describe('HogTransformer', () => {
                 name: successTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileHog(successTemplate.script),
+                bytecode: await compileScript(successTemplate.script),
                 execution_order: 1,
             })
 
@@ -1034,10 +1034,10 @@ describe('HogTransformer', () => {
                 name: skippedTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileHog(skippedTemplate.script),
+                bytecode: await compileScript(skippedTemplate.script),
                 execution_order: 2,
                 filters: {
-                    bytecode: await compileHog(`
+                    bytecode: await compileScript(`
                         return event = 'match-me'
                     `),
                     events: [{ id: 'match-me', name: 'match-me', type: 'events', order: 0 }],
@@ -1047,13 +1047,13 @@ describe('HogTransformer', () => {
             await insertInsightsFunction(hub.postgres, teamId, successFunction)
             await insertInsightsFunction(hub.postgres, teamId, skippedFunction)
 
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
                 successFunction.id,
                 skippedFunction.id,
             ])
 
             const event = createPluginEvent({ event: 'does-not-match' }, teamId)
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
+            const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
             // Verify that:
             // 1. First transformation succeeded (property was set)
@@ -1093,9 +1093,9 @@ describe('HogTransformer', () => {
             })
 
             await insertInsightsFunction(hub.postgres, teamId, filterOutPlugin)
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [filterOutPlugin.id])
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [filterOutPlugin.id])
 
-            executeSpy = jest.spyOn(hogTransformer['pluginExecutor'], 'execute')
+            executeSpy = jest.spyOn(scriptTransformer['pluginExecutor'], 'execute')
         })
 
         afterEach(() => {
@@ -1104,14 +1104,14 @@ describe('HogTransformer', () => {
 
         it('handles legacy plugin transformation to drop events', async () => {
             const event: PluginEvent = createPluginEvent({ event: 'drop-me', team_id: teamId })
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
+            const result = await scriptTransformer.transformEventAndProduceMessages(event)
             expect(executeSpy).toHaveBeenCalledTimes(1)
             expect(result.event).toMatchInlineSnapshot(`null`)
         })
 
         it('handles legacy plugin transformation to keep events', async () => {
             const event: PluginEvent = createPluginEvent({ event: 'keep-me', team_id: teamId })
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
+            const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
             expect(executeSpy).toHaveBeenCalledTimes(1)
             expect(result.event).toMatchInlineSnapshot(`
@@ -1167,13 +1167,13 @@ describe('HogTransformer', () => {
             await insertInsightsFunction(hub.postgres, teamId, geoIp)
             await insertInsightsFunction(hub.postgres, teamId, filterPlugin)
 
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
                 geoIp.id,
                 filterPlugin.id,
             ])
 
             const event: PluginEvent = createPluginEvent({ event: 'keep-me', team_id: teamId })
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
+            const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
             expect(forSnapshot(result.event)).toMatchInlineSnapshot(`
                 {
@@ -1263,9 +1263,9 @@ describe('HogTransformer', () => {
                 name: filterTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileHog(filterTemplate.script),
+                bytecode: await compileScript(filterTemplate.script),
                 filters: {
-                    bytecode: await compileHog(`
+                    bytecode: await compileScript(`
                         return event = 'match-me'
                     `),
                     events: [{ id: 'match-me', name: 'match-me', type: 'events', order: 0 }],
@@ -1273,10 +1273,10 @@ describe('HogTransformer', () => {
             })
 
             await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
 
             const event = createPluginEvent({ event: 'does-not-match-me' }, teamId)
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
+            const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
             // Verify transformation was skipped
             expect(result.event?.properties?.should_not_be_set).toBeUndefined()
@@ -1309,9 +1309,9 @@ describe('HogTransformer', () => {
                 name: filterMatchingTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileHog(filterMatchingTemplate.script),
+                bytecode: await compileScript(filterMatchingTemplate.script),
                 filters: {
-                    bytecode: await compileHog(`
+                    bytecode: await compileScript(`
                         // Filter that matches events with event name 'match-me'
                         return event = 'match-me'
                     `),
@@ -1320,11 +1320,11 @@ describe('HogTransformer', () => {
             })
 
             await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
 
             // Test event that should match the filter
             const matchingEvent = createPluginEvent({ event: 'match-me' }, teamId)
-            const matchResult = await hogTransformer.transformEventAndProduceMessages(matchingEvent)
+            const matchResult = await scriptTransformer.transformEventAndProduceMessages(matchingEvent)
 
             // Verify transformation was applied
             expect(matchResult.event?.properties?.test_property).toBe('test_value')
@@ -1334,7 +1334,7 @@ describe('HogTransformer', () => {
 
             // Test event that shouldn't match the filter
             const nonMatchingEvent = createPluginEvent({ event: 'dont-match-me' }, teamId)
-            const nonMatchResult = await hogTransformer.transformEventAndProduceMessages(nonMatchingEvent)
+            const nonMatchResult = await scriptTransformer.transformEventAndProduceMessages(nonMatchingEvent)
 
             // Verify transformation was skipped
             expect(nonMatchResult.event?.properties?.test_property).toBeUndefined()
@@ -1367,15 +1367,15 @@ describe('HogTransformer', () => {
                 name: noFilterTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileHog(noFilterTemplate.script),
+                bytecode: await compileScript(noFilterTemplate.script),
                 // No filters defined
             })
 
             await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
 
             const event = createPluginEvent({ event: 'any-event' }, teamId)
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
+            const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
             // Verify transformation was applied
             expect(result.event?.properties?.no_filter_property).toBe('applied')
@@ -1422,9 +1422,9 @@ describe('HogTransformer', () => {
                 name: errorFilterTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileHog(errorFilterTemplate.script),
+                bytecode: await compileScript(errorFilterTemplate.script),
                 filters: {
-                    bytecode: await compileHog(`
+                    bytecode: await compileScript(`
                         // Invalid filter that will throw an error
                         lol
                     `),
@@ -1437,25 +1437,25 @@ describe('HogTransformer', () => {
                 name: workingTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileHog(workingTemplate.script),
+                bytecode: await compileScript(workingTemplate.script),
             })
 
             await insertInsightsFunction(hub.postgres, teamId, errorFunction)
             await insertInsightsFunction(hub.postgres, teamId, workingFunction)
 
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
                 errorFunction.id,
                 workingFunction.id,
             ])
 
             const queueAppMetricsSpy = jest.spyOn(
-                hogTransformer['insightsFunctionMonitoringService'],
+                scriptTransformer['insightsFunctionMonitoringService'],
                 'queueAppMetrics'
             )
-            const queueLogsSpy = jest.spyOn(hogTransformer['insightsFunctionMonitoringService'], 'queueLogs')
+            const queueLogsSpy = jest.spyOn(scriptTransformer['insightsFunctionMonitoringService'], 'queueLogs')
 
             const event = createPluginEvent({ event: 'test-event' }, teamId)
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
+            const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
             // Verify one transformation was applied and the other was skipped
             expect(result.event?.properties?.$transformations_skipped).toContain(
@@ -1509,9 +1509,9 @@ describe('HogTransformer', () => {
                 name: multiFilterTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileHog(multiFilterTemplate.script),
+                bytecode: await compileScript(multiFilterTemplate.script),
                 filters: {
-                    bytecode: await compileHog(`
+                    bytecode: await compileScript(`
                         // First filter checks for 'match-me-1'
                         let filter1 := event = 'match-me-1'
                         // Second filter checks for 'match-me-2'
@@ -1527,10 +1527,10 @@ describe('HogTransformer', () => {
             })
 
             await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
 
             const event = createPluginEvent({ event: 'does-not-match-any' }, teamId)
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
+            const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
             // Verify transformation was skipped since no filters matched
             expect(result.event?.properties?.should_not_be_set).toBeUndefined()
@@ -1563,9 +1563,9 @@ describe('HogTransformer', () => {
                 name: multiFilterTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileHog(multiFilterTemplate.script),
+                bytecode: await compileScript(multiFilterTemplate.script),
                 filters: {
-                    bytecode: await compileHog(`
+                    bytecode: await compileScript(`
                         // First filter checks for 'match-me-1'
                         let filter1 := event = 'match-me-1'
                         // Second filter checks for 'match-me-2'
@@ -1577,10 +1577,10 @@ describe('HogTransformer', () => {
             })
 
             await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
 
             const event = createPluginEvent({ event: 'match-me-1' }, teamId)
-            const result = await hogTransformer.transformEventAndProduceMessages(event)
+            const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
             // Verify transformation was applied since one filter matched
             expect(result.event?.properties?.should_be_set).toBe(true)
@@ -1627,15 +1627,15 @@ describe('HogTransformer', () => {
             name: captureTemplate.name,
             team_id: teamId,
             enabled: true,
-            bytecode: await compileHog(captureTemplate.code),
+            bytecode: await compileScript(captureTemplate.code),
             id: 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa',
         })
 
         await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
-        hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
+        scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
 
         const event = createPluginEvent({ event: 'original-event', distinct_id: 'original_user' }, teamId)
-        const result = await hogTransformer.transformEventAndProduceMessages(event)
+        const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
         expect(result.invocationResults[0].error).toContain('insightsCapture is not supported in transformations')
     })
@@ -1647,12 +1647,12 @@ describe('HogTransformer', () => {
             resetScriptvmNodeModuleCacheForTests()
 
             hub.CDP_FN_RUST_VM_EXECUTION_ENABLED = true
-            hogTransformer = createHogTransformerService(hub, {
+            scriptTransformer = createScriptTransformerService(hub, {
                 ...hub,
                 monitoringOutputs: createTestMonitoringOutputs(mockProducer),
             })
 
-            bytecode = await compileHog(defaultTemplate.code)
+            bytecode = await compileScript(defaultTemplate.code)
             const insightsFunction = createInsightsFunction({
                 type: 'transformation',
                 name: 'Rust routed',
@@ -1662,7 +1662,7 @@ describe('HogTransformer', () => {
                 id: 'bbbbbbbb-bbbb-4bbb-bbbb-bbbbbbbbbbbb',
             })
             await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
-            hogTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
         })
 
         it('executes transformations on the rust vm when the flag is enabled', async () => {
@@ -1673,7 +1673,7 @@ describe('HogTransformer', () => {
                 logsTruncated: false,
             })
 
-            const result = await hogTransformer.transformEventAndProduceMessages(createPluginEvent({}, teamId))
+            const result = await scriptTransformer.transformEventAndProduceMessages(createPluginEvent({}, teamId))
 
             expect(mockScriptvmNode.executeSync).toHaveBeenCalledTimes(1)
             expect(mockScriptvmNode.executeSync.mock.calls[0][0]).toEqual(bytecode)
@@ -1691,7 +1691,7 @@ describe('HogTransformer', () => {
                 logsTruncated: false,
             })
 
-            const result = await hogTransformer.transformEventAndProduceMessages(createPluginEvent({}, teamId))
+            const result = await scriptTransformer.transformEventAndProduceMessages(createPluginEvent({}, teamId))
 
             expect(mockScriptvmNode.executeSync).toHaveBeenCalledTimes(1)
             // The node vm ran the real bytecode: the event survives with its original properties.

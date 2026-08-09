@@ -1,5 +1,5 @@
 import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../../_tests/examples'
-import { createHogExecutionGlobals, createInsightsFunction } from '../../_tests/fixtures'
+import { createScriptExecutionGlobals, createInsightsFunction } from '../../_tests/fixtures'
 import { CyclotronJobInvocationResult } from '../../types'
 import { createInvocation } from '../../utils/invocation-utils'
 import { createInvocationSanitizer, sanitizeInvocationForPersistence } from './shared'
@@ -25,7 +25,7 @@ describe('sanitizeInvocationForPersistence', () => {
     it('should strip groups from state.globals', () => {
         const invocation = createInvocation(
             {
-                ...createHogExecutionGlobals({ groups: exampleGroups }),
+                ...createScriptExecutionGlobals({ groups: exampleGroups }),
                 inputs: {},
             },
             exampleInsightsFunction
@@ -42,7 +42,7 @@ describe('sanitizeInvocationForPersistence', () => {
 
     it('should preserve all other state fields', () => {
         const globals = {
-            ...createHogExecutionGlobals({ groups: exampleGroups }),
+            ...createScriptExecutionGlobals({ groups: exampleGroups }),
             inputs: { url: 'https://example.com' },
         }
         const invocation = createInvocation(globals, exampleInsightsFunction)
@@ -61,7 +61,7 @@ describe('sanitizeInvocationForPersistence', () => {
     it('should return original invocation when no groups present', () => {
         const invocation = createInvocation(
             {
-                ...createHogExecutionGlobals({ groups: undefined }),
+                ...createScriptExecutionGlobals({ groups: undefined }),
                 inputs: {},
             },
             exampleInsightsFunction
@@ -76,7 +76,7 @@ describe('sanitizeInvocationForPersistence', () => {
     it('should return original invocation when groups is empty', () => {
         const invocation = createInvocation(
             {
-                ...createHogExecutionGlobals(),
+                ...createScriptExecutionGlobals(),
                 inputs: {},
             },
             exampleInsightsFunction
@@ -87,7 +87,7 @@ describe('sanitizeInvocationForPersistence', () => {
         expect(sanitized).toBe(invocation)
     })
 
-    it('should handle invocations without state.globals (e.g. hogflow)', () => {
+    it('should handle invocations without state.globals (e.g. flow)', () => {
         const invocation = {
             id: 'test-id',
             teamId: 1,
@@ -116,7 +116,7 @@ describe('sanitizeInvocationForPersistence', () => {
     it('should strip multiple group types', () => {
         const invocation = createInvocation(
             {
-                ...createHogExecutionGlobals({
+                ...createScriptExecutionGlobals({
                     groups: {
                         ...exampleGroups,
                         company: {
@@ -145,7 +145,7 @@ describe('sanitizeInvocationForPersistence', () => {
     it('should strip person when stripPerson is true', () => {
         const invocation = createInvocation(
             {
-                ...createHogExecutionGlobals({ groups: undefined }),
+                ...createScriptExecutionGlobals({ groups: undefined }),
                 inputs: {},
             },
             exampleInsightsFunction
@@ -164,7 +164,7 @@ describe('sanitizeInvocationForPersistence', () => {
     it('should not strip person by default', () => {
         const invocation = createInvocation(
             {
-                ...createHogExecutionGlobals({ groups: exampleGroups }),
+                ...createScriptExecutionGlobals({ groups: exampleGroups }),
                 inputs: {},
             },
             exampleInsightsFunction
@@ -182,7 +182,7 @@ describe('sanitizeInvocationForPersistence', () => {
     ])('should always strip groups and strip person when stripPerson=$stripPerson', ({ stripPerson, expectPerson }) => {
         const invocation = createInvocation(
             {
-                ...createHogExecutionGlobals({ groups: exampleGroups }),
+                ...createScriptExecutionGlobals({ groups: exampleGroups }),
                 inputs: {},
             },
             exampleInsightsFunction
@@ -221,7 +221,7 @@ describe('createInvocationSanitizer', () => {
     it('should strip groups from invocations', () => {
         const sanitizer = createInvocationSanitizer({ CDP_CYCLOTRON_STRIP_PERSON_FROM_STATE_TEAMS: '' })
         const invocation = createInvocation(
-            { ...createHogExecutionGlobals({ groups: exampleGroups }), inputs: {} },
+            { ...createScriptExecutionGlobals({ groups: exampleGroups }), inputs: {} },
             exampleInsightsFunction
         )
 
@@ -233,7 +233,7 @@ describe('createInvocationSanitizer', () => {
     it('should strip person for configured teams', () => {
         const sanitizer = createInvocationSanitizer({ CDP_CYCLOTRON_STRIP_PERSON_FROM_STATE_TEAMS: '2' })
         const invocation = createInvocation(
-            { ...createHogExecutionGlobals({ groups: exampleGroups }), inputs: {} },
+            { ...createScriptExecutionGlobals({ groups: exampleGroups }), inputs: {} },
             { ...exampleInsightsFunction, team_id: 2 }
         )
 
@@ -244,7 +244,7 @@ describe('createInvocationSanitizer', () => {
     it('should not strip person for non-configured teams', () => {
         const sanitizer = createInvocationSanitizer({ CDP_CYCLOTRON_STRIP_PERSON_FROM_STATE_TEAMS: '99' })
         const invocation = createInvocation(
-            { ...createHogExecutionGlobals({ groups: exampleGroups }), inputs: {} },
+            { ...createScriptExecutionGlobals({ groups: exampleGroups }), inputs: {} },
             { ...exampleInsightsFunction, team_id: 2 }
         )
 
@@ -255,7 +255,7 @@ describe('createInvocationSanitizer', () => {
     it('should sanitize results', () => {
         const sanitizer = createInvocationSanitizer({ CDP_CYCLOTRON_STRIP_PERSON_FROM_STATE_TEAMS: '' })
         const invocation = createInvocation(
-            { ...createHogExecutionGlobals({ groups: exampleGroups }), inputs: {} },
+            { ...createScriptExecutionGlobals({ groups: exampleGroups }), inputs: {} },
             exampleInsightsFunction
         )
         const result: CyclotronJobInvocationResult = {

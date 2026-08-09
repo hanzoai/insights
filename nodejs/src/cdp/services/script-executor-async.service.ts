@@ -24,8 +24,8 @@ import { isNonFailureStatus } from '../utils/non-failure-status-codes'
 import { EmailService } from './messaging/email.service'
 import { PushNotificationService } from './messaging/push-notification.service'
 import { RecipientTokensService } from './messaging/recipient-tokens.service'
-import { HogExecutorExecuteOptions, HogExecutorPreviousResult, HogExecutorService } from './script-executor.service'
-import { HogInputsService } from './script-inputs.service'
+import { ScriptExecutorExecuteOptions, ScriptExecutorPreviousResult, ScriptExecutorService } from './script-executor.service'
+import { ScriptInputsService } from './script-inputs.service'
 import {
     SELF_LOOP_MAX_DEPTH,
     getSelfLoopDepth,
@@ -40,7 +40,7 @@ const cdpEmailQueuedTotal = new Counter({
     help: 'Total emails routed to the dedicated email queue',
 })
 
-export interface HogExecutorAsyncConfig {
+export interface ScriptExecutorAsyncConfig {
     googleAdwordsDeveloperToken: string
     fetchRetries: number
     fetchBackoffBaseMs: number
@@ -51,17 +51,17 @@ export interface HogExecutorAsyncConfig {
 /**
  * Every capability the async functions can reach is required - an async executor missing one is a
  * misconfiguration, not a supported mode, and would only surface as a runtime throw deep inside a
- * customer's function. Callers that don't need any of them want HogExecutorService directly.
+ * customer's function. Callers that don't need any of them want ScriptExecutorService directly.
  */
-export interface HogExecutorAsyncDependencies {
+export interface ScriptExecutorAsyncDependencies {
     teamManager: TeamManager
-    hogInputsService: HogInputsService
+    scriptInputsService: ScriptInputsService
     emailService: EmailService
     recipientTokensService: RecipientTokensService
     pushNotificationService: PushNotificationService
 }
 
-export type HogExecutorExecuteAsyncOptions = HogExecutorExecuteOptions & {
+export type ScriptExecutorExecuteAsyncOptions = ScriptExecutorExecuteOptions & {
     maxAsyncFunctions?: number
     maxFetchRetries?: number
     // Set only by the editor's test panel ("Run test"), marking this invocation as a test send. Two
@@ -76,21 +76,21 @@ export type HogExecutorExecuteAsyncOptions = HogExecutorExecuteOptions & {
  * Script execution plus everything a function needs to suspend and resume: fetches, emails, push
  * notifications, and the queue routing between the workers that service them.
  *
- * The synchronous Script core is exposed as `hogExecutor` rather than re-wrapped, so callers reach
+ * The synchronous Script core is exposed as `scriptExecutor` rather than re-wrapped, so callers reach
  * `buildInputsWithGlobals` / `buildInsightsFunctionInvocations` / `getSensitiveValues` on the thing that
  * actually owns them.
  */
-export class HogExecutorAsyncService {
+export class ScriptExecutorAsyncService {
     constructor(
-        public readonly hogExecutor: HogExecutorService,
-        private config: HogExecutorAsyncConfig,
-        private deps: HogExecutorAsyncDependencies
+        public readonly scriptExecutor: ScriptExecutorService,
+        private config: ScriptExecutorAsyncConfig,
+        private deps: ScriptExecutorAsyncDependencies
     ) {}
 
     @instrumented('script-executor.executeWithAsyncFunctions')
     async executeWithAsyncFunctions(
         invocation: CyclotronJobInvocationInsightsFunction,
-        options?: HogExecutorExecuteAsyncOptions
+        options?: ScriptExecutorExecuteAsyncOptions
     ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
         let asyncFunctionCount = 0
         const maxAsyncFunctions = options?.maxAsyncFunctions ?? 1
@@ -108,18 +108,18 @@ export class HogExecutorAsyncService {
 
                 if (result && asyncFunctionCount > maxAsyncFunctions) {
                     // We don't want to block the consumer too much hence we have a limit on async functions
-                    logger.debug('🦔', `[HogExecutor] Max async functions reached: ${maxAsyncFunctions}`)
+                    logger.debug('🦔', `[ScriptExecutor] Max async functions reached: ${maxAsyncFunctions}`)
                     break
                 }
 
                 // Queue-aware routing: each worker can execute some actions inline
                 // and routes others to a specialized queue. The email worker sends
-                // emails inline but routes fetches back to hogflow. The hogflow
+                // emails inline but routes fetches back to flow. The flow
                 // worker does fetches inline but routes emails to the email queue.
                 //
                 // Future: once we add an execution time budget, the email worker
                 // will also handle fetches inline. The only reason to reschedule
-                // back to hogflow will be when overall execution time exceeds the
+                // back to flow will be when overall execution time exceeds the
                 // budget, to avoid blocking the queue.
                 if (queueParamsType === 'fetch') {
                     if (invocation.queue === 'email') {
@@ -184,10 +184,10 @@ export class HogExecutorAsyncService {
      */
     async execute(
         invocation: CyclotronJobInvocationInsightsFunction,
-        options: HogExecutorExecuteOptions = {},
-        previousResult: HogExecutorPreviousResult = {}
+        options: ScriptExecutorExecuteOptions = {},
+        previousResult: ScriptExecutorPreviousResult = {}
     ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
-        return this.hogExecutor.execute(
+        return this.scriptExecutor.execute(
             invocation,
             {
                 ...options,
@@ -282,7 +282,7 @@ export class HogExecutorAsyncService {
     @instrumented('script-executor.executeFetch')
     async executeFetch(
         invocation: CyclotronJobInvocationInsightsFunction,
-        options?: Pick<HogExecutorExecuteAsyncOptions, 'maxFetchRetries'>
+        options?: Pick<ScriptExecutorExecuteAsyncOptions, 'maxFetchRetries'>
     ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
         const templateId = invocation.insightsFunction.template_id ?? 'unknown'
         if (invocation.queueParameters?.type !== 'fetch') {
@@ -307,7 +307,7 @@ export class HogExecutorAsyncService {
             headers['developer-token'] = this.config.googleAdwordsDeveloperToken
         }
 
-        const integrationInputs = await this.deps.hogInputsService.loadIntegrationInputs(invocation.insightsFunction)
+        const integrationInputs = await this.deps.scriptInputsService.loadIntegrationInputs(invocation.insightsFunction)
 
         if (Object.keys(integrationInputs).length > 0) {
             for (const [key, value] of Object.entries(integrationInputs)) {
@@ -367,7 +367,7 @@ export class HogExecutorAsyncService {
                     params.body = injectSelfLoopDepth(params.body, functionId, depth + 1)
                 }
             } catch (err) {
-                logger.warn('🦔', '[HogExecutor] Self-loop guard skipped due to an internal error', {
+                logger.warn('🦔', '[ScriptExecutor] Self-loop guard skipped due to an internal error', {
                     error: err,
                     teamId: invocation.teamId,
                 })

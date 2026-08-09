@@ -1,28 +1,28 @@
 import { PipelineResult, isOkResult } from '~/ingestion/framework/results'
 import type { ProcessingStep } from '~/ingestion/framework/steps'
-import { MetricConfig } from '~/ingestion/framework/tophog/tophog'
+import { MetricConfig } from '~/ingestion/framework/topfn/topfn'
 
 import { wrapStep } from './helpers'
 
 type Recorder = { record(key: Record<string, string>, value: number): void }
 
-export interface TopHogRegistry {
+export interface TopFnRegistry {
     registerSum(name: string, opts?: MetricConfig): Recorder
     registerMax(name: string, opts?: MetricConfig): Recorder
     registerAverage(name: string, opts?: MetricConfig): Recorder
 }
 
-export interface TopHogMetric<TInput, TOutput> {
+export interface TopFnMetric<TInput, TOutput> {
     start(input: TInput): (result: PipelineResult<TOutput, string>) => void
 }
 
-export type TopHogMetricFactory<TInput, TOutput> = (registry: TopHogRegistry) => TopHogMetric<TInput, TOutput>
+export type TopFnMetricFactory<TInput, TOutput> = (registry: TopFnRegistry) => TopFnMetric<TInput, TOutput>
 
 export function count<TInput, TOutput>(
     name: string,
     key: (input: TInput) => Record<string, string>,
     opts?: MetricConfig
-): TopHogMetricFactory<TInput, TOutput> {
+): TopFnMetricFactory<TInput, TOutput> {
     return (registry) => new InputMetric(registry.registerSum(name, opts), key, () => 1)
 }
 
@@ -30,7 +30,7 @@ export function countResult<TInput, TOutput>(
     name: string,
     key: (result: PipelineResult<TOutput, string>, input: TInput) => Record<string, string>,
     opts?: MetricConfig
-): TopHogMetricFactory<TInput, TOutput> {
+): TopFnMetricFactory<TInput, TOutput> {
     return (registry) => new CompletionMetric(registry.registerSum(name, opts), key, () => 1)
 }
 
@@ -38,7 +38,7 @@ export function countOk<TInput, TOutput>(
     name: string,
     key: (output: TOutput, input: TInput) => Record<string, string>,
     opts?: MetricConfig
-): TopHogMetricFactory<TInput, TOutput> {
+): TopFnMetricFactory<TInput, TOutput> {
     return (registry) => new OutputMetric(registry.registerSum(name, opts), key, () => 1)
 }
 
@@ -47,7 +47,7 @@ export function sum<TInput, TOutput>(
     key: (input: TInput) => Record<string, string>,
     value: (input: TInput) => number,
     opts?: MetricConfig
-): TopHogMetricFactory<TInput, TOutput> {
+): TopFnMetricFactory<TInput, TOutput> {
     return (registry) => new InputMetric(registry.registerSum(name, opts), key, value)
 }
 
@@ -56,7 +56,7 @@ export function sumResult<TInput, TOutput>(
     key: (result: PipelineResult<TOutput, string>, input: TInput) => Record<string, string>,
     value: (result: PipelineResult<TOutput, string>, input: TInput) => number,
     opts?: MetricConfig
-): TopHogMetricFactory<TInput, TOutput> {
+): TopFnMetricFactory<TInput, TOutput> {
     return (registry) => new CompletionMetric(registry.registerSum(name, opts), key, value)
 }
 
@@ -65,7 +65,7 @@ export function sumOk<TInput, TOutput>(
     key: (output: TOutput, input: TInput) => Record<string, string>,
     value: (output: TOutput, input: TInput) => number,
     opts?: MetricConfig
-): TopHogMetricFactory<TInput, TOutput> {
+): TopFnMetricFactory<TInput, TOutput> {
     return (registry) => new OutputMetric(registry.registerSum(name, opts), key, value)
 }
 
@@ -74,7 +74,7 @@ export function max<TInput, TOutput>(
     key: (input: TInput) => Record<string, string>,
     value: (input: TInput) => number,
     opts?: MetricConfig
-): TopHogMetricFactory<TInput, TOutput> {
+): TopFnMetricFactory<TInput, TOutput> {
     return (registry) => new InputMetric(registry.registerMax(name, opts), key, value)
 }
 
@@ -83,7 +83,7 @@ export function maxResult<TInput, TOutput>(
     key: (result: PipelineResult<TOutput, string>, input: TInput) => Record<string, string>,
     value: (result: PipelineResult<TOutput, string>, input: TInput) => number,
     opts?: MetricConfig
-): TopHogMetricFactory<TInput, TOutput> {
+): TopFnMetricFactory<TInput, TOutput> {
     return (registry) => new CompletionMetric(registry.registerMax(name, opts), key, value)
 }
 
@@ -92,7 +92,7 @@ export function maxOk<TInput, TOutput>(
     key: (output: TOutput, input: TInput) => Record<string, string>,
     value: (output: TOutput, input: TInput) => number,
     opts?: MetricConfig
-): TopHogMetricFactory<TInput, TOutput> {
+): TopFnMetricFactory<TInput, TOutput> {
     return (registry) => new OutputMetric(registry.registerMax(name, opts), key, value)
 }
 
@@ -101,7 +101,7 @@ export function average<TInput, TOutput>(
     key: (input: TInput) => Record<string, string>,
     value: (input: TInput) => number,
     opts?: MetricConfig
-): TopHogMetricFactory<TInput, TOutput> {
+): TopFnMetricFactory<TInput, TOutput> {
     return (registry) => new InputMetric(registry.registerAverage(name, opts), key, value)
 }
 
@@ -110,7 +110,7 @@ export function averageResult<TInput, TOutput>(
     key: (result: PipelineResult<TOutput, string>, input: TInput) => Record<string, string>,
     value: (result: PipelineResult<TOutput, string>, input: TInput) => number,
     opts?: MetricConfig
-): TopHogMetricFactory<TInput, TOutput> {
+): TopFnMetricFactory<TInput, TOutput> {
     return (registry) => new CompletionMetric(registry.registerAverage(name, opts), key, value)
 }
 
@@ -119,7 +119,7 @@ export function averageOk<TInput, TOutput>(
     key: (output: TOutput, input: TInput) => Record<string, string>,
     value: (output: TOutput, input: TInput) => number,
     opts?: MetricConfig
-): TopHogMetricFactory<TInput, TOutput> {
+): TopFnMetricFactory<TInput, TOutput> {
     return (registry) => new OutputMetric(registry.registerAverage(name, opts), key, value)
 }
 
@@ -127,19 +127,19 @@ export function timer<TInput, TOutput>(
     name: string,
     key: (input: TInput) => Record<string, string>,
     opts?: MetricConfig
-): TopHogMetricFactory<TInput, TOutput> {
+): TopFnMetricFactory<TInput, TOutput> {
     return (registry) => new TimingMetric(registry.registerSum(name, opts), key)
 }
 
-export type TopHogWrapper = <TInput, TOutput, R extends string = never>(
+export type TopFnWrapper = <TInput, TOutput, R extends string = never>(
     step: ProcessingStep<TInput, TOutput, R>,
-    factories: TopHogMetricFactory<TInput, TOutput>[]
+    factories: TopFnMetricFactory<TInput, TOutput>[]
 ) => ProcessingStep<TInput, TOutput, R>
 
-export function createTopHogWrapper(tracker: TopHogRegistry): TopHogWrapper {
+export function createTopFnWrapper(tracker: TopFnRegistry): TopFnWrapper {
     return <TInput, TOutput, R extends string = never>(
         step: ProcessingStep<TInput, TOutput, R>,
-        factories: TopHogMetricFactory<TInput, TOutput>[]
+        factories: TopFnMetricFactory<TInput, TOutput>[]
     ): ProcessingStep<TInput, TOutput, R> => {
         if (!factories.length) {
             return step
@@ -154,7 +154,7 @@ export function createTopHogWrapper(tracker: TopHogRegistry): TopHogWrapper {
     }
 }
 
-class InputMetric<TInput, TOutput> implements TopHogMetric<TInput, TOutput> {
+class InputMetric<TInput, TOutput> implements TopFnMetric<TInput, TOutput> {
     constructor(
         private readonly tracker: Recorder,
         private readonly key: (input: TInput) => Record<string, string>,
@@ -167,7 +167,7 @@ class InputMetric<TInput, TOutput> implements TopHogMetric<TInput, TOutput> {
     }
 }
 
-class CompletionMetric<TInput, TOutput> implements TopHogMetric<TInput, TOutput> {
+class CompletionMetric<TInput, TOutput> implements TopFnMetric<TInput, TOutput> {
     constructor(
         private readonly tracker: Recorder,
         private readonly key: (result: PipelineResult<TOutput, string>, input: TInput) => Record<string, string>,
@@ -181,7 +181,7 @@ class CompletionMetric<TInput, TOutput> implements TopHogMetric<TInput, TOutput>
     }
 }
 
-class OutputMetric<TInput, TOutput> implements TopHogMetric<TInput, TOutput> {
+class OutputMetric<TInput, TOutput> implements TopFnMetric<TInput, TOutput> {
     constructor(
         private readonly tracker: Recorder,
         private readonly key: (output: TOutput, input: TInput) => Record<string, string>,
@@ -197,7 +197,7 @@ class OutputMetric<TInput, TOutput> implements TopHogMetric<TInput, TOutput> {
     }
 }
 
-class TimingMetric<TInput, TOutput> implements TopHogMetric<TInput, TOutput> {
+class TimingMetric<TInput, TOutput> implements TopFnMetric<TInput, TOutput> {
     constructor(
         private readonly tracker: Recorder,
         private readonly key: (input: TInput) => Record<string, string>

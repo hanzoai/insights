@@ -2,7 +2,7 @@ import { create } from '@bufbuild/protobuf'
 import { Code, ConnectError, createRouterTransport } from '@connectrpc/connect'
 import { DateTime } from 'luxon'
 
-import { PersonHogService } from '~/common/generated/personinsights/personinsights/service/v1/service_pb'
+import { PersonFnService } from '~/common/generated/personinsights/personinsights/service/v1/service_pb'
 import { TeamDistinctIdSchema } from '~/common/generated/personinsights/personinsights/types/v1/common_pb'
 import {
     GetDistinctIdsForPersonsResponseSchema,
@@ -12,8 +12,8 @@ import {
     PersonsByDistinctIdsResponseSchema,
     PersonsResponseSchema,
 } from '~/common/generated/personinsights/personinsights/types/v1/person_pb'
-import { PersonHogClient } from '~/common/personinsights/client'
-import { PersonHogPersonReadRepository } from '~/common/personinsights/personinsights-person-read-repository'
+import { PersonFnClient } from '~/common/personinsights/client'
+import { PersonFnPersonReadRepository } from '~/common/personinsights/personinsights-person-read-repository'
 
 import { PersonsManagerService } from './persons-manager.service'
 
@@ -47,9 +47,9 @@ function makeProtoPerson(p: TestPerson) {
     })
 }
 
-function createTestPersonHogPersonReadRepository(persons: TestPerson[]): PersonHogPersonReadRepository {
+function createTestPersonFnPersonReadRepository(persons: TestPerson[]): PersonFnPersonReadRepository {
     const transport = createRouterTransport(({ service }) => {
-        service(PersonHogService, {
+        service(PersonFnService, {
             getPersonsByDistinctIds: (req) => {
                 const results = []
                 for (const td of req.teamDistinctIds) {
@@ -98,8 +98,8 @@ function createTestPersonHogPersonReadRepository(persons: TestPerson[]): PersonH
         })
     })
 
-    const client = PersonHogClient.fromTransport(transport)
-    return new PersonHogPersonReadRepository(client, 'test')
+    const client = PersonFnClient.fromTransport(transport)
+    return new PersonFnPersonReadRepository(client, 'test')
 }
 
 const TEAM_1 = 1
@@ -147,12 +147,12 @@ describe('PersonsManagerService', () => {
         hasAvailableFeature: jest.fn().mockResolvedValue(true),
     } as any
 
-    let repo: PersonHogPersonReadRepository
+    let repo: PersonFnPersonReadRepository
     let manager: PersonsManagerService
 
     beforeEach(() => {
         jest.restoreAllMocks()
-        repo = createTestPersonHogPersonReadRepository(TEST_PERSONS)
+        repo = createTestPersonFnPersonReadRepository(TEST_PERSONS)
         manager = new PersonsManagerService(mockTeamManager, repo, 'http://localhost:8000')
     })
 
@@ -199,7 +199,7 @@ describe('PersonsManagerService', () => {
                     distinctIds: ['foo:bar:distinct_id_B_1'],
                 },
             ]
-            const colonRepo = createTestPersonHogPersonReadRepository(personsWithColons)
+            const colonRepo = createTestPersonFnPersonReadRepository(personsWithColons)
             const colonManager = new PersonsManagerService(mockTeamManager, colonRepo, 'http://localhost:8000')
 
             const res = await Promise.all([
@@ -254,7 +254,7 @@ describe('PersonsManagerService', () => {
                     distinctIds: ['user@example.com'],
                 },
             ]
-            const emailRepo = createTestPersonHogPersonReadRepository(personsWithEmail)
+            const emailRepo = createTestPersonFnPersonReadRepository(personsWithEmail)
             const emailManager = new PersonsManagerService(mockTeamManager, emailRepo, 'http://localhost:8000')
 
             const result = await emailManager.getCyclotronPerson(TEAM_1, 'user@example.com', 'distinct_id')
@@ -303,14 +303,14 @@ describe('PersonsManagerService', () => {
     describe('error handling', () => {
         it('propagates errors when personinsights is unavailable', async () => {
             const failingTransport = createRouterTransport(({ service }) => {
-                service(PersonHogService, {
+                service(PersonFnService, {
                     getPersonsByDistinctIds: () => {
                         throw new ConnectError('unavailable', Code.Unavailable)
                     },
                 })
             })
-            const failingClient = PersonHogClient.fromTransport(failingTransport)
-            const failingRepo = new PersonHogPersonReadRepository(failingClient, 'test')
+            const failingClient = PersonFnClient.fromTransport(failingTransport)
+            const failingRepo = new PersonFnPersonReadRepository(failingClient, 'test')
             const failingManager = new PersonsManagerService(mockTeamManager, failingRepo, 'http://localhost:8000')
 
             await expect(failingManager.getCyclotronPerson(TEAM_1, 'distinct_id_A_1', 'distinct_id')).rejects.toThrow()

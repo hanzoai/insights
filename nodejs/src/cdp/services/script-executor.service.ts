@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { Histogram } from 'prom-client'
 
-import { ExecResult, convertHogToJS } from '@hanzo/scriptvm'
+import { ExecResult, convertScriptToJS } from '@hanzo/scriptvm'
 
 import { instrumented } from '~/common/tracing/tracing-utils'
 import { logger } from '~/common/utils/logger'
@@ -14,12 +14,12 @@ import type {
     InsightsFunctionType,
 } from '../types'
 import { createAddLogFunction, sanitizeLogMessage } from '../utils'
-import { execHog } from '../utils/script-exec'
+import { execScript } from '../utils/script-exec'
 import { convertToInsightsFunctionFilterGlobal, filterFunctionInstrumented } from '../utils/script-function-filtering'
 import { createInvocationResult } from '../utils/invocation-utils'
-import { HogInputsService } from './script-inputs.service'
+import { ScriptInputsService } from './script-inputs.service'
 
-export interface HogExecutorConfig {
+export interface ScriptExecutorConfig {
     /** Hard wall-clock limit for one Script program. The VM aborts the invocation once it elapses. */
     executionTimeoutMs: number
 }
@@ -27,7 +27,7 @@ export interface HogExecutorConfig {
 export const MAX_ASYNC_STEPS = 5
 export const MAX_FN_LOGS = 25
 
-const hogExecutionDuration = new Histogram({
+const scriptExecutionDuration = new Histogram({
     name: 'cdp_insights_function_execution_duration_ms',
     help: 'Processing time and success status of internal functions',
     // We have a timeout so we don't need to worry about much more than that
@@ -47,20 +47,20 @@ function formatNumber(val: number) {
 /**
  * Called when the VM suspends on an async function instead of finishing. The Script core has no way
  * to service one, so a caller that wants async functions (fetch, email, push) must supply this -
- * see HogExecutorAsyncService. Without it a suspending function is an error.
+ * see ScriptExecutorAsyncService. Without it a suspending function is an error.
  */
-export type HogExecutorAsyncFunctionHandler = (
+export type ScriptExecutorAsyncFunctionHandler = (
     call: { name: string; args: any[]; globals: InsightsFunctionInvocationGlobalsWithInputs },
     result: CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>
 ) => Promise<void>
 
 /** The parts of an earlier step's result that carry forward into the next one. */
-export type HogExecutorPreviousResult = Pick<
+export type ScriptExecutorPreviousResult = Pick<
     Partial<CyclotronJobInvocationResult>,
     'finished' | 'capturedInsightsEvents' | 'warehouseWebhookPayloads' | 'logs' | 'metrics' | 'error' | 'execResult'
 >
 
-export type HogExecutorExecuteOptions = {
+export type ScriptExecutorExecuteOptions = {
     functions?: Record<string, (args: unknown[]) => unknown>
     /**
      * Async functions are stubbed in the VM so the program can call them and suspend. Defaults to
@@ -68,7 +68,7 @@ export type HogExecutorExecuteOptions = {
      * names (and an `onAsyncFunction` handler) in.
      */
     asyncFunctionsNames?: string[]
-    onAsyncFunction?: HogExecutorAsyncFunctionHandler
+    onAsyncFunction?: ScriptExecutorAsyncFunctionHandler
 }
 
 /**
@@ -76,12 +76,12 @@ export type HogExecutorExecuteOptions = {
  *
  * Deliberately has no fetch, email, push, team or Redis dependency - transformations run in
  * ingestion on exactly this and must not inherit CDP delivery infrastructure. Anything that needs
- * to suspend and resume belongs in HogExecutorAsyncService, which wraps this one.
+ * to suspend and resume belongs in ScriptExecutorAsyncService, which wraps this one.
  */
-export class HogExecutorService {
+export class ScriptExecutorService {
     constructor(
-        private config: HogExecutorConfig,
-        private hogInputsService: HogInputsService
+        private config: ScriptExecutorConfig,
+        private scriptInputsService: ScriptInputsService
     ) {}
 
     async buildInputsWithGlobals(
@@ -89,7 +89,7 @@ export class HogExecutorService {
         globals: InsightsFunctionInvocationGlobals,
         additionalInputs?: Record<string, any>
     ): Promise<InsightsFunctionInvocationGlobalsWithInputs> {
-        return this.hogInputsService.buildInputsWithGlobals(insightsFunction, globals, additionalInputs)
+        return this.scriptInputsService.buildInputsWithGlobals(insightsFunction, globals, additionalInputs)
     }
 
     /**
@@ -140,8 +140,8 @@ export class HogExecutorService {
     @instrumented({ key: 'script-executor.execute', sendException: false })
     async execute(
         invocation: CyclotronJobInvocationInsightsFunction,
-        options: HogExecutorExecuteOptions = {},
-        previousResult: HogExecutorPreviousResult = {}
+        options: ScriptExecutorExecuteOptions = {},
+        previousResult: ScriptExecutorPreviousResult = {}
     ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
         const loggingContext = {
             invocationId: invocation.id,
@@ -150,7 +150,7 @@ export class HogExecutorService {
             insightsFunctionUrl: invocation.state.globals.source?.url,
         }
 
-        logger.debug('🦔', `[HogExecutor] Executing function`, loggingContext)
+        logger.debug('🦔', `[ScriptExecutor] Executing function`, loggingContext)
 
         const result = createInvocationResult<CyclotronJobInvocationInsightsFunction>(invocation, {}, previousResult)
         const addLog = createAddLogFunction(result.logs)
@@ -176,7 +176,7 @@ export class HogExecutorService {
                         invocation.insightsFunction,
                         invocation.state.globals
                     )
-                    globals = await this.hogInputsService.buildInputsWithGlobals(
+                    globals = await this.scriptInputsService.buildInputsWithGlobals(
                         invocation.insightsFunction,
                         invocation.state.globals,
                         additionalInputs
@@ -193,7 +193,7 @@ export class HogExecutorService {
             const eventId = invocation?.state.globals?.event?.uuid || 'Unknown event'
 
             try {
-                let hogLogs = 0
+                let scriptLogs = 0
 
                 const asyncFunctions = (options.asyncFunctionsNames ?? []).reduce(
                     (acc, fn) => {
@@ -203,22 +203,22 @@ export class HogExecutorService {
                     {} as Record<string, (args: any[]) => Promise<void>>
                 )
 
-                const execHogOutcome = await execHog(invocationInput, {
+                const execScriptOutcome = await execScript(invocationInput, {
                     globals,
                     timeout: this.config.executionTimeoutMs,
                     maxAsyncSteps: MAX_ASYNC_STEPS, // NOTE: This will likely be configurable in the future
                     asyncFunctions: asyncFunctions,
                     functions: {
                         print: (...args) => {
-                            hogLogs++
-                            if (hogLogs === MAX_FN_LOGS) {
+                            scriptLogs++
+                            if (scriptLogs === MAX_FN_LOGS) {
                                 addLog(
                                     'warn',
                                     `Function exceeded maximum log entries. No more logs will be collected. Event: ${eventId}`
                                 )
                             }
 
-                            if (hogLogs >= MAX_FN_LOGS) {
+                            if (scriptLogs >= MAX_FN_LOGS) {
                                 return
                             }
 
@@ -278,22 +278,22 @@ export class HogExecutorService {
                     },
                 })
 
-                hogExecutionDuration.observe(execHogOutcome.durationMs)
+                scriptExecutionDuration.observe(execScriptOutcome.durationMs)
 
                 result.invocation.state.timings.push({
                     kind: 'script',
-                    duration_ms: execHogOutcome.durationMs,
+                    duration_ms: execScriptOutcome.durationMs,
                 })
 
-                if (!execHogOutcome.execResult || execHogOutcome.error || execHogOutcome.execResult.error) {
-                    throw execHogOutcome.error ?? execHogOutcome.execResult?.error ?? new Error('Unknown error')
+                if (!execScriptOutcome.execResult || execScriptOutcome.error || execScriptOutcome.execResult.error) {
+                    throw execScriptOutcome.error ?? execScriptOutcome.execResult?.error ?? new Error('Unknown error')
                 }
 
-                execRes = execHogOutcome.execResult
+                execRes = execScriptOutcome.execResult
 
                 // Store the result if execution finished
                 if (execRes.finished && Boolean(execRes.result)) {
-                    result.execResult = convertHogToJS(execRes.result)
+                    result.execResult = convertScriptToJS(execRes.result)
                 }
             } catch (e) {
                 addLog('error', `Error executing function on event ${eventId}: ${e}`)
@@ -304,7 +304,7 @@ export class HogExecutorService {
             result.invocation.state.vmState = execRes.state
 
             if (!execRes.finished) {
-                const args = (execRes.asyncFunctionArgs ?? []).map((arg) => convertHogToJS(arg))
+                const args = (execRes.asyncFunctionArgs ?? []).map((arg) => convertScriptToJS(arg))
                 if (!execRes.state) {
                     // NOTE: This shouldn't be possible so is more of a type sanity check
                     throw new Error('State should be provided for async function')
@@ -336,7 +336,7 @@ export class HogExecutorService {
 
                     if (execRes.state.maxMemUsed > 1024 * 1024) {
                         // If the memory used is more than a MB then we should log it
-                        logger.warn('🦔', `[HogExecutor] Function used more than 1MB of memory`, {
+                        logger.warn('🦔', `[ScriptExecutor] Function used more than 1MB of memory`, {
                             insightsFunctionId: invocation.insightsFunction.id,
                             insightsFunctionName: invocation.insightsFunction.name,
                             teamId: invocation.teamId,

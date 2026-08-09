@@ -1,7 +1,7 @@
 import { Message } from 'node-rdkafka'
 
 import { GroupTypeManager } from '~/common/groups/group-type-manager'
-import { HogTransformer } from '~/common/script-transformations/script-transformer.interface'
+import { ScriptTransformer } from '~/common/script-transformations/script-transformer.interface'
 import {
     AiEventOutput,
     AsyncOutput,
@@ -18,7 +18,7 @@ import { PersonsStoreForBatch } from '~/ingestion/common/persons/persons-store-f
 import { EmitEventStepOutput } from '~/ingestion/common/steps/event-processing/emit-event-step'
 import { EventPipelineRunnerOptions } from '~/ingestion/common/steps/event-processing/event-pipeline-options'
 import { PipelineBuilder, StartPipelineBuilder } from '~/ingestion/framework/builders/pipeline-builders'
-import { TopHogWrapper } from '~/ingestion/framework/extensions/tophog'
+import { TopFnWrapper } from '~/ingestion/framework/extensions/topfn'
 import { PluginEvent } from '~/plugin-scaffold'
 import { EventHeaders, Team } from '~/types'
 
@@ -43,8 +43,8 @@ export interface AiEventSubpipelineConfig {
     >
     teamManager: TeamManager
     groupTypeManager: GroupTypeManager
-    hogTransformer: HogTransformer
-    topHog: TopHogWrapper
+    scriptTransformer: ScriptTransformer
+    topFn: TopFnWrapper
 }
 
 /**

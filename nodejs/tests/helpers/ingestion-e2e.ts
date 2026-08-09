@@ -12,7 +12,7 @@ import { GroupTypeManager } from '~/common/groups/group-type-manager'
 import { GroupRepository } from '~/common/groups/repositories/group-repository.interface'
 import { PostgresGroupRepository } from '~/common/groups/repositories/postgres-group-repository'
 import { KafkaProducerWrapper } from '~/common/kafka/producer'
-import { buildGroupRepository, buildPersonRepository, createPersonHogClient } from '~/common/personinsights'
+import { buildGroupRepository, buildPersonRepository, createPersonFnClient } from '~/common/personinsights'
 import { PersonRepository } from '~/common/persons/repositories/person-repository'
 import { PostgresPersonRepository } from '~/common/persons/repositories/postgres-person-repository'
 import { PostgresRouter } from '~/common/utils/db/postgres'
@@ -419,7 +419,7 @@ export async function createIngestionTestInfra(
     const pubSub = new PubSub(redisPool)
     await pubSub.start()
 
-    const personinsightsClient = createPersonHogClient(serverConfig)
+    const personinsightsClient = createPersonFnClient(serverConfig)
     const clientLabel = serverConfig.PLUGIN_SERVER_MODE ?? 'unknown'
 
     const postgresGroupRepository = new PostgresGroupRepository(postgres)

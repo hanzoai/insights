@@ -42,7 +42,7 @@ describe('IngestionApiServer', () => {
         pipeline = { feed: jest.fn(), next: jest.fn() }
         ;(server as any).joinedPipeline = pipeline
         ;(server as any).promiseScheduler = { schedule: jest.fn(), waitForAll: jest.fn().mockResolvedValue(undefined) }
-        ;(server as any).hogTransformer = { processInvocationResults: jest.fn().mockResolvedValue(undefined) }
+        ;(server as any).scriptTransformer = { processInvocationResults: jest.fn().mockResolvedValue(undefined) }
         // stop() would call process.exit; stub it so the test only observes that it was invoked.
         stopSpy = jest.spyOn(server, 'stop').mockResolvedValue(undefined)
     })

@@ -6,7 +6,7 @@ import { CyclotronJobQueuePostgresV2 } from '../services/job-queue/job-queue-pos
 import { JobQueue } from '../services/job-queue/job-queue.interface'
 import { InsightsFunctionManagerService } from '../services/managers/script-function-manager.service'
 import { InsightsFunctionMonitoringService } from '../services/monitoring/script-function-monitoring.service'
-import { HogInvocationResultsService } from '../services/monitoring/script-invocation-results.service'
+import { ScriptInvocationResultsService } from '../services/monitoring/script-invocation-results.service'
 import { CyclotronJobInvocationFlow } from '../types'
 import { RerunJobState } from './rerun-job.types'
 import { RerunPaginatorService } from './rerun-paginator.service'
@@ -42,7 +42,7 @@ describe('RerunPaginatorService replay fidelity (hog_flow)', () => {
             queueRerunWrapperRow: jest.fn(),
             flush: jest.fn().mockResolvedValue(undefined),
             dropQueuedRowsFor: jest.fn(),
-        } as unknown as jest.Mocked<HogInvocationResultsService>
+        } as unknown as jest.Mocked<ScriptInvocationResultsService>
         const monitoring = {
             queueLogs: jest.fn(),
             flush: jest.fn().mockResolvedValue(undefined),

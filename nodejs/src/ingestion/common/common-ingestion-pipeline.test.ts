@@ -9,13 +9,13 @@ import { PromiseScheduler } from '~/common/utils/promise-scheduler'
 import { TeamManager } from '~/common/utils/team-manager'
 import { UUIDT } from '~/common/utils/utils'
 import { ChunkProcessingStep } from '~/ingestion/framework/base-chunk-pipeline'
-import { TopHogRegistry, countResult } from '~/ingestion/framework/extensions/tophog'
+import { TopFnRegistry, countResult } from '~/ingestion/framework/extensions/topfn'
 import { createOkContext } from '~/ingestion/framework/helpers'
 import { PipelineResult, dlq, drop, isDropResult, isOkResult, ok, redirect } from '~/ingestion/framework/results'
 import { ProcessingStep } from '~/ingestion/framework/steps'
 import { PluginEvent } from '~/plugin-scaffold'
 import { createTestTeam } from '~/tests/helpers/team'
-import { RecordedTopHogMetric, createRecordingTopHog } from '~/tests/helpers/tophog'
+import { RecordedTopFnMetric, createRecordingTopFn } from '~/tests/helpers/topfn'
 import { EventHeaders, IncomingEvent, Team } from '~/types'
 
 import { CommonIngestionPipelineConfig, newCommonIngestionPipeline } from './common-ingestion-pipeline'
@@ -63,8 +63,8 @@ describe('CommonIngestionPipelineBuilder', () => {
     let mockTeamManager: jest.Mocked<TeamManager>
     let promiseScheduler: PromiseScheduler
     let config: CommonIngestionPipelineConfig<TestRedirectOutput>
-    let topHog: TopHogRegistry
-    let topHogRecords: Map<string, RecordedTopHogMetric[]>
+    let topFn: TopFnRegistry
+    let topFnRecords: Map<string, RecordedTopFnMetric[]>
 
     const team = createTestTeam({ id: 42, api_token: 'token-42' })
 
@@ -181,13 +181,13 @@ describe('CommonIngestionPipelineBuilder', () => {
 
         promiseScheduler = new PromiseScheduler()
 
-        const recording = createRecordingTopHog()
-        topHog = recording.registry
-        topHogRecords = recording.records
+        const recording = createRecordingTopFn()
+        topFn = recording.registry
+        topFnRecords = recording.records
 
         config = {
             teamManager: mockTeamManager,
-            topHog,
+            topFn,
             outputs: new IngestionOutputs({
                 [DLQ_OUTPUT]: new SingleIngestionOutput(DLQ_OUTPUT, DLQ_TOPIC, mockKafkaProducer, 'test'),
                 [INGESTION_WARNINGS_OUTPUT]: new SingleIngestionOutput(
@@ -746,12 +746,12 @@ describe('CommonIngestionPipelineBuilder', () => {
         expect(parseJSON(warnings[0].details).marker).toBe('sub-step')
     })
 
-    it('records resolveTeam topHog metrics around team resolution', async () => {
+    it('records resolveTeam topFn metrics around team resolution', async () => {
         const pipeline = newCommonIngestionPipeline<MessageOnly, MessageOnly>(config)
             .parseHeaders()
             .parseMessage()
             .resolveTeam({
-                topHog: [
+                topFn: [
                     countResult('teams_resolved', (result, input) =>
                         isOkResult(result)
                             ? { outcome: `ok:${result.value.team.id}` }
@@ -766,7 +766,7 @@ describe('CommonIngestionPipelineBuilder', () => {
             createMessage('user-1', 'test_event', 'unknown-token'),
         ])
 
-        expect((topHogRecords.get('teams_resolved') ?? []).map((r) => r.key)).toEqual([
+        expect((topFnRecords.get('teams_resolved') ?? []).map((r) => r.key)).toEqual([
             { outcome: 'ok:42' },
             { outcome: 'miss:user-1' },
         ])
@@ -784,11 +784,11 @@ describe('CommonIngestionPipelineBuilder', () => {
 
         await runPipeline(pipeline, [createMessage('user-0')])
 
-        const sizes = topHogRecords.get('message_size_by_token') ?? []
+        const sizes = topFnRecords.get('message_size_by_token') ?? []
         expect(sizes).toHaveLength(1)
         expect(sizes[0].key).toEqual({ token: team.api_token })
         expect(sizes[0].value).toBeGreaterThan(0)
-        expect(topHogRecords.get('parse_time_ms_by_token')).toHaveLength(1)
+        expect(topFnRecords.get('parse_time_ms_by_token')).toHaveLength(1)
     })
 
     it('passes retry options through to chunk steps', async () => {
