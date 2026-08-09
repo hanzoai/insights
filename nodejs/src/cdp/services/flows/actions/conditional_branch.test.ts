@@ -317,7 +317,7 @@ describe('action.conditional_branch', () => {
             // Must name the flow, not the run: attributing the residual is the counter's whole job.
             expect(await pollOnlyAdvanceLabels()).toEqual({
                 team_id: waitInvocation.flow.team_id,
-                hog_flow_id: waitInvocation.flow.id,
+                flow_id: waitInvocation.flow.id,
             })
         })
 

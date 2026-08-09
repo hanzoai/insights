@@ -95,7 +95,7 @@ export class ConditionalBranchHandler implements ActionHandler {
             // eventMatched short-circuit above, and not on entry). This is the wake the streams missed.
             if (isWait && invocation.state.currentAction?.pollReparked === true) {
                 counterScriptflowWaitPollOnlyAdvance
-                    .labels({ team_id: invocation.flow.team_id, hog_flow_id: invocation.flow.id })
+                    .labels({ team_id: invocation.flow.team_id, flow_id: invocation.flow.id })
                     .inc()
             }
             if (rekeyWoken) {

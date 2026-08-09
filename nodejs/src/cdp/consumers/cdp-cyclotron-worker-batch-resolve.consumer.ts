@@ -186,7 +186,7 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
                 flowId: state.flowId,
                 batchJobId: state.batchJobId,
             })
-            counterBatchFlowTriggerFailed.labels({ hog_flow_id: state.flowId, reason: 'missing_entity' }).inc()
+            counterBatchFlowTriggerFailed.labels({ flow_id: state.flowId, reason: 'missing_entity' }).inc()
             await this.transitionToFailedTerminal(job, state, 'Workflow or team was deleted mid-run')
             return
         }
@@ -321,7 +321,7 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
     }
 
     private emitTruncationLog(state: BatchResolverState): void {
-        counterBatchFlowAudienceTruncated.labels({ hog_flow_id: state.flowId }).inc()
+        counterBatchFlowAudienceTruncated.labels({ flow_id: state.flowId }).inc()
         const message = `Audience reached the max cap of ${state.maxAudienceSize}, ${state.totalEnqueued} persons enqueued; the remainder did not receive this workflow.`
         logger.warn('⚠️', `${this.name} - audience truncated`, {
             batchJobId: state.batchJobId,
