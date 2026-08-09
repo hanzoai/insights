@@ -1,5 +1,5 @@
 // copied from rrweb-snapshot, not included in rrweb types
-import { EventType, IncrementalSource, customEvent, removedNodeMutation } from 'insights-js/rrweb-types'
+import { EventType, IncrementalSource, customEvent, removedNodeMutation } from '@hanzo/insights-rrweb-types'
 
 export enum NodeType {
     Document = 0,
