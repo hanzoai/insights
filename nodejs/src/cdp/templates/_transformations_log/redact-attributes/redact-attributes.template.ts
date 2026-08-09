@@ -7,7 +7,7 @@ export const template: InsightsFunctionTemplate = {
     id: 'template-log-transformation-redact-attributes',
     name: 'Hash log attributes',
     description: 'Replace the values of the configured log attributes with a SHA-256 hash to protect PII.',
-    icon_url: '/static/mascot/builder-script-02.png',
+    icon_url: '/static/script/builder-script-02.png',
     category: ['Custom'],
     code_language: 'script',
     code: `

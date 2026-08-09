@@ -1,0 +1,397 @@
+import { DateTime } from 'luxon'
+
+import { FixtureFlowBuilder } from '~/cdp/_tests/builders/flow.builder'
+import { INSIGHTS_FILTERS_EXAMPLES } from '~/cdp/_tests/examples'
+import { createExampleFlowInvocation } from '~/cdp/_tests/fixtures-flows'
+import { Flow, FlowAction } from '~/cdp/schema/flow'
+import { CyclotronJobInvocationFlow } from '~/cdp/types'
+import { createInvocationResult } from '~/cdp/utils/invocation-utils'
+
+import { findActionById, findActionByType } from '../flow-utils'
+import {
+    ConditionalBranchHandler,
+    checkConditions,
+    counterHogflowRekeyWake,
+    counterHogflowWaitPollOnlyAdvance,
+} from './conditional_branch'
+
+const pollOnlyAdvanceCount = async (): Promise<number> =>
+    (await counterHogflowWaitPollOnlyAdvance.get()).values[0]?.value ?? 0
+
+const pollOnlyAdvanceLabels = async (): Promise<Record<string, string | number> | undefined> =>
+    (await counterHogflowWaitPollOnlyAdvance.get()).values[0]?.labels
+
+const rekeyWakeCount = async (outcome: 'advanced' | 'reparked'): Promise<number> =>
+    (await counterHogflowRekeyWake.get()).values.find((v) => v.labels.outcome === outcome)?.value ?? 0
+
+describe('action.conditional_branch', () => {
+    let invocation: CyclotronJobInvocationFlow
+    let action: Extract<FlowAction, { type: 'conditional_branch' }>
+    let flow: Flow
+
+    beforeEach(() => {
+        const fixedTime = DateTime.fromObject({ year: 2025, month: 1, day: 1 }, { zone: 'UTC' })
+        jest.spyOn(Date, 'now').mockReturnValue(fixedTime.toMillis())
+
+        flow = new FixtureFlowBuilder()
+            .withWorkflow({
+                actions: {
+                    conditional_branch: {
+                        type: 'conditional_branch',
+                        config: {
+                            conditions: [
+                                {
+                                    filters: INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters, // Match for pageviews
+                                },
+                            ], // Filled by tests
+                        },
+                    },
+                    condition_1: {
+                        type: 'delay',
+                        config: {
+                            delay_duration: '2h',
+                        },
+                    },
+                    condition_2: {
+                        type: 'delay',
+                        config: {
+                            delay_duration: '2h',
+                        },
+                    },
+                },
+                edges: [
+                    {
+                        from: 'conditional_branch',
+                        to: 'condition_2',
+                        type: 'branch',
+                        index: 1,
+                    },
+                    {
+                        from: 'conditional_branch',
+                        to: 'condition_1',
+                        type: 'branch',
+                        index: 0,
+                    },
+                ],
+            })
+            .build()
+
+        action = findActionByType(flow, 'conditional_branch')!
+        invocation = createExampleFlowInvocation(flow)
+
+        invocation.state.currentAction = {
+            id: action.id,
+            startedAtTimestamp: DateTime.utc().toMillis(),
+        }
+    })
+
+    describe('no matching events', () => {
+        it('should return finished if no matches', async () => {
+            invocation.state.event!.event = 'no-match'
+            const result = await checkConditions(invocation, action)
+            expect(result).toEqual({})
+        })
+
+        describe('wait logic', () => {
+            it('should handle wait duration and schedule next check', async () => {
+                action.config.delay_duration = '2h'
+                const result = await checkConditions(invocation, action)
+                expect(result).toEqual({
+                    // Should schedule for 10 minutes from now
+                    scheduledAt: DateTime.utc().plus({ minutes: 10 }),
+                })
+            })
+
+            it('should not schedule for later than the max wait duration', async () => {
+                action.config.delay_duration = '5m'
+                const result = await checkConditions(invocation, action)
+                expect(result).toEqual({
+                    // Should schedule for 5 minutes from now
+                    scheduledAt: DateTime.utc().plus({ minutes: 5 }),
+                })
+            })
+
+            it('should throw error if action started at timestamp is invalid', async () => {
+                invocation.state.currentAction = undefined
+                action.config.delay_duration = '300s'
+                await expect(async () => checkConditions(invocation, action)).rejects.toThrow(
+                    "'startedAtTimestamp' is not set or is invalid"
+                )
+            })
+        })
+    })
+
+    describe('matching events', () => {
+        beforeEach(() => {
+            invocation = createExampleFlowInvocation(flow, {
+                // These values match the pageview_or_autocapture_filter
+                event: {
+                    event: '$pageview',
+                    properties: {
+                        $current_url: 'https://hanzo.ai',
+                    },
+                } as any,
+            })
+        })
+
+        it('should match condition and go to action', async () => {
+            const result = await checkConditions(invocation, action)
+            expect(result).toEqual({
+                nextAction: findActionById(invocation.flow, 'condition_1'),
+            })
+        })
+
+        it('should ignore conditions that do not match', async () => {
+            action.config.conditions = [
+                {
+                    filters: INSIGHTS_FILTERS_EXAMPLES.elements_text_filter.filters, // No match
+                },
+                {
+                    filters: INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters, // No match
+                },
+            ]
+
+            const result = await checkConditions(invocation, action)
+            expect(result).toEqual({
+                nextAction: findActionById(invocation.flow, 'condition_2'),
+            })
+        })
+
+        it('should execute the first matching branch when multiple conditions match', async () => {
+            action.config.conditions = [
+                {
+                    filters: INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters, // Match
+                },
+                {
+                    filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters, // Also matches (always true)
+                },
+            ]
+
+            const result = await checkConditions(invocation, action)
+            expect(result).toEqual({
+                nextAction: findActionById(invocation.flow, 'condition_1'),
+            })
+        })
+    })
+
+    describe('wait_until_condition eventMatched short-circuit', () => {
+        let waitInvocation: CyclotronJobInvocationFlow
+        let waitAction: Extract<FlowAction, { type: 'wait_until_condition' }>
+        let handler: ConditionalBranchHandler
+
+        beforeEach(() => {
+            const waitFlow = new FixtureFlowBuilder()
+                .withWorkflow({
+                    actions: {
+                        wait_until_condition: {
+                            type: 'wait_until_condition',
+                            config: {
+                                condition: {
+                                    filters: INSIGHTS_FILTERS_EXAMPLES.elements_text_filter.filters, // no match
+                                },
+                                max_wait_duration: '10m',
+                            },
+                        },
+                        matched_target: {
+                            type: 'delay',
+                            config: { delay_duration: '2h' },
+                        },
+                    },
+                    edges: [
+                        {
+                            from: 'wait_until_condition',
+                            to: 'matched_target',
+                            type: 'branch',
+                            index: 0,
+                        },
+                    ],
+                })
+                .build()
+
+            waitAction = findActionByType(waitFlow, 'wait_until_condition')!
+            waitInvocation = createExampleFlowInvocation(waitFlow)
+            waitInvocation.state.currentAction = {
+                id: waitAction.id,
+                startedAtTimestamp: DateTime.utc().toMillis(),
+            }
+            handler = new ConditionalBranchHandler()
+            counterHogflowWaitPollOnlyAdvance.reset()
+            counterHogflowRekeyWake.reset()
+        })
+
+        it('advances to the matched branch and clears eventMatched', async () => {
+            waitInvocation.state.currentAction!.eventMatched = true
+            waitInvocation.state.currentAction!.eventMatchedEvent = 'subscription created'
+            waitInvocation.state.currentAction!.eventMatchedEventUuid = 'evt-uuid'
+
+            const result = await handler.execute({
+                invocation: waitInvocation,
+                action: waitAction,
+                result: createInvocationResult(waitInvocation),
+            })
+
+            expect(result.nextAction).toEqual(findActionById(waitInvocation.flow, 'matched_target'))
+            expect(result.result).toEqual({ eventMatched: true })
+            // All wake markers are cleared so a later timeout fire isn't misread as an event wake.
+            expect(waitInvocation.state.currentAction!.eventMatched).toBe(false)
+            expect(waitInvocation.state.currentAction!.eventMatchedEvent).toBeUndefined()
+            expect(waitInvocation.state.currentAction!.eventMatchedEventUuid).toBeUndefined()
+        })
+
+        it('falls through to condition evaluation when eventMatched is not set', async () => {
+            const result = await handler.execute({
+                invocation: waitInvocation,
+                action: waitAction,
+                result: createInvocationResult(waitInvocation),
+            })
+
+            // Condition does not match, so the step reschedules itself rather than advancing.
+            expect(result.scheduledAt).toBeDefined()
+            expect(result.nextAction).toBeUndefined()
+        })
+
+        it('does not fire immediately when the condition has no properties (always-true bytecode)', async () => {
+            // An empty property condition compiles to always-true bytecode. It must not match on
+            // entry and advance the wait; the step should park until an event wakes it or it times out.
+            waitAction.config.condition = { filters: INSIGHTS_FILTERS_EXAMPLES.no_filters.filters }
+
+            const result = await handler.execute({
+                invocation: waitInvocation,
+                action: waitAction,
+                result: createInvocationResult(waitInvocation),
+            })
+
+            expect(result.scheduledAt).toBeDefined()
+            expect(result.nextAction).toBeUndefined()
+        })
+
+        it('re-parks a wait_until_condition on the 10-minute cap (polling retained as backstop)', async () => {
+            // Polling is kept for now: a wait_until_condition re-parks on the 10-minute cap and
+            // re-checks its condition, even though the subscription matcher also wakes it early on a
+            // matching signal. A 30-minute wait therefore schedules ~10 minutes out, not ~30.
+            waitAction.config.max_wait_duration = '30m'
+
+            const result = await handler.execute({
+                invocation: waitInvocation,
+                action: waitAction,
+                result: createInvocationResult(waitInvocation),
+            })
+
+            expect(result.scheduledAt).toEqual(DateTime.utc().plus({ minutes: 10 }))
+        })
+
+        it('marks the wait as re-parked when its condition does not match', async () => {
+            // The default condition does not match, so the wait re-parks and records that it has
+            // polled at least once — without counting a poll-only advance.
+            const result = await handler.execute({
+                invocation: waitInvocation,
+                action: waitAction,
+                result: createInvocationResult(waitInvocation),
+            })
+
+            expect(result.scheduledAt).toBeDefined()
+            expect(waitInvocation.state.currentAction!.pollReparked).toBe(true)
+            expect(await pollOnlyAdvanceCount()).toBe(0)
+        })
+
+        it('counts a poll-only advance when a re-parked wait matches on a later re-check', async () => {
+            // Evaluable event-name filter that matches the example invocation's `test` event.
+            waitAction.config.condition = {
+                filters: {
+                    bytecode: ['_H', 1, 32, 'test', 32, 'event', 1, 1, 11],
+                    events: [{ id: 'test', name: 'test', type: 'events', order: 0 }],
+                },
+            }
+            // The wait already re-parked at least once and the matcher did not wake it: the periodic
+            // re-check is what found the condition true.
+            waitInvocation.state.currentAction!.pollReparked = true
+
+            const result = await handler.execute({
+                invocation: waitInvocation,
+                action: waitAction,
+                result: createInvocationResult(waitInvocation),
+            })
+
+            expect(result.nextAction).toEqual(findActionById(waitInvocation.flow, 'matched_target'))
+            expect(await pollOnlyAdvanceCount()).toBe(1)
+            // Must name the flow, not the run: attributing the residual is the counter's whole job.
+            expect(await pollOnlyAdvanceLabels()).toEqual({
+                team_id: waitInvocation.flow.team_id,
+                hog_flow_id: waitInvocation.flow.id,
+            })
+        })
+
+        it('does not count an evaluate-on-entry match (the wait never re-parked)', async () => {
+            // Evaluable event-name filter that matches the example invocation's `test` event.
+            waitAction.config.condition = {
+                filters: {
+                    bytecode: ['_H', 1, 32, 'test', 32, 'event', 1, 1, 11],
+                    events: [{ id: 'test', name: 'test', type: 'events', order: 0 }],
+                },
+            }
+            // pollReparked is unset: the condition was already true on entry, which polling did not catch.
+
+            const result = await handler.execute({
+                invocation: waitInvocation,
+                action: waitAction,
+                result: createInvocationResult(waitInvocation),
+            })
+
+            expect(result.nextAction).toEqual(findActionById(waitInvocation.flow, 'matched_target'))
+            expect(await pollOnlyAdvanceCount()).toBe(0)
+        })
+
+        it('does not count a matcher (eventMatched) wake as poll-only', async () => {
+            waitInvocation.state.currentAction!.pollReparked = true
+            waitInvocation.state.currentAction!.eventMatched = true
+
+            await handler.execute({
+                invocation: waitInvocation,
+                action: waitAction,
+                result: createInvocationResult(waitInvocation),
+            })
+
+            expect(await pollOnlyAdvanceCount()).toBe(0)
+        })
+
+        it('records a rekey wake as advanced and consumes the one-shot flag when the merge makes the condition match', async () => {
+            // A merge re-keyed this parked wait onto the survivor and woke it (rekeyWake). The re-check
+            // now finds the condition true. Consuming the flag is what keeps the next re-check from
+            // re-emitting the outcome — without it a re-parked wake would inflate the churn metric.
+            waitAction.config.condition = {
+                filters: {
+                    bytecode: ['_H', 1, 32, 'test', 32, 'event', 1, 1, 11],
+                    events: [{ id: 'test', name: 'test', type: 'events', order: 0 }],
+                },
+            }
+            waitInvocation.state.currentAction!.rekeyWake = true
+
+            const result = await handler.execute({
+                invocation: waitInvocation,
+                action: waitAction,
+                result: createInvocationResult(waitInvocation),
+            })
+
+            expect(result.nextAction).toEqual(findActionById(waitInvocation.flow, 'matched_target'))
+            expect(await rekeyWakeCount('advanced')).toBe(1)
+            expect(await rekeyWakeCount('reparked')).toBe(0)
+            expect(waitInvocation.state.currentAction!.rekeyWake).toBe(false)
+        })
+
+        it('records a rekey wake as reparked and consumes the one-shot flag when the merge does not satisfy the wait', async () => {
+            // The default condition still does not match after the re-key, so waking was wasted churn.
+            waitInvocation.state.currentAction!.rekeyWake = true
+
+            const result = await handler.execute({
+                invocation: waitInvocation,
+                action: waitAction,
+                result: createInvocationResult(waitInvocation),
+            })
+
+            expect(result.scheduledAt).toBeDefined()
+            expect(await rekeyWakeCount('reparked')).toBe(1)
+            expect(await rekeyWakeCount('advanced')).toBe(0)
+            expect(waitInvocation.state.currentAction!.rekeyWake).toBe(false)
+        })
+    })
+})
