@@ -29,12 +29,12 @@ def _restore_anthropic_env():
 
 def test_no_gateway_returns_none_and_leaves_env_untouched():
     before = {k: os.environ.get(k) for k in _ANTHROPIC_ENV_KEYS}
-    assert _apply_gateway_route(None, {"stamphog_pr_number": 1}) is None
+    assert _apply_gateway_route(None, {"stamp_pr_number": 1}) is None
     assert {k: os.environ.get(k) for k in _ANTHROPIC_ENV_KEYS} == before
 
 
 def test_gateway_mode_uses_plain_query_and_applies_env():
-    active = _apply_gateway_route(("https://gateway.us.hanzo.ai", "sk-secret"), {"stamphog_pr_number": 7})
+    active = _apply_gateway_route(("https://gateway.us.hanzo.ai", "sk-secret"), {"stamp_pr_number": 7})
     # Plain query, not the traced wrapper (else the gateway's $ai_generation double-counts).
     assert active is reviewer.query
     assert os.environ["ANTHROPIC_BASE_URL"] == "https://gateway.us.hanzo.ai"
@@ -42,6 +42,6 @@ def test_gateway_mode_uses_plain_query_and_applies_env():
     assert os.environ["ANTHROPIC_API_KEY"] == "sk-secret"
     headers = os.environ["ANTHROPIC_CUSTOM_HEADERS"]
     # Single X-Insights-Properties JSON blob; the slugless gateway ignores per-property headers.
-    assert '"ai_product":"aio_stamphog"' in headers
-    assert '"stamphog_pr_number":7' in headers
+    assert '"ai_product":"aio_stamp"' in headers
+    assert '"stamp_pr_number":7' in headers
     assert "x-insights-property-" not in headers

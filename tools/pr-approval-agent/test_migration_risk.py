@@ -18,7 +18,7 @@ def _check(
 ) -> dict:
     """Build a fake check_run.
 
-    `analyzed_paths` becomes the JSON inside the `<!-- stamphog:v1 [...] -->`
+    `analyzed_paths` becomes the JSON inside the `<!-- stamp:v1 [...] -->`
     marker; pass `None` to omit the marker entirely (simulates older checks
     or non-success conclusions). `summary_override` lets tests inject raw
     summary text (e.g. malformed markers).
@@ -28,7 +28,7 @@ def _check(
     elif analyzed_paths is None:
         summary = "no marker here"
     else:
-        summary = f"<!-- stamphog:v1 {json.dumps(analyzed_paths)} -->\nreport body"
+        summary = f"<!-- stamp:v1 {json.dumps(analyzed_paths)} -->\nreport body"
     return {
         "name": name,
         "status": status,
@@ -111,9 +111,9 @@ def test_empty_marker_means_no_bypass() -> None:
     "summary",
     [
         pytest.param("no marker here at all", id="no-marker"),
-        pytest.param("<!-- stamphog:v1 not-json-array -->", id="malformed-json"),
-        pytest.param('<!-- stamphog:v1 ["missing close ', id="truncated"),
-        pytest.param('<!-- stamphog:v1 {"shape":"wrong"} -->', id="wrong-shape"),
+        pytest.param("<!-- stamp:v1 not-json-array -->", id="malformed-json"),
+        pytest.param('<!-- stamp:v1 ["missing close ', id="truncated"),
+        pytest.param('<!-- stamp:v1 {"shape":"wrong"} -->', id="wrong-shape"),
     ],
 )
 def test_malformed_or_missing_marker_falls_back_to_no_bypass(summary: str) -> None:

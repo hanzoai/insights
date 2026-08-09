@@ -22,6 +22,7 @@ tree when upstream renames something out from under us.
 from __future__ import annotations
 
 import argparse
+import ast
 import glob
 import json
 import os
@@ -286,7 +287,7 @@ PATH_DIR_RULES: list[tuple[str, str]] = [
 # path AND right for a file's bytes. `\bLemon(?=[A-Z])` and nothing looser,
 # because `lemon_squeezy` is Lemon Squeezy, a payments vendor whose warehouse
 # source we import, and a rule matching a bare `lemon` would rename someone
-# else's product. `\bhog\b` cannot reach `hedgehog`, `tophog`, `stamphog`,
+# else's product. `\bhog\b` cannot reach `hedgehog`, `tophog`, `stamp`,
 # `hog_invocation_results` or `hogfunction` -- each of those is either handled
 # above by name or is a physical name we do not own.
 PATH_REGEX = CONTENT_REGEX
@@ -330,7 +331,7 @@ DROP_DIRS: list[tuple[str, str]] = [
     ("products/visual_review", "visual regression review"),
     ("products/business_knowledge", "knowledge base product"),
     ("products/data_catalog", "catalog product"),
-    ("products/stamphog", "upstream stamp/rewards toy"),
+    ("products/stamp", "upstream stamp/rewards toy"),
     (
         "products/games",
         "two mascot easter-egg games (368 hedgehogs, flappy hedgehog). The last "
@@ -1231,7 +1232,7 @@ def check_marks(root: str) -> int:
 # and a refusal happens on every commit.
 #
 # Deliberately NOT the whole of `hog`. `tophog` is seven Datastore tables and a
-# Kafka topic, `stamphog` and `review_hog` are two live Django apps with rows in
+# Kafka topic, `stamp` and `review_hog` are two live Django apps with rows in
 # `django_migrations`, `hog_invocation_results` is a table, `hogland` is someone
 # else's service and `@hanzo/brand/hoggies` is a subpath of a package we do not
 # publish. Those are named below as outstanding, never as exempt -- an exemption
@@ -1561,7 +1562,7 @@ def _npm_dep_strings(root: str, rel: str) -> list[tuple[str, str, str]]:
             for key, spec in (doc.get(section) or {}).items():
                 # `workspace:*` resolves inside this tree, so no registry serves
                 # it and no upstream name is involved -- which is the whole
-                # subject here. Our own `@hanzo/products-stamphog` is the case
+                # subject here. Our own `@hanzo/products-stamp` is the case
                 # that proves it: the app keeps a name it cannot be renamed out
                 # of, and it is ours.
                 if isinstance(spec, str) and spec.startswith("workspace:"):
@@ -1887,6 +1888,84 @@ def check_modules(root: str) -> int:
     return 1
 
 
+# A migration's name is its identity in django_migrations, which is why
+# MIGRATION_RE freezes the FILENAME. The string that NAMES that migration from
+# another one's `dependencies` is not a filename, so nothing froze it, and a
+# content rule rewrote one: `0026` came to depend on a `0025` spelled a way no
+# file is. Django answers that while BUILDING the graph, so it is not a
+# migrate-time failure -- every management command and every test that loads
+# the graph stops with NodeNotFoundError.
+#
+# The same shape as check_modules one level over, and refused for the same
+# reason: a reference that names something not on disk.
+def migration_deps(root: str) -> list[tuple[str, str, str]]:
+    """Every (file, app_label, migration) dependency this tree declares."""
+    out: list[tuple[str, str, str]] = []
+    for rel in tracked_files(root):
+        if not is_migration(rel):
+            continue
+        try:
+            tree = ast.parse(open(os.path.join(root, rel), encoding="utf-8").read())
+        except (OSError, SyntaxError):
+            continue
+        for node in ast.walk(tree):
+            if not (isinstance(node, ast.Tuple) and len(node.elts) == 2):
+                continue
+            if not all(isinstance(e, ast.Constant) and isinstance(e.value, str) for e in node.elts):
+                continue
+            app, name = node.elts[0].value, node.elts[1].value
+            if len(name) > 4 and name[:4].isdigit() and "_" in name:
+                out.append((rel, app, name))
+    return out
+
+
+APP_LABEL = re.compile(r'^\s*label\s*=\s*"([^"]+)"', re.M)
+
+
+def migrations_by_label(root: str) -> dict[str, set[str]]:
+    """The migrations each app label actually has on disk.
+
+    Keyed by LABEL rather than by directory, because a dependency names an app
+    the way django_migrations does -- and the two part company exactly when a
+    rename moves the module and leaves the label, which is the case this guards.
+    """
+    tracked = tracked_files(root)
+    dirs: dict[str, str] = {"insights": "insights/migrations"}
+    for rel in tracked:
+        if not rel.endswith("/apps.py"):
+            continue
+        mm = APP_LABEL.search(open(os.path.join(root, rel), encoding="utf-8", errors="ignore").read())
+        if mm:
+            dirs[mm.group(1)] = os.path.dirname(rel) + "/migrations"
+    have: dict[str, set[str]] = {}
+    for label, d in dirs.items():
+        have[label] = {
+            os.path.basename(p)[:-3]
+            for p in tracked
+            if p.startswith(d + "/") and os.path.basename(p)[0].isdigit()
+        }
+    return have
+
+
+def check_migrations(root: str) -> int:
+    have = migrations_by_label(root)
+    # Only labels this tree owns: a dependency on a third-party app names
+    # migrations that live in site-packages, and this cannot see those.
+    missing = [
+        (rel, app, name)
+        for rel, app, name in migration_deps(root)
+        if app in have and name not in have[app]
+    ]
+    if not missing:
+        return 0
+    print(f"FAIL: {len(missing)} migration dependencies name a migration that is not on disk")
+    print("    A migration's name is its identity, so the rules freeze the FILENAME.")
+    print("    The string naming it from another migration has to be frozen with it.")
+    for rel, app, name in missing[:20]:
+        print(f"    {rel}: ({app!r}, {name!r})")
+    return 1
+
+
 def check_workspace(root: str) -> int:
     """Every `workspace:` dep must name a package the workspace actually has.
 
@@ -1909,6 +1988,7 @@ def check(root: str) -> int:
     bad += check_license(root)
     bad += check_workspace(root)
     bad += check_modules(root)
+    bad += check_migrations(root)
     bad += check_mangled(root)
     bad += check_marks(root)
     bad += check_hog(root)

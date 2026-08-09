@@ -117,11 +117,11 @@ depends_on = [
     "products.replay",
     "products.replay_vision",
     "products.revenue_analytics",
-    "products.review_hog",
+    "products.review",
     "products.signals",
     "products.skills",
     "products.slack_app",
-    "products.stamphog",
+    "products.stamp",
     "products.streamlit_apps",
     "products.surveys",
     "products.tasks",
@@ -664,16 +664,16 @@ depends_on = [
 layer = "modules"
 
 [[modules]]
-path = "products.review_hog"
+path = "products.review"
 depends_on = [
     "ee",
     "insights",
     "products.engineering_analytics",
     "products.signals",
     "products.skills",
-    # Facade-only (enforced by stamphog's [[interfaces]] block): the inbox trigger queues
-    # hosted Stamphog reviews and registers the toggle resolver hook.
-    "products.stamphog",
+    # Facade-only (enforced by stamp's [[interfaces]] block): the inbox trigger queues
+    # hosted Stamp reviews and registers the toggle resolver hook.
+    "products.stamp",
     "products.tasks",
 ]
 layer = "modules"
@@ -1190,7 +1190,7 @@ depends_on = ["insights"]
 layer = "modules"
 
 [[modules]]
-path = "products.stamphog"
+path = "products.stamp"
 depends_on = ["insights", "products.tasks"]
 layer = "modules"
 
@@ -1200,7 +1200,7 @@ expose = [
     "backend\\.presentation\\.views.*",
 ]
 from = [
-    "products.stamphog",
+    "products.stamp",
 ]
 
 [[modules]]

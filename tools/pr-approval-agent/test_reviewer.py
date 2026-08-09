@@ -186,17 +186,17 @@ def test_inline_truncation_keeps_unresolved_drops_resolved(
     assert line == omission
 
 
-def _fake_stamphog_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, guidance: str) -> Path:
+def _fake_stamp_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, guidance: str) -> Path:
     monkeypatch.setattr(policy, "repo_root", lambda: tmp_path)
-    stamphog_dir = tmp_path / ".stamphog"
-    stamphog_dir.mkdir()
-    (stamphog_dir / "review-guidance.md").write_text(guidance)
-    return stamphog_dir
+    stamp_dir = tmp_path / ".stamp"
+    stamp_dir.mkdir()
+    (stamp_dir / "review-guidance.md").write_text(guidance)
+    return stamp_dir
 
 
 def test_guidance_appends_steering_under_marked_section(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    stamphog_dir = _fake_stamphog_dir(tmp_path, monkeypatch, "norms prose\n")
-    (stamphog_dir / "steering.md").write_text("Prefer squash merges.\n")
+    stamp_dir = _fake_stamp_dir(tmp_path, monkeypatch, "norms prose\n")
+    (stamp_dir / "steering.md").write_text("Prefer squash merges.\n")
 
     text = _load_review_guidance()
 
@@ -207,7 +207,7 @@ def test_guidance_appends_steering_under_marked_section(tmp_path: Path, monkeypa
 
 def test_guidance_unchanged_without_steering(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     # No steering.md must mean a byte-identical prompt — the Action's existing repos see no change.
-    _fake_stamphog_dir(tmp_path, monkeypatch, "norms prose\n")
+    _fake_stamp_dir(tmp_path, monkeypatch, "norms prose\n")
     assert _load_review_guidance() == "norms prose\n"
 
 

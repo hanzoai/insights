@@ -14,16 +14,16 @@ concurrency:
 
 jobs:
     review:
-        # Write access is required to apply the stamphog label, so no
+        # Write access is required to apply the stamp label, so no
         # additional author_association check is needed. Bot-authored PRs are
         # hard-excluded regardless of who applies the label — see the
         # bot-author-skip job, which strips the label and explains why.
-        # Triggers: explicit `stamphog` label, ready_for_review with the
+        # Triggers: explicit `stamp` label, ready_for_review with the
         # label already present, or `synchronize` where decide-delta
         # asked for re-review (or itself failed — fail closed for safety).
         needs: [decide-delta, dismiss]
         # !cancelled() rather than always() so a push that supersedes this run stops the
-        # LLM review instead of posting a stamphog approval for a commit that is no longer
+        # LLM review instead of posting a stamp approval for a commit that is no longer
         # HEAD. The explicit decide-delta checks below keep the fail-closed re-review paths.
         if: >-
             !cancelled()
@@ -32,8 +32,8 @@ jobs:
             && !contains(github.event.pull_request.user.login, '[bot]')
             && github.event.pull_request.user.login != 'insights-bot'
             && (
-              github.event.label.name == 'stamphog'
-              || (github.event.action == 'ready_for_review' && contains(github.event.pull_request.labels.*.name, 'stamphog'))
+              github.event.label.name == 'stamp'
+              || (github.event.action == 'ready_for_review' && contains(github.event.pull_request.labels.*.name, 'stamp'))
               || needs.decide-delta.outputs.run_review == 'true'
               || needs.decide-delta.result == 'failure'
             )
@@ -74,7 +74,7 @@ jobs:
             - name: Run review
               env:
                   # Dedicated key so a rotation of the shared ANTHROPIC_API_KEY
-                  # doesn't break stamphog (and vice versa). The env var name
+                  # doesn't break stamp (and vice versa). The env var name
                   # stays ANTHROPIC_API_KEY — that's what the Claude Agent SDK reads.
                   ANTHROPIC_API_KEY: ${{ secrets.STAMPFN_ANTHROPIC_API_KEY }}
                   # ai-gateway cutover: when both are set, the review routes through
@@ -93,8 +93,8 @@ jobs:
             - name: Post review
               if: always()
               env:
-                  # Everything stamphog does — the approval, the sticky comment,
-                  # the label strip — posts as the Stamphog app (GH_TOKEN) so it
+                  # Everything stamp does — the approval, the sticky comment,
+                  # the label strip — posts as the Stamp app (GH_TOKEN) so it
                   # all carries the bot's own identity. The app approval was
                   # confirmed to unblock PRs, so the earlier bodyless
                   # github-actions[bot] fallback approval has been dropped.
@@ -121,7 +121,7 @@ jobs:
                   fi
 
                   if [ "$VERDICT" = "APPROVED" ]; then
-                    # Single Stamphog app approval, carrying the review body.
+                    # Single Stamp app approval, carrying the review body.
                     # Fatal on failure (the step runs under `set -e`): this is
                     # now the only approval, so if it doesn't post the PR stays
                     # blocked and that must surface as a red run, not a warning.
@@ -136,8 +136,8 @@ jobs:
                     # bodies can't be minimized or deleted, so when an automation
                     # loop keeps re-applying the label against a deterministic
                     # denial (e.g. the size gate) the refusals pile up — one PR
-                    # collected 60+ near-identical stamphog reviews.
-                    MARKER='<!-- stamphog-sticky-review -->'
+                    # collected 60+ near-identical stamp reviews.
+                    MARKER='<!-- stamp-sticky-review -->'
                     RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
                     # Author + leading-marker filter: on a public repo anyone can
@@ -157,7 +157,7 @@ jobs:
                     if [ -n "$EXISTING" ]; then
                       COMMENT_ID=$(jq -r '.id' <<<"$EXISTING")
                       EXISTING_BODY=$(jq -r '.body' <<<"$EXISTING")
-                      PREV_COUNT=$(jq -r '.body | (match("stamphog-review-count:([0-9]+)").captures[0].string // "0")' <<<"$EXISTING")
+                      PREV_COUNT=$(jq -r '.body | (match("stamp-review-count:([0-9]+)").captures[0].string // "0")' <<<"$EXISTING")
                     fi
 
                     # The append path requires an actual verdict in the prior body —
@@ -170,26 +170,26 @@ jobs:
                       # the author still needs to act on. The anchored grep dedups
                       # only the note itself, never verdict reasoning that happens
                       # to mention review failures.
-                      { grep -v '^> ⚠️ A later review run failed' <<<"$EXISTING_BODY" || true; } > /tmp/stamphog-comment.md
+                      { grep -v '^> ⚠️ A later review run failed' <<<"$EXISTING_BODY" || true; } > /tmp/stamp-comment.md
                       {
                         echo
                         echo "> ⚠️ A later review run failed before producing a verdict — check the [workflow run]($RUN_URL). The verdict above is from an earlier run."
-                      } >> /tmp/stamphog-comment.md
+                      } >> /tmp/stamp-comment.md
                     else
                       # The counter tracks verdicts only — a crash rebuild keeps
                       # the previous count so repeated failures don't inflate it.
                       if [ -n "$REASONING" ]; then
                         COUNT=$((PREV_COUNT + 1))
-                        HEADLINE="stamphog reviewed \`${REVIEWED_SHA:-unknown}\` — verdict: **${VERDICT:-unknown}**"
+                        HEADLINE="stamp reviewed \`${REVIEWED_SHA:-unknown}\` — verdict: **${VERDICT:-unknown}**"
                         DETAIL="$REASONING"
                       else
                         COUNT=$PREV_COUNT
-                        HEADLINE="stamphog review failed before producing a verdict"
+                        HEADLINE="stamp review failed before producing a verdict"
                         DETAIL="Check the [workflow run]($RUN_URL) and re-apply the label to retry."
                       fi
                       {
                         echo "$MARKER"
-                        echo "<!-- stamphog-review-count:$COUNT -->"
+                        echo "<!-- stamp-review-count:$COUNT -->"
                         echo "> [!NOTE]"
                         echo "> 🤖 $HEADLINE"
                         echo
@@ -197,10 +197,10 @@ jobs:
                         if [ -n "$COMMENT_ID" ]; then
                           echo
                           [ "$PREV_COUNT" -gt 0 ] \
-                            && echo "_Updated in place — this replaces $PREV_COUNT earlier stamphog review(s) on this PR._" \
-                            || echo "_Updated in place from an earlier stamphog review._"
+                            && echo "_Updated in place — this replaces $PREV_COUNT earlier stamp review(s) on this PR._" \
+                            || echo "_Updated in place from an earlier stamp review._"
                         fi
-                      } > /tmp/stamphog-comment.md
+                      } > /tmp/stamp-comment.md
                     fi
 
                     # A failed PATCH (comment deleted, transient API error) falls
@@ -209,11 +209,11 @@ jobs:
                     # COMMENT-review path had.
                     if [ -n "$COMMENT_ID" ]; then
                       gh api -X PATCH "repos/$REPO/issues/comments/$COMMENT_ID" \
-                        -F "body=@/tmp/stamphog-comment.md" || COMMENT_ID=""
+                        -F "body=@/tmp/stamp-comment.md" || COMMENT_ID=""
                     fi
                     if [ -z "$COMMENT_ID" ]; then
                       gh api -X POST "repos/$REPO/issues/$PR/comments" \
-                        -F "body=@/tmp/stamphog-comment.md"
+                        -F "body=@/tmp/stamp-comment.md"
                     fi
                   fi
 
@@ -228,7 +228,7 @@ jobs:
                   # default instead of everyone remembering to extend a
                   # keep-list.
                   if [ "$VERDICT" = "REFUSED" ] || [ "$VERDICT" = "ESCALATE" ]; then
-                    gh pr edit "$PR" --remove-label stamphog \
+                    gh pr edit "$PR" --remove-label stamp \
                       --repo "$REPO"
                   fi
 
@@ -246,7 +246,7 @@ jobs:
     # classifies the new commits since the last bot approval, dismiss only
     # runs when the delta is non-trivial. Trivial deltas (test/docs/lockfile
     # /generated paths and clean merges from the base branch) retain the
-    # prior approval — a comment on the PR records the reason. The stamphog
+    # prior approval — a comment on the PR records the reason. The stamp
     # label stays sticky across pushes; the review job's existing
     # non-APPROVED label-strip is the auto-loop's escape hatch.
     decide-delta:
@@ -256,7 +256,7 @@ jobs:
             && github.event.pull_request.user.type != 'Bot'
             && !contains(github.event.pull_request.user.login, '[bot]')
             && github.event.pull_request.user.login != 'insights-bot'
-            && contains(github.event.pull_request.labels.*.name, 'stamphog')
+            && contains(github.event.pull_request.labels.*.name, 'stamp')
         runs-on: ubuntu-latest
         timeout-minutes: 5
         outputs:
@@ -319,7 +319,7 @@ jobs:
                   REASON: ${{ steps.decide.outputs.reason }}
               run: |
                   gh pr comment "$PR" --repo "$REPO" \
-                    --body "Retaining stamphog approval — delta since last review classified as \`$REASON\`."
+                    --body "Retaining stamp approval — delta since last review classified as \`$REASON\`."
 
     # insightscli-lint: not-a-required-gate — branches on decide-delta's result to decide
     # whether to dismiss a stale approval; it emits no required status check.
@@ -343,7 +343,7 @@ jobs:
         # no-op when there's nothing to dismiss.
         # Same-repo only: forked / Dependabot PRs don't receive the app secrets,
         # so the app-token step below would fail on every such synchronize. There
-        # is nothing to dismiss there anyway, since stamphog can never have
+        # is nothing to dismiss there anyway, since stamp can never have
         # approved a fork PR (the review job's app-token step is equally starved
         # of secrets on forks), so gate the whole job to head branches in this repo.
         if: >-
@@ -369,7 +369,7 @@ jobs:
 
             - name: Dismiss stale bot approvals
               env:
-                  # Act as the Stamphog app for consistency with every other
+                  # Act as the Stamp app for consistency with every other
                   # write. pull-requests:write can dismiss any review regardless
                   # of its author, so the app dismisses both its own approvals
                   # and any legacy github-actions[bot] ones.
@@ -380,23 +380,23 @@ jobs:
               run: |
                   set -euo pipefail
 
-                  # Dismiss APPROVED reviews from either Stamphog identity —
-                  # github-actions[bot] (bodyless approval) and stamphog[bot]
+                  # Dismiss APPROVED reviews from either Stamp identity —
+                  # github-actions[bot] (bodyless approval) and stamp[bot]
                   # (the app approval carrying the review body). Human reviews
                   # and non-approval reviews are untouched.
                   mapfile -t REVIEW_IDS < <(
                       gh api "repos/$REPO/pulls/$PR/reviews" --paginate \
-                        --jq '.[] | select((.user.login == "github-actions[bot]" or .user.login == "stamphog[bot]") and .state == "APPROVED") | .id'
+                        --jq '.[] | select((.user.login == "github-actions[bot]" or .user.login == "stamp[bot]") and .state == "APPROVED") | .id'
                   )
 
                   for id in "${REVIEW_IDS[@]}"; do
                       [ -z "$id" ] && continue
                       gh api -X PUT "repos/$REPO/pulls/$PR/reviews/$id/dismissals" \
-                        -f message="New commits pushed (delta classified \`$REASON\`) — stamphog approval dismissed; re-review running automatically." \
+                        -f message="New commits pushed (delta classified \`$REASON\`) — stamp approval dismissed; re-review running automatically." \
                         -f event=DISMISS
                   done
 
-    # stamphog never reviews bot-authored PRs (dependabot, mendral, other
+    # stamp never reviews bot-authored PRs (dependabot, mendral, other
     # agents). A human applying the label can't override this — bot output
     # isn't a trusted basis for an auto-approval. review / decide-delta are
     # gated to skip bot authors; this job runs instead to strip the label so
@@ -414,8 +414,8 @@ jobs:
               || github.event.pull_request.user.login == 'insights-bot'
             )
             && (
-              github.event.label.name == 'stamphog'
-              || (github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, 'stamphog'))
+              github.event.label.name == 'stamp'
+              || (github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, 'stamp'))
             )
         runs-on: ubuntu-latest
         timeout-minutes: 5
@@ -441,6 +441,6 @@ jobs:
                   # posted — or the label predates this gate — so just clean up.
                   if [ "$ACTION" != "synchronize" ]; then
                     gh pr comment "$PR" --repo "$REPO" \
-                      --body "stamphog does not review bot-authored PRs — removing the \`stamphog\` label. This change needs a human reviewer."
+                      --body "stamp does not review bot-authored PRs — removing the \`stamp\` label. This change needs a human reviewer."
                   fi
-                  gh pr edit "$PR" --repo "$REPO" --remove-label stamphog
+                  gh pr edit "$PR" --repo "$REPO" --remove-label stamp

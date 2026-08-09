@@ -1,0 +1,381 @@
+import { router } from 'kea-router'
+import { expectLogic } from 'kea-test-utils'
+
+import { urls } from 'scenes/urls'
+
+import { useMocks } from '~/mocks/jest'
+import { initKeaTests } from '~/test/init'
+
+import { ReviewReviewsListScope } from 'products/review/frontend/generated/api.schemas'
+
+import { MAX_REVIEWS_LIMIT, REVIEWS_PAGE_SIZE, reviewSettingsLogic } from './reviewSettingsLogic'
+
+/** A minimal review detail: only the fields the drawer selectors read. */
+function reviewDetail(id: string, runUrgencyThreshold: string | null): Record<string, any> {
+    return {
+        id,
+        published: false,
+        run_urgency_threshold: runUrgencyThreshold,
+        findings: [
+            { title: 'blocker', effective_priority: 'must_fix' },
+            { title: 'recommended', effective_priority: 'should_fix' },
+        ],
+        dismissed_findings: [],
+    }
+}
+
+// More project-wide reviews than the API's maximum limit, so both "Show more" growth and its
+// ceiling are reachable.
+const everyoneReviews = Array.from({ length: MAX_REVIEWS_LIMIT + REVIEWS_PAGE_SIZE }, (_, i) => ({
+    id: `r${i}`,
+    in_progress: false,
+}))
+
+describe('reviewSettingsLogic', () => {
+    let logic: ReturnType<typeof reviewSettingsLogic.build>
+
+    beforeEach(() => {
+        useMocks({
+            get: {
+                // The user has no reviews of their own; the project has a dozen.
+                '/v1/projects/:team_id/review/reviews/': ({ request }) => {
+                    const url = new URL(request.url)
+                    const limit = Number(url.searchParams.get('limit') ?? REVIEWS_PAGE_SIZE)
+                    const pool =
+                        url.searchParams.get('scope') === ReviewReviewsListScope.Everyone ? everyoneReviews : []
+                    return [200, { results: pool.slice(0, limit), has_more: pool.length > limit }]
+                },
+                '/v1/projects/:team_id/review/reviews/perspective_stats/': () => [
+                    200,
+                    { report_count: 0, perspectives: [] },
+                ],
+                '/v1/projects/:team_id/review/settings/': () => [
+                    200,
+                    { review_inbox_prs: false, review_labeled_prs: true, urgency_threshold: 'should_fix' },
+                ],
+                '/v1/projects/:team_id/review/perspectives/': () => [200, []],
+                '/v1/projects/:team_id/review/blind_spots/': () => [200, []],
+                '/v1/projects/:team_id/review/validators/': () => [200, []],
+            },
+            post: {
+                '/v1/projects/:team_id/review/reviews/trigger/': () => [
+                    202,
+                    { workflow_id: 'wf-1', status: 'started' },
+                ],
+            },
+        })
+        // The scope reducers persist; without this a prior test's explicit choice leaks over.
+        localStorage.clear()
+        initKeaTests()
+        logic = reviewSettingsLogic()
+    })
+
+    afterEach(() => {
+        logic.unmount()
+    })
+
+    it('auto-defaults to the entire project when the user has no reviews of their own', async () => {
+        logic.mount()
+
+        await expectLogic(logic)
+            .toDispatchActions(['loadRecentReviewsSuccess', 'applyDefaultReviewsScope', 'loadRecentReviewsSuccess'])
+            .toMatchValues({
+                reviewsScope: ReviewReviewsListScope.Everyone,
+                // The auto-default is not an explicit choice — a later real one must still win.
+                hasUserChosenReviewsScope: false,
+            })
+        expect(logic.values.recentReviews).toHaveLength(REVIEWS_PAGE_SIZE)
+        // The auto-default must not write the URL: hydrating `?reviews_scope=` from a link marks
+        // the scope as explicitly chosen, so mirroring the fallback would make it permanent.
+        expect(router.values.searchParams.reviews_scope).toBeUndefined()
+    })
+
+    it('a started review clears the input, reloads the list, and resets the in-flight flag', async () => {
+        logic.mount()
+        // Consume the mount-time auto-default so its loadRecentReviews can't satisfy the assertion below.
+        await expectLogic(logic).toDispatchActions([
+            'loadRecentReviewsSuccess',
+            'applyDefaultReviewsScope',
+            'loadRecentReviewsSuccess',
+        ])
+        logic.actions.setTriggerPrUrl('https://github.com/Insights/hanzo.ai/pull/1')
+
+        await expectLogic(logic, () => logic.actions.submitTriggerReview())
+            .toDispatchActions([
+                'submitTriggerReview',
+                'startTriggeredReviewWatch',
+                'loadRecentReviews',
+                'submitTriggerReviewFinished',
+            ])
+            .toMatchValues({ triggeringReview: false, triggerPrUrl: '' })
+        // The report row is created seconds after the 202; the watch keeps the list polling until
+        // it appears — without it the poll only arms when another review is already running.
+        expect(logic.values.awaitingTriggeredReview).toBe(true)
+    })
+
+    it('a repeat submit while a request is in flight does not start a second review', async () => {
+        // The disabled button can't stop an Enter keypress in the input, so the listener must drop
+        // repeats itself — without the guard each keypress POSTs another trigger.
+        let triggerCalls = 0
+        useMocks({
+            post: {
+                '/v1/projects/:team_id/review/reviews/trigger/': () => {
+                    triggerCalls++
+                    return [202, { workflow_id: 'wf-1', status: 'started' }]
+                },
+            },
+        })
+        logic.mount()
+        await expectLogic(logic).toDispatchActions([
+            'loadRecentReviewsSuccess',
+            'applyDefaultReviewsScope',
+            'loadRecentReviewsSuccess',
+        ])
+        logic.actions.setTriggerPrUrl('https://github.com/Insights/hanzo.ai/pull/1')
+
+        logic.actions.submitTriggerReview()
+        logic.actions.submitTriggerReview()
+        await expectLogic(logic).toDispatchActions(['submitTriggerReviewFinished'])
+
+        expect(triggerCalls).toBe(1)
+    })
+
+    it('an already-reviewed PR informs without arming the watch', async () => {
+        useMocks({
+            post: {
+                '/v1/projects/:team_id/review/reviews/trigger/': () => [
+                    200,
+                    { workflow_id: '', status: 'already_reviewed' },
+                ],
+            },
+        })
+        logic.mount()
+        await expectLogic(logic).toDispatchActions([
+            'loadRecentReviewsSuccess',
+            'applyDefaultReviewsScope',
+            'loadRecentReviewsSuccess',
+        ])
+        logic.actions.setTriggerPrUrl('https://github.com/Insights/hanzo.ai/pull/1')
+
+        // Arming the watch here would poll for two minutes waiting for a run that never starts.
+        await expectLogic(logic, () => logic.actions.submitTriggerReview())
+            .toDispatchActions(['submitTriggerReview', 'loadRecentReviews', 'submitTriggerReviewFinished'])
+            .toNotHaveDispatchedActions(['startTriggeredReviewWatch'])
+            .toMatchValues({ triggeringReview: false, triggerPrUrl: '', awaitingTriggeredReview: false })
+    })
+
+    it('a rejected trigger resets the in-flight flag and keeps the input for correction', async () => {
+        useMocks({
+            post: {
+                '/v1/projects/:team_id/review/reviews/trigger/': () => [
+                    403,
+                    { error: "Review reviews can't be started from this project yet" },
+                ],
+            },
+        })
+        logic.mount()
+        await expectLogic(logic).toDispatchActions([
+            'loadRecentReviewsSuccess',
+            'applyDefaultReviewsScope',
+            'loadRecentReviewsSuccess',
+        ])
+        logic.actions.setTriggerPrUrl('https://github.com/Insights/hanzo.ai/pull/1')
+
+        await expectLogic(logic, () => logic.actions.submitTriggerReview())
+            .toDispatchActions(['submitTriggerReview', 'submitTriggerReviewFinished'])
+            .toNotHaveDispatchedActions(['loadRecentReviews', 'startTriggeredReviewWatch'])
+            .toMatchValues({
+                triggeringReview: false,
+                triggerPrUrl: 'https://github.com/Insights/hanzo.ai/pull/1',
+                awaitingTriggeredReview: false,
+            })
+    })
+
+    it('the scope switch rescopes the effectiveness stats along with the list', async () => {
+        // The page-level switch must move the stat cards and the reviews list together — dropping
+        // the stats reload from the scope listeners (or the scope param from the request) would
+        // show one scope's list over the other scope's numbers, the exact confusion the switch
+        // exists to fix.
+        const statsScopes: (string | null)[] = []
+        useMocks({
+            get: {
+                '/v1/projects/:team_id/review/reviews/perspective_stats/': ({ request }) => {
+                    statsScopes.push(new URL(request.url).searchParams.get('scope'))
+                    return [200, { report_count: 0, perspectives: [] }]
+                },
+            },
+        })
+        logic.mount()
+        await expectLogic(logic)
+            .toDispatchActions(['loadRecentReviewsSuccess', 'applyDefaultReviewsScope', 'loadRecentReviewsSuccess'])
+            .toFinishAllListeners()
+        // The mount-time auto-default to Entire project already rescoped the stats.
+        expect(statsScopes[statsScopes.length - 1]).toBe(ReviewReviewsListScope.Everyone)
+
+        logic.actions.setReviewsScope(ReviewReviewsListScope.Mine)
+        // Old data drops synchronously so neither the cards nor the list ever show the other
+        // scope's content — even if the reload were to fail.
+        expect(logic.values.perspectiveStats).toBeNull()
+        expect(logic.values.recentReviews).toBeNull()
+        await expectLogic(logic).toDispatchActions(['loadPerspectiveStatsSuccess'])
+        expect(statsScopes[statsScopes.length - 1]).toBe(ReviewReviewsListScope.Mine)
+    })
+
+    it('respects an explicit scope choice even when that scope is empty', async () => {
+        logic.mount()
+        // Consume the mount-time auto-default, so the not-dispatched window below starts after it.
+        await expectLogic(logic).toDispatchActions([
+            'loadRecentReviewsSuccess',
+            'applyDefaultReviewsScope',
+            'loadRecentReviewsSuccess',
+        ])
+
+        await expectLogic(logic, () => logic.actions.setReviewsScope(ReviewReviewsListScope.Mine))
+            .toDispatchActions(['loadRecentReviewsSuccess'])
+            .toNotHaveDispatchedActions(['applyDefaultReviewsScope'])
+            .toMatchValues({
+                reviewsScope: ReviewReviewsListScope.Mine,
+                hasUserChosenReviewsScope: true,
+                recentReviews: [],
+            })
+    })
+
+    it('grows the list by a page per "Show more" and collapses instantly on "Show fewer"', async () => {
+        logic.mount()
+        // Land on the everyone scope (auto-default) with the first page loaded.
+        await expectLogic(logic).toDispatchActions([
+            'loadRecentReviewsSuccess',
+            'applyDefaultReviewsScope',
+            'loadRecentReviewsSuccess',
+        ])
+        expect(logic.values.moreReviewsAvailable).toBe(true)
+
+        await expectLogic(logic, () => logic.actions.showMoreReviews())
+            .toDispatchActions(['loadRecentReviewsSuccess'])
+            .toMatchValues({ reviewsLimit: REVIEWS_PAGE_SIZE * 2 })
+        expect(logic.values.recentReviews).toHaveLength(REVIEWS_PAGE_SIZE * 2)
+
+        // The collapse must not wait for the reconciling refetch, and hiding loaded rows means
+        // "Show more" must stay on offer regardless of the last response's flag.
+        logic.actions.showFewerReviews()
+        expect(logic.values.recentReviews).toHaveLength(REVIEWS_PAGE_SIZE)
+        expect(logic.values.moreReviewsAvailable).toBe(true)
+        await expectLogic(logic).toDispatchActions(['loadRecentReviewsSuccess']).toMatchValues({
+            reviewsLimit: REVIEWS_PAGE_SIZE,
+        })
+
+        // A scope flip is a different list — it starts compact again.
+        logic.actions.showMoreReviews()
+        logic.actions.setReviewsScope(ReviewReviewsListScope.Mine)
+        await expectLogic(logic).toMatchValues({ reviewsLimit: REVIEWS_PAGE_SIZE })
+    })
+
+    it('buckets drawer findings by the stored run threshold, with the viewer proxy only for old rows', async () => {
+        // The run gated at must_fix while the viewer's own setting (mocked above) is should_fix.
+        // Bucketing by the viewer's setting would show the held-back should_fix finding as
+        // published — the exact lie the stored snapshot exists to fix.
+        useMocks({
+            get: {
+                '/v1/projects/:team_id/review/reviews/r-stamped/': () => [
+                    200,
+                    reviewDetail('r-stamped', 'must_fix'),
+                ],
+                '/v1/projects/:team_id/review/reviews/r-old/': () => [200, reviewDetail('r-old', null)],
+            },
+        })
+        logic.mount()
+        await expectLogic(logic).toDispatchActions(['loadSettingsSuccess'])
+
+        logic.actions.openReviewDetailById('r-stamped')
+        await expectLogic(logic).toDispatchActions(['loadReviewDetailSuccess'])
+        expect(logic.values.reviewFindingsSplit?.published.map((f) => f.title)).toEqual(['blocker'])
+        expect(logic.values.reviewFindingsSplit?.belowThreshold.map((f) => f.title)).toEqual(['recommended'])
+
+        // A pre-column row (null stored threshold) keeps the old viewer-settings approximation.
+        logic.actions.openReviewDetailById('r-old')
+        await expectLogic(logic).toDispatchActions(['loadReviewDetailSuccess'])
+        expect(logic.values.reviewFindingsSplit?.published.map((f) => f.title)).toEqual(['blocker', 'recommended'])
+        expect(logic.values.reviewFindingsSplit?.belowThreshold).toEqual([])
+    })
+
+    it('opens a review from ?review= and mirrors drawer state back to the URL', async () => {
+        // ?review=<report id> is a permanent public contract: PR status comments bake this exact
+        // param into their "View them in Insights" links, so renaming the param or dropping the URL
+        // sync silently dead-ends every held-back-findings link already posted to GitHub.
+        useMocks({
+            get: {
+                '/v1/projects/:team_id/review/reviews/r-9/': () => [200, reviewDetail('r-9', null)],
+            },
+        })
+        logic.mount()
+        await expectLogic(logic).toDispatchActions(['loadRecentReviewsSuccess'])
+
+        router.actions.push(urls.codeReview(), { review: 'r-9' })
+        await expectLogic(logic)
+            .toDispatchActions(['openReviewDetailById', 'loadReviewDetailSuccess'])
+            // No list row on a deep link — the drawer must render from the loaded detail alone.
+            .toMatchValues({ reviewDrawerOpen: true, openedReview: null })
+        expect(logic.values.reviewDetail?.id).toBe('r-9')
+
+        // A repeat location event for the same review (e.g. the open's own URL write-back) must not
+        // re-dispatch into the already-open drawer and reload the detail forever.
+        await expectLogic(logic, () =>
+            router.actions.push(urls.codeReview(), { review: 'r-9' })
+        ).toNotHaveDispatchedActions(['openReviewDetailById'])
+
+        // Closing removes the param in place (replace, not push), so back doesn't reopen the drawer.
+        logic.actions.closeReviewDrawer()
+        expect(logic.values.reviewDrawerOpen).toBe(false)
+        expect(router.values.searchParams.review).toBeUndefined()
+
+        // And navigation that drops the param closes an open drawer — the URL and the visible
+        // report must never disagree.
+        router.actions.push(urls.codeReview(), { review: 'r-9' })
+        await expectLogic(logic).toDispatchActions(['openReviewDetailById'])
+        router.actions.push(urls.codeReview(), {})
+        expect(logic.values.reviewDrawerOpen).toBe(false)
+    })
+
+    it('closes a deep-linked drawer when the review fails to load', async () => {
+        // A stale ?review= link (deleted report, wrong project) has no list row to fall back on —
+        // without the failure path the drawer would sit open on skeletons forever.
+        useMocks({
+            get: {
+                '/v1/projects/:team_id/review/reviews/r-gone/': () => [404, { detail: 'Not found.' }],
+            },
+        })
+        logic.mount()
+        await expectLogic(logic).toDispatchActions(['loadRecentReviewsSuccess'])
+
+        router.actions.push(urls.codeReview(), { review: 'r-gone' })
+        await expectLogic(logic).toDispatchActions([
+            'openReviewDetailById',
+            'loadReviewDetailFailure',
+            'closeReviewDrawer',
+        ])
+        expect(logic.values.reviewDrawerOpen).toBe(false)
+        expect(router.values.searchParams.review).toBeUndefined()
+    })
+
+    it('stops "Show more" at the API\'s maximum limit', async () => {
+        logic.mount()
+        await expectLogic(logic).toDispatchActions([
+            'loadRecentReviewsSuccess',
+            'applyDefaultReviewsScope',
+            'loadRecentReviewsSuccess',
+        ])
+
+        // Enough clicks to push an unclamped limit past the API's max, where the request would 400
+        // and strand the user on a dead button.
+        for (let i = 0; i < MAX_REVIEWS_LIMIT / REVIEWS_PAGE_SIZE; i++) {
+            logic.actions.showMoreReviews()
+        }
+        await expectLogic(logic).toFinishAllListeners()
+
+        expect(logic.values.reviewsLimit).toBe(MAX_REVIEWS_LIMIT)
+        expect(logic.values.recentReviews).toHaveLength(MAX_REVIEWS_LIMIT)
+        // More rows exist server-side, but the ceiling is reached — the button goes away rather
+        // than offering a request the server rejects.
+        expect(logic.values.moreReviewsAvailable).toBe(false)
+    })
+})

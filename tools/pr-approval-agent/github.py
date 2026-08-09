@@ -89,16 +89,16 @@ def is_bot_author(user: dict) -> bool:
     return "[bot]" in login or login in _BOT_MACHINE_USERS
 
 
-# Stamphog's own review identities: REFUSE/ESCALATE comment reviews post via
-# the GitHub App (stamphog[bot]); APPROVE reviews post via the workflow's
+# Stamp's own review identities: REFUSE/ESCALATE comment reviews post via
+# the GitHub App (stamp[bot]); APPROVE reviews post via the workflow's
 # GITHUB_TOKEN (github-actions[bot]) so they count toward branch protection.
-_SELF_REVIEW_LOGINS = {"stamphog[bot]", "github-actions[bot]"}
+_SELF_REVIEW_LOGINS = {"stamp[bot]", "github-actions[bot]"}
 
 
 def _prompt_worthy_author(login: str | None, association: str | None, is_bot: bool) -> bool:
     """One author-trust gate for reviews, inline comments, and discussion.
 
-    Drops stamphog's own prior verdicts (they describe a stale snapshot the next
+    Drops stamp's own prior verdicts (they describe a stale snapshot the next
     run would misread as third-party tampering) and admits only trusted org
     members or bots. Without this, an untrusted external commenter could reach
     the prompt via discussion and grief it with a fake maintainer hold or forge
@@ -117,7 +117,7 @@ def _normalize_reviews_for_prompt(reviews_raw: list[dict], head_sha: str) -> lis
     the current PR head. This lets the LLM distinguish active feedback from
     older context that may already have been addressed in follow-up commits.
 
-    Stamphog's own prior reviews are excluded: they describe an earlier
+    Stamp's own prior reviews are excluded: they describe an earlier
     snapshot of the PR, are never independent review signal, and the reviewer
     has no way to recognize them as its own — re-reading a stale verdict after
     the PR state changed makes it suspect tampering and refuse forever.
@@ -147,7 +147,7 @@ def _normalize_discussion_for_prompt(comments_raw: list[dict]) -> list[dict]:
     """Normalize the PR's issue-comment timeline for the reviewer prompt.
 
     These are the general discussion comments (not inline review comments).
-    Stamphog's own bot comments are excluded and the same author-trust gate as
+    Stamp's own bot comments are excluded and the same author-trust gate as
     reviews/inline comments applies, so an untrusted external commenter can't
     slip a fake maintainer hold or assurance claim into the prompt.
     """
@@ -372,11 +372,11 @@ def _fetch_threads_and_reactions(repo: str, pr_number: int, author: str) -> tupl
                     f"has >50 comments — pagination not implemented, escalate to human review"
                 )
             for c in comment_page["nodes"]:
-                # Same author-trust gate as reviews and discussion: stamphog's
+                # Same author-trust gate as reviews and discussion: stamp's
                 # own inline comments describe an earlier snapshot (feeding them
                 # back reads as impersonation) and untrusted external commenters
                 # are dropped. Reactions on these comments are also dropped — a
-                # 👍 on stamphog's comment endorses stamphog's verdict, not the PR.
+                # 👍 on stamp's comment endorses stamp's verdict, not the PR.
                 comment_author = c.get("author") or {}
                 if not _prompt_worthy_author(
                     comment_author.get("login"), c.get("authorAssociation"), comment_author.get("__typename") == "Bot"

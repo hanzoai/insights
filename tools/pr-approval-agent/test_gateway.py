@@ -72,7 +72,7 @@ def test_resolves_and_strips_v1_for_anthropic_base(monkeypatch, configured_url, 
 
 
 def test_gateway_env_points_sdk_at_gateway():
-    env = gateway_env("https://gateway.us.hanzo.ai", "sk-secret", {"stamphog_pr_number": 123})
+    env = gateway_env("https://gateway.us.hanzo.ai", "sk-secret", {"stamp_pr_number": 123})
     assert env["ANTHROPIC_BASE_URL"] == "https://gateway.us.hanzo.ai"
     assert env["ANTHROPIC_AUTH_TOKEN"] == "sk-secret"
     assert env["ANTHROPIC_API_KEY"] == "sk-secret"
@@ -80,34 +80,34 @@ def test_gateway_env_points_sdk_at_gateway():
 
 def test_gateway_env_tags_ai_product_and_attribution():
     # Go gateway reads one X-Insights-Properties JSON blob, not x-insights-property-*.
-    env = gateway_env("https://host", "sk-secret", {"stamphog_pr_number": 123, "stamphog_repo": "Insights/insights"})
+    env = gateway_env("https://host", "sk-secret", {"stamp_pr_number": 123, "stamp_repo": "Insights/insights"})
     headers = env["ANTHROPIC_CUSTOM_HEADERS"]
     assert headers == (
-        'X-Insights-Properties: {"ai_product":"aio_stamphog","stamphog_pr_number":123,"stamphog_repo":"Insights/insights"}'
+        'X-Insights-Properties: {"ai_product":"aio_stamp","stamp_pr_number":123,"stamp_repo":"Insights/insights"}'
     )
     assert "x-insights-property-" not in headers
 
 
 def test_ai_product_uses_aio_prefix_no_reserved_prefix():
-    assert AI_PRODUCT == "aio_stamphog"
+    assert AI_PRODUCT == "aio_stamp"
     assert not AI_PRODUCT.startswith("$")
 
 
 def test_header_values_are_single_line():
-    env = gateway_env("https://host", "sk-secret", {"stamphog_pr_title": "line one\nline two"})
+    env = gateway_env("https://host", "sk-secret", {"stamp_pr_title": "line one\nline two"})
     header = env["ANTHROPIC_CUSTOM_HEADERS"]
     assert "\n" not in header
-    assert '"stamphog_pr_title":"line one line two"' in header
+    assert '"stamp_pr_title":"line one line two"' in header
 
 
 def test_none_attribution_values_dropped():
-    env = gateway_env("https://host", "sk-secret", {"stamphog_commit_type": None})
-    assert "stamphog_commit_type" not in env["ANTHROPIC_CUSTOM_HEADERS"]
+    env = gateway_env("https://host", "sk-secret", {"stamp_commit_type": None})
+    assert "stamp_commit_type" not in env["ANTHROPIC_CUSTOM_HEADERS"]
 
 
 def test_extra_properties_parses_server_injected_json(monkeypatch):
-    monkeypatch.setenv("STAMPFN_EXTRA_PROPERTIES", '{"stamphog_runtime":"hosted","stamphog_team_id":2}')
-    assert analytics_extra_properties() == {"stamphog_runtime": "hosted", "stamphog_team_id": 2}
+    monkeypatch.setenv("STAMPFN_EXTRA_PROPERTIES", '{"stamp_runtime":"hosted","stamp_team_id":2}')
+    assert analytics_extra_properties() == {"stamp_runtime": "hosted", "stamp_team_id": 2}
 
 
 @pytest.mark.parametrize(
