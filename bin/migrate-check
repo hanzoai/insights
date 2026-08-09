@@ -5,4 +5,10 @@ if [ -z "$INSIGHTS_SKIP_MIGRATION_CHECKS" ]; then
 	python manage.py migrate --check
 	python manage.py migrate_datastore --check
 	python manage.py run_async_migrations --check
+	# The three above read django_migrations: they answer "is every migration recorded as
+	# applied", which is a different question from "does the database have what the models
+	# declare". Production served for a long time with eleven absent tables while all three
+	# passed, because those migrations' rows had been faked past a failure and a migration
+	# recorded as applied can never run again. This one reads the schema.
+	python manage.py schema_drift
 fi
