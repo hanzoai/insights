@@ -1,4 +1,4 @@
-import { ExecResult, convertScriptToJS } from '@hanzo/scriptvm'
+import { ExecResult, convertHogToJS } from '@hanzo/scriptvm'
 
 import { execScriptImmediate } from '~/cdp/utils/script-exec'
 
@@ -21,7 +21,7 @@ export function execBenchProgram(
     })
 
     if (execResult?.finished) {
-        execResult.result = convertScriptToJS(execResult.result)
+        execResult.result = convertHogToJS(execResult.result)
     }
 
     return { execResult, error, durationMs }

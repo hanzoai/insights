@@ -178,7 +178,7 @@ describe('ErrorTrackingConsumer', () => {
                     mockProducer,
                     'test'
                 ),
-                topfn: new SingleIngestionOutput('tophog', 'datastore_topfn_test', mockProducer, 'test'),
+                topfn: new SingleIngestionOutput('topfn', 'datastore_topfn_test', mockProducer, 'test'),
                 app_metrics: new SingleIngestionOutput(
                     'app_metrics',
                     'datastore_app_metrics2_test',

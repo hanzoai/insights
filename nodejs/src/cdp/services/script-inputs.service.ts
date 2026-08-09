@@ -1,4 +1,4 @@
-import { convertScriptToJS } from '@hanzo/scriptvm'
+import { convertHogToJS } from '@hanzo/scriptvm'
 
 import { CyclotronInputType } from '~/cdp/schema/cyclotron'
 import { ACCESS_TOKEN_PLACEHOLDER } from '~/common/config/constants'
@@ -254,7 +254,7 @@ export const formatScriptInput = async (
             // NOT ALLOWED
             throw new Error(`Could not execute bytecode for input field: ${key}`)
         }
-        return convertScriptToJS(result.result)
+        return convertHogToJS(result.result)
     }
 
     if (Array.isArray(bytecode)) {
