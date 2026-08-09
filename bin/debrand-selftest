@@ -335,43 +335,49 @@ with tempfile.TemporaryDirectory() as tmp:
 # The two module systems are one defect wearing two syntaxes. TypeScript went
 # unchecked and 190 specifiers named files that had been renamed away, which is
 # the whole CDP consumer graph -- the event worker, not the web boot.
-check(
-    "a stale TypeScript specifier is repointed at where the file went",
-    debrand.ts_ref_target(
-        "./services/insightsflows/hogflow-utils",
-        "nodejs/src/cdp/cdp-api.ts",
-        {"nodejs/src/cdp/services/insightsflows/insightsflow-utils.ts"},
-        ROOT,
-    ),
-    "./services/insightsflows/insightsflow-utils",
-)
-check(
-    "...through the alias spelling too",
-    debrand.ts_ref_target(
-        "~/cdp/schema/hogflow",
-        "nodejs/src/cdp/types.ts",
-        {"nodejs/src/cdp/schema/insightsflow.ts"},
-        ROOT,
-    ),
-    "~/cdp/schema/insightsflow",
-)
-# Renaming a specifier no rule can resolve would be a guess, and a guess wires
-# the app to the wrong module without saying so.
-check(
-    "a specifier that resolves is left alone",
-    debrand.ts_ref_target(
-        "./insightsflow-utils",
-        "nodejs/src/cdp/a.ts",
-        {"nodejs/src/cdp/insightsflow-utils.ts"},
-        ROOT,
-    ),
-    None,
-)
-check(
-    "...and so is one that resolves under neither spelling",
-    debrand.ts_ref_target("./gone", "nodejs/src/cdp/a.ts", set(), ROOT),
-    None,
-)
+#
+# Rooted at an empty directory, not at this repo: `ts_file` asks the filesystem
+# whether a specifier names a directory, so against the real tree these cases
+# would answer differently the day someone adds a directory that happens to
+# match, and a test that depends on what else is on disk is not a test.
+with tempfile.TemporaryDirectory() as tmp:
+    check(
+        "a stale TypeScript specifier is repointed at where the file went",
+        debrand.ts_ref_target(
+            "./services/insightsflows/hogflow-utils",
+            "nodejs/src/cdp/cdp-api.ts",
+            {"nodejs/src/cdp/services/insightsflows/insightsflow-utils.ts"},
+            tmp,
+        ),
+        "./services/insightsflows/insightsflow-utils",
+    )
+    check(
+        "...through the alias spelling too",
+        debrand.ts_ref_target(
+            "~/cdp/schema/hogflow",
+            "nodejs/src/cdp/types.ts",
+            {"nodejs/src/cdp/schema/insightsflow.ts"},
+            tmp,
+        ),
+        "~/cdp/schema/insightsflow",
+    )
+    # Renaming a specifier no rule can resolve would be a guess, and a guess
+    # wires the app to the wrong module without saying so.
+    check(
+        "a specifier that resolves is left alone",
+        debrand.ts_ref_target(
+            "./insightsflow-utils",
+            "nodejs/src/cdp/a.ts",
+            {"nodejs/src/cdp/insightsflow-utils.ts"},
+            tmp,
+        ),
+        None,
+    )
+    check(
+        "...and so is one that resolves under neither spelling",
+        debrand.ts_ref_target("./gone", "nodejs/src/cdp/a.ts", set(), tmp),
+        None,
+    )
 
 
 # Applying the rules to an already-converged tree has to be a no-op, or every
