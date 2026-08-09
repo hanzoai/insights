@@ -165,7 +165,7 @@ describe('Hogflow Executor', () => {
     })
 
     describe('general event processing', () => {
-        let hogFlow: Flow
+        let flow: Flow
 
         beforeEach(async () => {
             hogFlow = new FixtureFlowBuilder()
@@ -633,13 +633,13 @@ describe('Hogflow Executor', () => {
             it.each([
                 [
                     'the current action was deleted',
-                    (hogFlow: Flow) => {
+                    (flow: Flow) => {
                         hogFlow.actions = hogFlow.actions.filter((action) => action.id !== 'delay')
                     },
                 ],
                 [
                     'the current action no longer has a continue edge',
-                    (hogFlow: Flow) => {
+                    (flow: Flow) => {
                         hogFlow.edges = hogFlow.edges.filter((edge) => edge.from !== 'delay')
                     },
                 ],
@@ -687,7 +687,7 @@ describe('Hogflow Executor', () => {
 
             describe('skip-forward for deleted steps (action_redirects)', () => {
                 const parkOnDeleted = (
-                    hogFlow: Flow,
+                    flow: Flow,
                     actionId = 'delay'
                 ): ReturnType<typeof createExampleFlowInvocation> => {
                     const invocation = createExampleFlowInvocation(hogFlow)
@@ -774,13 +774,13 @@ describe('Hogflow Executor', () => {
                 it.each([
                     [
                         'the dead position has no map entry',
-                        (hogFlow: Flow) => {
+                        (flow: Flow) => {
                             hogFlow.actions = hogFlow.actions.filter((action) => action.id !== 'delay')
                         },
                     ],
                     [
                         'the surviving position lost its edge (map keys are deleted steps only)',
-                        (hogFlow: Flow) => {
+                        (flow: Flow) => {
                             hogFlow.edges = hogFlow.edges.filter((edge) => edge.from !== 'delay')
                         },
                     ],
@@ -861,7 +861,7 @@ describe('Hogflow Executor', () => {
         // recomputed from the edited config.
         describe('follow-live contract: edits picked up on wake', () => {
             const parkAt = (
-                hogFlow: Flow,
+                flow: Flow,
                 actionId: string,
                 agoMs: number
             ): ReturnType<typeof createExampleFlowInvocation> => {
@@ -874,7 +874,7 @@ describe('Hogflow Executor', () => {
                 return invocation
             }
 
-            const editFlow = (hogFlow: Flow, mutate: (hogFlow: Flow) => void): void => {
+            const editFlow = (flow: Flow, mutate: (flow: Flow) => void): void => {
                 mutate(hogFlow)
                 hogFlow.updated_at = DateTime.now().toMillis()
             }
@@ -994,7 +994,7 @@ describe('Hogflow Executor', () => {
                         ],
                     })
 
-                const addDelayAction = (hogFlow: Flow, id: string): void => {
+                const addDelayAction = (flow: Flow, id: string): void => {
                     hogFlow.actions.push({
                         id,
                         name: id,
@@ -1183,7 +1183,7 @@ describe('Hogflow Executor', () => {
         })
 
         describe('early exit conditions', () => {
-            let hogFlow: Flow
+            let flow: Flow
 
             beforeEach(async () => {
                 // Setup: exit if person no longer matches trigger filters
@@ -1548,7 +1548,7 @@ describe('Hogflow Executor', () => {
             })
 
             describe('on_error handling', () => {
-                let hogFlow: Flow
+                let flow: Flow
                 beforeEach(async () => {
                     hogFlow = new FixtureFlowBuilder()
                         .withWorkflow({
@@ -2017,7 +2017,7 @@ describe('Hogflow Executor', () => {
     })
 
     describe('filter_test_accounts', () => {
-        let hogFlow: Flow
+        let flow: Flow
 
         beforeEach(async () => {
             hogFlow = new FixtureFlowBuilder()
@@ -2174,7 +2174,7 @@ describe('Hogflow Executor', () => {
 
     describe('variable merging', () => {
         it('merges default and provided variables correctly', () => {
-            const hogFlow: Flow = new FixtureFlowBuilder()
+            const flow: Flow = new FixtureFlowBuilder()
                 .withWorkflow({
                     actions: {
                         trigger: {
@@ -2230,7 +2230,7 @@ describe('Hogflow Executor', () => {
 
     describe('group propagation', () => {
         it('carries groups from globals onto the invocation', () => {
-            const hogFlow: Flow = new FixtureFlowBuilder()
+            const flow: Flow = new FixtureFlowBuilder()
                 .withWorkflow({
                     actions: {
                         trigger: { type: 'trigger', config: { type: 'event', filters: {} } },
@@ -2315,7 +2315,7 @@ describe('Hogflow Executor', () => {
             }
         })
 
-        const executeToCompletion = async (hogFlow: Flow) => {
+        const executeToCompletion = async (flow: Flow) => {
             const invocation = createExampleFlowInvocation(hogFlow, {
                 event: {
                     ...createHogExecutionGlobals().event,
