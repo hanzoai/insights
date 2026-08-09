@@ -391,11 +391,11 @@ export const oauthAuthorizeLogic = kea<oauthAuthorizeLogicType>([
                 loadAllTeams: async () => {
                     const user = userLogic.values.user
                     if (!user?.organizations?.length) {
-                        return await api.loadPaginatedResults('api/projects')
+                        return await api.loadPaginatedResults('v1/projects')
                     }
                     const results = await Promise.all(
                         user.organizations.map((org) =>
-                            api.loadPaginatedResults<TeamBasicType>(`api/organizations/${org.id}/projects`)
+                            api.loadPaginatedResults<TeamBasicType>(`v1/organizations/${org.id}/projects`)
                         )
                     )
                     return results.flat()
@@ -437,7 +437,7 @@ export const oauthAuthorizeLogic = kea<oauthAuthorizeLogicType>([
             actions.setNewProjectLoading(true)
             try {
                 const orgId = values.selectedOrganization
-                const endpoint = orgId ? `api/organizations/${orgId}/projects/` : 'api/projects/'
+                const endpoint = orgId ? `v1/organizations/${orgId}/projects/` : 'v1/projects/'
                 await api.create(endpoint, { name })
                 toast.success(`Project "${name}" created`)
                 actions.setShowCreateProject(false)

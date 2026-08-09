@@ -8,6 +8,7 @@ from django.test.utils import CaptureQueriesContext
 from insights.api.search import ENTITY_MAP, class_queryset, search_entities
 from insights.helpers.full_text_search import build_search_vector, process_query
 from insights.models import OrganizationMembership, Team, User
+from insights.models.ee_models import AccessControl
 
 from products.dashboards.backend.models.dashboard import Dashboard
 from products.early_access_features.backend.models import EarlyAccessFeature
@@ -16,8 +17,6 @@ from products.feature_flags.backend.models.feature_flag import FeatureFlag
 from products.notebooks.backend.models import Notebook
 from products.product_analytics.backend.models.insight import Insight
 from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
-
-from insights.models.ee_models import AccessControl
 
 
 class TestSearch(APIBaseTest):
@@ -45,7 +44,7 @@ class TestSearch(APIBaseTest):
         )
 
     def test_search(self):
-        response = self.client.get("/api/projects/@current/search?q=sec")
+        response = self.client.get("/v1/projects/@current/search?q=sec")
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()["results"]), 4)
@@ -56,20 +55,20 @@ class TestSearch(APIBaseTest):
         self.assertEqual(response.json()["counts"]["notebook"], 1)
 
     def test_search_without_counts(self):
-        response = self.client.get("/api/projects/@current/search?q=sec&include_counts=false")
+        response = self.client.get("/v1/projects/@current/search?q=sec&include_counts=false")
 
         assert response.status_code == 200
         assert len(response.json()["results"]) == 4
         assert "counts" not in response.json()
 
     def test_search_results_identical_with_and_without_counts(self):
-        response_with = self.client.get("/api/projects/@current/search?q=sec&include_counts=true")
-        response_without = self.client.get("/api/projects/@current/search?q=sec&include_counts=false")
+        response_with = self.client.get("/v1/projects/@current/search?q=sec&include_counts=true")
+        response_without = self.client.get("/v1/projects/@current/search?q=sec&include_counts=false")
 
         assert response_with.json()["results"] == response_without.json()["results"]
 
     def test_search_without_query(self):
-        response = self.client.get("/api/projects/@current/search")
+        response = self.client.get("/v1/projects/@current/search")
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()["results"]), 11)
@@ -81,7 +80,7 @@ class TestSearch(APIBaseTest):
 
     def test_search_filtered_by_entity(self):
         response = self.client.get(
-            "/api/projects/@current/search?q=sec&entities=insight&entities=dashboard&entities=notebook"
+            "/v1/projects/@current/search?q=sec&entities=insight&entities=dashboard&entities=notebook"
         )
 
         self.assertEqual(response.status_code, 200)
@@ -92,7 +91,7 @@ class TestSearch(APIBaseTest):
 
     def test_response_format_and_ids(self):
         response = self.client.get(
-            "/api/projects/@current/search?q=sec&entities=insight&entities=dashboard&entities=notebook"
+            "/v1/projects/@current/search?q=sec&entities=insight&entities=dashboard&entities=notebook"
         )
 
         sorted_results = sorted(response.json()["results"], key=lambda entity: entity["type"])
@@ -126,7 +125,7 @@ class TestSearch(APIBaseTest):
         )
 
     def test_extra_fields(self):
-        response = self.client.get("/api/projects/@current/search?entities=insight")
+        response = self.client.get("/v1/projects/@current/search?entities=insight")
 
         self.assertEqual(response.status_code, 200)
         results = response.json()["results"]
@@ -134,7 +133,7 @@ class TestSearch(APIBaseTest):
             self.assertEqual(set(result["extra_fields"].keys()), {"name", "description", "query"})
 
     def test_search_with_fully_invalid_query(self):
-        response = self.client.get("/api/projects/@current/search?q=%3E")
+        response = self.client.get("/v1/projects/@current/search?q=%3E")
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()["results"]), 11)
@@ -147,12 +146,12 @@ class TestSearch(APIBaseTest):
         Dashboard.objects.create(name="permissions", team=self.team, created_by=self.user)
         Dashboard.objects.create(name="permissions", team=other_team, created_by=self.user)
 
-        response = self.client.get("/api/projects/@current/search?q=permissions")
+        response = self.client.get("/v1/projects/@current/search?q=permissions")
 
         self.assertEqual(response.json()["counts"]["dashboard"], 1)
 
     def test_dangerous_characters(self):
-        response = self.client.get("/api/projects/@current/search?q=%21%3A%28%29%5B%5D%26%7C%3C%3E%20str1%20str2")
+        response = self.client.get("/v1/projects/@current/search?q=%21%3A%28%29%5B%5D%26%7C%3C%3E%20str1%20str2")
         self.assertEqual(response.status_code, 200)
 
     def test_event_definitions(self):
@@ -160,7 +159,7 @@ class TestSearch(APIBaseTest):
         EventDefinition.objects.create(name="second event", team=self.team)
         EventDefinition.objects.create(name="third event", team=self.team)
 
-        response = self.client.get("/api/projects/@current/search?q=sec&entities=event_definition")
+        response = self.client.get("/v1/projects/@current/search?q=sec&entities=event_definition")
 
         self.assertEqual(response.status_code, 200)
 
@@ -169,7 +168,7 @@ class TestSearch(APIBaseTest):
         EarlyAccessFeature.objects.create(name="second feature", team=self.team, stage="beta")
         EarlyAccessFeature.objects.create(name="third feature", team=self.team, stage="alpha")
 
-        response = self.client.get("/api/projects/@current/search?q=sec&entities=early_access_feature")
+        response = self.client.get("/v1/projects/@current/search?q=sec&entities=early_access_feature")
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["counts"]["early_access_feature"], 1)
@@ -184,7 +183,7 @@ class TestSearch(APIBaseTest):
         InsightsFlow.objects.create(name="second workflow", team=self.team)
         InsightsFlow.objects.create(name="third workflow", team=self.team)
 
-        response = self.client.get("/api/projects/@current/search?q=sec&entities=insights_flow")
+        response = self.client.get("/v1/projects/@current/search?q=sec&entities=insights_flow")
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["counts"]["insights_flow"], 1)
@@ -407,7 +406,7 @@ class TestSearchAccessLevels(APIBaseTest):
         EventDefinition.objects.create(team=self.team, name="searchable-event")
         AccessControl.objects.create(team=self.team, resource="feature_flag", resource_id=None, access_level="none")
 
-        response = self.client.get("/api/projects/@current/search?q=searchable")
+        response = self.client.get("/v1/projects/@current/search?q=searchable")
 
         assert response.status_code == 200
         flag_levels = self._levels_by_result_id(response, "feature_flag")
@@ -438,7 +437,7 @@ class TestSearchAccessLevels(APIBaseTest):
             organization_member=self.membership,
         )
 
-        response = self.client.get("/api/projects/@current/search?q=searchable")
+        response = self.client.get("/v1/projects/@current/search?q=searchable")
 
         assert response.status_code == 200
         # "none" resource access + object grants: only granted objects are returned, with resolved levels

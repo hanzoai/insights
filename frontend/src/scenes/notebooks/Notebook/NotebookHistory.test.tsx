@@ -62,9 +62,9 @@ describe('Notebook history revert flow', () => {
         historyLogic = null
         useMocks({
             get: {
-                [`/api/projects/@current/notebooks/${SHORT_ID}/`]: () => [200, cachedNotebook],
-                [`/api/projects/:project_id/notebooks/${SHORT_ID}/`]: () => [200, cachedNotebook],
-                [`/api/projects/:project_id/notebooks/${SHORT_ID}/kernel/status/`]: () => [200, { backend: null }],
+                [`/v1/projects/@current/notebooks/${SHORT_ID}/`]: () => [200, cachedNotebook],
+                [`/v1/projects/:project_id/notebooks/${SHORT_ID}/`]: () => [200, cachedNotebook],
+                [`/v1/projects/:project_id/notebooks/${SHORT_ID}/kernel/status/`]: () => [200, { backend: null }],
             },
         })
         initKeaTests()

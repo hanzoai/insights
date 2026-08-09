@@ -551,7 +551,7 @@ class TestMultiPolicyConflictDetection(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/",
             {"filters": {"groups": [{"properties": [], "rollout_percentage": 80}]}},
             format="json",
         )
@@ -566,7 +566,7 @@ class TestMultiPolicyConflictDetection(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/",
             {"filters": {"groups": [{"properties": [], "rollout_percentage": 80}]}},
             format="json",
         )
@@ -615,7 +615,7 @@ class TestActionRegistrationAndIntegration(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/",
             {"active": True, "filters": {"groups": [{"properties": [], "rollout_percentage": 80}]}},
             format="json",
         )

@@ -140,7 +140,7 @@ class PendingInviteSerializer(serializers.Serializer):
 
 
 class OnboardingSkipRequestSerializer(serializers.Serializer):
-    """Request body for POST /api/users/{id}/onboarding/skip/.
+    """Request body for POST /v1/users/{id}/onboarding/skip/.
 
     Source of truth for OpenAPI / generated TS / zod / MCP — bind this serializer at
     runtime so the contract clients believe is enforced (length cap, choice validation,
@@ -208,7 +208,7 @@ class UserSerializer(serializers.ModelSerializer):
     # Intentionally NOT declared explicitly — Meta.read_only_fields below is silently ignored
     # for explicitly declared fields (a well-known DRF gotcha that drf-spectacular replicates
     # in its generated OpenAPI), so any explicit declaration here would re-open the writable
-    # PATCH bypass on /api/users/@me/. Letting DRF auto-generate the field from the model
+    # PATCH bypass on /v1/users/@me/. Letting DRF auto-generate the field from the model
     # picks up the choices on User.onboarding_skipped_reason and Meta.read_only_fields wins.
     onboarding_delegated_to_organization_id = serializers.UUIDField(
         read_only=True,
@@ -228,7 +228,7 @@ class UserSerializer(serializers.ModelSerializer):
             "True if the user has at least one Personal API Key or passkey and has not yet "
             "acknowledged their existing credentials. Used to gate a one-shot review screen on "
             "first post-provisioning login. Becomes False once the user POSTs to "
-            "`/api/users/@me/credentials_review_complete/`. Read-only."
+            "`/v1/users/@me/credentials_review_complete/`. Read-only."
         ),
     )
 
@@ -399,7 +399,7 @@ class UserSerializer(serializers.ModelSerializer):
     @tracer.start_as_current_span("user_serializer.is_organization_first_user")
     def get_is_organization_first_user(self, instance: User) -> bool | None:
         # Only compute when the serialized user is the requesting user. Avoids paying an
-        # extra membership query on every /api/users/@me/ hit for admin/staff flows that
+        # extra membership query on every /v1/users/@me/ hit for admin/staff flows that
         # don't need this field, and ensures invitee attribution can't leak across users.
         if not self._is_self_request(instance):
             return None
@@ -440,7 +440,7 @@ class UserSerializer(serializers.ModelSerializer):
             "organization_id", flat=True
         )
 
-        # Hard cap on the number of invites returned. /api/users/@me/ runs on every page
+        # Hard cap on the number of invites returned. /v1/users/@me/ runs on every page
         # navigation; an outlier user invited to many orgs (e.g. a popular gmail.com address)
         # would otherwise ship a huge payload on every hit.
         PENDING_INVITES_MAX = 25

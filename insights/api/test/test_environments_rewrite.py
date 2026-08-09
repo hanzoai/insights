@@ -58,7 +58,7 @@ class TestRewriteMechanism(SimpleTestCase):
 
 class TestEnvironmentsRewriteIntegration(APIBaseTest):
     def test_read_is_served_transparently_with_deprecation_headers(self):
-        response = self.client.get("/api/environments/@current/")
+        response = self.client.get("/v1/environments/@current/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # No redirect — the client gets the response on the original URL.
         self.assertNotIn("Location", response)
@@ -69,7 +69,7 @@ class TestEnvironmentsRewriteIntegration(APIBaseTest):
         # Renaming is admin-only, so run as an admin here — this test covers the rewrite, not the permission check.
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
-        response = self.client.patch("/api/environments/@current/", {"name": "renamed via env alias"}, format="json")
+        response = self.client.patch("/v1/environments/@current/", {"name": "renamed via env alias"}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["name"], "renamed via env alias")
 

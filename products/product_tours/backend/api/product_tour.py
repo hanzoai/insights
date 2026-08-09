@@ -1055,7 +1055,7 @@ class ProductTourViewSet(
 
 class ProductTourAPISerializer(serializers.ModelSerializer):
     """
-    Serializer for the exposed /api/product_tours endpoint, to be used in insights-js.
+    Serializer for the exposed /v1/product_tours endpoint, to be used in insights-js.
     Only exposes fields needed by the SDK, no sensitive data.
     """
 

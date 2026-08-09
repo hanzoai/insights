@@ -45,7 +45,7 @@ describe('pendingApprovalsLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:teamId/change_requests': () => [200, { results: [] }],
+                '/v1/environments/:teamId/change_requests': () => [200, { results: [] }],
             },
         })
         initKeaTests()

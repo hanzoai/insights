@@ -23,10 +23,10 @@ describe('TaxonomicPopover', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/event_definitions': mockGetEventDefinitions,
+                '/v1/projects/:team/event_definitions': mockGetEventDefinitions,
             },
             post: {
-                '/api/environments/:team/query': { results: [] },
+                '/v1/environments/:team/query': { results: [] },
             },
         })
         initKeaTests()

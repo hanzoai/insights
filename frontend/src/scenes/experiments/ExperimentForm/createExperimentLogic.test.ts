@@ -36,11 +36,11 @@ describe('createExperimentLogic', () => {
         useMocks({
             get: {
                 // saveExperiment verifies flag-key availability before building the payload
-                '/api/projects/:team_id/feature_flags/': () => [200, { results: [], count: 0 }],
-                '/api/projects/:team_id/experiments': () => [200, { results: [], count: 0 }],
+                '/v1/projects/:team_id/feature_flags/': () => [200, { results: [], count: 0 }],
+                '/v1/projects/:team_id/experiments': () => [200, { results: [], count: 0 }],
             },
             post: {
-                [`/api/projects/${MOCK_TEAM_ID}/experiments`]: async ({ request }) => {
+                [`/v1/projects/${MOCK_TEAM_ID}/experiments`]: async ({ request }) => {
                     const body = (await request.json()) as Experiment
                     if (!body.name || !body.description) {
                         return [400, { detail: 'Validation error' }]
@@ -60,7 +60,7 @@ describe('createExperimentLogic', () => {
                 },
             },
             patch: {
-                '/api/environments/:team_id/add_product_intent/': () => [200, {}],
+                '/v1/environments/:team_id/add_product_intent/': () => [200, {}],
             },
         })
         initKeaTests()

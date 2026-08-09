@@ -33,7 +33,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                'api/environments/:team_id/customer_profile_configs/': { count: 0, results: [] },
+                'v1/environments/:team_id/customer_profile_configs/': { count: 0, results: [] },
             },
         }),
     ],
@@ -60,10 +60,10 @@ export const B2BModeWithGroupsEnabled: Story = {
         useAvailableFeatures([AvailableFeature.GROUP_ANALYTICS])
         useStorybookMocks({
             get: {
-                'api/environments/:team_id/groups_types/': [
+                'v1/environments/:team_id/groups_types/': [
                     { group_type: 'organization', group_type_index: 0, name_singular: null, name_plural: null },
                 ],
-                'api/projects/:team_id/groups_types/': [
+                'v1/projects/:team_id/groups_types/': [
                     { group_type: 'organization', group_type_index: 0, name_singular: null, name_plural: null },
                 ],
             },

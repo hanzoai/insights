@@ -42,7 +42,7 @@ class TestEvaluationActivityLogging(ActivityLogTestHelper):
 
     def _create_evaluation(self, **overrides: Any) -> dict[str, Any]:
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             _create_evaluation_payload(**overrides),
             format="json",
         )
@@ -51,7 +51,7 @@ class TestEvaluationActivityLogging(ActivityLogTestHelper):
 
     def _update_evaluation(self, evaluation_id: str, updates: dict[str, Any]) -> dict[str, Any]:
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{evaluation_id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{evaluation_id}/",
             updates,
             format="json",
         )
@@ -214,7 +214,7 @@ class TestEvaluationActivityLogging(ActivityLogTestHelper):
         self.assertEqual(evaluation.status, "active")
         self.clear_activity_logs()
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         logs = self.get_activity_logs_for_item("Evaluation", str(evaluation.id))

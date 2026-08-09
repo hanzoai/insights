@@ -18,8 +18,8 @@ _HELPER = "products.revenue_analytics.backend.api.find_values_for_revenue_analyt
 class TestRevenueAnalyticsAPIAccessControl(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.taxonomy_url = f"/api/environments/{self.team.pk}/revenue_analytics/taxonomy/values/"
-        self.joins_url = f"/api/environments/{self.team.pk}/revenue_analytics/joins/"
+        self.taxonomy_url = f"/v1/environments/{self.team.pk}/revenue_analytics/taxonomy/values/"
+        self.joins_url = f"/v1/environments/{self.team.pk}/revenue_analytics/joins/"
         self.organization.available_product_features = [
             {"key": AvailableFeature.ACCESS_CONTROL, "name": AvailableFeature.ACCESS_CONTROL}
         ]

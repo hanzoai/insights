@@ -470,7 +470,7 @@ runcmd:
             attempt += 1
             try:
                 events_resp = requests.get(
-                    f"{base_url}/api/projects/@current/events/",  # nosemgrep: python.lang.security.audit.insecure-transport.requests.request-with-http.request-with-http
+                    f"{base_url}/v1/projects/@current/events/",  # nosemgrep: python.lang.security.audit.insecure-transport.requests.request-with-http.request-with-http
                     params={"event": event_name},
                     headers=headers,
                     timeout=10,
@@ -527,9 +527,7 @@ runcmd:
             print("✅ Repo checkout updated")
 
         # Update .env file with new image tag
-        update_env_cmd = (
-            f"cd /hobby && sed -i 's/^INSIGHTS_APP_TAG=.*/INSIGHTS_APP_TAG={new_sha}/' .env && grep INSIGHTS_APP_TAG .env"
-        )
+        update_env_cmd = f"cd /hobby && sed -i 's/^INSIGHTS_APP_TAG=.*/INSIGHTS_APP_TAG={new_sha}/' .env && grep INSIGHTS_APP_TAG .env"
         result = self.run_ssh_command(update_env_cmd, timeout=30)
         if result["exit_code"] != 0:
             raise RuntimeError(f"Failed to update .env: {result['stderr']}")

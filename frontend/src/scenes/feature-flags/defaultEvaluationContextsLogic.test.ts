@@ -25,10 +25,10 @@ describe('defaultEvaluationContextsLogic', () => {
 
         useMocks({
             get: {
-                '/api/environments/:team_id/default_evaluation_contexts/': () => [200, mockResponse],
+                '/v1/environments/:team_id/default_evaluation_contexts/': () => [200, mockResponse],
             },
             post: {
-                '/api/environments/:team_id/default_evaluation_contexts/': async ({ request }) => {
+                '/v1/environments/:team_id/default_evaluation_contexts/': async ({ request }) => {
                     const body = (await request.json()) as any
                     const contextName = body.context_name
                     const newContext = {
@@ -44,7 +44,7 @@ describe('defaultEvaluationContextsLogic', () => {
                     }
                     return [200, { ...newContext, created: true, hidden_from_suggestions: false }]
                 },
-                '/api/environments/:team_id/evaluation_context_suggestions/': async ({ request }) => {
+                '/v1/environments/:team_id/evaluation_context_suggestions/': async ({ request }) => {
                     const body = (await request.json()) as any
                     const contextName = body.context_name
                     mockResponse.available_contexts = mockResponse.available_contexts.filter((c) => c !== contextName)
@@ -56,14 +56,14 @@ describe('defaultEvaluationContextsLogic', () => {
                 },
             },
             delete: {
-                '/api/environments/:team_id/default_evaluation_contexts/': ({ request }) => {
+                '/v1/environments/:team_id/default_evaluation_contexts/': ({ request }) => {
                     const contextName = new URL(request.url).searchParams.get('context_name')
                     mockResponse.default_evaluation_contexts = mockResponse.default_evaluation_contexts.filter(
                         (c) => c.name !== contextName
                     )
                     return [200, { success: true }]
                 },
-                '/api/environments/:team_id/evaluation_context_suggestions/': ({ request }) => {
+                '/v1/environments/:team_id/evaluation_context_suggestions/': ({ request }) => {
                     const contextName = new URL(request.url).searchParams.get('context_name')
                     mockResponse.hidden_contexts = mockResponse.hidden_contexts.filter((c) => c !== contextName)
                     if (contextName && !mockResponse.available_contexts.includes(contextName)) {
@@ -74,7 +74,7 @@ describe('defaultEvaluationContextsLogic', () => {
                 },
             },
             patch: {
-                '/api/environments/:team_id/': async ({ request }) => {
+                '/v1/environments/:team_id/': async ({ request }) => {
                     const body = (await request.json()) as any
                     return [200, { ...body }]
                 },
@@ -149,7 +149,7 @@ describe('defaultEvaluationContextsLogic', () => {
 
             useMocks({
                 post: {
-                    '/api/environments/:team_id/evaluation_context_suggestions/': () => [400, { error: 'Bad request' }],
+                    '/v1/environments/:team_id/evaluation_context_suggestions/': () => [400, { error: 'Bad request' }],
                 },
             })
 
@@ -174,7 +174,7 @@ describe('defaultEvaluationContextsLogic', () => {
 
             useMocks({
                 delete: {
-                    '/api/environments/:team_id/evaluation_context_suggestions/': () => [400, { error: 'Bad request' }],
+                    '/v1/environments/:team_id/evaluation_context_suggestions/': () => [400, { error: 'Bad request' }],
                 },
             })
 

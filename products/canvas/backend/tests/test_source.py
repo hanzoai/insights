@@ -132,7 +132,7 @@ class TestCanvasSourceAdapter(SimpleTestCase):
     def test_direct_network_calls_warn_but_stay_publishable(self):
         # fetch() is blocked by the sandbox CSP, not by publish — a comment or
         # string mentioning it must not brick a canvas, so it's a warning.
-        candidate = project(files={CANVAS_COMPONENT_PATH: CODE + 'fetch("/api/x");'})
+        candidate = project(files={CANVAS_COMPONENT_PATH: CODE + 'fetch("/v1/x");'})
         diagnostics = validate_source_project(candidate)
         self.assertFalse(has_errors(diagnostics))
         self.assertIn("network_fetch", [d["code"] for d in diagnostics])

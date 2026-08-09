@@ -208,7 +208,7 @@ def _tokens_from_name(value: str) -> set[str]:
 def _api_tokens_from_strings(strings: set[str]) -> tuple[str, ...]:
     tokens: set[str] = set()
     for value in strings:
-        if "/api/" not in value and not value.startswith("/api"):
+        if "/v1/" not in value and not value.startswith("/api"):
             continue
         for part in value.replace("?", "/").replace("&", "/").split("/"):
             clean = part.strip("{}:@?&=").replace("-", "_")
@@ -298,7 +298,7 @@ def classify_test_file(path: str) -> TestFeatures:
                 calls_http_client = True
 
     imports_api_client = bool(imports & API_CLIENT_IMPORTS)
-    uses_api_url = any("/api/" in value or value.startswith("/api") for value in strings)
+    uses_api_url = any("/v1/" in value or value.startswith("/api") for value in strings)
     lower_imports = " ".join(sorted(imports)).lower()
     lower_path = path.lower()
 

@@ -9,8 +9,8 @@ from parameterized import parameterized
 from rest_framework import status
 
 from insights.api.test.test_team import create_team
-from insights.datastore.client import sync_execute
 from insights.constants import AvailableFeature
+from insights.datastore.client import sync_execute
 from insights.models import SessionRecording
 from insights.models.organization import OrganizationMembership
 from insights.models.user import User
@@ -64,7 +64,7 @@ class TestSessionRecordingsSharing(APIBaseTest, DatastoreTestMixin, QueryMatchin
 
     def _enable_sharing(self, session_id: str) -> str | None:
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/session_recordings/{session_id}/sharing",
+            f"/v1/projects/{self.team.id}/session_recordings/{session_id}/sharing",
             {"enabled": True},
         )
         assert response.status_code == status.HTTP_200_OK, response.json()
@@ -80,20 +80,20 @@ class TestSessionRecordingsSharing(APIBaseTest, DatastoreTestMixin, QueryMatchin
         [
             (
                 "accessing a different session ID than the one shared",
-                lambda self, token: f"/api/projects/{self.team.id}/session_recordings/2?sharing_access_token={token}",
+                lambda self, token: f"/v1/projects/{self.team.id}/session_recordings/2?sharing_access_token={token}",
             ),
             (
                 "accessing the list endpoint (not allowed with sharing token)",
-                lambda self, token: f"/api/projects/{self.team.id}/session_recordings?sharing_access_token={token}",
+                lambda self, token: f"/v1/projects/{self.team.id}/session_recordings?sharing_access_token={token}",
             ),
             (
                 "accessing with a non-existent team ID",
-                lambda self, token: f"/api/projects/12345/session_recordings?sharing_access_token={token}",
+                lambda self, token: f"/v1/projects/12345/session_recordings?sharing_access_token={token}",
             ),
             (
                 "accessing the same session from a different team",
                 lambda self, token: (
-                    f"/api/projects/{self.other_team.id}/session_recordings/{self.session_id}?sharing_access_token={token}"
+                    f"/v1/projects/{self.other_team.id}/session_recordings/{self.session_id}?sharing_access_token={token}"
                 ),
             ),
         ]
@@ -117,7 +117,7 @@ class TestSessionRecordingsSharing(APIBaseTest, DatastoreTestMixin, QueryMatchin
         self.client.logout()
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recordings/{self.session_id}?sharing_access_token={token}"
+            f"/v1/projects/{self.team.id}/session_recordings/{self.session_id}?sharing_access_token={token}"
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -135,7 +135,7 @@ class TestSessionRecordingsSharing(APIBaseTest, DatastoreTestMixin, QueryMatchin
         self.client.logout()
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recordings/{self.session_id}/snapshots?sharing_access_token={token}"
+            f"/v1/projects/{self.team.id}/session_recordings/{self.session_id}/snapshots?sharing_access_token={token}"
         )
         assert response.status_code == status.HTTP_200_OK, response.json()
 
@@ -199,7 +199,7 @@ class TestSessionRecordingsSharingAccessControl(APIBaseTest, DatastoreTestMixin,
         self.client.force_login(self.member_user)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/session_recordings/{self.session_id}/sharing",
+            f"/v1/projects/{self.team.id}/session_recordings/{self.session_id}/sharing",
             {"enabled": True},
         )
 
@@ -223,7 +223,7 @@ class TestSessionRecordingsSharingAccessControl(APIBaseTest, DatastoreTestMixin,
         self.client.force_login(self.member_user)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/session_recordings/{self.session_id}/sharing",
+            f"/v1/projects/{self.team.id}/session_recordings/{self.session_id}/sharing",
             {"enabled": True},
         )
 
@@ -233,7 +233,7 @@ class TestSessionRecordingsSharingAccessControl(APIBaseTest, DatastoreTestMixin,
     def test_sharing_response_exposes_user_access_level(self) -> None:
         self.client.force_login(self.member_user)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/{self.session_id}/sharing")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/{self.session_id}/sharing")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["user_access_level"] == "editor"

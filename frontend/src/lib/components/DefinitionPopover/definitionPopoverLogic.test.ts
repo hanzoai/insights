@@ -51,25 +51,25 @@ describe('definitionPopoverLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                [`/api/projects/${MOCK_TEAM_ID}/event_definitions/`]: {
+                [`/v1/projects/${MOCK_TEAM_ID}/event_definitions/`]: {
                     results: mockEventDefinitions,
                     count: mockEventDefinitions.length,
                 },
-                [`/api/projects/${MOCK_TEAM_ID}/property_definitions/`]: {
+                [`/v1/projects/${MOCK_TEAM_ID}/property_definitions/`]: {
                     results: [mockEventPropertyDefinition],
                     count: 1,
                 },
-                [`/api/projects/${MOCK_TEAM_ID}/actions/`]: {
+                [`/v1/projects/${MOCK_TEAM_ID}/actions/`]: {
                     results: [mockActionDefinition],
                     count: 1,
                 },
-                [`/api/projects/${MOCK_TEAM_ID}/cohorts/`]: {
+                [`/v1/projects/${MOCK_TEAM_ID}/cohorts/`]: {
                     results: [mockCohort],
                     count: 1,
                 },
             },
             patch: {
-                [`/api/projects/${MOCK_TEAM_ID}/:object/:id/`]: {},
+                [`/v1/projects/${MOCK_TEAM_ID}/:object/:id/`]: {},
             },
         })
 
@@ -147,19 +147,19 @@ describe('definitionPopoverLogic', () => {
                 {
                     type: TaxonomicFilterGroupType.Actions,
                     definition: mockActionDefinition as ActionType,
-                    url: `api/projects/${MOCK_TEAM_ID}/actions/${mockActionDefinition.id}`,
+                    url: `v1/projects/${MOCK_TEAM_ID}/actions/${mockActionDefinition.id}`,
                     dispatchActions: [actionsModel, ['updateAction']],
                 },
                 {
                     type: TaxonomicFilterGroupType.CustomEvents,
                     definition: mockEventDefinitions[0],
-                    url: `api/projects/${MOCK_TEAM_ID}/event_definitions/${mockEventDefinitions[0].id}`,
+                    url: `v1/projects/${MOCK_TEAM_ID}/event_definitions/${mockEventDefinitions[0].id}`,
                     dispatchActions: [],
                 },
                 {
                     type: TaxonomicFilterGroupType.Events,
                     definition: mockEventDefinitions[1],
-                    url: `api/projects/${MOCK_TEAM_ID}/event_definitions/${mockEventDefinitions[1].id}`,
+                    url: `v1/projects/${MOCK_TEAM_ID}/event_definitions/${mockEventDefinitions[1].id}`,
                     dispatchActions: [],
                 },
                 {
@@ -170,7 +170,7 @@ describe('definitionPopoverLogic', () => {
                 {
                     type: TaxonomicFilterGroupType.EventProperties,
                     definition: mockEventPropertyDefinition as PropertyDefinition,
-                    url: `api/projects/${MOCK_TEAM_ID}/property_definitions/${mockEventPropertyDefinition.id}`,
+                    url: `v1/projects/${MOCK_TEAM_ID}/property_definitions/${mockEventPropertyDefinition.id}`,
                     dispatchActions: [propertyDefinitionsModel, ['updatePropertyDefinitions']],
                 },
                 {
@@ -186,7 +186,7 @@ describe('definitionPopoverLogic', () => {
                 {
                     type: TaxonomicFilterGroupType.Cohorts,
                     definition: mockCohort,
-                    url: `api/projects/${MOCK_TEAM_ID}/cohorts/${mockCohort.id}`,
+                    url: `v1/projects/${MOCK_TEAM_ID}/cohorts/${mockCohort.id}`,
                     dispatchActions: [cohortsModel, ['updateCohort']],
                 },
                 {
@@ -243,7 +243,7 @@ describe('definitionPopoverLogic', () => {
                 }).toDispatchActions(['handleSaveSuccess'])
 
                 expect(api.update).toHaveBeenCalledWith(
-                    `api/projects/${MOCK_TEAM_ID}/property_definitions/${mockEventPropertyDefinition.id}`,
+                    `v1/projects/${MOCK_TEAM_ID}/property_definitions/${mockEventPropertyDefinition.id}`,
                     expect.objectContaining({ description: 'edited' })
                 )
             })

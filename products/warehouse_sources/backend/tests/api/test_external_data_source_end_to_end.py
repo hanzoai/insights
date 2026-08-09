@@ -149,7 +149,7 @@ def _is_empty_query(query: DataWarehouseSavedQuery) -> bool:
 @pytest.mark.django_db(transaction=True)
 def test_stripe_source_creation_and_sync_updates_managed_views(team, api_client, run_data_import_workflow):
     response = api_client.post(
-        f"/api/environments/{team.pk}/external_data_sources/",
+        f"/v1/environments/{team.pk}/external_data_sources/",
         data={
             "source_type": "Stripe",
             "payload": {

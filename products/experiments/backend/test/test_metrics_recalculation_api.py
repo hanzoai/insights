@@ -57,13 +57,13 @@ class TestMetricsRecalculationAPI(APIBaseTest):
         return exp
 
     def _post_url(self, exp_id: int) -> str:
-        return f"/api/projects/{self.team.id}/experiments/{exp_id}/metrics_recalculation/"
+        return f"/v1/projects/{self.team.id}/experiments/{exp_id}/metrics_recalculation/"
 
     def _latest_url(self, exp_id: int) -> str:
-        return f"/api/projects/{self.team.id}/experiments/{exp_id}/metrics_recalculation/latest/"
+        return f"/v1/projects/{self.team.id}/experiments/{exp_id}/metrics_recalculation/latest/"
 
     def _by_id_url(self, exp_id: int, recalc_id: str) -> str:
-        return f"/api/projects/{self.team.id}/experiments/{exp_id}/metrics_recalculation/{recalc_id}/"
+        return f"/v1/projects/{self.team.id}/experiments/{exp_id}/metrics_recalculation/{recalc_id}/"
 
     # ------------------------------------------------------------------
     # POST /metrics_recalculation/

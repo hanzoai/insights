@@ -32,8 +32,8 @@ describe('visionActionRunsLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/vision/actions/:action/': ACTION,
-                '/api/projects/:team/vision/actions/:action/runs/': {
+                '/v1/projects/:team/vision/actions/:action/': ACTION,
+                '/v1/projects/:team/vision/actions/:action/runs/': {
                     results: [
                         run('r1'),
                         run('r2', {
@@ -72,7 +72,7 @@ describe('visionActionRunsLogic', () => {
         let posted = false
         useMocks({
             post: {
-                '/api/projects/:team/vision/actions/:action/run/': ({ request }: { request: Request }) => {
+                '/v1/projects/:team/vision/actions/:action/run/': ({ request }: { request: Request }) => {
                     // The button hits this action's run endpoint, not create/observe.
                     expect(request.url).toContain('/vision/actions/a1/run/')
                     posted = true

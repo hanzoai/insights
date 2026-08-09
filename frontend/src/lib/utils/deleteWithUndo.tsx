@@ -16,7 +16,7 @@ export async function deleteWithUndo<T extends Record<string, any>>({
     callback?: (undo: boolean, object: T) => void
 }): Promise<void> {
     try {
-        await api.update(`api/${props.endpoint}/${props.object[props.idField || 'id']}`, {
+        await api.update(`v1/${props.endpoint}/${props.object[props.idField || 'id']}`, {
             ...props.object,
             deleted: !undo,
         })
@@ -56,7 +56,7 @@ export async function deleteInsightWithUndo({
     callback?: (undo: boolean, object: QueryBasedInsightModel) => void
 }): Promise<void> {
     try {
-        await api.update(`api/${props.endpoint}/${props.object[props.idField || 'id']}`, {
+        await api.update(`v1/${props.endpoint}/${props.object[props.idField || 'id']}`, {
             ...props.object,
             deleted: !undo,
         })

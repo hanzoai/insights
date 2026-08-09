@@ -41,8 +41,8 @@ describe('FilterGroup', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/quick_filters/': { results: [] },
-                '/api/projects/:team_id/surveys/question_labels/': { labels: [] },
+                '/v1/environments/:team_id/quick_filters/': { results: [] },
+                '/v1/projects/:team_id/surveys/question_labels/': { labels: [] },
             },
         })
         initKeaTests()

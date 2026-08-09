@@ -61,7 +61,7 @@ describe('the feature flag release conditions logic', () => {
 
         useMocks({
             post: {
-                '/api/projects/:team/feature_flags/user_blast_radius': () => [200, { affected: 120, total: 2000 }],
+                '/v1/projects/:team/feature_flags/user_blast_radius': () => [200, { affected: 120, total: 2000 }],
             },
         })
     })
@@ -1448,11 +1448,11 @@ describe('the feature flag release conditions logic', () => {
 
                 useMocks({
                     post: {
-                        '/api/projects/:team/feature_flags/user_blast_radius': () => [
+                        '/v1/projects/:team/feature_flags/user_blast_radius': () => [
                             200,
                             { affected: 10, total: 100 },
                         ],
-                        '/api/environments/:team/persons/batch_by_distinct_ids/': () => [200, { results }],
+                        '/v1/environments/:team/persons/batch_by_distinct_ids/': () => [200, { results }],
                     },
                 })
 
@@ -1491,11 +1491,11 @@ describe('the feature flag release conditions logic', () => {
 
                 useMocks({
                     post: {
-                        '/api/projects/:team/feature_flags/user_blast_radius': () => [
+                        '/v1/projects/:team/feature_flags/user_blast_radius': () => [
                             200,
                             { affected: 10, total: 100 },
                         ],
-                        '/api/environments/:team/persons/batch_by_distinct_ids/': () => [500, {}],
+                        '/v1/environments/:team/persons/batch_by_distinct_ids/': () => [500, {}],
                     },
                 })
 
@@ -1527,11 +1527,11 @@ describe('the feature flag release conditions logic', () => {
                 let callCount = 0
                 useMocks({
                     post: {
-                        '/api/projects/:team/feature_flags/user_blast_radius': () => [
+                        '/v1/projects/:team/feature_flags/user_blast_radius': () => [
                             200,
                             { affected: 10, total: 100 },
                         ],
-                        '/api/environments/:team/persons/batch_by_distinct_ids/': () => {
+                        '/v1/environments/:team/persons/batch_by_distinct_ids/': () => {
                             callCount += 1
                             // First chunk resolves, second chunk fails.
                             return callCount === 1 ? [200, { results: firstChunkResults }] : [500, {}]
@@ -1561,8 +1561,8 @@ describe('the feature flag release conditions logic', () => {
 
             useMocks({
                 post: {
-                    '/api/projects/:team/feature_flags/user_blast_radius': () => [200, { affected: 10, total: 100 }],
-                    '/api/environments/:team/persons/batch_by_distinct_ids/': () => [
+                    '/v1/projects/:team/feature_flags/user_blast_radius': () => [200, { affected: 10, total: 100 }],
+                    '/v1/environments/:team/persons/batch_by_distinct_ids/': () => [
                         200,
                         { results: { 'distinct-1': { name: 'alice@example.com' } } },
                     ],
@@ -1597,8 +1597,8 @@ describe('the feature flag release conditions logic', () => {
             let callCount = 0
             useMocks({
                 post: {
-                    '/api/projects/:team/feature_flags/user_blast_radius': () => [200, { affected: 10, total: 100 }],
-                    '/api/environments/:team/persons/batch_by_distinct_ids/': () => {
+                    '/v1/projects/:team/feature_flags/user_blast_radius': () => [200, { affected: 10, total: 100 }],
+                    '/v1/environments/:team/persons/batch_by_distinct_ids/': () => {
                         callCount += 1
                         return [200, { results: { 'distinct-1': { name: 'alice@example.com' } } }]
                     },

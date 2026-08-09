@@ -116,10 +116,10 @@ describe('EditorFilters', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/trend': [],
-                '/api/environments/:team_id/insights/': { results: [{}] },
-                '/api/users/@me': {},
-                '/api/environments/:team_id/groups_types/': [],
+                '/v1/environments/:team_id/insights/trend': [],
+                '/v1/environments/:team_id/insights/': { results: [{}] },
+                '/v1/users/@me': {},
+                '/v1/environments/:team_id/groups_types/': [],
             },
         })
         initKeaTests()

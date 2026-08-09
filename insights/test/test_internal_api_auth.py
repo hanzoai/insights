@@ -99,7 +99,7 @@ class TestInternalAPIAuth(APIBaseTest):
     def test_sets_org_and_team_from_team_id_route_param(self):
         request = Request(
             self.factory.get(
-                f"/api/projects/{self.team.id}/internal/insights_flows/user_blast_radius",
+                f"/v1/projects/{self.team.id}/internal/insights_flows/user_blast_radius",
                 HTTP_X_INTERNAL_API_SECRET="test-secret-123",
             ),
             parser_context={"kwargs": {"team_id": str(self.team.id)}},
@@ -114,7 +114,7 @@ class TestInternalAPIAuth(APIBaseTest):
     def test_invalid_team_id_route_param_denies_access(self):
         request = Request(
             self.factory.get(
-                "/api/projects/999999999/internal/insights_flows/user_blast_radius",
+                "/v1/projects/999999999/internal/insights_flows/user_blast_radius",
                 HTTP_X_INTERNAL_API_SECRET="test-secret-123",
             ),
             parser_context={"kwargs": {"team_id": "999999999"}},
@@ -126,7 +126,7 @@ class TestInternalAPIAuth(APIBaseTest):
     @override_settings(INTERNAL_API_SECRET="test-secret-123")
     def test_internal_insights_flow_endpoint_allows_internal_auth_without_user_membership(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/internal/insights_flows/user_blast_radius",
+            f"/v1/projects/{self.team.id}/internal/insights_flows/user_blast_radius",
             {},
             format="json",
             headers={"x-internal-api-secret": "test-secret-123"},

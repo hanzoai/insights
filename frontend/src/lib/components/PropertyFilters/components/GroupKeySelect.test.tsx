@@ -45,11 +45,11 @@ describe('GroupKeySelect', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team/groups/': {
+                '/v1/environments/:team/groups/': {
                     results: MOCK_GROUPS,
                     next: null,
                 },
-                '/api/environments/:team/groups/find': ({ request }) => {
+                '/v1/environments/:team/groups/find': ({ request }) => {
                     const groupKey = new URL(request.url).searchParams.get('group_key')
                     const group = [...MOCK_GROUPS, FIND_ONLY_GROUP].find((g) => g.group_key === groupKey)
                     return group ? [200, group] : [404, { detail: 'Not found' }]
@@ -153,7 +153,7 @@ describe('GroupKeySelect', () => {
     it('falls back to group_key when group has no name property', async () => {
         useMocks({
             get: {
-                '/api/environments/:team/groups/': {
+                '/v1/environments/:team/groups/': {
                     results: [
                         {
                             group_type_index: 0,

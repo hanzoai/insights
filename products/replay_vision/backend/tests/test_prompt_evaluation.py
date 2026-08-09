@@ -387,7 +387,7 @@ class TestPromptEvaluationApi(_VisionAPITestCase):
 
     def _url(self, suggestion_id) -> str:
         return (
-            f"/api/projects/{self.team.id}/vision/scanners/{self.scanner.id}/"
+            f"/v1/projects/{self.team.id}/vision/scanners/{self.scanner.id}/"
             f"prompt_suggestions/{suggestion_id}/evaluate/"
         )
 
@@ -493,7 +493,7 @@ class TestPromptEvaluationApi(_VisionAPITestCase):
         )
 
         current = self.client.get(
-            f"/api/projects/{self.team.id}/vision/scanners/{self.scanner.id}/prompt_suggestions/current/"
+            f"/v1/projects/{self.team.id}/vision/scanners/{self.scanner.id}/prompt_suggestions/current/"
         )
         self.assertEqual(current.json()["suggestion"]["evaluation"]["status"], "failed")
 

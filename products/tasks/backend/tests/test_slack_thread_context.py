@@ -51,7 +51,7 @@ class _SlackThreadContextBase(TestCase):
 class TestSlackThreadContextEndpoint(_SlackThreadContextBase):
     def _url(self, slack_url: str | None = None) -> str:
         suffix = f"?url={quote(slack_url, safe='')}" if slack_url else ""
-        return f"/api/projects/{self.team.id}/tasks/slack_thread_context/{suffix}"
+        return f"/v1/projects/{self.team.id}/tasks/slack_thread_context/{suffix}"
 
     def _create_fixture(
         self,

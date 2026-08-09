@@ -138,7 +138,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
     def _mutate_provider_key(self, action: str):
         if action == "create":
             return self.client.post(
-                f"/api/environments/{self.team.id}/llm_analytics/provider_keys/",
+                f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/",
                 {
                     "provider": "openai",
                     "name": "New Key",
@@ -149,19 +149,19 @@ class TestAIObservabilityAccessControl(APIBaseTest):
 
         if action == "update":
             return self.client.patch(
-                f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{self.provider_key.id}/",
+                f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{self.provider_key.id}/",
                 {"name": "Updated Key"},
                 format="json",
             )
 
         if action == "validate":
             return self.client.post(
-                f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{self.provider_key.id}/validate/"
+                f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{self.provider_key.id}/validate/"
             )
 
         if action == "delete":
             return self.client.delete(
-                f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{self.provider_key.id}/"
+                f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{self.provider_key.id}/"
             )
 
         raise ValueError(f"Unsupported action: {action}")
@@ -179,7 +179,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self._set_access_level(self.viewer_user, access_level="viewer")
         self.client.force_login(self.viewer_user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/{endpoint}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/{endpoint}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("products.exports.backend.facade.api.async_connect", new_callable=AsyncMock)
@@ -195,7 +195,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/datasets/{self.dataset.id}/exports/",
+            f"/v1/environments/{self.team.id}/datasets/{self.dataset.id}/exports/",
             {},
             format="json",
         )
@@ -214,7 +214,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         obj = getattr(self, attr)
-        response = self.client.get(f"/api/environments/{self.team.id}/{endpoint}/{obj.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/{endpoint}/{obj.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch("products.ai_observability.backend.api.ai_blob.object_storage.read_object")
@@ -223,21 +223,21 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self._set_access_level(self.viewer_user, access_level="viewer")
         self.client.force_login(self.viewer_user)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/ai_blob/v1/sha256/{'a' * 64}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/ai_blob/v1/sha256/{'a' * 64}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_viewer_can_list_score_definitions(self):
         self._set_access_level(self.viewer_user, access_level="viewer")
         self.client.force_login(self.viewer_user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/score_definitions/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/score_definitions/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_viewer_can_list_trace_reviews(self):
         self._set_access_level(self.viewer_user, access_level="viewer")
         self.client.force_login(self.viewer_user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/trace_reviews/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/trace_reviews/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_viewer_can_retrieve_trace_review(self):
@@ -245,7 +245,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/llm_analytics/trace_reviews/{self.trace_review.id}/"
+            f"/v1/environments/{self.team.id}/llm_analytics/trace_reviews/{self.trace_review.id}/"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -253,7 +253,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self._set_access_level(self.viewer_user, access_level="viewer")
         self.client.force_login(self.viewer_user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/review_queues/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/review_queues/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_viewer_can_retrieve_review_queue(self):
@@ -261,7 +261,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/llm_analytics/review_queues/{self.review_queue.id}/"
+            f"/v1/environments/{self.team.id}/llm_analytics/review_queues/{self.review_queue.id}/"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -269,7 +269,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self._set_access_level(self.viewer_user, access_level="viewer")
         self.client.force_login(self.viewer_user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/review_queue_items/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/review_queue_items/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_viewer_can_retrieve_review_queue_item(self):
@@ -277,7 +277,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/llm_analytics/review_queue_items/{self.review_queue_item.id}/"
+            f"/v1/environments/{self.team.id}/llm_analytics/review_queue_items/{self.review_queue_item.id}/"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -285,14 +285,14 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self._set_access_level(self.viewer_user, resource="ai_observability_clusters", access_level="viewer")
         self.client.force_login(self.viewer_user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/clustering_config/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/clustering_config/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_viewer_can_list_clustering_jobs(self):
         self._set_access_level(self.viewer_user, resource="ai_observability_clusters", access_level="viewer")
         self.client.force_login(self.viewer_user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/clustering_jobs/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/clustering_jobs/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_viewer_can_retrieve_clustering_job(self):
@@ -300,7 +300,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/llm_analytics/clustering_jobs/{self.clustering_job.id}/"
+            f"/v1/environments/{self.team.id}/llm_analytics/clustering_jobs/{self.clustering_job.id}/"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -311,7 +311,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "New Evaluation",
                 "evaluation_type": "llm_judge",
@@ -329,7 +329,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/datasets/",
+            f"/v1/environments/{self.team.id}/datasets/",
             {"name": "New Dataset"},
             format="json",
         )
@@ -340,7 +340,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{self.evaluation.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{self.evaluation.id}/",
             {"name": "Updated"},
             format="json",
         )
@@ -351,7 +351,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{self.provider_key.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{self.provider_key.id}/",
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -360,7 +360,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/score_definitions/",
+            f"/v1/environments/{self.team.id}/llm_analytics/score_definitions/",
             {
                 "name": "Quality",
                 "kind": "categorical",
@@ -375,7 +375,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/trace_reviews/",
+            f"/v1/environments/{self.team.id}/llm_analytics/trace_reviews/",
             {"trace_id": "trace_new"},
             format="json",
         )
@@ -386,7 +386,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_analytics/trace_reviews/{self.trace_review.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/trace_reviews/{self.trace_review.id}/",
             {"comment": "Updated"},
             format="json",
         )
@@ -397,7 +397,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/llm_analytics/trace_reviews/{self.trace_review.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/trace_reviews/{self.trace_review.id}/",
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -406,7 +406,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/review_queues/",
+            f"/v1/environments/{self.team.id}/llm_analytics/review_queues/",
             {"name": "New queue"},
             format="json",
         )
@@ -417,7 +417,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_analytics/review_queues/{self.review_queue.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/review_queues/{self.review_queue.id}/",
             {"name": "Renamed queue"},
             format="json",
         )
@@ -428,7 +428,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/llm_analytics/review_queues/{self.review_queue.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/review_queues/{self.review_queue.id}/",
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -437,7 +437,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/review_queue_items/",
+            f"/v1/environments/{self.team.id}/llm_analytics/review_queue_items/",
             {"queue_id": str(self.review_queue.id), "trace_id": "trace_new"},
             format="json",
         )
@@ -449,7 +449,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
 
         alternate_queue = ReviewQueue.objects.create(team=self.team, name="Bug bash", created_by=self.user)
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_analytics/review_queue_items/{self.review_queue_item.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/review_queue_items/{self.review_queue_item.id}/",
             {"queue_id": str(alternate_queue.id)},
             format="json",
         )
@@ -460,7 +460,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/llm_analytics/review_queue_items/{self.review_queue_item.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/review_queue_items/{self.review_queue_item.id}/",
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -469,7 +469,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/clustering_jobs/",
+            f"/v1/environments/{self.team.id}/llm_analytics/clustering_jobs/",
             {"name": "New Job", "analysis_level": "trace", "event_filters": []},
             format="json",
         )
@@ -480,7 +480,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_analytics/clustering_jobs/{self.clustering_job.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/clustering_jobs/{self.clustering_job.id}/",
             {"name": "Renamed"},
             format="json",
         )
@@ -491,7 +491,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/llm_analytics/clustering_jobs/{self.clustering_job.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/clustering_jobs/{self.clustering_job.id}/",
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -500,7 +500,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/clustering_config/set_event_filters/",
+            f"/v1/environments/{self.team.id}/llm_analytics/clustering_config/set_event_filters/",
             {"event_filters": []},
             format="json",
         )
@@ -513,7 +513,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/clustering_runs/",
+            f"/v1/environments/{self.team.id}/llm_analytics/clustering_runs/",
             {},
             format="json",
         )
@@ -527,7 +527,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Editor Evaluation",
                 "evaluation_type": "llm_judge",
@@ -545,7 +545,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/datasets/",
+            f"/v1/environments/{self.team.id}/datasets/",
             {"name": "Editor Dataset"},
             format="json",
         )
@@ -569,12 +569,12 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/dataset_items/",
+            f"/v1/environments/{self.team.id}/dataset_items/",
             {"dataset": str(self.dataset.id), "input": {"question": "Can I edit this dataset?"}},
             format="json",
         )
         inaccessible_response = self.client.post(
-            f"/api/environments/{self.team.id}/dataset_items/",
+            f"/v1/environments/{self.team.id}/dataset_items/",
             {"dataset": str(inaccessible_dataset.id), "input": {"question": "Can I edit this dataset?"}},
             format="json",
         )
@@ -606,18 +606,18 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         list_response = self.client.get(
-            f"/api/environments/{self.team.id}/dataset_items/",
+            f"/v1/environments/{self.team.id}/dataset_items/",
             {"dataset": str(self.dataset.id)},
         )
         inaccessible_list_response = self.client.get(
-            f"/api/environments/{self.team.id}/dataset_items/",
+            f"/v1/environments/{self.team.id}/dataset_items/",
             {"dataset": str(inaccessible_dataset.id)},
         )
         retrieve_response = self.client.get(
-            f"/api/environments/{self.team.id}/dataset_items/{item.item.id}/",
+            f"/v1/environments/{self.team.id}/dataset_items/{item.item.id}/",
         )
         blocked_update_response = self.client.patch(
-            f"/api/environments/{self.team.id}/dataset_items/{item.item.id}/",
+            f"/v1/environments/{self.team.id}/dataset_items/{item.item.id}/",
             {"base_version": 1, "input": {"question": "Blocked"}},
             format="json",
         )
@@ -630,7 +630,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         dataset_access.access_level = "editor"
         dataset_access.save(update_fields=["access_level"])
         allowed_update_response = self.client.patch(
-            f"/api/environments/{self.team.id}/dataset_items/{item.item.id}/",
+            f"/v1/environments/{self.team.id}/dataset_items/{item.item.id}/",
             {"base_version": 1, "input": {"question": "Allowed"}},
             format="json",
         )
@@ -673,12 +673,12 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         editable_response = self.client.patch(
-            f"/api/environments/{self.team.id}/dataset_items/{editable_item.item.id}/",
+            f"/v1/environments/{self.team.id}/dataset_items/{editable_item.item.id}/",
             {"base_version": 1, "input": {"question": "Updated"}},
             format="json",
         )
         view_only_response = self.client.patch(
-            f"/api/environments/{self.team.id}/dataset_items/{view_only_item.item.id}/",
+            f"/v1/environments/{self.team.id}/dataset_items/{view_only_item.item.id}/",
             {"base_version": 1, "input": {"question": "Blocked"}},
             format="json",
         )
@@ -690,7 +690,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         membership = OrganizationMembership.objects.get(user=self.viewer_user, organization=self.organization)
 
         response = self.client.put(
-            f"/api/environments/{self.team.id}/datasets/{self.dataset.id}/access_controls/",
+            f"/v1/environments/{self.team.id}/datasets/{self.dataset.id}/access_controls/",
             {
                 "access_level": "viewer",
                 "organization_member": str(membership.id),
@@ -714,7 +714,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{self.evaluation.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{self.evaluation.id}/",
             {"name": "Updated by editor"},
             format="json",
         )
@@ -759,7 +759,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/score_definitions/",
+            f"/v1/environments/{self.team.id}/llm_analytics/score_definitions/",
             {
                 "name": "Quality",
                 "kind": "categorical",
@@ -774,7 +774,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/trace_reviews/",
+            f"/v1/environments/{self.team.id}/llm_analytics/trace_reviews/",
             {"trace_id": "trace_new"},
             format="json",
         )
@@ -785,7 +785,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_analytics/trace_reviews/{self.trace_review.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/trace_reviews/{self.trace_review.id}/",
             {"comment": "Updated by editor"},
             format="json",
         )
@@ -796,7 +796,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/llm_analytics/trace_reviews/{self.trace_review.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/trace_reviews/{self.trace_review.id}/",
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -805,7 +805,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/review_queues/",
+            f"/v1/environments/{self.team.id}/llm_analytics/review_queues/",
             {"name": "Escalations"},
             format="json",
         )
@@ -816,7 +816,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_analytics/review_queues/{self.review_queue.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/review_queues/{self.review_queue.id}/",
             {"name": "Renamed queue"},
             format="json",
         )
@@ -827,7 +827,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/llm_analytics/review_queues/{self.review_queue.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/review_queues/{self.review_queue.id}/",
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -836,7 +836,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/review_queue_items/",
+            f"/v1/environments/{self.team.id}/llm_analytics/review_queue_items/",
             {"queue_id": str(self.review_queue.id), "trace_id": "trace_new"},
             format="json",
         )
@@ -848,7 +848,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
 
         alternate_queue = ReviewQueue.objects.create(team=self.team, name="Bug bash", created_by=self.user)
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_analytics/review_queue_items/{self.review_queue_item.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/review_queue_items/{self.review_queue_item.id}/",
             {"queue_id": str(alternate_queue.id)},
             format="json",
         )
@@ -859,7 +859,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/llm_analytics/review_queue_items/{self.review_queue_item.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/review_queue_items/{self.review_queue_item.id}/",
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -868,7 +868,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/clustering_jobs/",
+            f"/v1/environments/{self.team.id}/llm_analytics/clustering_jobs/",
             {"name": "Editor Job", "analysis_level": "trace", "event_filters": []},
             format="json",
         )
@@ -879,7 +879,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_analytics/clustering_jobs/{self.clustering_job.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/clustering_jobs/{self.clustering_job.id}/",
             {"name": "Renamed by editor"},
             format="json",
         )
@@ -890,7 +890,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/llm_analytics/clustering_jobs/{self.clustering_job.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/clustering_jobs/{self.clustering_job.id}/",
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -899,7 +899,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/clustering_config/set_event_filters/",
+            f"/v1/environments/{self.team.id}/llm_analytics/clustering_config/set_event_filters/",
             {"event_filters": []},
             format="json",
         )
@@ -916,7 +916,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/clustering_runs/",
+            f"/v1/environments/{self.team.id}/llm_analytics/clustering_runs/",
             {},
             format="json",
         )
@@ -937,7 +937,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self._set_access_level(self.no_access_user, access_level="none")
         self.client.force_login(self.no_access_user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/{endpoint}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/{endpoint}/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     @parameterized.expand(
@@ -950,7 +950,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self._set_access_level(self.no_access_user, resource="ai_observability_clusters", access_level="none")
         self.client.force_login(self.no_access_user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/{endpoint}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/{endpoint}/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     @patch("products.ai_observability.backend.api.ai_blob.object_storage.read_object")
@@ -959,7 +959,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self._set_access_level(self.no_access_user, access_level="none")
         self.client.force_login(self.no_access_user)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/ai_blob/v1/sha256/{'a' * 64}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/ai_blob/v1/sha256/{'a' * 64}")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     # -- Resource inheritance: setting llm_analytics cascades to child resources --
@@ -975,7 +975,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self._set_access_level(self.viewer_user, resource="llm_analytics", access_level="viewer")
         self.client.force_login(self.viewer_user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/{endpoint}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/{endpoint}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @parameterized.expand(
@@ -989,7 +989,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self._set_access_level(self.no_access_user, resource="llm_analytics", access_level="none")
         self.client.force_login(self.no_access_user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/{endpoint}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/{endpoint}/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     # -- ai_observability_clusters is independent from llm_analytics (not a child resource) --
@@ -999,7 +999,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self._set_access_level(self.editor_user, resource="ai_observability_clusters", access_level="none")
         self.client.force_login(self.editor_user)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/clustering_jobs/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/clustering_jobs/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_ai_observability_clusters_editor_without_llm_analytics_access(self):
@@ -1007,10 +1007,10 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self._set_access_level(self.editor_user, resource="ai_observability_clusters", access_level="editor")
         self.client.force_login(self.editor_user)
 
-        clustering_response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/clustering_jobs/")
+        clustering_response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/clustering_jobs/")
         self.assertEqual(clustering_response.status_code, status.HTTP_200_OK)
 
-        evaluations_response = self.client.get(f"/api/environments/{self.team.id}/evaluations/")
+        evaluations_response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/")
         self.assertEqual(evaluations_response.status_code, status.HTTP_403_FORBIDDEN)
 
     # -- Org admin has full access without explicit permissions --
@@ -1023,7 +1023,7 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Admin Evaluation",
                 "evaluation_type": "llm_judge",
@@ -1056,8 +1056,8 @@ class TestAIObservabilityAccessControl(APIBaseTest):
         membership.save()
         self.client.force_login(self.editor_user)
 
-        dataset_list_response = self.client.get(f"/api/environments/{self.team.id}/datasets/")
-        item_retrieve_response = self.client.get(f"/api/environments/{self.team.id}/dataset_items/{item.item.id}/")
+        dataset_list_response = self.client.get(f"/v1/environments/{self.team.id}/datasets/")
+        item_retrieve_response = self.client.get(f"/v1/environments/{self.team.id}/dataset_items/{item.item.id}/")
 
         self.assertIn(str(self.dataset.id), [result["id"] for result in dataset_list_response.data["results"]])
         self.assertEqual(item_retrieve_response.status_code, status.HTTP_200_OK)

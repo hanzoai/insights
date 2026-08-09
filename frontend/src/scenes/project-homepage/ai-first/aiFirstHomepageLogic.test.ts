@@ -20,10 +20,10 @@ describe('aiFirstHomepageLogic', () => {
         localStorage.clear()
         useMocks({
             get: {
-                '/api/environments/:team_id/conversations/': { results: [] },
-                '/api/projects/:team_id/dashboards/': { results: [] },
-                '/api/projects/:team_id/file_system/': { results: [] },
-                '/api/projects/:team_id/file_system_shortcut/': { results: [] },
+                '/v1/environments/:team_id/conversations/': { results: [] },
+                '/v1/projects/:team_id/dashboards/': { results: [] },
+                '/v1/projects/:team_id/file_system/': { results: [] },
+                '/v1/projects/:team_id/file_system_shortcut/': { results: [] },
             },
         })
         initKeaTests()

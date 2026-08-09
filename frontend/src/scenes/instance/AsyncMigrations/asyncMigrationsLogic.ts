@@ -273,7 +273,7 @@ export const asyncMigrationsLogic = kea<asyncMigrationsLogicType>([
                     if (!userLogic.values.user?.is_staff) {
                         return []
                     }
-                    return (await api.get('api/async_migrations')).results
+                    return (await api.get('v1/async_migrations')).results
                 },
             },
         ],
@@ -284,7 +284,7 @@ export const asyncMigrationsLogic = kea<asyncMigrationsLogicType>([
                     if (!userLogic.values.user?.is_staff) {
                         return []
                     }
-                    const settings: InstanceSetting[] = (await api.get('api/instance_settings')).results
+                    const settings: InstanceSetting[] = (await api.get('v1/instance_settings')).results
                     return settings.filter((setting) => setting.key.includes('ASYNC_MIGRATIONS'))
                 },
             },
@@ -338,7 +338,7 @@ export const asyncMigrationsLogic = kea<asyncMigrationsLogicType>([
             )
         },
         updateMigrationStatus: async ({ migration, endpoint, message }) => {
-            const res = await api.create(`/api/async_migrations/${migration.id}/${endpoint}`, {
+            const res = await api.create(`/v1/async_migrations/${migration.id}/${endpoint}`, {
                 parameters: migration.parameters,
             })
             if (res.success) {
@@ -351,7 +351,7 @@ export const asyncMigrationsLogic = kea<asyncMigrationsLogicType>([
         updateSetting: async ({ settingKey, newValue }) => {
             // TODO: Use systemStatusLogic.ts for consistency
             try {
-                await api.update(`/api/instance_settings/${settingKey}`, {
+                await api.update(`/v1/instance_settings/${settingKey}`, {
                     value: newValue,
                 })
                 toast.success(`Instance setting ${settingKey} updated`)
@@ -364,7 +364,7 @@ export const asyncMigrationsLogic = kea<asyncMigrationsLogicType>([
         },
         loadAsyncMigrationErrors: async ({ migrationId }) => {
             try {
-                const errorsForMigration = await api.get(`api/async_migrations/${migrationId}/errors`)
+                const errorsForMigration = await api.get(`v1/async_migrations/${migrationId}/errors`)
                 actions.loadAsyncMigrationErrorsSuccess(migrationId, errorsForMigration)
             } catch (error) {
                 actions.loadAsyncMigrationErrorsFailure(migrationId, error)

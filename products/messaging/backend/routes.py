@@ -16,7 +16,7 @@ def register_routes(routers: RouterRegistry) -> None:
     routers.projects.register(
         r"messaging_preferences", MessagePreferencesViewSet, "project_messaging_preferences", ["team_id"]
     )
-    # New endpoint — register under /api/projects/ only, not the dual-route legacy shim.
+    # New endpoint — register under /v1/projects/ only, not the dual-route legacy shim.
     routers.projects.register(
         r"messaging_suppressions", MessageSuppressionViewSet, "project_messaging_suppressions", ["team_id"]
     )

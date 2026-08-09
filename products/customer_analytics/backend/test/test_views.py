@@ -14,6 +14,7 @@ from rest_framework import status
 from insights.constants import AvailableFeature
 from insights.models import Tag, TaggedItem
 from insights.models.activity_logging.activity_log import ActivityLog
+from insights.models.ee_models import AccessControl
 from insights.models.organization import OrganizationMembership
 from insights.models.personal_api_key import PersonalAPIKey
 from insights.models.team import Team
@@ -39,13 +40,11 @@ from products.product_analytics.backend.models.insight import Insight
 from products.warehouse_sources.backend.models.external_data_schema import ExternalDataSchema
 from products.warehouse_sources.backend.models.external_data_source import ExternalDataSource
 
-from insights.models.ee_models import AccessControl
-
 
 class TestCustomerProfileConfigViewSet(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.endpoint_base = f"/api/environments/{self.team.id}/customer_profile_configs/"
+        self.endpoint_base = f"/v1/environments/{self.team.id}/customer_profile_configs/"
         self.valid_data = {
             "scope": "person",
             "content": [{"type": "ph-node-foo", "index": 0}],
@@ -233,7 +232,7 @@ class TestCustomerProfileConfigViewSet(APIBaseTest):
 class TestCustomerJourneyViewSet(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.endpoint_base = f"/api/environments/{self.team.id}/customer_journeys/"
+        self.endpoint_base = f"/v1/environments/{self.team.id}/customer_journeys/"
         self.insight = Insight.objects.create(team=self.team)
 
     def _create_journey(self, **kwargs):
@@ -416,7 +415,7 @@ class TestCustomerJourneyViewSet(APIBaseTest):
 class TestAccountViewSet(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.endpoint_base = f"/api/environments/{self.team.id}/accounts/"
+        self.endpoint_base = f"/v1/environments/{self.team.id}/accounts/"
 
     def _create_account(self, **kwargs):
         defaults = {"team": self.team, "name": "Acme Corp"}
@@ -859,21 +858,21 @@ class TestAccountViewSet(APIBaseTest):
         # ordering=name only matches if the filter actually flips the order.
         self._create_account(name="Apple")
         self._create_account(name="Banana")
-        response = self.client.get(f"/api/environments/{self.team.id}/accounts/?ordering=name")
+        response = self.client.get(f"/v1/environments/{self.team.id}/accounts/?ordering=name")
         assert [r["name"] for r in response.json()["results"]] == ["Apple", "Banana"]
 
     def test_list_accounts_ordering_by_name_desc(self):
         # Default `-created_at` order would be [Apple, Banana]; ordering=-name flips to [Banana, Apple].
         self._create_account(name="Banana")
         self._create_account(name="Apple")
-        response = self.client.get(f"/api/environments/{self.team.id}/accounts/?ordering=-name")
+        response = self.client.get(f"/v1/environments/{self.team.id}/accounts/?ordering=-name")
         assert [r["name"] for r in response.json()["results"]] == ["Banana", "Apple"]
 
     def test_list_accounts_invalid_ordering_is_ignored(self):
         # Malformed ordering should fall back to default `-created_at` order.
         self._create_account(name="Apple")
         self._create_account(name="Banana")
-        response = self.client.get(f"/api/environments/{self.team.id}/accounts/?ordering=robert');drop")
+        response = self.client.get(f"/v1/environments/{self.team.id}/accounts/?ordering=robert');drop")
         assert response.status_code == status.HTTP_200_OK
         assert [r["name"] for r in response.json()["results"]] == ["Banana", "Apple"]
 
@@ -948,7 +947,7 @@ class TestAccountNotebookViewSet(APIBaseTest):
     def setUp(self):
         super().setUp()
         self.account = Account.objects.unscoped().create(team=self.team, name="Acme Corp")
-        self.endpoint_base = f"/api/environments/{self.team.id}/accounts/{self.account.id}/notebooks/"
+        self.endpoint_base = f"/v1/environments/{self.team.id}/accounts/{self.account.id}/notebooks/"
 
     def test_create_account_notebook_uses_internal_visibility(self):
         response = self.client.post(
@@ -1060,7 +1059,7 @@ class TestAccountNotebookViewSet(APIBaseTest):
         self.assertFalse(ResourceNotebook.objects.filter(account=self.account).exists())
 
     def test_create_for_unknown_account_returns_404(self):
-        bad_url = f"/api/environments/{self.team.id}/accounts/00000000-0000-0000-0000-000000000000/notebooks/"
+        bad_url = f"/v1/environments/{self.team.id}/accounts/00000000-0000-0000-0000-000000000000/notebooks/"
 
         response = self.client.post(bad_url, {"title": "X"}, format="json")
 
@@ -1070,7 +1069,7 @@ class TestAccountNotebookViewSet(APIBaseTest):
         other_team = Team.objects.create(organization=self.organization)
         other_account = Account.objects.unscoped().create(team=other_team, name="Other team")
 
-        url = f"/api/environments/{self.team.id}/accounts/{other_account.id}/notebooks/"
+        url = f"/v1/environments/{self.team.id}/accounts/{other_account.id}/notebooks/"
         response = self.client.post(url, {"title": "X"}, format="json")
 
         self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
@@ -1081,7 +1080,7 @@ class TestAccountNotebookViewSet(APIBaseTest):
         )
         ResourceNotebook.objects.create(notebook=notebook, account=self.account)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/notebooks/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/notebooks/")
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         short_ids = [n["short_id"] for n in response.json()["results"]]
         self.assertNotIn(notebook.short_id, short_ids)
@@ -1205,10 +1204,10 @@ class TestAccountNotebookViewSet(APIBaseTest):
         )
         ResourceNotebook.objects.create(notebook=notebook, account=self.account)
 
-        # The frontend NotebookScene fetches via /api/projects/{team}/notebooks/{short_id}/
+        # The frontend NotebookScene fetches via /v1/projects/{team}/notebooks/{short_id}/
         # (not the customer-analytics nested endpoint), so the parent_resource field must be
         # present on NotebookSerializer responses.
-        response = self.client.get(f"/api/projects/{self.team.id}/notebooks/{notebook.short_id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/notebooks/{notebook.short_id}/")
 
         self.assertEqual(status.HTTP_200_OK, response.status_code, response.json())
         self.assertEqual(
@@ -1221,7 +1220,7 @@ class TestAccountNotebookViewSet(APIBaseTest):
             team=self.team, title="Standalone", content={}, visibility=Notebook.Visibility.DEFAULT
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/notebooks/{notebook.short_id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/notebooks/{notebook.short_id}/")
 
         self.assertEqual(status.HTTP_200_OK, response.status_code, response.json())
         self.assertIsNone(response.json()["parent_resource"])
@@ -1262,10 +1261,10 @@ class TestCustomerAnalyticsAccessControl(APIBaseTest):
             name="Test Journey",
         )
 
-        self.journeys_url = f"/api/environments/{self.team.id}/customer_journeys/"
+        self.journeys_url = f"/v1/environments/{self.team.id}/customer_journeys/"
 
         self.account = Account.objects.unscoped().create(team=self.team, name="ACL Account")
-        self.accounts_url = f"/api/environments/{self.team.id}/accounts/"
+        self.accounts_url = f"/v1/environments/{self.team.id}/accounts/"
 
     def _set_access_level(self, user: User, resource: str = "customer_analytics", access_level: str = "viewer") -> None:
         try:
@@ -1486,7 +1485,7 @@ class TestCustomerAnalyticsAccessControl(APIBaseTest):
 class TestCustomPropertyDefinitionViewSet(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.endpoint_base = f"/api/environments/{self.team.id}/custom_property_definitions/"
+        self.endpoint_base = f"/v1/environments/{self.team.id}/custom_property_definitions/"
 
     def _create(self, **overrides):
         payload = {"name": "ARR", "display_type": "currency", "is_big_number": True}
@@ -1705,7 +1704,7 @@ class TestCustomPropertyDefinitionAccessControl(APIBaseTest):
         self.definition = CustomPropertyDefinition.objects.unscoped().create(
             team=self.team, name="ARR", display_type="currency"
         )
-        self.endpoint_base = f"/api/environments/{self.team.id}/custom_property_definitions/"
+        self.endpoint_base = f"/v1/environments/{self.team.id}/custom_property_definitions/"
 
     def _set_access_level(self, user: User, resource: str = "customer_analytics", access_level: str = "viewer") -> None:
         membership = OrganizationMembership.objects.get(user=user, organization=self.organization)
@@ -1782,7 +1781,7 @@ class TestCustomPropertyValueViewSet(APIBaseTest):
         self.number_def = create_custom_property_definition(
             team_id=self.team.id, name="Seats", display_type=DisplayType.NUMBER
         )
-        self.endpoint = f"/api/projects/{self.team.id}/accounts/{self.account.id}/custom_property_values/"
+        self.endpoint = f"/v1/projects/{self.team.id}/accounts/{self.account.id}/custom_property_values/"
 
     def _set(self, definition_id, value, endpoint=None):
         return self.client.post(
@@ -1838,7 +1837,7 @@ class TestCustomPropertyValueViewSet(APIBaseTest):
     def test_account_from_another_team_returns_404(self):
         other_team = Team.objects.create(organization=self.organization)
         other_account = create_account(team_id=other_team.id)
-        endpoint = f"/api/projects/{self.team.id}/accounts/{other_account.id}/custom_property_values/"
+        endpoint = f"/v1/projects/{self.team.id}/accounts/{other_account.id}/custom_property_values/"
 
         response = self._set(self.text_def.id, "x", endpoint=endpoint)
 
@@ -1880,7 +1879,7 @@ class TestCustomPropertyValueViewSet(APIBaseTest):
 class TestCustomPropertySourceViewSet(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.endpoint = f"/api/projects/{self.team.id}/custom_property_sources/"
+        self.endpoint = f"/v1/projects/{self.team.id}/custom_property_sources/"
         saved_query_model = apps.get_model("data_modeling", "DataWarehouseSavedQuery")
         self.view = saved_query_model.objects.create(
             team=self.team, name="billing_view", columns={"org_id": {}, "mrr": {}}
@@ -2005,7 +2004,7 @@ class TestCustomPropertySourceViewSet(APIBaseTest):
     def test_create_group_definition_and_source_round_trip(self, _flag):
         # Group support: a group definition carries a group_type_index, and its source binds the same
         # warehouse way as a person source (external_data_schema + column_property_map + key_column).
-        definitions_endpoint = f"/api/projects/{self.team.id}/custom_property_definitions/"
+        definitions_endpoint = f"/v1/projects/{self.team.id}/custom_property_definitions/"
         definition = self.client.post(
             definitions_endpoint,
             {"name": "Plan tier", "display_type": "text", "target_type": "group", "group_type_index": 0},
@@ -2040,7 +2039,7 @@ class TestCustomPropertySourceViewSet(APIBaseTest):
     @patch("hanzo_insights.feature_enabled", return_value=True)
     def test_group_type_index_validation(self, _name, extra, _flag):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/custom_property_definitions/",
+            f"/v1/projects/{self.team.id}/custom_property_definitions/",
             {"name": "X", "display_type": "text", **extra},
             format="json",
         )
@@ -2050,8 +2049,8 @@ class TestCustomPropertySourceViewSet(APIBaseTest):
 class TestCustomPropertyGroupScope(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.definitions_endpoint = f"/api/projects/{self.team.id}/custom_property_definitions/"
-        self.sources_endpoint = f"/api/projects/{self.team.id}/custom_property_sources/"
+        self.definitions_endpoint = f"/v1/projects/{self.team.id}/custom_property_definitions/"
+        self.sources_endpoint = f"/v1/projects/{self.team.id}/custom_property_sources/"
 
     def _token(self, scopes: list[str]) -> str:
         value = generate_random_token_personal()
@@ -2214,7 +2213,7 @@ class TestAccountNotesViewSet(APIBaseTest):
     def setUp(self):
         super().setUp()
         self.account = Account.objects.unscoped().create(team=self.team, name="Acme Corp")
-        self.endpoint_base = f"/api/projects/{self.team.id}/account_notes/"
+        self.endpoint_base = f"/v1/projects/{self.team.id}/account_notes/"
 
     def _link_note(self, account: Account | None = None, **kwargs) -> Notebook:
         kwargs.setdefault("visibility", Notebook.Visibility.INTERNAL)
@@ -2388,7 +2387,7 @@ class TestAccountNotesViewSet(APIBaseTest):
 class TestAccountRelationshipDefinitionViewSet(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.endpoint_base = f"/api/projects/{self.team.id}/account_relationship_definitions/"
+        self.endpoint_base = f"/v1/projects/{self.team.id}/account_relationship_definitions/"
 
     def _create(self, **overrides):
         payload = {"name": "CSM", "description": "Customer success manager"}
@@ -2488,7 +2487,7 @@ class TestAccountRelationshipViewSet(APIBaseTest):
     def setUp(self):
         super().setUp()
         self.account = create_account(team_id=self.team.id)
-        self.endpoint = f"/api/projects/{self.team.id}/accounts/{self.account.id}/relationships/"
+        self.endpoint = f"/v1/projects/{self.team.id}/accounts/{self.account.id}/relationships/"
 
     def _create_relationship_definition(self, name="CSM"):
         return AccountRelationshipDefinition.objects.for_team(self.team.id).create(
@@ -2542,7 +2541,7 @@ class TestAccountRelationshipViewSet(APIBaseTest):
         other_team = Team.objects.create(organization=self.organization)
         other_account = create_account(team_id=other_team.id)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/accounts/{other_account.id}/relationships/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/accounts/{other_account.id}/relationships/")
 
         self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
 
@@ -2599,7 +2598,7 @@ class TestAccountSupportTicketViewSet(APIBaseTest):
     def setUp(self):
         super().setUp()
         self.account = Account.objects.unscoped().create(team=self.team, name="Acme Corp", external_id="acme-1")
-        self.endpoint = f"/api/environments/{self.team.id}/accounts/{self.account.id}/support_tickets/"
+        self.endpoint = f"/v1/environments/{self.team.id}/accounts/{self.account.id}/support_tickets/"
 
     def test_list_returns_tickets_for_the_accounts_org(self):
         Ticket.objects.create(
@@ -2625,7 +2624,7 @@ class TestAccountSupportTicketViewSet(APIBaseTest):
     def test_list_is_empty_when_account_has_no_external_id(self):
         unlinked = Account.objects.unscoped().create(team=self.team, name="Unlinked", external_id=None)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/accounts/{unlinked.id}/support_tickets/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/accounts/{unlinked.id}/support_tickets/")
 
         self.assertEqual(status.HTTP_200_OK, response.status_code, response.json())
         self.assertEqual(response.json(), [])

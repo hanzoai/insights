@@ -53,7 +53,7 @@ class TestEndpointViewSetPSAKAuth(DatastoreTestMixin, APIBaseTest):
         token, _ = _make_psak(self.team, label="run-key")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/endpoints/my_endpoint/run/",
+            f"/v1/projects/{self.team.id}/endpoints/my_endpoint/run/",
             data={},
             content_type="application/json",
             **self._auth_headers(token),
@@ -67,7 +67,7 @@ class TestEndpointViewSetPSAKAuth(DatastoreTestMixin, APIBaseTest):
         token, _ = _make_psak(self.team, label="get-key")
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/endpoints/my_endpoint/run/",
+            f"/v1/projects/{self.team.id}/endpoints/my_endpoint/run/",
             **self._auth_headers(token),
         )
 
@@ -79,7 +79,7 @@ class TestEndpointViewSetPSAKAuth(DatastoreTestMixin, APIBaseTest):
         token, _ = _make_psak(self.team, label="inactive-key")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/endpoints/my_endpoint/run/",
+            f"/v1/projects/{self.team.id}/endpoints/my_endpoint/run/",
             data={},
             content_type="application/json",
             **self._auth_headers(token),
@@ -95,7 +95,7 @@ class TestEndpointViewSetPSAKAuth(DatastoreTestMixin, APIBaseTest):
 
         with patch.object(UserAccessControl, "specific_access_level_for_object") as acl_spy:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/endpoints/my_endpoint/run/",
+                f"/v1/projects/{self.team.id}/endpoints/my_endpoint/run/",
                 data={},
                 content_type="application/json",
                 **self._auth_headers(token),
@@ -111,7 +111,7 @@ class TestEndpointViewSetPSAKAuth(DatastoreTestMixin, APIBaseTest):
         self.assertIsNone(self.endpoint.last_executed_at)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/endpoints/my_endpoint/run/",
+            f"/v1/projects/{self.team.id}/endpoints/my_endpoint/run/",
             data={},
             content_type="application/json",
             **self._auth_headers(token),
@@ -131,7 +131,7 @@ class TestEndpointViewSetPSAKAuth(DatastoreTestMixin, APIBaseTest):
 
         with patch("insights.event_usage.hanzo_insights.capture") as capture_mock:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/endpoints/my_endpoint/run/",
+                f"/v1/projects/{self.team.id}/endpoints/my_endpoint/run/",
                 data={},
                 content_type="application/json",
                 **self._auth_headers(token),
@@ -153,7 +153,7 @@ class TestEndpointViewSetPSAKAuth(DatastoreTestMixin, APIBaseTest):
 
         with patch("insights.event_usage.hanzo_insights.capture") as capture_mock:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/endpoints/my_endpoint/run/",
+                f"/v1/projects/{self.team.id}/endpoints/my_endpoint/run/",
                 data={},
                 content_type="application/json",
             )
@@ -170,7 +170,7 @@ class TestEndpointViewSetPSAKAuth(DatastoreTestMixin, APIBaseTest):
         token, _ = _make_psak(self.team, label="body-key")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/endpoints/my_endpoint/run/",
+            f"/v1/projects/{self.team.id}/endpoints/my_endpoint/run/",
             data={"secret_api_key": token},
             content_type="application/json",
         )
@@ -189,7 +189,7 @@ class TestEndpointViewSetPSAKAuth(DatastoreTestMixin, APIBaseTest):
 
         with patch("insights.insightsql.database.database._compute_system_table_access_decision", side_effect=spy):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/endpoints/my_endpoint/run/",
+                f"/v1/projects/{self.team.id}/endpoints/my_endpoint/run/",
                 data={},
                 content_type="application/json",
                 **self._auth_headers(token),
@@ -222,7 +222,7 @@ class TestEndpointViewSetPSAKAuth(DatastoreTestMixin, APIBaseTest):
 
         response = self.client.generic(
             method,
-            f"/api/projects/{self.team.id}/endpoints/{path_suffix}",
+            f"/v1/projects/{self.team.id}/endpoints/{path_suffix}",
             **self._auth_headers(token),
         )
 
@@ -233,7 +233,7 @@ class TestEndpointViewSetPSAKAuth(DatastoreTestMixin, APIBaseTest):
         token, _ = _make_psak(self.team, label="create-key")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/endpoints/",
+            f"/v1/projects/{self.team.id}/endpoints/",
             data={"name": "new_endpoint", "query": SAMPLE_QUERY},
             content_type="application/json",
             **self._auth_headers(token),
@@ -252,7 +252,7 @@ class TestEndpointViewSetPSAKAuth(DatastoreTestMixin, APIBaseTest):
         token, _ = _make_psak(self.team, label=f"no-scope-{_name}", scopes=scopes)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/endpoints/my_endpoint/run/",
+            f"/v1/projects/{self.team.id}/endpoints/my_endpoint/run/",
             data={},
             content_type="application/json",
             **self._auth_headers(token),
@@ -264,7 +264,7 @@ class TestEndpointViewSetPSAKAuth(DatastoreTestMixin, APIBaseTest):
     def test_unknown_psak_returns_401(self):
         # Valid-looking but not-in-DB token
         response = self.client.post(
-            f"/api/projects/{self.team.id}/endpoints/my_endpoint/run/",
+            f"/v1/projects/{self.team.id}/endpoints/my_endpoint/run/",
             data={},
             content_type="application/json",
             **self._auth_headers("phs_" + "z" * 35),
@@ -280,7 +280,7 @@ class TestEndpointViewSetPSAKAuth(DatastoreTestMixin, APIBaseTest):
         token, _ = _make_psak(self.team, label="team-mismatch-key")
 
         response = self.client.post(
-            f"/api/projects/{other_team.id}/endpoints/my_endpoint/run/",
+            f"/v1/projects/{other_team.id}/endpoints/my_endpoint/run/",
             data={},
             content_type="application/json",
             **self._auth_headers(token),
@@ -294,7 +294,7 @@ class TestEndpointViewSetPSAKAuth(DatastoreTestMixin, APIBaseTest):
         token, _ = _make_psak(self.team, label="remote-config-key")
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/feature_flags/some_flag/remote_config/",
+            f"/v1/projects/{self.team.id}/feature_flags/some_flag/remote_config/",
             **self._auth_headers(token),
         )
 
@@ -307,7 +307,7 @@ class TestEndpointViewSetPSAKAuth(DatastoreTestMixin, APIBaseTest):
         self.organization_membership.save()
         self.client.force_login(self.user)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/endpoints/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/endpoints/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
@@ -330,7 +330,7 @@ class TestEndpointPSAKRateLimit(DatastoreTestMixin, APIBaseTest):
         super().tearDown()
 
     def _run(self, token: str | None = None):
-        url = f"/api/projects/{self.team.id}/endpoints/rl_endpoint/run/"
+        url = f"/v1/projects/{self.team.id}/endpoints/rl_endpoint/run/"
         if token is None:
             return self.client.post(url, data={}, content_type="application/json")
         return self.client.post(url, data={}, content_type="application/json", HTTP_AUTHORIZATION=f"Bearer {token}")

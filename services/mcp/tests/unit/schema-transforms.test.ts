@@ -31,7 +31,7 @@ describe('stripEnumMinLength', () => {
     it('handles nested enum schemas in parameters', () => {
         const spec = {
             paths: {
-                '/api/projects/{project_id}/activity_log/': {
+                '/v1/projects/{project_id}/activity_log/': {
                     get: {
                         parameters: [
                             {
@@ -59,7 +59,7 @@ describe('stripEnumMinLength', () => {
 
         stripEnumMinLength(spec)
 
-        const params = spec.paths['/api/projects/{project_id}/activity_log/'].get.parameters
+        const params = spec.paths['/v1/projects/{project_id}/activity_log/'].get.parameters
         expect(params[0]!.schema).not.toHaveProperty('minLength')
         expect(params[0]!.schema.enum).toEqual(['Cohort', 'FeatureFlag'])
         expect(params[1]!.schema.minLength).toBe(1)
@@ -68,7 +68,7 @@ describe('stripEnumMinLength', () => {
     it('handles array items with enum and minLength', () => {
         const spec = {
             paths: {
-                '/api/things/': {
+                '/v1/things/': {
                     get: {
                         parameters: [
                             {
@@ -91,7 +91,7 @@ describe('stripEnumMinLength', () => {
 
         stripEnumMinLength(spec)
 
-        const items = spec.paths['/api/things/'].get.parameters[0]!.schema.items
+        const items = spec.paths['/v1/things/'].get.parameters[0]!.schema.items
         expect(items).not.toHaveProperty('minLength')
         expect(items.enum).toEqual(['Cohort', 'FeatureFlag'])
     })

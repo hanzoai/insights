@@ -25,8 +25,8 @@ describe('SurveyAudienceFilters', () => {
         initKeaTests()
         useMocks({
             get: {
-                '/api/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
-                '/api/projects/:team/surveys/responses_count': () => [200, {}],
+                '/v1/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
+                '/v1/projects/:team/surveys/responses_count': () => [200, {}],
             },
         })
         mockPropertyFilters.mockClear()
