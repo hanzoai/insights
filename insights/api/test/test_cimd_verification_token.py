@@ -8,7 +8,7 @@ from insights.models.oauth import CIMDVerificationToken, create_cimd_verificatio
 
 class TestCIMDVerificationTokenViewSet(APIBaseTest):
     def _url(self, detail_id: str | None = None) -> str:
-        base = f"/api/organizations/{self.organization.id}/cimd_verification_tokens/"
+        base = f"/v1/organizations/{self.organization.id}/cimd_verification_tokens/"
         return f"{base}{detail_id}/" if detail_id else base
 
     def test_admin_can_create_and_sees_plaintext_once(self):

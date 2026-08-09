@@ -23,7 +23,7 @@ from insights.api.documentation import lint_spec_consistency_hook
 def test_lint_spec_consistency_hook_operation_id_validation(operation_id: str, should_warn: bool) -> None:
     spec = {
         "paths": {
-            "/api/test/": {
+            "/v1/test/": {
                 "get": {"operationId": operation_id},
             },
         },
@@ -44,7 +44,7 @@ def test_lint_spec_consistency_hook_skips_non_method_keys() -> None:
     """`parameters`, `summary`, etc. on a path object aren't HTTP methods — skip them."""
     spec = {
         "paths": {
-            "/api/test/": {
+            "/v1/test/": {
                 "parameters": [{"name": "weird-name"}],
                 "get": {"operationId": "valid_id"},
             },

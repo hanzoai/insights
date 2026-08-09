@@ -183,7 +183,7 @@ function useInsightMocks(interval: string = 'day', timezone: string = 'UTC'): vo
     }
     useMocks({
         get: {
-            '/api/environments/:team_id/insights/': () => {
+            '/v1/environments/:team_id/insights/': () => {
                 return [
                     200,
                     {
@@ -191,10 +191,10 @@ function useInsightMocks(interval: string = 'day', timezone: string = 'UTC'): vo
                     },
                 ]
             },
-            [`/api/environments/:team_id/insights/${MOCK_INSIGHT_NUMERIC_ID}`]: () => {
+            [`/v1/environments/:team_id/insights/${MOCK_INSIGHT_NUMERIC_ID}`]: () => {
                 return [200, insight]
             },
-            '/api/users/@me/': [200, {}],
+            '/v1/users/@me/': [200, {}],
         },
     })
 }
@@ -202,7 +202,7 @@ function useInsightMocks(interval: string = 'day', timezone: string = 'UTC'): vo
 function useAnnotationsMocks(): void {
     useMocks({
         get: {
-            '/api/projects/:team_id/annotations/': {
+            '/v1/projects/:team_id/annotations/': {
                 results: [
                     MOCK_ANNOTATION_ORG_SCOPED,
                     MOCK_ANNOTATION_ORG_SCOPED_FROM_INSIGHT_3,
@@ -217,7 +217,7 @@ function useAnnotationsMocks(): void {
                     MOCK_ANNOTATION_DASHBOARD_SCOPED_3,
                 ],
             },
-            '/api/users/@me/': [200, {}],
+            '/v1/users/@me/': [200, {}],
         },
     })
 }

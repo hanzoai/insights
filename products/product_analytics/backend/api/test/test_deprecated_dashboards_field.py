@@ -75,7 +75,7 @@ class TestDeprecatedDashboardsFieldAPI(APIBaseTest):
 
     @override_settings(INSIGHT_DASHBOARDS_OPT_IN_ENFORCED=True)
     def test_enforced_personal_api_key_must_opt_in_to_deprecated_dashboards_field(self):
-        url = f"/api/projects/{self.team.id}/insights/{self.insight.id}/"
+        url = f"/v1/projects/{self.team.id}/insights/{self.insight.id}/"
 
         default_response = self.client.get(url, HTTP_AUTHORIZATION=self.bearer)
         assert default_response.status_code == status.HTTP_200_OK
@@ -88,20 +88,20 @@ class TestDeprecatedDashboardsFieldAPI(APIBaseTest):
 
     def test_unenforced_personal_api_key_still_receives_deprecated_dashboards_field(self):
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{self.insight.id}/", HTTP_AUTHORIZATION=self.bearer
+            f"/v1/projects/{self.team.id}/insights/{self.insight.id}/", HTTP_AUTHORIZATION=self.bearer
         )
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["dashboards"] == [self.dashboard.id]
 
     def test_session_auth_does_not_receive_deprecated_dashboards_field(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/{self.insight.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/{self.insight.id}/")
         assert response.status_code == status.HTTP_200_OK
         assert "dashboards" not in response.json()
         assert [tile["dashboard_id"] for tile in response.json()["dashboard_tiles"]] == [self.dashboard.id]
 
     def test_session_auth_write_does_not_echo_deprecated_dashboards_field(self):
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights/{self.insight.id}/",
+            f"/v1/projects/{self.team.id}/insights/{self.insight.id}/",
             {"dashboards": []},
             format="json",
         )

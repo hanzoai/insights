@@ -17,7 +17,7 @@ MOCK_PATH = "products.ai_observability.backend.translation.llm.get_llm_client"
 class TestTranslateAPI(APIBaseTest):
     def test_unauthenticated_user_cannot_access_translation(self):
         self.client.logout()
-        response = self.client.post(f"/api/environments/{self.team.id}/llm_analytics/translate")
+        response = self.client.post(f"/v1/environments/{self.team.id}/llm_analytics/translate")
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     @patch(MOCK_PATH)
@@ -29,7 +29,7 @@ class TestTranslateAPI(APIBaseTest):
         mock_get_client.return_value.chat.completions.create.return_value = mock_response
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/translate",
+            f"/v1/environments/{self.team.id}/llm_analytics/translate",
             {"text": "Hello world", "target_language": "es"},
             format="json",
         )
@@ -49,7 +49,7 @@ class TestTranslateAPI(APIBaseTest):
         mock_get_client.return_value = mock_client
 
         self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/translate",
+            f"/v1/environments/{self.team.id}/llm_analytics/translate",
             {"text": "Test", "target_language": "fr"},
             format="json",
         )
@@ -68,7 +68,7 @@ class TestTranslateAPI(APIBaseTest):
         mock_get_client.return_value = mock_client
 
         self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/translate",
+            f"/v1/environments/{self.team.id}/llm_analytics/translate",
             {"text": "Bonjour le monde"},
             format="json",
         )
@@ -84,7 +84,7 @@ class TestTranslateAPI(APIBaseTest):
         mock_get_client.side_effect = ValueError("LLM_GATEWAY_URL and LLM_GATEWAY_API_KEY must be configured")
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/translate",
+            f"/v1/environments/{self.team.id}/llm_analytics/translate",
             {"text": "Hello world", "target_language": "es"},
             format="json",
         )
@@ -97,7 +97,7 @@ class TestTranslateAPI(APIBaseTest):
         long_text = "a" * 10001
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/translate",
+            f"/v1/environments/{self.team.id}/llm_analytics/translate",
             {"text": long_text, "target_language": "es"},
             format="json",
         )
@@ -109,7 +109,7 @@ class TestTranslateAPI(APIBaseTest):
         self.organization.is_ai_data_processing_approved = True
         self.organization.save()
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/translate",
+            f"/v1/environments/{self.team.id}/llm_analytics/translate",
             {"target_language": "es"},
             format="json",
         )
@@ -124,7 +124,7 @@ class TestTranslateAPI(APIBaseTest):
         mock_get_client.return_value.chat.completions.create.side_effect = Exception("API error")
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/translate",
+            f"/v1/environments/{self.team.id}/llm_analytics/translate",
             {"text": "Hello world", "target_language": "es"},
             format="json",
         )
@@ -143,7 +143,7 @@ class TestTranslateAPI(APIBaseTest):
         mock_get_client.return_value = mock_client
 
         self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/translate",
+            f"/v1/environments/{self.team.id}/llm_analytics/translate",
             {"text": "Line 1\nLine 2", "target_language": "es"},
             format="json",
         )
@@ -161,7 +161,7 @@ class TestTranslateAPI(APIBaseTest):
         mock_get_client.return_value.chat.completions.create.return_value = mock_response
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/translate",
+            f"/v1/environments/{self.team.id}/llm_analytics/translate",
             {"text": "Hello", "target_language": "es"},
             format="json",
         )
@@ -174,7 +174,7 @@ class TestTranslateAPI(APIBaseTest):
         self.organization.save()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/translate",
+            f"/v1/environments/{self.team.id}/llm_analytics/translate",
             {"text": "Hello world", "target_language": "es"},
             format="json",
         )
@@ -191,7 +191,7 @@ class TestTranslateAPI(APIBaseTest):
         mock_get_client.return_value.chat.completions.create.return_value = mock_response
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/translate",
+            f"/v1/environments/{self.team.id}/llm_analytics/translate",
             {"text": "Hello world", "target_language": "es"},
             format="json",
         )
@@ -209,7 +209,7 @@ class TestTranslateAPI(APIBaseTest):
         mock_get_client.return_value = mock_client
 
         self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/translate",
+            f"/v1/environments/{self.team.id}/llm_analytics/translate",
             {"text": "Test", "target_language": "es"},
             format="json",
         )

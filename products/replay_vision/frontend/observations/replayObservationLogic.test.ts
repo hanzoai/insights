@@ -15,7 +15,7 @@ describe('replayObservationLogic', () => {
         retrySpy = jest.fn(() => [202, { workflow_id: 'wf-retry' }])
         useMocks({
             get: {
-                '/api/projects/:team/vision/observations/:id/': {
+                '/v1/projects/:team/vision/observations/:id/': {
                     id: 'obs-1',
                     scanner_id: 'scanner-9',
                     session_id: 'sess-1',
@@ -36,7 +36,7 @@ describe('replayObservationLogic', () => {
                 },
             },
             post: {
-                '/api/projects/:team/vision/observations/:id/retry/': retrySpy,
+                '/v1/projects/:team/vision/observations/:id/retry/': retrySpy,
             },
         })
         initKeaTests()

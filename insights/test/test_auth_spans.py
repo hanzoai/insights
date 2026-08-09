@@ -69,19 +69,19 @@ class TestAuthSpans(BaseTest):
         [
             (
                 "personal_api_key_no_key",
-                lambda factory: factory.get("/api/users/@me/"),
+                lambda factory: factory.get("/v1/users/@me/"),
                 lambda req: PersonalAPIKeyAuthentication().authenticate(req),
                 "insights.auth.personal_api_key",
             ),
             (
                 "jwt_no_authorization_header",
-                lambda factory: factory.get("/api/users/@me/"),
+                lambda factory: factory.get("/v1/users/@me/"),
                 lambda req: JwtAuthentication.authenticate(req),
                 "insights.auth.jwt",
             ),
             (
                 "session_no_session",
-                lambda factory: Request(factory.get("/api/users/@me/")),
+                lambda factory: Request(factory.get("/v1/users/@me/")),
                 lambda req: SessionAuthentication().authenticate(req),
                 "insights.auth.session",
             ),
@@ -101,7 +101,7 @@ class TestAuthSpans(BaseTest):
             label="test",
             secure_value=hash_key_value(token),
         )
-        request = self.factory.get("/api/users/@me/", HTTP_AUTHORIZATION=f"Bearer {token}")
+        request = self.factory.get("/v1/users/@me/", HTTP_AUTHORIZATION=f"Bearer {token}")
 
         result = PersonalAPIKeyAuthentication().authenticate(request)
         assert result is not None

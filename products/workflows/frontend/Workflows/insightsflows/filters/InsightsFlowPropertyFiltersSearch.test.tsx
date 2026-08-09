@@ -37,15 +37,15 @@ describe('InsightsFlowPropertyFilters search', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/event_definitions': mockGetEventDefinitions,
-                '/api/projects/:team/property_definitions': mockGetPropertyDefinitions,
-                '/api/projects/:team/actions': { results: [mockActionDefinition] },
-                '/api/environments/:team/persons/properties': [],
-                '/api/environments/:team/events/values': { results: [], refreshing: false },
-                '/api/environments/:team_id/quick_filters/': { results: [] },
+                '/v1/projects/:team/event_definitions': mockGetEventDefinitions,
+                '/v1/projects/:team/property_definitions': mockGetPropertyDefinitions,
+                '/v1/projects/:team/actions': { results: [mockActionDefinition] },
+                '/v1/environments/:team/persons/properties': [],
+                '/v1/environments/:team/events/values': { results: [], refreshing: false },
+                '/v1/environments/:team_id/quick_filters/': { results: [] },
             },
             post: {
-                '/api/environments/:team/query': { results: [] },
+                '/v1/environments/:team/query': { results: [] },
             },
         })
         initKeaTests()

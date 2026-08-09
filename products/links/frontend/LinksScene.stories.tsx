@@ -69,13 +69,13 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/links': {
+                '/v1/projects/:team_id/links': {
                     count: 2,
                     results: LINKS_RESULT as any[],
                     next: null,
                     previous: null,
                 },
-                '/api/projects/:team_id/links/:linkId/': LINKS_RESULT[0],
+                '/v1/projects/:team_id/links/:linkId/': LINKS_RESULT[0],
             },
         }),
     ],

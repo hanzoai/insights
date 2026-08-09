@@ -29,7 +29,7 @@ export const createMarkdownHandler: ToolBase<
     const markdown = `# ${params.title}${body}`
     const notebook = await context.api.request<Schemas.Notebook>({
         method: 'POST',
-        path: `/api/projects/${encodeURIComponent(projectId)}/notebooks/`,
+        path: `/v1/projects/${encodeURIComponent(projectId)}/notebooks/`,
         body: {
             title: params.title,
             content: buildMarkdownNotebookContent(markdown),

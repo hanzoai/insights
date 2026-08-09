@@ -25,7 +25,7 @@ const meta: Meta<(props: StoryProps) => JSX.Element> = {
     render: ({ hasPendingInvite }: StoryProps) => {
         useStorybookMocks({
             get: {
-                '/api/users/@me/': () => [
+                '/v1/users/@me/': () => [
                     200,
                     {
                         ...MOCK_DEFAULT_USER,
@@ -33,8 +33,8 @@ const meta: Meta<(props: StoryProps) => JSX.Element> = {
                         pending_invites: hasPendingInvite ? [PENDING_INVITE] : [],
                     },
                 ],
-                '/api/environments/@current/': () => [200, MOCK_DEFAULT_TEAM],
-                '/api/projects/@current/': () => [200, MOCK_DEFAULT_TEAM],
+                '/v1/environments/@current/': () => [200, MOCK_DEFAULT_TEAM],
+                '/v1/projects/@current/': () => [200, MOCK_DEFAULT_TEAM],
             },
         })
 

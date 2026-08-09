@@ -41,14 +41,14 @@ describe('heatmapApiPath', () => {
 
     it.each([
         // in-app requests must pin the team the page was loaded for, not the user's global current project
-        ['in-app', 42, '', '/api/projects/42/heatmaps/'],
-        ['in-app', 42, 'events/', '/api/projects/42/heatmaps/events/'],
+        ['in-app', 42, '', '/v1/projects/42/heatmaps/'],
+        ['in-app', 42, 'events/', '/v1/projects/42/heatmaps/events/'],
         // the toolbar has no app context and keeps the legacy unscoped route
-        ['toolbar', 42, '', '/api/heatmap/'],
-        ['toolbar', 42, 'events/', '/api/heatmap/events/'],
+        ['toolbar', 42, '', '/v1/heatmap/'],
+        ['toolbar', 42, 'events/', '/v1/heatmap/events/'],
         // without an app context team there is nothing to scope to, so fall back to the legacy route
-        ['in-app', null, '', '/api/heatmap/'],
-        ['in-app', null, 'events/', '/api/heatmap/events/'],
+        ['in-app', null, '', '/v1/heatmap/'],
+        ['in-app', null, 'events/', '/v1/heatmap/events/'],
     ] as const)('context %s with team %s and endpoint %s resolves %s', (context, teamId, endpoint, expected) => {
         window.INSIGHTS_APP_CONTEXT = (teamId === null
             ? undefined

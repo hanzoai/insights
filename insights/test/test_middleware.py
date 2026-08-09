@@ -227,10 +227,10 @@ class TestAutoProjectMiddleware(APIBaseTest):
             FuzzyInt(self.base_app_num_queries, self.base_app_num_queries + 10)
         ):  # AutoProjectMiddleware adds 4 queries + 1 from activity logging
             response_app = self.client.get(f"/dashboard/{dashboard.id}")
-        response_users_api = self.client.get(f"/api/users/@me/")
+        response_users_api = self.client.get(f"/v1/users/@me/")
         response_users_api_data = response_users_api.json()
         self.user.refresh_from_db()
-        response_dashboards_api = self.client.get(f"/api/projects/@current/dashboards/{dashboard.id}/")
+        response_dashboards_api = self.client.get(f"/v1/projects/@current/dashboards/{dashboard.id}/")
 
         self.assertEqual(response_app.status_code, 200)
         self.assertEqual(response_users_api.status_code, 200)
@@ -243,10 +243,10 @@ class TestAutoProjectMiddleware(APIBaseTest):
         dashboard = Dashboard.objects.create(team=self.second_team)
 
         response_app = self.client.get(f"/dashboard/{dashboard.id}/")
-        response_users_api = self.client.get(f"/api/users/@me/")
+        response_users_api = self.client.get(f"/v1/users/@me/")
         response_users_api_data = response_users_api.json()
         self.user.refresh_from_db()
-        response_dashboards_api = self.client.get(f"/api/projects/@current/dashboards/{dashboard.id}/")
+        response_dashboards_api = self.client.get(f"/v1/projects/@current/dashboards/{dashboard.id}/")
 
         self.assertEqual(response_app.status_code, 200)
         self.assertEqual(response_users_api.status_code, 200)
@@ -265,10 +265,10 @@ class TestAutoProjectMiddleware(APIBaseTest):
         dashboard = Dashboard.objects.create(team=third_team)
 
         response_app = self.client.get(f"/dashboard/{dashboard.id}")
-        response_users_api = self.client.get(f"/api/users/@me/")
+        response_users_api = self.client.get(f"/v1/users/@me/")
         response_users_api_data = response_users_api.json()
         self.user.refresh_from_db()
-        response_dashboards_api = self.client.get(f"/api/projects/@current/dashboards/{dashboard.id}/")
+        response_dashboards_api = self.client.get(f"/v1/projects/@current/dashboards/{dashboard.id}/")
 
         self.assertEqual(response_app.status_code, 200)
         self.assertEqual(response_users_api.status_code, 200)
@@ -281,7 +281,7 @@ class TestAutoProjectMiddleware(APIBaseTest):
             FuzzyInt(self.base_app_num_queries, self.base_app_num_queries + 4)
         ):  # No AutoProjectMiddleware queries
             response_app = self.client.get(f"/dashboard")
-        response_users_api = self.client.get(f"/api/users/@me/")
+        response_users_api = self.client.get(f"/v1/users/@me/")
         response_users_api_data = response_users_api.json()
         self.user.refresh_from_db()
 
@@ -293,10 +293,10 @@ class TestAutoProjectMiddleware(APIBaseTest):
         insight = Insight.objects.create(team=self.second_team)
 
         response_app = self.client.get(f"/insights/{insight.short_id}")
-        response_users_api = self.client.get(f"/api/users/@me/")
+        response_users_api = self.client.get(f"/v1/users/@me/")
         response_users_api_data = response_users_api.json()
         self.user.refresh_from_db()
-        response_insights_api = self.client.get(f"/api/projects/@current/insights/{insight.id}/")
+        response_insights_api = self.client.get(f"/v1/projects/@current/insights/{insight.id}/")
 
         self.assertEqual(response_app.status_code, 200)
         self.assertEqual(response_users_api.status_code, 200)
@@ -309,10 +309,10 @@ class TestAutoProjectMiddleware(APIBaseTest):
         insight = Insight.objects.create(team=self.second_team)
 
         response_app = self.client.get(f"/insights/{insight.short_id}/edit")
-        response_users_api = self.client.get(f"/api/users/@me/")
+        response_users_api = self.client.get(f"/v1/users/@me/")
         response_users_api_data = response_users_api.json()
         self.user.refresh_from_db()
-        response_insights_api = self.client.get(f"/api/projects/@current/insights/{insight.id}/")
+        response_insights_api = self.client.get(f"/v1/projects/@current/insights/{insight.id}/")
 
         self.assertEqual(response_app.status_code, 200)
         self.assertEqual(response_users_api.status_code, 200)
@@ -323,10 +323,10 @@ class TestAutoProjectMiddleware(APIBaseTest):
         action = Action.objects.create(team=self.second_team)
 
         response_app = self.client.get(f"/action/{action.id}")
-        response_users_api = self.client.get(f"/api/users/@me/")
+        response_users_api = self.client.get(f"/v1/users/@me/")
         response_users_api_data = response_users_api.json()
         self.user.refresh_from_db()
-        response_actions_api = self.client.get(f"/api/projects/@current/actions/{action.id}/")
+        response_actions_api = self.client.get(f"/v1/projects/@current/actions/{action.id}/")
 
         self.assertEqual(response_app.status_code, 200)
         self.assertEqual(response_users_api.status_code, 200)
@@ -337,10 +337,10 @@ class TestAutoProjectMiddleware(APIBaseTest):
         cohort = Cohort.objects.create(team=self.second_team, created_by=self.user)
 
         response_app = self.client.get(f"/cohorts/{cohort.id}")
-        response_users_api = self.client.get(f"/api/users/@me/")
+        response_users_api = self.client.get(f"/v1/users/@me/")
         response_users_api_data = response_users_api.json()
         self.user.refresh_from_db()
-        response_cohorts_api = self.client.get(f"/api/projects/@current/cohorts/{cohort.id}/")
+        response_cohorts_api = self.client.get(f"/v1/projects/@current/cohorts/{cohort.id}/")
 
         self.assertEqual(response_app.status_code, 200)
         self.assertEqual(response_users_api.status_code, 200)
@@ -357,10 +357,10 @@ class TestAutoProjectMiddleware(APIBaseTest):
             FuzzyInt(self.base_app_num_queries, self.base_app_num_queries + 10)
         ):  # +1 from activity logging _get_before_update(), +1 from passkey credential review check
             response_app = self.client.get(f"/feature_flags/{feature_flag.id}")
-        response_users_api = self.client.get(f"/api/users/@me/")
+        response_users_api = self.client.get(f"/v1/users/@me/")
         response_users_api_data = response_users_api.json()
         self.user.refresh_from_db()
-        response_feature_flags_api = self.client.get(f"/api/projects/@current/feature_flags/{feature_flag.id}/")
+        response_feature_flags_api = self.client.get(f"/v1/projects/@current/feature_flags/{feature_flag.id}/")
 
         self.assertEqual(response_app.status_code, 200)
         self.assertEqual(response_users_api.status_code, 200)
@@ -371,7 +371,7 @@ class TestAutoProjectMiddleware(APIBaseTest):
     def test_project_unchanged_when_creating_feature_flag(self):
         with self.assertNumQueries(FuzzyInt(self.base_app_num_queries, self.base_app_num_queries + 5)):
             response_app = self.client.get(f"/feature_flags/new")
-        response_users_api = self.client.get(f"/api/users/@me/")
+        response_users_api = self.client.get(f"/v1/users/@me/")
         response_users_api_data = response_users_api.json()
         self.user.refresh_from_db()
 
@@ -381,34 +381,34 @@ class TestAutoProjectMiddleware(APIBaseTest):
 
     def test_project_switched_when_accessing_another_project_by_id(self):
         project_1_request = self.client.get(f"/project/{self.team.pk}/home")
-        response_users_api = self.client.get(f"/api/users/@me/")
+        response_users_api = self.client.get(f"/v1/users/@me/")
         assert project_1_request.status_code == 200
         assert response_users_api.json().get("team", {}).get("id") == self.team.id
 
         project_2_request = self.client.get(f"/project/{self.second_team.pk}/home")
-        response_users_api = self.client.get(f"/api/users/@me/")
+        response_users_api = self.client.get(f"/v1/users/@me/")
         assert project_2_request.status_code == 200
         assert response_users_api.json().get("team", {}).get("id") == self.second_team.id
 
     def test_project_unchanged_when_accessing_inaccessible_project_by_id(self):
         project_1_request = self.client.get(f"/project/{self.team.pk}/home")
-        response_users_api = self.client.get(f"/api/users/@me/")
+        response_users_api = self.client.get(f"/v1/users/@me/")
         assert project_1_request.status_code == 200
         assert response_users_api.json().get("team", {}).get("id") == self.team.id
 
         project_2_request = self.client.get(f"/project/{self.no_access_team.pk}/home")
-        response_users_api = self.client.get(f"/api/users/@me/")
+        response_users_api = self.client.get(f"/v1/users/@me/")
         assert project_2_request.status_code == 200
         assert response_users_api.json().get("team", {}).get("id") == self.team.id
 
     def test_project_unchanged_when_accessing_missing_project_by_id(self):
         project_1_request = self.client.get(f"/project/{self.team.pk}/home")
-        response_users_api = self.client.get(f"/api/users/@me/")
+        response_users_api = self.client.get(f"/v1/users/@me/")
         assert project_1_request.status_code == 200
         assert response_users_api.json().get("team", {}).get("id") == self.team.id
 
         project_2_request = self.client.get(f"/project/999999/home")
-        response_users_api = self.client.get(f"/api/users/@me/")
+        response_users_api = self.client.get(f"/v1/users/@me/")
         assert project_2_request.status_code == 200
         assert response_users_api.json().get("team", {}).get("id") == self.team.id
 
@@ -581,24 +581,24 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
         )
 
     def test_staff_user_can_login(self):
-        assert self.client.get("/api/users/@me").json()["email"] == self.user.email
+        assert self.client.get("/v1/users/@me").json()["email"] == self.user.email
         response = self.login_as_other_user()
         assert response.status_code == 200
-        assert self.client.get("/api/users/@me").json()["email"] == "other-user@hanzo.ai"
+        assert self.client.get("/v1/users/@me").json()["email"] == "other-user@hanzo.ai"
 
     def test_not_staff_user_cannot_login(self):
         self.user.is_staff = False
         self.user.save()
-        assert self.client.get("/api/users/@me").json()["email"] == self.user.email
+        assert self.client.get("/v1/users/@me").json()["email"] == self.user.email
         response = self.login_as_other_user()
         assert response.status_code == 200
-        assert self.client.get("/api/users/@me").json()["email"] == self.user.email
+        assert self.client.get("/v1/users/@me").json()["email"] == self.user.email
 
     def test_after_idle_timeout_api_requests_401(self):
         now = datetime(2024, 1, 1, 12, 0, 0)
         with freeze_time(now):
             self.login_as_other_user()
-            res = self.client.get("/api/users/@me")
+            res = self.client.get("/v1/users/@me")
             assert res.status_code == 200
             assert res.json()["email"] == "other-user@hanzo.ai"
             assert res.json()["is_impersonated_until"] == "2024-01-01T12:00:20+00:00"
@@ -607,7 +607,7 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
         # Move forward by 19
         now = now + timedelta(seconds=19)
         with freeze_time(now):
-            res = self.client.get("/api/users/@me")
+            res = self.client.get("/v1/users/@me")
             assert res.status_code == 200
             assert res.json()["email"] == "other-user@hanzo.ai"
             assert res.json()["is_impersonated_until"] == "2024-01-01T12:00:39+00:00"
@@ -616,14 +616,14 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
         now = now + timedelta(seconds=21)
 
         with freeze_time(now):
-            res = self.client.get("/api/users/@me")
+            res = self.client.get("/v1/users/@me")
             assert res.status_code == 401
 
     def test_after_total_timeout_api_requests_401(self):
         now = datetime(2024, 1, 1, 12, 0, 0)
         with freeze_time(now):
             self.login_as_other_user()
-            res = self.client.get("/api/users/@me")
+            res = self.client.get("/v1/users/@me")
             assert res.status_code == 200
             assert res.json()["email"] == "other-user@hanzo.ai"
             assert res.json()["is_impersonated_until"] == "2024-01-01T12:00:20+00:00"
@@ -633,7 +633,7 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
             # Move forward by 19 seconds 4 times for a total of 76 seconds
             now = now + timedelta(seconds=19)
             with freeze_time(now):
-                res = self.client.get("/api/users/@me")
+                res = self.client.get("/v1/users/@me")
                 assert res.status_code == 200
                 assert res.json()["email"] == "other-user@hanzo.ai"
                 # Format exactly like the date above
@@ -643,7 +643,7 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
 
         now = now + timedelta(seconds=19)
         with freeze_time(now):
-            res = self.client.get("/api/users/@me")
+            res = self.client.get("/v1/users/@me")
             assert res.status_code == 200
             assert res.json()["email"] == "other-user@hanzo.ai"
             # Even though below the idle timeout, we now see the total timeout as that is earlier
@@ -653,7 +653,7 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
         now = now + timedelta(seconds=10)
 
         with freeze_time(now):
-            res = self.client.get("/api/users/@me")
+            res = self.client.get("/v1/users/@me")
             assert res.status_code == 401
 
     def test_after_timeout_non_admin_page_redirects_to_admin(self):
@@ -668,7 +668,7 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
             assert res.headers["Location"] == "/admin/"
 
             # Verify we're back to original user
-            res = self.client.get("/api/users/@me")
+            res = self.client.get("/v1/users/@me")
             assert res.status_code == 200
             assert res.json()["email"] == "user1@hanzo.ai"
 
@@ -688,7 +688,7 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
             assert res.headers["Location"] == f"/admin/insights/user/{third_user.id}/change/"
 
             # Verify we're back to original user
-            res = self.client.get("/api/users/@me")
+            res = self.client.get("/v1/users/@me")
             assert res.status_code == 200
             assert res.json()["email"] == "user1@hanzo.ai"
 
@@ -704,7 +704,7 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
             assert res.headers["Location"] == f"/admin/insights/user/{self.other_user.id}/change/"
 
             # Verify we're back to original user
-            res = self.client.get("/api/users/@me")
+            res = self.client.get("/v1/users/@me")
             assert res.status_code == 200
             assert res.json()["email"] == "user1@hanzo.ai"
 
@@ -732,7 +732,7 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
             )
 
             # Verify we're back to the original staff user
-            res = self.client.get("/api/users/@me")
+            res = self.client.get("/v1/users/@me")
             assert res.status_code == 200
             assert res.json()["email"] == "user1@hanzo.ai"
 
@@ -756,7 +756,7 @@ class TestAutoLogoutImpersonateMiddleware(APIBaseTest):
             assert res.headers["Location"] == "/"
 
             # Verify we're back to the original staff user
-            res = self.client.get("/api/users/@me")
+            res = self.client.get("/v1/users/@me")
             assert res.status_code == 200
             assert res.json()["email"] == "user1@hanzo.ai"
 
@@ -804,10 +804,10 @@ class TestImpersonationReadOnlyMiddleware(APIBaseTest):
         self.login_as_other_user_read_only()
 
         # Verify we're logged in as the other user
-        assert self.client.get("/api/users/@me").json()["email"] == "other-user@hanzo.ai"
+        assert self.client.get("/v1/users/@me").json()["email"] == "other-user@hanzo.ai"
 
         # Try to delete the dashboard
-        response = self.client.delete(f"/api/projects/{self.team.id}/dashboards/{dashboard.id}/")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/dashboards/{dashboard.id}/")
 
         assert response.status_code == 403
         response_data = response.json()
@@ -824,26 +824,26 @@ class TestImpersonationReadOnlyMiddleware(APIBaseTest):
         self.login_as_other_user_read_only()
 
         # Verify we're logged in as the other user
-        response = self.client.get("/api/users/@me")
+        response = self.client.get("/v1/users/@me")
         assert response.status_code == 200
         assert response.json()["email"] == "other-user@hanzo.ai"
 
         # GET request to dashboards should work
-        response = self.client.get(f"/api/projects/{self.team.id}/dashboards/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/dashboards/")
         assert response.status_code == 200
 
     def test_reimpersonating_same_user_read_write_clears_read_only(self):
         self.login_as_other_user_read_only()
-        assert self.client.get("/api/users/@me/").json()["is_impersonated_read_only"] is True
+        assert self.client.get("/v1/users/@me/").json()["is_impersonated_read_only"] is True
 
         # Re-impersonating the same user reuses the session (Django only flushes on a user change),
         # so the start must clear the prior read-only flag instead of silently forcing read-only.
         self.login_as_other_user()
-        assert self.client.get("/api/users/@me/").json()["is_impersonated_read_only"] is False
+        assert self.client.get("/v1/users/@me/").json()["is_impersonated_read_only"] is False
 
     def test_rejected_reimpersonation_preserves_read_only_and_reason(self):
         self.login_as_other_user_read_only()
-        assert self.client.get("/api/users/@me/").json()["is_impersonated_read_only"] is True
+        assert self.client.get("/v1/users/@me/").json()["is_impersonated_read_only"] is True
 
         # An empty reason is rejected by loginas without changing the session (it redirects back to
         # the referer). The rejected attempt must not clear the active read-only flag or its reason.
@@ -853,7 +853,7 @@ class TestImpersonationReadOnlyMiddleware(APIBaseTest):
             HTTP_REFERER="/some/page",
         )
 
-        user = self.client.get("/api/users/@me/").json()
+        user = self.client.get("/v1/users/@me/").json()
         assert user["is_impersonated_read_only"] is True
         assert user["is_impersonated_reason"] == "Test read-only impersonation"
 
@@ -877,10 +877,10 @@ class TestImpersonationReadOnlyMiddleware(APIBaseTest):
     def test_read_only_impersonation_allows_allowlisted_post(self, _name, path_suffix, body):
         self.login_as_other_user_read_only()
 
-        assert self.client.get("/api/users/@me").json()["email"] == "other-user@hanzo.ai"
+        assert self.client.get("/v1/users/@me").json()["email"] == "other-user@hanzo.ai"
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/{path_suffix}",
+            f"/v1/projects/{self.team.id}/{path_suffix}",
             data=body,
             content_type="application/json",
         )
@@ -894,11 +894,11 @@ class TestImpersonationReadOnlyMiddleware(APIBaseTest):
         self.login_as_other_user()
 
         # Verify we're logged in as the other user
-        assert self.client.get("/api/users/@me").json()["email"] == "other-user@hanzo.ai"
+        assert self.client.get("/v1/users/@me").json()["email"] == "other-user@hanzo.ai"
 
         # Update should work with regular impersonation
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard.id}/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard.id}/",
             data={"name": "Updated Dashboard"},
             content_type="application/json",
         )
@@ -917,7 +917,7 @@ class TestImpersonationReadOnlyMiddleware(APIBaseTest):
         self.login_as_other_user()
 
         # Should still be logged in as original user
-        assert self.client.get("/api/users/@me").json()["email"] == self.user.email
+        assert self.client.get("/v1/users/@me").json()["email"] == self.user.email
 
     def test_read_only_impersonation_blocked_when_user_disallows(self):
         """Verify read-only impersonation fails when target user has allow_impersonation=False."""
@@ -927,14 +927,14 @@ class TestImpersonationReadOnlyMiddleware(APIBaseTest):
         self.login_as_other_user_read_only()
 
         # Should still be logged in as original user
-        assert self.client.get("/api/users/@me").json()["email"] == self.user.email
+        assert self.client.get("/v1/users/@me").json()["email"] == self.user.email
 
     @parameterized.expand([("with_trailing_slash", "/logout/"), ("without_trailing_slash", "/logout")])
     def test_read_only_impersonation_logout_redirects_to_user_admin(self, _name, logout_path):
         self.login_as_other_user_read_only()
 
         # Verify we're logged in as the other user
-        assert self.client.get("/api/users/@me").json()["email"] == "other-user@hanzo.ai"
+        assert self.client.get("/v1/users/@me").json()["email"] == "other-user@hanzo.ai"
 
         # Explicit logout via main logout endpoint — frontend submits to /logout (no slash),
         # while server-side tooling and tests sometimes use /logout/. Both must work.
@@ -944,14 +944,14 @@ class TestImpersonationReadOnlyMiddleware(APIBaseTest):
         assert response.headers["Location"] == f"/admin/insights/user/{self.other_user.id}/change/"
 
         # Verify we're back to original user
-        assert self.client.get("/api/users/@me").json()["email"] == self.user.email
+        assert self.client.get("/v1/users/@me").json()["email"] == self.user.email
 
     def test_read_only_impersonation_allows_set_current_organization(self):
         """Verify read-only impersonation allows PATCH with only set_current_organization."""
         self.login_as_other_user_read_only()
 
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             data={"set_current_organization": str(self.organization.id)},
             content_type="application/json",
         )
@@ -965,7 +965,7 @@ class TestImpersonationReadOnlyMiddleware(APIBaseTest):
         self.login_as_other_user_read_only()
 
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             data={
                 "set_current_organization": str(self.organization.id),
                 "first_name": "Hacked",
@@ -1017,7 +1017,7 @@ class TestAdminImpersonationMiddleware(APIBaseTest):
         self.login_as_other_user()
 
         # API confirms we're impersonating
-        assert self.client.get("/api/users/@me").json()["email"] == "other-user@hanzo.ai"
+        assert self.client.get("/v1/users/@me").json()["email"] == "other-user@hanzo.ai"
 
         response = self.client.get("/admin/")
         assert response.status_code == 200
@@ -1038,7 +1038,7 @@ class TestAdminImpersonationMiddleware(APIBaseTest):
         """Outside of /admin/, the impersonated user must remain in effect."""
         self.login_as_other_user()
 
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         assert response.status_code == 200
         assert response.json()["email"] == "other-user@hanzo.ai"
 
@@ -1094,7 +1094,7 @@ class TestAdminImpersonationMiddleware(APIBaseTest):
         dashboard = Dashboard.objects.create(team=self.team, name="Test Dashboard")
         self.login_as_other_user_read_only()
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/dashboards/{dashboard.id}/")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/dashboards/{dashboard.id}/")
         assert response.status_code == 403
         assert response.json()["code"] == "impersonation_read_only"
 
@@ -1251,23 +1251,23 @@ class TestImpersonationBlockedPathsMiddleware(APIBaseTest):
         )
 
     def test_impersonation_allows_get_to_users_api(self):
-        """Verify impersonation allows GET requests to /api/users/."""
+        """Verify impersonation allows GET requests to /v1/users/."""
         self.login_as_other_user()
 
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         assert response.status_code == 200
         assert response.json()["email"] == "other-user@hanzo.ai"
 
     def test_impersonation_blocks_patch_to_users_api(self):
-        """Verify any impersonation blocks PATCH requests to /api/users/."""
+        """Verify any impersonation blocks PATCH requests to /v1/users/."""
         self.login_as_other_user()
 
         # Verify we're logged in as the other user
-        assert self.client.get("/api/users/@me/").json()["email"] == "other-user@hanzo.ai"
+        assert self.client.get("/v1/users/@me/").json()["email"] == "other-user@hanzo.ai"
 
         # Try to update user
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             data={"first_name": "Changed"},
             content_type="application/json",
         )
@@ -1278,9 +1278,9 @@ class TestImpersonationBlockedPathsMiddleware(APIBaseTest):
         assert response_data["code"] == "impersonation_path_blocked"
 
     def test_non_impersonated_session_can_patch_users_api(self):
-        """Verify non-impersonated sessions can PATCH /api/users/."""
+        """Verify non-impersonated sessions can PATCH /v1/users/."""
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             data={"first_name": "Updated"},
             content_type="application/json",
         )
@@ -1294,7 +1294,7 @@ class TestImpersonationBlockedPathsMiddleware(APIBaseTest):
         self.login_as_other_user()
 
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             data={"set_current_organization": str(self.organization.id)},
             content_type="application/json",
         )
@@ -1306,7 +1306,7 @@ class TestImpersonationBlockedPathsMiddleware(APIBaseTest):
         self.login_as_other_user()
 
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             data={
                 "set_current_organization": str(self.organization.id),
                 "first_name": "Hacked",
@@ -1318,24 +1318,24 @@ class TestImpersonationBlockedPathsMiddleware(APIBaseTest):
         assert response.json()["code"] == "impersonation_path_blocked"
 
     def test_impersonation_allows_get_to_personal_api_keys(self):
-        """Verify impersonation allows GET requests to /api/personal_api_keys/."""
+        """Verify impersonation allows GET requests to /v1/personal_api_keys/."""
         self.login_as_other_user()
 
         # Verify we're logged in as the other user
-        assert self.client.get("/api/users/@me/").json()["email"] == "other-user@hanzo.ai"
+        assert self.client.get("/v1/users/@me/").json()["email"] == "other-user@hanzo.ai"
 
-        response = self.client.get("/api/personal_api_keys/")
+        response = self.client.get("/v1/personal_api_keys/")
         assert response.status_code == 200
 
     def test_impersonation_blocks_post_to_personal_api_keys(self):
-        """Verify any impersonation blocks POST requests to /api/personal_api_keys/."""
+        """Verify any impersonation blocks POST requests to /v1/personal_api_keys/."""
         self.login_as_other_user()
 
         # Verify we're logged in as the other user
-        assert self.client.get("/api/users/@me/").json()["email"] == "other-user@hanzo.ai"
+        assert self.client.get("/v1/users/@me/").json()["email"] == "other-user@hanzo.ai"
 
         response = self.client.post(
-            "/api/personal_api_keys/",
+            "/v1/personal_api_keys/",
             data={"label": "Test Key"},
             content_type="application/json",
         )
@@ -1347,15 +1347,15 @@ class TestImpersonationBlockedPathsMiddleware(APIBaseTest):
 
     def test_impersonation_blocks_post_to_personal_api_keys_without_trailing_slash(self):
         """The DefaultRouterPlusPlus router accepts paths with or without a trailing slash
-        (trailing_slash = r"/?"), so /api/personal_api_keys reaches the same viewset as
-        /api/personal_api_keys/. The middleware must block both forms — a startswith
-        check against "/api/personal_api_keys/" alone is bypassed by the slashless variant."""
+        (trailing_slash = r"/?"), so /v1/personal_api_keys reaches the same viewset as
+        /v1/personal_api_keys/. The middleware must block both forms — a startswith
+        check against "/v1/personal_api_keys/" alone is bypassed by the slashless variant."""
         self.login_as_other_user()
 
-        assert self.client.get("/api/users/@me/").json()["email"] == "other-user@hanzo.ai"
+        assert self.client.get("/v1/users/@me/").json()["email"] == "other-user@hanzo.ai"
 
         response = self.client.post(
-            "/api/personal_api_keys",
+            "/v1/personal_api_keys",
             data={"label": "Test Key"},
             content_type="application/json",
         )
@@ -1368,14 +1368,14 @@ class TestImpersonationBlockedPathsMiddleware(APIBaseTest):
         assert response_data["code"] == "impersonation_path_blocked"
 
     def test_impersonation_blocks_patch_to_users_api_without_trailing_slash(self):
-        """Same bypass class as the personal_api_keys slashless test: /api/users/@me
-        (no trailing slash) must be blocked just like /api/users/@me/."""
+        """Same bypass class as the personal_api_keys slashless test: /v1/users/@me
+        (no trailing slash) must be blocked just like /v1/users/@me/."""
         self.login_as_other_user()
 
-        assert self.client.get("/api/users/@me/").json()["email"] == "other-user@hanzo.ai"
+        assert self.client.get("/v1/users/@me/").json()["email"] == "other-user@hanzo.ai"
 
         response = self.client.patch(
-            "/api/users/@me",
+            "/v1/users/@me",
             data={"first_name": "Changed"},
             content_type="application/json",
         )
@@ -1412,7 +1412,7 @@ class TestImpersonationLoginReasonRequired(APIBaseTest):
         )
 
         # Should still be logged in as original staff user (impersonation rejected)
-        assert self.client.get("/api/users/@me/").json()["email"] == self.user.email
+        assert self.client.get("/v1/users/@me/").json()["email"] == self.user.email
 
     def test_impersonation_succeeds_with_reason(self):
         """Verify impersonation succeeds when a reason is provided."""
@@ -1423,7 +1423,7 @@ class TestImpersonationLoginReasonRequired(APIBaseTest):
         )
 
         # Should now be logged in as other user
-        assert self.client.get("/api/users/@me/").json()["email"] == "other-user@hanzo.ai"
+        assert self.client.get("/v1/users/@me/").json()["email"] == "other-user@hanzo.ai"
 
     def test_impersonation_rejected_with_empty_reason(self):
         """Verify impersonation is rejected when reason is empty string."""
@@ -1434,7 +1434,7 @@ class TestImpersonationLoginReasonRequired(APIBaseTest):
         )
 
         # Should still be logged in as original staff user
-        assert self.client.get("/api/users/@me/").json()["email"] == self.user.email
+        assert self.client.get("/v1/users/@me/").json()["email"] == self.user.email
 
     def test_impersonation_rejected_with_whitespace_only_reason(self):
         """Verify impersonation is rejected when reason is only whitespace."""
@@ -1445,7 +1445,7 @@ class TestImpersonationLoginReasonRequired(APIBaseTest):
         )
 
         # Should still be logged in as original staff user
-        assert self.client.get("/api/users/@me/").json()["email"] == self.user.email
+        assert self.client.get("/v1/users/@me/").json()["email"] == self.user.email
 
 
 class TestUpgradeImpersonation(APIBaseTest):
@@ -1480,7 +1480,7 @@ class TestUpgradeImpersonation(APIBaseTest):
         self.login_as_read_only()
 
         # Verify we're in read-only mode
-        user_response = self.client.get("/api/users/@me/")
+        user_response = self.client.get("/v1/users/@me/")
         assert user_response.json()["is_impersonated_read_only"] is True
 
         # Upgrade to read-write
@@ -1493,12 +1493,12 @@ class TestUpgradeImpersonation(APIBaseTest):
         assert response.json()["success"] is True
 
         # Verify we're now in read-write mode
-        user_response = self.client.get("/api/users/@me/")
+        user_response = self.client.get("/v1/users/@me/")
         assert user_response.json()["is_impersonated_read_only"] is False
 
     def test_start_exposes_reason_on_user_api(self):
         self.login_as_read_only()
-        assert self.client.get("/api/users/@me/").json()["is_impersonated_reason"] == "Initial read-only impersonation"
+        assert self.client.get("/v1/users/@me/").json()["is_impersonated_reason"] == "Initial read-only impersonation"
 
     def test_upgrade_returns_404_when_not_impersonated(self):
         response = self.client.post(
@@ -1680,7 +1680,7 @@ class TestActiveOrganizationMiddleware(APIBaseTest):
         self.organization.save()
 
         # API paths are skipped by middleware
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["email"], self.user.email)
 
@@ -1695,7 +1695,7 @@ class TestActiveOrganizationMiddleware(APIBaseTest):
         self.organization.save()
 
         # API paths should work even with inactive org
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_inactive_organization_redirects_non_api_paths(self):
@@ -1733,7 +1733,7 @@ class TestActiveOrganizationMiddleware(APIBaseTest):
     def test_unauthenticated_user_not_affected(self):
         self.client.logout()
         # API paths are skipped, so auth check happens in view
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         # Non-API paths are also skipped for unauthenticated users
@@ -1746,7 +1746,7 @@ class TestActiveOrganizationMiddleware(APIBaseTest):
             ("/dashboard", status.HTTP_302_FOUND, "/organization-pending-deletion"),
             ("/some-page", status.HTTP_302_FOUND, "/organization-pending-deletion"),
             ("/organization-pending-deletion", status.HTTP_200_OK, None),
-            ("/api/users/@me/", status.HTTP_200_OK, None),
+            ("/v1/users/@me/", status.HTTP_200_OK, None),
         ]
     )
     def test_pending_deletion_routing(self, path, expected_status, expected_location):
@@ -1832,7 +1832,7 @@ class TestActivityLoggingMiddleware(APIBaseTest):
 
 class TestCSPMiddleware(APIBaseTest):
     def test_non_html_response_gets_strict_csp(self):
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         assert response.status_code == 200
         assert response["Content-Security-Policy"] == "default-src 'none'"
         assert "Content-Security-Policy-Report-Only" not in response
@@ -1950,7 +1950,7 @@ class TestSocialAuthExceptionMiddleware(APIBaseTest):
             ),
             (
                 "auth_failed_on_non_oauth_path",
-                "/api/some-endpoint/",
+                "/v1/some-endpoint/",
                 AuthFailed(_social_auth_backend(), "some error"),
             ),
         ]
@@ -2031,7 +2031,7 @@ def test_chqueries_middleware_tags_source(user_agent, expected_source):
         return HttpResponse("ok")
 
     factory = RequestFactory()
-    request = factory.get("/api/projects/@current/query/", HTTP_USER_AGENT=user_agent)
+    request = factory.get("/v1/projects/@current/query/", HTTP_USER_AGENT=user_agent)
     request.user = MagicMock(pk=1, is_authenticated=False)
     request.session = MagicMock(session_key="abc123")
 
@@ -2044,8 +2044,8 @@ def test_chqueries_middleware_tags_source(user_agent, expected_source):
 
 @parameterized.expand(
     [
-        ("api_path_emits", "/api/projects/@current/query/", True),
-        ("api_capture_excluded", "/api/projects/@current/capture/", False),
+        ("api_path_emits", "/v1/projects/@current/query/", True),
+        ("api_capture_excluded", "/v1/projects/@current/capture/", False),
         ("non_api_path_excluded", "/login", False),
     ]
 )
@@ -2116,7 +2116,7 @@ def test_chqueries_middleware_api_latency_labels(name, user_agent, access_method
             tag_queries(access_method=access_method)
         return HttpResponse("ok")
 
-    request = RequestFactory().get("/api/projects/@current/query/", HTTP_USER_AGENT=user_agent)
+    request = RequestFactory().get("/v1/projects/@current/query/", HTTP_USER_AGENT=user_agent)
     request.user = MagicMock(pk=1, is_authenticated=False)
     request.session = MagicMock(session_key="abc123")
 
@@ -2154,7 +2154,7 @@ def test_chqueries_middleware_api_latency_status_class(name, status_code, expect
 
     before = sample_count()
 
-    request = RequestFactory().get("/api/projects/@current/query/")
+    request = RequestFactory().get("/v1/projects/@current/query/")
     request.user = MagicMock(pk=1, is_authenticated=False)
     request.session = MagicMock(session_key="abc123")
 
@@ -2186,7 +2186,7 @@ def test_chqueries_middleware_api_latency_records_on_raise():
     def boom(req):
         raise RuntimeError("view exploded")
 
-    request = RequestFactory().get("/api/projects/@current/query/")
+    request = RequestFactory().get("/v1/projects/@current/query/")
     request.user = MagicMock(pk=1, is_authenticated=False)
     request.session = MagicMock(session_key="abc123")
 
@@ -2214,14 +2214,14 @@ def test_query_time_counting_middleware_emits_durations_in_milliseconds() -> Non
 
 @parameterized.expand(
     [
-        ("/api/projects/@current/insights/", True),
-        ("/api/projects/@current/dashboards/", True),
-        ("/api/projects/@current/property_definitions/", True),
+        ("/v1/projects/@current/insights/", True),
+        ("/v1/projects/@current/dashboards/", True),
+        ("/v1/projects/@current/property_definitions/", True),
         ("/", True),
         ("/insights/abc123", True),
         ("/dashboard/42", True),
         ("/project/2/insights", True),
-        ("/api/projects/@current/feature_flags/", False),
+        ("/v1/projects/@current/feature_flags/", False),
     ]
 )
 def test_query_time_counting_middleware_should_instrument(path, expected) -> None:

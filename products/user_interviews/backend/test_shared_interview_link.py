@@ -61,7 +61,7 @@ class TestGenerateSharedLink(_FeatureFlagEnabledMixin):
         )
 
     def _url(self, topic_id: str) -> str:
-        return f"/api/environments/{self.team.id}/user_interview_topics/{topic_id}/shared_link/"
+        return f"/v1/environments/{self.team.id}/user_interview_topics/{topic_id}/shared_link/"
 
     def test_creates_shared_link_via_sentinel_context(self) -> None:
         topic = self._topic()
@@ -108,7 +108,7 @@ class TestReservedIdentifierRejected(_FeatureFlagEnabledMixin):
     # would collide on the unique (topic, interviewee_identifier) constraint and silently merge with
     # or revoke the topic's shared link, so it's rejected at every input boundary.
     def _topics_url(self) -> str:
-        return f"/api/environments/{self.team.id}/user_interview_topics/"
+        return f"/v1/environments/{self.team.id}/user_interview_topics/"
 
     @parameterized.expand([("sentinel", SHARED_INTERVIEWEE_IDENTIFIER), ("shared_namespace", "shared:abc123")])
     def test_topic_create_rejects_reserved_distinct_id(self, _name: str, identifier: str) -> None:
@@ -140,10 +140,10 @@ class TestRevokeSharedLink(_FeatureFlagEnabledMixin):
         )
 
     def _url(self, topic_id: str) -> str:
-        return f"/api/environments/{self.team.id}/user_interview_topics/{topic_id}/shared_link/"
+        return f"/v1/environments/{self.team.id}/user_interview_topics/{topic_id}/shared_link/"
 
     def _start_call_url(self, token: str) -> str:
-        return f"/api/user_interviews/share/{token}/start_call/"
+        return f"/v1/user_interviews/share/{token}/start_call/"
 
     def _token(self, body: dict) -> str:
         return body["interview_url"].rstrip("/").rsplit("/", 1)[-1]
@@ -228,7 +228,7 @@ class TestSharedStartCall(APIBaseTest):
         return _make_shared_config(team=self.team, topic=topic, created_by=self.user)
 
     def _url(self, token: str | None) -> str:
-        return f"/api/user_interviews/share/{token}/start_call/"
+        return f"/v1/user_interviews/share/{token}/start_call/"
 
     _SESSION_ID_V7 = "018f0b7a-0000-7000-8000-000000000000"
 
@@ -342,7 +342,7 @@ class TestSharedVapiWebhook(APIBaseTest):
         body = json.dumps(payload)
         signature = hmac.new(secret.encode(), body.encode(), hashlib.sha256).hexdigest()
         return self.client.post(
-            "/api/user_interviews/vapi_webhook/",
+            "/v1/user_interviews/vapi_webhook/",
             data=body,
             content_type="application/json",
             HTTP_X_VAPI_SIGNATURE=signature,

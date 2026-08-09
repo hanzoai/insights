@@ -143,7 +143,7 @@ class TestTeamCIHealthAPI(DatastoreTestMixin, APIBaseTest):
         )
 
     def _get(self, endpoint: str, **params: str) -> dict:
-        response = self.client.get(f"/api/projects/{self.team.id}/engineering_analytics/{endpoint}/", params)
+        response = self.client.get(f"/v1/projects/{self.team.id}/engineering_analytics/{endpoint}/", params)
         assert response.status_code == status.HTTP_200_OK, response.content
         return response.json()
 
@@ -208,5 +208,5 @@ class TestTeamCIHealthAPI(DatastoreTestMixin, APIBaseTest):
         assert data["tests"] == []
 
     def test_activity_requires_owner_team(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/engineering_analytics/team_ci_activity/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/engineering_analytics/team_ci_activity/")
         assert response.status_code == status.HTTP_400_BAD_REQUEST

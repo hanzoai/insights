@@ -23,7 +23,7 @@ export function buildGroupAnalyticsTaxonomicGroupNames(
         name: capitalizeFirstLetter(aggregationLabel(type.group_type_index).plural),
         searchPlaceholder: aggregationLabel(type.group_type_index).plural,
         type: `${TaxonomicFilterGroupType.GroupNamesPrefix}_${type.group_type_index}` as unknown as TaxonomicFilterGroupType,
-        endpoint: combineUrl(`api/environments/${teamId}/groups/`, {
+        endpoint: combineUrl(`v1/environments/${teamId}/groups/`, {
             group_type_index: type.group_type_index,
         }).url,
         getPopoverHeader: () => 'Group Names',
@@ -46,13 +46,13 @@ export function buildGroupAnalyticsTaxonomicGroups(
         name: `${capitalizeFirstLetter(aggregationLabel(type.group_type_index).singular)} properties`,
         searchPlaceholder: `${aggregationLabel(type.group_type_index).singular} properties`,
         type: `${TaxonomicFilterGroupType.GroupsPrefix}_${type.group_type_index}` as unknown as TaxonomicFilterGroupType,
-        endpoint: combineUrl(`api/projects/${projectId}/property_definitions`, {
+        endpoint: combineUrl(`v1/projects/${projectId}/property_definitions`, {
             type: 'group',
             group_type_index: type.group_type_index,
             exclude_hidden: true,
         }).url,
         valuesEndpoint: (key) =>
-            `api/projects/${projectId}/groups/property_values?${toParams({
+            `v1/projects/${projectId}/groups/property_values?${toParams({
                 key,
                 group_type_index: type.group_type_index,
             })}`,

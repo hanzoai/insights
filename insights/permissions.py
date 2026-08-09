@@ -755,7 +755,7 @@ class APIScopePermission(ScopeBasePermission):
             )
 
         if scope_object == "user":
-            return  # The /api/users/@me/ endpoint is exempt from team and org scoping
+            return  # The /v1/users/@me/ endpoint is exempt from team and org scoping
 
         self._check_organization_personal_api_key_restrictions(request, view)
 

@@ -359,7 +359,7 @@ describe('ApiClient fetchJson on 403 permission_denied', () => {
             baseUrl: 'https://us.hanzo.ai',
         })
 
-        await expect(client.request({ method: 'GET', path: '/api/users/@me/' })).rejects.toBeInstanceOf(
+        await expect(client.request({ method: 'GET', path: '/v1/users/@me/' })).rejects.toBeInstanceOf(
             InsightsPermissionError
         )
 

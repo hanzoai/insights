@@ -16,7 +16,7 @@ describe('actionsLogic', () => {
 
         useMocks({
             get: {
-                '/api/projects/:team/actions/': { count: 0, results: [] },
+                '/v1/projects/:team/actions/': { count: 0, results: [] },
             },
         })
 

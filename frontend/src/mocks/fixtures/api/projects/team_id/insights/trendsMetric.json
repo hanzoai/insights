@@ -68,7 +68,7 @@
                         "date_from": "2022-03-04",
                         "date_to": "2022-03-04"
                     },
-                    "url": "api/projects/1/persons/trends/?date_from=2022-03-04&date_to=2022-03-04&display=ActionsLineGraph&events=%5B%7B%22id%22%3A+%22%24pageview%22%2C+%22type%22%3A+%22events%22%2C+%22order%22%3A+0%2C+%22name%22%3A+%22%24pageview%22%2C+%22custom_name%22%3A+null%2C+%22math%22%3A+null%2C+%22math_property%22%3A+null%2C+%22math_group_type_index%22%3A+null%2C+%22properties%22%3A+%7B%7D%7D%5D&insight=TRENDS&interval=day&entity_id=%24pageview&entity_type=events"
+                    "url": "v1/projects/1/persons/trends/?date_from=2022-03-04&date_to=2022-03-04&display=ActionsLineGraph&events=%5B%7B%22id%22%3A+%22%24pageview%22%2C+%22type%22%3A+%22events%22%2C+%22order%22%3A+0%2C+%22name%22%3A+%22%24pageview%22%2C+%22custom_name%22%3A+null%2C+%22math%22%3A+null%2C+%22math_property%22%3A+null%2C+%22math_group_type_index%22%3A+null%2C+%22properties%22%3A+%7B%7D%7D%5D&insight=TRENDS&interval=day&entity_id=%24pageview&entity_type=events"
                 },
                 {
                     "filter": {
@@ -78,7 +78,7 @@
                         "date_from": "2022-03-05",
                         "date_to": "2022-03-05"
                     },
-                    "url": "api/projects/1/persons/trends/?date_from=2022-03-05&date_to=2022-03-05&display=ActionsLineGraph&events=%5B%7B%22id%22%3A+%22%24pageview%22%2C+%22type%22%3A+%22events%22%2C+%22order%22%3A+0%2C+%22name%22%3A+%22%24pageview%22%2C+%22custom_name%22%3A+null%2C+%22math%22%3A+null%2C+%22math_property%22%3A+null%2C+%22math_group_type_index%22%3A+null%2C+%22properties%22%3A+%7B%7D%7D%5D&insight=TRENDS&interval=day&entity_id=%24pageview&entity_type=events"
+                    "url": "v1/projects/1/persons/trends/?date_from=2022-03-05&date_to=2022-03-05&display=ActionsLineGraph&events=%5B%7B%22id%22%3A+%22%24pageview%22%2C+%22type%22%3A+%22events%22%2C+%22order%22%3A+0%2C+%22name%22%3A+%22%24pageview%22%2C+%22custom_name%22%3A+null%2C+%22math%22%3A+null%2C+%22math_property%22%3A+null%2C+%22math_group_type_index%22%3A+null%2C+%22properties%22%3A+%7B%7D%7D%5D&insight=TRENDS&interval=day&entity_id=%24pageview&entity_type=events"
                 },
                 {
                     "filter": {
@@ -88,7 +88,7 @@
                         "date_from": "2022-03-06",
                         "date_to": "2022-03-06"
                     },
-                    "url": "api/projects/1/persons/trends/?date_from=2022-03-06&date_to=2022-03-06&display=ActionsLineGraph&events=%5B%7B%22id%22%3A+%22%24pageview%22%2C+%22type%22%3A+%22events%22%2C+%22order%22%3A+0%2C+%22name%22%3A+%22%24pageview%22%2C+%22custom_name%22%3A+null%2C+%22math%22%3A+null%2C+%22math_property%22%3A+null%2C+%22math_group_type_index%22%3A+null%2C+%22properties%22%3A+%7B%7D%7D%5D&insight=TRENDS&interval=day&entity_id=%24pageview&entity_type=events"
+                    "url": "v1/projects/1/persons/trends/?date_from=2022-03-06&date_to=2022-03-06&display=ActionsLineGraph&events=%5B%7B%22id%22%3A+%22%24pageview%22%2C+%22type%22%3A+%22events%22%2C+%22order%22%3A+0%2C+%22name%22%3A+%22%24pageview%22%2C+%22custom_name%22%3A+null%2C+%22math%22%3A+null%2C+%22math_property%22%3A+null%2C+%22math_group_type_index%22%3A+null%2C+%22properties%22%3A+%7B%7D%7D%5D&insight=TRENDS&interval=day&entity_id=%24pageview&entity_type=events"
                 },
                 {
                     "filter": {
@@ -98,7 +98,7 @@
                         "date_from": "2022-03-07",
                         "date_to": "2022-03-07"
                     },
-                    "url": "api/projects/1/persons/trends/?date_from=2022-03-07&date_to=2022-03-07&display=ActionsLineGraph&events=%5B%7B%22id%22%3A+%22%24pageview%22%2C+%22type%22%3A+%22events%22%2C+%22order%22%3A+0%2C+%22name%22%3A+%22%24pageview%22%2C+%22custom_name%22%3A+null%2C+%22math%22%3A+null%2C+%22math_property%22%3A+null%2C+%22math_group_type_index%22%3A+null%2C+%22properties%22%3A+%7B%7D%7D%5D&insight=TRENDS&interval=day&entity_id=%24pageview&entity_type=events"
+                    "url": "v1/projects/1/persons/trends/?date_from=2022-03-07&date_to=2022-03-07&display=ActionsLineGraph&events=%5B%7B%22id%22%3A+%22%24pageview%22%2C+%22type%22%3A+%22events%22%2C+%22order%22%3A+0%2C+%22name%22%3A+%22%24pageview%22%2C+%22custom_name%22%3A+null%2C+%22math%22%3A+null%2C+%22math_property%22%3A+null%2C+%22math_group_type_index%22%3A+null%2C+%22properties%22%3A+%7B%7D%7D%5D&insight=TRENDS&interval=day&entity_id=%24pageview&entity_type=events"
                 },
                 {
                     "filter": {
@@ -108,7 +108,7 @@
                         "date_from": "2022-03-08",
                         "date_to": "2022-03-08"
                     },
-                    "url": "api/projects/1/persons/trends/?date_from=2022-03-08&date_to=2022-03-08&display=ActionsLineGraph&events=%5B%7B%22id%22%3A+%22%24pageview%22%2C+%22type%22%3A+%22events%22%2C+%22order%22%3A+0%2C+%22name%22%3A+%22%24pageview%22%2C+%22custom_name%22%3A+null%2C+%22math%22%3A+null%2C+%22math_property%22%3A+null%2C+%22math_group_type_index%22%3A+null%2C+%22properties%22%3A+%7B%7D%7D%5D&insight=TRENDS&interval=day&entity_id=%24pageview&entity_type=events"
+                    "url": "v1/projects/1/persons/trends/?date_from=2022-03-08&date_to=2022-03-08&display=ActionsLineGraph&events=%5B%7B%22id%22%3A+%22%24pageview%22%2C+%22type%22%3A+%22events%22%2C+%22order%22%3A+0%2C+%22name%22%3A+%22%24pageview%22%2C+%22custom_name%22%3A+null%2C+%22math%22%3A+null%2C+%22math_property%22%3A+null%2C+%22math_group_type_index%22%3A+null%2C+%22properties%22%3A+%7B%7D%7D%5D&insight=TRENDS&interval=day&entity_id=%24pageview&entity_type=events"
                 },
                 {
                     "filter": {
@@ -118,7 +118,7 @@
                         "date_from": "2022-03-09",
                         "date_to": "2022-03-09"
                     },
-                    "url": "api/projects/1/persons/trends/?date_from=2022-03-09&date_to=2022-03-09&display=ActionsLineGraph&events=%5B%7B%22id%22%3A+%22%24pageview%22%2C+%22type%22%3A+%22events%22%2C+%22order%22%3A+0%2C+%22name%22%3A+%22%24pageview%22%2C+%22custom_name%22%3A+null%2C+%22math%22%3A+null%2C+%22math_property%22%3A+null%2C+%22math_group_type_index%22%3A+null%2C+%22properties%22%3A+%7B%7D%7D%5D&insight=TRENDS&interval=day&entity_id=%24pageview&entity_type=events"
+                    "url": "v1/projects/1/persons/trends/?date_from=2022-03-09&date_to=2022-03-09&display=ActionsLineGraph&events=%5B%7B%22id%22%3A+%22%24pageview%22%2C+%22type%22%3A+%22events%22%2C+%22order%22%3A+0%2C+%22name%22%3A+%22%24pageview%22%2C+%22custom_name%22%3A+null%2C+%22math%22%3A+null%2C+%22math_property%22%3A+null%2C+%22math_group_type_index%22%3A+null%2C+%22properties%22%3A+%7B%7D%7D%5D&insight=TRENDS&interval=day&entity_id=%24pageview&entity_type=events"
                 },
                 {
                     "filter": {
@@ -128,7 +128,7 @@
                         "date_from": "2022-03-10",
                         "date_to": "2022-03-10"
                     },
-                    "url": "api/projects/1/persons/trends/?date_from=2022-03-10&date_to=2022-03-10&display=ActionsLineGraph&events=%5B%7B%22id%22%3A+%22%24pageview%22%2C+%22type%22%3A+%22events%22%2C+%22order%22%3A+0%2C+%22name%22%3A+%22%24pageview%22%2C+%22custom_name%22%3A+null%2C+%22math%22%3A+null%2C+%22math_property%22%3A+null%2C+%22math_group_type_index%22%3A+null%2C+%22properties%22%3A+%7B%7D%7D%5D&insight=TRENDS&interval=day&entity_id=%24pageview&entity_type=events"
+                    "url": "v1/projects/1/persons/trends/?date_from=2022-03-10&date_to=2022-03-10&display=ActionsLineGraph&events=%5B%7B%22id%22%3A+%22%24pageview%22%2C+%22type%22%3A+%22events%22%2C+%22order%22%3A+0%2C+%22name%22%3A+%22%24pageview%22%2C+%22custom_name%22%3A+null%2C+%22math%22%3A+null%2C+%22math_property%22%3A+null%2C+%22math_group_type_index%22%3A+null%2C+%22properties%22%3A+%7B%7D%7D%5D&insight=TRENDS&interval=day&entity_id=%24pageview&entity_type=events"
                 },
                 {
                     "filter": {
@@ -138,7 +138,7 @@
                         "date_from": "2022-03-11",
                         "date_to": "2022-03-11"
                     },
-                    "url": "api/projects/1/persons/trends/?date_from=2022-03-11&date_to=2022-03-11&display=ActionsLineGraph&events=%5B%7B%22id%22%3A+%22%24pageview%22%2C+%22type%22%3A+%22events%22%2C+%22order%22%3A+0%2C+%22name%22%3A+%22%24pageview%22%2C+%22custom_name%22%3A+null%2C+%22math%22%3A+null%2C+%22math_property%22%3A+null%2C+%22math_group_type_index%22%3A+null%2C+%22properties%22%3A+%7B%7D%7D%5D&insight=TRENDS&interval=day&entity_id=%24pageview&entity_type=events"
+                    "url": "v1/projects/1/persons/trends/?date_from=2022-03-11&date_to=2022-03-11&display=ActionsLineGraph&events=%5B%7B%22id%22%3A+%22%24pageview%22%2C+%22type%22%3A+%22events%22%2C+%22order%22%3A+0%2C+%22name%22%3A+%22%24pageview%22%2C+%22custom_name%22%3A+null%2C+%22math%22%3A+null%2C+%22math_property%22%3A+null%2C+%22math_group_type_index%22%3A+null%2C+%22properties%22%3A+%7B%7D%7D%5D&insight=TRENDS&interval=day&entity_id=%24pageview&entity_type=events"
                 }
             ],
             "filter": {

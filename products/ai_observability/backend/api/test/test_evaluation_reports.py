@@ -161,7 +161,7 @@ class TestEvaluationReportApi(APIBaseTest):
             created_by=self.user,
             conditions=[{"id": "c1", "rollout_percentage": 100, "properties": []}],
         )
-        self.base_url = f"/api/environments/{self.team.id}/llm_analytics/evaluation_reports/"
+        self.base_url = f"/v1/environments/{self.team.id}/llm_analytics/evaluation_reports/"
 
     def _create_boolean_evaluation(self, name: str = "Other Eval") -> Evaluation:
         return Evaluation.objects.create(

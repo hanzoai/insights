@@ -121,7 +121,7 @@ export const apiStatusLogic = kea<apiStatusLogicType>([
                 if (now - 10000 > (cache.lastUnauthorizedCheck ?? 0)) {
                     cache.lastUnauthorizedCheck = Date.now()
 
-                    await api.get('api/users/@me/').catch((error: any) => {
+                    await api.get('v1/users/@me/').catch((error: any) => {
                         if (error.status === 401) {
                             userLogic.findMounted()?.actions.logout(true)
                         }

@@ -139,7 +139,7 @@ export const pipelineNotificationsLogic = kea<pipelineNotificationsLogicType>([
                             }
                             try {
                                 const pcs = await api.loadPaginatedResults<PluginDestinationConfig>(
-                                    `api/projects/${team.id}/pipeline_destination_configs/?limit=100`
+                                    `v1/projects/${team.id}/pipeline_destination_configs/?limit=100`
                                 )
                                 for (const pc of pcs) {
                                     items.push({

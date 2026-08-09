@@ -172,8 +172,8 @@ def _workflow_trigger_from_request(request: Request) -> Trigger | None:
 
 class ExternalTicketView(APIView):
     """
-    GET /api/conversations/external/ticket/<ticket_id>  — Fetch ticket data
-    PATCH /api/conversations/external/ticket/<ticket_id> — Update ticket fields
+    GET /v1/conversations/external/ticket/<ticket_id>  — Fetch ticket data
+    PATCH /v1/conversations/external/ticket/<ticket_id> — Update ticket fields
 
     Authenticated via Bearer token (team secret_api_token) in Authorization header.
     """

@@ -290,7 +290,7 @@ describe('ToolExecutor metrics', () => {
             await executor.handleToolCall({ name: 'fail-tool', arguments: {} }, makeState([{ name: 'fail-tool' }]))
 
             expect(trackToolCallExtras('fail-tool')).toMatchObject({
-                $mcp_error_message: 'HTTP 502 Bad Gateway on GET /api/environments/2/insights/',
+                $mcp_error_message: 'HTTP 502 Bad Gateway on GET /v1/environments/2/insights/',
             })
         })
 
@@ -328,7 +328,7 @@ describe('ToolExecutor metrics', () => {
                 $mcp_error_type: 'rate_limited',
                 $mcp_error_status: 429,
                 // Subclasses of InsightsApiError get the same rebuilt-safe message shape.
-                $mcp_error_message: 'HTTP 429 Too Many Requests on POST /api/environments/2/mcp_tools/execute_sql/',
+                $mcp_error_message: 'HTTP 429 Too Many Requests on POST /v1/environments/2/mcp_tools/execute_sql/',
             })
         })
 

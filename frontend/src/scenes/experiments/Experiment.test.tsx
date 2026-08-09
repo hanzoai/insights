@@ -50,24 +50,24 @@ const DRAFT_EXPERIMENT: ExperimentType = {
 
 const apiMocks = {
     get: {
-        '/api/projects/:team/experiments': () => [200, { results: [], count: 0 }],
-        '/api/projects/:team/experiments/123': () => [200, DRAFT_EXPERIMENT],
-        '/api/projects/:team/feature_flags/': () => [200, { results: [], count: 0 }],
-        '/api/projects/:team/experiment_holdouts': () => [200, { results: [], count: 0 }],
-        '/api/projects/:team/experiment_saved_metrics': () => [200, { results: [], count: 0 }],
-        '/api/user_home_settings/@me/': () => [200, {}],
+        '/v1/projects/:team/experiments': () => [200, { results: [], count: 0 }],
+        '/v1/projects/:team/experiments/123': () => [200, DRAFT_EXPERIMENT],
+        '/v1/projects/:team/feature_flags/': () => [200, { results: [], count: 0 }],
+        '/v1/projects/:team/experiment_holdouts': () => [200, { results: [], count: 0 }],
+        '/v1/projects/:team/experiment_saved_metrics': () => [200, { results: [], count: 0 }],
+        '/v1/user_home_settings/@me/': () => [200, {}],
     },
     post: {
-        '/api/environments/:team/query/': () => [200, { results: [] }],
+        '/v1/environments/:team/query/': () => [200, { results: [] }],
     },
     patch: {
-        '/api/environments/:team/add_product_intent/': () => [200, {}],
+        '/v1/environments/:team/add_product_intent/': () => [200, {}],
     },
 }
 
 function mockApiForExperiment(experimentData?: ExperimentType): Record<string, any> {
     return experimentData
-        ? { ...apiMocks, get: { ...apiMocks.get, '/api/projects/:team/experiments/123': () => [200, experimentData] } }
+        ? { ...apiMocks, get: { ...apiMocks.get, '/v1/projects/:team/experiments/123': () => [200, experimentData] } }
         : apiMocks
 }
 

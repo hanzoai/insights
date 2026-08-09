@@ -92,7 +92,7 @@ class TestGenerateInterviewLinks(_FeatureFlagEnabledMixin):
         return UserInterviewTopic.objects.create(**defaults)
 
     def _generate_links_url(self, topic_id: str) -> str:
-        return f"/api/environments/{self.team.id}/user_interview_topics/{topic_id}/generate_links/"
+        return f"/v1/environments/{self.team.id}/user_interview_topics/{topic_id}/generate_links/"
 
     def test_generate_links_materializes_contexts_and_sharing_configs(self):
         topic = self._create_topic()
@@ -146,7 +146,7 @@ class TestGenerateInterviewLinks(_FeatureFlagEnabledMixin):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def _generate_links_csv_url(self, topic_id: str) -> str:
-        return f"/api/environments/{self.team.id}/user_interview_topics/{topic_id}/links_csv/"
+        return f"/v1/environments/{self.team.id}/user_interview_topics/{topic_id}/links_csv/"
 
     def test_generate_links_csv_returns_csv_with_expected_columns_and_rows(self):
         topic = self._create_topic()
@@ -205,7 +205,7 @@ class TestGenerateInterviewLinks(_FeatureFlagEnabledMixin):
 
 class TestUserInterviewTopicCreate(_FeatureFlagEnabledMixin):
     def _url(self) -> str:
-        return f"/api/environments/{self.team.id}/user_interview_topics/"
+        return f"/v1/environments/{self.team.id}/user_interview_topics/"
 
     @parameterized.expand(
         [
@@ -251,7 +251,7 @@ class TestUserInterviewTopicEdit(_FeatureFlagEnabledMixin):
         return UserInterviewTopic.objects.create(**defaults)
 
     def _detail_url(self, topic_id: str) -> str:
-        return f"/api/environments/{self.team.id}/user_interview_topics/{topic_id}/"
+        return f"/v1/environments/{self.team.id}/user_interview_topics/{topic_id}/"
 
     def _add_url(self, topic_id: str) -> str:
         return f"{self._detail_url(topic_id)}add_interviewee/"
@@ -572,7 +572,7 @@ class TestInterviewStartCall(APIBaseTest):
     def test_returns_merged_assistant_overrides(self):
         share = self._create_share()
         self.client.logout()
-        response = self.client.post(f"/api/user_interviews/share/{share.access_token}/start_call/")
+        response = self.client.post(f"/v1/user_interviews/share/{share.access_token}/start_call/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         body = response.json()
         self.assertEqual(body, {"web_call": {"webCallUrl": "https://daily.example/call", "id": "call_test"}})
@@ -587,7 +587,7 @@ class TestInterviewStartCall(APIBaseTest):
     def test_returns_scoped_server_messages(self):
         share = self._create_share()
         self.client.logout()
-        response = self.client.post(f"/api/user_interviews/share/{share.access_token}/start_call/")
+        response = self.client.post(f"/v1/user_interviews/share/{share.access_token}/start_call/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         overrides = self.create_vapi_web_call.call_args.args[0]
         # Scoped to the two lifecycle events we act on — keeps Vapi from sending
@@ -598,7 +598,7 @@ class TestInterviewStartCall(APIBaseTest):
     def test_returns_personalised_first_message(self):
         share = self._create_share()
         self.client.logout()
-        response = self.client.post(f"/api/user_interviews/share/{share.access_token}/start_call/")
+        response = self.client.post(f"/v1/user_interviews/share/{share.access_token}/start_call/")
         assert response.status_code == status.HTTP_200_OK, response.content
         first_message = self.create_vapi_web_call.call_args.args[0]["firstMessage"]
         assert "Hey Alex!" in first_message
@@ -610,21 +610,21 @@ class TestInterviewStartCall(APIBaseTest):
         share.enabled = False
         share.save()
         self.client.logout()
-        response = self.client.post(f"/api/user_interviews/share/{share.access_token}/start_call/")
+        response = self.client.post(f"/v1/user_interviews/share/{share.access_token}/start_call/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     @override_settings(VAPI_PUBLIC_KEY="", VAPI_ASSISTANT_ID="")
     def test_503_when_vapi_unconfigured(self):
         share = self._create_share()
         self.client.logout()
-        response = self.client.post(f"/api/user_interviews/share/{share.access_token}/start_call/")
+        response = self.client.post(f"/v1/user_interviews/share/{share.access_token}/start_call/")
         self.assertEqual(response.status_code, status.HTTP_503_SERVICE_UNAVAILABLE)
 
     @override_settings(VAPI_PUBLIC_KEY="pk_test", VAPI_ASSISTANT_ID="asst_test")
     def test_returns_questions_as_json_not_python_repr(self):
         share = self._create_share()
         self.client.logout()
-        self.client.post(f"/api/user_interviews/share/{share.access_token}/start_call/")
+        self.client.post(f"/v1/user_interviews/share/{share.access_token}/start_call/")
         questions_raw = self.create_vapi_web_call.call_args.args[0]["variableValues"]["questions"]
         # The Vapi assistant prompt receives this string verbatim; it must parse as JSON,
         # not Python repr (which would be `['What blocks you?']` with single quotes).
@@ -639,7 +639,7 @@ class TestInterviewStartCall(APIBaseTest):
         org.allow_publicly_shared_resources = False
         org.save()
         self.client.logout()
-        response = self.client.post(f"/api/user_interviews/share/{share.access_token}/start_call/")
+        response = self.client.post(f"/v1/user_interviews/share/{share.access_token}/start_call/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     @freeze_time("2026-05-14 12:00:00")
@@ -652,7 +652,7 @@ class TestInterviewStartCall(APIBaseTest):
         share.expires_at = timezone.now() - datetime.timedelta(minutes=1)
         share.save()
         self.client.logout()
-        response = self.client.post(f"/api/user_interviews/share/{share.access_token}/start_call/")
+        response = self.client.post(f"/v1/user_interviews/share/{share.access_token}/start_call/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
@@ -707,7 +707,7 @@ class TestVapiWebhook(APIBaseTest):
         body = json.dumps(payload)
         signature = hmac.new(secret.encode(), body.encode(), hashlib.sha256).hexdigest()
         return self.client.post(
-            "/api/user_interviews/vapi_webhook/",
+            "/v1/user_interviews/vapi_webhook/",
             data=body,
             content_type="application/json",
             HTTP_X_VAPI_SIGNATURE=signature,
@@ -735,7 +735,7 @@ class TestVapiWebhook(APIBaseTest):
         share = self._create_share()
         self.client.logout()
         response = self.client.post(
-            "/api/user_interviews/vapi_webhook/",
+            "/v1/user_interviews/vapi_webhook/",
             data=self._end_of_call_payload(share.access_token),
             content_type="application/json",
         )
@@ -753,7 +753,7 @@ class TestVapiWebhook(APIBaseTest):
         share = self._create_share()
         self.client.logout()
         response = self.client.post(
-            "/api/user_interviews/vapi_webhook/",
+            "/v1/user_interviews/vapi_webhook/",
             data=self._end_of_call_payload(share.access_token),
             content_type="application/json",
             HTTP_X_VAPI_SIGNATURE="a" * 64,  # right shape, wrong value
@@ -779,7 +779,7 @@ class TestVapiWebhook(APIBaseTest):
         }
         if value is not None:
             kwargs["HTTP_X_VAPI_SIGNATURE"] = value
-        response = self.client.post("/api/user_interviews/vapi_webhook/", **kwargs)
+        response = self.client.post("/v1/user_interviews/vapi_webhook/", **kwargs)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     @override_settings(VAPI_WEBHOOK_SECRET="topsecret")
@@ -1023,7 +1023,7 @@ class TestSendInterviewInvites(_FeatureFlagEnabledMixin):
         return UserInterviewTopic.objects.create(**defaults)
 
     def _url(self, topic_id: str) -> str:
-        return f"/api/environments/{self.team.id}/user_interview_topics/{topic_id}/send_invites/"
+        return f"/v1/environments/{self.team.id}/user_interview_topics/{topic_id}/send_invites/"
 
     def test_send_invites_emails_only_email_identifiers(self):
         topic = self._create_topic()
@@ -1229,7 +1229,7 @@ class TestSendInterviewInvites(_FeatureFlagEnabledMixin):
 
 class TestInviteFieldValidation(_FeatureFlagEnabledMixin):
     def _url(self) -> str:
-        return f"/api/environments/{self.team.id}/user_interview_topics/"
+        return f"/v1/environments/{self.team.id}/user_interview_topics/"
 
     UNSAFE_SUBJECTS = [
         ("url_scheme", "Visit http://evil.com"),
@@ -1339,7 +1339,7 @@ class TestPreviewInterviewInvite(_FeatureFlagEnabledMixin):
         return UserInterviewTopic.objects.create(**defaults)
 
     def _url(self, topic_id: str) -> str:
-        return f"/api/environments/{self.team.id}/user_interview_topics/{topic_id}/preview_invite/"
+        return f"/v1/environments/{self.team.id}/user_interview_topics/{topic_id}/preview_invite/"
 
     def test_preview_renders_subject_and_html_for_default_identifier(self):
         topic = self._create_topic(invite_subject="Quick chat about replay?", invite_message="Hey,\nGot a sec?")

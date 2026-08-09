@@ -71,7 +71,7 @@ describe('InsightPageHeader', () => {
             get: {
                 // insightLogic mounts alongside and fetches its insight by short_id; without
                 // a match it errors with "Insight ... not found"
-                '/api/environments/:team_id/insights/': ({ request }: { request: Request }) => [
+                '/v1/environments/:team_id/insights/': ({ request }: { request: Request }) => [
                     200,
                     {
                         results: [{ id: 1, short_id: new URL(request.url).searchParams.get('short_id'), query: null }],
@@ -79,7 +79,7 @@ describe('InsightPageHeader', () => {
                 ],
             },
             post: {
-                '/api/environments/:team_id/query/': () => [200, { results: [] }],
+                '/v1/environments/:team_id/query/': () => [200, { results: [] }],
             },
         })
         initKeaTests()
@@ -349,10 +349,10 @@ describe('InsightPageHeader', () => {
             let patchCalled = false
             useMocks({
                 post: {
-                    '/api/environments/:team_id/query/': () => [200, { results: [] }],
+                    '/v1/environments/:team_id/query/': () => [200, { results: [] }],
                 },
                 patch: {
-                    '/api/environments/:team_id/insights/:id/': () => {
+                    '/v1/environments/:team_id/insights/:id/': () => {
                         patchCalled = true
                         return [200, makeInsight({ name: 'Updated Name' })]
                     },

@@ -110,10 +110,10 @@ export const nonInsightsFunctionsLogic = kea<nonInsightsFunctionsLogicType>([
                 loadInsightsFunctionPluginsDestinations: async () => {
                     const [pluginConfigs, plugins] = await Promise.all([
                         api.loadPaginatedResults<PluginConfigTypeNew>(
-                            `api/projects/${values.currentProjectId}/pipeline_destination_configs`
+                            `v1/projects/${values.currentProjectId}/pipeline_destination_configs`
                         ),
                         api.loadPaginatedResults<PluginType>(
-                            `api/organizations/${values.currentOrganizationId}/pipeline_destinations`
+                            `v1/organizations/${values.currentOrganizationId}/pipeline_destinations`
                         ),
                     ])
 
@@ -160,10 +160,10 @@ export const nonInsightsFunctionsLogic = kea<nonInsightsFunctionsLogicType>([
                 loadInsightsFunctionPluginsSiteApps: async () => {
                     const [pluginConfigs, plugins] = await Promise.all([
                         api.loadPaginatedResults<PluginConfigTypeNew>(
-                            `api/projects/${values.currentProjectId}/pipeline_frontend_apps_configs`
+                            `v1/projects/${values.currentProjectId}/pipeline_frontend_apps_configs`
                         ),
                         api.loadPaginatedResults<PluginType>(
-                            `api/organizations/${values.currentOrganizationId}/pipeline_frontend_apps`
+                            `v1/organizations/${values.currentOrganizationId}/pipeline_frontend_apps`
                         ),
                     ])
 

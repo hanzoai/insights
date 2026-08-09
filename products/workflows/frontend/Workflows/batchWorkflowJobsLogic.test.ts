@@ -18,7 +18,7 @@ describe('batchWorkflowJobsLogic', () => {
         getCalls = 0
         useMocks({
             get: {
-                '/api/environments/:team_id/hog_flows/:id/batch_jobs/': () => {
+                '/v1/environments/:team_id/hog_flows/:id/batch_jobs/': () => {
                     getCalls += 1
                     return [200, []]
                 },

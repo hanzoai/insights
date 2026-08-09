@@ -121,14 +121,14 @@ export const staffUsersLogic = kea<staffUsersLogicType>([
             [] as UserType[],
             {
                 loadAllUsers: async () => {
-                    return (await api.get('api/users')).results ?? []
+                    return (await api.get('v1/users')).results ?? []
                 },
                 addStaffUsers: async () => {
                     const { staffUsersToBeAdded, allUsers } = values
                     actions.setStaffUsersToBeAdded([])
                     const newStaffUsers = await Promise.all(
                         staffUsersToBeAdded.map(
-                            async (userUuid) => await api.update<UserType>(`api/users/${userUuid}`, { is_staff: true })
+                            async (userUuid) => await api.update<UserType>(`v1/users/${userUuid}`, { is_staff: true })
                         )
                     )
                     const updatedAllUsers: UserType[] = [
@@ -139,7 +139,7 @@ export const staffUsersLogic = kea<staffUsersLogicType>([
                     return updatedAllUsers
                 },
                 deleteStaffUser: async ({ userUuid }) => {
-                    await api.update<UserType>(`api/users/${userUuid}`, { is_staff: false })
+                    await api.update<UserType>(`v1/users/${userUuid}`, { is_staff: false })
                     if (values.user?.uuid === userUuid) {
                         actions.loadUser() // Loads the main user object to properly reflect staff user changes
                         router.actions.push(urls.projectRoot())

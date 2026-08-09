@@ -450,35 +450,35 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/vision/scanners/': scanners,
-                '/api/projects/:team_id/vision/scanners/stats/': scannerStats,
-                '/api/projects/:team_id/vision/scanners/creators/': { creators: [alice, bob] },
-                '/api/projects/:team_id/vision/quota/': quota,
-                '/api/projects/:team_id/vision/scanners/:id/': summarizerScanner,
-                '/api/projects/:team_id/vision/scanners/:id/impact/': scannerImpact,
-                '/api/projects/:team_id/vision/scanners/:id/observations/': observations,
-                '/api/projects/:team_id/vision/scanners/:id/observations/stats/': summarizerStats,
-                '/api/projects/:team_id/vision/scanners/:scannerId/prompt_suggestions/': {
+                '/v1/projects/:team_id/vision/scanners/': scanners,
+                '/v1/projects/:team_id/vision/scanners/stats/': scannerStats,
+                '/v1/projects/:team_id/vision/scanners/creators/': { creators: [alice, bob] },
+                '/v1/projects/:team_id/vision/quota/': quota,
+                '/v1/projects/:team_id/vision/scanners/:id/': summarizerScanner,
+                '/v1/projects/:team_id/vision/scanners/:id/impact/': scannerImpact,
+                '/v1/projects/:team_id/vision/scanners/:id/observations/': observations,
+                '/v1/projects/:team_id/vision/scanners/:id/observations/stats/': summarizerStats,
+                '/v1/projects/:team_id/vision/scanners/:scannerId/prompt_suggestions/': {
                     count: 1,
                     next: null,
                     previous: null,
                     results: [promptSuggestion],
                 },
-                '/api/projects/:team_id/vision/scanners/:scannerId/prompt_suggestions/current/': {
+                '/v1/projects/:team_id/vision/scanners/:scannerId/prompt_suggestions/current/': {
                     suggestion: promptSuggestion,
                     stale: false,
                     rated_count: 12,
                     evaluation_session_cap: 25,
                 },
-                '/api/projects/:team_id/vision/actions/': actions,
-                '/api/projects/:team_id/vision/actions/:id/': digestAction,
-                '/api/projects/:team_id/vision/actions/:visionActionId/runs/': actionRuns,
-                '/api/projects/:team_id/vision/actions/:visionActionId/runs/:id/': actionRunDetail,
-                '/api/projects/:team_id/vision/observations/:id/': observationDetail,
+                '/v1/projects/:team_id/vision/actions/': actions,
+                '/v1/projects/:team_id/vision/actions/:id/': digestAction,
+                '/v1/projects/:team_id/vision/actions/:visionActionId/runs/': actionRuns,
+                '/v1/projects/:team_id/vision/actions/:visionActionId/runs/:id/': actionRunDetail,
+                '/v1/projects/:team_id/vision/observations/:id/': observationDetail,
             },
             post: {
-                '/api/environments/:team_id/query/:query_kind/': observationsTrend,
-                '/api/projects/:team_id/vision/scanners/estimate/': estimate,
+                '/v1/environments/:team_id/query/:query_kind/': observationsTrend,
+                '/v1/projects/:team_id/vision/scanners/estimate/': estimate,
             },
         }),
     ],
@@ -563,10 +563,10 @@ export const StartupProgramCap: StoryObj = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/vision/scanners/': scanners,
-                '/api/projects/:team_id/vision/scanners/stats/': scannerStats,
-                '/api/projects/:team_id/vision/quota/': { ...quota, credit_limit: null, remaining: null },
-                '/api/billing/': { ...billingJson, startup_program_label: StartupProgramLabel.YC },
+                '/v1/projects/:team_id/vision/scanners/': scanners,
+                '/v1/projects/:team_id/vision/scanners/stats/': scannerStats,
+                '/v1/projects/:team_id/vision/quota/': { ...quota, credit_limit: null, remaining: null },
+                '/v1/billing/': { ...billingJson, startup_program_label: StartupProgramLabel.YC },
             },
         }),
     ],

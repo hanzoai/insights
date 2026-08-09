@@ -54,7 +54,7 @@ class TestTraceSpansDurationHistogram(_TraceSpansTestBase):
         if service_names is not None:
             query["serviceNames"] = service_names
         response = self.client.post(
-            f"/api/projects/{self.team.id}/tracing/spans/duration-histogram/",
+            f"/v1/projects/{self.team.id}/tracing/spans/duration-histogram/",
             {"query": query},
             format="json",
         )

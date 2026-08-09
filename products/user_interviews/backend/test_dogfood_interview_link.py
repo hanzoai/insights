@@ -19,10 +19,10 @@ class _FeatureFlagEnabledMixin(APIBaseTest):
 
 class TestDogfoodInterviewLink(_FeatureFlagEnabledMixin):
     def _topics_url(self) -> str:
-        return f"/api/environments/{self.team.id}/user_interview_topics/"
+        return f"/v1/environments/{self.team.id}/user_interview_topics/"
 
     def _test_link_url(self, topic_id: str) -> str:
-        return f"/api/environments/{self.team.id}/user_interview_topics/{topic_id}/test_link/"
+        return f"/v1/environments/{self.team.id}/user_interview_topics/{topic_id}/test_link/"
 
     def _create_topic(self) -> UserInterviewTopic:
         response = self.client.post(

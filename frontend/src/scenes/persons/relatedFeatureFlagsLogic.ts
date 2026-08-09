@@ -158,7 +158,7 @@ export const relatedFeatureFlagsLogic = kea<relatedFeatureFlagsLogicType>([
                 loadRelatedFeatureFlags: async () => {
                     actions.loadFeatureFlags()
                     const response = await api.get(
-                        `api/projects/${values.currentProjectId}/feature_flags/evaluation_reasons?${toParams({
+                        `v1/projects/${values.currentProjectId}/feature_flags/evaluation_reasons?${toParams({
                             ...(props.distinctId ? { distinct_id: props.distinctId } : {}),
                             ...(props.groups ? { groups: props.groups } : {}),
                         })}`

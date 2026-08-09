@@ -22,7 +22,7 @@ class TestGenerateInsightMetadata(APIBaseTest):
         super().setUp()
         self.organization.is_ai_data_processing_approved = True
         self.organization.save()
-        self.url = f"/api/projects/{self.team.id}/insights/generate_metadata/"
+        self.url = f"/v1/projects/{self.team.id}/insights/generate_metadata/"
 
     @patch(MOCK_PATH)
     def test_returns_name_and_description(self, mock_openai):

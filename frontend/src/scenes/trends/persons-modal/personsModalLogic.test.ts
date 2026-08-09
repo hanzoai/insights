@@ -16,7 +16,7 @@ describe('personsModalLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/session_recordings': () => [200, { results: [] }],
+                '/v1/environments/:team_id/session_recordings': () => [200, { results: [] }],
             },
         })
         initKeaTests()
@@ -147,7 +147,7 @@ describe('personsModalLogic', () => {
                     },
                     includeRecordings: true,
                 },
-                url: '/api/environments/1/persons?',
+                url: '/v1/environments/1/persons?',
                 additionalSelect: { matched_recordings: 'matched_recordings' },
             })
             logic.mount()
@@ -207,7 +207,7 @@ describe('personsModalLogic', () => {
                         funnelStepBreakdown,
                         includeRecordings: true,
                     },
-                    url: '/api/environments/1/persons?',
+                    url: '/v1/environments/1/persons?',
                     additionalSelect: { matched_recordings: 'matched_recordings' },
                 })
                 logic.mount()
@@ -449,7 +449,7 @@ describe('personsModalLogic', () => {
                         ...(funnelStep !== undefined ? { funnelStep } : {}),
                         includeRecordings: true,
                     } as any,
-                    url: '/api/environments/1/persons?',
+                    url: '/v1/environments/1/persons?',
                     additionalSelect: { matched_recordings: 'matched_recordings' },
                 })
                 logic.mount()
@@ -559,7 +559,7 @@ describe('personsModalLogic', () => {
                     },
                     includeRecordings: true,
                 },
-                url: '/api/environments/1/persons?',
+                url: '/v1/environments/1/persons?',
                 additionalSelect: { matched_recordings: 'matched_recordings' },
             })
             logic.mount()
@@ -607,7 +607,7 @@ describe('personsModalLogic', () => {
                     },
                     includeRecordings: true,
                 },
-                url: '/api/environments/1/persons?',
+                url: '/v1/environments/1/persons?',
                 additionalSelect: { matched_recordings: 'matched_recordings' },
             })
             logic.mount()

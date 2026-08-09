@@ -58,7 +58,7 @@ describe('maxGlobalLogic', () => {
         it.each(['/insights/abc123', '/surveys/xyz789'])(
             'opens the conversation in the side panel without replacing the main content on %s',
             async (page) => {
-                useMocks({ get: { '/api/environments/:team_id/conversations/:id': MOCK_CONVERSATION } })
+                useMocks({ get: { '/v1/environments/:team_id/conversations/:id': MOCK_CONVERSATION } })
                 router.actions.push(page)
 
                 await expectLogic(logic, () => {

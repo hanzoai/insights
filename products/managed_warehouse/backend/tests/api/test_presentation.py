@@ -697,7 +697,7 @@ def test_onboard_team_survives_direct_source_failure(
 @override_settings(DUCKGRES_API_URL="http://duckgres.invalid", DUCKGRES_INTERNAL_SECRET="s")
 def test_delete_org_issues_delete_to_org_root(mock_internal: MagicMock, _mock_enabled: MagicMock) -> None:
     # Guards the empty-path branch in _request: delete_org must hit the org resource itself,
-    # /api/v1/orgs/{org}, not a suffixed org path or the global /api/v1/ route.
+    # /v1/v1/orgs/{org}, not a suffixed org path or the global /v1/v1/ route.
     org_id = uuid4()
     mock_internal.request.return_value = MagicMock(status_code=200, **{"json.return_value": {"status": "deleted"}})
 

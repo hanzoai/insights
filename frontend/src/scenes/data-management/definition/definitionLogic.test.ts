@@ -18,8 +18,8 @@ describe('definitionLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/event_definitions/:id': mockEventDefinitions[0],
-                '/api/projects/:team/property_definitions/:id': mockEventPropertyDefinition,
+                '/v1/projects/:team/event_definitions/:id': mockEventDefinitions[0],
+                '/v1/projects/:team/property_definitions/:id': mockEventPropertyDefinition,
             },
         })
         initKeaTests()

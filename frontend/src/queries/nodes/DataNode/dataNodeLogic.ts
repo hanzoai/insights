@@ -1573,7 +1573,7 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
         abortQuery: async ({ queryId }) => {
             try {
                 const { currentTeamId } = values
-                await api.delete(`api/environments/${currentTeamId}/query/${queryId}/`)
+                await api.delete(`v1/environments/${currentTeamId}/query/${queryId}/`)
             } catch (e) {
                 console.warn('Failed cancelling query', e)
             }

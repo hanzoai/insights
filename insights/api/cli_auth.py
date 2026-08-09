@@ -121,9 +121,9 @@ class CLIAuthViewSet(viewsets.ViewSet):
     OAuth2 Device Authorization Flow for CLI authentication
 
     Endpoints:
-    - POST /api/cli-auth/device-code/  (no auth required)
-    - POST /api/cli-auth/authorize/    (session auth required)
-    - POST /api/cli-auth/poll/         (no auth required)
+    - POST /v1/cli-auth/device-code/  (no auth required)
+    - POST /v1/cli-auth/authorize/    (session auth required)
+    - POST /v1/cli-auth/poll/         (no auth required)
     """
 
     def get_permissions(self):

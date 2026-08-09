@@ -13,7 +13,7 @@ from products.ai_observability.backend.models.score_definitions import (
 
 class TestScoreDefinitionsApi(APIBaseTest):
     def _endpoint(self) -> str:
-        return f"/api/environments/{self.team.id}/llm_analytics/score_definitions/"
+        return f"/v1/environments/{self.team.id}/llm_analytics/score_definitions/"
 
     def _current_version(self, definition: ScoreDefinition) -> ScoreDefinitionVersion:
         current_version = definition.current_version

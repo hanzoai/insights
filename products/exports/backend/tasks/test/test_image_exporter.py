@@ -254,7 +254,10 @@ class TestImageExporter(APIBaseTest):
         insight = Insight.objects.create(
             team=self.team,
             name="Test Insight",
-            query={"kind": "DataVisualizationNode", "source": {"kind": "InsightsQLQuery", "query": "SELECT 1 as value"}},
+            query={
+                "kind": "DataVisualizationNode",
+                "source": {"kind": "InsightsQLQuery", "query": "SELECT 1 as value"},
+            },
         )
         exported_asset = ExportedAsset.objects.create(
             team=self.team,
@@ -335,7 +338,10 @@ class TestImageExporter(APIBaseTest):
         insight = Insight.objects.create(
             team=self.team,
             name="Test Insight",
-            query={"kind": "DataVisualizationNode", "source": {"kind": "InsightsQLQuery", "query": "SELECT 1 as value"}},
+            query={
+                "kind": "DataVisualizationNode",
+                "source": {"kind": "InsightsQLQuery", "query": "SELECT 1 as value"},
+            },
         )
         DashboardTile.objects.create(dashboard=dashboard, insight=insight)
 
@@ -580,7 +586,7 @@ class TestHeatmapExportURLEncoding(APIBaseTest):
         mock_open: Any,
         mock_screenshot_asset: Any,
     ) -> None:
-        data_url = "/api/environments/1/heatmap_screenshots/abc/content/?width=1024&format=jpeg"
+        data_url = "/v1/environments/1/heatmap_screenshots/abc/content/?width=1024&format=jpeg"
         exported_asset = ExportedAsset.objects.create(
             team=self.team,
             export_format=ExportedAsset.ExportFormat.PNG,
@@ -614,7 +620,7 @@ class TestHeatmapExportURLEncoding(APIBaseTest):
         # contain `&` which, without encoding, splits into separate top-level params
         # and truncates the dataURL value the exporter receives.
 
-        data_url = "/api/environments/1/heatmap_screenshots/abc/content/?width=1024&format=jpeg"
+        data_url = "/v1/environments/1/heatmap_screenshots/abc/content/?width=1024&format=jpeg"
         unencoded = f"https://example.com/exporter?token=fake&pageURL=https://example.com&dataURL={data_url}"
 
         parsed = urlparse(unencoded)
@@ -623,7 +629,7 @@ class TestHeatmapExportURLEncoding(APIBaseTest):
         # The inner `&format=jpeg` leaks as a top-level param
         assert "format" in params, "Inner &format leaked as top-level param"
         # And the dataURL is truncated — missing `&format=jpeg`
-        assert params["dataURL"] == ["/api/environments/1/heatmap_screenshots/abc/content/?width=1024"]
+        assert params["dataURL"] == ["/v1/environments/1/heatmap_screenshots/abc/content/?width=1024"]
         assert params["dataURL"] != [data_url]
 
 

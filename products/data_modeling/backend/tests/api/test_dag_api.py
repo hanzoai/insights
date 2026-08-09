@@ -14,7 +14,7 @@ class TestDAGViewSet(APIBaseTest):
         DAG.objects.create(team=self.team, name="my_dag")
         DAG.objects.create(team=self.team, name="another_dag")
 
-        response = self.client.get(f"/api/environments/{self.team.id}/data_modeling_dags/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/data_modeling_dags/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 2)
@@ -23,7 +23,7 @@ class TestDAGViewSet(APIBaseTest):
 
     def test_create_dag(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/data_modeling_dags/",
+            f"/v1/environments/{self.team.id}/data_modeling_dags/",
             {"name": "new_dag", "description": "A test DAG"},
         )
 
@@ -37,7 +37,7 @@ class TestDAGViewSet(APIBaseTest):
         dag = DAG.objects.create(team=self.team, name="my_dag", description="desc")
         Node.objects.create(team=self.team, dag=dag, name="events", type=NodeType.TABLE)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/data_modeling_dags/{dag.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/data_modeling_dags/{dag.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["name"], "my_dag")
@@ -47,7 +47,7 @@ class TestDAGViewSet(APIBaseTest):
         dag = DAG.objects.create(team=self.team, name="my_dag")
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/data_modeling_dags/{dag.id}/",
+            f"/v1/environments/{self.team.id}/data_modeling_dags/{dag.id}/",
             {"description": "updated description"},
         )
 
@@ -57,7 +57,7 @@ class TestDAGViewSet(APIBaseTest):
     def test_delete_dag(self):
         dag = DAG.objects.create(team=self.team, name="my_dag")
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/data_modeling_dags/{dag.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/data_modeling_dags/{dag.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(DAG.objects.filter(team=self.team, id=dag.id).exists())
@@ -65,7 +65,7 @@ class TestDAGViewSet(APIBaseTest):
     def test_cannot_delete_default_dag(self):
         dag = DAG.get_or_create_default(self.team)
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/data_modeling_dags/{dag.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/data_modeling_dags/{dag.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertTrue(DAG.objects.filter(team=self.team, id=dag.id).exists())
@@ -74,7 +74,7 @@ class TestDAGViewSet(APIBaseTest):
         dag = DAG.get_or_create_default(self.team)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/data_modeling_dags/{dag.id}/",
+            f"/v1/environments/{self.team.id}/data_modeling_dags/{dag.id}/",
             {"name": "renamed"},
         )
 
@@ -85,7 +85,7 @@ class TestDAGViewSet(APIBaseTest):
     def test_cannot_delete_managed_dag(self):
         dag = DAG.get_or_create_revenue_analytics(self.team)
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/data_modeling_dags/{dag.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/data_modeling_dags/{dag.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertTrue(DAG.objects.filter(team=self.team, id=dag.id).exists())
@@ -94,7 +94,7 @@ class TestDAGViewSet(APIBaseTest):
         dag = DAG.get_or_create_revenue_analytics(self.team)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/data_modeling_dags/{dag.id}/",
+            f"/v1/environments/{self.team.id}/data_modeling_dags/{dag.id}/",
             {"name": "renamed"},
         )
 
@@ -106,7 +106,7 @@ class TestDAGViewSet(APIBaseTest):
         dag = DAG.get_or_create_revenue_analytics(self.team)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/data_modeling_dags/{dag.id}/",
+            f"/v1/environments/{self.team.id}/data_modeling_dags/{dag.id}/",
             {"description": "updated description"},
         )
 
@@ -116,7 +116,7 @@ class TestDAGViewSet(APIBaseTest):
 
     def test_cannot_create_dag_with_reserved_name(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/data_modeling_dags/",
+            f"/v1/environments/{self.team.id}/data_modeling_dags/",
             {"name": "Insights Revenue Analytics"},
         )
 
@@ -140,7 +140,7 @@ class TestDAGViewSet(APIBaseTest):
         before = DAG.objects.filter(team=self.team).count()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/data_modeling_dags/",
+            f"/v1/environments/{self.team.id}/data_modeling_dags/",
             {"name": dag_name},
         )
 
@@ -151,7 +151,7 @@ class TestDAGViewSet(APIBaseTest):
         dag = DAG.objects.create(team=self.team, name="my_dag")
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/data_modeling_dags/{dag.id}/",
+            f"/v1/environments/{self.team.id}/data_modeling_dags/{dag.id}/",
             {"name": "my_dag\x1b[2Kevil"},
         )
 
@@ -161,7 +161,7 @@ class TestDAGViewSet(APIBaseTest):
 
     def test_ordinary_punctuation_in_a_name_is_still_allowed(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/data_modeling_dags/",
+            f"/v1/environments/{self.team.id}/data_modeling_dags/",
             {"name": "Ünïcode — dbt/staging (v2)"},
         )
 
@@ -171,7 +171,7 @@ class TestDAGViewSet(APIBaseTest):
         dag = DAG.objects.create(team=self.team, name="my_dag")
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/data_modeling_dags/{dag.id}/",
+            f"/v1/environments/{self.team.id}/data_modeling_dags/{dag.id}/",
             {"name": "Insights Revenue Analytics"},
         )
 
@@ -188,7 +188,7 @@ class TestDAGViewSet(APIBaseTest):
             "products.data_modeling.backend.presentation.views.dag.tiered_schedules_enabled",
             return_value=enabled,
         ) as mock_flag:
-            response = self.client.get(f"/api/environments/{self.team.id}/data_modeling_dags/")
+            response = self.client.get(f"/v1/environments/{self.team.id}/data_modeling_dags/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual([d["frequency_managed_by_nodes"] for d in response.json()["results"]], [enabled, enabled])
@@ -204,7 +204,7 @@ class TestDAGViewSet(APIBaseTest):
             return_value=True,
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/data_modeling_dags/{dag.id}/",
+                f"/v1/environments/{self.team.id}/data_modeling_dags/{dag.id}/",
                 {"sync_frequency": "15min"},
             )
 
@@ -223,7 +223,7 @@ class TestDAGViewSet(APIBaseTest):
             # The frontend spreads the whole DAG into the PATCH, echoing the current
             # sync_frequency back unchanged — that echo must not trip the tiered rejection.
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/data_modeling_dags/{dag.id}/",
+                f"/v1/environments/{self.team.id}/data_modeling_dags/{dag.id}/",
                 {"name": "renamed", "description": "still editable", "sync_frequency": "24hour"},
             )
 
@@ -241,7 +241,7 @@ class TestDAGViewSet(APIBaseTest):
             return_value=False,
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/data_modeling_dags/{dag.id}/",
+                f"/v1/environments/{self.team.id}/data_modeling_dags/{dag.id}/",
                 {"sync_frequency": "15min"},
             )
 
@@ -255,6 +255,6 @@ class TestDAGViewSet(APIBaseTest):
         Node.objects.create(team=self.team, dag=dag, name="events", type=NodeType.TABLE)
         Node.objects.create(team=self.team, dag=dag, name="persons", type=NodeType.TABLE)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/data_modeling_dags/{dag.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/data_modeling_dags/{dag.id}/")
 
         self.assertEqual(response.json()["node_count"], 2)

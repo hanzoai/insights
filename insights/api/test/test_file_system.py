@@ -48,7 +48,7 @@ def _create_feature_flag_case(testcase: "TestFileSystemViewSetLogging"):
         key=f"test-flag-{uuid4().hex}",
         created_by=testcase.user,
     )
-    url = f"/api/projects/{testcase.project.id}/feature_flags/{flag.id}/"
+    url = f"/v1/projects/{testcase.project.id}/feature_flags/{flag.id}/"
     return flag, url
 
 
@@ -67,7 +67,7 @@ def _create_enterprise_experiment_case(testcase: "TestFileSystemViewSetLogging")
         created_by=testcase.user,
         type=Experiment.ExperimentType.PRODUCT,
     )
-    url = f"/api/projects/{testcase.project.id}/experiments/{experiment.id}/"
+    url = f"/v1/projects/{testcase.project.id}/experiments/{experiment.id}/"
     return experiment, url
 
 
@@ -337,7 +337,7 @@ class TestFileSystemOrdering(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/file_system/",
+            f"/v1/environments/{self.team.id}/file_system/",
             {"order_by": "-last_viewed_at", "not_type": "folder"},
         )
 
@@ -401,7 +401,7 @@ class TestFileSystemOrdering(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/file_system/",
+            f"/v1/environments/{self.team.id}/file_system/",
             {"order_by": "-last_viewed_at", "not_type": "folder"},
         )
 
@@ -426,7 +426,7 @@ class TestFileSystemOrdering(APIBaseTest):
             )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/file_system/",
+            f"/v1/environments/{self.team.id}/file_system/",
             {"order_by": "last_viewed_at", "not_type": "folder", "limit": "2"},
         )
 
@@ -449,7 +449,7 @@ class TestFileSystemOrdering(APIBaseTest):
         # Search-within-Recents shares the view-log-first path: it returns only viewed items whose
         # path matches the term.
         response = self.client.get(
-            f"/api/environments/{self.team.id}/file_system/",
+            f"/v1/environments/{self.team.id}/file_system/",
             {"order_by": "-last_viewed_at", "not_type": "folder", "search": "revenue"},
         )
 
@@ -460,7 +460,7 @@ class TestFileSystemOrdering(APIBaseTest):
 class TestFileSystemSearchNameOnly(APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/api/environments/{self.team.id}/file_system/"
+        self.url = f"/v1/environments/{self.team.id}/file_system/"
         FileSystem.objects.create(
             team=self.team,
             path="AlphaParent",
@@ -515,7 +515,7 @@ class TestLogApiFileSystemView(APIBaseTest):
         self, _name: str, has_user: bool, has_cookie: bool, expected_count: int
     ) -> None:
         FileSystemViewLog.objects.all().delete()
-        request = self.factory.get("/api/test/")
+        request = self.factory.get("/v1/test/")
         request.user = self.user if has_user else AnonymousUser()
         if has_cookie:
             request.COOKIES[settings.SESSION_COOKIE_NAME] = "session-key"
@@ -526,7 +526,7 @@ class TestLogApiFileSystemView(APIBaseTest):
 
     def test_log_api_file_system_view_skips_for_impersonated_session(self) -> None:
         FileSystemViewLog.objects.all().delete()
-        request = self.factory.get("/api/test/")
+        request = self.factory.get("/v1/test/")
         request.user = self.user
         request.COOKIES[settings.SESSION_COOKIE_NAME] = "session-key"
 
@@ -563,7 +563,7 @@ class TestFileSystemLogViewEndpoint(APIBaseTest):
         representation = obj.get_file_system_representation()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/file_system/log_view/",
+            f"/v1/environments/{self.team.id}/file_system/log_view/",
             {"type": representation.type, "ref": str(representation.ref)},
         )
 
@@ -581,7 +581,7 @@ class TestFileSystemLogViewEndpoint(APIBaseTest):
 
         with patch("insights.decorators.is_impersonated_session", return_value=True):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/file_system/log_view/",
+                f"/v1/environments/{self.team.id}/file_system/log_view/",
                 {"type": representation.type, "ref": str(representation.ref)},
             )
 
@@ -610,7 +610,7 @@ class TestFileSystemLogViewEndpoint(APIBaseTest):
         )
         data: dict = {"type": "scene", "limit": 10}
         response = self.client.get(
-            f"/api/environments/{self.team.id}/file_system/log_view/",
+            f"/v1/environments/{self.team.id}/file_system/log_view/",
             data=data,
         )
 
@@ -641,7 +641,7 @@ class TestFileSystemDeletion(APIBaseTest):
         file_entry = FileSystem.objects.get(team=self.team, type="feature_flag", ref=str(flag.id))
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/file_system/{file_entry.id}/",
+            f"/v1/environments/{self.team.id}/file_system/{file_entry.id}/",
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -668,7 +668,7 @@ class TestFileSystemDeletion(APIBaseTest):
         )
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/file_system/{duplicate_entry.id}/",
+            f"/v1/environments/{self.team.id}/file_system/{duplicate_entry.id}/",
         )
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
@@ -689,7 +689,7 @@ class TestFileSystemDeletion(APIBaseTest):
         )
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/file_system/{entry.id}/",
+            f"/v1/environments/{self.team.id}/file_system/{entry.id}/",
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -716,7 +716,7 @@ class TestFileSystemDeletion(APIBaseTest):
         )
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/file_system/{folder.id}/",
+            f"/v1/environments/{self.team.id}/file_system/{folder.id}/",
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -727,7 +727,7 @@ class TestFileSystemDeletion(APIBaseTest):
         file_entry = FileSystem.objects.get(team=self.team, type="feature_flag", ref=str(flag.id))
 
         delete_response = self.client.delete(
-            f"/api/environments/{self.team.id}/file_system/{file_entry.id}/",
+            f"/v1/environments/{self.team.id}/file_system/{file_entry.id}/",
         )
 
         assert delete_response.status_code == status.HTTP_200_OK
@@ -736,7 +736,7 @@ class TestFileSystemDeletion(APIBaseTest):
         assert flag.active is False
 
         undo_response = self.client.post(
-            f"/api/environments/{self.team.id}/file_system/undo_delete/",
+            f"/v1/environments/{self.team.id}/file_system/undo_delete/",
             {"items": [{"type": "feature_flag", "ref": str(flag.id)}]},
         )
 
@@ -754,14 +754,14 @@ class TestFileSystemDeletion(APIBaseTest):
         original_path = file_entry.path
 
         delete_response = self.client.delete(
-            f"/api/environments/{self.team.id}/file_system/{file_entry.id}/",
+            f"/v1/environments/{self.team.id}/file_system/{file_entry.id}/",
         )
 
         assert delete_response.status_code == status.HTTP_200_OK
         assert not FileSystem.objects.filter(team=self.team, type="feature_flag", ref=str(flag.id)).exists()
 
         undo_response = self.client.post(
-            f"/api/environments/{self.team.id}/file_system/undo_delete/",
+            f"/v1/environments/{self.team.id}/file_system/undo_delete/",
             {"items": [{"type": "feature_flag", "ref": str(flag.id), "path": original_path}]},
         )
 
@@ -780,7 +780,7 @@ class TestFileSystemDeletion(APIBaseTest):
         entry = FileSystem.objects.get(team=self.team, type=case.type_string, ref=ref)
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/file_system/{entry.id}/",
+            f"/v1/environments/{self.team.id}/file_system/{entry.id}/",
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -797,13 +797,13 @@ class TestFileSystemDeletion(APIBaseTest):
         entry = FileSystem.objects.get(team=self.team, type=case.type_string, ref=ref)
 
         delete_response = self.client.delete(
-            f"/api/environments/{self.team.id}/file_system/{entry.id}/",
+            f"/v1/environments/{self.team.id}/file_system/{entry.id}/",
         )
 
         assert delete_response.status_code == status.HTTP_200_OK
 
         undo_response = self.client.post(
-            f"/api/environments/{self.team.id}/file_system/undo_delete/",
+            f"/v1/environments/{self.team.id}/file_system/undo_delete/",
             {"items": [{"type": case.type_string, "ref": ref}]},
         )
 
@@ -822,9 +822,9 @@ class TestFileSystemDeletion(APIBaseTest):
         )
         entry = FileSystem.objects.get(team=self.team, type="insight", ref=insight.short_id)
 
-        self.client.delete(f"/api/environments/{self.team.id}/file_system/{entry.id}/")
+        self.client.delete(f"/v1/environments/{self.team.id}/file_system/{entry.id}/")
         self.client.post(
-            f"/api/environments/{self.team.id}/file_system/undo_delete/",
+            f"/v1/environments/{self.team.id}/file_system/undo_delete/",
             {"items": [{"type": "insight", "ref": insight.short_id}]},
         )
 
@@ -836,9 +836,9 @@ class TestFileSystemDeletion(APIBaseTest):
         cohort = Cohort.objects.create(team=self.team, name="File system cohort", filters={"properties": []})
         entry = FileSystem.objects.get(team=self.team, type="cohort", ref=str(cohort.id))
 
-        self.client.delete(f"/api/environments/{self.team.id}/file_system/{entry.id}/")
+        self.client.delete(f"/v1/environments/{self.team.id}/file_system/{entry.id}/")
         self.client.post(
-            f"/api/environments/{self.team.id}/file_system/undo_delete/",
+            f"/v1/environments/{self.team.id}/file_system/undo_delete/",
             {"items": [{"type": "cohort", "ref": str(cohort.id)}]},
         )
 

@@ -29,7 +29,7 @@ describe('scannerOverviewLogic', () => {
         impactRequests = []
         useMocks({
             get: {
-                '/api/projects/:team/vision/scanners/:id/': {
+                '/v1/projects/:team/vision/scanners/:id/': {
                     id: 'sid',
                     name: 'm',
                     scanner_type: 'monitor',
@@ -37,12 +37,12 @@ describe('scannerOverviewLogic', () => {
                     sampling_rate: 1,
                     enabled: true,
                 },
-                '/api/projects/:team/vision/scanners/:id/observations/': { results: [], count: 0 },
-                '/api/projects/:team/vision/scanners/:id/impact/': ({ request }) => {
+                '/v1/projects/:team/vision/scanners/:id/observations/': { results: [], count: 0 },
+                '/v1/projects/:team/vision/scanners/:id/impact/': ({ request }) => {
                     impactRequests.push(request.url)
                     return [200, IMPACT]
                 },
-                '/api/projects/:team/vision/scanners/:id/observations/stats/': ({ request }) => {
+                '/v1/projects/:team/vision/scanners/:id/observations/stats/': ({ request }) => {
                     statsRequests.push(request.url)
                     return [200, STATS]
                 },

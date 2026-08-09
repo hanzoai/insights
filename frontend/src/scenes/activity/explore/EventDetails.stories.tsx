@@ -39,7 +39,7 @@ const meta: Meta<typeof EventDetails> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:project_id/event_definitions/primary_properties/': { primary_properties: {} },
+                '/v1/projects/:project_id/event_definitions/primary_properties/': { primary_properties: {} },
             },
         }),
     ],

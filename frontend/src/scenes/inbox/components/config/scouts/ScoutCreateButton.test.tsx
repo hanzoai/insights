@@ -35,8 +35,8 @@ describe('scout creation buttons', () => {
         mockGetAccessControlDisabledReason.mockReturnValue(null)
         useMocks({
             get: {
-                '/api/projects/:team/signals/scout/configs/': [],
-                '/api/projects/:team/signals/scout/metadata/current/': {
+                '/v1/projects/:team/signals/scout/configs/': [],
+                '/v1/projects/:team/signals/scout/metadata/current/': {
                     enrolled: true,
                     banner_message: null,
                     limits: {
@@ -46,15 +46,15 @@ describe('scout creation buttons', () => {
                         runs_remaining_today: null,
                     },
                 },
-                '/api/projects/:team/tasks/repositories/': { repositories: [] },
+                '/v1/projects/:team/tasks/repositories/': { repositories: [] },
             },
             post: {
-                '/api/projects/:team/tasks/': async ({ request }) => {
+                '/v1/projects/:team/tasks/': async ({ request }) => {
                     const body = (await request.json()) as { description: string }
                     createdTaskDescriptions.push(body.description)
                     return [201, { id: 'task-1' }]
                 },
-                '/api/projects/:team/tasks/:id/run/': { id: 'task-1' },
+                '/v1/projects/:team/tasks/:id/run/': { id: 'task-1' },
             },
         })
         initKeaTests()

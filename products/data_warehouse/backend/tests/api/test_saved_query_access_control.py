@@ -35,10 +35,10 @@ class TestDataWarehouseSavedQueryAccessControl(WarehouseAccessControlTestMixin):
         )
 
     def _list_url(self) -> str:
-        return f"/api/environments/{self.team.pk}/warehouse_saved_queries/"
+        return f"/v1/environments/{self.team.pk}/warehouse_saved_queries/"
 
     def _detail_url(self) -> str:
-        return f"/api/environments/{self.team.pk}/warehouse_saved_queries/{self.saved_query.id}/"
+        return f"/v1/environments/{self.team.pk}/warehouse_saved_queries/{self.saved_query.id}/"
 
     @parameterized.expand(
         [
@@ -171,7 +171,7 @@ class TestDataWarehouseSavedQueryAccessControl(WarehouseAccessControlTestMixin):
         AccessControl.objects.create(team=self.team, resource="warehouse_view", access_level="none")
         self.client.force_login(self.viewer_user)
 
-        url = f"/api/environments/{self.team.pk}/warehouse_saved_queries/{own_query.id}/"
+        url = f"/v1/environments/{self.team.pk}/warehouse_saved_queries/{own_query.id}/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Creator bypass: highest level for warehouse_view is "manager".
@@ -206,7 +206,7 @@ class TestDataWarehouseSavedQueryAccessControl(WarehouseAccessControlTestMixin):
         self.assertEqual(patch_response.status_code, status.HTTP_200_OK)
 
         # A different query without an object-level grant stays blocked.
-        other_url = f"/api/environments/{self.team.pk}/warehouse_saved_queries/{other_query.id}/"
+        other_url = f"/v1/environments/{self.team.pk}/warehouse_saved_queries/{other_query.id}/"
         self.assertEqual(self.client.get(other_url).status_code, status.HTTP_403_FORBIDDEN)
 
 
@@ -223,10 +223,10 @@ class TestDataWarehouseSavedQueryFolderAccessControl(WarehouseAccessControlTestM
         )
 
     def _list_url(self) -> str:
-        return f"/api/environments/{self.team.pk}/warehouse_saved_query_folders/"
+        return f"/v1/environments/{self.team.pk}/warehouse_saved_query_folders/"
 
     def _detail_url(self) -> str:
-        return f"/api/environments/{self.team.pk}/warehouse_saved_query_folders/{self.folder.id}/"
+        return f"/v1/environments/{self.team.pk}/warehouse_saved_query_folders/{self.folder.id}/"
 
     def test_folder_list_works_without_restrictions(self):
         self.client.force_login(self.user)
@@ -323,7 +323,7 @@ class TestMaterializationRequiresUnderlyingAccess(WarehouseAccessControlTestMixi
         self.client.force_login(self.editor_user)
 
     def _base(self) -> str:
-        return f"/api/environments/{self.team.pk}/warehouse_saved_queries/{self.view.id}"
+        return f"/v1/environments/{self.team.pk}/warehouse_saved_queries/{self.view.id}"
 
     def test_materialize_denied_when_the_query_reads_a_denied_table(self):
         response = self.client.post(f"{self._base()}/materialize/")
@@ -349,7 +349,7 @@ class TestMaterializationRequiresUnderlyingAccess(WarehouseAccessControlTestMixi
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/data_modeling_nodes/{node.id}/run/",
+            f"/v1/environments/{self.team.pk}/data_modeling_nodes/{node.id}/run/",
             {"direction": "downstream"},
             format="json",
         )
@@ -364,7 +364,7 @@ class TestMaterializationRequiresUnderlyingAccess(WarehouseAccessControlTestMixi
             team=self.team, dag=dag, name=self.view.name, saved_query=self.view, type=NodeType.VIEW
         )
 
-        response = self.client.post(f"/api/environments/{self.team.pk}/data_modeling_nodes/{node.id}/materialize/")
+        response = self.client.post(f"/v1/environments/{self.team.pk}/data_modeling_nodes/{node.id}/materialize/")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 

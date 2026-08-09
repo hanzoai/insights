@@ -527,7 +527,7 @@ export const aiObservabilitySessionDataLogic = kea<aiObservabilitySessionDataLog
                     const hierarchy = restoreTree(fullTrace.events || [], traceId)
 
                     // nosemgrep: prefer-codegen-api
-                    const data = await api.create(`api/environments/${teamId}/llm_analytics/summarization/`, {
+                    const data = await api.create(`v1/environments/${teamId}/llm_analytics/summarization/`, {
                         summarize_type: 'trace',
                         mode: 'minimal',
                         force_refresh: forceRefresh,

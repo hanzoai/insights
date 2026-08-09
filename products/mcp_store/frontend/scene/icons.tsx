@@ -29,7 +29,7 @@ export function iconDomainFromServerUrl(serverUrl: string | null | undefined): s
 
 export function serverIconUrl(iconDomain: string, theme?: 'light' | 'dark'): string {
     const themeSuffix = theme ? `&theme=${theme}` : ''
-    return `/api/projects/@current/mcp_servers/icon/?domain=${encodeURIComponent(iconDomain)}${themeSuffix}`
+    return `/v1/projects/@current/mcp_servers/icon/?domain=${encodeURIComponent(iconDomain)}${themeSuffix}`
 }
 
 interface ServerIconProps {

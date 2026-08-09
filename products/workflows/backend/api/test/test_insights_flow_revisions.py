@@ -43,10 +43,10 @@ class TestInsightsFlowRevisions(APIBaseTest):
 
     def _create_active_flow(self) -> str:
         insights_flow = {"name": "Test Flow", "actions": [_trigger_action(), _webhook_action()]}
-        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        create = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert create.status_code == 201, create.json()
         flow_id = create.json()["id"]
-        activate = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
+        activate = self.client.patch(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
         assert activate.status_code == 200, activate.json()
         return flow_id
 
@@ -59,16 +59,16 @@ class TestInsightsFlowRevisions(APIBaseTest):
                 {"from": "action_1", "to": "action_2", "type": "continue"},
             ],
         }
-        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        create = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert create.status_code == 201, create.json()
         flow_id = create.json()["id"]
-        activate = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
+        activate = self.client.patch(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
         assert activate.status_code == 200, activate.json()
         return flow_id
 
     def _live_edit(self, flow_id: str, url: str = "https://changed.example.com"):
         return self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"actions": [_trigger_action(), _webhook_action(url=url)]},
         )
 
@@ -76,7 +76,7 @@ class TestInsightsFlowRevisions(APIBaseTest):
         # Graph content edits over MCP go through the surgical graph endpoint (a plain update
         # rejects actions/edges outright), so drafts are staged the way real agents stage them.
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {
                 "operations": [
                     {
@@ -95,10 +95,10 @@ class TestInsightsFlowRevisions(APIBaseTest):
             mock_count.return_value = MagicMock(
                 status_code=200, json=lambda: {"count": 0, "by_action": {}, "position_unknown": 0}
             )
-            preview = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish", {})
+            preview = self.client.post(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/publish", {})
         assert preview.status_code == 200, preview.json()
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/publish",
             {"confirm": True, "confirm_token": preview.json()["confirm_token"]},
         )
         assert response.status_code == 200, response.json()
@@ -107,12 +107,12 @@ class TestInsightsFlowRevisions(APIBaseTest):
     def _list_revisions(self, flow_id: str) -> list[dict]:
         # Assert through the endpoint, not the ORM, so these exercise its team scoping, ordering
         # (newest-first), and serialization (content omitted).
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/revisions")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/revisions")
         assert response.status_code == 200, response.json()
         return response.json()["results"]
 
     def _revision_content(self, flow_id: str, version: int) -> dict:
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/revisions/{version}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/revisions/{version}")
         assert response.status_code == 200, response.json()
         return response.json()["content"]
 
@@ -152,7 +152,7 @@ class TestInsightsFlowRevisions(APIBaseTest):
     def test_graph_live_edit_appends_revision(self):
         flow_id = self._create_active_three_step_flow()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {"operations": [{"op": "remove_action", "id": "action_1"}]},
         )
         assert response.status_code == 200, response.json()
@@ -184,7 +184,9 @@ class TestInsightsFlowRevisions(APIBaseTest):
     def test_non_content_writes_do_not_append_revisions(self, _name, path_suffix, payload, client_header):
         flow_id = self._create_active_flow()
         extra = {"HTTP_X_INSIGHTS_CLIENT": client_header} if client_header else {}
-        response = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}{path_suffix}", payload, **extra)
+        response = self.client.patch(
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}{path_suffix}", payload, **extra
+        )
         assert response.status_code == 200, response.json()
         assert self._list_revisions(flow_id) == []
         assert response.json()["version"] == 1
@@ -194,14 +196,14 @@ class TestInsightsFlowRevisions(APIBaseTest):
         # serializer defaults differ), but the second must not append a junk revision.
         flow_id = self._create_active_flow()
         first = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"actions": [_trigger_action(), _webhook_action()]},
         )
         assert first.status_code == 200, first.json()
         revisions_after_first = [r["version"] for r in self._list_revisions(flow_id)]
 
         second = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"actions": [_trigger_action(), _webhook_action()]},
         )
         assert second.status_code == 200, second.json()
@@ -213,7 +215,7 @@ class TestInsightsFlowRevisions(APIBaseTest):
         flow_id = self._create_active_flow()
         self._live_edit(flow_id)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/revisions")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/revisions")
         assert response.status_code == 200, response.json()
         results = response.json()["results"]
         assert [r["version"] for r in results] == [2, 1]
@@ -221,7 +223,7 @@ class TestInsightsFlowRevisions(APIBaseTest):
         assert results[1]["created_by"] is None, "the bootstrap snapshot has no author and must serialize as null"
         assert "content" not in results[0]
 
-        detail = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/revisions/1")
+        detail = self.client.get(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/revisions/1")
         assert detail.status_code == 200, detail.json()
         urls = [
             a["config"]["inputs"]["url"]["value"]
@@ -232,7 +234,7 @@ class TestInsightsFlowRevisions(APIBaseTest):
 
     def test_retrieve_missing_revision_404s(self):
         flow_id = self._create_active_flow()
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/revisions/99")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/revisions/99")
         assert response.status_code == 404, response.json()
 
     # ── Restore (rollback) ───────────────────────────────────────────
@@ -242,7 +244,7 @@ class TestInsightsFlowRevisions(APIBaseTest):
         self._live_edit(flow_id)
         live_actions = InsightsFlow.objects.get(pk=flow_id).actions
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/revisions/1/restore", {})
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/revisions/1/restore", {})
         assert response.status_code == 200, response.json()
 
         flow = InsightsFlow.objects.get(pk=flow_id)
@@ -265,7 +267,7 @@ class TestInsightsFlowRevisions(APIBaseTest):
         flow = InsightsFlow.objects.get(pk=flow_id)
         assert flow.action_redirects == {"action_1": "action_2"}
 
-        restore = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/revisions/1/restore", {})
+        restore = self.client.post(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/revisions/1/restore", {})
         assert restore.status_code == 200, restore.json()
         self._publish(flow_id)
 
@@ -277,7 +279,7 @@ class TestInsightsFlowRevisions(APIBaseTest):
 
     def _stage_draft_delete_action_1(self, flow_id: str) -> None:
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {"operations": [{"op": "remove_action", "id": "action_1"}]},
             HTTP_X_INSIGHTS_CLIENT="mcp",
         )
@@ -288,7 +290,7 @@ class TestInsightsFlowRevisions(APIBaseTest):
         self._live_edit(flow_id)
         self._stage_draft(flow_id, url="https://staged.example.com")
 
-        conflict = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/revisions/1/restore", {})
+        conflict = self.client.post(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/revisions/1/restore", {})
         assert conflict.status_code == 409, conflict.json()
         flow = InsightsFlow.objects.get(pk=flow_id)
         assert flow.draft is not None
@@ -296,7 +298,7 @@ class TestInsightsFlowRevisions(APIBaseTest):
         assert staged_urls == ["https://staged.example.com"], "a rejected restore must not clobber the open draft"
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/revisions/1/restore", {"overwrite": True}
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/revisions/1/restore", {"overwrite": True}
         )
         assert response.status_code == 200, response.json()
         flow = InsightsFlow.objects.get(pk=flow_id)

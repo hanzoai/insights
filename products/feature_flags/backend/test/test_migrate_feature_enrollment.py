@@ -124,7 +124,7 @@ class TestMigrateFeatureEnrollmentOnKeyChange(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/",
             {"key": "new-key"},
         )
 
@@ -144,7 +144,7 @@ class TestMigrateFeatureEnrollmentOnKeyChange(APIBaseTest):
         flag = FeatureFlag.objects.create(team=self.team, key="old-key", created_by=self.user, filters=filters)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/",
             patch_body,
         )
 

@@ -22,7 +22,7 @@ describe('sharedMetricModalLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team_id/experiment_saved_metrics': ({ request }) => {
+                '/v1/projects/:team_id/experiment_saved_metrics': ({ request }) => {
                     const url = new URL(request.url)
                     const offset = parseInt(url.searchParams.get('offset') ?? '0')
                     const search = url.searchParams.get('search') ?? ''
@@ -150,7 +150,7 @@ describe('sharedMetricModalLogic', () => {
     it('a metric covered by another active tag stays selected when one tag is toggled off', async () => {
         useMocks({
             get: {
-                '/api/projects/:team_id/experiment_saved_metrics': ({ request }) => {
+                '/v1/projects/:team_id/experiment_saved_metrics': ({ request }) => {
                     const offset = parseInt(new URL(request.url).searchParams.get('offset') ?? '0')
                     if (offset === 0) {
                         return [
@@ -253,7 +253,7 @@ describe('sharedMetricModalLogic', () => {
         // mount with a fresh mock where the baseline genuinely has none
         useMocks({
             get: {
-                '/api/projects/:team_id/experiment_saved_metrics': () => [
+                '/v1/projects/:team_id/experiment_saved_metrics': () => [
                     200,
                     { count: 0, next: null, previous: null, results: [] },
                 ],

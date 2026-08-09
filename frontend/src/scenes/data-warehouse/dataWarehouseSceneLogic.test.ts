@@ -28,7 +28,7 @@ describe('dataWarehouseSceneLogic', () => {
         warehouseStatusResponse = [404, {}]
         useMocks({
             get: {
-                '/api/projects/:team_id/data_warehouse/warehouse_status/': () => warehouseStatusResponse,
+                '/v1/projects/:team_id/data_warehouse/warehouse_status/': () => warehouseStatusResponse,
             },
         })
         initKeaTests()

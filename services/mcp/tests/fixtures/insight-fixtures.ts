@@ -1,6 +1,6 @@
 // Real captured insight API responses, shared with the frontend's MSW fixtures
 // (frontend/src/mocks/fixtures/api/projects/team_id/insights/). They are legacy
-// `/api/insight/` payloads whose `result` field carries the same series items the
+// `/v1/insight/` payloads whose `result` field carries the same series items the
 // modern `/query/` endpoint returns under `results` — the part the UI app type
 // guards and visualizers inspect. `queryPayload` re-wraps a fixture's series as
 // the `{ query, results }` payload the MCP UI apps receive.

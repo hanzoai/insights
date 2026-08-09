@@ -40,7 +40,7 @@ const meta: Meta = {
         },
         mswDecorator({
             post: {
-                'api/environments/:team_id/error_tracking/stack_frames/batch_get/': { results: batchGetResults },
+                'v1/environments/:team_id/error_tracking/stack_frames/batch_get/': { results: batchGetResults },
             },
         }),
     ],

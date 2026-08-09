@@ -59,7 +59,7 @@ export const appContextLogic = kea<appContextLogicType>([
         const preloadedUser = appContext?.current_user
 
         if (appContext && preloadedUser) {
-            void api.get('api/users/@me/').then((remoteUser: UserType) => {
+            void api.get('v1/users/@me/').then((remoteUser: UserType) => {
                 if (remoteUser.uuid !== preloadedUser.uuid) {
                     console.error(`Preloaded user ${preloadedUser.uuid} does not match remote user ${remoteUser.uuid}`)
                     insights.captureException(

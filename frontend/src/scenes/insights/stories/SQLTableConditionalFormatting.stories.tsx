@@ -78,7 +78,7 @@ const cachedResults: InsightsQLQueryResponse<string[][]> = {
 function ConditionalFormattingTable({ mode }: { mode: 'light' | 'dark' }): JSX.Element | null {
     useStorybookMocks({
         get: {
-            '/api/users/@me/': () => [200, { ...MOCK_DEFAULT_USER, theme_mode: mode }],
+            '/v1/users/@me/': () => [200, { ...MOCK_DEFAULT_USER, theme_mode: mode }],
         },
     })
     const { user } = useValues(userLogic)

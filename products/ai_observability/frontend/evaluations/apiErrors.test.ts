@@ -34,7 +34,7 @@ describe('evaluationErrorMessage', () => {
         ],
         [
             'falls back to the supplied default when nothing useful is available',
-            new ApiError('Non-OK response [PATCH /api/...]', 500, undefined, null),
+            new ApiError('Non-OK response [PATCH /v1/...]', 500, undefined, null),
             'fallback copy',
         ],
         ['unwraps a plain Error', new Error('Network down'), 'Network down'],

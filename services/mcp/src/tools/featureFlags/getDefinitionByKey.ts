@@ -68,7 +68,7 @@ const featureFlagGetDefinitionByKey = (): ToolBase<typeof schema, Result> => ({
         // triggering a redundant fetch-by-id round trip.
         const list = await context.api.request<Schemas.PaginatedFeatureFlagList>({
             method: 'GET',
-            path: `/api/projects/${encodeURIComponent(projectId)}/feature_flags/`,
+            path: `/v1/projects/${encodeURIComponent(projectId)}/feature_flags/`,
             query: { key, limit: 5 },
         })
         const results = list.results ?? []
