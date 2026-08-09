@@ -63,6 +63,15 @@ COPY ./common/plugin-scaffold/ ./common/plugin-scaffold/
 # package (see the override there), so there is no local directory to copy and
 # never was in this fork.
 COPY ./common/insights-node/ ./common/insights-node/
+# nodejs declares `"@hanzo/replay-headless": "workspace:*"` and the session
+# replay rasterizer imports its ./protocol entry, so without these two the
+# install has no local directory to link and tsc reports the module missing —
+# then every type that came through it degrades, which is why one uncopied
+# package produced errors about `active` and `ts_to_s` not existing on
+# InactivityPeriod. replay-headless depends on replay-shared, so both come or
+# neither works.
+COPY ./common/replay-headless/ ./common/replay-headless/
+COPY ./common/replay-shared/ ./common/replay-shared/
 # Only the files this tree actually has. `tsconfig.build.json` and `vendor/` are
 # upstream paths that did not survive the plugin-server -> nodejs rename, and a
 # COPY of a source that is not in the context fails the whole build with
