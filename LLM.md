@@ -258,6 +258,15 @@ rollout finishes.
   fall-through to the pod. So the publish runs BETWEEN the build and the pin in
   `deploy.yml`. Pin first and there is a window where pods serve a build whose
   chunks nobody has published.
+- **A pin can still move without a publish, by hand, and that is now a
+  foot-gun.** `charts/app/pin.sh` checks semver, registry pullability, the
+  repository, and monotonicity — it does NOT check that the build's manifest
+  exists. `PIN_ROLLBACK=1` and a direct edit to
+  `charts/app/values/hanzo/insights-web.yaml` both bypass the workflow. That
+  used to be harmless because the image carried its own `STATIC_ROOT`; it is not
+  any more, because the ingress never reads the pod. **Rolling back to a build
+  older than the 30-day horizon will find its unique chunks pruned.** Check
+  `s3://cdn/insights-builds/` for that version before pinning backwards.
 - **Retention is 30 days**, held by `bin/prune-static` (weekly, in
   `.hanzo/workflows/prune-static.yml`) and read from the per-build manifests in
   `s3://cdn/insights-builds/`, never from object age: a chunk unchanged across
