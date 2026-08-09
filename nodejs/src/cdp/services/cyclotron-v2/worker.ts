@@ -489,7 +489,7 @@ export class CyclotronV2Worker {
 
                 // Cross-queue routing into the email queue: assign a fresh
                 // dequeue_seq so the row participates in fair ordering. Without
-                // this, hogflow → email re-routing (via job.reschedule({
+                // this, flow → email re-routing (via job.reschedule({
                 // queueName: 'email' })) lands the row with NULL dequeue_seq,
                 // which `NULLS FIRST` drains ahead of every fair-ordered row —
                 // defeating the per-team interleave for the most common email

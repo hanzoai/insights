@@ -23,7 +23,7 @@ export const WARPSTREAM_CALCULATED_EVENTS_PRODUCER = 'WARPSTREAM_CALCULATED_EVEN
 export type WarpstreamCalculatedEventsProducer = typeof WARPSTREAM_CALCULATED_EVENTS_PRODUCER
 
 /**
- * Targets the Warpstream Cyclotron cluster for outputs (batch hogflow requests).
+ * Targets the Warpstream Cyclotron cluster for outputs (batch flow requests).
  * Distinct from the legacy `KAFKA_CDP_PRODUCER_*` env vars used by the cyclotron
  * job queue itself — kept separate so the cluster-named convention holds across
  * all outputs in the CDP registry.

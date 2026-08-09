@@ -1,4 +1,4 @@
-import { compileHog } from '~/cdp/templates/compiler'
+import { compileScript } from '~/cdp/templates/compiler'
 
 import { BENCH_LOG_RECORDS, BENCH_PROGRAMS, buildBenchGlobals } from './fixtures'
 import { execBenchProgram } from './scriptvm-exec'
@@ -16,7 +16,7 @@ describe('scriptvm log transformation benchmark programs', () => {
         'program %s executes correctly and under the per-record ceiling',
         async (_id, program) => {
             expect.hasAssertions()
-            const bytecode = await compileHog(program.script)
+            const bytecode = await compileScript(program.script)
 
             for (const { id: recordId, record } of BENCH_LOG_RECORDS) {
                 // Warmup (JIT, RE2 compile)
@@ -46,7 +46,7 @@ describe('scriptvm log transformation benchmark programs', () => {
 
     it('body-regex-scrub redacts emails and secret keys', async () => {
         const program = BENCH_PROGRAMS.find((p) => p.id === 'body-regex-scrub')!
-        const bytecode = await compileHog(program.script)
+        const bytecode = await compileScript(program.script)
         const record = BENCH_LOG_RECORDS.find((r) => r.id === 'plain-body')!.record
 
         const { execResult } = execBenchProgram(bytecode, buildBenchGlobals(record, program.inputs), TIMEOUT_MS)
@@ -60,7 +60,7 @@ describe('scriptvm log transformation benchmark programs', () => {
 
     it('redact-attributes hashes only the configured keys', async () => {
         const program = BENCH_PROGRAMS.find((p) => p.id === 'redact-attributes')!
-        const bytecode = await compileHog(program.script)
+        const bytecode = await compileScript(program.script)
         const record = BENCH_LOG_RECORDS.find((r) => r.id === 'plain-body')!.record
 
         const { execResult } = execBenchProgram(bytecode, buildBenchGlobals(record, program.inputs), TIMEOUT_MS)
@@ -73,7 +73,7 @@ describe('scriptvm log transformation benchmark programs', () => {
 
     it('conditional-drop returns null for matching records and passes others', async () => {
         const program = BENCH_PROGRAMS.find((p) => p.id === 'conditional-drop')!
-        const bytecode = await compileHog(program.script)
+        const bytecode = await compileScript(program.script)
 
         const noisy = BENCH_LOG_RECORDS.find((r) => r.id === 'fat-attributes')!.record
         const dropped = execBenchProgram(bytecode, buildBenchGlobals(noisy, program.inputs), TIMEOUT_MS)

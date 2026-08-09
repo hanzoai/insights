@@ -7,8 +7,8 @@ import {
 import { buildInsightsFunctionInvocations } from '../utils/invocation-utils'
 import { InsightsFunctionManagerService } from './managers/script-function-manager.service'
 import { InsightsFunctionMonitoringService } from './monitoring/script-function-monitoring.service'
-import { HogMaskerService } from './monitoring/script-masker.service'
-import { HogWatcherService, HogWatcherState } from './monitoring/script-watcher.service'
+import { ScriptMaskerService } from './monitoring/script-masker.service'
+import { ScriptWatcherService, ScriptWatcherState } from './monitoring/script-watcher.service'
 import { InsightsFunctionInvocationPipeline } from './script-function-invocation-pipeline.service'
 
 jest.mock('../utils/invocation-utils', () => ({
@@ -66,8 +66,8 @@ function makeGlobals(teamId = 1): InsightsFunctionInvocationGlobals {
 describe('InsightsFunctionInvocationPipeline', () => {
     let insightsFunctionManager: jest.Mocked<InsightsFunctionManagerService>
 
-    let hogWatcher: jest.Mocked<HogWatcherService>
-    let hogMasker: jest.Mocked<HogMaskerService>
+    let scriptWatcher: jest.Mocked<ScriptWatcherService>
+    let scriptMasker: jest.Mocked<ScriptMaskerService>
     let insightsFunctionMonitoringService: jest.Mocked<InsightsFunctionMonitoringService>
     let quotaLimiting: jest.Mocked<QuotaLimiting>
     let pipeline: InsightsFunctionInvocationPipeline
@@ -78,13 +78,13 @@ describe('InsightsFunctionInvocationPipeline', () => {
             getInsightsFunctionsForTeams: jest.fn().mockResolvedValue({}),
         } as unknown as jest.Mocked<InsightsFunctionManagerService>
 
-        hogWatcher = {
+        scriptWatcher = {
             getEffectiveStates: jest.fn().mockResolvedValue({}),
-        } as unknown as jest.Mocked<HogWatcherService>
+        } as unknown as jest.Mocked<ScriptWatcherService>
 
-        hogMasker = {
+        scriptMasker = {
             filterByMasking: jest.fn((invocations) => Promise.resolve({ masked: [], notMasked: invocations })),
-        } as unknown as jest.Mocked<HogMaskerService>
+        } as unknown as jest.Mocked<ScriptMaskerService>
 
         insightsFunctionMonitoringService = {
             queueAppMetrics: jest.fn(),
@@ -98,23 +98,23 @@ describe('InsightsFunctionInvocationPipeline', () => {
 
         pipeline = new InsightsFunctionInvocationPipeline(config, {
             insightsFunctionManager,
-            hogInputsService: {} as any,
-            hogWatcher,
-            hogWatcherMirror: null,
-            hogMasker,
+            scriptInputsService: {} as any,
+            scriptWatcher,
+            scriptWatcherMirror: null,
+            scriptMasker,
             insightsFunctionMonitoringService,
             quotaLimiting,
             redis: {} as any,
             valkeyShadow: null,
         })
 
-        rateLimitGroupedMock = (pipeline as any).hogRateLimiter.rateLimitGrouped as jest.Mock
+        rateLimitGroupedMock = (pipeline as any).scriptRateLimiter.rateLimitGrouped as jest.Mock
         rateLimitGroupedMock.mockResolvedValue([])
     })
 
     it('returns empty when no script functions match', async () => {
         const result = await pipeline.buildInvocations([makeGlobals()], {
-            hogTypes: ['destination'],
+            scriptTypes: ['destination'],
             filterFn: () => true,
         })
         expect(result).toEqual([])
@@ -129,11 +129,11 @@ describe('InsightsFunctionInvocationPipeline', () => {
         const fn = makeInsightsFunction()
         const inv = makeInvocation(fn, 'evt-uuid-1')
         jest.mocked(buildInsightsFunctionInvocations).mockResolvedValue({ invocations: [inv], metrics: [], logs: [] })
-        hogWatcher.getEffectiveStates.mockResolvedValue({ [fn.id]: { state: HogWatcherState.healthy } } as any)
+        scriptWatcher.getEffectiveStates.mockResolvedValue({ [fn.id]: { state: ScriptWatcherState.healthy } } as any)
         rateLimitGroupedMock.mockResolvedValue([[null, { isRateLimited: false }]])
 
         const result = await pipeline.buildInvocations([makeGlobals()], {
-            hogTypes: ['destination'],
+            scriptTypes: ['destination'],
             filterFn: () => true,
         })
 
@@ -152,11 +152,11 @@ describe('InsightsFunctionInvocationPipeline', () => {
         const fn = makeInsightsFunction()
         const inv = makeInvocation(fn)
         jest.mocked(buildInsightsFunctionInvocations).mockResolvedValue({ invocations: [inv], metrics: [], logs: [] })
-        hogWatcher.getEffectiveStates.mockResolvedValue({ [fn.id]: { state: HogWatcherState.disabled } } as any)
+        scriptWatcher.getEffectiveStates.mockResolvedValue({ [fn.id]: { state: ScriptWatcherState.disabled } } as any)
         rateLimitGroupedMock.mockResolvedValue([[null, { isRateLimited: false }]])
 
         const result = await pipeline.buildInvocations([makeGlobals()], {
-            hogTypes: ['destination'],
+            scriptTypes: ['destination'],
             filterFn: () => true,
         })
 
@@ -167,15 +167,15 @@ describe('InsightsFunctionInvocationPipeline', () => {
         )
     })
 
-    it('routes degraded invocations to hogoverflow queue when overflow enabled', async () => {
+    it('routes degraded invocations to scriptoverflow queue when overflow enabled', async () => {
         const fn = makeInsightsFunction()
         const inv = makeInvocation(fn)
         jest.mocked(buildInsightsFunctionInvocations).mockResolvedValue({ invocations: [inv], metrics: [], logs: [] })
-        hogWatcher.getEffectiveStates.mockResolvedValue({ [fn.id]: { state: HogWatcherState.degraded } } as any)
+        scriptWatcher.getEffectiveStates.mockResolvedValue({ [fn.id]: { state: ScriptWatcherState.degraded } } as any)
         rateLimitGroupedMock.mockResolvedValue([[null, { isRateLimited: false }]])
 
         const result = await pipeline.buildInvocations([makeGlobals()], {
-            hogTypes: ['destination'],
+            scriptTypes: ['destination'],
             filterFn: () => true,
         })
 
@@ -188,12 +188,12 @@ describe('InsightsFunctionInvocationPipeline', () => {
         const fn = makeInsightsFunction()
         const inv = makeInvocation(fn)
         jest.mocked(buildInsightsFunctionInvocations).mockResolvedValue({ invocations: [inv], metrics: [], logs: [] })
-        hogWatcher.getEffectiveStates.mockResolvedValue({ [fn.id]: { state: HogWatcherState.healthy } } as any)
+        scriptWatcher.getEffectiveStates.mockResolvedValue({ [fn.id]: { state: ScriptWatcherState.healthy } } as any)
         rateLimitGroupedMock.mockResolvedValue([[null, { isRateLimited: false }]])
         quotaLimiting.isTeamQuotaLimited.mockResolvedValue(true)
 
         const result = await pipeline.buildInvocations([makeGlobals()], {
-            hogTypes: ['destination'],
+            scriptTypes: ['destination'],
             filterFn: () => true,
         })
 
@@ -204,12 +204,12 @@ describe('InsightsFunctionInvocationPipeline', () => {
         const fn = makeInsightsFunction()
         const inv = makeInvocation(fn)
         jest.mocked(buildInsightsFunctionInvocations).mockResolvedValue({ invocations: [inv], metrics: [], logs: [] })
-        hogWatcher.getEffectiveStates.mockResolvedValue({ [fn.id]: { state: HogWatcherState.healthy } } as any)
+        scriptWatcher.getEffectiveStates.mockResolvedValue({ [fn.id]: { state: ScriptWatcherState.healthy } } as any)
         rateLimitGroupedMock.mockResolvedValue([[null, { isRateLimited: false }]])
-        hogMasker.filterByMasking.mockResolvedValue({ masked: [inv], notMasked: [] })
+        scriptMasker.filterByMasking.mockResolvedValue({ masked: [inv], notMasked: [] })
 
         const result = await pipeline.buildInvocations([makeGlobals()], {
-            hogTypes: ['destination'],
+            scriptTypes: ['destination'],
             filterFn: () => true,
         })
 
@@ -230,9 +230,9 @@ describe('InsightsFunctionInvocationPipeline', () => {
             metrics: [],
             logs: [],
         })
-        hogWatcher.getEffectiveStates.mockResolvedValue({
-            [fn1.id]: { state: HogWatcherState.healthy },
-            [fn2.id]: { state: HogWatcherState.healthy },
+        scriptWatcher.getEffectiveStates.mockResolvedValue({
+            [fn1.id]: { state: ScriptWatcherState.healthy },
+            [fn2.id]: { state: ScriptWatcherState.healthy },
         } as any)
         rateLimitGroupedMock.mockResolvedValue([
             [null, { isRateLimited: false }],
@@ -240,7 +240,7 @@ describe('InsightsFunctionInvocationPipeline', () => {
         ])
 
         await pipeline.buildInvocations([makeGlobals()], {
-            hogTypes: ['destination'],
+            scriptTypes: ['destination'],
             filterFn: () => true,
         })
 
@@ -254,11 +254,11 @@ describe('InsightsFunctionInvocationPipeline', () => {
         const fn = makeInsightsFunction()
         const inv = makeInvocation(fn)
         jest.mocked(buildInsightsFunctionInvocations).mockResolvedValue({ invocations: [inv], metrics: [], logs: [] })
-        hogWatcher.getEffectiveStates.mockResolvedValue({ [fn.id]: { state: HogWatcherState.healthy } } as any)
+        scriptWatcher.getEffectiveStates.mockResolvedValue({ [fn.id]: { state: ScriptWatcherState.healthy } } as any)
         rateLimitGroupedMock.mockResolvedValue([[null, { isRateLimited: true }]])
 
         const result = await pipeline.buildInvocations([makeGlobals()], {
-            hogTypes: ['destination'],
+            scriptTypes: ['destination'],
             filterFn: () => true,
         })
 

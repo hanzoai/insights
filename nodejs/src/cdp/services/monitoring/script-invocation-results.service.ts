@@ -2,7 +2,7 @@ import { promisify } from 'node:util'
 import { gunzip, gzip } from 'node:zlib'
 import { Counter, Gauge } from 'prom-client'
 
-import { HogInvocationResultsOutput, INSIGHTS_INVOCATION_RESULTS_OUTPUT } from '~/common/outputs'
+import { ScriptInvocationResultsOutput, INSIGHTS_INVOCATION_RESULTS_OUTPUT } from '~/common/outputs'
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
 import { safeDatastoreString } from '~/common/utils/db/utils'
 import { captureException } from '~/common/utils/insights'
@@ -18,23 +18,23 @@ import {
     CyclotronJobInvocationResult,
 } from '../../types'
 
-const counterHogInvocationResultRowsProduced = new Counter({
+const counterScriptInvocationResultRowsProduced = new Counter({
     name: 'cdp_hog_invocation_result_rows_produced',
     help: 'Lifecycle rows queued for the hog_invocation_results Datastore table.',
     labelNames: ['function_kind', 'status'],
 })
 
-const counterHogInvocationResultProduceFailed = new Counter({
+const counterScriptInvocationResultProduceFailed = new Counter({
     name: 'cdp_hog_invocation_result_produce_failed',
     help: 'Rows that failed to produce to Kafka.',
 })
 
-const hogInvocationResultsPendingMessages = new Gauge({
+const scriptInvocationResultsPendingMessages = new Gauge({
     name: 'cdp_hog_invocation_results_pending_messages',
     help: 'Rows queued waiting to be flushed to Kafka.',
 })
 
-export type HogInvocationResultsServiceOutput = HogInvocationResultsOutput | CdpOutput
+export type ScriptInvocationResultsServiceOutput = ScriptInvocationResultsOutput | CdpOutput
 
 /**
  * Lifecycle row produced to Datastore via Kafka. Mirrors the columns on the
@@ -45,7 +45,7 @@ export type HogInvocationResultsServiceOutput = HogInvocationResultsOutput | Cdp
  * ReplacingMergeTree on `(team_id, function_kind, function_id, invocation_id)`
  * keyed by `version` collapses prior versions at merge time.
  */
-export interface HogInvocationResultRow {
+export interface ScriptInvocationResultRow {
     team_id: number
     // `*_rerun` kinds tag the wrapper row that drives a re-run, so the
     // Invocations list can surface in-flight re-runs alongside the function's
@@ -290,11 +290,11 @@ const sumDurationMs = (invocation: CyclotronJobInvocation): number | null => {
  * rows for filtered-out events is intentionally skipped — the worker only
  * calls into this service for invocations that are actually queued to run.
  */
-export class HogInvocationResultsService {
-    private queuedRows: HogInvocationResultRow[] = []
+export class ScriptInvocationResultsService {
+    private queuedRows: ScriptInvocationResultRow[] = []
 
     constructor(
-        private outputs: IngestionOutputs<HogInvocationResultsServiceOutput>,
+        private outputs: IngestionOutputs<ScriptInvocationResultsServiceOutput>,
         private config: { INSIGHTS_INVOCATION_RESULTS_ENABLED: boolean }
     ) {}
 
@@ -336,9 +336,9 @@ export class HogInvocationResultsService {
         }
 
         const row = this.buildLifecycleRow(invocation, status, opts)
-        counterHogInvocationResultRowsProduced.labels(row.function_kind, row.status).inc()
+        counterScriptInvocationResultRowsProduced.labels(row.function_kind, row.status).inc()
         this.queuedRows.push(row)
-        hogInvocationResultsPendingMessages.set(this.queuedRows.length)
+        scriptInvocationResultsPendingMessages.set(this.queuedRows.length)
     }
 
     private buildLifecycleRow(
@@ -350,7 +350,7 @@ export class HogInvocationResultsService {
             startedAt?: Date
             finishedAt?: Date
         }
-    ): HogInvocationResultRow {
+    ): ScriptInvocationResultRow {
         const now = new Date()
         const trigger = extractTriggerFields(invocation)
         const classified = classifyError(opts.error)
@@ -398,7 +398,7 @@ export class HogInvocationResultsService {
             }
         }
 
-        const row: HogInvocationResultRow = {
+        const row: ScriptInvocationResultRow = {
             team_id: invocation.teamId,
             function_kind: this.functionKindFor(invocation),
             function_id: this.functionIdFor(invocation),
@@ -449,10 +449,10 @@ export class HogInvocationResultsService {
         try {
             const row = this.buildLifecycleRow(invocation, 'failed', opts)
             await this.produceRow(row)
-            counterHogInvocationResultRowsProduced.labels(row.function_kind, row.status).inc()
+            counterScriptInvocationResultRowsProduced.labels(row.function_kind, row.status).inc()
             return true
         } catch (error) {
-            counterHogInvocationResultProduceFailed.inc()
+            counterScriptInvocationResultProduceFailed.inc()
             logger.error('⚠️', `failed to durably record terminal failure: ${error}`, {
                 error: String(error),
                 invocation_id: invocation.id,
@@ -462,7 +462,7 @@ export class HogInvocationResultsService {
         }
     }
 
-    private async produceRow(row: HogInvocationResultRow): Promise<void> {
+    private async produceRow(row: ScriptInvocationResultRow): Promise<void> {
         const value = Buffer.from(
             safeDatastoreString(
                 JSON.stringify({
@@ -515,7 +515,7 @@ export class HogInvocationResultsService {
             args.startedAt && args.finishedAt ? Math.max(0, args.finishedAt.getTime() - args.startedAt.getTime()) : null
 
         const scheduledAtIso = isoMicroseconds(args.scheduledAt)
-        const row: HogInvocationResultRow = {
+        const row: ScriptInvocationResultRow = {
             team_id: args.teamId,
             function_kind: rerunWrapperKindFor(args.parentFunctionKind),
             function_id: args.functionId,
@@ -542,9 +542,9 @@ export class HogInvocationResultsService {
             is_deleted: 0,
         }
 
-        counterHogInvocationResultRowsProduced.labels(row.function_kind, row.status).inc()
+        counterScriptInvocationResultRowsProduced.labels(row.function_kind, row.status).inc()
         this.queuedRows.push(row)
-        hogInvocationResultsPendingMessages.set(this.queuedRows.length)
+        scriptInvocationResultsPendingMessages.set(this.queuedRows.length)
     }
 
     queueInvocationResults(results: CyclotronJobInvocationResult[]): void {
@@ -577,7 +577,7 @@ export class HogInvocationResultsService {
         }
         const drop = new Set(invocationIds)
         this.queuedRows = this.queuedRows.filter((r) => !drop.has(r.invocation_id))
-        hogInvocationResultsPendingMessages.set(this.queuedRows.length)
+        scriptInvocationResultsPendingMessages.set(this.queuedRows.length)
     }
 
     async flush(): Promise<void> {
@@ -587,12 +587,12 @@ export class HogInvocationResultsService {
 
         const rows = this.queuedRows
         this.queuedRows = []
-        hogInvocationResultsPendingMessages.set(0)
+        scriptInvocationResultsPendingMessages.set(0)
 
         await Promise.all(
             rows.map((row) =>
                 this.produceRow(row).catch((error) => {
-                    counterHogInvocationResultProduceFailed.inc()
+                    counterScriptInvocationResultProduceFailed.inc()
                     // Best-effort — never disrupt invocation processing for a
                     // monitoring write.
                     logger.error('⚠️', `failed to produce script invocation result: ${error}`, {

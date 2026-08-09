@@ -1,7 +1,7 @@
 import { create } from '@bufbuild/protobuf'
 import { Client } from '@connectrpc/connect'
 
-import { PersonHogService } from '~/common/generated/personinsights/personinsights/service/v1/service_pb'
+import { PersonFnService } from '~/common/generated/personinsights/personinsights/service/v1/service_pb'
 import { TeamDistinctIdSchema } from '~/common/generated/personinsights/personinsights/types/v1/common_pb'
 import {
     GetDistinctIdsForPersonsRequestSchema,
@@ -32,8 +32,8 @@ function protoPersonToDomain(proto: ProtoPerson): InternalPerson {
 
 const PERSONFN_BATCH_SIZE = 250
 
-export class PersonHogPersonOperations {
-    constructor(private client: Client<typeof PersonHogService>) {}
+export class PersonFnPersonOperations {
+    constructor(private client: Client<typeof PersonFnService>) {}
 
     async fetchPersonsByDistinctIds(
         teamPersons: { teamId: number; distinctId: string }[],

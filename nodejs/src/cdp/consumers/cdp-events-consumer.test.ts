@@ -19,13 +19,13 @@ import { FixtureFlowBuilder } from '../_tests/builders/flow.builder'
 import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
     insertInsightsFunction as _insertInsightsFunction,
-    createHogExecutionGlobals,
+    createScriptExecutionGlobals,
     createIncomingEvent,
     createKafkaMessage,
 } from '../_tests/fixtures'
 import { insertFlow as _insertFlow } from '../_tests/fixtures-flows'
 import { GroupsManagerService } from '../services/managers/groups-manager.service'
-import { HogWatcherState } from '../services/monitoring/script-watcher.service'
+import { ScriptWatcherState } from '../services/monitoring/script-watcher.service'
 import { InsightsFunctionInvocationGlobals, InsightsFunctionType } from '../types'
 import { CdpEventsConsumer } from './cdp-events.consumer'
 
@@ -65,7 +65,7 @@ describe('CdpEventsConsumer', () => {
         const mockJobQueue = createMockJobQueue()
 
         processor = new CdpEventsConsumer(hub, createCdpConsumerDeps(hub), {
-            hogQueue: mockJobQueue,
+            scriptQueue: mockJobQueue,
             flowQueue: mockJobQueue,
         })
 
@@ -139,7 +139,7 @@ describe('CdpEventsConsumer', () => {
                     ...INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                 })
 
-                globals = createHogExecutionGlobals({
+                globals = createScriptExecutionGlobals({
                     project: {
                         id: team.id,
                     } as any,
@@ -293,8 +293,8 @@ describe('CdpEventsConsumer', () => {
             })
 
             it('should filter out functions that are disabled', async () => {
-                await processor.hogWatcher.forceStateChange(fnFetchNoFilters, HogWatcherState.disabled)
-                await processor.hogWatcher.forceStateChange(fnPrinterPageviewFilters, HogWatcherState.disabled)
+                await processor.scriptWatcher.forceStateChange(fnFetchNoFilters, ScriptWatcherState.disabled)
+                await processor.scriptWatcher.forceStateChange(fnPrinterPageviewFilters, ScriptWatcherState.disabled)
 
                 const { invocations } = await processor.processBatch([globals])
 
@@ -330,7 +330,7 @@ describe('CdpEventsConsumer', () => {
             {
                 it('should bill once per event, not per destination (multiple events)', async () => {
                     // Create a second event with different UUID
-                    const globals2 = createHogExecutionGlobals({
+                    const globals2 = createScriptExecutionGlobals({
                         project: {
                             id: team.id,
                         } as any,
@@ -402,7 +402,7 @@ describe('CdpEventsConsumer', () => {
                 })
 
                 // Globals for team2 (without data_pipelines)
-                globals = createHogExecutionGlobals({
+                globals = createScriptExecutionGlobals({
                     project: {
                         id: team2.id,
                     } as any,
@@ -504,7 +504,7 @@ describe('CdpEventsConsumer', () => {
             let globals: InsightsFunctionInvocationGlobals
 
             beforeEach(() => {
-                globals = createHogExecutionGlobals({
+                globals = createScriptExecutionGlobals({
                     project: {
                         id: team.id,
                     } as any,
@@ -574,7 +574,7 @@ describe('script flow processing', () => {
         const mockQueue = createMockJobQueue()
 
         processor = new CdpEventsConsumer(hub, createCdpConsumerDeps(hub), {
-            hogQueue: mockQueue,
+            scriptQueue: mockQueue,
             flowQueue: mockQueue,
         })
 
@@ -602,7 +602,7 @@ describe('script flow processing', () => {
         let globals: InsightsFunctionInvocationGlobals
 
         beforeEach(() => {
-            globals = createHogExecutionGlobals({
+            globals = createScriptExecutionGlobals({
                 project: {
                     id: team.id,
                 } as any,
@@ -718,7 +718,7 @@ describe('script flow processing', () => {
         let globals: InsightsFunctionInvocationGlobals
 
         beforeEach(() => {
-            globals = createHogExecutionGlobals({
+            globals = createScriptExecutionGlobals({
                 project: {
                     id: team.id,
                 } as any,
@@ -1023,7 +1023,7 @@ describe('script flow processing', () => {
         }
 
         beforeEach(() => {
-            globals = createHogExecutionGlobals({
+            globals = createScriptExecutionGlobals({
                 groups: undefined, // Must be undefined so addGroupsToGlobals actually enriches
                 project: {
                     id: team.id,
@@ -1040,7 +1040,7 @@ describe('script flow processing', () => {
             })
         })
 
-        it('should enrich globals with group properties for hogflow invocations', async () => {
+        it('should enrich globals with group properties for flow invocations', async () => {
             await setupGroups()
 
             const flow = await insertFlow(
@@ -1077,7 +1077,7 @@ describe('script flow processing', () => {
             })
         })
 
-        it('should include group properties in hogflow filterGlobals', async () => {
+        it('should include group properties in flow filterGlobals', async () => {
             await setupGroups()
 
             await insertFlow(

@@ -5,7 +5,7 @@ import { insertRow } from '~/tests/helpers/sql'
 
 import { CyclotronJobInvocationFlow, CyclotronPerson, FlowInvocationContext } from '../types'
 import { convertToInsightsFunctionFilterGlobal } from '../utils/script-function-filtering'
-import { createHogExecutionGlobals } from './fixtures'
+import { createScriptExecutionGlobals } from './fixtures'
 
 export const insertFlow = async (postgres: PostgresRouter, flow: Flow): Promise<Flow> => {
     // This is only used for testing so we need to override some values
@@ -25,7 +25,7 @@ export const createFlowInvocationContext = (
 ): FlowInvocationContext => {
     return {
         event: {
-            ...createHogExecutionGlobals().event,
+            ...createScriptExecutionGlobals().event,
             ...data.event,
         },
         actionStepCount: 0,

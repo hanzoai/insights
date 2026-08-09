@@ -4,7 +4,7 @@ import { CyclotronJobInvocationResult } from '../types'
 import { CapturedEventsService } from './captured-events/captured-events.service'
 import { MessageAssetsService } from './messaging/message-assets.service'
 import { InsightsFunctionMonitoringService } from './monitoring/script-function-monitoring.service'
-import { HogInvocationResultsService } from './monitoring/script-invocation-results.service'
+import { ScriptInvocationResultsService } from './monitoring/script-invocation-results.service'
 import { WarehouseWebhooksService } from './warehouse/warehouse-webhooks.service'
 
 /**
@@ -12,7 +12,7 @@ import { WarehouseWebhooksService } from './warehouse/warehouse-webhooks.service
  * CDP consumer/API caller needs:
  *
  * - `InsightsFunctionMonitoringService` — aggregated app metrics + log entries
- * - `HogInvocationResultsService`  — per-invocation lifecycle row in Datastore
+ * - `ScriptInvocationResultsService`  — per-invocation lifecycle row in Datastore
  *                                    (powers the new runs UI + rerun path)
  * - `WarehouseWebhooksService`    — warehouse source webhook payloads
  * - `CapturedEventsService`       — Insights events emitted via insights.capture()
@@ -28,7 +28,7 @@ import { WarehouseWebhooksService } from './warehouse/warehouse-webhooks.service
 export class InvocationResultsService {
     constructor(
         public readonly monitoringService: InsightsFunctionMonitoringService,
-        public readonly invocationResultsRowsService: HogInvocationResultsService,
+        public readonly invocationResultsRowsService: ScriptInvocationResultsService,
         public readonly warehouseWebhooksService: WarehouseWebhooksService,
         public readonly capturedEventsService: CapturedEventsService,
         public readonly messageAssetsService: MessageAssetsService

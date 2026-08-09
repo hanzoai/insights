@@ -30,8 +30,8 @@ import { insertFlow as _insertFlow } from './_tests/fixtures-flows'
 import { CdpApi } from './cdp-api'
 import { CdpConsumerBaseDeps } from './consumers/cdp-base.consumer'
 import { insightsFilterOutPlugin } from './legacy-plugins/_transformations/insights-filter-out-plugin/template'
-import { BASE_REDIS_KEY, HogWatcherState } from './services/monitoring/script-watcher.service'
-import { compileHog } from './templates/compiler'
+import { BASE_REDIS_KEY, ScriptWatcherState } from './services/monitoring/script-watcher.service'
+import { compileScript } from './templates/compiler'
 import { InsightsFunctionInvocationGlobals, InsightsFunctionType } from './types'
 
 // Email MX validation runs on every email send, so without a mock the test-panel
@@ -103,7 +103,7 @@ describe('CDP API', () => {
 
         cdpDeps = createCdpConsumerDeps(hub)
         api = new CdpApi(hub, cdpDeps, {
-            hogQueue: createMockJobQueue(),
+            scriptQueue: createMockJobQueue(),
             flowQueue: createMockJobQueue(),
         })
         app = setupExpressApp()
@@ -658,7 +658,7 @@ describe('CDP API', () => {
                 team_id: team.id,
                 enabled: true,
                 script,
-                bytecode: await compileHog(script),
+                bytecode: await compileScript(script),
                 inputs: { needle: { value: 'hunter2' } },
             })
         })
@@ -706,7 +706,7 @@ describe('CDP API', () => {
                 .post(`/api/projects/${team.id}/insights_functions/new/invocations`)
                 .send({
                     globals: logRecordGlobals,
-                    configuration: { ...configuration, script, bytecode: await compileHog(script) },
+                    configuration: { ...configuration, script, bytecode: await compileScript(script) },
                 })
 
             expect(res.status).toEqual(200)
@@ -723,7 +723,7 @@ describe('CDP API', () => {
                 .post(`/api/projects/${team.id}/insights_functions/new/invocations`)
                 .send({
                     globals: logRecordGlobals,
-                    configuration: { ...configuration, script, bytecode: await compileHog(script) },
+                    configuration: { ...configuration, script, bytecode: await compileScript(script) },
                 })
 
             expect(res.status).toEqual(200)
@@ -753,8 +753,8 @@ describe('CDP API', () => {
         })
 
         it('returns the states of all script functions', async () => {
-            await api['hogWatcher'].forceStateChange(insightsFunction, HogWatcherState.degraded)
-            await api['hogWatcher'].forceStateChange(insightsFunctionMultiFetch, HogWatcherState.disabled)
+            await api['scriptWatcher'].forceStateChange(insightsFunction, ScriptWatcherState.degraded)
+            await api['scriptWatcher'].forceStateChange(insightsFunctionMultiFetch, ScriptWatcherState.disabled)
 
             const res = await supertest(app).get('/api/insights_functions/states')
             expect(res.status).toEqual(200)
@@ -815,7 +815,7 @@ describe('CDP API', () => {
         })
     })
 
-    describe('hogflow invocation groups', () => {
+    describe('flow invocation groups', () => {
         const resolvedGroup = {
             id: 'org-1',
             type: 'organization',
@@ -892,7 +892,7 @@ describe('CDP API', () => {
         })
     })
 
-    describe('hogflow wait_until_condition test invocations', () => {
+    describe('flow wait_until_condition test invocations', () => {
         // Matches events whose name equals `eventName` - same shape the serializer compiles
         // for an "events to wait for" entry.
         const eventBytecode = (eventName: string): any[] => ['_H', 1, 32, eventName, 32, 'event', 1, 1, 11]
@@ -996,7 +996,7 @@ describe('CDP API', () => {
         expect(allLogText).toContain('***REDACTED***')
     })
 
-    describe('batch hogflow invocations', () => {
+    describe('batch flow invocations', () => {
         let batchFlow: Flow
 
         beforeEach(async () => {
@@ -1275,7 +1275,7 @@ describe('CDP API', () => {
         })
     })
 
-    describe('scheduled hogflow invocations', () => {
+    describe('scheduled flow invocations', () => {
         let scheduleFlow: Flow
         let mockQueueInvocations: jest.Mock
 
@@ -1363,7 +1363,7 @@ describe('CDP API', () => {
         })
     })
 
-    describe('hogflow in-flight count', () => {
+    describe('flow in-flight count', () => {
         let countFlow: Flow
         let mockCountInFlightJobs: jest.Mock
 
@@ -1439,7 +1439,7 @@ describe('CDP API', () => {
         })
     })
 
-    describe('hogflow reschedule parked', () => {
+    describe('flow reschedule parked', () => {
         let rescheduleFlow: Flow
         let mockRescheduleParkedJobs: jest.Mock
         const sweepFloor = new Date('2025-06-01T00:10:00.000Z')
@@ -1706,7 +1706,7 @@ describe('CDP API', () => {
             // Stub EmailService so the test doesn't depend on a running maildev SMTP. The spy
             // captures whether the inline path was taken — that's the assertion that proves the fix.
             emailSpy = jest
-                .spyOn(api['hogExecutorAsync']['deps'].emailService, 'executeSendEmail')
+                .spyOn(api['scriptExecutorAsync']['deps'].emailService, 'executeSendEmail')
                 .mockImplementation((invocation: any) =>
                     Promise.resolve({
                         invocation,

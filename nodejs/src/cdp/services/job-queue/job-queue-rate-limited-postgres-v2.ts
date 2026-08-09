@@ -21,7 +21,7 @@ export interface RateLimitedQueueOptions {
  * bucket. Used by the email worker to claim SES capacity before pulling jobs.
  *
  * The base queue and `CyclotronV2Worker` are completely untouched — other
- * consumers (script, hogflow, etc.) construct the base queue and never load the
+ * consumers (script, flow, etc.) construct the base queue and never load the
  * rate-limit code path.
  */
 export class CyclotronJobQueueRateLimitedPostgresV2 extends CyclotronJobQueuePostgresV2 {

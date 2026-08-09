@@ -6,9 +6,9 @@ import { DateTime } from 'luxon'
 import { Message } from 'node-rdkafka'
 
 import { insertInsightsFunction as _insertInsightsFunction } from '~/cdp/_tests/fixtures'
-import { createHogTransformerService } from '~/cdp/script-transformations/script-transformer.service'
+import { createScriptTransformerService } from '~/cdp/script-transformations/script-transformer.service'
 import { template as geoipTemplate } from '~/cdp/templates/_transformations/geoip/geoip.template'
-import { compileHog } from '~/cdp/templates/compiler'
+import { compileScript } from '~/cdp/templates/compiler'
 import { InsightsFunctionType } from '~/cdp/types'
 import { DatastoreGroupRepository } from '~/common/groups/repositories/datastore-group-repository'
 import { PostgresUse } from '~/common/utils/db/postgres'
@@ -122,7 +122,7 @@ describe('IngestionConsumer', () => {
                 outputs,
                 datastoreGroupRepository: new DatastoreGroupRepository(outputs),
                 aiSubpipelineFactory: createAiEventSubpipeline,
-                hogTransformer: createHogTransformerService(infra.config, {
+                scriptTransformer: createScriptTransformerService(infra.config, {
                     ...infra,
                     monitoringOutputs: createTestMonitoringOutputs(mockProducer),
                 }),
@@ -1303,11 +1303,11 @@ describe('IngestionConsumer', () => {
 
         beforeEach(async () => {
             // Create a transformation function using the geoip template as an example
-            const hogByteCode = await compileHog(geoipTemplate.code)
+            const scriptByteCode = await compileScript(geoipTemplate.code)
             transformationFunction = await insertInsightsFunction({
                 name: 'GeoIP Transformation',
                 script: geoipTemplate.code,
-                bytecode: hogByteCode,
+                bytecode: scriptByteCode,
             })
 
             ingester = await createIngestionConsumer(infra)

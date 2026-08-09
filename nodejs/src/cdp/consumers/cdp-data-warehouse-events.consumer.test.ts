@@ -12,7 +12,7 @@ import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES 
 import { insertInsightsFunction as _insertInsightsFunction, createKafkaMessage } from '../_tests/fixtures'
 import { insertFlow as _insertFlow } from '../_tests/fixtures-flows'
 import { CdpDataWarehouseEvent } from '../schema'
-import { HogWatcherState } from '../services/monitoring/script-watcher.service'
+import { ScriptWatcherState } from '../services/monitoring/script-watcher.service'
 import { InsightsFunctionInvocationGlobals, InsightsFunctionType } from '../types'
 import { CdpDatawarehouseEventsConsumer } from './cdp-data-warehouse-events.consumer'
 
@@ -73,7 +73,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
         const mockJobQueue = createMockJobQueue()
 
         processor = new CdpDatawarehouseEventsConsumer(hub, createCdpConsumerDeps(hub), {
-            hogQueue: mockJobQueue,
+            scriptQueue: mockJobQueue,
             flowQueue: mockJobQueue,
         })
 
@@ -260,7 +260,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
         })
 
         it('should filter out disabled script functions', async () => {
-            await processor.hogWatcher.forceStateChange(fnFetchNoFilters, HogWatcherState.disabled)
+            await processor.scriptWatcher.forceStateChange(fnFetchNoFilters, ScriptWatcherState.disabled)
 
             const { invocations } = await processor.processBatch([globals])
 
@@ -283,7 +283,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
         })
 
         it('should handle degraded state by setting queue priority', async () => {
-            await processor.hogWatcher.forceStateChange(fnFetchNoFilters, HogWatcherState.degraded)
+            await processor.scriptWatcher.forceStateChange(fnFetchNoFilters, ScriptWatcherState.degraded)
 
             const { invocations } = await processor.processBatch([globals])
 

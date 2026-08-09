@@ -334,7 +334,7 @@ export function getDefaultCdpConfig(): CdpConfig {
         CYCLOTRON_NODE_JANITOR_STALL_BACKOFF_BASE_MS: 60000,
         CYCLOTRON_NODE_JANITOR_STALL_BACKOFF_MAX_MS: 600000,
         // Floor > the script flow cache's worst-case staleness (~6 min), so swept jobs
-        // always wake against post-edit config. Rate sized well under hogflow worker
+        // always wake against post-edit config. Rate sized well under flow worker
         // steady-state throughput: the past incident class here is an instantaneous
         // mass wake, so wakes are trickled (500k parked @ 200/s ≈ 42 min spread).
         // Dev/test default must match Django's (insights/settings/data_stores.py).

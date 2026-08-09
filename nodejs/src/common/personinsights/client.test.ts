@@ -2,7 +2,7 @@ import { create } from '@bufbuild/protobuf'
 import { Code, ConnectError, type ServiceImpl, createRouterTransport } from '@connectrpc/connect'
 import { DateTime } from 'luxon'
 
-import { PersonHogService } from '~/common/generated/personinsights/personinsights/service/v1/service_pb'
+import { PersonFnService } from '~/common/generated/personinsights/personinsights/service/v1/service_pb'
 import { ConsistencyLevel } from '~/common/generated/personinsights/personinsights/types/v1/common_pb'
 import {
     GroupSchema,
@@ -22,7 +22,7 @@ import type {
 } from '~/common/generated/personinsights/personinsights/types/v1/person_pb'
 
 import {
-    PersonHogClient,
+    PersonFnClient,
     parseRolloutTeamIds,
     resolveConsistencyHeader,
     shouldUseGrpcForTeam,
@@ -94,7 +94,7 @@ function makeProtoPerson(
     })
 }
 
-const SERVICE_DEFAULTS: ServiceImpl<typeof PersonHogService> = {
+const SERVICE_DEFAULTS: ServiceImpl<typeof PersonFnService> = {
     getGroup: () => ({}),
     getGroups: () => ({ groups: [], missingGroups: [] }),
     getGroupsBatch: () => ({ results: [] }),
@@ -135,14 +135,14 @@ const SERVICE_DEFAULTS: ServiceImpl<typeof PersonHogService> = {
     splitPerson: () => ({ splits: [] }),
 }
 
-function createMockClient(overrides: Partial<ServiceImpl<typeof PersonHogService>> = {}): PersonHogClient {
+function createMockClient(overrides: Partial<ServiceImpl<typeof PersonFnService>> = {}): PersonFnClient {
     const transport = createRouterTransport(({ service }) => {
-        service(PersonHogService, {
+        service(PersonFnService, {
             ...SERVICE_DEFAULTS,
             ...overrides,
         })
     })
-    return PersonHogClient.fromTransport(transport)
+    return PersonFnClient.fromTransport(transport)
 }
 
 describe('parseRolloutTeamIds', () => {
@@ -256,7 +256,7 @@ describe('resolveConsistencyHeader', () => {
     })
 })
 
-describe('PersonHogClient', () => {
+describe('PersonFnClient', () => {
     describe('groups', () => {
         describe('fetchGroup', () => {
             it('converts proto group to domain group', async () => {

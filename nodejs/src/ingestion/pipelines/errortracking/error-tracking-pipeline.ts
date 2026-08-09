@@ -8,7 +8,7 @@ import {
     EventOutput,
     IngestionWarningsOutput,
     OverflowOutput,
-    TophogOutput,
+    TopFnOutput,
 } from '~/common/outputs'
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
 import { PersonReadRepository } from '~/common/persons/repositories/person-repository'
@@ -28,18 +28,18 @@ import {
 import { createCreateEventStep } from '~/ingestion/common/steps/event-processing/create-event-step'
 import { EmitEventStepOutput, createEmitEventStep } from '~/ingestion/common/steps/event-processing/emit-event-step'
 import { createFetchPersonChunkStep } from '~/ingestion/common/steps/event-processing/fetch-person-chunk-step'
-import { createHogTransformEventStep } from '~/ingestion/common/steps/event-processing/script-transform-event-step'
+import { createScriptTransformEventStep } from '~/ingestion/common/steps/event-processing/script-transform-event-step'
 import { createReadOnlyProcessGroupsStep } from '~/ingestion/common/steps/event-processing/readonly-process-groups-step'
 import { createRecordIngestionLagStep } from '~/ingestion/common/steps/record-ingestion-lag'
 import { IngestionOverflowMode } from '~/ingestion/config'
 import { BatchingContext, BatchingPipeline } from '~/ingestion/framework/batching-pipeline'
-import { TopHogRegistry, count } from '~/ingestion/framework/extensions/tophog'
+import { TopFnRegistry, count } from '~/ingestion/framework/extensions/topfn'
 import { createBatch } from '~/ingestion/framework/helpers'
 
 import { createAttachMessageBytesStep } from './attach-message-bytes-step'
 import { createCymbalProcessingStep } from './cymbal-processing-step'
 import { CymbalClient } from './cymbal/client'
-import { ErrorTrackingHogTransformer } from './error-tracking-consumer'
+import { ErrorTrackingScriptTransformer } from './error-tracking-consumer'
 import { createErrorTrackingPrepareEventStep } from './prepare-event-step'
 
 export interface ErrorTrackingPipelineInput {
@@ -63,7 +63,7 @@ export type ErrorTrackingPipeline = BatchingPipeline<
 >
 
 export type ErrorTrackingOutputs = IngestionOutputs<
-    EventOutput | IngestionWarningsOutput | DlqOutput | OverflowOutput | TophogOutput | AppMetricsOutput
+    EventOutput | IngestionWarningsOutput | DlqOutput | OverflowOutput | TopFnOutput | AppMetricsOutput
 >
 
 export interface ErrorTrackingPipelineConfig {
@@ -71,7 +71,7 @@ export interface ErrorTrackingPipelineConfig {
     promiseScheduler: PromiseScheduler
     teamManager: TeamManager
     personRepository: PersonReadRepository
-    hogTransformer: ErrorTrackingHogTransformer | null
+    scriptTransformer: ErrorTrackingScriptTransformer | null
     cymbalClient: CymbalClient
     groupTypeManager: ReadOnlyGroupTypeManager
     cookielessManager: CookielessManager
@@ -91,8 +91,8 @@ export interface ErrorTrackingPipelineConfig {
     overflowRedirectService?: OverflowRedirectService
     /** Service for refreshing TTLs on overflow lane events. */
     overflowLaneTTLRefreshService?: OverflowRedirectService
-    /** TopHog registry for metrics. */
-    topHog: TopHogRegistry
+    /** TopFn registry for metrics. */
+    topFn: TopFnRegistry
 }
 
 /**
@@ -126,7 +126,7 @@ export function createErrorTrackingPipeline(config: ErrorTrackingPipelineConfig)
         promiseScheduler,
         teamManager,
         personRepository,
-        hogTransformer,
+        scriptTransformer,
         cymbalClient,
         groupTypeManager,
         cookielessManager,
@@ -135,7 +135,7 @@ export function createErrorTrackingPipeline(config: ErrorTrackingPipelineConfig)
         preservePartitionLocality,
         overflowRedirectService,
         overflowLaneTTLRefreshService,
-        topHog,
+        topFn,
     } = config
 
     const preCymbal = newCommonIngestionPipeline<ErrorTrackingPipelineInput, { message: Message }, OverflowOutput>({
@@ -143,7 +143,7 @@ export function createErrorTrackingPipeline(config: ErrorTrackingPipelineConfig)
         outputs,
         promiseScheduler,
         concurrentBatches: 1,
-        topHog,
+        topFn,
     })
         // Header-only steps: parse Kafka headers and apply token-level restrictions.
         // Cheap; runs per-event before we touch the body.
@@ -196,14 +196,14 @@ export function createErrorTrackingPipeline(config: ErrorTrackingPipelineConfig)
                 retry: { tries: 5, sleepMs: 100, name: 'fetch_person_chunk' },
             })
             // Run Script transformations (including GeoIP if team has it enabled)
-            .pipe(createHogTransformEventStep(hogTransformer))
+            .pipe(createScriptTransformEventStep(scriptTransformer))
             // Prepare event for emission
             .pipe(createErrorTrackingPrepareEventStep())
             // Map group types to indexes (read-only, no new group types created)
             .pipe(createReadOnlyProcessGroupsStep(groupTypeManager))
             .pipe(createCreateEventStep(EVENTS_OUTPUT))
             .pipe(createEmitEventStep({ outputs }), {
-                topHog: [
+                topFn: [
                     count('emitted_events', (input) => ({
                         team_id: String(input.teamId),
                     })),

@@ -15,10 +15,10 @@ import {
     InsightsFunctionType,
 } from '../../types'
 
-export interface HogWatcherConfig {
-    hogCostTimingLowerMs: number
-    hogCostTimingUpperMs: number
-    hogCostTiming: number
+export interface ScriptWatcherConfig {
+    scriptCostTimingLowerMs: number
+    scriptCostTimingUpperMs: number
+    scriptCostTiming: number
     asyncCostTimingLowerMs: number
     asyncCostTimingUpperMs: number
     asyncCostTiming: number
@@ -39,7 +39,7 @@ const REDIS_KEY_TOKENS = `${BASE_REDIS_KEY}/tokens`
 const REDIS_KEY_STATE = `${BASE_REDIS_KEY}/state`
 const REDIS_KEY_STATE_LOCK = `${BASE_REDIS_KEY}/state-lock`
 
-export enum HogWatcherState {
+export enum ScriptWatcherState {
     healthy = 1,
     degraded = 2,
     disabled = 3,
@@ -49,9 +49,9 @@ export enum HogWatcherState {
     forcefully_disabled = 12,
 }
 
-export type HogWatcherFunctionState = {
+export type ScriptWatcherFunctionState = {
     tokens: number
-    state: HogWatcherState
+    state: ScriptWatcherState
 }
 
 type FunctionCostEntry = {
@@ -82,19 +82,19 @@ export const isInsightsFunctionResult = (
 }
 
 // Helper if you don't care about the forced side of things
-export const effectiveState = (state: HogWatcherState) => {
-    if (state === HogWatcherState.forcefully_degraded) {
-        return HogWatcherState.degraded
+export const effectiveState = (state: ScriptWatcherState) => {
+    if (state === ScriptWatcherState.forcefully_degraded) {
+        return ScriptWatcherState.degraded
     }
-    if (state === HogWatcherState.forcefully_disabled) {
-        return HogWatcherState.disabled
+    if (state === ScriptWatcherState.forcefully_disabled) {
+        return ScriptWatcherState.disabled
     }
     return state
 }
 
-export class HogWatcherService {
+export class ScriptWatcherService {
     private costsMapping: InsightsFunctionTimingCosts
-    private lazyLoader: LazyLoader<HogWatcherFunctionState>
+    private lazyLoader: LazyLoader<ScriptWatcherFunctionState>
 
     private queuedResults: {
         results: CyclotronJobInvocationResult[]
@@ -109,7 +109,7 @@ export class HogWatcherService {
 
     constructor(
         private teamManager: TeamManager,
-        private config: HogWatcherConfig,
+        private config: ScriptWatcherConfig,
         private redis: RedisV2,
         redisReader?: RedisV2
     ) {
@@ -127,9 +127,9 @@ export class HogWatcherService {
         )
         this.costsMapping = {
             script: {
-                lowerBound: this.config.hogCostTimingLowerMs,
-                upperBound: this.config.hogCostTimingUpperMs,
-                cost: this.config.hogCostTiming,
+                lowerBound: this.config.scriptCostTimingLowerMs,
+                upperBound: this.config.scriptCostTimingUpperMs,
+                cost: this.config.scriptCostTiming,
             },
             async_function: {
                 lowerBound: this.config.asyncCostTimingLowerMs,
@@ -160,12 +160,12 @@ export class HogWatcherService {
         previousState,
     }: {
         insightsFunction: InsightsFunctionType
-        state: HogWatcherState
-        previousState: HogWatcherState
+        state: ScriptWatcherState
+        previousState: ScriptWatcherState
     }) {
         const team = await this.teamManager.getTeam(insightsFunction.team_id)
 
-        logger.info('[HogWatcherService] onStateChange', {
+        logger.info('[ScriptWatcherService] onStateChange', {
             insightsFunctionId: insightsFunction.id,
             insightsFunctionName: insightsFunction.name,
             state,
@@ -178,23 +178,23 @@ export class HogWatcherService {
                 insights_function_type: insightsFunction.type,
                 insights_function_name: insightsFunction.name,
                 insights_function_template_id: insightsFunction.template_id,
-                state: HogWatcherState[state], // Convert numeric state to readable string
-                previous_state: HogWatcherState[previousState], // Convert numeric state to readable string
+                state: ScriptWatcherState[state], // Convert numeric state to readable string
+                previous_state: ScriptWatcherState[previousState], // Convert numeric state to readable string
             })
         }
     }
 
-    public calculateNewState(tokens: number): HogWatcherState {
+    public calculateNewState(tokens: number): ScriptWatcherState {
         const rating = tokens / this.config.bucketSize
 
         if (rating < 0 && this.config.automaticallyDisableFunctions) {
-            return HogWatcherState.disabled
+            return ScriptWatcherState.disabled
         }
         if (rating <= this.config.thresholdDegraded) {
-            return HogWatcherState.degraded
+            return ScriptWatcherState.degraded
         }
 
-        return HogWatcherState.healthy
+        return ScriptWatcherState.healthy
     }
 
     /**
@@ -209,7 +209,7 @@ export class HogWatcherService {
      */
     public async getPersistedStates(
         ids: InsightsFunctionType['id'][]
-    ): Promise<Record<InsightsFunctionType['id'], HogWatcherFunctionState>> {
+    ): Promise<Record<InsightsFunctionType['id'], ScriptWatcherFunctionState>> {
         const idsSet = new Set(ids)
         const nowSeconds = Math.round(Date.now() / 1000)
 
@@ -224,7 +224,7 @@ export class HogWatcherService {
         try {
             res = await this.redisReader.usePipeline({ name: 'getStates' }, buildGetStatesPipeline)
         } catch (err) {
-            logger.warn('🔀', '[HogWatcher] reader getStates failed, falling back to writer', { err })
+            logger.warn('🔀', '[ScriptWatcher] reader getStates failed, falling back to writer', { err })
             res = await this.redis.usePipeline({ name: 'getStates' }, buildGetStatesPipeline)
         }
 
@@ -245,25 +245,25 @@ export class HogWatcherService {
                 }
 
                 acc[id] = {
-                    state: stateVal ? Number(stateVal) : HogWatcherState.healthy,
+                    state: stateVal ? Number(stateVal) : ScriptWatcherState.healthy,
                     tokens,
                 }
 
                 return acc
             },
-            {} as Record<InsightsFunctionType['id'], HogWatcherFunctionState>
+            {} as Record<InsightsFunctionType['id'], ScriptWatcherFunctionState>
         )
     }
 
     /**
      * Like getPersistedStates but returns the state of a single script function
      */
-    public async getPersistedState(id: InsightsFunctionType['id']): Promise<HogWatcherFunctionState> {
+    public async getPersistedState(id: InsightsFunctionType['id']): Promise<ScriptWatcherFunctionState> {
         const res = await this.getPersistedStates([id])
         return res[id]
     }
 
-    public async getCachedPersistedState(id: InsightsFunctionType['id']): Promise<HogWatcherFunctionState | null> {
+    public async getCachedPersistedState(id: InsightsFunctionType['id']): Promise<ScriptWatcherFunctionState | null> {
         return await this.lazyLoader.get(id)
     }
 
@@ -272,7 +272,7 @@ export class HogWatcherService {
      */
     public async getEffectiveStates(
         ids: InsightsFunctionType['id'][]
-    ): Promise<Record<InsightsFunctionType['id'], HogWatcherFunctionState>> {
+    ): Promise<Record<InsightsFunctionType['id'], ScriptWatcherFunctionState>> {
         const states = await this.getPersistedStates(ids)
         return Object.fromEntries(
             Object.entries(states).map(([id, state]) => [
@@ -285,12 +285,12 @@ export class HogWatcherService {
     /**
      * Like getPersistedState but returns the effective state (i.e. ignores forcefully set states)
      */
-    public async getEffectiveState(id: InsightsFunctionType['id']): Promise<HogWatcherFunctionState> {
+    public async getEffectiveState(id: InsightsFunctionType['id']): Promise<ScriptWatcherFunctionState> {
         const res = await this.getEffectiveStates([id])
         return res[id]
     }
 
-    public async getCachedEffectiveState(id: InsightsFunctionType['id']): Promise<HogWatcherFunctionState | null> {
+    public async getCachedEffectiveState(id: InsightsFunctionType['id']): Promise<ScriptWatcherFunctionState | null> {
         const res = await this.lazyLoader.get(id)
         if (!res) {
             return null
@@ -299,7 +299,7 @@ export class HogWatcherService {
         return { state: effectiveState(res.state), tokens: res.tokens }
     }
 
-    public async getAllFunctionStates(): Promise<Record<InsightsFunctionType['id'], HogWatcherFunctionState>> {
+    public async getAllFunctionStates(): Promise<Record<InsightsFunctionType['id'], ScriptWatcherFunctionState>> {
         const scan = (pool: RedisV2): Promise<string[] | null> =>
             pool.useClient({ name: 'scanStates' }, async (client) => {
                 const keys: string[] = []
@@ -318,7 +318,7 @@ export class HogWatcherService {
         try {
             stateKeys = await scan(this.redisReader)
         } catch (err) {
-            logger.warn('🔀', '[HogWatcher] reader scanStates failed, falling back to writer', { err })
+            logger.warn('🔀', '[ScriptWatcher] reader scanStates failed, falling back to writer', { err })
             stateKeys = await scan(this.redis)
         }
 
@@ -340,21 +340,21 @@ export class HogWatcherService {
     }
 
     public async doStageChanges(
-        changes: [InsightsFunctionType, HogWatcherState][],
+        changes: [InsightsFunctionType, ScriptWatcherState][],
         forceReset: boolean = false
     ): Promise<void> {
         const res = await this.redis.usePipeline({ name: 'forceStateChange' }, (pipeline) => {
             for (const [insightsFunction, state] of changes) {
                 insightsFunctionStateChange.inc({
-                    state: HogWatcherState[state],
+                    state: ScriptWatcherState[state],
                     kind: insightsFunction.type,
                 })
 
                 const id = insightsFunction.id
                 const newScore =
-                    state === HogWatcherState.healthy
+                    state === ScriptWatcherState.healthy
                         ? this.config.bucketSize
-                        : state === HogWatcherState.degraded
+                        : state === ScriptWatcherState.degraded
                           ? this.config.bucketSize * this.config.thresholdDegraded
                           : 0
 
@@ -378,7 +378,7 @@ export class HogWatcherService {
         await Promise.all(
             changes.map(async ([insightsFunction, state], index) => {
                 const [stateResult] = getRedisPipelineResults(res, index, numOperations)
-                const previousState = Number(stateResult[1] ?? HogWatcherState.healthy)
+                const previousState = Number(stateResult[1] ?? ScriptWatcherState.healthy)
                 if (previousState !== state) {
                     await this.onStateChange({
                         insightsFunction,
@@ -390,7 +390,7 @@ export class HogWatcherService {
         )
     }
 
-    public async forceStateChange(insightsFunction: InsightsFunctionType, state: HogWatcherState): Promise<void> {
+    public async forceStateChange(insightsFunction: InsightsFunctionType, state: ScriptWatcherState): Promise<void> {
         await this.doStageChanges([[insightsFunction, state]])
     }
 
@@ -434,7 +434,7 @@ export class HogWatcherService {
      * volumes that is prohibitive, so the logs transformer reports a single aggregated VM
      * duration per function per message instead. Cost is derived from that aggregate via the
      * same piecewise-linear curve (bounds come from this instance's config, so a logs-tuned
-     * HogWatcher charges on a logs-appropriate scale). Everything downstream — token bucket,
+     * ScriptWatcher charges on a logs-appropriate scale). Everything downstream — token bucket,
      * state reads, transition rules — is shared with observeResults.
      */
     public async observeAggregatedResults(
@@ -493,7 +493,7 @@ export class HogWatcherService {
         const requests = functionCostEntries.map((fc) => ({ id: fc.functionId, cost: fc.cost }))
         const [stateRes, rateLimitRes] = await Promise.all([
             readStates(this.redisReader).catch((err) => {
-                logger.warn('🔀', '[HogWatcher] reader readStatesForObserve failed, falling back to writer', { err })
+                logger.warn('🔀', '[ScriptWatcher] reader readStatesForObserve failed, falling back to writer', { err })
                 return readStates(this.redis)
             }),
             this.rateLimiter.rateLimitGrouped(requests),
@@ -503,12 +503,12 @@ export class HogWatcherService {
             return
         }
 
-        const changes: [InsightsFunctionType, HogWatcherState][] = []
+        const changes: [InsightsFunctionType, ScriptWatcherState][] = []
 
         // Calculate all those that have changed state
         functionCostEntries.map((functionCost, index) => {
             const limit = rateLimitRes[index]?.[1]
-            const currentState: HogWatcherState = Number(stateRes.states[index] ?? HogWatcherState.healthy)
+            const currentState: ScriptWatcherState = Number(stateRes.states[index] ?? ScriptWatcherState.healthy)
             const tokens = Number(limit?.tokens ?? this.config.bucketSize)
             const newState = this.calculateNewState(tokens)
 
@@ -518,7 +518,7 @@ export class HogWatcherService {
                     return
                 }
 
-                if (currentState === HogWatcherState.disabled || currentState >= HogWatcherState.forcefully_degraded) {
+                if (currentState === ScriptWatcherState.disabled || currentState >= ScriptWatcherState.forcefully_degraded) {
                     // We never modify the state of a disabled function automatically, or a forcefully set value
                     return
                 }

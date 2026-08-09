@@ -5,7 +5,7 @@ export {
     ErrorTrackingConsumer,
     type ErrorTrackingConsumerOptions,
     type ErrorTrackingConsumerDeps,
-    type ErrorTrackingHogTransformer,
+    type ErrorTrackingScriptTransformer,
 } from './error-tracking-consumer'
 export { CymbalClient, type CymbalClientConfig } from './cymbal'
 export { createErrorTrackingPipeline, runErrorTrackingPipeline } from './error-tracking-pipeline'

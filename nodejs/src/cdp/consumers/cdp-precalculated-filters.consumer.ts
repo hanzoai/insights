@@ -16,7 +16,7 @@ import { HealthCheckResult, RawDatastoreEvent } from '../../types'
 import { PRECALCULATED_PERSON_PROPERTIES_OUTPUT, PREFILTERED_EVENTS_OUTPUT } from '../outputs/outputs'
 import { InsightsFunctionFilterGlobals } from '../types'
 import { ProducedPersonPropertiesEvent } from '../types-person-properties'
-import { execHog } from '../utils/script-exec'
+import { execScript } from '../utils/script-exec'
 import { convertDatastoreRawEventToFilterGlobals } from '../utils/script-function-filtering'
 import { CdpConsumerBase, CdpConsumerBaseConfig, CdpConsumerBaseDeps } from './cdp-base.consumer'
 
@@ -122,7 +122,7 @@ export class CdpPrecalculatedFiltersConsumer extends CdpConsumerBase {
         }
 
         try {
-            const { execResult } = await execHog(filter.bytecode, {
+            const { execResult } = await execScript(filter.bytecode, {
                 globals: filterGlobals,
             })
 
@@ -152,7 +152,7 @@ export class CdpPrecalculatedFiltersConsumer extends CdpConsumerBase {
         }
 
         try {
-            const { execResult } = await execHog(filter.bytecode, {
+            const { execResult } = await execScript(filter.bytecode, {
                 globals: personGlobals,
             })
 

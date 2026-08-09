@@ -12,9 +12,9 @@ import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '~/types'
 
 import { CyclotronJobInvocationFlow, DBInsightsFunctionTemplate } from '../../../types'
-import { HogExecutorAsyncService } from '../../script-executor-async.service'
-import { HogExecutorService } from '../../script-executor.service'
-import { HogInputsService } from '../../script-inputs.service'
+import { ScriptExecutorAsyncService } from '../../script-executor-async.service'
+import { ScriptExecutorService } from '../../script-executor.service'
+import { ScriptInputsService } from '../../script-inputs.service'
 import { InsightsFunctionTemplateManagerService } from '../../managers/script-function-template-manager.service'
 import { RecipientsManagerService } from '../../managers/recipients-manager.service'
 import { TeamWorkflowsConfigService } from '../../managers/team-workflows-config.service'
@@ -32,7 +32,7 @@ describe('InsightsFunctionHandler', () => {
     let hub: Hub
     let team: Team
     let insightsFunctionHandler: InsightsFunctionHandler
-    let mockInsightsFunctionExecutor: HogExecutorAsyncService
+    let mockInsightsFunctionExecutor: ScriptExecutorAsyncService
     let mockInsightsFunctionTemplateManager: InsightsFunctionTemplateManagerService
     let mockFlowFunctionsService: FlowFunctionsService
     let mockRecipientPreferencesService: RecipientPreferencesService
@@ -48,7 +48,7 @@ describe('InsightsFunctionHandler', () => {
         team = await getFirstTeam(hub.postgres)
 
         const recipientTokensService = new RecipientTokensService(hub.ENCRYPTION_SALT_KEYS, hub.SITE_URL)
-        const hogInputsService = new HogInputsService(
+        const scriptInputsService = new ScriptInputsService(
             hub.integrationManager,
             recipientTokensService,
             hub.encryptedFields
@@ -71,8 +71,8 @@ describe('InsightsFunctionHandler', () => {
             new EmailSuppressionService(hub.postgres, emailSuppressionConfigFromEnv()),
             new RecipientsManagerService(hub.postgres)
         )
-        mockInsightsFunctionExecutor = new HogExecutorAsyncService(
-            new HogExecutorService({ executionTimeoutMs: hub.CDP_WATCHER_FN_COST_TIMING_UPPER_MS }, hogInputsService),
+        mockInsightsFunctionExecutor = new ScriptExecutorAsyncService(
+            new ScriptExecutorService({ executionTimeoutMs: hub.CDP_WATCHER_FN_COST_TIMING_UPPER_MS }, scriptInputsService),
             {
                 googleAdwordsDeveloperToken: hub.CDP_GOOGLE_ADWORDS_DEVELOPER_TOKEN,
                 fetchRetries: hub.CDP_FETCH_RETRIES,
@@ -82,7 +82,7 @@ describe('InsightsFunctionHandler', () => {
             },
             {
                 teamManager: hub.teamManager,
-                hogInputsService,
+                scriptInputsService,
                 emailService,
                 recipientTokensService,
                 pushNotificationService: undefined as any,
@@ -110,7 +110,7 @@ describe('InsightsFunctionHandler', () => {
         // Simple script function that prints the inputs
 
         template = await insertInsightsFunctionTemplate(hub.postgres, {
-            id: 'template-test-hogflow-executor',
+            id: 'template-test-flow-executor',
             name: 'Test Template',
             code: `fetch('http://localhost/test', { 'method': 'POST', 'body': inputs })`,
             inputs_schema: [
@@ -586,7 +586,7 @@ describe('InsightsFunctionHandler', () => {
     describe('non_failure_status_codes propagation', () => {
         it('propagates non_failure_status_codes from action.config.inputs into the synthetic script function', async () => {
             const templateWithNonFailure = await insertInsightsFunctionTemplate(hub.postgres, {
-                id: 'template-test-hogflow-non-failure-status',
+                id: 'template-test-flow-non-failure-status',
                 name: 'Test Template With Non-Failure Codes',
                 code: `fetch('http://localhost/test', { 'method': 'POST', 'body': {} })`,
                 inputs_schema: [

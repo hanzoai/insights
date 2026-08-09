@@ -15,7 +15,7 @@ import { DateTime } from 'luxon'
 import { Message } from 'node-rdkafka'
 import { v4 } from 'uuid'
 
-import { createHogTransformerService } from '~/cdp/script-transformations/script-transformer.service'
+import { createScriptTransformerService } from '~/cdp/script-transformations/script-transformer.service'
 import { DatastoreGroupRepository } from '~/common/groups/repositories/datastore-group-repository'
 import { KafkaProducerWrapper } from '~/common/kafka/producer'
 import { UUIDT } from '~/common/utils/utils'
@@ -239,7 +239,7 @@ describe.each(FLAG_COMBINATIONS)('Person Updates E2E ($#)', (config) => {
             personRepository: infra.personRepository,
             cookielessManager: infra.cookielessManager,
             aiSubpipelineFactory: createAiEventSubpipeline,
-            hogTransformer: createHogTransformerService(infra.config, {
+            scriptTransformer: createScriptTransformerService(infra.config, {
                 geoipService: infra.geoipService,
                 postgres: infra.postgres,
                 pubSub: infra.pubSub,

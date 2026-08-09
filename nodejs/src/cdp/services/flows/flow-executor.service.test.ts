@@ -2,8 +2,8 @@
 import { DateTime, Duration } from 'luxon'
 
 import { FixtureFlowBuilder, SimpleFlowRepresentation } from '~/cdp/_tests/builders/flow.builder'
-import { createHogExecutionGlobals, insertInsightsFunctionTemplate, insertIntegration } from '~/cdp/_tests/fixtures'
-import { compileHog } from '~/cdp/templates/compiler'
+import { createScriptExecutionGlobals, insertInsightsFunctionTemplate, insertIntegration } from '~/cdp/_tests/fixtures'
+import { compileScript } from '~/cdp/templates/compiler'
 import { template as insightsCaptureTemplate } from '~/cdp/templates/_destinations/insights_capture/insights-capture.template'
 import { Flow } from '~/cdp/schema/flow'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
@@ -14,9 +14,9 @@ import { Hub } from '../../../types'
 import { createHub } from '~/common/utils/db/hub'
 import { INSIGHTS_FILTERS_EXAMPLES } from '../../_tests/examples'
 import { createExampleFlowInvocation } from '../../_tests/fixtures-flows'
-import { HogExecutorAsyncService } from '../script-executor-async.service'
-import { HogExecutorService } from '../script-executor.service'
-import { HogInputsService } from '../script-inputs.service'
+import { ScriptExecutorAsyncService } from '../script-executor-async.service'
+import { ScriptExecutorService } from '../script-executor.service'
+import { ScriptInputsService } from '../script-inputs.service'
 import { EmailService } from '../messaging/email.service'
 import { EmailTrackingCodeSigner } from '../messaging/helpers/tracking-code'
 import { RecipientTokensService } from '../messaging/recipient-tokens.service'
@@ -45,7 +45,7 @@ const cleanLogs = (logs: string[]): string[] => {
     return logs.map((log) => log.replace(/Function completed in \d+(\.\d+)?ms/, 'Function completed in REPLACEDms'))
 }
 
-describe('Hogflow Executor', () => {
+describe('Scriptflow Executor', () => {
     let executor: FlowExecutorService
     let hub: Hub
     const mockFetch = jest.mocked(fetch)
@@ -65,7 +65,7 @@ describe('Hogflow Executor', () => {
         hub = await createHub({
             SITE_URL: 'http://localhost:8000',
         })
-        const hogInputsService = new HogInputsService(
+        const scriptInputsService = new ScriptInputsService(
             hub.integrationManager,
             new RecipientTokensService(hub.ENCRYPTION_SALT_KEYS, hub.SITE_URL),
             hub.encryptedFields
@@ -90,8 +90,8 @@ describe('Hogflow Executor', () => {
             new RecipientsManagerService(hub.postgres)
         )
         const recipientTokensService = new RecipientTokensService(hub.ENCRYPTION_SALT_KEYS, hub.SITE_URL)
-        const hogExecutor = new HogExecutorAsyncService(
-            new HogExecutorService({ executionTimeoutMs: hub.CDP_WATCHER_FN_COST_TIMING_UPPER_MS }, hogInputsService),
+        const scriptExecutor = new ScriptExecutorAsyncService(
+            new ScriptExecutorService({ executionTimeoutMs: hub.CDP_WATCHER_FN_COST_TIMING_UPPER_MS }, scriptInputsService),
             {
                 googleAdwordsDeveloperToken: hub.CDP_GOOGLE_ADWORDS_DEVELOPER_TOKEN,
                 fetchRetries: hub.CDP_FETCH_RETRIES,
@@ -101,7 +101,7 @@ describe('Hogflow Executor', () => {
             },
             {
                 teamManager: hub.teamManager,
-                hogInputsService,
+                scriptInputsService,
                 emailService,
                 recipientTokensService,
                 pushNotificationService: undefined as any,
@@ -111,7 +111,7 @@ describe('Hogflow Executor', () => {
         const flowFunctionsService = new FlowFunctionsService(
             hub.SITE_URL,
             insightsFunctionTemplateManager,
-            hogExecutor
+            scriptExecutor
         )
         const recipientsManager = new RecipientsManagerService(hub.postgres)
         const recipientPreferencesService = new RecipientPreferencesService(recipientsManager, emailSuppressionService)
@@ -123,7 +123,7 @@ describe('Hogflow Executor', () => {
         } as unknown as EmailValidationService
 
         await insertInsightsFunctionTemplate(hub.postgres, {
-            id: 'template-test-hogflow-executor',
+            id: 'template-test-flow-executor',
             name: 'Test Template',
             code: `
             print(f'Hello, {inputs.name}!')
@@ -138,7 +138,7 @@ describe('Hogflow Executor', () => {
         })
 
         await insertInsightsFunctionTemplate(hub.postgres, {
-            id: 'template-test-hogflow-executor-async',
+            id: 'template-test-flow-executor-async',
             name: 'Test template multi fetch',
             code: `
             print(f'Hello, {inputs.name}!')
@@ -182,11 +182,11 @@ describe('Hogflow Executor', () => {
                         function_id_1: {
                             type: 'function',
                             config: {
-                                template_id: 'template-test-hogflow-executor',
+                                template_id: 'template-test-flow-executor',
                                 inputs: {
                                     name: {
                                         value: `Mr {event?.properties?.name}`,
-                                        bytecode: await compileHog(`return f'Mr {event?.properties?.name}'`),
+                                        bytecode: await compileScript(`return f'Mr {event?.properties?.name}'`),
                                     },
                                 },
                             },
@@ -220,7 +220,7 @@ describe('Hogflow Executor', () => {
             // an email/webhook that already went out.
             const invocation = createExampleFlowInvocation(flow, {
                 event: {
-                    ...createHogExecutionGlobals().event,
+                    ...createScriptExecutionGlobals().event,
                     properties: {
                         name: 'John Doe',
                     },
@@ -248,7 +248,7 @@ describe('Hogflow Executor', () => {
             // restart from the trigger (which would re-send) and never a hang.
             const invocation = createExampleFlowInvocation(flow, {
                 event: {
-                    ...createHogExecutionGlobals().event,
+                    ...createScriptExecutionGlobals().event,
                     properties: {
                         name: 'John Doe',
                     },
@@ -268,10 +268,10 @@ describe('Hogflow Executor', () => {
             expect(result.logs.map((log) => log.message)).not.toContain('Executing action [Action:function_id_1]')
         })
 
-        it('can execute a simple hogflow', async () => {
+        it('can execute a simple flow', async () => {
             const invocation = createExampleFlowInvocation(flow, {
                 event: {
-                    ...createHogExecutionGlobals().event,
+                    ...createScriptExecutionGlobals().event,
                     properties: {
                         name: 'John Doe',
                     },
@@ -404,13 +404,13 @@ describe('Hogflow Executor', () => {
             })
         })
 
-        it('can execute a hogflow with async function delays', async () => {
+        it('can execute a flow with async function delays', async () => {
             const action = flow.actions.find((action) => action.id === 'function_id_1')!
-            ;(action.config as any).template_id = 'template-test-hogflow-executor-async'
+            ;(action.config as any).template_id = 'template-test-flow-executor-async'
 
             const invocation = createExampleFlowInvocation(flow, {
                 event: {
-                    ...createHogExecutionGlobals().event,
+                    ...createScriptExecutionGlobals().event,
                     properties: {
                         name: 'John Doe',
                     },
@@ -472,7 +472,7 @@ describe('Hogflow Executor', () => {
             it('should only run the action if the provided filters match', async () => {
                 const invocation = createExampleFlowInvocation(flow, {
                     event: {
-                        ...createHogExecutionGlobals().event,
+                        ...createScriptExecutionGlobals().event,
                         event: '$pageview',
                         properties: {
                             $current_url: 'https://hanzo.ai',
@@ -497,7 +497,7 @@ describe('Hogflow Executor', () => {
             it('should skip the action if the filters do not match', async () => {
                 const invocation = createExampleFlowInvocation(flow, {
                     event: {
-                        ...createHogExecutionGlobals().event,
+                        ...createScriptExecutionGlobals().event,
                         event: 'not-a-pageview',
                         properties: {
                             $current_url: 'https://hanzo.ai',
@@ -522,7 +522,7 @@ describe('Hogflow Executor', () => {
             it('executes only a single step at a time', async () => {
                 const invocation = createExampleFlowInvocation(flow, {
                     event: {
-                        ...createHogExecutionGlobals().event,
+                        ...createScriptExecutionGlobals().event,
                         properties: {
                             name: 'Debug User',
                         },
@@ -565,7 +565,7 @@ describe('Hogflow Executor', () => {
             it('surfaces the matcher wake event in the resume log', async () => {
                 const invocation = createExampleFlowInvocation(flow, {
                     event: {
-                        ...createHogExecutionGlobals().event,
+                        ...createScriptExecutionGlobals().event,
                         properties: { name: 'Debug User' },
                         timestamp: '2026-01-30T20:20:20.200Z',
                     },
@@ -1072,7 +1072,7 @@ describe('Hogflow Executor', () => {
                             config: {
                                 template_id: 'template-test-follow-live-paused',
                                 inputs: {
-                                    name: { value: 'Original', bytecode: await compileHog(`return 'Original'`) },
+                                    name: { value: 'Original', bytecode: await compileScript(`return 'Original'`) },
                                 },
                             },
                         },
@@ -1097,7 +1097,7 @@ describe('Hogflow Executor', () => {
                     ;(action.config as any).inputs.name.value = 'Edited'
                 })
                 ;(flow.actions.find((a) => a.id === 'function_1')!.config as any).inputs.name.bytecode =
-                    await compileHog(`return 'Edited'`)
+                    await compileScript(`return 'Edited'`)
 
                 // The continuation completes as prepared: inputs were rendered at step entry
                 const result = await executor.execute(pausedResult.invocation)
@@ -1201,11 +1201,11 @@ describe('Hogflow Executor', () => {
                             function_id_1: {
                                 type: 'function',
                                 config: {
-                                    template_id: 'template-test-hogflow-executor',
+                                    template_id: 'template-test-flow-executor',
                                     inputs: {
                                         name: {
                                             value: `Mr {event?.properties?.name}`,
-                                            bytecode: await compileHog(`return f'Mr {event?.properties?.name}'`),
+                                            bytecode: await compileScript(`return f'Mr {event?.properties?.name}'`),
                                         },
                                     },
                                 },
@@ -1226,7 +1226,7 @@ describe('Hogflow Executor', () => {
             it('should not exit early if exit condition is exit_only_at_end', async () => {
                 const invocation = createExampleFlowInvocation(flow, {
                     event: {
-                        ...createHogExecutionGlobals().event,
+                        ...createScriptExecutionGlobals().event,
                         event: '$pageview',
                         properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
                     },
@@ -1245,7 +1245,7 @@ describe('Hogflow Executor', () => {
 
                 const invocation2 = createExampleFlowInvocation(flow, {
                     event: {
-                        ...createHogExecutionGlobals().event,
+                        ...createScriptExecutionGlobals().event,
                         event: 'not-a-pageview',
                         properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
                     },
@@ -1283,7 +1283,7 @@ describe('Hogflow Executor', () => {
                     flow,
                     {
                         event: {
-                            ...createHogExecutionGlobals().event,
+                            ...createScriptExecutionGlobals().event,
                             event: '$pageview',
                             properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
                         },
@@ -1309,7 +1309,7 @@ describe('Hogflow Executor', () => {
                     flow,
                     {
                         event: {
-                            ...createHogExecutionGlobals().event,
+                            ...createScriptExecutionGlobals().event,
                             event: '$pageview',
                             properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
                         },
@@ -1340,7 +1340,7 @@ describe('Hogflow Executor', () => {
 
                 const invocation1 = createExampleFlowInvocation(flow, {
                     event: {
-                        ...createHogExecutionGlobals().event,
+                        ...createScriptExecutionGlobals().event,
                         event: '$pageview',
                         properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
                     },
@@ -1357,7 +1357,7 @@ describe('Hogflow Executor', () => {
 
                 const invocation2 = createExampleFlowInvocation(flow, {
                     event: {
-                        ...createHogExecutionGlobals().event,
+                        ...createScriptExecutionGlobals().event,
                         event: '$not-a-pageview',
                         properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
                     },
@@ -1398,7 +1398,7 @@ describe('Hogflow Executor', () => {
                     flow,
                     {
                         event: {
-                            ...createHogExecutionGlobals().event,
+                            ...createScriptExecutionGlobals().event,
                             event: '$not-a-pageview',
                             properties: { $current_url: 'https://hanzo.ai' },
                         },
@@ -1424,7 +1424,7 @@ describe('Hogflow Executor', () => {
                     flow,
                     {
                         event: {
-                            ...createHogExecutionGlobals().event,
+                            ...createScriptExecutionGlobals().event,
                             event: '$not-a-pageview',
                             properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
                         },
@@ -1459,7 +1459,7 @@ describe('Hogflow Executor', () => {
                     flow,
                     {
                         event: {
-                            ...createHogExecutionGlobals().event,
+                            ...createScriptExecutionGlobals().event,
                             event: '$pageview',
                             properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
                         },
@@ -1504,7 +1504,7 @@ describe('Hogflow Executor', () => {
                     flow,
                     {
                         event: {
-                            ...createHogExecutionGlobals().event,
+                            ...createScriptExecutionGlobals().event,
                             event: '$pageview',
                             properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
                         },
@@ -1532,7 +1532,7 @@ describe('Hogflow Executor', () => {
 
                 const invocation = createExampleFlowInvocation(flow, {
                     event: {
-                        ...createHogExecutionGlobals().event,
+                        ...createScriptExecutionGlobals().event,
                         event: '$pageview',
                         properties: { name: 'John Doe', $current_url: 'https://hanzo.ai' },
                     },
@@ -1563,11 +1563,11 @@ describe('Hogflow Executor', () => {
                                 function_id_1: {
                                     type: 'function',
                                     config: {
-                                        template_id: 'template-test-hogflow-executor',
+                                        template_id: 'template-test-flow-executor',
                                         inputs: {
                                             name: {
                                                 value: `Mr {event?.properties?.name}`,
-                                                bytecode: await compileHog(`raise Exception('fail!')`),
+                                                bytecode: await compileScript(`raise Exception('fail!')`),
                                             },
                                         },
                                     },
@@ -1609,7 +1609,7 @@ describe('Hogflow Executor', () => {
 
                         const invocation = createExampleFlowInvocation(flow, {
                             event: {
-                                ...createHogExecutionGlobals().event,
+                                ...createScriptExecutionGlobals().event,
                                 properties: { name: 'Test User' },
                             },
                         })
@@ -1645,7 +1645,7 @@ describe('Hogflow Executor', () => {
 
                         const invocation = createExampleFlowInvocation(flow, {
                             event: {
-                                ...createHogExecutionGlobals().event,
+                                ...createScriptExecutionGlobals().event,
                                 properties: { name: 'Test User' },
                             },
                         })
@@ -1856,7 +1856,7 @@ describe('Hogflow Executor', () => {
                     const flow = createFlow(simpleFlow)
                     const invocation = createExampleFlowInvocation(flow, {
                         event: {
-                            ...createHogExecutionGlobals().event,
+                            ...createScriptExecutionGlobals().event,
                             event: '$pageview',
                             properties: {
                                 $current_url: 'https://hanzo.ai',
@@ -1922,7 +1922,7 @@ describe('Hogflow Executor', () => {
 
                 const invocation = createExampleFlowInvocation(flow, {
                     event: {
-                        ...createHogExecutionGlobals().event,
+                        ...createScriptExecutionGlobals().event,
                         properties: { user_name: 'Test User', value: 'test-value-123' },
                     },
                 })
@@ -2035,11 +2035,11 @@ describe('Hogflow Executor', () => {
                         function_id_1: {
                             type: 'function',
                             config: {
-                                template_id: 'template-test-hogflow-executor',
+                                template_id: 'template-test-flow-executor',
                                 inputs: {
                                     name: {
                                         value: `Mr {event?.properties?.name}`,
-                                        bytecode: await compileHog(`return f'Mr {event?.properties?.name}'`),
+                                        bytecode: await compileScript(`return f'Mr {event?.properties?.name}'`),
                                     },
                                 },
                             },
@@ -2068,7 +2068,7 @@ describe('Hogflow Executor', () => {
 
         it('should filter out internal users with @hanzo.ai email', async () => {
             // Create globals with internal user email
-            const globals = createHogExecutionGlobals({
+            const globals = createScriptExecutionGlobals({
                 event: {
                     uuid: 'uuid',
                     event: '$pageview',
@@ -2107,7 +2107,7 @@ describe('Hogflow Executor', () => {
 
         it('should allow external users without @hanzo.ai email', async () => {
             // Create globals with external user email
-            const globals = createHogExecutionGlobals({
+            const globals = createScriptExecutionGlobals({
                 event: {
                     uuid: 'uuid',
                     event: '$pageview',
@@ -2153,7 +2153,7 @@ describe('Hogflow Executor', () => {
                     },
                 })
                 .build()
-            const globals = createHogExecutionGlobals({
+            const globals = createScriptExecutionGlobals({
                 event: {
                     uuid: 'row-uuid-0001',
                     event: '$warehouse_source_row',
@@ -2274,7 +2274,7 @@ describe('Hogflow Executor', () => {
         let flowBuilder: (outputVariable: any) => Promise<Flow>
 
         beforeEach(async () => {
-            const nameBytecode = await compileHog(`return 'Test'`)
+            const nameBytecode = await compileScript(`return 'Test'`)
             flowBuilder = (outputVariable: any) => {
                 return Promise.resolve(
                     new FixtureFlowBuilder()
@@ -2290,7 +2290,7 @@ describe('Hogflow Executor', () => {
                                 action_1: {
                                     type: 'function',
                                     config: {
-                                        template_id: 'template-test-hogflow-executor',
+                                        template_id: 'template-test-flow-executor',
                                         inputs: {
                                             name: {
                                                 value: 'Test',
@@ -2318,7 +2318,7 @@ describe('Hogflow Executor', () => {
         const executeToCompletion = async (flow: Flow) => {
             const invocation = createExampleFlowInvocation(flow, {
                 event: {
-                    ...createHogExecutionGlobals().event,
+                    ...createScriptExecutionGlobals().event,
                     properties: { name: 'Test' },
                 },
             })
@@ -2388,7 +2388,7 @@ describe('Hogflow Executor', () => {
 
             const invocation = createExampleFlowInvocation(flow, {
                 event: {
-                    ...createHogExecutionGlobals().event,
+                    ...createScriptExecutionGlobals().event,
                     properties: { name: 'Test' },
                 },
             })
@@ -2408,7 +2408,7 @@ describe('Hogflow Executor', () => {
             const flow = await flowBuilder({ key: 'response', result_path: null })
             const invocation = createExampleFlowInvocation(flow, {
                 event: {
-                    ...createHogExecutionGlobals().event,
+                    ...createScriptExecutionGlobals().event,
                     properties: { name: 'Test' },
                 },
             })
@@ -2618,7 +2618,7 @@ describe('Hogflow Executor', () => {
 
             const invocation = createExampleFlowInvocation(flow, {
                 event: {
-                    ...createHogExecutionGlobals().event,
+                    ...createScriptExecutionGlobals().event,
                     event: '$pageview',
                     properties: {
                         $current_url: 'https://hanzo.ai',
@@ -2731,7 +2731,7 @@ describe('Hogflow Executor', () => {
 
             const invocation = createExampleFlowInvocation(flow, {
                 event: {
-                    ...createHogExecutionGlobals().event,
+                    ...createScriptExecutionGlobals().event,
                     event: '$pageview',
                 },
             })
@@ -2746,7 +2746,7 @@ describe('Hogflow Executor', () => {
             expect(result.invocation.queueParameters?.type).toBe('email')
         })
 
-        it('should complete the full round-trip: hogflow → email queue → email sent → workflow continues', async () => {
+        it('should complete the full round-trip: flow → email queue → email sent → workflow continues', async () => {
             const team = await getFirstTeam(hub.postgres)
 
             await insertIntegration(hub.postgres, team.id, {
@@ -2829,12 +2829,12 @@ describe('Hogflow Executor', () => {
 
             const invocation = createExampleFlowInvocation(flow, {
                 event: {
-                    ...createHogExecutionGlobals().event,
+                    ...createScriptExecutionGlobals().event,
                     event: '$pageview',
                 },
             })
 
-            // Step 1: Hogflow worker executes (queue !== 'email') — should route to email queue
+            // Step 1: Scriptflow worker executes (queue !== 'email') — should route to email queue
             const flowResult = await executor.execute(invocation)
             expect(flowResult.finished).toBe(false)
             expect(flowResult.invocation.queue).toBe('email')

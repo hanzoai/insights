@@ -14,7 +14,7 @@ const ActualKafkaProducerWrapper: typeof KafkaProducerWrapper =
  * attached. Its `auto.offset.reset=latest` drops rows produced before attach, so a seed right after
  * topic (re)creation can lose rows and never satisfy a count poll. Mirrors waitForDatastoreKafkaConsumer.
  */
-export const waitForHogInvocationResultsMvReady = async (datastore: Datastore): Promise<void> => {
+export const waitForScriptInvocationResultsMvReady = async (datastore: Datastore): Promise<void> => {
     const producer = await ActualKafkaProducerWrapper.create(undefined)
     const probeTeamId = -999_999
     try {
