@@ -388,7 +388,16 @@ def get_personinsights_client() -> Optional[PersonHogClient]:
             if _client is None:
                 addr = getattr(settings, "PERSONFN_ADDR", "")
                 if not addr:
-                    return None
+                    # No address is not a missing dependency — it is a deployment
+                    # that does not run personinsights. The service is a read-through
+                    # accelerator in front of this app's own Postgres, so the rows
+                    # are still there; serve them from the ORM instead of returning
+                    # None and 500ing every caller.
+                    from insights.personinsights_client.local_client import LocalClient  # noqa: PLC0415
+
+                    _client = LocalClient()  # ty: ignore[invalid-assignment]
+                    logger.info("personinsights_local_client_initialized")
+                    return _client
 
                 timeout_ms = getattr(settings, "PERSONFN_TIMEOUT_MS", 5000)
                 client_name = getattr(settings, "OTEL_SERVICE_NAME", None) or "insights-django"
