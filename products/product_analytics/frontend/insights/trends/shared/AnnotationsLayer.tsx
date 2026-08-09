@@ -85,7 +85,7 @@ export function AnnotationsLayer({
 
     return (
         <div
-            className="HogChartsAnnotationsLayer"
+            className="ScriptChartsAnnotationsLayer"
             style={WRAPPER_STYLE}
             onClick={stopPointerPropagation}
             onMouseMove={stopPointerPropagation}

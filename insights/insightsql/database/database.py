@@ -86,7 +86,7 @@ from insights.insightsql.database.schema.experiment_metric_events_preaggregated 
 from insights.insightsql.database.schema.groups import GroupsTable, RawGroupsTable
 from insights.insightsql.database.schema.groups_revenue_analytics import GroupsRevenueAnalyticsTable
 from insights.insightsql.database.schema.heatmaps import HeatmapsTable
-from insights.insightsql.database.schema.hog_invocation_results import HogInvocationResultsTable
+from insights.insightsql.database.schema.hog_invocation_results import ScriptInvocationResultsTable
 from insights.insightsql.database.schema.information_schema import disable_data_catalog
 from insights.insightsql.database.schema.log_entries import (
     BatchExportLogEntriesTable,
@@ -397,7 +397,7 @@ def _construct_database_root_node(*, include_insights_tables: bool) -> TableNode
                         name="session_replay_features", table=SessionReplayFeaturesTable()
                     ),
                     "hog_invocation_results": TableNode(
-                        name="hog_invocation_results", table=HogInvocationResultsTable()
+                        name="hog_invocation_results", table=ScriptInvocationResultsTable()
                     ),
                     "metrics": TableNode(name="metrics", table=MetricsTable()),
                     "metric_samples": TableNode(name="metric_samples", table=MetricSamplesTable()),

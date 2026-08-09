@@ -4,7 +4,7 @@ import { useRef } from 'react'
 import { Banner, Button, Divider, Input, Label, Skeleton } from '@hanzo/elements'
 import { IconDownload, IconGear, IconRevert } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType, appEditorUrl } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
@@ -26,7 +26,7 @@ import { heatmapsBrowserLogic } from './heatmapsBrowserLogic'
 import { IframeHeatmapBrowser } from './IframeHeatmapBrowser'
 import { recordingClickmapLogic } from './recordingClickmapLogic'
 
-const MascotMagnifyingGlass = pngHoggie()
+const MascotMagnifyingGlass = pngMascot()
 
 function ExportButton({
     iframeRef,

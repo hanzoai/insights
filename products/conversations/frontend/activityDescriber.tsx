@@ -113,7 +113,7 @@ const ticketActionsMapping: Record<
             // a change with neither a user nor a trigger is a genuine auto-expiry. Only claim
             // "reopened" when the expiry actually flipped the ticket back to open; a snooze
             // on an already-resolved ticket clears without reopening it.
-            if (logItem?.user || logItem?.detail?.trigger?.job_type === 'hog_flow') {
+            if (logItem?.user || logItem?.detail?.trigger?.job_type === 'script_flow') {
                 return { description: [<>removed snooze</>] }
             }
             const reopened = (logItem?.detail?.changes ?? []).some((c) => c.field === 'status' && c.after === 'open')
@@ -163,7 +163,7 @@ export function ticketActivityDescriber(logItem: ActivityLogItem, asNotification
     // (never trusted from the log payload), so it can't be spoofed via the update headers.
     const trigger = logItem.detail.trigger
     const actor =
-        trigger?.job_type === 'hog_flow' && trigger.job_id ? (
+        trigger?.job_type === 'script_flow' && trigger.job_id ? (
             <WorkflowActivityLink id={trigger.job_id} />
         ) : (
             <strong className="ph-no-capture">{userNameForLogItem(logItem)}</strong>

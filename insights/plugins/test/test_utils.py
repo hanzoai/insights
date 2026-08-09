@@ -647,7 +647,7 @@ class TestPluginsUtils(BaseTest):
             get_file_from_archive(base64.b64decode(HELLO_WORLD_PLUGIN_GITLAB_ZIP[1]), "plugin.json"),
         )
         self.assertEqual(plugin_json_zip["name"], "hellojsplugin")
-        self.assertEqual(plugin_json_zip["url"], "https://github.com/PosthHog/helloworldplugin")
+        self.assertEqual(plugin_json_zip["url"], "https://github.com/PosthScript/helloworldplugin")
         self.assertEqual(plugin_json_zip["description"], "Greet the World and Foo a Bar, JS edition!")
 
         plugin_json_tgz = cast(

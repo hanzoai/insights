@@ -4,7 +4,7 @@ import { useActions, useValues } from 'kea'
 import { useRef, useState } from 'react'
 
 import api from 'lib/api'
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { CardTopHeadingRow } from 'lib/components/Cards/CardTopHeadingRow'
 import { Spinner } from 'lib/elements/Spinner'
 import { toParams } from 'lib/utils/url'
@@ -31,7 +31,7 @@ import type { DashboardWidgetComponentProps } from '../registry'
 import { parseSessionReplayWidgetConfig } from './sessionReplayWidgetConfigValidation'
 import { sessionReplayWidgetSavedFiltersLogic } from './sessionReplayWidgetSavedFiltersLogic'
 
-const MascotDirector = pngHoggie()
+const MascotDirector = pngMascot()
 
 type SessionReplayWidgetResult = {
     results?: SessionRecordingType[]

@@ -37,7 +37,7 @@ def create_announcement(team: Team, created_by: User, message: str, channel_ids:
     try:
         allowed = {c.id: c for c in list_support_bot_channels(team.pk, members_only=True)}
     except SupportSlackNotConfigured:
-        raise AnnouncementValidationError("The SupportHog Slack bot is not connected.")
+        raise AnnouncementValidationError("The Support Slack bot is not connected.")
     except SupportSlackChannelsUnavailable:
         raise AnnouncementValidationError("Could not verify Slack channels right now. Please try again.")
 
@@ -134,7 +134,7 @@ def send_pending_deliveries(announcement_id: str, team_id: int) -> None:
                 announcement_id=announcement.id, status=AnnouncementDelivery.Status.PENDING
             ).update(
                 status=AnnouncementDelivery.Status.FAILED,
-                error="SupportHog Slack is not connected",
+                error="Support Slack is not connected",
                 updated_at=timezone.now(),
             )
             deferred = 0

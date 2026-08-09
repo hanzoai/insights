@@ -5,7 +5,7 @@ from products.workflows.backend.api.action_redirects import compute_action_redir
 
 # Publish-time impact summary: what applying a staged draft will do to people already in the flow.
 # Pure functions over the two graphs plus externally-fetched counts, so the matrix is unit-testable
-# without a DB — mirrors the worker's runtime variable scan (hogflow-variable-usage.ts), which
+# without a DB — mirrors the worker's runtime variable scan (flow-variable-usage.ts), which
 # observes the same misses per-run at execution time.
 
 # Both templating modes reference workflow variables textually: `{variables.foo}` (script) and

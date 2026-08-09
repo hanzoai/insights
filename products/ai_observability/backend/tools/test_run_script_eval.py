@@ -11,7 +11,7 @@ from pydantic import ValidationError
 
 from insights.insightsql_queries.ai.utils import HEAVY_COLUMN_NAMES
 
-from products.ai_observability.backend.tools.run_script_eval import RunHogEvalTestArgs, RunHogEvalTestTool
+from products.ai_observability.backend.tools.run_script_eval import RunScriptEvalTestArgs, RunScriptEvalTestTool
 
 EVENT_TIMESTAMP = "2026-07-20T12:34:56Z"
 
@@ -45,14 +45,14 @@ def _run_tool(tool, **kwargs):
     return async_to_sync(tool._arun_impl)(**kwargs)
 
 
-def test_run_hog_eval_args_reject_unknown_target():
+def test_run_script_eval_args_reject_unknown_target():
     with pytest.raises(ValidationError):
-        RunHogEvalTestArgs(source="return true", target="traces")
+        RunScriptEvalTestArgs(source="return true", target="traces")
 
 
-class TestRunHogEvalTestTool(BaseTest):
+class TestRunScriptEvalTestTool(BaseTest):
     def _make_tool(self):
-        return RunHogEvalTestTool(team=self.team, user=self.user)
+        return RunScriptEvalTestTool(team=self.team, user=self.user)
 
     @parameterized.expand(
         [
@@ -67,7 +67,7 @@ class TestRunHogEvalTestTool(BaseTest):
             ),
         ]
     )
-    @patch("products.ai_observability.backend.tools.run_hog_eval.query_ai_events")
+    @patch("products.ai_observability.backend.tools.run_script_eval.query_ai_events")
     def test_compilation_and_execution(self, _name, source, expected_verdict, mock_query):
         mock_response = MagicMock()
         mock_response.results = [_make_event()]
@@ -89,7 +89,7 @@ class TestRunHogEvalTestTool(BaseTest):
         assert "Compilation error" in result
         assert artifact is None
 
-    @patch("products.ai_observability.backend.tools.run_hog_eval.query_ai_events")
+    @patch("products.ai_observability.backend.tools.run_script_eval.query_ai_events")
     def test_no_events_found(self, mock_query):
         mock_response = MagicMock()
         mock_response.results = []
@@ -101,7 +101,7 @@ class TestRunHogEvalTestTool(BaseTest):
         assert "No recent AI events" in result
         assert artifact is None
 
-    @patch("products.ai_observability.backend.tools.run_hog_eval.query_ai_events")
+    @patch("products.ai_observability.backend.tools.run_script_eval.query_ai_events")
     def test_runtime_error_handling(self, mock_query):
         mock_response = MagicMock()
         mock_response.results = [_make_event()]
@@ -113,7 +113,7 @@ class TestRunHogEvalTestTool(BaseTest):
         assert artifact is None
         assert "Event" in result
 
-    @patch("products.ai_observability.backend.tools.run_hog_eval.query_ai_events")
+    @patch("products.ai_observability.backend.tools.run_script_eval.query_ai_events")
     def test_result_formatting_includes_previews(self, mock_query):
         mock_response = MagicMock()
         mock_response.results = [
@@ -131,7 +131,7 @@ class TestRunHogEvalTestTool(BaseTest):
         assert "Output:" in result
         assert "Result: PASS" in result
 
-    @patch("products.ai_observability.backend.tools.run_hog_eval.query_ai_events")
+    @patch("products.ai_observability.backend.tools.run_script_eval.query_ai_events")
     def test_null_return_shows_na(self, mock_query):
         mock_response = MagicMock()
         mock_response.results = [_make_event()]
@@ -144,7 +144,7 @@ class TestRunHogEvalTestTool(BaseTest):
         assert "N/A" in result
         assert "ERROR" not in result
 
-    @patch("products.ai_observability.backend.tools.run_hog_eval.query_ai_events")
+    @patch("products.ai_observability.backend.tools.run_script_eval.query_ai_events")
     def test_runtime_error_shows_error_not_na(self, mock_query):
         mock_response = MagicMock()
         mock_response.results = [_make_event()]
@@ -157,7 +157,7 @@ class TestRunHogEvalTestTool(BaseTest):
         assert "Result: ERROR" in result
         assert "Result: N/A" not in result
 
-    @patch("products.ai_observability.backend.tools.run_hog_eval.query_ai_events")
+    @patch("products.ai_observability.backend.tools.run_script_eval.query_ai_events")
     def test_ai_metric_event_type(self, mock_query):
         mock_response = MagicMock()
         event_row = [
@@ -176,7 +176,7 @@ class TestRunHogEvalTestTool(BaseTest):
         assert "PASS" in result
         assert "$ai_metric" in result
 
-    @patch("products.ai_observability.backend.tools.run_hog_eval.query_ai_events")
+    @patch("products.ai_observability.backend.tools.run_script_eval.query_ai_events")
     def test_heavy_column_remerge_from_ai_events(self, mock_query):
         """On the shared `events` table `properties.$ai_input` is empty, but the
         dedicated `ai_events` table carries the value in the native `input`
@@ -217,12 +217,12 @@ class TestRunHogEvalTestTool(BaseTest):
 
         assert "Result: PASS" in result, f"expected PASS after heavy-merge, got: {result}"
 
-    @patch("insights.temporal.ai_observability.run_trace_evaluation.run_hog_eval_over_recent_traces")
+    @patch("insights.temporal.ai_observability.run_trace_evaluation.run_script_eval_over_recent_traces")
     def test_trace_target_evaluates_whole_traces(self, mock_run_over_traces):
-        from insights.temporal.ai_observability.run_trace_evaluation import TraceHogTestResult
+        from insights.temporal.ai_observability.run_trace_evaluation import TraceScriptTestResult
 
         mock_run_over_traces.return_value = [
-            TraceHogTestResult(
+            TraceScriptTestResult(
                 trace_id="trace-1",
                 verdict=True,
                 reasoning="looks good",
@@ -246,7 +246,7 @@ class TestRunHogEvalTestTool(BaseTest):
         assert "Trace trace-1" in result
         assert "Result: PASS" in result
 
-    @patch("products.ai_observability.backend.tools.run_hog_eval.query_ai_events")
+    @patch("products.ai_observability.backend.tools.run_script_eval.query_ai_events")
     def test_query_targets_ai_events(self, mock_query):
         """The constructed SelectQuery must target `insights.ai_events` — otherwise
         the heavy column slots in the projection are NULL on the events table."""

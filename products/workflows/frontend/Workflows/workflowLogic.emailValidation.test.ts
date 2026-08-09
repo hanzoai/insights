@@ -111,7 +111,7 @@ describe('workflowLogic email step "from" validation', () => {
     ])('flags the step as invalid when %s', async (_name, fromValue) => {
         useMocks({
             get: {
-                '/v1/environments/:team_id/hog_flows/:id/': makeWorkflow(fromValue),
+                '/v1/environments/:team_id/script_flows/:id/': makeWorkflow(fromValue),
                 '/v1/projects/:team_id/insights_function_templates/': hangingTemplatesEndpoint,
             },
         })
@@ -128,7 +128,7 @@ describe('workflowLogic email step "from" validation', () => {
     it('does not flag a "from" error when an integration sender has been picked', async () => {
         useMocks({
             get: {
-                '/v1/environments/:team_id/hog_flows/:id/': makeWorkflow({ integrationId: 42 }),
+                '/v1/environments/:team_id/script_flows/:id/': makeWorkflow({ integrationId: 42 }),
                 '/v1/projects/:team_id/insights_function_templates/': hangingTemplatesEndpoint,
             },
         })
@@ -145,7 +145,7 @@ describe('workflowLogic email step "from" validation', () => {
     it('keeps the email-block error after templates load (function-action branch must not clobber it)', async () => {
         useMocks({
             get: {
-                '/v1/environments/:team_id/hog_flows/:id/': makeWorkflow({}),
+                '/v1/environments/:team_id/script_flows/:id/': makeWorkflow({}),
                 '/v1/projects/:team_id/insights_function_templates/': loadedTemplatesResponse,
             },
         })
@@ -162,7 +162,7 @@ describe('workflowLogic email step "from" validation', () => {
     it('propagates the step error into workflowHasActionErrors', async () => {
         useMocks({
             get: {
-                '/v1/environments/:team_id/hog_flows/:id/': makeWorkflow({}),
+                '/v1/environments/:team_id/script_flows/:id/': makeWorkflow({}),
                 '/v1/projects/:team_id/insights_function_templates/': hangingTemplatesEndpoint,
             },
         })

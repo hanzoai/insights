@@ -1,4 +1,4 @@
-"""Shared inputs + id helpers for the ReviewHog Temporal workflows.
+"""Shared inputs + id helpers for the Review Temporal workflows.
 
 Lives apart from `workflow.py` so the client (and any sync trigger) can build the workflow id and
 input without importing the workflow code (which pulls in the heavy activity dependencies).

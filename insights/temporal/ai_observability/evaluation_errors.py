@@ -97,8 +97,8 @@ USER_ERROR_SPECS: dict[str, EvaluationErrorSpec] = {
         status_reason=EvaluationStatusReason.MODEL_NOT_FOUND,
         disables_evaluation=True,
     ),
-    "hog_error": EvaluationErrorSpec(
-        error_type="hog_error",
+    "script_error": EvaluationErrorSpec(
+        error_type="script_error",
         owner="user",
         safe_message="The Script evaluation code failed. Fix the code before re-enabling this evaluation.",
         status_reason=EvaluationStatusReason.INSIGHTS_ERROR,
@@ -223,7 +223,7 @@ def terminal_user_error_result_from_application_error(
 
 
 def status_reason_detail_for_terminal_user_error(spec: EvaluationErrorSpec, message: str | None) -> str | None:
-    if spec.error_type != "hog_error" or not message:
+    if spec.error_type != "script_error" or not message:
         return None
 
     if len(message) <= MAX_STATUS_REASON_DETAIL_LENGTH:

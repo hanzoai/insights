@@ -14,21 +14,21 @@ import type {
     PaginatedDigestChannelListApi,
     PaginatedDigestRunListApi,
     PaginatedReviewRunListApi,
-    PaginatedStamphogPullRequestListApi,
-    PaginatedStamphogRepoConfigListApi,
+    PaginatedStampPullRequestListApi,
+    PaginatedStampRepoConfigListApi,
     PatchedDigestChannelApi,
-    PatchedStamphogRepoConfigApi,
+    PatchedStampRepoConfigApi,
     ReviewRunApi,
-    StamphogDigestChannelsListParams,
-    StamphogDigestRunsListParams,
-    StamphogInstallInfoApi,
-    StamphogPullRequestApi,
-    StamphogPullRequestsListParams,
-    StamphogRepoConfigApi,
-    StamphogRepoConfigsListParams,
-    StamphogReviewRunsListParams,
-    StamphogSyncInstallationRequestApi,
-    StamphogSyncInstallationResponseApi,
+    StampDigestChannelsListParams,
+    StampDigestRunsListParams,
+    StampInstallInfoApi,
+    StampPullRequestApi,
+    StampPullRequestsListParams,
+    StampRepoConfigApi,
+    StampRepoConfigsListParams,
+    StampReviewRunsListParams,
+    StampSyncInstallationRequestApi,
+    StampSyncInstallationResponseApi,
 } from './api.schemas'
 
 // https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir/49579497#49579497
@@ -48,7 +48,7 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>]
       }
     : DistributeReadOnlyOverUnions<T>
 
-export const getStamphogDigestChannelsListUrl = (projectId: string, params?: StamphogDigestChannelsListParams) => {
+export const getStampDigestChannelsListUrl = (projectId: string, params?: StampDigestChannelsListParams) => {
     const normalizedParams = new URLSearchParams()
 
     Object.entries(params || {}).forEach(([key, value]) => {
@@ -60,37 +60,37 @@ export const getStamphogDigestChannelsListUrl = (projectId: string, params?: Sta
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/stamphog/digest_channels/?${stringifiedParams}`
-        : `/api/projects/${projectId}/stamphog/digest_channels/`
+        ? `/api/projects/${projectId}/stamp/digest_channels/?${stringifiedParams}`
+        : `/api/projects/${projectId}/stamp/digest_channels/`
 }
 
 /**
  * Per-audience Slack destinations for the daily merged-PR digest.
  */
-export const stamphogDigestChannelsList = async (
+export const stampDigestChannelsList = async (
     projectId: string,
-    params?: StamphogDigestChannelsListParams,
+    params?: StampDigestChannelsListParams,
     options?: RequestInit
 ): Promise<PaginatedDigestChannelListApi> => {
-    return apiMutator<PaginatedDigestChannelListApi>(getStamphogDigestChannelsListUrl(projectId, params), {
+    return apiMutator<PaginatedDigestChannelListApi>(getStampDigestChannelsListUrl(projectId, params), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getStamphogDigestChannelsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/stamphog/digest_channels/`
+export const getStampDigestChannelsCreateUrl = (projectId: string) => {
+    return `/api/projects/${projectId}/stamp/digest_channels/`
 }
 
 /**
  * Per-audience Slack destinations for the daily merged-PR digest.
  */
-export const stamphogDigestChannelsCreate = async (
+export const stampDigestChannelsCreate = async (
     projectId: string,
     digestChannelApi: NonReadonly<DigestChannelApi>,
     options?: RequestInit
 ): Promise<DigestChannelApi> => {
-    return apiMutator<DigestChannelApi>(getStamphogDigestChannelsCreateUrl(projectId), {
+    return apiMutator<DigestChannelApi>(getStampDigestChannelsCreateUrl(projectId), {
         ...options,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -98,38 +98,38 @@ export const stamphogDigestChannelsCreate = async (
     })
 }
 
-export const getStamphogDigestChannelsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamphog/digest_channels/${id}/`
+export const getStampDigestChannelsRetrieveUrl = (projectId: string, id: string) => {
+    return `/api/projects/${projectId}/stamp/digest_channels/${id}/`
 }
 
 /**
  * Per-audience Slack destinations for the daily merged-PR digest.
  */
-export const stamphogDigestChannelsRetrieve = async (
+export const stampDigestChannelsRetrieve = async (
     projectId: string,
     id: string,
     options?: RequestInit
 ): Promise<DigestChannelApi> => {
-    return apiMutator<DigestChannelApi>(getStamphogDigestChannelsRetrieveUrl(projectId, id), {
+    return apiMutator<DigestChannelApi>(getStampDigestChannelsRetrieveUrl(projectId, id), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getStamphogDigestChannelsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamphog/digest_channels/${id}/`
+export const getStampDigestChannelsUpdateUrl = (projectId: string, id: string) => {
+    return `/api/projects/${projectId}/stamp/digest_channels/${id}/`
 }
 
 /**
  * Per-audience Slack destinations for the daily merged-PR digest.
  */
-export const stamphogDigestChannelsUpdate = async (
+export const stampDigestChannelsUpdate = async (
     projectId: string,
     id: string,
     digestChannelApi: NonReadonly<DigestChannelApi>,
     options?: RequestInit
 ): Promise<DigestChannelApi> => {
-    return apiMutator<DigestChannelApi>(getStamphogDigestChannelsUpdateUrl(projectId, id), {
+    return apiMutator<DigestChannelApi>(getStampDigestChannelsUpdateUrl(projectId, id), {
         ...options,
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -137,20 +137,20 @@ export const stamphogDigestChannelsUpdate = async (
     })
 }
 
-export const getStamphogDigestChannelsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamphog/digest_channels/${id}/`
+export const getStampDigestChannelsPartialUpdateUrl = (projectId: string, id: string) => {
+    return `/api/projects/${projectId}/stamp/digest_channels/${id}/`
 }
 
 /**
  * Per-audience Slack destinations for the daily merged-PR digest.
  */
-export const stamphogDigestChannelsPartialUpdate = async (
+export const stampDigestChannelsPartialUpdate = async (
     projectId: string,
     id: string,
     patchedDigestChannelApi?: NonReadonly<PatchedDigestChannelApi>,
     options?: RequestInit
 ): Promise<DigestChannelApi> => {
-    return apiMutator<DigestChannelApi>(getStamphogDigestChannelsPartialUpdateUrl(projectId, id), {
+    return apiMutator<DigestChannelApi>(getStampDigestChannelsPartialUpdateUrl(projectId, id), {
         ...options,
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -158,25 +158,25 @@ export const stamphogDigestChannelsPartialUpdate = async (
     })
 }
 
-export const getStamphogDigestChannelsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamphog/digest_channels/${id}/`
+export const getStampDigestChannelsDestroyUrl = (projectId: string, id: string) => {
+    return `/api/projects/${projectId}/stamp/digest_channels/${id}/`
 }
 
 /**
  * Per-audience Slack destinations for the daily merged-PR digest.
  */
-export const stamphogDigestChannelsDestroy = async (
+export const stampDigestChannelsDestroy = async (
     projectId: string,
     id: string,
     options?: RequestInit
 ): Promise<void> => {
-    return apiMutator<void>(getStamphogDigestChannelsDestroyUrl(projectId, id), {
+    return apiMutator<void>(getStampDigestChannelsDestroyUrl(projectId, id), {
         ...options,
         method: 'DELETE',
     })
 }
 
-export const getStamphogDigestRunsListUrl = (projectId: string, params?: StamphogDigestRunsListParams) => {
+export const getStampDigestRunsListUrl = (projectId: string, params?: StampDigestRunsListParams) => {
     const normalizedParams = new URLSearchParams()
 
     Object.entries(params || {}).forEach(([key, value]) => {
@@ -188,43 +188,43 @@ export const getStamphogDigestRunsListUrl = (projectId: string, params?: Stampho
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/stamphog/digest_runs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/stamphog/digest_runs/`
+        ? `/api/projects/${projectId}/stamp/digest_runs/?${stringifiedParams}`
+        : `/api/projects/${projectId}/stamp/digest_runs/`
 }
 
 /**
  * Read-only history of posted (or attempted) digests, filterable by digest channel.
  */
-export const stamphogDigestRunsList = async (
+export const stampDigestRunsList = async (
     projectId: string,
-    params?: StamphogDigestRunsListParams,
+    params?: StampDigestRunsListParams,
     options?: RequestInit
 ): Promise<PaginatedDigestRunListApi> => {
-    return apiMutator<PaginatedDigestRunListApi>(getStamphogDigestRunsListUrl(projectId, params), {
+    return apiMutator<PaginatedDigestRunListApi>(getStampDigestRunsListUrl(projectId, params), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getStamphogDigestRunsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamphog/digest_runs/${id}/`
+export const getStampDigestRunsRetrieveUrl = (projectId: string, id: string) => {
+    return `/api/projects/${projectId}/stamp/digest_runs/${id}/`
 }
 
 /**
  * Read-only history of posted (or attempted) digests, filterable by digest channel.
  */
-export const stamphogDigestRunsRetrieve = async (
+export const stampDigestRunsRetrieve = async (
     projectId: string,
     id: string,
     options?: RequestInit
 ): Promise<DigestRunApi> => {
-    return apiMutator<DigestRunApi>(getStamphogDigestRunsRetrieveUrl(projectId, id), {
+    return apiMutator<DigestRunApi>(getStampDigestRunsRetrieveUrl(projectId, id), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getStamphogPullRequestsListUrl = (projectId: string, params?: StamphogPullRequestsListParams) => {
+export const getStampPullRequestsListUrl = (projectId: string, params?: StampPullRequestsListParams) => {
     const normalizedParams = new URLSearchParams()
 
     Object.entries(params || {}).forEach(([key, value]) => {
@@ -236,43 +236,43 @@ export const getStamphogPullRequestsListUrl = (projectId: string, params?: Stamp
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/stamphog/pull_requests/?${stringifiedParams}`
-        : `/api/projects/${projectId}/stamphog/pull_requests/`
+        ? `/api/projects/${projectId}/stamp/pull_requests/?${stringifiedParams}`
+        : `/api/projects/${projectId}/stamp/pull_requests/`
 }
 
 /**
- * Read-only pull requests stamphog knows about, filterable by PR number and merge state.
+ * Read-only pull requests stamp knows about, filterable by PR number and merge state.
  */
-export const stamphogPullRequestsList = async (
+export const stampPullRequestsList = async (
     projectId: string,
-    params?: StamphogPullRequestsListParams,
+    params?: StampPullRequestsListParams,
     options?: RequestInit
-): Promise<PaginatedStamphogPullRequestListApi> => {
-    return apiMutator<PaginatedStamphogPullRequestListApi>(getStamphogPullRequestsListUrl(projectId, params), {
+): Promise<PaginatedStampPullRequestListApi> => {
+    return apiMutator<PaginatedStampPullRequestListApi>(getStampPullRequestsListUrl(projectId, params), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getStamphogPullRequestsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamphog/pull_requests/${id}/`
+export const getStampPullRequestsRetrieveUrl = (projectId: string, id: string) => {
+    return `/api/projects/${projectId}/stamp/pull_requests/${id}/`
 }
 
 /**
- * Read-only pull requests stamphog knows about, filterable by PR number and merge state.
+ * Read-only pull requests stamp knows about, filterable by PR number and merge state.
  */
-export const stamphogPullRequestsRetrieve = async (
+export const stampPullRequestsRetrieve = async (
     projectId: string,
     id: string,
     options?: RequestInit
-): Promise<StamphogPullRequestApi> => {
-    return apiMutator<StamphogPullRequestApi>(getStamphogPullRequestsRetrieveUrl(projectId, id), {
+): Promise<StampPullRequestApi> => {
+    return apiMutator<StampPullRequestApi>(getStampPullRequestsRetrieveUrl(projectId, id), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getStamphogRepoConfigsListUrl = (projectId: string, params?: StamphogRepoConfigsListParams) => {
+export const getStampRepoConfigsListUrl = (projectId: string, params?: StampRepoConfigsListParams) => {
     const normalizedParams = new URLSearchParams()
 
     Object.entries(params || {}).forEach(([key, value]) => {
@@ -284,160 +284,160 @@ export const getStamphogRepoConfigsListUrl = (projectId: string, params?: Stamph
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/stamphog/repo_configs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/stamphog/repo_configs/`
+        ? `/api/projects/${projectId}/stamp/repo_configs/?${stringifiedParams}`
+        : `/api/projects/${projectId}/stamp/repo_configs/`
 }
 
 /**
- * Per-repo stamphog settings — enable/disable review, GitHub App installation, policy overrides.
+ * Per-repo stamp settings — enable/disable review, GitHub App installation, policy overrides.
  */
-export const stamphogRepoConfigsList = async (
+export const stampRepoConfigsList = async (
     projectId: string,
-    params?: StamphogRepoConfigsListParams,
+    params?: StampRepoConfigsListParams,
     options?: RequestInit
-): Promise<PaginatedStamphogRepoConfigListApi> => {
-    return apiMutator<PaginatedStamphogRepoConfigListApi>(getStamphogRepoConfigsListUrl(projectId, params), {
+): Promise<PaginatedStampRepoConfigListApi> => {
+    return apiMutator<PaginatedStampRepoConfigListApi>(getStampRepoConfigsListUrl(projectId, params), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getStamphogRepoConfigsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/stamphog/repo_configs/`
+export const getStampRepoConfigsCreateUrl = (projectId: string) => {
+    return `/api/projects/${projectId}/stamp/repo_configs/`
 }
 
 /**
- * Per-repo stamphog settings — enable/disable review, GitHub App installation, policy overrides.
+ * Per-repo stamp settings — enable/disable review, GitHub App installation, policy overrides.
  */
-export const stamphogRepoConfigsCreate = async (
+export const stampRepoConfigsCreate = async (
     projectId: string,
-    stamphogRepoConfigApi: NonReadonly<StamphogRepoConfigApi>,
+    stampRepoConfigApi: NonReadonly<StampRepoConfigApi>,
     options?: RequestInit
-): Promise<StamphogRepoConfigApi> => {
-    return apiMutator<StamphogRepoConfigApi>(getStamphogRepoConfigsCreateUrl(projectId), {
+): Promise<StampRepoConfigApi> => {
+    return apiMutator<StampRepoConfigApi>(getStampRepoConfigsCreateUrl(projectId), {
         ...options,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(stamphogRepoConfigApi),
+        body: JSON.stringify(stampRepoConfigApi),
     })
 }
 
-export const getStamphogRepoConfigsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamphog/repo_configs/${id}/`
+export const getStampRepoConfigsRetrieveUrl = (projectId: string, id: string) => {
+    return `/api/projects/${projectId}/stamp/repo_configs/${id}/`
 }
 
 /**
- * Per-repo stamphog settings — enable/disable review, GitHub App installation, policy overrides.
+ * Per-repo stamp settings — enable/disable review, GitHub App installation, policy overrides.
  */
-export const stamphogRepoConfigsRetrieve = async (
+export const stampRepoConfigsRetrieve = async (
     projectId: string,
     id: string,
     options?: RequestInit
-): Promise<StamphogRepoConfigApi> => {
-    return apiMutator<StamphogRepoConfigApi>(getStamphogRepoConfigsRetrieveUrl(projectId, id), {
+): Promise<StampRepoConfigApi> => {
+    return apiMutator<StampRepoConfigApi>(getStampRepoConfigsRetrieveUrl(projectId, id), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getStamphogRepoConfigsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamphog/repo_configs/${id}/`
+export const getStampRepoConfigsUpdateUrl = (projectId: string, id: string) => {
+    return `/api/projects/${projectId}/stamp/repo_configs/${id}/`
 }
 
 /**
- * Per-repo stamphog settings — enable/disable review, GitHub App installation, policy overrides.
+ * Per-repo stamp settings — enable/disable review, GitHub App installation, policy overrides.
  */
-export const stamphogRepoConfigsUpdate = async (
+export const stampRepoConfigsUpdate = async (
     projectId: string,
     id: string,
-    stamphogRepoConfigApi: NonReadonly<StamphogRepoConfigApi>,
+    stampRepoConfigApi: NonReadonly<StampRepoConfigApi>,
     options?: RequestInit
-): Promise<StamphogRepoConfigApi> => {
-    return apiMutator<StamphogRepoConfigApi>(getStamphogRepoConfigsUpdateUrl(projectId, id), {
+): Promise<StampRepoConfigApi> => {
+    return apiMutator<StampRepoConfigApi>(getStampRepoConfigsUpdateUrl(projectId, id), {
         ...options,
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(stamphogRepoConfigApi),
+        body: JSON.stringify(stampRepoConfigApi),
     })
 }
 
-export const getStamphogRepoConfigsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamphog/repo_configs/${id}/`
+export const getStampRepoConfigsPartialUpdateUrl = (projectId: string, id: string) => {
+    return `/api/projects/${projectId}/stamp/repo_configs/${id}/`
 }
 
 /**
- * Per-repo stamphog settings — enable/disable review, GitHub App installation, policy overrides.
+ * Per-repo stamp settings — enable/disable review, GitHub App installation, policy overrides.
  */
-export const stamphogRepoConfigsPartialUpdate = async (
+export const stampRepoConfigsPartialUpdate = async (
     projectId: string,
     id: string,
-    patchedStamphogRepoConfigApi?: NonReadonly<PatchedStamphogRepoConfigApi>,
+    patchedStampRepoConfigApi?: NonReadonly<PatchedStampRepoConfigApi>,
     options?: RequestInit
-): Promise<StamphogRepoConfigApi> => {
-    return apiMutator<StamphogRepoConfigApi>(getStamphogRepoConfigsPartialUpdateUrl(projectId, id), {
+): Promise<StampRepoConfigApi> => {
+    return apiMutator<StampRepoConfigApi>(getStampRepoConfigsPartialUpdateUrl(projectId, id), {
         ...options,
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(patchedStamphogRepoConfigApi),
+        body: JSON.stringify(patchedStampRepoConfigApi),
     })
 }
 
-export const getStamphogRepoConfigsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamphog/repo_configs/${id}/`
+export const getStampRepoConfigsDestroyUrl = (projectId: string, id: string) => {
+    return `/api/projects/${projectId}/stamp/repo_configs/${id}/`
 }
 
 /**
- * Per-repo stamphog settings — enable/disable review, GitHub App installation, policy overrides.
+ * Per-repo stamp settings — enable/disable review, GitHub App installation, policy overrides.
  */
-export const stamphogRepoConfigsDestroy = async (
+export const stampRepoConfigsDestroy = async (
     projectId: string,
     id: string,
     options?: RequestInit
 ): Promise<void> => {
-    return apiMutator<void>(getStamphogRepoConfigsDestroyUrl(projectId, id), {
+    return apiMutator<void>(getStampRepoConfigsDestroyUrl(projectId, id), {
         ...options,
         method: 'DELETE',
     })
 }
 
-export const getStamphogRepoConfigsInstallInfoRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/stamphog/repo_configs/install_info/`
+export const getStampRepoConfigsInstallInfoRetrieveUrl = (projectId: string) => {
+    return `/api/projects/${projectId}/stamp/repo_configs/install_info/`
 }
 
 /**
- * Per-repo stamphog settings — enable/disable review, GitHub App installation, policy overrides.
+ * Per-repo stamp settings — enable/disable review, GitHub App installation, policy overrides.
  */
-export const stamphogRepoConfigsInstallInfoRetrieve = async (
+export const stampRepoConfigsInstallInfoRetrieve = async (
     projectId: string,
     options?: RequestInit
-): Promise<StamphogInstallInfoApi> => {
-    return apiMutator<StamphogInstallInfoApi>(getStamphogRepoConfigsInstallInfoRetrieveUrl(projectId), {
+): Promise<StampInstallInfoApi> => {
+    return apiMutator<StampInstallInfoApi>(getStampRepoConfigsInstallInfoRetrieveUrl(projectId), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getStamphogRepoConfigsSyncInstallationCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/stamphog/repo_configs/sync_installation/`
+export const getStampRepoConfigsSyncInstallationCreateUrl = (projectId: string) => {
+    return `/api/projects/${projectId}/stamp/repo_configs/sync_installation/`
 }
 
 /**
- * Per-repo stamphog settings — enable/disable review, GitHub App installation, policy overrides.
+ * Per-repo stamp settings — enable/disable review, GitHub App installation, policy overrides.
  */
-export const stamphogRepoConfigsSyncInstallationCreate = async (
+export const stampRepoConfigsSyncInstallationCreate = async (
     projectId: string,
-    stamphogSyncInstallationRequestApi: StamphogSyncInstallationRequestApi,
+    stampSyncInstallationRequestApi: StampSyncInstallationRequestApi,
     options?: RequestInit
-): Promise<StamphogSyncInstallationResponseApi> => {
-    return apiMutator<StamphogSyncInstallationResponseApi>(getStamphogRepoConfigsSyncInstallationCreateUrl(projectId), {
+): Promise<StampSyncInstallationResponseApi> => {
+    return apiMutator<StampSyncInstallationResponseApi>(getStampRepoConfigsSyncInstallationCreateUrl(projectId), {
         ...options,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(stamphogSyncInstallationRequestApi),
+        body: JSON.stringify(stampSyncInstallationRequestApi),
     })
 }
 
-export const getStamphogReviewRunsListUrl = (projectId: string, params?: StamphogReviewRunsListParams) => {
+export const getStampReviewRunsListUrl = (projectId: string, params?: StampReviewRunsListParams) => {
     const normalizedParams = new URLSearchParams()
 
     Object.entries(params || {}).forEach(([key, value]) => {
@@ -449,37 +449,37 @@ export const getStamphogReviewRunsListUrl = (projectId: string, params?: Stampho
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/stamphog/review_runs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/stamphog/review_runs/`
+        ? `/api/projects/${projectId}/stamp/review_runs/?${stringifiedParams}`
+        : `/api/projects/${projectId}/stamp/review_runs/`
 }
 
 /**
- * Read-only history of stamphog review runs, filterable by repository, PR number, and status.
+ * Read-only history of stamp review runs, filterable by repository, PR number, and status.
  */
-export const stamphogReviewRunsList = async (
+export const stampReviewRunsList = async (
     projectId: string,
-    params?: StamphogReviewRunsListParams,
+    params?: StampReviewRunsListParams,
     options?: RequestInit
 ): Promise<PaginatedReviewRunListApi> => {
-    return apiMutator<PaginatedReviewRunListApi>(getStamphogReviewRunsListUrl(projectId, params), {
+    return apiMutator<PaginatedReviewRunListApi>(getStampReviewRunsListUrl(projectId, params), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getStamphogReviewRunsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/stamphog/review_runs/${id}/`
+export const getStampReviewRunsRetrieveUrl = (projectId: string, id: string) => {
+    return `/api/projects/${projectId}/stamp/review_runs/${id}/`
 }
 
 /**
- * Read-only history of stamphog review runs, filterable by repository, PR number, and status.
+ * Read-only history of stamp review runs, filterable by repository, PR number, and status.
  */
-export const stamphogReviewRunsRetrieve = async (
+export const stampReviewRunsRetrieve = async (
     projectId: string,
     id: string,
     options?: RequestInit
 ): Promise<ReviewRunApi> => {
-    return apiMutator<ReviewRunApi>(getStamphogReviewRunsRetrieveUrl(projectId, id), {
+    return apiMutator<ReviewRunApi>(getStampReviewRunsRetrieveUrl(projectId, id), {
         ...options,
         method: 'GET',
     })

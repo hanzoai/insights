@@ -18,7 +18,7 @@ from insights.temporal.ai_observability.eval_reports.workflow import (
     GenerateAndDeliverEvalReportWorkflow,
     ScheduleAllEvalReportsWorkflow,
 )
-from insights.temporal.ai_observability.evaluation_hog import execute_hog_eval_activity
+from insights.temporal.ai_observability.evaluation_script import execute_script_eval_activity
 from insights.temporal.ai_observability.evaluation_llm_judge import execute_llm_judge_activity
 from insights.temporal.ai_observability.evaluation_sentiment import execute_sentiment_eval_activity
 from insights.temporal.ai_observability.evaluation_workflow_activities import (
@@ -37,21 +37,21 @@ from insights.temporal.ai_observability.run_aggregate_evaluation import (
 )
 from insights.temporal.ai_observability.run_evaluation import RunEvaluationWorkflow
 from insights.temporal.ai_observability.run_session_evaluation import (
-    execute_session_hog_eval_activity,
+    execute_session_script_eval_activity,
     execute_session_llm_judge_activity,
 )
 from insights.temporal.ai_observability.run_tagger import (
     RunTaggerWorkflow,
     disable_tagger_activity,
     emit_tagger_event_activity,
-    execute_hog_tagger_activity,
+    execute_script_tagger_activity,
     execute_tagger_activity,
     fetch_tagger_activity,
 )
 from insights.temporal.ai_observability.run_trace_evaluation import (
     RunTraceEvaluationWorkflow,
     emit_trace_evaluation_event_activity,
-    execute_trace_hog_eval_activity,
+    execute_trace_script_eval_activity,
     execute_trace_llm_judge_activity,
 )
 from insights.temporal.ai_observability.shared_activities import (
@@ -82,12 +82,12 @@ EVAL_ACTIVITIES = [
     send_evaluation_disabled_email_activity,
     update_key_state_activity,
     execute_llm_judge_activity,
-    execute_hog_eval_activity,
+    execute_script_eval_activity,
     execute_sentiment_eval_activity,
     execute_trace_llm_judge_activity,
-    execute_trace_hog_eval_activity,
+    execute_trace_script_eval_activity,
     execute_session_llm_judge_activity,
-    execute_session_hog_eval_activity,
+    execute_session_script_eval_activity,
     check_trace_settled_activity,
     check_session_settled_activity,
     emit_evaluation_event_activity,
@@ -103,7 +103,7 @@ TAGGER_WORKFLOWS = [
 TAGGER_ACTIVITIES = [
     fetch_tagger_activity,
     execute_tagger_activity,
-    execute_hog_tagger_activity,
+    execute_script_tagger_activity,
     emit_tagger_event_activity,
     disable_tagger_activity,
 ]
@@ -148,7 +148,7 @@ ACTIVITIES = [
     send_evaluation_disabled_email_activity,
     update_key_state_activity,
     execute_llm_judge_activity,
-    execute_hog_eval_activity,
+    execute_script_eval_activity,
     execute_sentiment_eval_activity,
     emit_evaluation_event_activity,
     emit_internal_telemetry_activity,

@@ -1,6 +1,6 @@
-"""ReviewHog's thin GitHub REST layer over the gated egress transport.
+"""Review's thin GitHub REST layer over the gated egress transport.
 
-Every ReviewHog call to GitHub goes through `github_api_request` / `github_api_get_paginated`, which
+Every Review call to GitHub goes through `github_api_request` / `github_api_get_paginated`, which
 route through `insights.egress.github.transport.github_request` — budget-gated per installation and
 recorded on the egress telemetry by construction. Auth is the caller-held App installation token;
 pass `installation_id` alongside it so the call is metered against that installation's shared budget.
@@ -38,7 +38,7 @@ def is_app_bot_author(user: dict[str, Any] | None) -> bool:
 
 GITHUB_API_BASE = "https://api.github.com"
 
-_SOURCE = "review_hog"
+_SOURCE = "review"
 _PER_PAGE = 100
 _TIMEOUT = 30.0
 

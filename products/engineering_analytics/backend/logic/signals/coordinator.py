@@ -55,7 +55,7 @@ class CISignalTarget:
 
 
 def _rollout_flag_enabled(team: Team, user: "User") -> bool:
-    # Enrollment and the rollout flag are orthogonal gates, re-checked per target. Evaluated as
+    # Enrollment and the rollout flag are ortscriptonal gates, re-checked per target. Evaluated as
     # the enabling user: a person-cohort release condition never matches a synthetic distinct_id.
     org_id = str(team.organization_id)
     project_id = str(team.id)

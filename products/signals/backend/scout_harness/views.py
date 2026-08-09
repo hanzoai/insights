@@ -1257,7 +1257,7 @@ class ScoutCanonicalTeamAccessPermission(BasePermission):
     rows (`_canonical_team_id`). The default team gate only checks membership / token
     team-scope for the URL team, so a user or key scoped solely to a child environment would
     be authorized against one team while touching another's rows. Re-anchor both checks to
-    the canonical team. Mirrors `StamphogCanonicalTeamAccessPermission`. Root teams (no
+    the canonical team. Mirrors `StampCanonicalTeamAccessPermission`. Root teams (no
     parent) are unaffected — the default checks already cover them.
     """
 

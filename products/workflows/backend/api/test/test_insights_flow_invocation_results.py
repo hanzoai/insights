@@ -17,7 +17,7 @@ from insights.models.utils import generate_random_token_personal, hash_key_value
 from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 
-def create_hog_invocation_result(
+def create_script_invocation_result(
     team_id: int,
     function_id: str,
     invocation_id: str,
@@ -82,7 +82,7 @@ class TestInsightsFlowInvocationResults(DatastoreTestMixin, APIBaseTest):
         )
 
     def _seed(self, invocation_id: str, **kwargs):
-        create_hog_invocation_result(
+        create_script_invocation_result(
             team_id=self.team.pk, function_id=str(self.insights_flow.pk), invocation_id=invocation_id, **kwargs
         )
 
@@ -187,13 +187,13 @@ class TestInsightsFlowInvocationResults(DatastoreTestMixin, APIBaseTest):
     def test_isolated_from_other_flow_and_function_kind(self):
         self._seed("inv-mine", invocation_status="success")
         # Same team, but a insights_function invocation and a different flow id must not leak in.
-        create_hog_invocation_result(
+        create_script_invocation_result(
             team_id=self.team.pk,
             function_id=str(self.insights_flow.pk),
             invocation_id="inv-fn",
             function_kind="insights_function",
         )
-        create_hog_invocation_result(team_id=self.team.pk, function_id="some-other-flow", invocation_id="inv-other")
+        create_script_invocation_result(team_id=self.team.pk, function_id="some-other-flow", invocation_id="inv-other")
         results = self._list().json()
         assert {r["invocation_id"] for r in results} == {"inv-mine"}
 

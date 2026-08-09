@@ -771,7 +771,7 @@ def _detect_source_type(table: DataWarehouseTable) -> str:
         return table.external_data_source.source_type or "BigQuery"
 
     platform = map_url_to_provider(table.url_pattern)
-    return platform if platform != "BlushingHog" else "self_managed"
+    return platform if platform != "BlushingScript" else "self_managed"
 
 
 def _get_adapter_class(source_type: str) -> type:

@@ -304,8 +304,8 @@ class UsageReportCounters:
     elixir_events_count_in_period: int
     unity_events_count_in_period: int
     rust_events_count_in_period: int
-    active_hog_destinations_in_period: int
-    active_hog_transformations_in_period: int
+    active_script_destinations_in_period: int
+    active_script_transformations_in_period: int
 
     # Workflow metrics
     workflow_emails_sent_in_period: int
@@ -2226,7 +2226,7 @@ def get_teams_with_recording_bytes_in_period(
 
 @timed_log()
 @retry(tries=QUERY_RETRIES, delay=QUERY_RETRY_DELAY, backoff=QUERY_RETRY_BACKOFF)
-def get_teams_with_active_hog_destinations_in_period() -> list:
+def get_teams_with_active_script_destinations_in_period() -> list:
     return list(
         InsightsFunction.objects.filter(
             type=InsightsFunctionType.DESTINATION,
@@ -2240,7 +2240,7 @@ def get_teams_with_active_hog_destinations_in_period() -> list:
 
 @timed_log()
 @retry(tries=QUERY_RETRIES, delay=QUERY_RETRY_DELAY, backoff=QUERY_RETRY_BACKOFF)
-def get_teams_with_active_hog_transformations_in_period() -> list:
+def get_teams_with_active_script_transformations_in_period() -> list:
     return list(
         InsightsFunction.objects.filter(
             type=InsightsFunctionType.TRANSFORMATION,
@@ -2935,8 +2935,8 @@ def _get_all_usage_data(period_start: datetime, period_end: datetime) -> dict[st
         "teams_with_task_sandbox_seconds_in_period": task_sandbox_usage.seconds,
         "teams_with_task_sandbox_cpu_core_seconds_in_period": task_sandbox_usage.cpu_core_seconds,
         "teams_with_task_sandbox_memory_gib_seconds_in_period": task_sandbox_usage.memory_gib_seconds,
-        "teams_with_active_hog_destinations_in_period": get_teams_with_active_hog_destinations_in_period(),
-        "teams_with_active_hog_transformations_in_period": get_teams_with_active_hog_transformations_in_period(),
+        "teams_with_active_script_destinations_in_period": get_teams_with_active_script_destinations_in_period(),
+        "teams_with_active_script_transformations_in_period": get_teams_with_active_script_transformations_in_period(),
         "teams_with_workflow_emails_sent_in_period": get_teams_with_workflow_emails_sent_in_period(
             period_start, period_end
         ),
@@ -3149,8 +3149,8 @@ def _get_team_report(all_data: dict[str, Any], team: Team) -> UsageReportCounter
         task_sandbox_memory_gib_seconds_in_period=all_data["teams_with_task_sandbox_memory_gib_seconds_in_period"].get(
             team.id, 0
         ),
-        active_hog_destinations_in_period=all_data["teams_with_active_hog_destinations_in_period"].get(team.id, 0),
-        active_hog_transformations_in_period=all_data["teams_with_active_hog_transformations_in_period"].get(
+        active_script_destinations_in_period=all_data["teams_with_active_script_destinations_in_period"].get(team.id, 0),
+        active_script_transformations_in_period=all_data["teams_with_active_script_transformations_in_period"].get(
             team.id, 0
         ),
         workflow_emails_sent_in_period=all_data["teams_with_workflow_emails_sent_in_period"].get(team.id, 0),

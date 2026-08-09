@@ -36,7 +36,7 @@ geoip_template = MOCK_NODE_TEMPLATES[2]
 
 
 EXAMPLE_FULL = {
-    "name": "HogHook",
+    "name": "ScriptHook",
     "script": "fetch(inputs.url, {\n  'headers': inputs.headers,\n  'body': inputs.payload,\n  'method': inputs.method\n});",
     "type": "destination",
     "code_language": "script",
@@ -848,7 +848,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         ]
         assert filtered_actual_activities == expected_activities
 
-    def test_generates_hog_bytecode(self, *args):
+    def test_generates_script_bytecode(self, *args):
         response = self.client.post(
             f"/v1/projects/{self.team.id}/insights_functions/",
             data={
@@ -1308,7 +1308,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         response_transform = self.client.post(
             f"/v1/projects/{self.team.id}/insights_functions/",
             data={
-                "name": "HogTransform",
+                "name": "ScriptTransform",
                 "script": "return event",
                 "type": "transformation",
                 "template_id": "template-geoip",
@@ -1378,7 +1378,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         response_transform = self.client.post(
             f"/v1/projects/{self.team.id}/insights_functions/",
             data={
-                "name": "HogTransform",
+                "name": "ScriptTransform",
                 "script": "return event",
                 "type": "transformation",
                 "template_id": "template-geoip",
@@ -1796,10 +1796,10 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
     def test_can_call_a_test_invocation(self):
         with patch(
-            "products.cdp.backend.api.insights_function.create_hog_invocation_test"
-        ) as mock_create_hog_invocation_test:
+            "products.cdp.backend.api.insights_function.create_script_invocation_test"
+        ) as mock_create_script_invocation_test:
             res = MagicMock(status_code=200, json=lambda: {"status": "success"})
-            mock_create_hog_invocation_test.return_value = res
+            mock_create_script_invocation_test.return_value = res
 
             response = self.client.post(
                 f"/v1/projects/{self.team.id}/insights_functions/new/invocations/",
@@ -1813,14 +1813,14 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             assert response.status_code == status.HTTP_200_OK, response.json()
             assert response.json() == {"status": "success"}
 
-            assert mock_create_hog_invocation_test.call_count == 1
-            assert mock_create_hog_invocation_test.call_args_list[0].kwargs["team_id"] == self.team.id
-            assert mock_create_hog_invocation_test.call_args_list[0].kwargs["insights_function_id"] == "new"
+            assert mock_create_script_invocation_test.call_count == 1
+            assert mock_create_script_invocation_test.call_args_list[0].kwargs["team_id"] == self.team.id
+            assert mock_create_script_invocation_test.call_args_list[0].kwargs["insights_function_id"] == "new"
             assert (
-                mock_create_hog_invocation_test.call_args_list[0].kwargs["payload"]["configuration"]["type"]
+                mock_create_script_invocation_test.call_args_list[0].kwargs["payload"]["configuration"]["type"]
                 == "destination"
             )
-            assert mock_create_hog_invocation_test.call_args_list[0].kwargs["payload"]["configuration"]["inputs"][
+            assert mock_create_script_invocation_test.call_args_list[0].kwargs["payload"]["configuration"]["inputs"][
                 "url"
             ] == {
                 "bytecode": [
@@ -1847,7 +1847,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
     def test_rerun_rejected_for_non_rerunnable_type(self, insights_function_type):
         fn = InsightsFunction.objects.create(team=self.team, type=insights_function_type, script="return event")
 
-        with patch("products.cdp.backend.api.insights_function.rerun_hog_invocations") as mock_rerun:
+        with patch("products.cdp.backend.api.insights_function.rerun_script_invocations") as mock_rerun:
             response = self.client.post(
                 f"/v1/projects/{self.team.id}/insights_functions/{fn.id}/rerun/",
                 data={
@@ -1866,7 +1866,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
     def test_rerun_allowed_for_destination(self):
         fn = InsightsFunction.objects.create(team=self.team, type="destination", script="return event")
 
-        with patch("products.cdp.backend.api.insights_function.rerun_hog_invocations") as mock_rerun:
+        with patch("products.cdp.backend.api.insights_function.rerun_script_invocations") as mock_rerun:
             mock_rerun.return_value = MagicMock(status_code=200, json=lambda: {"rerun_job_id": "job-1"})
 
             response = self.client.post(
@@ -2163,7 +2163,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
     def test_transformation_rejects_inputs_referencing_unavailable_globals(self):
         # Realtime transformations only have project, event, and inputs in scope
-        # (HogTransformerService.createInvocationGlobals). Saving an input template
+        # (ScriptTransformerService.createInvocationGlobals). Saving an input template
         # that references person/groups/source must fail validation rather than
         # crash ingestion at runtime.
         response = self.client.post(
@@ -2265,19 +2265,19 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         )
         assert response.status_code == status.HTTP_200_OK
 
-    def test_validates_raw_hog_code_size(self):
+    def test_validates_raw_script_code_size(self):
         """Test that we validate the raw HOG code size before compiling it."""
         # Generate a large HOG code string that exceeds the maximum allowed size
-        large_hog_code = "return " + "x" * (MAX_FN_CODE_SIZE_BYTES + 1000)
+        large_script_code = "return " + "x" * (MAX_FN_CODE_SIZE_BYTES + 1000)
 
         # Try to create a function with HOG code exceeding the size limit
-        # No need to mock compile_hog as we're checking the string size directly
+        # No need to mock compile_script as we're checking the string size directly
         response = self.client.post(
             f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Large HOG Code Function",
                 "type": "transformation",
-                "script": large_hog_code,
+                "script": large_script_code,
             },
         )
 
@@ -2286,7 +2286,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         assert "HOG code exceeds maximum size" in response.json()["detail"]
         assert f"{MAX_FN_CODE_SIZE_BYTES // 1024}KB" in response.json()["detail"]
 
-    def test_validates_raw_hog_code_size_during_update(self):
+    def test_validates_raw_script_code_size_during_update(self):
         """Test that we validate the raw HOG code size when updating an existing function."""
         # First create a script function with small, valid code
         response = self.client.post(
@@ -2302,13 +2302,13 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         function_id = response.json()["id"]
 
         # Generate a large HOG code string for the update that exceeds the limit
-        large_hog_code = "return " + "x" * (MAX_FN_CODE_SIZE_BYTES + 1000)
+        large_script_code = "return " + "x" * (MAX_FN_CODE_SIZE_BYTES + 1000)
 
         # Update the function with large HOG code
         update_response = self.client.patch(
             f"/v1/projects/{self.team.id}/insights_functions/{function_id}/",
             data={
-                "script": large_hog_code,
+                "script": large_script_code,
             },
         )
 
@@ -2923,11 +2923,11 @@ class TestLogTransformationAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTes
             ("person_global", "let e := person.properties.email\nreturn record"),
         ]
     )
-    def test_rejects_async_functions_and_unavailable_globals_in_hog_code(self, _name, script):
+    def test_rejects_async_functions_and_unavailable_globals_in_script_code(self, _name, script):
         response = self._create_log_transformation(script=script)
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
 
-    def test_allows_locals_loops_and_lambdas_in_hog_code(self):
+    def test_allows_locals_loops_and_lambdas_in_script_code(self):
         response = self._create_log_transformation(
             script=(
                 "fun redact(value) { return replaceAll(value, 'x', 'y') }\n"

@@ -74,7 +74,7 @@ class SignalScoutRunSummary(BaseModel):
 # in its skill's `allowed_tools`) has already done the research and authors a full `SignalReport`
 # directly. The bootstrap, scratchpad, recency, business-knowledge, friction, and output sections are
 # identical for both; only the channel-specific sections differ. `build_run_prompt` composes the right
-# set from the constants below. Orthogonal to the channel fork, every scout gets an origin-matched
+# set from the constants below. Ortscriptonal to the channel fork, every scout gets an origin-matched
 # improvement channel: a *custom* (team-authored) scout gets the self-improvement section
 # (`_self_improvement_section`), which on the report channel also invites escalating strong suggestions
 # as inbox reports about the scout; a *canonical* scout gets `_CANONICAL_IMPROVEMENT`, routing
@@ -463,7 +463,7 @@ _REPORT_CHARTS = f"""# Attaching charts
 - **Each chart is `chart_id` + `title` + `query`.** `chart_id` is your own slug (lowercase letters, numbers, `_`, `-`), `title` the heading above it, `query` a query node: `InsightVizNode` (an ad-hoc product analytics chart), `DataVisualizationNode` (a `InsightsQLQuery` source, plus `display` and `chartSettings` when you want a graph rather than a result table), or `SavedInsightNode` (an existing insight by `shortId`). Anything else is refused. Add a `caption` when there's something specific to look at.
 - **A graph from SQL needs its axes named.** Setting `display` without `chartSettings` draws an empty box: `chartSettings.xAxis.column` and `chartSettings.yAxis[].column` say which columns of your result are which. Leave `display` off entirely and the node renders the result table instead, which reads better than a chart for a handful of rows.
 - **Only attach a query you actually ran this session.** A query is checked for its `kind` and its size when you write it, not for whether it runs, so a well-formed node holding a broken query is stored without complaint and then fails to draw when a reader opens the report, with nothing to tell you. When you want the exact shape of an ad-hoc node, read it off an existing insight rather than guessing.
-- **A chart renders data, it does not run code.** ScriptVM `bytecode`, a nested `HogQuery`, `sendRawQuery`, and a nested `SuggestedQuestionsQuery` (whose runner would buy an LLM completion per reader) are each refused wherever they sit in the node. A warehouse query is fine through InsightsQL: keep `connectionId`, drop `sendRawQuery`.
+- **A chart renders data, it does not run code.** ScriptVM `bytecode`, a nested `ScriptQuery`, `sendRawQuery`, and a nested `SuggestedQuestionsQuery` (whose runner would buy an LLM completion per reader) are each refused wherever they sit in the node. A warehouse query is fine through InsightsQL: keep `connectionId`, drop `sendRawQuery`.
 - **Place it from the summary.** A markdown link with a `chart:` target, `[Daily signups](chart:signups-drop)`, draws the chart at that point in the body; reference it once, since repeating doesn't draw a second copy, and an unreferenced chart still renders after the prose. Two references in one paragraph sit side by side, so give a pair you want compared a paragraph of their own; one inside a table cell or heading has no room to draw, so its chart falls to the end. The inbox sizes a chart from its query, so set `size` (`small`, `medium`, `large`) only when it gets that wrong.
 - **Write prose that stands on its own.** A report can also be delivered to Slack, where nothing draws a chart and a reference degrades to its plain label. "Signups fell 60% over the week" survives that; "the chart below shows the drop" leaves a Slack reader with nothing.
 - **Pin the window** to absolute dates wherever the node supports it, so the reader sees the data you wrote about rather than whatever a relative range resolves to days later.
@@ -820,7 +820,7 @@ def build_run_prompt(
     other scout gets the signal persona that fires weak `emit_signal` findings for the pipeline to
     cluster. The bootstrap, scratchpad, recency, and close-out sections are shared.
 
-    Orthogonal to the channel fork, the prompt also forks on the skill's *origin*: a custom
+    Ortscriptonal to the channel fork, the prompt also forks on the skill's *origin*: a custom
     (team-authored) scout gets the self-improvement section inviting evidence-backed `improve:`
     scratchpad suggestions for its own skill body — and, when it holds report tools, escalating
     recurring or material suggestions as inbox reports about the scout itself; a canonical scout

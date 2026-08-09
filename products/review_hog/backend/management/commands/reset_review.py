@@ -1,4 +1,4 @@
-"""Wipe all ReviewHog DB state so a re-run starts from a genuinely clean slate.
+"""Wipe all Review DB state so a re-run starts from a genuinely clean slate.
 
 Postgres is the single source of truth for a review (there is no on-disk store), so this one
 command is the entire "clean state" story while iterating: it deletes every `ReviewReportArtefact`
@@ -22,7 +22,7 @@ from products.review_hog.backend.models import ReviewReport, ReviewReportArtefac
 
 class Command(BaseCommand):
     help = (
-        "Wipe all ReviewHog DB state (every ReviewReport + ReviewReportArtefact + ReviewSkillConfig "
+        "Wipe all Review DB state (every ReviewReport + ReviewReportArtefact + ReviewSkillConfig "
         "+ ReviewUserSettings, across all teams). DEBUG only."
     )
 
@@ -40,7 +40,7 @@ class Command(BaseCommand):
 
     def handle(self, *args: Any, **options: Any) -> None:
         if not settings.DEBUG:
-            raise CommandError("reset_review_hog only runs with DEBUG=True — it wipes every team's ReviewHog rows.")
+            raise CommandError("reset_review only runs with DEBUG=True — it wipes every team's Review rows.")
 
         dry_run: bool = options["dry_run"]
         skip_confirm: bool = options["yes"]
@@ -57,7 +57,7 @@ class Command(BaseCommand):
         settings_count = user_settings.count()
 
         if report_count == 0 and artefact_count == 0 and config_count == 0 and settings_count == 0:
-            self.stdout.write("ReviewHog DB is already empty — nothing to delete.")
+            self.stdout.write("Review DB is already empty — nothing to delete.")
             return
 
         summary = (

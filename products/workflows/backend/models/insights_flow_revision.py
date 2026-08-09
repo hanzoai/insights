@@ -12,7 +12,7 @@ class InsightsFlowRevision(TeamScopedRootMixin, UUIDTModel):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["insights_flow", "version"], name="unique_hogflow_revision_version"),
+            models.UniqueConstraint(fields=["insights_flow", "version"], name="unique_flow_revision_version"),
         ]
 
     # db_constraint=False on team/created_by: a real FK constraint to a hot table (insights_team,

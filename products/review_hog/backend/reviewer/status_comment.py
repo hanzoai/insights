@@ -75,7 +75,7 @@ _THRESHOLD_ATTRIBUTIONS = {
     "override": "the requester's",
     "default": "the default",
 }
-# Only personal thresholds live in someone's ReviewHog settings; the default variant has no page to point at.
+# Only personal thresholds live in someone's Review settings; the default variant has no page to point at.
 _PERSONAL_THRESHOLD_SOURCES = frozenset({"author", "override"})
 
 _PRIORITY_LABELS = {
@@ -108,7 +108,7 @@ _NO_ISSUES_MEDIA = (
 
 def status_marker(report_id: str) -> str:
     """The hidden marker identifying the report's status comment across turns and crashed runs."""
-    return f"<!-- reviewhog:status:{report_id} -->"
+    return f"<!-- review:status:{report_id} -->"
 
 
 def report_deep_link(team_id: int, report_id: str) -> str:
@@ -133,7 +133,7 @@ def render_in_progress_body(report_id: str, progress: dict[str, Any] | None) -> 
     counter = f" · {done}/{total}" if done is not None and total else ""
     return "\n".join(
         [
-            "### \U0001f994 ReviewHog is reviewing this pull request",
+            "### \U0001f994 Review is reviewing this pull request",
             "",
             f"**{label}{counter}**",
             "",
@@ -171,7 +171,7 @@ def render_final_body(
         f"**{counts[priority]} {_PRIORITY_LABELS[priority]}**"
         for priority in (IssuePriority.MUST_FIX, IssuePriority.SHOULD_FIX, IssuePriority.CONSIDER)
     )
-    lines = ["### \U0001f994 ReviewHog reviewed this pull request", ""]
+    lines = ["### \U0001f994 Review reviewed this pull request", ""]
     if found_total == 0:
         media_url, media_alt = random.choice(_NO_ISSUES_MEDIA)
         lines.extend(
@@ -197,7 +197,7 @@ def render_final_body(
                 f'"{_THRESHOLD_LABELS[threshold]}" urgency threshold'
             )
             if source in _PERSONAL_THRESHOLD_SOURCES:
-                sentence += " in their ReviewHog settings"
+                sentence += " in their Review settings"
             sentence += ", so they were not published."
             if report_url:
                 sentence += f" [View them in Insights]({report_url})."
@@ -209,7 +209,7 @@ def render_final_body(
 def render_failed_body(report_id: str) -> str:
     return "\n".join(
         [
-            "### \U0001f994 ReviewHog couldn't finish this review",
+            "### \U0001f994 Review couldn't finish this review",
             "",
             "The review run failed partway. It will run again on the next push to this pull request.",
             "",
@@ -322,7 +322,7 @@ def ensure_status_comment(team_id: int, report_id: str) -> None:
         report.status_comment_edited_at = timezone.now()
         report.save(update_fields=["status_comment_id", "status_comment_edited_at", "updated_at"])
     except Exception:
-        logger.exception("Could not post the ReviewHog status comment; the review continues without it")
+        logger.exception("Could not post the Review status comment; the review continues without it")
 
 
 def maybe_refresh_status_comment(team_id: int, report_id: str) -> None:
@@ -370,7 +370,7 @@ def maybe_refresh_status_comment(team_id: int, report_id: str) -> None:
             installation_id=installation_id,
         )
     except Exception:
-        logger.exception("Could not refresh the ReviewHog status comment; the review continues without it")
+        logger.exception("Could not refresh the Review status comment; the review continues without it")
 
 
 def finalize_status_comment(
@@ -406,7 +406,7 @@ def finalize_status_comment(
         )
         _edit_and_stamp(team_id, report, body)
     except Exception:
-        logger.exception("Could not finalize the ReviewHog status comment; the review is unaffected")
+        logger.exception("Could not finalize the Review status comment; the review is unaffected")
 
 
 def fail_status_comment(team_id: int, report_id: str) -> None:
@@ -417,7 +417,7 @@ def fail_status_comment(team_id: int, report_id: str) -> None:
             return
         _edit_and_stamp(team_id, report, render_failed_body(report_id))
     except Exception:
-        logger.exception("Could not mark the ReviewHog status comment as failed")
+        logger.exception("Could not mark the Review status comment as failed")
 
 
 def _edit_and_stamp(team_id: int, report: ReviewReport, body: str) -> None:

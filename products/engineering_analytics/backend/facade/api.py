@@ -316,7 +316,7 @@ def list_recently_merged_pull_requests(
     user_access_control: "UserAccessControl | None" = None,
 ) -> list[MergedPullRequest]:
     """Merged pull requests in ``repository`` ('owner/name'), newest first, each with its branch-tip
-    ``head_sha`` — the discovery seam for ReviewHog telemetry. Raises
+    ``head_sha`` — the discovery seam for Review telemetry. Raises
     ``GitHubSourceNotConnectedError`` (propagated to the caller) when no GitHub source is connected.
 
     Ask one of two ways. ``numbers`` returns exactly those PRs whatever their merge date, which is

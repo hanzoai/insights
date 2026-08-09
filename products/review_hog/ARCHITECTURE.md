@@ -1,9 +1,9 @@
-# ReviewHog Architecture
+# Review Architecture
 
 ## Overview
 
-**ReviewHog** (`products/review_hog`) is an automated GitHub PR code reviewer. It is a Django app
-(`backend/apps.py`, label `review_hog`, module `products.review_hog.backend`). A run fetches a PR from
+**Review** (`products/review_hog`) is an automated GitHub PR code reviewer. It is a Django app
+(`backend/apps.py`, label `review`, module `products.review_hog.backend`). A run fetches a PR from
 GitHub, splits it into logically reviewable **chunks**, picks which perspectives each chunk actually needs
 (**perspective selection**, a cheap one-shot), runs the selected **perspective reviews in parallel** on each
 chunk inside **sandbox agents**, then combines → scope-cleans → deduplicates → validates the findings, renders
@@ -13,7 +13,7 @@ pulls over MCP — the same canonical-skill pattern the Signals scouts use.
 
 The repo-access LLM steps (perspective review, blind-spot check, validation) run inside **sandbox agents**
 spawned through the shared `products/tasks` infrastructure (`Task`/`TaskRun` → Temporal
-`ProcessTaskWorkflow` → Modal/Docker sandbox → agent-server) — ReviewHog composes a prompt, hands it to the
+`ProcessTaskWorkflow` → Modal/Docker sandbox → agent-server) — Review composes a prompt, hands it to the
 Tasks runner, and gets back the validated model, owning no sandbox/Temporal code. The pure-text steps
 (**chunking, perspective selection, dedup**) run within size gates as **one-shot direct LLM-gateway calls**
 (`reviewer/sandbox/direct_llm.py`, structured outputs against the same pydantic models; chunking/dedup fall
@@ -21,16 +21,16 @@ back to the sandbox above their gates, selection falls back to running everythin
 Postgres (`ReviewReport` + `ReviewReportArtefact`) — there is **no on-disk store**; the only external side
 effect is the GitHub review it posts.
 
-This document is the present-tense architecture reference — what ReviewHog _is today_. Its companion
+This document is the present-tense architecture reference — what Review _is today_. Its companion
 **[DECISIONS.md](./DECISIONS.md)** is the full record of _why_ it got there: the staged build history, the
 design decisions (with the alternatives weighed and rejected), the gotchas, the grounded implementation maps,
 and the roadmap — including the designed-but-unbuilt loop. Nothing is summarized away; go there to check the
 reasoning behind any part of this reference. [Status & next](#status--next) below is a short summary of what's
 in flight, with the detail in DECISIONS.md.
 
-> **Keep the docs in sync, each in its lane.** This reference is the source of truth for ReviewHog's
+> **Keep the docs in sync, each in its lane.** This reference is the source of truth for Review's
 > architecture — the pipeline shape, the sandbox/contract surface it binds to in `products/tasks`, the data
-> models, the prompts, the artefact layout. A merge or refactor that moves or renames what ReviewHog depends on
+> models, the prompts, the artefact layout. A merge or refactor that moves or renames what Review depends on
 > is exactly such a change: re-point the affected sections here, don't leave them stale. Land the reasoning,
 > build history, and roadmap updates in [DECISIONS.md](./DECISIONS.md) — that's the record that grows over time,
 > so this reference stays lean and present-tense. Don't let the build log grow back into this file.
@@ -39,7 +39,7 @@ in flight, with the detail in DECISIONS.md.
 
 ## Status & next
 
-ReviewHog runs end-to-end: label / UI / inbox triggers → the Temporal pipeline → published PR review. The
+Review runs end-to-end: label / UI / inbox triggers → the Temporal pipeline → published PR review. The
 current focus is productionizing the reviewer-topology eval and tightening the finder/validator balance
 (validator strictness, fewer junk candidates, the coverage gap); the **loop** — a living, multi-turn review that
 re-checks on new commits/comments and implements fixes — is designed but not built. The single-turn pipeline
@@ -49,7 +49,7 @@ The full roadmap — every open thread with its reasoning, the loop design, the 
 the experiment backlog — is in [DECISIONS.md](./DECISIONS.md) (start at its "🎯 NEXT" section) and `eval/`
 (`RUN_LOG.md`, `POTENTIAL_EXPERIMENTS.md`, `experiments/`).
 
-**Before real users:** settle the "ReviewHog Alpha" published-comment wording (see
+**Before real users:** settle the "Review Alpha" published-comment wording (see
 [Known issues](#known-issues--tech-debt)).
 
 ---
@@ -75,7 +75,7 @@ Check these four things before a local `run_review`; don't re-derive them from c
    ```bash
    PGPASSWORD=insights psql -h localhost -p 5432 -d insights -U insights -c \
      "SELECT pr_number, status, run_count, head_sha, published_head_sha \
-      FROM review_hog_reviewreport WHERE repository='Insights/insights' AND pr_number=<N> AND team_id=1;"
+      FROM review_reviewreport WHERE repository='Insights/insights' AND pr_number=<N> AND team_id=1;"
    ```
 
 Run it (no `GITHUB_TOKEN` env — fetch and publish resolve the team's GitHub App installation token
@@ -86,7 +86,7 @@ flox activate -- bash -c "DJANGO_SETTINGS_MODULE=insights.settings python manage
   run_review --pr-url https://github.com/Insights/insights/pull/<N> --team-id 1 --user-id 1 [--publish]"
 ```
 
-Verify a run: `review_hog_reviewreport.run_count` bumps once per finalized turn (status returns to
+Verify a run: `review_reviewreport.run_count` bumps once per finalized turn (status returns to
 `idle`), or inspect activity-level progress in Temporal:
 
 ```bash
@@ -186,7 +186,7 @@ pr_metadata.head_branch` is threaded (as explicit kwargs, alongside `team_id` / 
    dedup; the prompt is pure text), the sandbox path above it pinned to the same Sonnet 5 @ xhigh via the
    `DEDUP_*` constants — which also drops findings any prior inline
    comment already raised — every reviewer (bot
-   or human, ReviewHog's own included) treated uniformly, the author handle passed through for context.
+   or human, Review's own included) treated uniformly, the author handle passed through for context.
    Returns the canonical post-dedup `list[Issue]`; `persist_findings` mirrors them to
    `issue_finding` rows.
 8. **Validate** — the `ValidateIssuesWorkflow` child groups the survivors by chunk and fans out **one warm
@@ -204,7 +204,7 @@ pr_metadata.head_branch` is threaded (as explicit kwargs, alongside `team_id` / 
    `finalize_review_report` stores it as `ReviewReport.report_markdown` and bumps the run watermark.
 10. **Publish** — `publish_review` (GitHub REST via the gated egress transport, **DB-driven**) reads the body from
     `ReviewReport.report_markdown` and the inline comments from the valid finding/verdict rows (`load_valid_findings`),
-    posts a standalone "ReviewHog Alpha 🦔" feedback comment, then a PR review (`event="COMMENT"`, **pinned to the
+    posts a standalone "Review Alpha 🦔" feedback comment, then a PR review (`event="COMMENT"`, **pinned to the
     reviewed `head_sha`** via `commit_id`) with inline comments for `is_valid` `MUST_FIX`/`SHOULD_FIX` findings that
     land on a line present in the current diff (`CONSIDER` dropped). It posts whenever there's ≥1 valid publishable
     finding — if all are off-diff (no inline comments resolve) the body still posts, carrying them in the
@@ -219,7 +219,7 @@ pr_metadata.head_branch` is threaded (as explicit kwargs, alongside `team_id` / 
     whose threshold it was (the author's / the requester's / the default, from `resolved_from`) plus a
     "View them in Insights" deep link to the exact report (`/project/<team>/code-review?review=<report id>`,
     a **permanent public contract** — the frontend URL sync and `report_deep_link` must keep agreeing on it).
-    After the publish stage the workflow captures a **`reviewhog_review_completed`** product-analytics event —
+    After the publish stage the workflow captures a **`review_review_completed`** product-analytics event —
     one per finalized turn (published or stored), carrying repository / PR / trigger / finding-count / PR-size
     properties (`track_review_completed_activity`). Best-effort: telemetry can never fail a review.
 
@@ -287,9 +287,9 @@ run_sandbox_review (executor.py)
   → returns (session, model); caller ends the session and returns the model (None on failure)
 ```
 
-The PR-branch checkout that ReviewHog depends on is performed by master's
+The PR-branch checkout that Review depends on is performed by master's
 `get_sandbox_for_repository.py` block (driven by `ctx.branch`, which originates from `TaskRun.branch`), **not**
-by ReviewHog. The contract surface ReviewHog binds to — **imported only through the Tasks facade
+by Review. The contract surface Review binds to — **imported only through the Tasks facade
 `products.tasks.backend.facade.agents`** (Tasks is an isolated product; `tach` enforces the boundary) and
 that any future merge must preserve: `MultiTurnSession.start(prompt, context, model, *, branch, step_name)
 -> (session, model)`, `CustomPromptSandboxContext(team_id, user_id, repository)`, and `session.end()`.
@@ -303,7 +303,7 @@ Read this before testing another model (Sonnet, a new Codex model, a different e
 
 **`insights/insights` — where the knobs are set + validated.**
 
-- **Pick the values (ReviewHog):** `reviewer/constants.py` `REVIEW_{RUNTIME_ADAPTER,MODEL,REASONING_EFFORT}` →
+- **Pick the values (Review):** `reviewer/constants.py` `REVIEW_{RUNTIME_ADAPTER,MODEL,REASONING_EFFORT}` →
   passed at the `review_chunk_activity` `run_sandbox_review(...)` call → `run_sandbox_review`
   (`reviewer/sandbox/executor.py`) threads them onto the `CustomPromptSandboxContext`. To test another model, change
   these constants (the executor kwargs exist for every single-turn stage).
@@ -313,7 +313,7 @@ Read this before testing another model (Sonnet, a new Codex model, a different e
   `CLAUDE_REASONING_EFFORTS_BY_MODEL`, `CODEX_MODELS` + `CODEX_REASONING_EFFORTS` + `CODEX_XHIGH_REASONING_MODELS`
   (only `gpt-5.5` allows `xhigh`), and the pure checks `get_provider_for_runtime_adapter` /
   `get_supported_reasoning_efforts` / `get_reasoning_effort_error`. A new model/effort must be added here or the combo
-  is rejected. `test_constants.py` locks the ReviewHog combo to this registry at unit time.
+  is rejected. `test_constants.py` locks the Review combo to this registry at unit time.
 - **Transport into the sandbox:** `Task._build_task` writes `extra_state[{runtime_adapter, provider, model,
 reasoning_effort}]` → `get_task_processing_context` reads it back → `start_agent_server` →
   `build_agent_runtime_env_prefix` (`logic/services/sandbox.py`) emits
@@ -432,7 +432,7 @@ IDOR rule) via `class X(UUIDModel, TeamScopedRootMixin)`:
   the working-state types `chunk_set`, `perspective_result`, `perspective_selection`, `pr_snapshot`.
 
 Content schemas (`reviewer/artefact_content.py`, pydantic): `ReviewIssueFinding` and `ValidationVerdict` are
-ReviewHog-owned; `Commit` / `CodeReference` / `TaskRunArtefact` / `NoteArtefact` are reused from the Signals leaf.
+Review-owned; `Commit` / `CodeReference` / `TaskRunArtefact` / `NoteArtefact` are reused from the Signals leaf.
 See [DECISIONS.md](./DECISIONS.md) for the "reuse the leaf, own the model" boundary and why a PR review is not a
 `SignalReport`.
 
@@ -449,7 +449,7 @@ See [DECISIONS.md](./DECISIONS.md) for the "reuse the leaf, own the model" bound
     the sandbox learns to fetch `refs/pull/N/head`, test against origin-branch PRs.
 - **Publish a computed review without recomputing:** `python manage.py publish_review --pr-url <url> --team-id <id>`
   publishes the latest completed turn at its reviewed `head_sha` (DB-driven; no Temporal, no sandbox).
-- **Reset local state:** `DEBUG=1 python manage.py reset_review_hog [--dry-run] [--yes]` wipes all ReviewHog rows
+- **Reset local state:** `DEBUG=1 python manage.py reset_review [--dry-run] [--yes]` wipes all Review rows
   across every team (DEBUG-only; GitHub comments untouched).
 - **Lint:** `ruff check products/review_hog/ --fix && ruff format products/review_hog/`
 - **Tests:** the product's `backend:test` script covers **both** `backend/tests` and `backend/reviewer/tests`
@@ -471,13 +471,13 @@ See [DECISIONS.md](./DECISIONS.md) for the "reuse the leaf, own the model" bound
   `REVIEWFN_TEAM_ID` (the run team), `REVIEWFN_RUN_USER_ID` (optional; falls back to the integration creator).
 
 **Triggers.** Five entry points drive the same `ReviewPRWorkflow`: the `run_review` CLI (manual / eval), the
-`reviewhog` **label** on a `Insights/insights` PR (a thin GitHub Action → `POST /v1/review_hog/trigger`), a **UI**
+`review` **label** on a `Insights/insights` PR (a thin GitHub Action → `POST /v1/review/trigger`), a **UI**
 "Review this PR" field in the Code review scene (any installation-accessible PR), an **inbox** trigger (a
 `TaskRun` receiver auto-reviews self-driving Signals implementations), and **MCP tools**
 (`review-script-reviews-{trigger,list,get}`, defined in `products/review_hog/mcp/tools.yaml` and gated on the
 `review-script` feature flag) that drive the same reviews viewset with a personal API key or OAuth token. The UI and
-MCP paths are one surface: the viewset carries the grantable `review_hog` scope (`review_hog:read` for list /
-retrieve / perspective_stats, `review_hog:write` for trigger) rather than INTERNAL, and the trigger action keeps
+MCP paths are one surface: the viewset carries the grantable `review` scope (`review:read` for list /
+retrieve / perspective_stats, `review:write` for trigger) rather than INTERNAL, and the trigger action keeps
 the `REVIEWFN_TEAM_ID` dogfood gate and its synchronous URL / App-access / fork / open-state checks regardless of
 caller. See [DECISIONS.md](./DECISIONS.md) for each trigger's auth / scope / identity rules.
 
@@ -486,7 +486,7 @@ viewer is the **acting user OR the PR's author** — `author_login` compared cas
 viewer's linked GitHub login (`User.get_github_login()`, the reverse of the author→user mapping the reviewer
 runs under; no linked login → acting-user match only). `scope=everyone` is the whole project; `retrieve` is
 project-wide so any listed review opens. A specific report is linkable at `/code-review?review=<report id>`
-(mirrored to/from the drawer by `reviewHogSettingsLogic`'s URL sync; the status comment's held-back link
+(mirrored to/from the drawer by `reviewSettingsLogic`'s URL sync; the status comment's held-back link
 targets it, so the param is a permanent contract). The drawer buckets a review's findings into published vs
 below-threshold by the detail's stored `run_urgency_threshold` — the viewer's current setting is only the
 fallback for pre-column rows — and its first tab reads "Published" only when the review actually posted
@@ -526,7 +526,7 @@ fallback for pre-column rows — and its first tab reads "Published" only when t
   "Published" with no not-published banner. Fix: `retrieve` already loads the completed head — expose
   per-turn truth (`published_head_sha == completed_head_sha`) on the detail payload and gate the drawer's
   published flag on it.
-- **Alpha maturity** — the published comment still says "ReviewHog Alpha" and asks users to reply
+- **Alpha maturity** — the published comment still says "Review Alpha" and asks users to reply
   "valid"/"invalid" (`reviewer/tools/publish_review.py`, the `post_promo` block). Publish is now live
   per-run (the trigger endpoint posts with `publish=true`), so settle the prod wording before real users
   see it.

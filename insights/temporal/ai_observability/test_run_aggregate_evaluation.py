@@ -182,8 +182,8 @@ def _mock_activities(calls: list[str], exclude: set[str] | None = None) -> list[
             "deleted": False,
         }
 
-    @activity.defn(name="execute_trace_hog_eval_activity")
-    async def mock_execute_trace_hog(inputs: ExecuteTraceEvaluationInputs) -> EvaluationActivityResult:
+    @activity.defn(name="execute_trace_script_eval_activity")
+    async def mock_execute_trace_script(inputs: ExecuteTraceEvaluationInputs) -> EvaluationActivityResult:
         calls.append("execute")
         return {"result_type": "boolean", "verdict": True, "reasoning": "ok", "allows_na": False}
 
@@ -200,8 +200,8 @@ def _mock_activities(calls: list[str], exclude: set[str] | None = None) -> list[
         calls.append("check_session_settled")
         return "2026-07-23T00:00:00+00:00"
 
-    @activity.defn(name="execute_session_hog_eval_activity")
-    async def mock_execute_session_hog(inputs: ExecuteSessionEvaluationInputs) -> EvaluationActivityResult:
+    @activity.defn(name="execute_session_script_eval_activity")
+    async def mock_execute_session_script(inputs: ExecuteSessionEvaluationInputs) -> EvaluationActivityResult:
         calls.append("execute_session")
         return {"result_type": "boolean", "verdict": True, "reasoning": "ok", "allows_na": False}
 
@@ -212,11 +212,11 @@ def _mock_activities(calls: list[str], exclude: set[str] | None = None) -> list[
 
     all_activities = {
         "fetch_evaluation_activity": mock_fetch_evaluation,
-        "execute_trace_hog_eval_activity": mock_execute_trace_hog,
+        "execute_trace_script_eval_activity": mock_execute_trace_script,
         "emit_trace_evaluation_event_activity": mock_emit,
         "emit_internal_telemetry_activity": mock_telemetry,
         "check_session_settled_activity": mock_check_session_settled,
-        "execute_session_hog_eval_activity": mock_execute_session_hog,
+        "execute_session_script_eval_activity": mock_execute_session_script,
         "execute_session_llm_judge_activity": mock_execute_session_judge,
     }
     return [fn for name, fn in all_activities.items() if name not in exclude]

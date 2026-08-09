@@ -5,8 +5,8 @@ from insights.test.base import BaseTest, DatastoreTestMixin
 from parameterized import parameterized
 
 from insights.datastore.client import sync_execute
-from insights.models.tophog.queries import query_tophog_filter_options, query_tophog_metrics
-from insights.models.tophog.sql import DATA_TABLE_NAME, TRUNCATE_TOPFN_TABLE_SQL
+from insights.models.topfn.queries import query_topfn_filter_options, query_topfn_metrics
+from insights.models.topfn.sql import DATA_TABLE_NAME, TRUNCATE_TOPFN_TABLE_SQL
 
 TS = datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)
 DATE_FROM = datetime(2024, 1, 15, 0, 0, 0, tzinfo=UTC)
@@ -34,13 +34,13 @@ def _insert_rows(rows: list[tuple]) -> None:
     sync_execute(sql)
 
 
-class TestTopHogQueries(DatastoreTestMixin, BaseTest):
+class TestTopFnQueries(DatastoreTestMixin, BaseTest):
     def setUp(self):
         super().setUp()
         sync_execute(TRUNCATE_TOPFN_TABLE_SQL())
 
     def test_no_data_returns_empty(self):
-        results = query_tophog_metrics(DATE_FROM, DATE_TO)
+        results = query_topfn_metrics(DATE_FROM, DATE_TO)
         self.assertEqual(results, [])
 
     @parameterized.expand(
@@ -53,7 +53,7 @@ class TestTopHogQueries(DatastoreTestMixin, BaseTest):
         rows = [(TS, "latency", agg_type, {"fn": "process"}, v, 1, "events", "fast") for v in values]
         _insert_rows(rows)
 
-        results = query_tophog_metrics(DATE_FROM, DATE_TO)
+        results = query_topfn_metrics(DATE_FROM, DATE_TO)
         self.assertEqual(len(results), 1)
         self.assertAlmostEqual(results[0]["total"], expected_total, places=5)
         self.assertEqual(results[0]["obs"], len(values))
@@ -66,7 +66,7 @@ class TestTopHogQueries(DatastoreTestMixin, BaseTest):
             ]
         )
 
-        results = query_tophog_metrics(DATE_FROM, DATE_TO)
+        results = query_topfn_metrics(DATE_FROM, DATE_TO)
         self.assertEqual(len(results), 1)
         # weighted avg: (10*100 + 20*300) / (100+300) = 7000/400 = 17.5
         self.assertAlmostEqual(results[0]["total"], 17.5, places=5)
@@ -76,7 +76,7 @@ class TestTopHogQueries(DatastoreTestMixin, BaseTest):
         rows = [(TS, "latency", "sum", {"fn": f"func_{i}"}, float(i), 1, "events", "fast") for i in range(15)]
         _insert_rows(rows)
 
-        results = query_tophog_metrics(DATE_FROM, DATE_TO)
+        results = query_topfn_metrics(DATE_FROM, DATE_TO)
         self.assertEqual(len(results), 10)
         totals = [r["total"] for r in results]
         self.assertEqual(totals, sorted(totals, reverse=True))
@@ -90,7 +90,7 @@ class TestTopHogQueries(DatastoreTestMixin, BaseTest):
             ]
         )
 
-        results = query_tophog_metrics(DATE_FROM, DATE_TO, pipeline="events")
+        results = query_topfn_metrics(DATE_FROM, DATE_TO, pipeline="events")
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["key"], {"fn": "a"})
 
@@ -102,7 +102,7 @@ class TestTopHogQueries(DatastoreTestMixin, BaseTest):
             ]
         )
 
-        results = query_tophog_metrics(DATE_FROM, DATE_TO, lane="slow")
+        results = query_topfn_metrics(DATE_FROM, DATE_TO, lane="slow")
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["key"], {"fn": "b"})
 
@@ -116,7 +116,7 @@ class TestTopHogQueries(DatastoreTestMixin, BaseTest):
             ]
         )
 
-        results = query_tophog_metrics(DATE_FROM, DATE_TO, pipeline="recordings", lane="slow")
+        results = query_topfn_metrics(DATE_FROM, DATE_TO, pipeline="recordings", lane="slow")
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["key"], {"fn": "d"})
 
@@ -128,7 +128,7 @@ class TestTopHogQueries(DatastoreTestMixin, BaseTest):
             ]
         )
 
-        results = query_tophog_metrics(DATE_FROM, DATE_TO)
+        results = query_topfn_metrics(DATE_FROM, DATE_TO)
         self.assertEqual(len(results), 1)
         self.assertAlmostEqual(results[0]["total"], 30.0, places=5)
         self.assertEqual(results[0]["pipelines"], ["events", "recordings"])
@@ -143,6 +143,6 @@ class TestTopHogQueries(DatastoreTestMixin, BaseTest):
             ]
         )
 
-        pipelines, lanes = query_tophog_filter_options(DATE_FROM, DATE_TO)
+        pipelines, lanes = query_topfn_filter_options(DATE_FROM, DATE_TO)
         self.assertEqual(pipelines, ["events", "recordings"])
         self.assertEqual(lanes, ["fast", "slow"])

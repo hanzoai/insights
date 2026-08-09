@@ -59,7 +59,7 @@ class MetricRuleCanonicalTeamPermission(BasePermission):
     against a child environment reads and writes the PARENT's rules. The default team gate only
     checks membership of the URL team; re-anchor authorization to the canonical team so a
     credential scoped solely to a child environment can't touch the parent's rules. Mirrors
-    stamphog's StamphogCanonicalTeamAccessPermission.
+    stamp's StampCanonicalTeamAccessPermission.
     """
 
     message = "You don't have access to the project that owns this data."

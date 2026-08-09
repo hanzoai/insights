@@ -5,7 +5,7 @@ import { Checkbox, Divider, Input, Select, Tag, Link, Tooltip } from '@hanzo/ele
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { AppMetricsSparkline } from 'lib/components/AppMetrics/AppMetricsSparkline'
-import { MailHog } from 'lib/components/mascots'
+import { MailScript } from 'lib/components/mascots'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
@@ -229,7 +229,7 @@ export function WorkflowsTable(): JSX.Element {
                         <AppMetricsSparkline
                             logicKey={id}
                             forceParams={{
-                                appSource: 'hog_flow',
+                                appSource: 'script_flow',
                                 appSourceId: id,
                                 metricKind: ['success', 'failure'],
                                 breakdownBy: 'metric_kind',
@@ -348,7 +348,7 @@ export function WorkflowsTable(): JSX.Element {
                     action={() => {
                         showNewWorkflowModal()
                     }}
-                    customHog={MailHog}
+                    customScript={MailScript}
                     isEmpty
                     mcpSurfaceKey="workflows.create"
                 />

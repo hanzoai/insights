@@ -3430,7 +3430,7 @@ def parser_test_factory(backend: InsightsQLParserBackend):
             self.assertEqual(tag, ast.InsightsQLXTag(kind="em", attributes=[]))
 
         def test_return_insightsqlx_tag_value(self):
-            # `return <Tag/>` is a returnStmt whose value is a InsightsQLX tag, not the `<` less-than operator binding `return` as a Field. The rust parser's return-guard read the following `<` as less-than and rejected the tag while cpp accepts it; bare `<Tag/>` and `let x := <Tag/>` already worked, so only the return-value position needed the fix (`execute_hog` wraps a bare expression as `return <expr>;`, which is how this surfaced).
+            # `return <Tag/>` is a returnStmt whose value is a InsightsQLX tag, not the `<` less-than operator binding `return` as a Field. The rust parser's return-guard read the following `<` as less-than and rejected the tag while cpp accepts it; bare `<Tag/>` and `let x := <Tag/>` already worked, so only the return-value position needed the fix (`execute_script` wraps a bare expression as `return <expr>;`, which is how this surfaced).
             prog = cast(ast.Program, self._program("return <Sparkline />"))
             stmt = cast(ast.ReturnStatement, prog.declarations[0])
             self.assertIsInstance(stmt, ast.ReturnStatement)
@@ -5535,7 +5535,7 @@ def parser_test_factory(backend: InsightsQLParserBackend):
 
         def test_is_only_consumes_known_tails(self):
             # `IS` is only `IS [NOT] NULL` / `IS [NOT] DISTINCT FROM y` per cpp's grammar; in Script program mode anything else falls back to per-token ExprStatements (e.g. `this is a string` parses as four bare identifier statements).
-            # Caught by `test_metadata.py::test_string_template` parsing `"this is a {event} string"` as `HogLanguage.HOG`.
+            # Caught by `test_metadata.py::test_string_template` parsing `"this is a {event} string"` as `ScriptLanguage.HOG`.
             cases = (
                 "this is a string",
                 "this is a {event} string",
@@ -6786,7 +6786,7 @@ def parser_test_factory(backend: InsightsQLParserBackend):
                 with self.assertRaises(ExposedInsightsQLError, msg=src):
                     parse_expr(src, backend=backend)
 
-        def test_null_inf_nan_rejected_in_hog_identifier_slots(self):
+        def test_null_inf_nan_rejected_in_script_identifier_slots(self):
             # `varDecl`, `funcStmt`, `catchBlock`, `forInStmt`, and lambda heads all route through `identifier`, which omits NULL / INF / NAN / Script-stmt keywords.
             program_cases = (
                 "let null := 1",
@@ -7018,7 +7018,7 @@ def parser_test_factory(backend: InsightsQLParserBackend):
             for query in valid:
                 parse_program(query, backend=backend)
 
-        def test_window_name_rejects_hog_statement_keywords(self):
+        def test_window_name_rejects_script_statement_keywords(self):
             # A window name is an `identifier`, which admits only the keywords in
             # cpp's `keyword` rule; the Script-statement keywords are excluded, so they
             # are not valid window names. rust accepted any keyword there. Both

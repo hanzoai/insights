@@ -6,7 +6,7 @@ import { List, getScrollbarSize, useDynamicRowHeight, useListRef } from 'react-w
 
 import { Button, Link } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { AutoSizer } from 'lib/components/AutoSizer'
 import { SizeProps } from 'lib/components/AutoSizer/AutoSizer'
 import { TZLabelProps } from 'lib/components/TZLabel'
@@ -30,7 +30,7 @@ import { VirtualizedTableColumn } from 'products/logs/frontend/components/Virtua
 import { virtualizedLogsListLogic } from 'products/logs/frontend/components/VirtualizedLogsList/virtualizedLogsListLogic'
 import { LogsOrderBy, ParsedLogMessage } from 'products/logs/frontend/types'
 
-const MascotMagnifyingGlass = pngHoggie()
+const MascotMagnifyingGlass = pngMascot()
 
 const DEFAULT_ROW_HEIGHT = 32
 

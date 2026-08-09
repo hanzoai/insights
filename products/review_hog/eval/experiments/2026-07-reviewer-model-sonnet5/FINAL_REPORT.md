@@ -2,7 +2,7 @@
 
 > 4 runs · 2 arms · frozen PR #62096 (head `ba725a89`) · pinned 3-chunk split (12 units/run) · validator/dedup/chunking
 > constant (agent default = Opus) · review stage only (wave perspectives + blind-spot units).
-> Judged per dump vs the old ReviewHog 10-finding yardstick (`../2026-07-reviewer-topology/fixtures/old_reviewhog_report.md`),
+> Judged per dump vs the old Review 10-finding yardstick (`../2026-07-reviewer-topology/fixtures/old_review_report.md`),
 > raw output in `judge_results.json`. Runs 2026-07-03.
 > **Judge calls are unreviewed by a human — see the cross-judge divergence note in `judge_results.json` before acting on close calls.**
 

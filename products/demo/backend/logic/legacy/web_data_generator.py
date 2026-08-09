@@ -37,11 +37,11 @@ class WebDataGenerator(DataGenerator):
     def create_actions_dashboards(self):
         homepage = Action.objects.create(
             team=self.team,
-            name="Hogflix homepage view",
+            name="Scriptflix homepage view",
             steps_json=[
                 {
                     "event": "$pageview",
-                    "url": "http://hogflix.com",
+                    "url": "http://scriptflix.com",
                     "url_matching": "exact",
                 }
             ],
@@ -49,11 +49,11 @@ class WebDataGenerator(DataGenerator):
 
         user_signed_up = Action.objects.create(
             team=self.team,
-            name="Hogflix signed up",
+            name="Scriptflix signed up",
             steps_json=[
                 {
                     "event": "$autocapture",
-                    "url": "http://hogflix.com/1",
+                    "url": "http://scriptflix.com/1",
                     "url_matching": "contains",
                     "selector": "button",
                 }
@@ -62,11 +62,11 @@ class WebDataGenerator(DataGenerator):
 
         user_paid = Action.objects.create(
             team=self.team,
-            name="Hogflix paid",
+            name="Scriptflix paid",
             steps_json=[
                 {
                     "event": "$autocapture",
-                    "url": "http://hogflix.com/2",
+                    "url": "http://scriptflix.com/2",
                     "url_matching": "contains",
                     "selector": "button",
                 }
@@ -76,25 +76,25 @@ class WebDataGenerator(DataGenerator):
         dashboard = Dashboard.objects.create(name="Web Analytics", pinned=True, team=self.team)
         insight = Insight.objects.create(
             team=self.team,
-            name="Hogflix signup -> watching movie",
+            name="Scriptflix signup -> watching movie",
             description="Shows a conversion funnel from sign up to watching a movie.",
             filters={
                 "actions": [
                     {
                         "id": homepage.id,
-                        "name": "Hogflix homepage view",
+                        "name": "Scriptflix homepage view",
                         "order": 0,
                         "type": TREND_FILTER_TYPE_ACTIONS,
                     },
                     {
                         "id": user_signed_up.id,
-                        "name": "Hogflix signed up",
+                        "name": "Scriptflix signed up",
                         "order": 1,
                         "type": TREND_FILTER_TYPE_ACTIONS,
                     },
                     {
                         "id": user_paid.id,
-                        "name": "Hogflix paid",
+                        "name": "Scriptflix paid",
                         "order": 2,
                         "type": TREND_FILTER_TYPE_ACTIONS,
                     },
@@ -114,7 +114,7 @@ class WebDataGenerator(DataGenerator):
             distinct_id=distinct_id,
             timestamp=now() - relativedelta(days=start_day),
             properties={
-                "$current_url": "http://hogflix.com",
+                "$current_url": "http://scriptflix.com",
                 "$browser": browser,
                 "$lib": "web",
             },
@@ -124,7 +124,7 @@ class WebDataGenerator(DataGenerator):
             distinct_id=distinct_id,
             event="$autocapture",
             properties={
-                "$current_url": "http://hogflix.com",
+                "$current_url": "http://scriptflix.com",
                 "$browser": browser,
                 "$lib": "web",
                 "$event_type": "click",
@@ -137,7 +137,7 @@ class WebDataGenerator(DataGenerator):
                 event="$autocapture",
                 distinct_id=distinct_id,
                 properties={
-                    "$current_url": "http://hogflix.com/1",
+                    "$current_url": "http://scriptflix.com/1",
                     "$browser": browser,
                     "$lib": "web",
                     "$event_type": "click",
@@ -148,7 +148,7 @@ class WebDataGenerator(DataGenerator):
                 event="$pageview",
                 distinct_id=distinct_id,
                 properties={
-                    "$current_url": "http://hogflix.com/2",
+                    "$current_url": "http://scriptflix.com/2",
                     "$browser": browser,
                     "$lib": "web",
                 },
@@ -159,7 +159,7 @@ class WebDataGenerator(DataGenerator):
                     event="$autocapture",
                     distinct_id=distinct_id,
                     properties={
-                        "$current_url": "http://hogflix.com/2",
+                        "$current_url": "http://scriptflix.com/2",
                         "$browser": browser,
                         "$lib": "web",
                         "$event_type": "click",
@@ -176,7 +176,7 @@ class WebDataGenerator(DataGenerator):
                     event="$pageview",
                     distinct_id=distinct_id,
                     properties={
-                        "$current_url": "http://hogflix.com/3",
+                        "$current_url": "http://scriptflix.com/3",
                         "$browser": browser,
                         "$lib": "web",
                     },
@@ -218,5 +218,5 @@ class WebDataGenerator(DataGenerator):
 
     @cached_property
     def demo_recording(self) -> dict[str, Any]:
-        with open(_LEGACY_DATA_DIR / "hogflix_session_recording.json") as demo_session_file:
+        with open(_LEGACY_DATA_DIR / "scriptflix_session_recording.json") as demo_session_file:
             return json.load(demo_session_file)

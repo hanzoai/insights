@@ -67,7 +67,7 @@ from products.signals.backend.artefact_attribution import ArtefactAttribution
 
 logger = logging.getLogger(__name__)
 
-_EVENT = "reviewhog_finding_outcome"
+_EVENT = "review_finding_outcome"
 
 
 class Capture(Protocol):

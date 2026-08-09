@@ -1,6 +1,6 @@
 """Tests that all Script evaluation examples compile and run correctly.
 
-Examples are defined in hogEvalExamples.json (shared with the frontend).
+Examples are defined in scriptEvalExamples.json (shared with the frontend).
 """
 
 import json
@@ -13,13 +13,13 @@ from parameterized import parameterized
 
 from insights.schema import LLMTrace, LLMTraceEvent
 
-from insights.cdp.validation import compile_hog
-from insights.temporal.ai_observability.evaluation_hog import execute_hog_eval_bytecode
-from insights.temporal.ai_observability.run_evaluation import run_hog_eval
-from insights.temporal.ai_observability.run_session_evaluation import build_session_hog_globals
-from insights.temporal.ai_observability.run_trace_evaluation import build_trace_hog_globals
+from insights.cdp.validation import compile_script
+from insights.temporal.ai_observability.evaluation_script import execute_script_eval_bytecode
+from insights.temporal.ai_observability.run_evaluation import run_script_eval
+from insights.temporal.ai_observability.run_session_evaluation import build_session_script_globals
+from insights.temporal.ai_observability.run_trace_evaluation import build_trace_script_globals
 
-EXAMPLES_PATH = Path(__file__).resolve().parents[1] / "frontend" / "evaluations" / "hogEvalExamples.json"
+EXAMPLES_PATH = Path(__file__).resolve().parents[1] / "frontend" / "evaluations" / "scriptEvalExamples.json"
 EXAMPLES: list[dict] = json.loads(EXAMPLES_PATH.read_text())
 EXAMPLE_LABELS = [e["label"] for e in EXAMPLES]
 
@@ -107,7 +107,7 @@ def _make_clean_trace_globals(bytecode: list[Any]) -> dict[str, Any]:
             ),
         ],
     )
-    return build_trace_hog_globals(trace, "trace-123", bytecode=bytecode)
+    return build_trace_script_globals(trace, "trace-123", bytecode=bytecode)
 
 
 def _make_clean_session_globals(bytecode: list[Any]) -> dict[str, Any]:
@@ -130,31 +130,31 @@ def _make_clean_session_globals(bytecode: list[Any]) -> dict[str, Any]:
         )
         for index in (1, 2)
     ]
-    return build_session_hog_globals(traces, "session-123", bytecode=bytecode)
+    return build_session_script_globals(traces, "session-123", bytecode=bytecode)
 
 
-class TestHogEvalExamplesCompile:
+class TestScriptEvalExamplesCompile:
     @parameterized.expand(EXAMPLE_LABELS)
     def test_compiles(self, label):
         source = _get_source(label)
-        bytecode = compile_hog(source, "destination")
+        bytecode = compile_script(source, "destination")
         assert len(bytecode) > 0
 
 
-class TestHogEvalExamplesRun:
+class TestScriptEvalExamplesRun:
     @parameterized.expand(EXAMPLE_LABELS)
     def test_returns_bool_without_error(self, label):
         source = _get_source(label)
-        bytecode = compile_hog(source, "destination")
-        result = run_hog_eval(bytecode, CLEAN_EVENT)
+        bytecode = compile_script(source, "destination")
+        result = run_script_eval(bytecode, CLEAN_EVENT)
 
         assert result["error"] is None, f"'{label}' errored: {result['error']}"
         assert isinstance(result["verdict"], bool), f"'{label}' returned non-bool: {result['verdict']}"
 
     @parameterized.expand(EXAMPLE_LABELS)
     def test_returns_bool_without_error_for_trace(self, label):
-        bytecode = compile_hog(_get_source(label), "destination")
-        result = execute_hog_eval_bytecode(bytecode, _make_clean_trace_globals(bytecode), allows_na=False)
+        bytecode = compile_script(_get_source(label), "destination")
+        result = execute_script_eval_bytecode(bytecode, _make_clean_trace_globals(bytecode), allows_na=False)
 
         assert result["error"] is None, f"'{label}' errored for a trace: {result['error']}"
         assert isinstance(result["verdict"], bool), f"'{label}' returned non-bool for a trace: {result['verdict']}"
@@ -164,14 +164,14 @@ class TestHogEvalExamplesRun:
         """A session builds only `target` and `evaluation_events` — no `events` or `trace`. An
         example reaching for a trace-only global would come back undefined here rather than error,
         so assert on the verdict type as well: that is what catches it."""
-        bytecode = compile_hog(_get_source(label), "destination")
-        result = execute_hog_eval_bytecode(bytecode, _make_clean_session_globals(bytecode), allows_na=False)
+        bytecode = compile_script(_get_source(label), "destination")
+        result = execute_script_eval_bytecode(bytecode, _make_clean_session_globals(bytecode), allows_na=False)
 
         assert result["error"] is None, f"'{label}' errored for a session: {result['error']}"
         assert isinstance(result["verdict"], bool), f"'{label}' returned non-bool for a session: {result['verdict']}"
 
 
-class TestHogEvalExamplesBehavior:
+class TestScriptEvalExamplesBehavior:
     @parameterized.expand(
         [
             ("Output not empty",),
@@ -185,8 +185,8 @@ class TestHogEvalExamplesBehavior:
         ]
     )
     def test_passes_on_clean_output(self, label):
-        bytecode = compile_hog(_get_source(label), "destination")
-        result = run_hog_eval(bytecode, CLEAN_EVENT)
+        bytecode = compile_script(_get_source(label), "destination")
+        result = run_script_eval(bytecode, CLEAN_EVENT)
         assert result["error"] is None
         assert result["verdict"] is True
 
@@ -199,33 +199,33 @@ class TestHogEvalExamplesBehavior:
         ]
     )
     def test_fails_on_bad_output(self, label, bad_output):
-        bytecode = compile_hog(_get_source(label), "destination")
+        bytecode = compile_script(_get_source(label), "destination")
         # Use $ai_output directly so the output global is the plain string, not a JSON-serialized choices array
         event = _make_event()
         event["properties"].pop("$ai_output_choices", None)
         event["properties"]["$ai_output"] = bad_output
-        result = run_hog_eval(bytecode, event)
+        result = run_script_eval(bytecode, event)
         assert result["error"] is None
         assert result["verdict"] is False, f"'{label}' should have failed but passed"
 
     def test_cost_guard_fails_on_expensive(self):
-        bytecode = compile_hog(_get_source("Cost & latency guard"), "destination")
+        bytecode = compile_script(_get_source("Cost & latency guard"), "destination")
         event = _make_event(ai_total_cost_usd=0.10, ai_latency=1.0)
-        result = run_hog_eval(bytecode, event)
+        result = run_script_eval(bytecode, event)
         assert result["verdict"] is False
         assert "exceeds budget" in result["reasoning"]
 
     def test_output_not_empty_fails_on_empty_choice_content(self):
-        bytecode = compile_hog(_get_source("Output not empty"), "destination")
+        bytecode = compile_script(_get_source("Output not empty"), "destination")
         event = _make_event(ai_output_choices=[{"message": {"role": "assistant", "content": ""}}])
 
-        result = run_hog_eval(bytecode, event)
+        result = run_script_eval(bytecode, event)
 
         assert result["verdict"] is False
 
     @parameterized.expand([("Output not empty",), ("Min output length",), ("Output quality",)])
     def test_generation_quality_checks_fail_without_generation_events(self, label: str) -> None:
-        bytecode = compile_hog(_get_source(label), "destination")
+        bytecode = compile_script(_get_source(label), "destination")
         trace = LLMTrace(
             id="trace-123",
             createdAt=CLEAN_EVENT["timestamp"],
@@ -240,8 +240,8 @@ class TestHogEvalExamplesBehavior:
             ],
         )
 
-        result = execute_hog_eval_bytecode(
-            bytecode, build_trace_hog_globals(trace, trace.id, bytecode=bytecode), allows_na=False
+        result = execute_script_eval_bytecode(
+            bytecode, build_trace_script_globals(trace, trace.id, bytecode=bytecode), allows_na=False
         )
 
         assert result["verdict"] is False
@@ -249,10 +249,10 @@ class TestHogEvalExamplesBehavior:
 
     @parameterized.expand([([{"type": "text", "text": ""}],), ({"choices": [{"text": ""}]},)])
     def test_output_not_empty_fails_on_empty_text_choice(self, output_choices):
-        bytecode = compile_hog(_get_source("Output not empty"), "destination")
+        bytecode = compile_script(_get_source("Output not empty"), "destination")
         event = _make_event(ai_output_choices=output_choices)
 
-        result = run_hog_eval(bytecode, event)
+        result = run_script_eval(bytecode, event)
 
         assert result["verdict"] is False
 
@@ -264,75 +264,75 @@ class TestHogEvalExamplesBehavior:
         ]
     )
     def test_output_not_empty_passes_on_non_string_output(self, _name: str, output_choices: Any) -> None:
-        bytecode = compile_hog(_get_source("Output not empty"), "destination")
+        bytecode = compile_script(_get_source("Output not empty"), "destination")
         event = _make_event(ai_output_choices=output_choices)
 
-        result = run_hog_eval(bytecode, event)
+        result = run_script_eval(bytecode, event)
 
         assert result["verdict"] is True
 
     def test_refusal_detection_handles_openai_refusal_field(self):
-        bytecode = compile_hog(_get_source("Refusal detection"), "destination")
+        bytecode = compile_script(_get_source("Refusal detection"), "destination")
         event = _make_event(
             ai_output_choices=[
                 {"message": {"role": "assistant", "content": None, "refusal": "I cannot help with that request."}}
             ]
         )
 
-        result = run_hog_eval(bytecode, event)
+        result = run_script_eval(bytecode, event)
 
         assert result["verdict"] is False
 
     def test_error_detection_handles_string_error_flag(self):
-        bytecode = compile_hog(_get_source("Error detection"), "destination")
+        bytecode = compile_script(_get_source("Error detection"), "destination")
         event = _make_event()
         event["properties"]["$ai_is_error"] = "true"
 
-        result = run_hog_eval(bytecode, event)
+        result = run_script_eval(bytecode, event)
 
         assert result["verdict"] is False
 
     def test_tools_called_does_not_match_names_only_mentioned_in_output(self):
-        bytecode = compile_hog(_get_source("Tools called"), "destination")
+        bytecode = compile_script(_get_source("Tools called"), "destination")
         event = _make_event(
             ai_output_choices=[{"message": {"role": "assistant", "content": "I could call get_weather and get_news."}}]
         )
 
-        result = run_hog_eval(bytecode, event)
+        result = run_script_eval(bytecode, event)
 
         assert result["verdict"] is False
 
     def test_conversation_length_fails_on_long(self):
-        bytecode = compile_hog(_get_source("Conversation length"), "destination")
+        bytecode = compile_script(_get_source("Conversation length"), "destination")
         long_conversation = [{"role": "user", "content": f"Message {i}"} for i in range(15)]
         event = _make_event(ai_input=long_conversation)
-        result = run_hog_eval(bytecode, event)
+        result = run_script_eval(bytecode, event)
         assert result["verdict"] is False
         assert "Exceeds limit" in result["reasoning"]
 
     def test_conversation_length_skips_truncated_json(self):
-        bytecode = compile_hog(_get_source("Conversation length"), "destination")
+        bytecode = compile_script(_get_source("Conversation length"), "destination")
         event = _make_event(ai_input='[{"role":"user","content":"truncated... [truncated]')
 
-        result = run_hog_eval(bytecode, event)
+        result = run_script_eval(bytecode, event)
 
         assert result["error"] is None
         assert result["verdict"] is True
         assert "Could not parse input" in result["reasoning"]
 
     def test_regex_safety_fails_on_email(self):
-        bytecode = compile_hog(_get_source("Regex safety checks"), "destination")
+        bytecode = compile_script(_get_source("Regex safety checks"), "destination")
         event = _make_event(
             ai_output_choices=[
                 {"message": {"role": "assistant", "content": "Contact us at test@example.com"}, "index": 0}
             ],
         )
-        result = run_hog_eval(bytecode, event)
+        result = run_script_eval(bytecode, event)
         assert result["verdict"] is False
 
     def test_quickstart_prints_messages_and_choices(self):
-        bytecode = compile_hog(_get_source("Quickstart"), "destination")
-        result = run_hog_eval(bytecode, CLEAN_EVENT)
+        bytecode = compile_script(_get_source("Quickstart"), "destination")
+        result = run_script_eval(bytecode, CLEAN_EVENT)
         assert result["verdict"] is True
         assert "Event 0: $ai_generation" in result["reasoning"]
         assert "Input:" in result["reasoning"]
@@ -340,35 +340,35 @@ class TestHogEvalExamplesBehavior:
         assert "Model: gpt-4" in result["reasoning"]
 
     def test_na_guard_returns_null_when_model_missing(self):
-        bytecode = compile_hog(_get_source("N/A guard"), "destination")
+        bytecode = compile_script(_get_source("N/A guard"), "destination")
         event = _make_event(ai_model=None)
         del event["properties"]["$ai_model"]
-        result = run_hog_eval(bytecode, event, allows_na=True)
+        result = run_script_eval(bytecode, event, allows_na=True)
         assert result["error"] is None
         assert result["verdict"] is None
         assert "not applicable" in result["reasoning"]
 
     def test_na_guard_passes_on_allowed_model(self):
-        bytecode = compile_hog(_get_source("N/A guard"), "destination")
-        result = run_hog_eval(bytecode, CLEAN_EVENT)
+        bytecode = compile_script(_get_source("N/A guard"), "destination")
+        result = run_script_eval(bytecode, CLEAN_EVENT)
         assert result["error"] is None
         assert result["verdict"] is True
 
     def test_na_guard_fails_on_disallowed_model(self):
-        bytecode = compile_hog(_get_source("N/A guard"), "destination")
+        bytecode = compile_script(_get_source("N/A guard"), "destination")
         event = _make_event(ai_model="llama-3")
-        result = run_hog_eval(bytecode, event)
+        result = run_script_eval(bytecode, event)
         assert result["error"] is None
         assert result["verdict"] is False
         assert "not in the allowed list" in result["reasoning"]
 
     def test_quickstart_handles_plain_string_input_and_output(self):
-        bytecode = compile_hog(_get_source("Quickstart"), "destination")
+        bytecode = compile_script(_get_source("Quickstart"), "destination")
         event = _make_event()
         event["properties"].pop("$ai_output_choices", None)
         event["properties"]["$ai_input"] = "What is Insights?"
         event["properties"]["$ai_output"] = "Insights is a product analytics platform."
-        result = run_hog_eval(bytecode, event)
+        result = run_script_eval(bytecode, event)
         assert result["error"] is None
         assert result["verdict"] is True
         assert "Input: What is Insights?" in result["reasoning"]
@@ -376,7 +376,7 @@ class TestHogEvalExamplesBehavior:
 
     @parameterized.expand([("Quickstart",), ("Print messages",)])
     def test_diagnostic_output_fits_temporal_payload_for_max_unicode_trace(self, label):
-        bytecode = compile_hog(_get_source(label), "destination")
+        bytecode = compile_script(_get_source(label), "destination")
         unicode_text = "😀" * 101
         trace = LLMTrace(
             id="trace-123",
@@ -393,8 +393,8 @@ class TestHogEvalExamplesBehavior:
             ],
         )
 
-        result = execute_hog_eval_bytecode(
-            bytecode, build_trace_hog_globals(trace, trace.id, bytecode=bytecode), allows_na=False
+        result = execute_script_eval_bytecode(
+            bytecode, build_trace_script_globals(trace, trace.id, bytecode=bytecode), allows_na=False
         )
 
         assert result["error"] is None

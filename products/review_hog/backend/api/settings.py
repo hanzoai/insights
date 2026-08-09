@@ -13,7 +13,7 @@ from insights.models.scoping.manager import resolve_effective_team_id
 
 from products.review_hog.backend.models import ReviewUserSettings
 from products.review_hog.backend.reviewer.lazy_seed import seed_canonicals_tolerantly, sync_canonical_authoring
-from products.stamphog.backend.facade.api import has_reviewable_repo_config
+from products.stamp.backend.facade.api import has_reviewable_repo_config
 
 logger = logging.getLogger(__name__)
 
@@ -22,14 +22,14 @@ class ReviewUserSettingsSerializer(serializers.ModelSerializer):
     review_inbox_prs = serializers.BooleanField(
         required=False,
         help_text="Automatically review pull requests opened by self-driving implementations from the "
-        "user's Inbox: ReviewHog reviews each one and posts its findings to the pull request.",
+        "user's Inbox: Review reviews each one and posts its findings to the pull request.",
     )
-    stamphog_review_inbox_prs = serializers.BooleanField(
+    stamp_review_inbox_prs = serializers.BooleanField(
         required=False,
-        help_text="Also have hosted Stamphog review those same Inbox pull requests: an approve-first "
+        help_text="Also have hosted Stamp review those same Inbox pull requests: an approve-first "
         "review that posts a real GitHub approval when the change passes, and a comment when it "
-        "doesn't. Only takes effect when the project has a synced, enabled Stamphog repository "
-        "(see stamphog_connected).",
+        "doesn't. Only takes effect when the project has a synced, enabled Stamp repository "
+        "(see stamp_connected).",
     )
     review_labeled_prs = serializers.BooleanField(
         required=False,
@@ -45,23 +45,23 @@ class ReviewUserSettingsSerializer(serializers.ModelSerializer):
     )
     can_trigger_reviews = serializers.SerializerMethodField(
         help_text="Whether reviews can be started from this project's Code review page (the UI trigger "
-        "is limited to the designated ReviewHog team while the product is in alpha).",
+        "is limited to the designated Review team while the product is in alpha).",
     )
-    stamphog_connected = serializers.SerializerMethodField(
-        help_text="Whether this project has at least one synced, enabled Stamphog repository. When "
-        "false, the stamphog_review_inbox_prs toggle has nothing to act on and the UI renders it "
-        "disabled with a pointer to connect the Stamphog GitHub App.",
+    stamp_connected = serializers.SerializerMethodField(
+        help_text="Whether this project has at least one synced, enabled Stamp repository. When "
+        "false, the stamp_review_inbox_prs toggle has nothing to act on and the UI renders it "
+        "disabled with a pointer to connect the Stamp GitHub App.",
     )
 
     class Meta:
         model = ReviewUserSettings
         fields = [
             "review_inbox_prs",
-            "stamphog_review_inbox_prs",
+            "stamp_review_inbox_prs",
             "review_labeled_prs",
             "urgency_threshold",
             "can_trigger_reviews",
-            "stamphog_connected",
+            "stamp_connected",
         ]
 
     @extend_schema_field(serializers.BooleanField())
@@ -69,18 +69,18 @@ class ReviewUserSettingsSerializer(serializers.ModelSerializer):
         return bool(settings.REVIEWFN_TEAM_ID) and instance.team_id == settings.REVIEWFN_TEAM_ID
 
     @extend_schema_field(serializers.BooleanField())
-    def get_stamphog_connected(self, instance: ReviewUserSettings) -> bool:
-        # This reads the stamphog product DB, which can fail fast on its own circuit breaker. An
+    def get_stamp_connected(self, instance: ReviewUserSettings) -> bool:
+        # This reads the stamp product DB, which can fail fast on its own circuit breaker. An
         # informational UI flag must not fail the settings endpoint, so fall back to False.
         try:
             return has_reviewable_repo_config(instance.team_id)
         except Exception:
-            logger.exception("review_hog_stamphog_connected_check_failed")
+            logger.exception("review_stamp_connected_check_failed")
             return False
 
 
 class ReviewUserSettingsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
-    """The requesting user's ReviewHog settings for a project (one row, created on first read).
+    """The requesting user's Review settings for a project (one row, created on first read).
 
     Sibling of the perspective/validator/blind-spots config viewsets: skills control *how* a review
     runs, this controls *what gets reviewed* (trigger opt-outs) and *how strict publishing is*
@@ -106,11 +106,11 @@ class ReviewUserSettingsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet)
         methods=["GET"],
         responses={
             200: OpenApiResponse(
-                response=ReviewUserSettingsSerializer, description="The requesting user's ReviewHog settings."
+                response=ReviewUserSettingsSerializer, description="The requesting user's Review settings."
             ),
         },
-        summary="Get the user's ReviewHog settings",
-        description="Fetch the requesting user's ReviewHog settings for this project, creating the row "
+        summary="Get the user's Review settings",
+        description="Fetch the requesting user's Review settings for this project, creating the row "
         "with defaults on first read.",
     )
     @extend_schema(
@@ -120,8 +120,8 @@ class ReviewUserSettingsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet)
             200: OpenApiResponse(response=ReviewUserSettingsSerializer, description="The updated settings."),
             400: OpenApiResponse(description="Invalid field value (e.g. unknown urgency threshold)."),
         },
-        summary="Update the user's ReviewHog settings",
-        description="Partially update the requesting user's ReviewHog settings for this project. Only the "
+        summary="Update the user's Review settings",
+        description="Partially update the requesting user's Review settings for this project. Only the "
         "provided fields change.",
     )
     # Not named `settings` — that would shadow DRF's `APIView.settings` (its APISettings object).

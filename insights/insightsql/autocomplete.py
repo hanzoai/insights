@@ -9,7 +9,7 @@ from django.db.models.functions.comparison import Coalesce
 from insights.schema import (
     AutocompleteCompletionItem,
     AutocompleteCompletionItemKind,
-    HogLanguage,
+    ScriptLanguage,
     InsightsQLAutocomplete,
     InsightsQLAutocompleteResponse,
 )
@@ -82,7 +82,7 @@ def get_connection_supported_functions(context: InsightsQLContext) -> list[str]:
 
 
 def get_available_functions(language: str, context: InsightsQLContext) -> list[str]:
-    if language == HogLanguage.INSIGHTS_QL or language == HogLanguage.INSIGHTS_QL_EXPR:
+    if language == ScriptLanguage.INSIGHTS_QL or language == ScriptLanguage.INSIGHTS_QL_EXPR:
         return sorted(set(ALL_EXPOSED_FUNCTION_NAMES) | set(get_connection_supported_functions(context)))
 
     return ALL_FN_FUNCTIONS
@@ -439,7 +439,7 @@ class VariableFinder(TraversingVisitor):
         super().visit_variable_declaration(node)
 
 
-def gather_hog_variables_in_scope(root_node, node) -> list[str]:
+def gather_script_variables_in_scope(root_node, node) -> list[str]:
     finder = VariableFinder(node)
     finder.visit(root_node)
     return list(finder.node_vars)
@@ -489,27 +489,27 @@ def get_insightsql_autocomplete(
             query_end = query.endPosition + length_to_add
             select_ast: Optional[ast.AST] = None
 
-            if query.language == HogLanguage.INSIGHTS_QL:
+            if query.language == ScriptLanguage.INSIGHTS_QL:
                 with timings.measure("parse_select"):
                     select_ast = parse_select(query_to_try, timings=timings)
                     root_node: ast.AST = select_ast
-            elif query.language == HogLanguage.INSIGHTS_QL_EXPR:
+            elif query.language == ScriptLanguage.INSIGHTS_QL_EXPR:
                 with timings.measure("parse_expr"):
                     root_node = parse_expr(query_to_try, timings=timings)
                     select_ast = cast(ast.SelectQuery, clone_expr(source_query, clear_locations=True))
                     select_ast.select = [root_node]
-            elif query.language == HogLanguage.INSIGHTS_TEMPLATE:
+            elif query.language == ScriptLanguage.INSIGHTS_TEMPLATE:
                 with timings.measure("parse_template"):
                     root_node = parse_string_template(query_to_try, timings=timings)
-            elif query.language == HogLanguage.LIQUID:
+            elif query.language == ScriptLanguage.LIQUID:
                 with timings.measure("parse_liquid"):
                     # Liquid templates are handled similarly to Script templates for autocomplete
                     # We treat them as string templates but with Liquid syntax
                     root_node = parse_string_template(query_to_try, timings=timings)
-            elif query.language == HogLanguage.HOG:
+            elif query.language == ScriptLanguage.HOG:
                 with timings.measure("parse_program"):
                     root_node = parse_program(query_to_try, timings=timings)
-            elif query.language == HogLanguage.INSIGHTS_JSON:
+            elif query.language == ScriptLanguage.INSIGHTS_JSON:
                 query_to_try, query_start, query_end = extract_json_row(query_to_try, query_start, query_end)
                 if query_to_try == "":
                     break
@@ -519,12 +519,12 @@ def get_insightsql_autocomplete(
 
             with timings.measure("find_node"):
                 # to account for the magic F' symbol we append to change antlr's mode
-                extra = 2 if query.language == HogLanguage.INSIGHTS_TEMPLATE else 0
+                extra = 2 if query.language == ScriptLanguage.INSIGHTS_TEMPLATE else 0
                 find_node = GetNodeAtPositionTraverser(root_node, query_start + extra, query_end + extra)
             node = find_node.node
             parent_node = find_node.parent_node
 
-            if HogLanguage.INSIGHTS_TEMPLATE and isinstance(node, ast.Constant):
+            if ScriptLanguage.INSIGHTS_TEMPLATE and isinstance(node, ast.Constant):
                 # Do not show suggestions if not inside the {} part in a template string
                 continue
 
@@ -547,16 +547,16 @@ def get_insightsql_autocomplete(
                         if loop_globals != query.globals:
                             break
 
-            if query.language in (HogLanguage.HOG, HogLanguage.INSIGHTS_TEMPLATE, HogLanguage.LIQUID):
+            if query.language in (ScriptLanguage.HOG, ScriptLanguage.INSIGHTS_TEMPLATE, ScriptLanguage.LIQUID):
                 # For Script and Liquid, first add all local variables in scope
-                hog_vars = gather_hog_variables_in_scope(root_node, node)
+                script_vars = gather_script_variables_in_scope(root_node, node)
                 extend_responses(
-                    keys=hog_vars,
+                    keys=script_vars,
                     suggestions=response.suggestions,
                     kind=AutocompleteCompletionItemKind.VARIABLE,
                 )
 
-                if query.language != HogLanguage.LIQUID:
+                if query.language != ScriptLanguage.LIQUID:
                     extend_responses(
                         ALL_FN_FUNCTIONS,
                         response.suggestions,

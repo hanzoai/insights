@@ -6,7 +6,7 @@ from insights.datastore.query_tagging import Feature, Product, tags_context
 TOPFN_QUERY = """
 WITH filtered AS (
     SELECT *
-    FROM tophog
+    FROM topfn
     WHERE timestamp >= %(date_from)s AND timestamp <= %(date_to)s
     {filters}
 )
@@ -38,13 +38,13 @@ ORDER BY metric, type, rn
 
 FILTER_OPTIONS_QUERY = """
 SELECT DISTINCT pipeline, lane
-FROM tophog
+FROM topfn
 WHERE timestamp >= %(date_from)s AND timestamp <= %(date_to)s
 ORDER BY pipeline, lane
 """
 
 
-def query_tophog_metrics(
+def query_topfn_metrics(
     date_from: datetime,
     date_to: datetime,
     pipeline: str | None = None,
@@ -78,7 +78,7 @@ def query_tophog_metrics(
     ]
 
 
-def query_tophog_filter_options(
+def query_topfn_filter_options(
     date_from: datetime,
     date_to: datetime,
 ) -> tuple[list[str], list[str]]:

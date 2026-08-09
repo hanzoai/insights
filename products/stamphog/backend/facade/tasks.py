@@ -1,15 +1,15 @@
-"""Facade re-export for the stamphog Celery surface.
+"""Facade re-export for the stamp Celery surface.
 
 Core's central beat wiring (``insights/tasks/scheduled.py``) registers the daily digest fan-out
-from here rather than reaching into the product's internals, and review_hog's inbox trigger
+from here rather than reaching into the product's internals, and review's inbox trigger
 queues the initial self-driving PR review from here. Lives apart from ``api.py`` so the task
-modules' heavy imports (GitHub client, temporal client) stay off that module, which review_hog's
+modules' heavy imports (GitHub client, temporal client) stay off that module, which review's
 settings serializer imports on every request.
 """
 
-from products.stamphog.backend.tasks.digest import send_daily_digests
-from products.stamphog.backend.tasks.schedules import DAILY_DIGEST_CRONTAB
-from products.stamphog.backend.tasks.tasks import process_inbox_pr_review
+from products.stamp.backend.tasks.digest import send_daily_digests
+from products.stamp.backend.tasks.schedules import DAILY_DIGEST_CRONTAB
+from products.stamp.backend.tasks.tasks import process_inbox_pr_review
 
 __all__ = ["DAILY_DIGEST_CRONTAB", "queue_inbox_pr_review", "send_daily_digests"]
 
@@ -23,10 +23,10 @@ def queue_inbox_pr_review(
     signal_report_id: str,
     task_run_id: str,
 ) -> None:
-    """Queue the first hosted Stamphog review of a self-driving inbox PR, without waiting for it.
+    """Queue the first hosted Stamp review of a self-driving inbox PR, without waiting for it.
 
-    Called by review_hog's inbox trigger, which has already found an assigned reviewer with the
-    ``stamphog_review_inbox_prs`` toggle on. ``repository`` is the linked task's own repo, and the
+    Called by review's inbox trigger, which has already found an assigned reviewer with the
+    ``stamp_review_inbox_prs`` toggle on. ``repository`` is the linked task's own repo, and the
     PR must be in it, because the task-to-PR link this rides on (``TaskRun.output.pr_url``) is
     writable through the task-run API. The Celery task does the rest: resolve a synced and enabled
     repo config (no-op without one), fetch the PR, re-check that the App machine user authored it,

@@ -7,7 +7,7 @@
                     "filename": "products/review_hog/backend/models.py"
                 },
                 {
-                    "filename": "products/review_hog/backend/migrations/0019_reviewusersettings_stamphog_review_inbox_prs.py"
+                    "filename": "products/review_hog/backend/migrations/0019_reviewusersettings_stamp_review_inbox_prs.py"
                 },
                 {
                     "filename": "products/review_hog/backend/api/settings.py"
@@ -30,11 +30,11 @@
             ],
             "chunk_type": "feature",
             "key_changes": [
-                "Adds stamphog_review_inbox_prs boolean field to ReviewUserSettings (migration 0019), default off, alongside the existing review_inbox_prs toggle",
-                "Serializer exposes the new field plus a computed stamphog_connected flag that fails soft (returns False) if the cross-product Stamphog DB check errors",
-                "TaskRun receiver now resolves the acting reviewer once (_resolve_assigned_reviewer) and independently checks both toggles, dispatching review_hog's own review and/or stamphog's queue_inbox_pr_review facade on commit",
-                "Registers resolve_stamphog_acting_reviewer with stamphog's inbox hook registry at app-ready so the webhook leg can re-check the toggle without a circular import",
-                "New 'Let Stamphog review your Inbox PRs' switch in CodeReviewScene, disabled with a reason when Stamphog isn't connected but always interactive to opt out",
+                "Adds stamp_review_inbox_prs boolean field to ReviewUserSettings (migration 0019), default off, alongside the existing review_inbox_prs toggle",
+                "Serializer exposes the new field plus a computed stamp_connected flag that fails soft (returns False) if the cross-product Stamp DB check errors",
+                "TaskRun receiver now resolves the acting reviewer once (_resolve_assigned_reviewer) and independently checks both toggles, dispatching review's own review and/or stamp's queue_inbox_pr_review facade on commit",
+                "Registers resolve_stamp_acting_reviewer with stamp's inbox hook registry at app-ready so the webhook leg can re-check the toggle without a circular import",
+                "New 'Let Stamp review your Inbox PRs' switch in CodeReviewScene, disabled with a reason when Stamp isn't connected but always interactive to opt out",
                 "Generated API schema/zod/mcp client types regenerated for the new fields (mechanical, attached for context)"
             ]
         },
@@ -42,19 +42,19 @@
             "chunk_id": 2,
             "files": [
                 {
-                    "filename": "products/stamphog/backend/facade/api.py"
+                    "filename": "products/stamp/backend/facade/api.py"
                 },
                 {
-                    "filename": "products/stamphog/backend/facade/inbox_hooks.py"
+                    "filename": "products/stamp/backend/facade/inbox_hooks.py"
                 },
                 {
-                    "filename": "products/stamphog/backend/tasks/tasks.py"
+                    "filename": "products/stamp/backend/tasks/tasks.py"
                 },
                 {
-                    "filename": "products/stamphog/backend/temporal/activities.py"
+                    "filename": "products/stamp/backend/temporal/activities.py"
                 },
                 {
-                    "filename": "products/stamphog/backend/logic/reviewer.py"
+                    "filename": "products/stamp/backend/logic/reviewer.py"
                 },
                 {
                     "filename": "products/tasks/backend/facade/api.py"
@@ -68,13 +68,13 @@
             ],
             "chunk_type": "business_logic",
             "key_changes": [
-                "New facade/inbox_hooks.py: import-light inversion-hook registry so stamphog can call back into review_hog's toggle resolver without a dependency cycle",
-                "facade/api.py: has_reviewable_repo_config (drives the UI's stamphog_connected flag) and queue_inbox_pr_review (fire-and-forget Celery dispatch for the receiver/inbox leg)",
+                "New facade/inbox_hooks.py: import-light inversion-hook registry so stamp can call back into review's toggle resolver without a dependency cycle",
+                "facade/api.py: has_reviewable_repo_config (drives the UI's stamp_connected flag) and queue_inbox_pr_review (fire-and-forget Celery dispatch for the receiver/inbox leg)",
                 "tasks.py: _inbox_rereview_carve_out positively identifies self-driving PRs on the webhook path (repo-native head, synced+enabled repo config, tasks-facade match, re-checked toggle) and bypasses bot-author/draft/review-mode/write-permission gates only for that carve-out; new process_inbox_pr_review Celery task implements the initial receiver-leg review with head-keyed dedupe and inbox provenance; dedicated dismissal copy for opted-out reviewers",
-                "temporal/activities.py: derives self_driving_review from the run's stamped provenance for the engine context, skips the author merged-PR fetch on inbox runs, and stamps analytics with stamphog_self_driving_review",
+                "temporal/activities.py: derives self_driving_review from the run's stamped provenance for the engine context, skips the author merged-PR fetch on inbox runs, and stamps analytics with stamp_self_driving_review",
                 "logic/reviewer.py: threads the new self_driving_review flag into the sandboxed engine invocation context",
                 "products/tasks facade: new find_signal_implementation_run + SignalImplementationRunDTO, mirroring the webhook backstop's PR lookup and enforcing team scoping to positively identify self-driving runs",
-                "tach.toml: registers stamphog as a facade-only dependency for the modules now calling into it"
+                "tach.toml: registers stamp as a facade-only dependency for the modules now calling into it"
             ]
         },
         {
@@ -105,10 +105,10 @@
             "chunk_id": 4,
             "files": [
                 {
-                    "filename": "products/stamphog/AGENTS.md"
+                    "filename": "products/stamp/AGENTS.md"
                 },
                 {
-                    "filename": "products/stamphog/README.md"
+                    "filename": "products/stamp/README.md"
                 }
             ],
             "chunk_type": "documentation",

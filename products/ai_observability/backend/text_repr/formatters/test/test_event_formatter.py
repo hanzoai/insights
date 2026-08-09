@@ -264,7 +264,7 @@ class TestEvaluationFormatting:
         result = format_evaluation_text_repr(event)
         assert "EVALUATION: Unknown evaluation | Result: FAIL" in result
 
-    def test_evaluation_hog_runtime(self):
+    def test_evaluation_script_runtime(self):
         event = {
             "properties": {
                 "$ai_evaluation_name": "Length check",

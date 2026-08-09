@@ -199,10 +199,10 @@ def map_url_to_provider(url_pattern: str) -> str:
         url_pattern: The URL pattern from a data warehouse table
 
     Returns:
-        Platform identifier (aws, google-cloud, azure, cloudflare-r2) or 'BlushingHog' for unknown
+        Platform identifier (aws, google-cloud, azure, cloudflare-r2) or 'BlushingScript' for unknown
     """
     if not url_pattern:
-        return "BlushingHog"
+        return "BlushingScript"
 
     if "amazonaws.com" in url_pattern:
         return "aws"
@@ -213,4 +213,4 @@ def map_url_to_provider(url_pattern: str) -> str:
     elif ".r2.cloudflarestorage.com" in url_pattern:
         return "cloudflare-r2"
 
-    return "BlushingHog"
+    return "BlushingScript"

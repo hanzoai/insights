@@ -13,7 +13,7 @@ from products.warehouse_sources.backend.temporal.data_imports.sources.slack.webh
 class TestSlackWarehouseWebhookTemplate(BaseInsightsFunctionTemplateTest):
     template = template
 
-    def createHogGlobals(self, globals=None) -> dict:
+    def createScriptGlobals(self, globals=None) -> dict:
         data: dict = {
             "request": {
                 "method": "POST",

@@ -25,7 +25,7 @@ SCHEDULE_ID = "review-script-finding-outcomes-schedule"
 SCHEDULE_INTERVAL = timedelta(hours=1)
 
 
-async def create_review_hog_finding_outcomes_schedule(client: Client) -> None:
+async def create_review_finding_outcomes_schedule(client: Client) -> None:
     schedule = Schedule(
         action=ScheduleActionStartWorkflow(
             CLASSIFY_FINDING_OUTCOMES_WORKFLOW,

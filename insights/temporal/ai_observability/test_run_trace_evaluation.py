@@ -14,14 +14,14 @@ from insights.schema import LLMTrace, LLMTraceEvent
 from insights.insightsql import ast
 
 from insights.api.capture import CaptureInternalError
-from insights.cdp.validation import compile_hog
+from insights.cdp.validation import compile_script
 from insights.models import Organization, Team
 
 from products.ai_observability.backend.models.evaluation_config import EvaluationConfig
 from products.ai_observability.backend.models.evaluations import Evaluation
 from products.ai_observability.backend.models.provider_keys import LLMProviderKey
 
-from .evaluation_hog import execute_hog_eval_bytecode
+from .evaluation_script import execute_script_eval_bytecode
 from .evaluation_llm_judge import BooleanEvalResult
 from .evaluation_types import EvaluationActivityResult
 from .run_trace_evaluation import (
@@ -33,17 +33,17 @@ from .run_trace_evaluation import (
     RunTraceEvaluationInputs,
     RunTraceEvaluationWorkflow,
     TraceFetchOutcome,
-    TraceHogTestSample,
+    TraceScriptTestSample,
     _build_trace_skip_result,
     _sample_recent_traces,
-    build_trace_hog_globals,
+    build_trace_script_globals,
     build_trace_system_prompt,
     emit_trace_evaluation_event_activity,
-    execute_trace_hog_eval_activity,
+    execute_trace_script_eval_activity,
     execute_trace_llm_judge_activity,
     fetch_trace_for_evaluation,
     format_trace_for_judge,
-    run_hog_eval_over_recent_traces,
+    run_script_eval_over_recent_traces,
 )
 
 FROZEN_NOW = datetime(2024, 1, 1, 12, 0, 0, tzinfo=UTC)
@@ -184,7 +184,7 @@ class TestFormatTraceForJudge:
         assert "rate limited" in transcript
 
 
-class TestBuildTraceHogGlobals:
+class TestBuildTraceScriptGlobals:
     def test_builds_events_with_per_event_input_output(self):
         events = [
             create_trace_event("$ai_span", **{"$ai_input_state": "", "$ai_output_state": ""}),
@@ -193,7 +193,7 @@ class TestBuildTraceHogGlobals:
         ]
         trace = create_trace(events, totalCost=0.03, totalLatency=2.5)
 
-        globals_dict = build_trace_hog_globals(trace, "trace-123")
+        globals_dict = build_trace_script_globals(trace, "trace-123")
 
         assert "input" not in globals_dict
         assert "output" not in globals_dict
@@ -214,13 +214,13 @@ class TestBuildTraceHogGlobals:
         assert globals_dict["evaluation_events"][2]["output_text"] == "final answer"
 
     def test_saved_events_source_only_builds_compatibility_events(self):
-        bytecode = compile_hog("return length(events) == 1 and events.1.output == 'answer'", "destination")
+        bytecode = compile_script("return length(events) == 1 and events.1.output == 'answer'", "destination")
         trace = create_trace(
             [create_trace_event("$ai_generation", **{"$ai_input": "question", "$ai_output": "answer"})]
         )
 
-        globals_dict = build_trace_hog_globals(trace, "trace-123", bytecode=bytecode)
-        result = execute_hog_eval_bytecode(bytecode, globals_dict, allows_na=False)
+        globals_dict = build_trace_script_globals(trace, "trace-123", bytecode=bytecode)
+        result = execute_script_eval_bytecode(bytecode, globals_dict, allows_na=False)
 
         assert set(globals_dict) == {"events", "trace"}
         assert set(globals_dict["events"][0]) == {"uuid", "event", "timestamp", "input", "output", "properties"}
@@ -235,7 +235,7 @@ class TestBuildTraceHogGlobals:
         ]
         trace = create_trace(events)
 
-        globals_dict = build_trace_hog_globals(trace, "trace-123")
+        globals_dict = build_trace_script_globals(trace, "trace-123")
 
         event_props = globals_dict["events"][0]["properties"]
         assert event_props == {"$ai_model": "gpt-4o"}
@@ -298,7 +298,7 @@ class TestFetchTraceForEvaluation:
         assert outcome.trace is trace
 
 
-class TestRunHogEvalOverRecentTraces:
+class TestRunScriptEvalOverRecentTraces:
     @patch("insights.temporal.ai_observability.run_trace_evaluation.query_ai_events")
     def test_samples_the_first_matching_generation_timestamp(self, mock_query):
         mock_query.return_value = MagicMock(results=[["trace-123", "2024-01-01T10:00:00Z", FROZEN_NOW]])
@@ -315,7 +315,7 @@ class TestRunHogEvalOverRecentTraces:
         assert trigger_timestamp_select.alias == "trigger_timestamp"
         assert trigger_timestamp_select.expr.name == "min"
         assert samples == [
-            TraceHogTestSample(
+            TraceScriptTestSample(
                 trace_id="trace-123",
                 trigger_timestamp=datetime(2024, 1, 1, 10, 0, tzinfo=UTC),
             )
@@ -352,20 +352,20 @@ class TestRunHogEvalOverRecentTraces:
                 create_trace_event("$ai_generation", **{"$ai_input": "second", "$ai_output": "two"}),
             ]
         )
-        bytecode = compile_hog(
+        bytecode = compile_script(
             "return target.type == 'trace' and length(evaluation_events) == 2",
             "destination",
         )
 
         with patch(
             "insights.temporal.ai_observability.run_trace_evaluation._sample_recent_traces",
-            return_value=[TraceHogTestSample(trace_id="trace-123", trigger_timestamp=trigger_timestamp)],
+            return_value=[TraceScriptTestSample(trace_id="trace-123", trigger_timestamp=trigger_timestamp)],
         ) as mock_sample:
             with patch(
                 "insights.temporal.ai_observability.run_trace_evaluation._fetch_trace",
                 return_value=TraceFetchOutcome(trace=trace, skip_reason=None, event_count=2),
             ) as mock_fetch:
-                results = run_hog_eval_over_recent_traces(
+                results = run_script_eval_over_recent_traces(
                     team=team,
                     bytecode=bytecode,
                     condition_filter=None,
@@ -455,11 +455,11 @@ class TestExecuteTraceLLMJudgeActivity:
         mock_client_class.assert_not_called()
 
 
-class TestExecuteTraceHogEvalActivity:
+class TestExecuteTraceScriptEvalActivity:
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
-    async def test_runs_hog_against_trace_globals(self, setup_data):
-        bytecode = compile_hog("return length(events) = 2 and events[2].output = 'final answer'", "destination")
+    async def test_runs_script_against_trace_globals(self, setup_data):
+        bytecode = compile_script("return length(events) = 2 and events[2].output = 'final answer'", "destination")
         evaluation = evaluation_dict(
             setup_data,
             evaluation_type="script",
@@ -476,7 +476,7 @@ class TestExecuteTraceHogEvalActivity:
             "insights.temporal.ai_observability.run_trace_evaluation.fetch_trace_for_evaluation",
             return_value=TraceFetchOutcome(trace=trace, skip_reason=None, event_count=2),
         ):
-            result = await execute_trace_hog_eval_activity(
+            result = await execute_trace_script_eval_activity(
                 ExecuteTraceEvaluationInputs(
                     evaluation=evaluation,
                     team_id=setup_data["team"].id,
@@ -490,7 +490,7 @@ class TestExecuteTraceHogEvalActivity:
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
     async def test_skips_when_trace_too_large(self, setup_data):
-        bytecode = compile_hog("return true", "destination")
+        bytecode = compile_script("return true", "destination")
         evaluation = evaluation_dict(
             setup_data,
             evaluation_type="script",
@@ -501,7 +501,7 @@ class TestExecuteTraceHogEvalActivity:
             "insights.temporal.ai_observability.run_trace_evaluation.fetch_trace_for_evaluation",
             return_value=TraceFetchOutcome(trace=None, skip_reason="trace_too_large", event_count=10_000),
         ):
-            result = await execute_trace_hog_eval_activity(
+            result = await execute_trace_script_eval_activity(
                 ExecuteTraceEvaluationInputs(
                     evaluation=evaluation,
                     team_id=setup_data["team"].id,
@@ -515,10 +515,10 @@ class TestExecuteTraceHogEvalActivity:
 
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
-    async def test_user_hog_error_is_terminal(self, setup_data):
+    async def test_user_script_error_is_terminal(self, setup_data):
         # A non-boolean return is a user Script error; it must be terminal so the workflow disables
         # the broken eval instead of re-running it against every matching trace.
-        bytecode = compile_hog("return 42", "destination")
+        bytecode = compile_script("return 42", "destination")
         evaluation = evaluation_dict(
             setup_data,
             evaluation_type="script",
@@ -530,7 +530,7 @@ class TestExecuteTraceHogEvalActivity:
             "insights.temporal.ai_observability.run_trace_evaluation.fetch_trace_for_evaluation",
             return_value=TraceFetchOutcome(trace=trace, skip_reason=None, event_count=1),
         ):
-            result = await execute_trace_hog_eval_activity(
+            result = await execute_trace_script_eval_activity(
                 ExecuteTraceEvaluationInputs(
                     evaluation=evaluation,
                     team_id=setup_data["team"].id,
@@ -540,7 +540,7 @@ class TestExecuteTraceHogEvalActivity:
             )
 
         assert result["skipped"] is True
-        assert result["skip_reason"] == "hog_error"
+        assert result["skip_reason"] == "script_error"
         assert result["terminal_user_error"] is True
         assert result["status_reason"]
 

@@ -1,12 +1,12 @@
 from django.conf import settings
 
-from insights.datastore.kafka_engine import CONSUMER_GROUP_TOPHOG, CONSUMER_GROUP_TOPFN_WS, kafka_engine, ttl_period
+from insights.datastore.kafka_engine import CONSUMER_GROUP_TopFn, CONSUMER_GROUP_TOPFN_WS, kafka_engine, ttl_period
 from insights.datastore.table_engines import Distributed, MergeTreeEngine, ReplicationScheme
-from insights.kafka_client.topics import KAFKA_DATASTORE_TOPHOG
+from insights.kafka_client.topics import KAFKA_DATASTORE_TopFn
 
 TOPFN_TTL_DAYS = 30
 
-TABLE_BASE_NAME = "tophog"
+TABLE_BASE_NAME = "topfn"
 DATA_TABLE_NAME = f"sharded_{TABLE_BASE_NAME}"
 WRITABLE_TABLE_NAME = f"writable_{TABLE_BASE_NAME}"
 KAFKA_TABLE_NAME = f"kafka_{TABLE_BASE_NAME}"
@@ -92,7 +92,7 @@ SETTINGS date_time_input_format = 'best_effort', kafka_skip_broken_messages = 10
 def KAFKA_TOPFN_TABLE_SQL():
     return KAFKA_TOPFN_TABLE_BASE_SQL.format(
         table_name=KAFKA_TABLE_NAME,
-        engine=kafka_engine(topic=KAFKA_DATASTORE_TOPHOG, group=CONSUMER_GROUP_TOPHOG),
+        engine=kafka_engine(topic=KAFKA_DATASTORE_TopFn, group=CONSUMER_GROUP_TopFn),
     )
 
 
@@ -135,7 +135,7 @@ def KAFKA_TOPFN_WS_TABLE_SQL():
     return KAFKA_TOPFN_TABLE_BASE_SQL.format(
         table_name=KAFKA_WS_TABLE_NAME,
         engine=kafka_engine(
-            topic=KAFKA_DATASTORE_TOPHOG,
+            topic=KAFKA_DATASTORE_TopFn,
             group=CONSUMER_GROUP_TOPFN_WS,
             named_collection=settings.DATASTORE_KAFKA_WARPSTREAM_INGESTION_NAMED_COLLECTION,
         ),

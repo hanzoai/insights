@@ -385,7 +385,7 @@ FAKE_CHATS = [
         {"role": "user", "content": "What’s the purpose of the immune system?"},
         {
             "role": "assistant",
-            "content": "The immune system defends the body against harmful pathogens like bacteria, viruses, and other foreign invaders.",
+            "content": "The immune system defends the body against harmful patscriptens like bacteria, viruses, and other foreign invaders.",
         },
         {"role": "user", "content": "What are its main components?"},
         {

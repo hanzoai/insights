@@ -1,6 +1,6 @@
-# ReviewHog design record & history
+# Review design record & history
 
-The living [ARCHITECTURE.md](./ARCHITECTURE.md) is the present-tense reference — _what_ ReviewHog is today
+The living [ARCHITECTURE.md](./ARCHITECTURE.md) is the present-tense reference — _what_ Review is today
 (pipeline, models, persistence, triggers). This doc is the full record of _why_ it got there: the staged build
 history, the design decisions with the alternatives weighed and rejected, the gotchas, and the roadmap —
 including the designed-but-unbuilt loop and the grounded implementation maps. It is preserved **in full** so an
@@ -13,7 +13,7 @@ land new build notes, decisions, and roadmap updates here.
 
 ## Current state & roadmap
 
-This work (now on `signals/reviewhog`, originally `signals/custom-prompt-to-sandbox`) predates several
+This work (now on `signals/review`, originally `signals/custom-prompt-to-sandbox`) predates several
 months of `master` evolution. The work is staged; keep this section updated as stages land.
 
 ### 🎯 NEXT — productionize the 2026-07 reviewer-topology eval (CURRENT start-here; older START-HERE markers below are historical)
@@ -27,7 +27,7 @@ read `FINAL_REPORT.md` there first (config glossary + coverage matrix + ranking)
   consistent and highest-output config; the eval and its archive call this unit the "gap pass" — same thing,
   renamed below). Expected prod delta on a ~500-addition PR: ~5–6 valid findings / ~19M in /
   ~23 min, vs today's ~3–4 / ~11M / ~14 min. **The experiment code for all topologies sits UNCOMMITTED in
-  the working tree behind default-off `EXPERIMENT_*` constants (297 review_hog tests + ruff green)** — the
+  the working tree behind default-off `EXPERIMENT_*` constants (297 review tests + ruff green)** — the
   items below convert the winners into prod code and delete the losers. Decisions locked with the user
   2026-07-02:
 
@@ -66,7 +66,7 @@ read `FINAL_REPORT.md` there first (config glossary + coverage matrix + ranking)
      `_register_missing_configs` helpers now back both), sibling `ReviewBlindSpotsConfigViewSet` at
      `/blind_spots`, seeded by the cold-start sync. (2026-07-02 follow-up, scout-coordinator-style:
      the cold-start sync now runs `prune=True` — disk-removed canonicals tombstone on the team's next
-     review — and the `sync_review_hog_skills` command was DELETED as redundant with it; the run path
+     review — and the `sync_review_skills` command was DELETED as redundant with it; the run path
      is the one sync moment.) Findings run under the
      **reserved `BLIND_SPOT_PASS_NUMBER = 1000`** — NOT max(wave pass)+1 as originally planned: the
      adversarial review showed max+1 collides with the persisted `(pass, chunk)` resume keys when the
@@ -99,7 +99,7 @@ read `FINAL_REPORT.md` there first (config glossary + coverage matrix + ranking)
      — 3 duplicate pairs slipped through dedup in the C7 runs. The dedup prompt now tells the agent to
      compare blind-spot findings (`source_perspective` prefix `review-script-blind-spots-`) against the
      wave's on the same chunk first.
-   - Tests (312 review_hog total): loader prefix-isolation + canonical fallback + hard-raise, config-API
+   - Tests (312 review total): loader prefix-isolation + canonical fallback + hard-raise, config-API
      single-active + cross-prefix scoping, workflow wave→blind-spot routing (reserved pass, skill + lens
      threading, strictly-after ordering), prompt skill-get + lens injection + no-findings lead-in,
      activity (pass, chunk) same-turn scoping + step name. A 4-lens adversarial review (Temporal
@@ -108,7 +108,7 @@ read `FINAL_REPORT.md` there first (config glossary + coverage matrix + ranking)
      — all fixed; 3 further claims refuted. **e2e ✅ 2026-07-02 on frozen #62096** (no-publish, clean DB):
      2 chunks (new 400-gate engaged the semantic chunker) · 8 units (6 wave + `blind-spots-c1/c2`
      strictly after) · 10 raw → 8 dedup → 4 valid · ~26 min effective / ~13.1M input tokens. Canonical
-     skill auto-seeded (v1, `review_hog` category); pass-1000 ids flowed through dedup + validation;
+     skill auto-seeded (v1, `review` category); pass-1000 ids flowed through dedup + validation;
      chunk 2's wave found nothing → its blind-spot unit exercised the "they raised no findings" branch
      and still swept (its 1 finding deduped out). **1 of the 4 valid findings is blind-spots-only**
      (over-length action name → unhandled `DataError` instead of a retryable tool error, should_fix) —
@@ -170,7 +170,7 @@ read `FINAL_REPORT.md` there first (config glossary + coverage matrix + ranking)
    measurement gates the build; gates are mechanics (follower turn-1 cache reads), cost (follower turns
    drop), and quality (yardstick parity + anchoring guard) on frozen PR #62096. TTL: sandboxes run the 5m
    cache (proven); `ENABLE_PROMPT_CACHING_1H=1` per sandbox enforces 1h when needed. Working mode
-   (amended 2026-07-07): everything on `signals/reviewhog`, experiment code behind on/off constants,
+   (amended 2026-07-07): everything on `signals/review`, experiment code behind on/off constants,
    losers reverted — no per-experiment branches.
 8. **Try dedup at `effort=high` instead of `xhigh` (noted 2026-07-07).** Measured (local Datastore,
    `ai_stage=dedup`, 14d): dedup's output tokens are dominated by adaptive thinking at
@@ -198,16 +198,16 @@ read `FINAL_REPORT.md` there first (config glossary + coverage matrix + ranking)
    rate drops materially (toward ≤50%) on frozen-PR evals with the valid-finding set intact (item 5's
    coverage matrix as the guard); kill if valid findings drop with the noise.
 
-### ✅ BUILT 2026-07-27 — reviews surface exposed as MCP tools (grantable `review_hog` scope)
+### ✅ BUILT 2026-07-27 — reviews surface exposed as MCP tools (grantable `review` scope)
 
-Agents needed to drive ReviewHog over MCP — kick off a review, poll progress, pull the finished findings
+Agents needed to drive Review over MCP — kick off a review, poll progress, pull the finished findings
 ([PR #72917](https://github.com/Insights/insights/pull/72917)). The capabilities already existed as the reviews
 viewset behind the Code review UI; the blocker was auth: the viewset was `scope_object = "INTERNAL"`
 (session-only), unreachable with the personal API key / OAuth token MCP authenticates with. Decisions:
 
-- **A grantable `review_hog` scope, not a widened INTERNAL.** The viewset moves to `scope_object = "review_hog"`
-  with `trigger` behind `review_hog:write` and `perspective_stats` behind `review_hog:read` (`list` / `retrieve`
-  map to `review_hog:read` by default). Session UI access is unchanged — this only adds token access. The scope
+- **A grantable `review` scope, not a widened INTERNAL.** The viewset moves to `scope_object = "review"`
+  with `trigger` behind `review:write` and `perspective_stats` behind `review:read` (`list` / `retrieve`
+  map to `review:read` by default). Session UI access is unchanged — this only adds token access. The scope
   is mirrored across the standard lists (`insights/scopes.py`, the frontend `API_SCOPE_OBJECTS` array + the PAK
   modal in `scopes.tsx`, the generated agent / OAuth scope lists, the MCP guard lists).
 - **Three thin tools over the existing surface** (`products/review_hog/mcp/tools.yaml`):
@@ -227,11 +227,11 @@ Dogfooding surfaced a dead-end: a review triggered from the Code review scene ru
 `urgency_threshold` ("requester wins" — deliberate, unchanged), and when every finding fell below it, publish
 self-skipped and the findings were effectively invisible to the PR author — not in their "For you" tab (which
 matched `acting_user` only), no way to link to the report (drawer state was kea-only), the status comment
-blamed "the author's … ReviewHog settings" for a threshold that wasn't theirs, and the drawer's "Published (N)"
+blamed "the author's … Review settings" for a threshold that wasn't theirs, and the drawer's "Published (N)"
 tab claimed publication for findings computed against the _viewer's current_ threshold. Decisions:
 
 - **Report deep links**: `/code_review?review=<report UUID>`, mirrored both ways by the existing URL sync in
-  `reviewHogSettingsLogic` (`replace`, never `push`, so drawer open/close doesn't stack history). The status
+  `reviewSettingsLogic` (`replace`, never `push`, so drawer open/close doesn't stack history). The status
   comment's held-back sentence links here ("View them in Insights", auth-gated — same posture as Slack links),
   which makes the param a **permanent public contract**. A deep link has no list row, so the drawer renders
   entirely from the loaded detail (skeletons until then) via an id-only `openReviewDetailById` action.
@@ -322,16 +322,16 @@ said the pre-2026-07-02 ≤1000 gate; the code's `SINGLE_CHUNK_GATE_ADDITIONS` i
 
 ### ✅ BUILT 2026-07-08 — GitHub I/O moved to the gated egress transport (PyGithub removed)
 
-The `pygithub==2.7.0` dependency is gone; every ReviewHog GitHub call now goes through
+The `pygithub==2.7.0` dependency is gone; every Review GitHub call now goes through
 `insights.egress.github.transport.github_request` — the repo's mandated GitHub client, budget-gated per
 App installation and recorded on the egress telemetry by construction (PyGithub's `Github(token)` bypassed
-both). Removing the branch-added dependency also unblocks the Hogbox preview environment, which mounts PR
+both). Removing the branch-added dependency also unblocks the Scriptbox preview environment, which mounts PR
 code over the published `:master` image and therefore can't grow new Python deps (`ModuleNotFoundError: No
 module named 'github'` at migrate).
 
 - New `reviewer/tools/github_client.py`: `github_api_request` (one gated call; raises `GitHubRateLimitError`
   on a GitHub rate limit, `GitHubAPIError` on any other non-2xx) and `github_api_get_paginated`
-  (`per_page=100` page loop, after `github_integration_base`'s pattern), both stamped `source="review_hog"`
+  (`per_page=100` page loop, after `github_integration_base`'s pattern), both stamped `source="review"`
   with explicit normalized `endpoint` templates for telemetry labels.
 - `tools/github_meta.py` (`PRFetcher`, `fetch_branch_compare`, `find_open_pr_for_branch`),
   `tools/publish_review.py`, and the `publish_review` management command speak plain REST; PR/comment/file
@@ -359,13 +359,13 @@ Form-only pass over the six `skills/*/SKILL.md` canonicals applying [mattpocock/
 
 ### ✅ BUILT 2026-07-07 — sandbox workflow ids branded with review + step (Temporal debuggability) (uncommitted)
 
-Temporal used to show every ReviewHog sandbox run as `task-processing-<task_uuid>-<run_uuid>` — undebuggable next to the well-named `review-pr:{team}:{owner}/{repo}:{pr}` parent (+`/review`, `/validate` children); the readable `step_name` only reached the Task title.
-Now every sandbox run's workflow id is `{activity's workflow id}:{step}-{task_id}-{run_id}`, e.g. `review-pr:1:insights/insights:67451/validate:validation-c3-<task>-<run>` — one lowercase Temporal-UI search by PR number surfaces the whole review, and a failed workflow is self-describing. Scope: ReviewHog only (Signals etc. keep the default id); decided with the maintainer: **no schema changes** (state JSON only), full-context prefix, lowercase everywhere.
+Temporal used to show every Review sandbox run as `task-processing-<task_uuid>-<run_uuid>` — undebuggable next to the well-named `review-pr:{team}:{owner}/{repo}:{pr}` parent (+`/review`, `/validate` children); the readable `step_name` only reached the Task title.
+Now every sandbox run's workflow id is `{activity's workflow id}:{step}-{task_id}-{run_id}`, e.g. `review-pr:1:insights/insights:67451/validate:validation-c3-<task>-<run>` — one lowercase Temporal-UI search by PR number surfaces the whole review, and a failed workflow is self-describing. Scope: Review only (Signals etc. keep the default id); decided with the maintainer: **no schema changes** (state JSON only), full-context prefix, lowercase everywhere.
 
 - **products/tasks:** the previously dead `workflow_id_prefix` on `execute_task_processing_workflow{,_async}` is now threaded through `Task.create_and_run` → `create_task_and_trigger` → `MultiTurnSession.start/start_raw`, and rides `pending_dispatch` so the orphaned-run reconciler rebuilds the same id. Because a prefixed id is not derivable from `(task_id, run_id)`, dispatch persists it in the run's **`state` JSON** (`_record_prefixed_workflow_id`, before `start_workflow`) and `TaskRun.workflow_id` returns persisted-or-derived — keeping every row→workflow lookup working (the agent-heartbeat relay `models.heartbeat_workflow`, follow-up signals, `temporal_ui_url`). In-workflow consumers (`provision_sandbox` Modal tags, `relay_sandbox_events` heartbeat handle) now use `activity.info().workflow_id` instead of re-deriving. Default (non-prefixed) dispatches are byte-identical to before — no state write, derived id.
-- **ReviewHog:** `_sandbox_workflow_id_prefix(step)` (activities.py) brands all four sandbox stages (chunking sandbox path, review/blind-spot units, dedup sandbox path, validation sessions) via a `workflow_id_prefix` kwarg on `run_sandbox_review` / `start_sandbox_session` / `deduplicate_issues`. `review_pr_workflow_id` / `review_branch_workflow_id` now **lowercase** (GitHub owner/repo are case-insensitive) so parent, children, and sandbox ids search as one casing. Temporal id constraints checked: `:` and `/` already proven in this cluster's ids; ~130 chars ≪ the 1000-byte server cap.
+- **Review:** `_sandbox_workflow_id_prefix(step)` (activities.py) brands all four sandbox stages (chunking sandbox path, review/blind-spot units, dedup sandbox path, validation sessions) via a `workflow_id_prefix` kwarg on `run_sandbox_review` / `start_sandbox_session` / `deduplicate_issues`. `review_pr_workflow_id` / `review_branch_workflow_id` now **lowercase** (GitHub owner/repo are case-insensitive) so parent, children, and sandbox ids search as one casing. Temporal id constraints checked: `:` and `/` already proven in this cluster's ids; ~130 chars ≪ the 1000-byte server cap.
 - Tests: `products/tasks/backend/tests/test_workflow_id_prefix.py` (property persisted-or-derived; dispatch starts under the id it records, default writes nothing; reconciler rebuilds the prefixed id from `pending_dispatch`) + prefix assertions in `test_review_activity.py` / `test_validate_activity.py` (activity tests now run under `ActivityEnvironment`) + a mixed-case id test in `test_branch_targets.py`.
-- **Follow-up, same day — spawned-task attribution (the Signals pattern, all reused fields):** every ReviewHog sandbox spawn now passes `origin_product=TaskOriginProduct.REVIEW_HOG` (new enum member, choices-only tasks migration **0047**, SQL no-op), `internal=True` (`Task.internal` — not exposed to end users), and `ai_stage=step_name` (existing field → run state → stamped on `$ai_generation`, giving per-stage sandbox cost attribution like the one-shot calls already had). Set once in the executor (`_run_prompt` + `start_sandbox_session`), asserted in `test_executor.py`. **No new fields** — review linkage is already carried by the branded `state["workflow_id"]`; threading `signal_report_id` for inbox-triggered reviews is a possible later reuse (needs stage-input plumbing).
+- **Follow-up, same day — spawned-task attribution (the Signals pattern, all reused fields):** every Review sandbox spawn now passes `origin_product=TaskOriginProduct.REVIEW_HOG` (new enum member, choices-only tasks migration **0047**, SQL no-op), `internal=True` (`Task.internal` — not exposed to end users), and `ai_stage=step_name` (existing field → run state → stamped on `$ai_generation`, giving per-stage sandbox cost attribution like the one-shot calls already had). Set once in the executor (`_run_prompt` + `start_sandbox_session`), asserted in `test_executor.py`. **No new fields** — review linkage is already carried by the branded `state["workflow_id"]`; threading `signal_report_id` for inbox-triggered reviews is a possible later reuse (needs stage-input plumbing).
 
 ### ✅ BUILT 2026-07-07 — findings cross Temporal stages by reference, not by value (uncommitted)
 
@@ -405,7 +405,7 @@ A tiny PR (title change) used to pay every enabled perspective on every chunk �
 
 ### ✅ BUILT + e2e ✅ 2026-07-14 — live PR status comment (kickoff → on-persistence edits → outcome) (uncommitted)
 
-Before this, a labeled PR was silent until the review published (or forever, on a failed/zero-publishable run). Now the publish path carries **one marker-tagged issue comment per report** (`<!-- reviewhog:status:{report_id} -->`), posted at kickoff and **edited in place** — never re-posted, because comment edits don't notify PR subscribers while every new comment emails everyone. Design locked with the user 2026-07-13: no timer anywhere — updates ride the pipeline's own persistence moments.
+Before this, a labeled PR was silent until the review published (or forever, on a failed/zero-publishable run). Now the publish path carries **one marker-tagged issue comment per report** (`<!-- review:status:{report_id} -->`), posted at kickoff and **edited in place** — never re-posted, because comment edits don't notify PR subscribers while every new comment emails everyone. Design locked with the user 2026-07-13: no timer anywhere — updates ride the pipeline's own persistence moments.
 
 - **Module:** `reviewer/status_comment.py` (render + GitHub I/O + debounce); progress derivation extracted from `api/reviews.py` into **`reviewer/progress.py`** (shared `snapshot_stats` / `turn_stats` / `progress_payload`), so the PR comment and the UI's "Step k/6" rows read the same source and can't disagree. The comment mirrors the frontend's 6-step labels exactly.
 - **Kickoff:** `post_status_comment_activity`, dispatched in `ReviewPRWorkflow` only when `inputs.publish and meta.pr_number is not None`, and only **after every gate** (already-published, empty-diff, acting-user, opt-outs) — gated no-op turns and eval/CLI/branch runs keep zero GitHub footprint. Reuses the previous turn's comment by stored id, falls back to a marker scan (crash between POST and id-save), and falls back to a fresh POST on a 404'd stored id (user deleted it).
@@ -435,7 +435,7 @@ schema-failure class, killed structurally by structured outputs).
   enforcement backstop when a perspective re-raises anyway. No carry-forward yet — a suppressed re-find
   is absent from the new turn's finding set (the old turn's rows keep it).
 - **Executor:** `reviewer/sandbox/direct_llm.py` → `run_oneshot_review(...)` —
-  `get_async_anthropic_gateway_client(product="review_hog")` (product registered in
+  `get_async_anthropic_gateway_client(product="review")` (product registered in
   `insights/llm/gateway_client.py` + the llm-gateway config), `ONESHOT_MODEL = "claude-sonnet-5"` with
   adaptive thinking + `output_config.effort = "xhigh"` (the API-native expression of the sandbox pins),
   **structured outputs** from the stage's pydantic model (schema-guaranteed JSON), an `ai_stage` header
@@ -445,14 +445,14 @@ schema-failure class, killed structurally by structured outputs).
 - **Branch points:** `split_chunks_activity` (additions gate) and `deduplicate_issues` (issue-count gate);
   prompts byte-identical on both paths.
 - Smoke-verified end-to-end 2026-07-03 against the local gateway (sonnet-5 generation captured with
-  `ai_product=review_hog` + `ai_stage`). Eval round:
+  `ai_product=review` + `ai_stage`). Eval round:
   `eval/experiments/2026-07-oneshot-chunking-dedup/` (2 unpinned e2e runs on frozen PR #62096 + an offline
   chunk-plan sample; kill = set the two gates to 0, which restores sandbox behavior byte-identically).
 
 ### ✅ BUILT 2026-07-02 — Inbox "Code review" tab: onboarding/settings UI + `ReviewUserSettings` backend
 
-The first ReviewHog UI surface (uncommitted): one scrollable onboarding-and-settings page, live from load
-(no save step), per the Claude Design handoff at `playground/reviewhog-ui/design_handoff_reviewhog_onboarding`
+The first Review UI surface (uncommitted): one scrollable onboarding-and-settings page, live from load
+(no save step), per the Claude Design handoff at `playground/review-ui/design_handoff_review_onboarding`
 — concept kept, all components swapped for UI. Decisions locked with the user: staff-only tab +
 **Alpha** tag; label trigger **default ON** (opt-out — default-off would have halted the insights/insights
 label flow); urgency threshold = pure **priority** filter (not placement); perspectives keep the min-1
@@ -469,7 +469,7 @@ floor and blind-spots/validator are **exactly-one-active with deactivation block
   perspectives → blind-spot check → validation criteria → read-only skill drawer; it no longer sits
   behind the Inbox onboarding takeover.
 - **Where the code lives:** `products/review_hog/frontend/` (`CodeReviewScene.tsx`,
-  `reviewHogSettingsLogic.ts`, plus the pre-existing `generated/` orval clients). The kea deps live in
+  `reviewSettingsLogic.ts`, plus the pre-existing `generated/` orval clients). The kea deps live in
   `products/review_hog/package.json` as `"catalog:"` entries (kea / kea-loaders / kea-router — the
   `links` / `visual_review` pattern); the 2026-07-02 `ERR_PNPM_TRUST_DOWNGRADE` failure that originally
   forced the code into `frontend/src/scenes/inbox/` no longer reproduces with catalog deps. New schema
@@ -479,7 +479,7 @@ floor and blind-spots/validator are **exactly-one-active with deactivation block
   `review_inbox_prs` (default off; consumed by the Stage-6 inbox trigger since 2026-07-02),
   `review_labeled_prs` (default on), `urgency_threshold` (`consider`/`should_fix`/`must_fix`, default
   `consider` since 2026-07-16 — see the follow-up below; values mirror `IssuePriority`). GET/PATCH
-  singleton at `review_hog/settings` — the
+  singleton at `review/settings` — the
   action method is `user_settings` because a method named `settings` shadows DRF's `APIView.settings`
   and breaks the whole view (found by test).
 - **Label gate:** `resolve_acting_user_activity` now returns the acting user's settings snapshot
@@ -499,9 +499,9 @@ floor and blind-spots/validator are **exactly-one-active with deactivation block
 - **"Create your own …":** task kickoff mirroring Inbox "Make a scout" (`api.tasks.create` →
   `urls.taskDetail`), origin `USER_CREATED`. The frontend prompts are thin scout-style pointers; the
   actual authoring guide (naming contract `review-script-{perspective,blind-spots,validation}-<slug>`,
-  category `review_hog`, per-kind body shape, `insights:skill-create` flow, activation steps) lives in
+  category `review`, per-kind body shape, `insights:skill-create` flow, activation steps) lives in
   the canonical **`review-script-authoring`** skill — see the follow-up below.
-- **Verified:** 321 review_hog tests (`backend/tests` + `backend/reviewer/tests`, the product's actual
+- **Verified:** 321 review tests (`backend/tests` + `backend/reviewer/tests`, the product's actual
   `backend:test` scope) + ruff + tach; jest inbox suite; oxlint/tsgo clean on the touched files
   (repo-wide `pnpm format` is a footgun: its `--fix-dangerously` pass mangled 5 unrelated files —
   reverted; lint targeted paths instead). Live smoke on dev: tab renders with real synced skills,
@@ -625,13 +625,13 @@ until the user has completed reviews** — placement picked by the user from pro
 polish from the same session: single-active accent border removed (cards identical to perspectives),
 "Edit skill" links go to the skill's own page (`urls.skill(name)`, card + drawer footer via
 `ViewedSkill.skillName`), the Inbox-PRs trigger row uses the real `Logomark`, and the three-bar
-`ReviewHogMark` is deleted.
+`ReviewMark` is deleted.
 
 - **`ReviewReport.acting_user`** (migration 0009, nullable FK, `db_constraint=False`, SET_NULL):
   stamped in `_resolve_acting_user` via a new defaulted `ResolveActingUserInput.report_id`. It's "whose
   configuration drove this run", not "PR author" — so it survives future non-PR (branch-only)
   triggers, which was the user's design question. Old reports are null until their next run.
-- **`GET review_hog/reviews/`** (`ReviewRecentReviewsViewSet`): the requesting user's 10 most recent
+- **`GET review/reviews/`** (`ReviewRecentReviewsViewSet`): the requesting user's 10 most recent
   completed reports (`acting_user=me, last_run_at set`), newest first. Per row: repo, pr_number,
   head_branch, `github_url` (**pr_url, falling back to the branch tree URL** — both PR and branch are
   valid cases), run_count, last_run_at, published, and valid-finding counts by **effective** priority
@@ -658,7 +658,7 @@ payload into Python) from the turn's working-state artefacts, preferring the sna
   `candidate_count`/`dismissed_count` from the new `load_turn_findings` (all judged+unjudged pairs;
   `load_valid_findings` is now a filter over it). `pr_number` became nullable in the schema (branch
   targets). Enum pin: `ReviewIssuePriorityEnum` in `ENUM_NAME_OVERRIDES` (two fields share the set).
-- **`GET review_hog/reviews/<id>/`** (`retrieve`, same viewset, same acting-user scoping → 404
+- **`GET review/reviews/<id>/`** (`retrieve`, same viewset, same acting-user scoping → 404
   otherwise): full `ReviewDetailSerializer` = list row + `report_markdown` + `findings` (valid, most
   urgent first, `effective_priority` + `reviewer_priority` + `validator_note`) + `dismissed_findings`
   (with the validator's argumentation). Unjudged findings appear in neither list.
@@ -697,7 +697,7 @@ payload into Python) from the turn's working-state artefacts, preferring the sna
   to one "Blind spots" label) and each finding's `file:lines` deep-links to
   `github.com/<repo>/blob/<head_sha>/<file>#L…` (detail now returns `head_sha`). Test-helper note:
   `_report` stamps status IDLE for completed reports (model default ACTIVE reads as "running").
-- **Reviewer effectiveness chart (same day, iterated):** `GET review_hog/reviews/perspective_stats/`
+- **Reviewer effectiveness chart (same day, iterated):** `GET review/reviews/perspective_stats/`
   (`@action`, `ReviewPerspectiveStatsSerializer`) aggregates the user's last 50 completed reviews'
   latest turns: per `source_perspective` → raised / kept / dismissed. UI: THREE "Effectiveness"
   cards, one per section via `SingleActiveSection.preamble` — Perspectives (per-perspective bars),
@@ -713,17 +713,17 @@ payload into Python) from the turn's working-state artefacts, preferring the sna
 
 Mirrors the Inbox scope switch: the block can now list every review on the project, not just the requesting user's.
 
-- **`GET review_hog/reviews/?scope=mine|everyone`** (`ReviewsListParamsSerializer`, default `mine`):
+- **`GET review/reviews/?scope=mine|everyone`** (`ReviewsListParamsSerializer`, default `mine`):
   `everyone` drops the `acting_user` filter; everything else (running-first ordering, 5-row cap, DB-side enrichment) is unchanged.
   Bad values 400 via `is_valid(raise_exception=True)`.
   The `scope` ChoiceField's enum stays inline in the OpenAPI query parameter, so no `ScopeEnum` component collision (verified with `--fail-on-warn`).
 - **`retrieve` is now project-wide** (queries with `SCOPE_EVERYONE` internally) so any listed review opens;
   another team's report id still 404s (`for_team`), garbage ids still 404.
   `perspective_stats` stays personal — it describes _your_ reviewers' effectiveness.
-- **Index:** `(team, -last_run_at)` `reviewhog_rpt_team_recent_idx` (migration 0016, `SafeAddIndexConcurrently`) serves the everyone-scope completed slice;
+- **Index:** `(team, -last_run_at)` `review_rpt_team_recent_idx` (migration 0016, `SafeAddIndexConcurrently`) serves the everyone-scope completed slice;
   the mine slice keeps the 0011 `(team, acting_user, -last_run_at)` index.
 - **UI/logic:** `SegmentedButton` "For you / Entire project" on the section header;
-  `reviewsScope` + `hasUserChosenReviewsScope` persisted reducers in `reviewHogSettingsLogic`;
+  `reviewsScope` + `hasUserChosenReviewsScope` persisted reducers in `reviewSettingsLogic`;
   **auto-default** — an empty first mine-scope load flips to Entire project via `applyDefaultReviewsScope`, which is _not_ marked as a user choice so a later explicit pick wins (both directions jest-tested);
   an explicit pick is mirrored to `?reviews_scope=` — the auto-default never writes the URL, since hydrating from a link counts as an explicit choice and would make the fallback permanent;
   the loader takes a `breakpoint()` after the fetch so a scope flip mid-flight drops the stale response;
@@ -760,7 +760,7 @@ The 5-row cap became the first page: the list grows by a page per "Show more" cl
   Copy is "Show fewer" (countable rows), per user's "whatever is grammatically correct".
 - Tests: BE — envelope + limit growth + has_more boundary at exact count + out-of-range 400s (wiring guard);
   jest — grow/collapse cycle (instant collapse, has_more preserved, scope flip resets the limit).
-  Full suite: 503 backend + 3 jest green; `insightscli build:openapi` regenerated cleanly (list function keeps its `reviewHogReviewsList` name).
+  Full suite: 503 backend + 3 jest green; `insightscli build:openapi` regenerated cleanly (list function keeps its `reviewReviewsList` name).
 
 #### ✅ BUILT 2026-07-17 — page-level scope: the stats follow the "For you / Entire project" switch
 
@@ -796,7 +796,7 @@ skills follow later, deliberately not in this iteration.
 The "Create your own …" frontend prompts were fat, self-describing instruction sets — an
 anti-pattern (knowledge duplicated in FE strings, editable only via deploy, undiscoverable to other
 agents). Reworked to the **scout pattern** (`authoring-scouts`): the FE prompts in
-`reviewHogSettingsLogic.ts` are now thin kickoff pointers ("use the review-script-authoring skill from
+`reviewSettingsLogic.ts` are now thin kickoff pointers ("use the review-script-authoring skill from
 the Insights MCP … follow its <kind> path", plus a skill-unavailable fallback), and the actual guide
 is the canonical **`review-script-authoring`** skill at `products/review_hog/skills/review-script-authoring/`.
 
@@ -824,7 +824,7 @@ is the canonical **`review-script-authoring`** skill at `products/review_hog/ski
   branch's `branch`-aware `clone_repository` is superseded — master refactored the sandbox into an
   abstract base class and now checks out the PR branch via a `git fetch … && git checkout -B … FETCH_HEAD`
   block in `get_sandbox_for_repository.py`, driven by `ctx.branch`). `pyproject.toml` took master + re-added
-  `pygithub==2.7.0` (ReviewHog needed it at the time; master had dropped it); `uv.lock` relocked with `uv lock`.
+  `pygithub==2.7.0` (Review needed it at the time; master had dropped it); `uv.lock` relocked with `uv lock`.
   **Since removed** (2026-07-08): GitHub I/O now goes through the egress transport — see the BUILT entry above.
 - **Rewired the sandbox runner integration** (this was the "won't run end-to-end" breakage): master deleted
   `custom_prompt_runner.py` + `custom_prompt_executor.py` and replaced them with `custom_prompt_internals.py`
@@ -847,7 +847,7 @@ contracts"_) made `products/tasks` an **isolated product** and **relocated** the
 machinery from `products/tasks/backend/services/` to `products/tasks/backend/logic/services/`, exposing it
 through a facade at **`products/tasks/backend/facade/agents.py`**. The sole merge conflict
 (`products/tasks/backend/temporal/client.py`) kept **both** newly-added params — master's `prewarmed` and
-the branch's `workflow_id_prefix` (the merged function bodies already referenced both). ReviewHog was
+the branch's `workflow_id_prefix` (the merged function bodies already referenced both). Review was
 re-pointed accordingly:
 
 - `sandbox/executor.py` and `tests/test_executor.py` now import `MultiTurnSession`,
@@ -964,7 +964,7 @@ state + cloud persistence is its own effort — now **Stage 3** below.
 
 > **Status: Stage 3 complete (steps 1–14 built & green; 15–16 remaining).** Foundation, persist-after-success, explicit
 > team/user identity, the per-turn **point-in-time diff snapshot**, **step 8 — Postgres is the
-> single source of truth and the on-disk `reviews/<pr>/` store is gone**, and **step 9 — `reset_review_hog`**
+> single source of truth and the on-disk `reviews/<pr>/` store is gone**, and **step 9 — `reset_review`**
 > (DEBUG-only full wipe). The pipeline passes objects in-process within a run and persists every stage to rows;
 > a `head_sha`-scoped **DB-driven resume** reuses the turn-stable sandbox stages (chunk / analyze / perspective
 > review) on a re-run. The sandbox executor returns a validated model (via `MultiTurnSession.start(model=…)`)
@@ -973,7 +973,7 @@ state + cloud persistence is its own effort — now **Stage 3** below.
 > built: the review "lens" is renamed **perspective** throughout, and the three jinja focus templates are gone —
 > each perspective is a DB-synced `LLMSkill` (`products/review_hog/skills/review-script-perspective-*/SKILL.md`,
 > the Signals-scout canonical-skill pattern) that the sandbox agent **pulls** over MCP via `skill-get`; the
-> three couple into one ordered `PERSPECTIVES` registry. Lint + tach + the ReviewHog backend suite (138) + the
+> three couple into one ordered `PERSPECTIVES` registry. Lint + tach + the Review backend suite (138) + the
 > Signals artefact suite pass. **Step 11 — prompt iteration** is now built (A-lite): all three review prompts
 > (chunking, chunk-analysis, issues-review) are **perspective-agnostic** (the perspective's identity + focus live
 > entirely in the pulled skill) and inject only **what the agent can't self-derive** — the per-chunk change-set
@@ -987,8 +987,8 @@ state + cloud persistence is its own effort — now **Stage 3** below.
 > the per-chunk context block into a shared `tools/prompt_helpers.py`, and removed two dead-code spots (an
 > unreachable `i += 1`; a never-emitted `"modification"` change-type branch). **Step 13 — validator-as-skills**
 > is now built: the validation keep/drop criteria are a team-pulled `review-script-validation-criteria` skill (the
-> `issue_validation` prompt is criteria-agnostic); the step-10 sync was generalized (one `review_hog` category for
-> both review skill sets → a single **"Code review"** Skills-UI tab; command renamed `sync_review_hog_skills`);
+> `issue_validation` prompt is criteria-agnostic); the step-10 sync was generalized (one `review` category for
+> both review skill sets → a single **"Code review"** Skills-UI tab; command renamed `sync_review_skills`);
 > e2e ✅ on #63625. **Step 14 — dedup cleanup** is now built (Variant A: prior-reviewer dedup generalized off the
 > hardcoded bot to all prior inline comments, any author, treated uniformly; aggressive + uniform). What remains:
 > **(15)** the **Temporal migration** — `run.py main()` → a **single-turn**
@@ -1000,7 +1000,7 @@ state + cloud persistence is its own effort — now **Stage 3** below.
 
 **Why.** Today every run writes Pydantic-serialized JSON/MD to a gitignored `reviews/<pr_number>/` tree — no
 DB, no `team_id`, no run identity (a "run" is just the PR-number directory). That blocks two things: running
-in the cloud, and the intended **loop-y** behavior — after the first pass ReviewHog should re-check the PR for
+in the cloud, and the intended **loop-y** behavior — after the first pass Review should re-check the PR for
 new commits and new comments (from humans or other bots) and take **another turn**, repeating until nothing
 significant has changed. A PR review is therefore a **living document**, not a one-shot job — which is exactly
 the shape Signals' report/artefact store was built for, so we reuse that design.
@@ -1010,10 +1010,10 @@ the "not a SignalReport", and the "reuse the leaf, own the model" calls are made
 
 ##### Placement & boundaries
 
-- **ReviewHog stays a top-level peer product** (`products/review_hog/`). It is **not** nested under
+- **Review stays a top-level peer product** (`products/review_hog/`). It is **not** nested under
   `products/signals/` — the repo has zero precedent for a product inside another, and the exact precedent for
   "an agentic product that feeds Signals" is **`products/replay_vision/`**, a sibling that emits findings
-  through Signals' facade. ReviewHog is the same shape.
+  through Signals' facade. Review is the same shape.
 - **A PR review is NOT a `SignalReport`.** SignalReport's lifecycle (Datastore embeddings → similarity
   grouping → `total_weight` accrual → `signals_at_run` promotion gate → autonomy auto-start) answers "is this
   worth acting on, and which group does it join?" — a PR answers both by its identity `(repo, pr_number)`.
@@ -1021,27 +1021,27 @@ the "not a SignalReport", and the "reuse the leaf, own the model" calls are made
   polluting the Status enum. So: **separate parent entities, shared substrate only.**
 - **Reuse path = "peer + reuse the leaf"** (chosen over extracting a shared abstract base). Import mechanics
   decided it: Signals' `artefact_schemas.py` is dependency-light (pydantic + one tasks-facade DTO,
-  `RepoSelectionResult` — no Django/core/temporal), so ReviewHog imports the content models from it cheaply.
+  `RepoSelectionResult` — no Django/core/temporal), so Review imports the content models from it cheaply.
   The Django artefact _model_ (funnel + fields + a `tasks.Task` FK) is the entangled part — hoisting it into
   core would invert the dependency (core→product FK) and force re-parenting migrations, and the repo rule is
-  **nest-then-promote** (don't pre-build shared infra). So ReviewHog **reuses the leaf models and owns its own
+  **nest-then-promote** (don't pre-build shared infra). So Review **reuses the leaf models and owns its own
   model**; a shared abstract base is deferred (see below).
   - **Correction from the build:** the registry _helpers_ `artefact_type_for` / `parse_artefact_content` are
     **not reusable** — they close over Signals' module-global `ARTEFACT_CONTENT_SCHEMAS` and take no registry
-    argument, so they can't see ReviewHog's types. ReviewHog therefore defines its **own ~6-line copies** over
+    argument, so they can't see Review's types. Review therefore defines its **own ~6-line copies** over
     its own registry (`reviewer/artefact_content.py`). Only the content _models_ + `ArtefactContentValidationError`
     are imported from the leaf. (Cleaner anyway — zero shared mutable state.)
 - **Signals stays untouched at the table & behavior level.** So far the only Signals change is a **pure code
   move**: `ArtefactAttribution` was relocated from `products/signals/backend/models.py` into a new
   **zero-dependency** leaf `products/signals/backend/artefact_attribution.py` (stdlib only — leaner than
   `artefact_schemas.py`, which drags the tasks facade) and re-exported from `models.py` for the 9 existing
-  importers — no migration, no table change. ReviewHog imports attribution from that module with no transitive
+  importers — no migration, no table change. Review imports attribution from that module with no transitive
   weight. **Allowed exception (step 7):** a Signals-schema edit is permitted _only_ when it is a **minor,
   additive, optional** field that Signals never populates and that cannot change Signals behavior — e.g. the
   optional `diff: str | None = None` on `Commit` (default `None`; old rows still parse). Anything beyond that
   shape stays off-limits.
 
-##### What ReviewHog reuses vs owns
+##### What Review reuses vs owns
 
 - **Reuse directly (shared infra, already legal):** `MultiTurnSession` via the Tasks facade
   (`products.tasks.backend.facade.agents`, already imported by `executor.py`); `GitHubIntegration.get_diff` /
@@ -1050,8 +1050,8 @@ the "not a SignalReport", and the "reuse the leaf, own the model" calls are made
   `CodeReference`, `TaskRunArtefact`, `NoteArtefact`, plus `ArtefactContentValidationError` (and
   `ArtefactAttribution` from the new `artefact_attribution` leaf, after the move above). **Not** the registry
   helpers `artefact_type_for` / `parse_artefact_content` — they close over Signals' module-global registry, so
-  ReviewHog defines its own (see the correction above).
-- **ReviewHog owns:** `ReviewReport` + `ReviewReportArtefact` (own tables + funnel mirroring
+  Review defines its own (see the correction above).
+- **Review owns:** `ReviewReport` + `ReviewReportArtefact` (own tables + funnel mirroring
   `SignalReportArtefact`) and its product-specific content schemas (`ReviewIssueFinding`, `ValidationVerdict`).
   The per-turn diff snapshot (step 7) reuses the `commit` artefact via a minor optional `diff` field on Signals'
   `Commit` — not a new owned type.
@@ -1083,19 +1083,19 @@ gives the fail-closed `TeamScopedManager` + canonical-team `save()`; the subclas
   - **Funnel** (adapted from `SignalReportArtefact`): `_create` derives `type` from the content-model class via
     `artefact_type_for`, serializes `content.model_dump_json()`, and maps `ArtefactAttribution` →
     `created_by_id`/`task_id`; public appenders are `append_finding` / `append_verdict` / `add_log` (no generic
-    `append`/status routing — ReviewHog has no status types). **No** Signals auto-start hook.
+    `append`/status routing — Review has no status types). **No** Signals auto-start hook.
     - **Fail-closed divergence:** unlike `SignalReportArtefact` (plain `UUIDModel`), `ReviewReportArtefact` is
       fail-closed, so `_create` writes via `cls.objects.for_team(team_id).create(...)` — the cloud/Temporal
       orchestrator has no ambient team scope and the bare manager would raise `TeamScopeError`. `for_team` is the
       CLAUDE.md-blessed out-of-request write path; `team_id` is still passed explicitly (queryset filters don't
       propagate into row creation).
-  - **Registry + helpers:** a ReviewHog-local `ARTEFACT_CONTENT_SCHEMAS` mapping its type strings → content models
+  - **Registry + helpers:** a Review-local `ARTEFACT_CONTENT_SCHEMAS` mapping its type strings → content models
     (reused `Commit`/`CodeReference`/`TaskRunArtefact`/`NoteArtefact` + own `ReviewIssueFinding`/`ValidationVerdict`),
-    plus ReviewHog's own `artefact_type_for` / `parse_artefact_content` over that registry (the Signals helpers
+    plus Review's own `artefact_type_for` / `parse_artefact_content` over that registry (the Signals helpers
     can't take a foreign registry — see the correction above). A test asserts the registry keys equal the
     `ArtefactType` enum exactly.
   - Indexes mirroring Signals: `(report)`, `(report, type)`, `(report, type, -created_at)` for latest-wins seeks.
-    Index names are kept ≤30 chars (Django `E034`) and `reviewhog_*`-prefixed to avoid colliding with Signals'.
+    Index names are kept ≤30 chars (Django `E034`) and `review_*`-prefixed to avoid colliding with Signals'.
 
 Content schemas (`products/review_hog/backend/reviewer/artefact_content.py`, pydantic):
 
@@ -1132,7 +1132,7 @@ artefact: the reused Signals `Commit` schema gained one minor optional `diff` fi
 Signals-neutral — see step 7) to carry the point-in-time diff alongside the head-commit metadata. `get_diff`
 re-fetch is reserved for the **next** turn's _current_ diff — never for reconstructing a past turn. The data is moderate (tens–hundreds of KB per turn) and Postgres handles
 it comfortably (the team-scoped worktree cache stores far larger blobs in Postgres successfully); object storage
-is reserved for a blob that is both large _and_ irreproducible, of which ReviewHog has none. There is **no
+is reserved for a blob that is both large _and_ irreproducible, of which Review has none. There is **no
 on-disk store** — step 8 made the DB authoritative for inter-stage state too; per-stage prompts/outputs are
 either DB rows, in-process values within the run, or the S3 agent log (`task_run.log_url`).
 
@@ -1149,7 +1149,7 @@ either DB rows, in-process values within the run, or the S3 agent log (`task_run
 3. ✅ **Models:** added `products/review_hog/backend/models.py` (`ReviewReport` + `ReviewReportArtefact` + funnel)
    and `reviewer/artefact_content.py` (content schemas + local registry/helpers). Both fail-closed via
    `TeamScopedRootMixin`. Tests in `backend/tests/test_models.py` (5, green).
-4. ✅ **Migration:** `0001_initial` generated via `makemigrations review_hog` (two additive `CREATE TABLE`s + indexes
+4. ✅ **Migration:** `0001_initial` generated via `makemigrations review` (two additive `CREATE TABLE`s + indexes
    - the `(team, repository, pr_number)` unique constraint); `sqlmigrate` clean, drift check clean, `max_migration.txt`
      pinned. Fail-closed by birth via `TeamScopedRootMixin` (nothing added to `baseline_unmigrated.txt`).
 5. ✅ **Persist-after-success:** added `reviewer/persistence.py`, wired into `run.py` (the file-based
@@ -1187,7 +1187,7 @@ either DB rows, in-process values within the run, or the S3 agent log (`task_run
      caching a snapshot-less state.
    - **Schema.** Signals' `Commit` gained **one optional, Signals-neutral `diff: str | None = None`** field
      (default `None`; the Signals pipeline never sets it, old rows still parse) to carry that patch. The
-     fallback, if that ever became undesirable, is a ReviewHog-owned `diff_snapshot` type — but reuse is
+     fallback, if that ever became undesirable, is a Review-owned `diff_snapshot` type — but reuse is
      preferred.
    - **Persist (`persist_commit_snapshot`, called in `run.py` right after `upsert_review_report`).** Appends
      the `commit` artefact — `commit_sha = head_sha`, `branch` / `message` from PR metadata, `diff` =
@@ -1248,8 +1248,8 @@ either DB rows, in-process values within the run, or the S3 agent log (`task_run
    that match + the comment id to resolve/update, no semantic key needed. The `task_run` / `note` work-log artefacts
    and validation resume also land with the loop.
 
-9. ✅ **`reset_review_hog` management command — wipe ReviewHog's DB state for a clean slate.** A one-shot
-   `python manage.py reset_review_hog` deletes **all** ReviewHog rows across every team — every
+9. ✅ **`reset_review` management command — wipe Review's DB state for a clean slate.** A one-shot
+   `python manage.py reset_review` deletes **all** Review rows across every team — every
    `ReviewReportArtefact` (findings, verdicts, commit snapshots, and the `chunk_set` / `chunk_analysis` /
    `perspective_result` working state) and every `ReviewReport` — so a re-run starts genuinely fresh instead of
    resuming or accumulating against stale turns. Now that Postgres is the single source of truth, this is the
@@ -1258,7 +1258,7 @@ either DB rows, in-process values within the run, or the S3 agent log (`task_run
    deliberately **unscoped** — no `--team-id` / `--pr-url`, it just clears everything. `--dry-run` previews the
    counts without touching the DB; `--yes` skips the interactive confirm for scripted runs. The wipe goes
    through the fail-closed managers' cross-team escape hatch (`ReviewReport.objects.unscoped()` /
-   `ReviewReportArtefact.objects.unscoped()`), not raw SQL. (Tests in `backend/tests/test_reset_review_hog.py`:
+   `ReviewReportArtefact.objects.unscoped()`), not raw SQL. (Tests in `backend/tests/test_reset_review.py`:
    the DEBUG gate, the cross-team wipe, and `--dry-run` safety.)
 10. ✅ **Perspectives as LLMA skills — rename "lens" → "perspective" + DB-synced skill pipeline (before
     Temporal).** The three review "lenses" (Logic & Correctness / Contracts & Security / Performance &
@@ -1269,8 +1269,8 @@ either DB rows, in-process values within the run, or the S3 agent log (`task_run
     migration `0003`), and `persist_/load_lens_results` → `…_perspective_results`. The static jinja focus
     templates (`prompts/issues_review/pass_contexts/pass{1,2,3}_focus.jinja`, now **deleted**) became
     first-class **LLMA skills** at `products/review_hog/skills/review-script-perspective-*/SKILL.md`, synced into
-    per-team `LLMSkill` rows by `reviewer/lazy_seed.sync_canonical_perspectives` (`seeded_by="review_hog"`,
-    `category="review_perspective"`) — driven by the `sync_review_hog_skills` command and a cold-start
+    per-team `LLMSkill` rows by `reviewer/lazy_seed.sync_canonical_perspectives` (`seeded_by="review"`,
+    `category="review_perspective"`) — driven by the `sync_review_skills` command and a cold-start
     sync at run start. Delivery flipped to **pull**: `issues_review/prompt.jinja` instructs the agent to
     `skill-get(review-script-perspective-…, version=N)` over MCP (the sandbox's default `full` scope carries
     `llm_skill:read`). The three couple into one ordered `PERSPECTIVES` registry (`reviewer/skill_loader.py`)
@@ -1278,7 +1278,7 @@ either DB rows, in-process values within the run, or the S3 agent log (`task_run
     surface in the **Skills UI** under a **Review perspectives** tab (`category="review_perspective"` →
     `SKILL_CATEGORY_TABS` in `products/skills/frontend/llmSkillsLogic.ts` + the `/skills/perspectives` route in
     `products/skills/manifest.tsx`; mirrors the Signals "Scouts" tab — shows only when the team has ≥1
-    perspective row). **Superseded by step 13:** perspectives + validation now share the unified `review_hog`
+    perspective row). **Superseded by step 13:** perspectives + validation now share the unified `review`
     category under one **"Code review"** tab (`/skills/review-script`); the perspective rows were re-tagged from
     `review_perspective` by the sync's category self-heal. Full design in _Perspectives as LLMA skills_ under
     Deferred / future below.
@@ -1326,7 +1326,7 @@ either DB rows, in-process values within the run, or the S3 agent log (`task_run
     "what if", defensive paranoia, never-gonna-happen edge cases, and pure style (bias to drop when uncertain — a
     noisy reviewer gets ignored). A team retunes the bar by editing its row, no code change. **As built:** the
     criteria live in one canonical `review-script-validation-criteria` SKILL.md, pulled via `skill-get`; the step-10
-    sync was generalized (one `review_hog` category for both skill sets, command renamed `sync_review_hog_skills`);
+    sync was generalized (one `review` category for both skill sets, command renamed `sync_review_skills`);
     a single **"Code review"** Skills-UI tab covers perspectives + validation. 221 backend tests + ruff + tach
     green; **e2e ✅** on #63625 (9/9 stages; the agent confirmed-pulled the criteria skill via `skill-get`
     [`success:true`] and **dropped** an "unreachable" finding the criteria-less baseline kept — see
@@ -1384,7 +1384,7 @@ repository, branch, …)` builds `CustomPromptSandboxContext` inline. Each fan-o
     line-anchors ("reviewed == recorded"). Additive + backward-compatible (every hop an optional
     `head_sha: str | None = None`, default → today's branch-tip behavior), but it crosses the **isolated**
     `products/tasks` facade and touches a shared model + migration, so it lands as its **own self-contained,
-    tasks-owned change** ahead of ReviewHog consuming it. Full chain in the grounded map under _Everything on
+    tasks-owned change** ahead of Review consuming it. Full chain in the grounded map under _Everything on
     Temporal_. **May be skipped entirely** if the single-turn workflow (publish off) never needs reviewed-vs-tip
     consistency.
 
@@ -1415,7 +1415,7 @@ reproducible and is independently required for resume and the loop.
   `TODO: Make it a parent workflow`) is to be reworked into a **Temporal parent workflow** in a later pass; for
   now assume a cloud host runs it. On Temporal, persist large artifacts (e.g. the per-turn diff snapshot)
   **inside** the activity and pass **Postgres row ids by reference** (~2 MiB payload cap) — the payload cap is
-  a Temporal serialization limit, orthogonal to the store, so Postgres-first stands.
+  a Temporal serialization limit, ortscriptonal to the store, so Postgres-first stands.
 - **GitHub auth stays basic.** Keep the `GITHUB_TOKEN` path; move PR-fetch/publish onto the team-scoped
   `GitHubIntegration` (`get_diff` / `first_for_team_repository`) only when genuine per-team cloud auth is needed.
 
@@ -1440,11 +1440,11 @@ reproducible and is independently required for resume and the loop.
     (frontmatter `name` under a `REVIEW_FN_PERSPECTIVE_PREFIX = "review-script-perspective-"` constant + `description`;
     body = the perspective text moved out of the jinja focus blocks and **reworded to standalone perspective
     framing** — the pass-numbered "three-pass" wording was wrong once they run in parallel; substance kept).
-    A `sync_review_hog_skills` command (ported from Signals' `sync_canonical_skills` / `lazy_seed.py`) mirrors
+    A `sync_review_skills` command (ported from Signals' `sync_canonical_skills` / `lazy_seed.py`) mirrors
     each disk `SKILL.md` into **per-team `LLMSkill` / `LLMSkillFile` rows** (content-hashed; buckets
     created/updated/diverged/resurrected/pruned since 2026-07-08 — an all-dead canonical is recreated, not tombstoned;
-    ownership guard `metadata.seeded_by == "review_hog"`,
-    `category = "review_perspective"`), driven both by `manage.py sync_review_hog_skills`
+    ownership guard `metadata.seeded_by == "review"`,
+    `category = "review_perspective"`), driven both by `manage.py sync_review_skills`
     (`--team-id` / `--all-teams` / `--dry-run`) and a **lazy cold-start sync** at the start of a review run
     (mirroring the scout runner — no Temporal coordinator needed yet). Reuses the shared `LLMSkill` model, so
     add `products.skills` to `products.review_hog`'s `tach` `depends_on` (skills is un-isolated; no facade).
@@ -1464,9 +1464,9 @@ reproducible and is independently required for resume and the loop.
     `PERSPECTIVES` registry — the single source of truth the Temporal "perspective review" fan-out
     (`ReviewPerspectivesWorkflow`) iterates — so the perspective-loading code isn't touched twice.
   - **Acceptance gate — ✅ passed.** The e2e `run_review` against PR **#65862** (`--team-id 1 --user-id 1`,
-    `reset_review_hog` run first) completed the full 9-stage pipeline (exit 0): 5 findings + 5 verdicts, a
+    `reset_review` run first) completed the full 9-stage pipeline (exit 0): 5 findings + 5 verdicts, a
     12.5 KB rendered body. The cold-start sync seeded the three perspectives into team 1's `LLMSkill` rows
-    (v1, `seeded_by="review_hog"`, `category="review_perspective"`), and the sandbox agents **pull-delivered**
+    (v1, `seeded_by="review"`, `category="review_perspective"`), and the sandbox agents **pull-delivered**
     them — the prompt rendered `skill-get(review-script-perspective-…, version=1)`, the agents loaded and invoked
     `skill-get`/`skill-file-get` over MCP with no `isError`/`SkillNotFound`/`403`, and produced
     perspective-specialized output (9 `perspective_result` rows = 3 perspectives × 3 chunks; e.g. a Contracts &
@@ -1594,14 +1594,14 @@ git checkout -B <branch> FETCH_HEAD`** (`products/tasks` `get_sandbox_for_reposi
   `lazy_seed.sync_canonical_validation`. The step-10 sync was **generalized, not duplicated**: `_sync_canonicals`
   / `_discover_canonical` are prefix+category-driven and back both `sync_canonical_perspectives` and
   `sync_canonical_validation`; the management command was generalized + renamed
-  `sync_review_hog_perspectives` → **`sync_review_hog_skills`** (syncs both sets; `--all-teams` keys off
-  `seeded_by="review_hog"`). `skill_loader.load_validation_skill_for_run` pins the run's version;
+  `sync_review_perspectives` → **`sync_review_skills`** (syncs both sets; `--all-teams` keys off
+  `seeded_by="review"`). `skill_loader.load_validation_skill_for_run` pins the run's version;
   `validate_issues(team_id=…)` threads it into the render; the `issue_validation` prompt is **criteria-agnostic**
   (keeps the deduped-issues-in / per-issue-verdict-out contract + a `skill-get(review-script-validation-criteria,
 version=N)` block — the agent pulls the bar over MCP). Cold-start sync (`run.py _sync_review_skills_for_team`)
   seeds both skill sets per run.
   **Skills-UI grouping (decided with the maintainer 2026-06-25):** both review-script skill sets share **one**
-  category **`review_hog`** (constant `REVIEW_FN_SKILL_CATEGORY`) and surface under a single **"Code review"** tab
+  category **`review`** (constant `REVIEW_FN_SKILL_CATEGORY`) and surface under a single **"Code review"** tab
   (`/skills/review-script`); the perspective-vs-validation split is carried by the skill-name prefix
   (`review-script-perspective-*` vs `review-script-validation-*`), which the skills UI groups on. A category _is_ a tab
   here (the list endpoint filters one exact `category=`; `products/skills/backend/api/skills.py:283`), so "two
@@ -1630,7 +1630,7 @@ version=N)` block — the agent pulls the bar over MCP). Cold-start sync (`run.p
   `lazy_seed` / sync-command / pull machinery, so it's cheap once that exists — and landing it before Temporal
   means the workflow threads the final skill set, not a half-migrated one.
 
-- **Dedup cleanup — step 14, ✅ as built (2026-06-25).** `tools/issue_deduplicator.py` used to dedupe ReviewHog's
+- **Dedup cleanup — step 14, ✅ as built (2026-06-25).** `tools/issue_deduplicator.py` used to dedupe Review's
   findings against exactly one competing reviewer — `_PRIOR_REVIEWER_BOT = "greptile-apps[bot]"`, applied by a
   `_previous_bot_issues` author filter — feeding two places: (1) the deterministic positional gate
   `_select_dedup_candidates` (a finding sharing a file + overlapping line with a prior comment becomes an LLM dedup
@@ -1639,7 +1639,7 @@ version=N)` block — the agent pulls the bar over MCP). Cold-start sync (`run.p
   - **Dropped the hardcoded handle _and_ the `_previous_bot_issues` filter entirely** (not renamed). `pr_comments`
     from `fetch_pr_comments` is **already inline-only** (`pr.get_review_comments()`), so `deduplicate_issues` now
     builds `prior_comment_lines` and the LLM input straight from `pr_comments` — every prior inline comment, every
-    author (other bots, humans, ReviewHog's own), uniformly. (`_comment_line` already drops comments with no
+    author (other bots, humans, Review's own), uniformly. (`_comment_line` already drops comments with no
     resolvable file+line, so top-level "LGTM" chatter never reaches the gate.)
   - **Both the gate and the LLM input get all inline comments, with author handles** — already serialized on
     `PRComment.user`, so no data-flow change. The prompt instructs the agent to **use the author to read what a
@@ -1705,9 +1705,9 @@ version=N)` block — the agent pulls the bar over MCP). Cold-start sync (`run.p
     code; each fan-out child dispatches its sandbox-turn activities in **bounded batches** (width =
     `MAX_CONCURRENT_SANDBOXES`, repurposed as a fan-out width). The true global ceiling stays the `tasks-task-queue`
     worker's own concurrency — where the sandbox `ProcessTaskWorkflow`s actually execute.
-  - **Task queue:** register the orchestrator + child workflows + ReviewHog activities on
+  - **Task queue:** register the orchestrator + child workflows + Review activities on
     **`video-export-task-queue`** (`settings.VIDEO_EXPORT_TASK_QUEUE`) for now — it already hosts Signals' product
-    workflows, so ReviewHog co-locates with its mirror; a dedicated **`reviewhog-task-queue`** is a later split.
+    workflows, so Review co-locates with its mirror; a dedicated **`review-task-queue`** is a later split.
     Sandbox `ProcessTaskWorkflow`s stay on `tasks-task-queue`. Wire it via a new
     `products/review_hog/backend/temporal/__init__.py` (`WORKFLOWS` / `ACTIVITIES`) + a facade re-export, append to
     the `video-export-task-queue` tuple in `start_temporal_worker.py`, and update the CI worker-trigger.
@@ -1725,7 +1725,7 @@ version=N)` block — the agent pulls the bar over MCP). Cold-start sync (`run.p
   Insights's Temporal subsystems confirmed the conventions and the exact hook points; captured here so the rewrite
   (and any future agent picking it up) starts from facts, not re-derivation.
 
-  _Conventions ReviewHog must follow:_
+  _Conventions Review must follow:_
   - **Workflow shape:** inherit `InsightsWorkflow` + `@temporalio.workflow.defn(name="…")` with explicit kebab names,
     each mapping to its class: `review-pr` (`ReviewPRWorkflow`), `review-analyze-chunks` (`AnalyzeChunksWorkflow`),
     `review-perspectives` (`ReviewPerspectivesWorkflow`), `review-validate-issues` (`ValidateIssuesWorkflow`). The
@@ -1734,12 +1734,12 @@ version=N)` block — the agent pulls the bar over MCP). Cold-start sync (`run.p
     `insights/temporal/delete_teams/workflows.py:70-71`; Signals' `products/signals/backend/temporal/summary.py:125-141`
     (dataclass inputs + `parse_inputs` + a `workflow_id_for(team_id, artefact_id)` classmethod).
   - **Inputs:** `@dataclass` (not Pydantic), with an optional `@property properties_to_log -> dict` to keep sensitive
-    fields out of Datastore `log_entries` (`insights/temporal/delete_teams/types.py:13-14`). ReviewHog's inputs
+    fields out of Datastore `log_entries` (`insights/temporal/delete_teams/types.py:13-14`). Review's inputs
     (`team_id` / `user_id` / `repository` / `pr_url`) carry nothing secret but follow the convention.
   - **Determinism (the rewrite's biggest hazard):** workflow `@run` is pure — no clock / `random` / IO / ORM
     (`insights/temporal/README.md:24-29`). All ORM in activities via `database_sync_to_async(..., thread_sensitive=False)`
     / `@asyncify` (`products/signals/backend/temporal/summary.py:429`; `insights/temporal/common/utils.py:49-93`).
-    ReviewHog's `persistence.py` helpers are already sync and called via `sync_to_async` today → each wraps as an
+    Review's `persistence.py` helpers are already sync and called via `sync_to_async` today → each wraps as an
     activity body cleanly. Audit `run.py main()` for any clock read / direct ORM before it becomes the workflow body.
   - **Idempotency:** state-mutating activities `select_for_update()` + guard on status + atomic transition + return an
     idempotency flag; keep the `head_sha` watermark guard so a retry can't double-advance
@@ -1770,7 +1770,7 @@ version=N)` block — the agent pulls the bar over MCP). Cold-start sync (`run.p
     `insights/temporal/README.md:498-541`. (Today's `tests/test_run.py` patches `run.main()` — that target moves once
     `main()` becomes the workflow body.)
 
-  _Files to create (all ReviewHog-owned, additive):_
+  _Files to create (all Review-owned, additive):_
   - `products/review_hog/backend/temporal/__init__.py` — module-level `WORKFLOWS = [ReviewPRWorkflow,
 AnalyzeChunksWorkflow, ReviewPerspectivesWorkflow, ValidateIssuesWorkflow]` + `ACTIVITIES = [...]` (mirror
     `products/signals/backend/temporal/__init__.py:75-137`).
@@ -1790,12 +1790,12 @@ AnalyzeChunksWorkflow, ReviewPerspectivesWorkflow, ValidateIssuesWorkflow]` + `A
     `_sandbox_context_for` + the module-global `_sandbox_semaphore`; `run_sandbox_review` takes
     `(team_id, user_id, repository, branch[, head_sha])` explicitly and builds `CustomPromptSandboxContext` inline
     (a ContextVar doesn't cross worker boundaries → cross-tenant-bleed risk).
-  - `insights/management/commands/start_temporal_worker.py:324-333` — append ReviewHog's `WORKFLOWS` / `ACTIVITIES` to
+  - `insights/management/commands/start_temporal_worker.py:324-333` — append Review's `WORKFLOWS` / `ACTIVITIES` to
     the existing `VIDEO_EXPORT_TASK_QUEUE` tuple (queue constant `insights/settings/temporal.py:111`; DEBUG collapses
     to `development-task-queue`, so one local worker runs the orchestrator **and** the sandbox `ProcessTaskWorkflow`s).
     Core importing a product's temporal lists is the established Signals exception.
   - `.github/workflows/container-images-cd.yml` (~356-363) — add `^products/review_hog/backend/temporal` to the
-    video-export-worker change-detection grep so the pod redeploys on ReviewHog temporal changes.
+    video-export-worker change-detection grep so the pod redeploys on Review temporal changes.
   - `tach`: no new `depends_on` — the pin goes through `products.tasks.backend.facade.*`; re-run
     `tach check --dependencies --interfaces` after wiring.
 
@@ -1871,13 +1871,13 @@ chunk_id)`, so `load_perspective_results` already gives per-chunk skip-resume fo
   rather than dropping them. Weigh the noise trade-off (off-diff findings are more likely to be context the author
   didn't touch) — favor the body-section option first (lowest risk, no mis-anchored inline comments). The count of
   dropped findings is already knowable at publish time (valid findings minus posted inline), so the gap is measurable.
-- **Emit into the Signals inbox.** Like `replay_vision`, ReviewHog could emit notable findings into Signals via
+- **Emit into the Signals inbox.** Like `replay_vision`, Review could emit notable findings into Signals via
   the facade `emit_signal` so they surface in the inbox — a product feature, separate from this storage work.
 
 **Reuse ledger:** _reuse directly_ — `MultiTurnSession` (Tasks facade), `GitHubIntegration.get_diff` (next
 turn's current diff only); _reuse from the Signals leaf_ — `Commit` / `CodeReference` / `TaskRunArtefact` /
 `NoteArtefact` content models + `ArtefactContentValidationError` (from `artefact_schemas`), and
-`ArtefactAttribution` (from the new `artefact_attribution` leaf); _ReviewHog-owned_ — `ReviewReport` +
+`ArtefactAttribution` (from the new `artefact_attribution` leaf); _Review-owned_ — `ReviewReport` +
 `ReviewReportArtefact`, the funnel, **its own registry + `artefact_type_for` / `parse_artefact_content` helpers**
 (the Signals helpers close over Signals' module-global registry and can't take ours), the
 `ReviewIssueFinding` / `ValidationVerdict` schemas, and the working-state schemas
@@ -1892,15 +1892,15 @@ turn's current diff only); _reuse from the Signals leaf_ — `Commit` / `CodeRef
 > one-shot job. This section is the **canonical** loop design — it supersedes the scattered "deferred to the loop"
 > notes above and the _Cloud host, Temporal & GitHub_ stub. Researched 2026-06-26 against the real code (a parallel
 > reader sweep of every subsystem the loop touches + the Tasks write/push path verified directly); cites are to
-> current `master` / `signals/reviewhog`. **Triggers (a `reviewhog` label, à la Stamphog) and the publish identity
+> current `master` / `signals/review`. **Triggers (a `review` label, à la Stamp) and the publish identity
 > are assumed inputs, deferred** — the maintainer wires the label trigger later and supplies the publish identity
 > (the team's GitHub App installation token, or a service user + project API key). This section designs the **loop
 > itself**. Variants are presented with a **decision** each (the maintainer is not in the loop to answer questions).
 
 **The target (maintainer's words).** Today users hand-run a sandbox agent and put it on `/loop` every 15 min from a
-chat window — workable but blunt. ReviewHog should do it properly. One turn of the loop:
+chat window — workable but blunt. Review should do it properly. One turn of the loop:
 
-1. **Route** — decide if the PR passes through (Stamphog-style approve / skip) or needs review, and **which
+1. **Route** — decide if the PR passes through (Stamp-style approve / skip) or needs review, and **which
    perspectives** to enable.
 2. **Chunk** by meaning / area (only if needed — the existing chunk gate).
 3. **Spawn specialist reviewers in parallel** (Logic & Correctness, Contracts & Security, …, plus per-team custom
@@ -1969,7 +1969,7 @@ singleton until the cross-turn prerequisites (below) are paid off and live in-ru
 
 #### Triggers — GitHub events → turns (assumed input, deferred)
 
-The label trigger (à la Stamphog's `stamphog` label) and the publish identity are **deferred** per the maintainer;
+The label trigger (à la Stamp's `stamp` label) and the publish identity are **deferred** per the maintainer;
 sketched only so the loop's contract is clear. The unified webhook dispatcher already exists (`github_webhook`,
 HMAC-verified, `insights/urls.py:101-145,465-466`) with installation→team resolution (`_resolve_external_team`,
 `products/tasks/backend/webhooks.py:220-232`). Three advance signals, **all net-new dispatcher branches** (today
@@ -1986,33 +1986,33 @@ maintainer's service-user + project key — when multi-tenant identity is needed
 
 #### Router (step 1) — pass-through vs review, perspective selection
 
-Stamphog already implements the deterministic half, and it's **pure, dependency-free logic** (`gates.py:1-10` — only
-`re` / `collections` / `fnmatch` / `pathlib`). But Stamphog lives in `tools/pr-approval-agent/` as a standalone
+Stamp already implements the deterministic half, and it's **pure, dependency-free logic** (`gates.py:1-10` — only
+`re` / `collections` / `fnmatch` / `pathlib`). But Stamp lives in `tools/pr-approval-agent/` as a standalone
 `uv` / PEP-723 script with flat relative imports — **not importable app code**; the repo's owned-product /
 no-cross-import-from-`tools/` norms say **copy-and-own**, not import. So **re-vendor `gates.py`'s logic** (+ the
 `dismiss_check` delta classifier) into `products/review_hog/` as a deterministic `route` activity at the top of each
 turn:
 
-- **Pass-through** = Stamphog's T0 / allow-listed-only / test-only path (`is_allow_listed_only`, `test_only`,
+- **Pass-through** = Stamp's T0 / allow-listed-only / test-only path (`is_allow_listed_only`, `test_only`,
   `assign_tier`→T0 — `gates.py:457,371,556`): skip the expensive fan-out, optionally with one cheap single-turn LLM
-  "showstopper confirm" (Stamphog's `VERDICT_SCHEMA` + the **gates-authoritative, LLM-tightens-never-loosens**
+  "showstopper confirm" (Stamp's `VERDICT_SCHEMA` + the **gates-authoritative, LLM-tightens-never-loosens**
   invariant, `review_pr.py:459-481`).
 - **Perspective selection** = `detect_deny_categories` (`gates.py:392`) emits exactly `auth` / `crypto_secrets` /
-  `migrations` / `infra_cicd` / `billing` / `public_api` / `deps_toolchain`. **Invert Stamphog's semantics:** where
-  it _denies_ (T2-never → human), ReviewHog **enables the matching specialist** (auth/crypto → Contracts & Security;
+  `migrations` / `infra_cicd` / `billing` / `public_api` / `deps_toolchain`. **Invert Stamp's semantics:** where
+  it _denies_ (T2-never → human), Review **enables the matching specialist** (auth/crypto → Contracts & Security;
   migrations/deps → a data/dependency perspective; infra_cicd → infra/CI). Reuse the **detection**, drop the
   deny→skip **routing**.
 - **Fan-out width** = the T1 sub-tier (`t1_risk_subclass`, `gates.py:578`) + `scope_breadth` (single / two /
   cross-cutting, `gates.py:362`): T1a-trivial → minimal pass, T1d-complex / cross-cutting → full perspective set.
 - **Loop-continuation (steps 5–6)** = `dismiss_check.evaluate_delta` (`dismiss_check.py:168-209`): a first-parent
   commit walk classifying new commits trivial-vs-non-trivial (force-push detection) is the cheap "did a _major_
-  change appear since last review?" gate — but driven from **ReviewHog's own persisted `head_sha`** (already stored
-  per turn), not from a bot-approval review Stamphog posts and ReviewHog won't.
+  change appear since last review?" gate — but driven from **Review's own persisted `head_sha`** (already stored
+  per turn), not from a bot-approval review Stamp posts and Review won't.
 
 `github.py` (gh-CLI + local git) and `reviewer.py` (Claude Agent SDK) are execution-model-specific and **not**
-reusable — ReviewHog fetches via `fetch_pr_data_activity` and reviews via `MultiTurnSession`; only the prompt/schema
+reusable — Review fetches via `fetch_pr_data_activity` and reviews via `MultiTurnSession`; only the prompt/schema
 _design_ transfers. The thresholds were calibrated for "safe to rubber-stamp", not "how much review", so expect
-re-tuning for ReviewHog's objective.
+re-tuning for Review's objective.
 
 **Future — relevance-gate the enabled perspective set per PR/chunk (noted 2026-07-02).** The selection above only
 _adds_ specialists off deterministic categories; as custom perspectives multiply (e.g. a team's
@@ -2024,7 +2024,7 @@ into `ChunksList`), or a **separate cheap route step** deciding per PR. Per-chun
 relevance is genuinely per-chunk (a migrations chunk wants the SQL lens even when the rest of the PR doesn't), and
 it skips exactly the irrelevant `(perspective × chunk)` sandbox calls — the direct spend saver as lenses multiply.
 Guardrails: broad canonical lenses (logic-correctness) likely stay always-on; a deterministic file-pattern floor is
-authoritative Stamphog-style (`*.sql` / `migrations/` hits force the lens ON — the LLM may add a lens, never remove
+authoritative Stamp-style (`*.sql` / `migrations/` hits force the lens ON — the LLM may add a lens, never remove
 a deterministically-matched one); skipping is a per-run routing decision (the user's enablement config is
 untouched); and the blind-spot sweep stays unconditional as the safety net for a wrongly-skipped lens.
 
@@ -2068,11 +2068,11 @@ the **right substrate** — keep it; the loop only fixes what's positional. **Si
 
 #### Action plane — "implement the fixes" (step 4)
 
-Today ReviewHog only reviews + comments; editing code is net-new. Three tiers (verified against the real Tasks
+Today Review only reviews + comments; editing code is net-new. Three tiers (verified against the real Tasks
 write path):
 
 - **C — native GitHub suggestion blocks (decision: first; small).** Emit a one-click **suggestion block** inside the
-  inline comment ReviewHog already posts (today `_format_issue_comment` renders prose, `publish_review.py:70-142`);
+  inline comment Review already posts (today `_format_issue_comment` renders prose, `publish_review.py:70-142`);
   rides the existing gated publish path almost unchanged (`pr.create_review(event="COMMENT", …)`,
   `publish_review.py:202-238`). Net-new: the validator must emit a **line-accurate literal replacement** (a
   finding-schema field — today `suggestion` is prose) landing on the diff's RIGHT side (the position finder already
@@ -2086,14 +2086,14 @@ write path):
   (`git remote set-url origin https://x-access-token:<token>@github.com/<repo>`,
   `products/tasks/backend/temporal/process_task/sandbox_credentials.py:49-67`) and the env, refreshed mid-run, with
   an explicit **bot/installation-token authorship mode** (`PrAuthorshipMode`, `sandbox_credentials.py:149,240-276`).
-  So ReviewHog (behind the publish flag + per-PR opt-in) builds an implement-prompt from the kept findings, creates a
+  So Review (behind the publish flag + per-PR opt-in) builds an implement-prompt from the kept findings, creates a
   **Task** via the `products/tasks` **facade** targeting the PR repo at its branch with `create_pr=True`, and Tasks
   opens a **companion PR** (never force-pushes the author's branch — satisfies "never auto-push without opt-in" for
-  free) and persists its own `TaskRun`; ReviewHog writes a **`task_run`** artefact linking finding→task (the dedup
+  free) and persists its own `TaskRun`; Review writes a **`task_run`** artefact linking finding→task (the dedup
   key: only enqueue still-open findings with no prior linked task). _Cost:_ a full agentic sandbox per fix-batch is
   the most expensive tier — the "loop if justified" gate must throttle it. This is **not** `code_workstreams` (that's
   a scheduled PR _poller_ / grouper, `code_workstreams/workflow.py:1-27`) — it's `process_task` / `execute_sandbox`.
-- **B — a ReviewHog-owned write sandbox (decision: skip).** Re-derives at large effort exactly what A reuses
+- **B — a Review-owned write sandbox (decision: skip).** Re-derives at large effort exactly what A reuses
   (writable checkout, push credentials, branch / PR creation, fork-safety) — today's executor is read-shaped
   (shallow, single-branch, returns JSON, `executor.py:49-74`). Only if cross-product coupling to Tasks proves
   unacceptable.
@@ -2135,10 +2135,10 @@ validation skills from feedback_ (learning across PRs) is a much larger effort, 
 
 - **Topology = B-then-A** (not A-first): smallest prod-usable step; defers the `continue_as_new` traps until live
   control is genuinely needed.
-- **Router = copy-and-own** Stamphog's pure gate logic into `products/review_hog/`, **invert** deny→enable; don't
+- **Router = copy-and-own** Stamp's pure gate logic into `products/review_hog/`, **invert** deny→enable; don't
   cross-import `tools/`.
 - **Fix engine = reuse Tasks (A), not a new write sandbox (B).** The Tasks write/push/createPR path is verified; the
-  contents-write identity is Tasks' installation-token authorship mode, not a new ReviewHog credential.
+  contents-write identity is Tasks' installation-token authorship mode, not a new Review credential.
 - **Publish accumulation is fixed (turn-scoped `load_valid_findings`); lifecycle is what remains** — resolve/update of
   our own comments still needs the dedup's cross-turn match persisted before publish is re-enabled for the loop.
 - **Fork-PR safety** (`head.repo == base`) gates _any_ review, and hard-gates _implementing_, on attacker-influenced
@@ -2152,7 +2152,7 @@ validation skills from feedback_ (learning across PRs) is a much larger effort, 
 The first multi-turn run (#66456, 2026-06-29) proved **run-scoped publish** (no cross-turn re-post) but left the
 **covered-set inert** — its prior findings predated `run_index`, failed to parse, and never reached the prompt. A
 **clean DB + fresh PR** (every finding stamped) is where it actually fires. **Wipe ONCE to start the experiment** —
-`DEBUG=1 python manage.py reset_review_hog --yes` (deletes every `ReviewReport` + `ReviewReportArtefact` across all
+`DEBUG=1 python manage.py reset_review --yes` (deletes every `ReviewReport` + `ReviewReportArtefact` across all
 teams; DEBUG-only; GitHub comments untouched) — then **do NOT wipe between turns**: the accumulating DB _is_ the loop's
 cross-turn memory (covered-set, same-head resume, and watermarks all read prior-turn rows). Per turn N (N≥2):
 
@@ -2182,7 +2182,7 @@ cross-turn memory (covered-set, same-head resume, and watermarks all read prior-
 > **resolves Stage 4's deferred "triggers + publish identity" note**. The single-turn `ReviewPRWorkflow` (Stage 3,
 > step 15) is the body; this section is how it gets **started** in prod and how it **publishes**. **Publish
 > capability was validated 2026-06-26**: the GitHub App installation token posted a comment to PR #64651 → HTTP 201,
-> header `X-Accepted-GitHub-Permissions: issues=write; pull_requests=write`. So **no dedicated ReviewHog GitHub App is
+> header `X-Accepted-GitHub-Permissions: issues=write; pull_requests=write`. So **no dedicated Review GitHub App is
 > needed** — the existing integration's installation token posts reviews. **What changed vs the original design** (see
 > "Build order" below): the endpoint returns the **workflow id** (not a report id — the report row is created inside
 > the run's fetch activity, after the non-blocking start); fork rejection moved to the **Action gate + the fetch
@@ -2191,22 +2191,22 @@ cross-turn memory (covered-set, same-head resume, and watermarks all read prior-
 > server-side. **Not yet:** Phase 5 label lifecycle (strip/keep-on-error/dismiss-on-push) and the Stage 5b
 > iterate-on-same-PR validation.
 
-**Goal (maintainer).** A maintainer adds the `reviewhog` label to a **non-fork** PR in `Insights/insights` → ReviewHog
+**Goal (maintainer).** A maintainer adds the `review` label to a **non-fork** PR in `Insights/insights` → Review
 reviews it and **posts the review back to the PR**. v1 scope: **team 2** (the main team) in prod, `Insights/insights`
 only, **non-fork only**, **trigger + publish together** (not shadow-first).
 
-**Architecture — "Action calls the app" (Path A).** ReviewHog is **app-embedded** (Temporal workflow + the Tasks
-Modal sandbox + Postgres + DB-synced LLMA skills) — it **cannot** run on a GitHub Actions runner the way Stamphog
+**Architecture — "Action calls the app" (Path A).** Review is **app-embedded** (Temporal workflow + the Tasks
+Modal sandbox + Postgres + DB-synced LLMA skills) — it **cannot** run on a GitHub Actions runner the way Stamp
 does. So the label trigger is a **thin GitHub Action** that calls a **Insights endpoint**, which starts the Temporal
 workflow; the workflow fetches + publishes **server-side** via the GitHub App installation token. Rejected:
 **Path B** (label → the existing `webhooks/github/pr` dispatcher → Temporal, no CI — diverges from the team's
-Stamphog model) and **Path C** (re-platform ReviewHog as a standalone CI script — discards the whole Temporal
+Stamp model) and **Path C** (re-platform Review as a standalone CI script — discards the whole Temporal
 pipeline just built + hardened).
 
 ```text
-reviewhog label on a non-fork Insights/insights PR
-  └─ .github/workflows/review-script.yml   (gates: label==reviewhog by a human, head.repo==base.repo, concurrency; any author)
-       └─ one authenticated curl  →  POST /v1/review_hog/trigger  {repo, pr_number}   (Authorization: Bearer <secret>)
+review label on a non-fork Insights/insights PR
+  └─ .github/workflows/review-script.yml   (gates: label==review by a human, head.repo==base.repo, concurrency; any author)
+       └─ one authenticated curl  →  POST /v1/review/trigger  {repo, pr_number}   (Authorization: Bearer <secret>)
             └─ endpoint: verify shared secret · validate repo allowlist (forks blocked upstream by the Action
                  + downstream by the fetch activity) · resolve team-2 integration + run user
                  · start_workflow (NON-blocking) · 202 + workflow_id
@@ -2214,25 +2214,25 @@ reviewhog label on a non-fork Insights/insights PR
                            └─ publish: head_sha-pinned COMMENT review posted to the PR
 ```
 
-**Why ReviewHog ≠ Stamphog (and what we borrow).** Stamphog (`.github/workflows/pr-approval-agent.yml` +
+**Why Review ≠ Stamp (and what we borrow).** Stamp (`.github/workflows/pr-approval-agent.yml` +
 `tools/pr-approval-agent/`) is **self-contained in CI**: `uv run` a standalone Claude-Agent-SDK script on the runner;
 its own dedicated GitHub App (`GH_APP_PR_APPROVAL_AGENT_*`), its own `STAMPFN_ANTHROPIC_API_KEY`, and `github.token`
 (github-actions[bot]) **for approvals** (App-bot approvals show `author_association: NONE`, so don't count toward
 branch protection). Its `INSIGHTS_API_TOKEN` is an **analytics ingestion key** (`hanzo_insights.capture`) — **not**
-endpoint auth, so **Stamphog is no precedent for the trigger credential** (it never calls an app endpoint).
+endpoint auth, so **Stamp is no precedent for the trigger credential** (it never calls an app endpoint).
 **Borrowed:** the label trigger, the non-fork + bot-author gates, run-script-from-master untrusted-code safety,
 **`head_sha`-pinned review posting** (`commit_id=` avoids force-push drift), and the v2 label lifecycle. **Differs:**
-ReviewHog runs the LLM + fetch + publish **server-side**, only posts **COMMENT** reviews (no approve → no
+Review runs the LLM + fetch + publish **server-side**, only posts **COMMENT** reviews (no approve → no
 github-actions[bot] trick), and its Action carries **one** secret (no Anthropic / GitHub-app keys in CI).
 
 **Decisions locked (maintainer):**
 
 - **Auth = a plain shared secret, NOT PSAK.** The endpoint compares the `Authorization` header to a
   `settings.REVIEWFN_TRIGGER_TOKEN` — exactly how the existing GitHub webhook endpoint is gated by
-  `GITHUB_WEBHOOK_SECRET`. A PSAK + a new `review_hog:run` scope is over-engineered for a single-team dogfood (and the
+  `GITHUB_WEBHOOK_SECRET`. A PSAK + a new `review:run` scope is over-engineered for a single-team dogfood (and the
   "only `endpoint:read` exists today" is just because PSAK is new, not a reason). **Graduate to PSAK** only if this
   becomes a multi-caller service needing per-key rotation / throttles / audit (`adding-project-secret-api-key-auth`).
-- **GitHub identity = the existing App installation token** — no dedicated ReviewHog GitHub App. Local =
+- **GitHub identity = the existing App installation token** — no dedicated Review GitHub App. Local =
   `insights-local-dev` app (Integration row `id=6`, **team 1**, installation `142734631`, `created_by=user 1`); prod =
   the real `insights` App **on team 2**. Resolved **server-side** via
   `GitHubIntegration.first_for_team_repository(team_id, "Insights/insights").get_access_token()` — never a CI secret.
@@ -2260,7 +2260,7 @@ github-actions[bot] trick), and its Action carries **one** secret (no Anthropic 
    (`_installation_token(team_id, repository)` → `GitHubIntegration.first_for_team_repository(...).get_access_token()`),
    dropping the worker's `GITHUB_TOKEN` env dependency.
 2. ✅ **The endpoint** (`products/review_hog/backend/api/trigger.py` + `routes.py`, mounted unscoped at
-   `/v1/review_hog/trigger`): plain `viewsets.ViewSet`, `@action`-+-`@extend_schema`, shared-secret check
+   `/v1/review/trigger`): plain `viewsets.ViewSet`, `@action`-+-`@extend_schema`, shared-secret check
    (`hmac.compare_digest` vs `settings.REVIEWFN_TRIGGER_TOKEN`, fail-closed outside DEBUG/TEST), repo allowlist
    (`{"insights/insights"}`, case-insensitive), team from `settings.REVIEWFN_TEAM_ID`, run user from
    `settings.REVIEWFN_RUN_USER_ID` (fallback: the team's GitHub integration creator), `start_workflow` with
@@ -2276,7 +2276,7 @@ github-actions[bot] trick), and its Action carries **one** secret (no Anthropic 
    branch's version of the file (a PR can't edit its own trigger) and fires even on conflicted PRs; it exposes
    secrets to fork PRs, so the non-fork `if:` gate is the fork barrier — safe because the job never runs PR code.
    Residual gap: stacked PRs whose base branch predates this file still dispatch nothing (no workflow on the base).
-   A paired `bot-labeler-skip` job (Stamphog's pattern) turns the bot-labeler skip into feedback: it comments why
+   A paired `bot-labeler-skip` job (Stamp's pattern) turns the bot-labeler skip into feedback: it comments why
    and strips the label so a human can re-add it.
    **2026-07-14 update:** `synchronize` dropped (ADR 0002) — pushes no longer re-trigger; re-review = re-add the
    label.
@@ -2297,7 +2297,7 @@ github-actions[bot] trick), and its Action carries **one** secret (no Anthropic 
 - **`settings.REVIEWFN_TEAM_ID`** = `2` (env `REVIEWFN_TEAM_ID`). Unset ⇒ the endpoint returns 503.
 - **`settings.REVIEWFN_RUN_USER_ID`** — optional; unset falls back to the team-2 GitHub integration's `created_by`.
 - _(Optional)_ GitHub repo/org **variable** `REVIEWFN_ENDPOINT_URL` to override the Action's default
-  `https://us.hanzo.ai/api/review_hog/trigger/`.
+  `https://us.hanzo.ai/api/review/trigger/`.
 
 **File pointers (where the work landed):**
 
@@ -2316,7 +2316,7 @@ github-actions[bot] trick), and its Action carries **one** secret (no Anthropic 
   `.github/workflows/review-script.yml`. Tests: `backend/tests/test_trigger_api.py`,
   `backend/reviewer/tests/test_publish_review.py`, publish-gate cases in `backend/tests/test_temporal_workflow.py`,
   fork-flag case in `backend/reviewer/tests/test_github_meta.py`.
-- **Reference:** `.github/workflows/pr-approval-agent.yml` + `tools/pr-approval-agent/` (Stamphog).
+- **Reference:** `.github/workflows/pr-approval-agent.yml` + `tools/pr-approval-agent/` (Stamp).
 
 ---
 
@@ -2330,7 +2330,7 @@ github-actions[bot] trick), and its Action carries **one** secret (no Anthropic 
 **Goal.** Re-trigger the **same** PR (no publish) and confirm a second turn **does not re-surface findings it
 already accounted for** — it consumes prior context instead of duplicating, and only genuinely new findings
 (new commits / newly changed lines) would survive. **#66168 is the ideal target:** the 2026-06-26 publish run
-already posted ReviewHog's own inline comments there, so a **no-publish** re-trigger exercises the
+already posted Review's own inline comments there, so a **no-publish** re-trigger exercises the
 "consume-our-own-comments" dedup _without_ posting anything new — strictly safe.
 
 **✅ Early-exit gate — a stale re-trigger is now a no-op (BUILT 2026-06-29).** Before this, a re-trigger at an
@@ -2351,9 +2351,9 @@ eval loop still recomputes to measure reviewer changes. New inline comments are 
 `test_review_pr_workflow_early_exits_when_already_published`.)
 
 **📌 New comments at an unchanged head → nothing, for now (decision 2026-06-29).** When important new human/bot
-review comments appear but the SHA hasn't moved, ReviewHog currently does **nothing**: there's no comment-event
+review comments appear but the SHA hasn't moved, Review currently does **nothing**: there's no comment-event
 trigger (the Action fires only on `[labeled, ready_for_review]` since ADR 0002), and a manual same-head re-trigger
-hits the early-exit gate above (or, pre-publish, only re-feeds dedup). This is the right scope **while ReviewHog
+hits the early-exit gate above (or, pre-publish, only re-feeds dedup). This is the right scope **while Review
 only _reviews_**. It changes once the **Action plane** ("not just find issues — fix them", see Stage 4 →
 _Action plane_) lands: a human reply ("this is wrong" / "please fix this" / answering a finding) should then
 **advance a turn** — to respond, re-evaluate, or implement. That needs the three deferred pieces already on the
@@ -2362,7 +2362,7 @@ roadmap: a `pull_request_review_comment` / `issue_comment` → trigger branch, t
 finding identity. The early-exit gate is structured for this flip: it already surfaces `new_comment_count`, so the
 condition becomes "skip unless the head moved **or** new comments arrived" the moment comment-reaction is in scope.
 
-> **Future behavior (when the action plane is implemented — TODO, not built).** Once ReviewHog can _fix_
+> **Future behavior (when the action plane is implemented — TODO, not built).** Once Review can _fix_
 > issues, a tracked PR should be **polled on a cadence (≈ every 30 min)** — a per-PR Temporal Schedule /
 > `workflow.sleep` re-check (the Variant B timer in _Control plane_) — and on each tick: (1) read new comments
 > since the `last_seen_comment_id` watermark; (2) for each genuinely new issue raised (by a human or another
@@ -2375,7 +2375,7 @@ condition becomes "skip unless the head moved **or** new comments arrived" the m
 **What it exercises (already coded):**
 
 - **Cross-turn positional dedup (step 14).** `deduplicate_issues` drops any finding that collides (same file +
-  overlapping lines) with **any prior inline comment** on the PR — including ReviewHog's own from a prior turn
+  overlapping lines) with **any prior inline comment** on the PR — including Review's own from a prior turn
   (re-fetched via `PRFetcher.fetch_pr_comments` → `get_review_comments()`). With #66168 already carrying our
   comments, turn 2's dedup should suppress the previously-posted `should_fix`+ findings → strictly fewer
   surviving findings, and (publish off) nothing posted.
@@ -2444,7 +2444,7 @@ root-cause` signature key — that's brittle to re-phrasing and line drift. See 
 - **Promo comment** — _fixed_ 2026-06-26: posted once per report (`post_promo = published_head_sha is None`), and
   the watermark is only recorded on an actual post, so a no-op turn doesn't consume it.
 - **Confirm the fetch returns our own comments** — dedup only sees comments that survive `fetch_pr_comments`
-  (filtered paths / test files dropped; line-less chatter excluded by `_comment_line`). Verify ReviewHog's own
+  (filtered paths / test files dropped; line-less chatter excluded by `_comment_line`). Verify Review's own
   inline comments come back so the loop converges.
 
 **How to run (no publish):** `manage.py run_review --pr-url <#66168> --team-id 1 --user-id 1` (NO `--publish`),
@@ -2524,7 +2524,7 @@ is authoritative server-side, and the deterministic per-PR workflow id + `USE_EX
 **Design shape (v1):**
 
 - **New team-scoped, session-authenticated trigger action** (e.g. `POST` `trigger` on the
-  `review_hog/reviews` viewset), taking `pr_url`. The unscoped shared-secret `ReviewHogTriggerViewSet` and
+  `review/reviews` viewset), taking `pr_url`. The unscoped shared-secret `ReviewTriggerViewSet` and
   its `ALLOWED_REPOS` stay untouched as the CI interface — the two callers have different auth and scope
   rules, so they don't share an endpoint.
 - Sync pre-checks in the action: parse the URL (`PRParser`), team gate, installation-access check (above).
@@ -2537,7 +2537,7 @@ trigger_source=TRIGGER_UI)` with `user_id = request.user.id` too (inbox preceden
   label/inbox/manual; ungated in the workflow's gate map (explicit ask); update the `trigger_source`
   comment on `ReviewReport`.
 - **Frontend:** a PR-URL input + submit button in `CodeReviewScene` near "Your recent reviews"
-  (`reviewHogSettingsLogic` action + generated client; button disabled/loading in flight). On 202, reload
+  (`reviewSettingsLogic` action + generated client; button disabled/loading in flight). On 202, reload
   the recent-reviews list — the row appears once the fetch activity creates the report, and the existing
   in-progress poll takes over. Hide the field when the trigger isn't available for the team (surface a
   `can_trigger` boolean, e.g. on the settings GET, computed from the team gate).
@@ -2548,7 +2548,7 @@ trigger_source=TRIGGER_UI)` with `user_id = request.user.id` too (inbox preceden
 **As built (2026-07-16):**
 
 - `backend/api/reviews.py` — `trigger` action on `ReviewRecentReviewsViewSet`
-  (`POST /v1/projects/:id/review_hog/reviews/trigger/`): team gate vs `settings.REVIEWFN_TEAM_ID`
+  (`POST /v1/projects/:id/review/reviews/trigger/`): team gate vs `settings.REVIEWFN_TEAM_ID`
   (403), `PRParser` URL parse (400), sync `GitHubIntegration.first_for_team_repository` access check
   (400), then `start_review_pr_workflow(publish=True, user_id=acting_user_id=request.user.id,
 trigger_source=TRIGGER_UI)` → `202 {workflow_id, status}`. The URL is canonicalized (trailing
@@ -2559,12 +2559,12 @@ trigger_source=TRIGGER_UI)` → `202 {workflow_id, status}`. The URL is canonica
   the scene hides the trigger field when it's false.
 - `frontend/CodeReviewScene.tsx` — `TriggerReviewSection` (PR-URL input + submit, above the
   recent-reviews block; button loading/disabled while in flight);
-  `frontend/reviewHogSettingsLogic.ts` — `triggerPrUrl` / `triggeringReview` state +
+  `frontend/reviewSettingsLogic.ts` — `triggerPrUrl` / `triggeringReview` state +
   `submitTriggerReview` listener (toast on error, clear + reload recent reviews on 202; the new
   report row appears once the fetch activity creates it and the in-progress poll takes over).
 - Tests: `backend/tests/test_ui_trigger_api.py` (gate, URL parse, access check, workflow kwargs,
   `can_trigger_reviews` exposure), `test_settings_api.py` defaults updated, two
-  `reviewHogSettingsLogic.test.ts` cases (in-flight flag resets on both outcomes).
+  `reviewSettingsLogic.test.ts` cases (in-flight flag resets on both outcomes).
 - **Sync PR fetch (added 2026-07-16, closing the original "v1 gap"):** the action makes one
   `GET /pulls/{n}` (`_fetch_pr_metadata`) so the answer is honest — nonexistent (404), fork, and
   closed PRs reject immediately with a message instead of dying async before the report row exists,
@@ -2598,7 +2598,7 @@ trigger_source=TRIGGER_UI)` → `202 {workflow_id, status}`. The URL is canonica
 > **Status: BUILT + e2e'd, uncommitted.** (The implementation spec, `STAGE_6_PLAN.md`, was deleted
 > after the build — this section is the surviving as-built record.) The
 > `review_inbox_prs` switch is live: a signals-origin implementation run that records a PR (or a
-> pushed branch) now triggers a publishing review. Verified: review_hog tests (both dirs) + full
+> pushed branch) now triggers a publishing review. Verified: review tests (both dirs) + full
 > signals suite (1304) + ruff + tach + startup-import-budget green; `insightscli build:openapi` drift =
 > the new `code_review` enum member only.
 >
@@ -2649,7 +2649,7 @@ trigger_source=TRIGGER_UI)` → `202 {workflow_id, status}`. The URL is canonica
 > 🔁 trigger-redesign note above. The `TaskRun.branch` FIELD stays banned.**
 >
 > **2026-07-03 adversarial review (7 finder dimensions × 3-skeptic refutation panels, findings in
-> `/tmp/reviewhog-signals-combination-adversarial-review.md`) — 4 fixes applied:** (1) the confirmed
+> `/tmp/review-signals-combination-adversarial-review.md`) — 4 fixes applied:** (1) the confirmed
 > test gap — `test_acting_user.py` now sets `review_inbox_prs=True` on the row and asserts the
 > resolve passthrough (a surgical drop of that one line would have silently disabled the whole inbox
 > trigger with the suite green); (2) the branch-fallback removal above; (3) the success-path receipt
@@ -2682,7 +2682,7 @@ trigger_source=TRIGGER_UI)` → `202 {workflow_id, status}`. The URL is canonica
 >   the workflow's except path (guarded so it can't mask the original error); a workflow-retry
 >   success after a failed attempt yields failed + published receipts (a truthful log, accepted).
 >   Counts = validator-passed findings at `effective_priority` (validator-wins).
-> - **Receiver import discipline (startup budget):** `receivers.py` may import Django + review_hog
+> - **Receiver import discipline (startup budget):** `receivers.py` may import Django + review
 >   `models` ONLY at module level. Even `temporal/types.py` is off-limits — reaching it executes the
 >   temporal package `__init__`, which registers all activities (temporalio + modal +
 >   insights.schema onto every `django.setup()`). Both the client AND `TRIGGER_INBOX` are imported
@@ -2706,7 +2706,7 @@ trigger_source=TRIGGER_UI)` → `202 {workflow_id, status}`. The URL is canonica
 > - Toggle copy in `CodeReviewTab.tsx` updated from "Coming soon" to live behavior copy.
 
 **Goal.** Every self-driving (Signals) implementation gets reviewed automatically: when a signals-origin
-implementation task run records what it produced (its PR, or a pushed branch), ReviewHog reviews it. If the run opened
+implementation task run records what it produced (its PR, or a pushed branch), Review reviews it. If the run opened
 a PR, the review publishes back as PR comments (Stage-5 behavior); if there is no PR (future branch-only
 implementations), the same review runs and its findings/verdicts/body are **stored only** — usable for
 shadow-fixing before anything is published, and publishable on a later turn once a PR exists. The signal
@@ -2715,7 +2715,7 @@ research → implementation `task_run` → `commit`s → `code_review` → merge
 
 **Decisions locked (maintainer, 2026-07-02):**
 
-- **Two triggers only:** the Stage-5 `reviewhog` label (unchanged) and **"self-driving implementation
+- **Two triggers only:** the Stage-5 `review` label (unchanged) and **"self-driving implementation
   recorded its output"** (new, internal; AMENDED 2026-07-03 — originally "task finished", but successful
   runs never complete; see the 🔁 trigger-redesign note above). **No GitHub webhook for the inbox
   path** — the implementation runs in our own Temporal worker; its `output.pr_url`/`output.head_branch`
@@ -2750,12 +2750,12 @@ research → implementation `task_run` → `commit`s → `code_review` → merge
   become **trigger-aware**: label → `review_labeled_prs`, inbox → `review_inbox_prs`, CLI/eval →
   ungated. (The `workflow.py` gate comment already warns the next trigger must add a source input
   instead of reusing `acting_user_id is None`.)
-- **Agent read path = `execute_sql`** (MCP) over the review_hog tables, joining from the artefact's
+- **Agent read path = `execute_sql`** (MCP) over the review tables, joining from the artefact's
   `review_report_id`; `ReviewReport.report_markdown` carries the full rendered body even for stored-only
   turns. No dedicated read API is required by this stage.
 
 **Trigger mechanics (the new entry point).** A `post_save` receiver on `tasks.TaskRun`, registered by
-review_hog — exact precedent on the same model: `track_task_run_completion`
+review — exact precedent on the same model: `track_task_run_completion`
 (`products/tasks/backend/models.py:1739`). Fires when `status=COMPLETED` and `task.signal_report_id` is
 set and the run pushed commits (exact marker — `output` keys vs the report's `commit` artefacts — to pin
 down at build time). Then: settings gate → `transaction.on_commit` →
@@ -2763,9 +2763,9 @@ down at build time). Then: settings gate → `transaction.on_commit` →
 signal_report_id=...)`.
 
 - **Why not the alternatives.** Calling review*script from tasks (the webhook handler or
-  `ProcessTaskWorkflow`) is a **product dependency cycle** — review_hog already imports the Tasks facade
-  (`facade.agents`). The receiver keeps every edge in the existing direction (review_hog → tasks,
-  review_hog → signals) with zero tasks changes. **Temporal composition** — starting `"ReviewPRWorkflow"`
+  `ProcessTaskWorkflow`) is a **product dependency cycle** — review already imports the Tasks facade
+  (`facade.agents`). The receiver keeps every edge in the existing direction (review → tasks,
+  review → signals) with zero tasks changes. **Temporal composition** — starting `"ReviewPRWorkflow"`
   by registered name string, no import edge — is the right shape \_later*, when the shadow-fix loop
   becomes an orchestrated graph (implement → review → fix → publish); the receiver stays a thin adapter
   so that second entry slots in beside it, not inside it.
@@ -2800,12 +2800,12 @@ published|stored|failed, counts: {must_fix, should_fix, consider}}`. Appended on
   completion **or failure** (not on gate-skips — nothing was done), attributed
   `ArtefactAttribution.system()`. **Pointer-first by design** (maintainer): enough for an agent to go
   look by itself (SQL join on `review_report_id`), no digest/summary duplication. The write direction
-  review_hog → signals matches the existing edge (the `artefact_attribution` import).
+  review → signals matches the existing edge (the `artefact_attribution` import).
 - **Rejected: merging the two artefact tables** — their similarity is pattern-level by design. Different
   parents/identity (label reviews have no `SignalReport`; one report can produce several targets);
-  ReviewHog's working-state rows (`pr_snapshot` holds whole diffs) are MB-scale resume substrate, not
+  Review's working-state rows (`pr_snapshot` holds whole diffs) are MB-scale resume substrate, not
   activity-log content — the Inbox fetches a report's artefacts at `limit=1000` to render; and signals
-  artefacts are user-mutable (PATCH/DELETE) while ReviewHog's rows are resume-correctness substrate that
+  artefacts are user-mutable (PATCH/DELETE) while Review's rows are resume-correctness substrate that
   must not be.
 
 **Out of scope (this stage):** GitHub webhooks for the inbox path; a shadow-mode flag; a dedicated
@@ -2889,10 +2889,10 @@ customization is ever truly needed, promote chunking to a **team-wide** versione
 (skill deletion is not the opt-out; the config toggle is — see the archived-canonical outage fix). So archive-then-
 resync IS a reset for canonicals. Still deferred for the UI: an in-place **force re-pull** of a live edited row
 (overwrite with disk canonical as a new version, re-stamping `canonical_hash`) via a small `lazy_seed` helper, so
-users don't need the archive detour (the `sync_review_hog_skills` command this was once sketched as a flag on was
+users don't need the archive detour (the `sync_review_skills` command this was once sketched as a flag on was
 deleted 2026-07-02; the helper's main consumer is the future UI button anyway).
 
-**✅ 2026-07-02 — the ReviewHog UI landed** as the Inbox "Code review" tab (see the dated BUILT section near
+**✅ 2026-07-02 — the Review UI landed** as the Inbox "Code review" tab (see the dated BUILT section near
 the top): enable/select skills per user, view bodies read-only, trigger + threshold settings; editing still
 happens in the Skills editor (`/skills/review-script`, linked from every card). **Reset to canonical remains
 deferred** — it still needs the `lazy_seed` force-re-pull helper plus a button on that tab.
@@ -2920,10 +2920,10 @@ discriminated by skill-name prefix; see the validator next-step below) `(UUIDMod
 - `team` FK, `user` FK, `skill_name` CharField(max_length=200), `enabled` BooleanField(default=True,
   db_default=True), `created_at`/`updated_at`. Unique `(team, user, skill_name)`. **No extra fields** (user: skill
   name is the identity; nothing else).
-- **Drop** scouts' scheduling fields (`emit`, `run_interval_minutes`, `last_run_at`) — ReviewHog is PR-**triggered**,
+- **Drop** scouts' scheduling fields (`emit`, `run_interval_minutes`, `last_run_at`) — Review is PR-**triggered**,
   not scheduled; there is no coordinator/clock. Skip `ModelActivityMixin`/`all_teams` unless an admin page is later
   wanted. Migration via `makemigrations` (`/django-migrations`; delete stray file, `DEBUG=1 ./manage.py
-makemigrations review_hog`).
+makemigrations review`).
 - Mirror: `SignalScoutConfig` = `(team, skill_name, enabled)` on `TeamScopedRootMixin, UUIDModel`
   (`products/signals/backend/models.py:919, 946-947, 992-994`). Identity is **`skill_name`, never `created_by`**
   (`created_by` is audit-only and reassigns on edit). We add the `user` dimension scouts lack.
@@ -3016,7 +3016,7 @@ PERSPECTIVES`); the obsolete `test_registry_order_matches_perspective_type_enum`
   `--user-id`** so an eval run applies a known user's perspectives against any PR (the PR author need not be a
   Insights user). This is an explicit, exercised override, not dead fallback code.
 - **The toggle viewset is `scope_object = "INTERNAL"` (session/UI-only, not MCP/PAK), keyed by `skill_name`.**
-  `ReviewPerspectiveConfigViewSet` at `/v1/projects/:team_id/review_hog/perspectives` exposes `list` (the full
+  `ReviewPerspectiveConfigViewSet` at `/v1/projects/:team_id/review/perspectives` exposes `list` (the full
   perspective menu joined with the user's enable state — canonicals seed enabled, an un-toggled custom shows
   disabled) and `partial_update` (PATCH `…/{skill_name}/ {enabled}`), which **upserts** the config row so enabling a
   freshly authored custom works in one call. Min-1 is enforced at the viewset (reject disabling the last enabled)
@@ -3032,7 +3032,7 @@ PERSPECTIVES`); the obsolete `test_registry_order_matches_perspective_type_enum`
   canonicals instead of tombstoning (`PerspectiveSkillNotFoundError` deleted). The config toggle is the one
   opt-out lever; skill deletion is not a signal.
 
-**Still deferred (own steps):** the ReviewHog skills **UI** (add / enable-disable perspectives, edit, reset-to-
+**Still deferred (own steps):** the Review skills **UI** (add / enable-disable perspectives, edit, reset-to-
 canonical) — API/MCP only for now; the **"reset to canonical"** force-re-pull (above) ships with that UI; a future
 per-PR coordinator step that picks _which_ of the enabled perspectives best fit a given PR (the user's "what
 perspectives make sense for this PR").
@@ -3068,7 +3068,7 @@ What shipped:
   input swapped from `ValidateIntegrationInput(team_id)` to a new `LoadValidationInput(team_id, acting_user_id)` (the
   `LoadPerspectivesInput` analogue). `ValidateIntegrationInput` is still used by `validate_github_integration_activity`.
 - **A sibling viewset `ReviewValidatorConfigViewSet`** (`api/validators.py`, `scope_object="INTERNAL"`) at
-  `/v1/projects/:team_id/review_hog/validators` — chosen over branching the perspectives viewset because the two have
+  `/v1/projects/:team_id/review/validators` — chosen over branching the perspectives viewset because the two have
   different interaction semantics (radio vs checkbox, no floor vs min-1) and one handler carrying both is a
   conditional-behavior-by-prefix smell; the shared model + loader helpers mean no logic duplication. `list` shows every
   validator with the user's active one flagged (canonical auto-seeds active); `partial_update` PATCH `{active: true}`
@@ -3091,7 +3091,7 @@ fixes (a 3-line comment tightened to 2; `updated_at` bumped on the bulk deactiva
 scary-looking "prefix filter is ABSENT" report was a false alarm — a parallel verifier had temporarily edited the
 file to prove a gap and another agent read it mid-experiment.
 
-**Still deferred (own steps):** validator selection in the ReviewHog skills **UI** (ships with the perspective UI —
+**Still deferred (own steps):** validator selection in the Review skills **UI** (ships with the perspective UI —
 API/MCP only for now); a partial unique index if a hard DB single-active guarantee is ever wanted (app-level matches
 perspectives today).
 
@@ -3173,7 +3173,7 @@ Two cost cuts, both validated on a real 1465-line multi-chunk PR (#66840). Goal:
 ##### ✅ Change A + B BUILT 2026-06-30 — surface off-diff valid findings + validator priority override
 
 Two Tier-1 polishes to the single-turn **label → review → publish** flow (explicitly NOT loop work). Scoped with
-the maintainer 2026-06-30 — **both built (288 review_hog backend tests + ruff + ty + tach green; uncommitted, user
+the maintainer 2026-06-30 — **both built (288 review backend tests + ruff + ty + tach green; uncommitted, user
 commits manually). Each shipped behind its own 3-lens adversarial review (find → independently verify) = 0 confirmed
 production bugs; B's review surfaced one real test gap, since closed.** Locked decisions (AskUserQuestion):
 
@@ -3256,15 +3256,15 @@ whose reviewer flags an unchanged line / whose validator disagrees on severity.
 **Supersedes** the deferred "NEXT-NEXT — surface valid findings that can't be positioned on a diff line", the "let the
 validator adjust a finding's priority" note, and the publish-path OPEN QUESTION — all folded into this plan.
 
-**⏭ DEFERRED (new) — let teams configure the severity bar ReviewHog highlights.** With `consider` DB-only, a team
-can't yet say "also surface considers" or "must-fix only". When the ReviewHog skills UI lands (with "reset to
+**⏭ DEFERRED (new) — let teams configure the severity bar Review highlights.** With `consider` DB-only, a team
+can't yet say "also surface considers" or "must-fix only". When the Review skills UI lands (with "reset to
 canonical"), add a per-team (or per-user, mirroring perspective enablement) minimum-priority setting that both the
 inline path and the body Other-findings section read. Until then the bar is the hardcoded
 `PUBLISHED_PRIORITIES = {MUST_FIX, SHOULD_FIX}`.
 
 ##### ✅ BUILT 2026-07-01 — Codex reviews: the perspective review runs on a different model family (gpt-5.5 @ xhigh)
 
-> **Status: BUILT, uncommitted (user commits manually). 292 review_hog backend tests + the Tasks forwarding test +
+> **Status: BUILT, uncommitted (user commits manually). 292 review backend tests + the Tasks forwarding test +
 > ruff + ty + tach green. Shipped behind a 4-lens adversarial-review workflow (find → 2 independent skeptics refute
 > each finding) = 0 production bugs; the review's one confirmed finding was a test-coverage gap, since closed.**
 
@@ -3283,7 +3283,7 @@ plan's mechanism analysis still held; only the target stage flipped (find, not j
   parses + validates + salvages the end-turn. A Codex-specific agent-stop check (needed only for real multi-turn /
   next-step scheduling) is explicitly **deferred** — the user accepted any single-turn end-turn wrinkle as an e2e risk.
 - **Model + effort = `gpt-5.5` at `xhigh`.** `gpt-5.5` is the only Codex model that supports `xhigh` (others cap at
-  `high`). **Hardcoded** as a ReviewHog constant (one model for everyone) — a per-user model field stays deferred.
+  `high`). **Hardcoded** as a Review constant (one model for everyone) — a per-user model field stays deferred.
 
 **How the sandbox picks a model (the mechanism — fully in place and used in prod).**
 
@@ -3316,10 +3316,10 @@ hardcoded combo with a unit test against the registry instead.
 None` (mirrors the existing `runtime_adapter` / `model` fields).
 2. `create_task_and_trigger` (same file): now also forwards `reasoning_effort=context.reasoning_effort` into
    `Task.create_and_run` (the one missing hop).
-3. `facade/run_config.py`: exposed `ReasoningEffort` (added to imports + `__all__`) so ReviewHog imports it from the
+3. `facade/run_config.py`: exposed `ReasoningEffort` (added to imports + `__all__`) so Review imports it from the
    public facade.
 
-**As-built — ReviewHog (`products/review_hog`):**
+**As-built — Review (`products/review_hog`):**
 
 4. `reviewer/sandbox/executor.py`: `run_sandbox_review` gains optional `runtime_adapter` / `model` / `reasoning_effort`
    (default `None`) → threaded into its `CustomPromptSandboxContext`. Default-`None` means chunk + dedup callers are
@@ -3347,7 +3347,7 @@ the model pins: `CustomPromptSandboxContext.initial_permission_mode` → `create
   `model` / `runtime_adapter` / `reasoning_effort` → `create_and_run` receives all three; all-`None` → all `None`.
   _Catches:_ the forwarding drop that silently reverts a pinned run to the Claude default (`reasoning_effort` was the
   last unforwarded field).
-- **ReviewHog executor threading** (parameterized): mock `MultiTurnSession.start` (the true sandbox boundary), assert
+- **Review executor threading** (parameterized): mock `MultiTurnSession.start` (the true sandbox boundary), assert
   `run_sandbox_review(runtime_adapter=codex, model=gpt-5.5, reasoning_effort=xhigh)` builds a context carrying the
   three; unset → all `None`. _Catches:_ the executor dropping a pin, or defaults breaking so chunk/dedup get pinned.
 - **Constants validity** (pure): `get_reasoning_effort_error(REVIEW_*)` is `None` and the adapter resolves to provider
@@ -3397,7 +3397,7 @@ adapter (`claude → anthropic`, `codex → openai`), never set by hand.
 
 **`insights/insights` — where the knobs are set + validated.**
 
-- **Pick the values (ReviewHog):** `reviewer/constants.py` `REVIEW_{RUNTIME_ADAPTER,MODEL,REASONING_EFFORT}` →
+- **Pick the values (Review):** `reviewer/constants.py` `REVIEW_{RUNTIME_ADAPTER,MODEL,REASONING_EFFORT}` →
   passed at the `review_chunk_activity` `run_sandbox_review(...)` call → `run_sandbox_review`
   (`reviewer/sandbox/executor.py`) threads them onto the `CustomPromptSandboxContext`. To test another model, change
   these constants (or make them per-stage — the executor kwargs already exist for every single-turn stage).
@@ -3407,7 +3407,7 @@ adapter (`claude → anthropic`, `codex → openai`), never set by hand.
   `CLAUDE_REASONING_EFFORTS_BY_MODEL` (per Claude model), `CODEX_MODELS` + `CODEX_REASONING_EFFORTS` +
   `CODEX_XHIGH_REASONING_MODELS` (only `gpt-5.5` allows `xhigh`), and the pure checks
   `get_provider_for_runtime_adapter` / `get_supported_reasoning_efforts` / `get_reasoning_effort_error`. A new
-  model/effort must be added here or the combo is rejected. `test_constants.py` locks the ReviewHog combo to this
+  model/effort must be added here or the combo is rejected. `test_constants.py` locks the Review combo to this
   registry at unit time.
 - **Transport into the sandbox:** `Task._build_task` writes `extra_state[{runtime_adapter, provider, model,
 reasoning_effort}]` → `get_task_processing_context` reads it back → `start_agent_server` →

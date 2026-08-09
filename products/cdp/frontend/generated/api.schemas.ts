@@ -641,10 +641,10 @@ export interface InsightsFunctionPublishResponseApi {
  * * `succeeded` - succeeded
  * * `failed` - failed
  */
-export type HogInvocationRerunFilterStatusEnumApi =
-    (typeof HogInvocationRerunFilterStatusEnumApi)[keyof typeof HogInvocationRerunFilterStatusEnumApi]
+export type ScriptInvocationRerunFilterStatusEnumApi =
+    (typeof ScriptInvocationRerunFilterStatusEnumApi)[keyof typeof ScriptInvocationRerunFilterStatusEnumApi]
 
-export const HogInvocationRerunFilterStatusEnumApi = {
+export const ScriptInvocationRerunFilterStatusEnumApi = {
     Running: 'running',
     Succeeded: 'succeeded',
     Failed: 'failed',
@@ -653,13 +653,13 @@ export const HogInvocationRerunFilterStatusEnumApi = {
 /**
  * Filter shape for the rerun endpoint. `window_start`/`window_end` are required.
  */
-export interface HogInvocationRerunFilterApi {
+export interface ScriptInvocationRerunFilterApi {
     /** Inclusive lower bound on `scheduled_at` (UTC). */
     window_start: string
     /** Exclusive upper bound on `scheduled_at` (UTC). */
     window_end: string
     /** Restrict to invocations whose latest status is one of these. Defaults to ['failed']. */
-    status?: HogInvocationRerunFilterStatusEnumApi[]
+    status?: ScriptInvocationRerunFilterStatusEnumApi[]
     /** Restrict to invocations whose error_kind matches one of these (e.g. 'http_5xx', 'timeout'). */
     error_kind?: string[]
     /**
@@ -684,9 +684,9 @@ export interface HogInvocationRerunFilterApi {
 /**
  * Rerun invocations of a script function or script flow from their stored payloads.
  */
-export interface HogInvocationRerunRequestApi {
+export interface ScriptInvocationRerunRequestApi {
     /** Required. `window_start` / `window_end` pin the query to a small set of date partitions on the `hog_invocation_results` table. Optional `invocation_ids` restricts to specific invocations within that window. */
-    filter: HogInvocationRerunFilterApi
+    filter: ScriptInvocationRerunFilterApi
 }
 
 /**
@@ -695,7 +695,7 @@ export interface HogInvocationRerunRequestApi {
  * re-enqueue work happens asynchronously in the `cdp-rerun-worker` service.
  * Use `rerun_job_id` to look up progress on the wrapper job later.
  */
-export interface HogInvocationRerunResponseApi {
+export interface ScriptInvocationRerunResponseApi {
     /** ID of the cyclotron wrapper job that will run the rerun. Use this to poll status. */
     rerun_job_id: string
     /** Always 0 — rerun runs asynchronously. Kept for response shape stability. */

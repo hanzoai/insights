@@ -38,7 +38,7 @@ const action = (id: string, enabled = true): VisionActionApi => ({
     delivery_config: [],
     next_run_at: null,
     last_run_at: null,
-    hog_flow_id: null,
+    script_flow_id: null,
     created_at: '2026-01-01T00:00:00Z',
     created_by: null,
     updated_at: '2026-01-01T00:00:00Z',

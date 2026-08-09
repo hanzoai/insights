@@ -3,7 +3,7 @@ import { useState } from 'react'
 
 import { Skeleton } from '@hanzo/elements'
 
-import { WavingHog } from 'lib/components/mascots'
+import { WavingScript } from 'lib/components/mascots'
 import { TZLabel } from 'lib/components/TZLabel'
 import { Button } from 'lib/elements/Button'
 import { Tag } from 'lib/elements/Tag'
@@ -106,7 +106,7 @@ function SurveyResultsWidgetMessage({
                     className="flex max-w-xs flex-col items-center gap-2 px-2 text-balance"
                     data-attr="survey-results-widget-message"
                 >
-                    <WavingHog className="size-24 shrink-0" />
+                    <WavingScript className="size-24 shrink-0" />
                     <p className="m-0 text-base font-semibold text-primary">{title}</p>
                     <p className="m-0 text-sm text-muted">{message}</p>
                     {cta}

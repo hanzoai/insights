@@ -775,7 +775,7 @@ class TestUserAPI(APIBaseTest):
         # otherwise a blocked member could point their session back at the org that moved them off.
         blocking_org = Organization.objects.create(name="Enforcing org", enforce_verified_domains=True)
         OrganizationMembership.objects.create(organization=blocking_org, user=self.user)
-        OrganizationDomain.objects.create(domain="hogflix.com", organization=blocking_org, verified_at=timezone.now())
+        OrganizationDomain.objects.create(domain="scriptflix.com", organization=blocking_org, verified_at=timezone.now())
 
         response = self.client.patch("/v1/users/@me/", {"set_current_organization": str(blocking_org.id)})
 

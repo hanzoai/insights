@@ -1,6 +1,6 @@
 import { FeatureFlagKey } from 'lib/constants'
 
-import { CreateActionType } from '../../hogFlowEditorLogic'
+import { CreateActionType } from '../../flowEditorLogic'
 
 export type ActionNodeCategory = {
     label: string

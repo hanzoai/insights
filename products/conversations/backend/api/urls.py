@@ -22,8 +22,8 @@ from .github_setup import (
 )
 from .restore import WidgetRestoreRedeemView, WidgetRestoreRequestView
 from .slack_channels import SlackChannelsView
-from .slack_events import supporthog_event_handler
-from .slack_interactivity import supporthog_interactivity_handler
+from .slack_events import support_event_handler
+from .slack_interactivity import support_interactivity_handler
 from .slack_oauth import SupportSlackAuthorizeView, SupportSlackDisconnectView, support_slack_oauth_callback
 from .teams_channels import TeamsChannelsView, TeamsInstallAppView, TeamsSelectChannelView, TeamsTeamsView
 from .teams_events import teams_event_handler
@@ -37,18 +37,18 @@ urlpatterns = [
     path("v1/widget/tickets", WidgetTicketsView.as_view(), name="widget-tickets-v1"),
     path("v1/widget/restore/request", WidgetRestoreRequestView.as_view(), name="widget-restore-request-v1"),
     path("v1/widget/restore", WidgetRestoreRedeemView.as_view(), name="widget-restore-v1"),
-    # SupportHog Slack app
-    re_path(r"^v1/slack/events/?$", supporthog_event_handler, name="supporthog-slack-events"),
-    re_path(r"^v1/slack/interactivity/?$", supporthog_interactivity_handler, name="supporthog-slack-interactivity"),
-    re_path(r"^v1/slack/authorize/?$", SupportSlackAuthorizeView.as_view(), name="supporthog-slack-authorize"),
-    re_path(r"^v1/slack/callback/?$", support_slack_oauth_callback, name="supporthog-slack-callback"),
-    re_path(r"^v1/slack/disconnect/?$", SupportSlackDisconnectView.as_view(), name="supporthog-slack-disconnect"),
+    # Support Slack app
+    re_path(r"^v1/slack/events/?$", support_event_handler, name="support-slack-events"),
+    re_path(r"^v1/slack/interactivity/?$", support_interactivity_handler, name="support-slack-interactivity"),
+    re_path(r"^v1/slack/authorize/?$", SupportSlackAuthorizeView.as_view(), name="support-slack-authorize"),
+    re_path(r"^v1/slack/callback/?$", support_slack_oauth_callback, name="support-slack-callback"),
+    re_path(r"^v1/slack/disconnect/?$", SupportSlackDisconnectView.as_view(), name="support-slack-disconnect"),
     re_path(r"^v1/slack/channels/?$", SlackChannelsView.as_view(), name="slack-channels"),
-    # SupportHog Teams app
-    re_path(r"^v1/teams/events/?$", teams_event_handler, name="supporthog-teams-events"),
-    re_path(r"^v1/teams/authorize/?$", TeamsAuthorizeView.as_view(), name="supporthog-teams-authorize"),
-    re_path(r"^v1/teams/callback/?$", teams_oauth_callback, name="supporthog-teams-callback"),
-    re_path(r"^v1/teams/disconnect/?$", TeamsDisconnectView.as_view(), name="supporthog-teams-disconnect"),
+    # Support Teams app
+    re_path(r"^v1/teams/events/?$", teams_event_handler, name="support-teams-events"),
+    re_path(r"^v1/teams/authorize/?$", TeamsAuthorizeView.as_view(), name="support-teams-authorize"),
+    re_path(r"^v1/teams/callback/?$", teams_oauth_callback, name="support-teams-callback"),
+    re_path(r"^v1/teams/disconnect/?$", TeamsDisconnectView.as_view(), name="support-teams-disconnect"),
     re_path(r"^v1/teams/teams/?$", TeamsTeamsView.as_view(), name="teams-teams"),
     re_path(r"^v1/teams/channels/?$", TeamsChannelsView.as_view(), name="teams-channels"),
     re_path(r"^v1/teams/install/?$", TeamsInstallAppView.as_view(), name="teams-install"),

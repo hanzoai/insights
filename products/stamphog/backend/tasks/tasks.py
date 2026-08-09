@@ -1,4 +1,4 @@
-"""Celery tasks for stamphog — the inbound PR review path.
+"""Celery tasks for stamp — the inbound PR review path.
 
 ``process_pull_request_event`` is the durable hand-off from the GitHub webhook:
 it dedupes redeliveries, resolves the repo config, upserts the PR-grain
@@ -22,13 +22,13 @@ from celery import shared_task
 from insights.egress.github.transport import GitHubRateLimitError
 from insights.models.instance_setting import get_instance_setting
 
-from products.stamphog.backend.facade.enums import TERMINAL_STATUSES, ReviewMode, ReviewRunStatus, ReviewVerdict
-from products.stamphog.backend.facade.inbox_hooks import get_inbox_acting_reviewer_resolver
-from products.stamphog.backend.logic.approvals import dismiss_stale_approvals_for_head
-from products.stamphog.backend.logic.audiences import resolve_audience_key
-from products.stamphog.backend.logic.github_client import StamphogGitHubClient
-from products.stamphog.backend.models import PullRequest, ReviewRun, StamphogRepoConfig
-from products.stamphog.backend.temporal.client import execute_stamphog_review_workflow
+from products.stamp.backend.facade.enums import TERMINAL_STATUSES, ReviewMode, ReviewRunStatus, ReviewVerdict
+from products.stamp.backend.facade.inbox_hooks import get_inbox_acting_reviewer_resolver
+from products.stamp.backend.logic.approvals import dismiss_stale_approvals_for_head
+from products.stamp.backend.logic.audiences import resolve_audience_key
+from products.stamp.backend.logic.github_client import StampGitHubClient
+from products.stamp.backend.models import PullRequest, ReviewRun, StampRepoConfig
+from products.stamp.backend.temporal.client import execute_stamp_review_workflow
 from products.tasks.backend.facade.api import find_signal_implementation_run
 
 logger = structlog.get_logger(__name__)
@@ -36,7 +36,7 @@ logger = structlog.get_logger(__name__)
 # Redelivery dedup: GitHub retries the same X-GitHub-Delivery on 5xx/timeouts for a
 # while, so we swallow repeats within this window (workflow start is idempotent too).
 STAMPFN_PR_EVENT_IDEMPOTENCY_TTL_SECONDS = 6 * 60
-STAMPFN_PR_EVENT_IDEMPOTENCY_KEY_PREFIX = "stamphog:github:pr_event:"
+STAMPFN_PR_EVENT_IDEMPOTENCY_KEY_PREFIX = "stamp:github:pr_event:"
 
 # PR actions worth a (re)review. Anything else (closed, assigned, edited, ...) is dropped.
 # `labeled` passes this filter but only ever queues a run for repos in LABEL review mode, when the
@@ -46,39 +46,39 @@ STAMPFN_PR_EVENT_IDEMPOTENCY_KEY_PREFIX = "stamphog:github:pr_event:"
 RELEVANT_PR_ACTIONS = frozenset({"opened", "synchronize", "ready_for_review", "reopened", "labeled"})
 
 # Actions that (may) move the PR head. When one of these is skipped by the LABEL-mode gate, a prior
-# stamphog approval at the old head must still be retracted — the review workflow that normally does it
+# stamp approval at the old head must still be retracted — the review workflow that normally does it
 # is skipped. `reopened` doesn't move the head itself but is included defensively.
 _HEAD_CHANGING_ACTIONS = frozenset({"synchronize", "reopened"})
 
 # Approval dismissal message for the LABEL-mode skip path. Unlike the workflow's dismissal, no re-review
 # follows here (the trigger label is absent), so the copy tells the author how to re-request one.
 _LABEL_SKIP_DISMISS_MESSAGE = (
-    "New commits were pushed — dismissing the stamphog approval from an earlier head. "
+    "New commits were pushed — dismissing the stamp approval from an earlier head. "
     "Re-add the trigger label to request a fresh review."
 )
 
 _AUTHOR_SKIP_DISMISS_MESSAGE = (
-    "New commits were pushed — dismissing the stamphog approval from an earlier head. "
-    "The PR author no longer has write access to this repository, so stamphog will not re-review."
+    "New commits were pushed — dismissing the stamp approval from an earlier head. "
+    "The PR author no longer has write access to this repository, so stamp will not re-review."
 )
 
 _UNTRUSTED_SKIP_DISMISS_MESSAGE = (
-    "New commits were pushed — dismissing the stamphog approval from an earlier head. "
+    "New commits were pushed — dismissing the stamp approval from an earlier head. "
     "This PR no longer qualifies for automatic review."
 )
 
 # Used when a self-driving PR is skipped only because its acting reviewer is not opted in.
 # The generic message above would wrongly suggest the author isn't trusted.
 _INBOX_OPT_OUT_DISMISS_MESSAGE = (
-    "New commits were pushed — dismissing the stamphog approval from an earlier head. "
-    "No reviewer currently has stamphog inbox reviews enabled for this self-driving PR, "
-    "so stamphog will not re-review."
+    "New commits were pushed — dismissing the stamp approval from an earlier head. "
+    "No reviewer currently has stamp inbox reviews enabled for this self-driving PR, "
+    "so stamp will not re-review."
 )
 
 # Per-PR cooldown for label-triggered re-reviews, so removing/re-adding the trigger label can't spam
 # sandbox + LLM runs. Set only when a `labeled` event actually queues a run in LABEL mode.
 STAMPFN_LABEL_REREVIEW_COOLDOWN_SECONDS = 10 * 60
-STAMPFN_LABEL_REREVIEW_KEY_PREFIX = "stamphog:label_rereview:"
+STAMPFN_LABEL_REREVIEW_KEY_PREFIX = "stamp:label_rereview:"
 
 # PR body is trimmed to this at capture time so rows (and the digest LLM prompt) stay bounded.
 PR_BODY_EXCERPT_MAX_CHARS = 2000
@@ -190,7 +190,7 @@ def _inbox_rereview_carve_out(
     Self-driving inbox PRs are bot-authored drafts opened by a self-driving Inbox implementation
     run, so they trip every pre-filter and gate on this path (bot author, draft, author association,
     write permission, review mode). Their real gate is the acting reviewer's
-    ``stamphog_review_inbox_prs`` toggle. A carve-out comes back only when everything is identified:
+    ``stamp_review_inbox_prs`` toggle. A carve-out comes back only when everything is identified:
     a head branch in the base repo rather than a fork, a synced and enabled config, a tasks-facade
     match binding the PR's head ref to the branch the server stamped at run creation, for this
     exact repo scoped to the config's team, carrying a signal report on an undeleted task whose
@@ -211,7 +211,7 @@ def _inbox_rereview_carve_out(
         # Self-driving PRs are always authored by the team's GitHub App machine user, so this skips
         # the DB work for every human PR on this path.
         return _InboxCarveOut()
-    # Without review_hog's resolver there is no toggle to check, so the carve-out is empty anyway.
+    # Without review's resolver there is no toggle to check, so the carve-out is empty anyway.
     # Resolving it first saves the lookups below on every bot-authored head-changing delivery.
     resolver = get_inbox_acting_reviewer_resolver()
     if resolver is None:
@@ -269,7 +269,7 @@ def _review_skip_reason(pr: dict[str, Any]) -> str | None:
     return None
 
 
-def _author_lacks_write_permission(repo_config: StamphogRepoConfig, repo: str, pr: dict[str, Any]) -> bool:
+def _author_lacks_write_permission(repo_config: StampRepoConfig, repo: str, pr: dict[str, Any]) -> bool:
     """Whether the PR author's effective repo permission is below write.
 
     Unlike the payload-only pre-filters this costs a GitHub API call, so it runs last of the gates
@@ -279,10 +279,10 @@ def _author_lacks_write_permission(repo_config: StamphogRepoConfig, repo: str, p
     login = (pr.get("user") or {}).get("login") or ""
     if not login:
         return True
-    cache_key = f"stamphog:author_permission:{repo_config.id}:{login}"
+    cache_key = f"stamp:author_permission:{repo_config.id}:{login}"
     permission = cache.get(cache_key)
     if permission is None:
-        permission = StamphogGitHubClient(repo_config.installation_id).get_collaborator_permission(repo, login)
+        permission = StampGitHubClient(repo_config.installation_id).get_collaborator_permission(repo, login)
         ttl = (
             _AUTHOR_PERMISSION_ALLOW_CACHE_SECONDS
             if permission in WRITE_PERMISSIONS
@@ -292,12 +292,12 @@ def _author_lacks_write_permission(repo_config: StamphogRepoConfig, repo: str, p
     return permission not in WRITE_PERMISSIONS
 
 
-def _label_cooldown_key(repo_config: StamphogRepoConfig, pr_number: int) -> str:
+def _label_cooldown_key(repo_config: StampRepoConfig, pr_number: int) -> str:
     return f"{STAMPFN_LABEL_REREVIEW_KEY_PREFIX}{repo_config.id}:{pr_number}"
 
 
 def _review_mode_skip_reason(
-    repo_config: StamphogRepoConfig, action: str, payload: dict[str, Any], pr: dict[str, Any]
+    repo_config: StampRepoConfig, action: str, payload: dict[str, Any], pr: dict[str, Any]
 ) -> str | None:
     """Why the repo's review mode drops this event, or None to proceed.
 
@@ -321,7 +321,7 @@ def _review_mode_skip_reason(
     return None
 
 
-def _resolve_repo_config(installation_id: str, repo: str) -> StamphogRepoConfig | None:
+def _resolve_repo_config(installation_id: str, repo: str) -> StampRepoConfig | None:
     """Resolve the (installation, repo) to its owning config, oldest-wins.
 
     unscoped(): the team is unknown until this installation->config resolution completes — the one
@@ -331,8 +331,8 @@ def _resolve_repo_config(installation_id: str, repo: str) -> StamphogRepoConfig 
     replicated to the product-DB reader yet, and a miss here silently drops the delivery.
     """
     return (
-        StamphogRepoConfig.objects.unscoped()
-        .using(router.db_for_write(StamphogRepoConfig))
+        StampRepoConfig.objects.unscoped()
+        .using(router.db_for_write(StampRepoConfig))
         .filter(provider="github", installation_id=installation_id, repository=repo)
         .order_by("created_at", "id")
         .first()
@@ -351,7 +351,7 @@ def _mark_pr_event_processed(delivery_id: str) -> None:
     )
 
 
-def _upsert_pull_request(repo_config: StamphogRepoConfig, pr_payload: dict[str, Any]) -> PullRequest:
+def _upsert_pull_request(repo_config: StampRepoConfig, pr_payload: dict[str, Any]) -> PullRequest:
     """Upsert the PR-grain row, refreshing the descriptive fields from a not-older payload.
 
     Webhook deliveries can arrive out of order, so the refresh is gated on the payload's
@@ -411,9 +411,9 @@ def _start_review_workflow(review_run_id: str, team_id: int) -> None:
     from temporalio.exceptions import WorkflowAlreadyStartedError  # noqa: PLC0415
 
     try:
-        execute_stamphog_review_workflow(review_run_id=review_run_id, team_id=team_id)
+        execute_stamp_review_workflow(review_run_id=review_run_id, team_id=team_id)
     except WorkflowAlreadyStartedError:
-        logger.info("stamphog_review_workflow_already_running", review_run_id=review_run_id)
+        logger.info("stamp_review_workflow_already_running", review_run_id=review_run_id)
 
 
 def _resume_existing_delivery_run(delivery_id: str, team_id: int, repo: str) -> bool:
@@ -437,14 +437,14 @@ def _resume_existing_delivery_run(delivery_id: str, team_id: int, repo: str) -> 
         return False
     if existing.status == ReviewRunStatus.QUEUED:
         logger.info(
-            "stamphog_pr_event_restarting_queued_run",
+            "stamp_pr_event_restarting_queued_run",
             delivery_id=delivery_id,
             review_run_id=str(existing.id),
             repo=repo,
         )
         _start_review_workflow(str(existing.id), team_id)
     else:
-        logger.info("stamphog_pr_event_delivery_already_processed", delivery_id=delivery_id, repo=repo)
+        logger.info("stamp_pr_event_delivery_already_processed", delivery_id=delivery_id, repo=repo)
     return True
 
 
@@ -470,11 +470,11 @@ def _supersede_prior_runs(pr_obj: PullRequest) -> None:
 
 _BASE_RETARGET_DISMISS_MESSAGE = (
     "The PR was retargeted to a different base branch, so the approved diff is no longer what was "
-    "reviewed. Stamphog re-reviews automatically."
+    "reviewed. Stamp re-reviews automatically."
 )
 
 
-def _retract_approvals_on_base_retarget(repo_config: StamphogRepoConfig, pr: dict[str, Any]) -> None:
+def _retract_approvals_on_base_retarget(repo_config: StampRepoConfig, pr: dict[str, Any]) -> None:
     """Invalidate approvals and in-flight runs when a PR's base branch changes.
 
     A retarget rewrites the reviewed diff while the head SHA stays put, so post_verdict's head
@@ -508,7 +508,7 @@ def _retract_approvals_on_base_retarget(repo_config: StamphogRepoConfig, pr: dic
     )
     if superseded or dismissed:
         logger.info(
-            "stamphog_pr_event_base_retarget_invalidated",
+            "stamp_pr_event_base_retarget_invalidated",
             repo=repo_config.repository,
             pr_number=pr_number,
             superseded=superseded,
@@ -516,8 +516,8 @@ def _retract_approvals_on_base_retarget(repo_config: StamphogRepoConfig, pr: dic
         )
 
 
-def _retract_stale_approvals_on_skip(repo_config: StamphogRepoConfig, pr: dict[str, Any], message: str) -> None:
-    """Retract a standing stamphog approval when a head-changing event is skipped before the workflow.
+def _retract_stale_approvals_on_skip(repo_config: StampRepoConfig, pr: dict[str, Any], message: str) -> None:
+    """Retract a standing stamp approval when a head-changing event is skipped before the workflow.
 
     A skipped `synchronize`/`reopened` (missing trigger label, author lost write access) never reaches
     the workflow's dismiss_stale_approvals step, so a prior approval would keep satisfying required
@@ -545,7 +545,7 @@ def _retract_stale_approvals_on_skip(repo_config: StamphogRepoConfig, pr: dict[s
     dismissed = dismiss_stale_approvals_for_head(team_id, pull_request, repo_config, head_sha, message=message)
     if dismissed:
         logger.info(
-            "stamphog_pr_event_skip_dismissed_stale_approvals",
+            "stamp_pr_event_skip_dismissed_stale_approvals",
             repo=repo_config.repository,
             pr_number=pr_number,
             dismissed=dismissed,
@@ -557,7 +557,7 @@ def _record_merged_pull_request(payload: dict[str, Any], delivery_id: str) -> No
 
     Merge state is truth regardless of approval, so the facts are always recorded once
     the repo config resolves and is enabled. The digest gate (digest_enabled + a
-    stamphog-approved run) only decides whether audience_key gets stamped — the digest
+    stamp-approved run) only decides whether audience_key gets stamped — the digest
     filters on audience_key, so an unstamped merge never reaches Slack. A redelivery
     is a no-op: merged_at already being set means this merge was recorded.
     """
@@ -566,24 +566,24 @@ def _record_merged_pull_request(payload: dict[str, Any], delivery_id: str) -> No
     pr = payload.get("pull_request") or {}
     pr_number = pr.get("number")
     if not installation_id or not repo or not pr_number:
-        logger.warning("stamphog_merged_pr_missing_fields", has_installation=bool(installation_id), repo=repo)
+        logger.warning("stamp_merged_pr_missing_fields", has_installation=bool(installation_id), repo=repo)
         return
 
     repo_config = _resolve_repo_config(installation_id, repo)
     if not repo_config:
-        logger.info("stamphog_merged_pr_repo_not_configured", repo=repo, installation_id=installation_id)
+        logger.info("stamp_merged_pr_repo_not_configured", repo=repo, installation_id=installation_id)
         return
     # A digest-only repo (digest_enabled=True, review enabled=False) still needs its merges captured,
     # otherwise the daily digest has nothing to send. Gate the merge path on either flag; the digest
     # eligibility below still requires digest_enabled specifically.
     if not (repo_config.enabled or repo_config.digest_enabled):
-        logger.info("stamphog_merged_pr_repo_disabled", repo=repo)
+        logger.info("stamp_merged_pr_repo_disabled", repo=repo)
         return
 
     team_id = repo_config.team_id
     pr_obj = _upsert_pull_request(repo_config, pr)
     if pr_obj.merged_at is not None:
-        logger.info("stamphog_merged_pr_already_recorded", repo=repo, pr_number=pr_number, delivery_id=delivery_id)
+        logger.info("stamp_merged_pr_already_recorded", repo=repo, pr_number=pr_number, delivery_id=delivery_id)
         return
 
     pr_obj.merged_at = parse_datetime(pr.get("merged_at") or "") or timezone.now()
@@ -593,7 +593,7 @@ def _record_merged_pull_request(payload: dict[str, Any], delivery_id: str) -> No
     pr_obj.changed_files = pr.get("changed_files") or 0
     update_fields = ["merged_at", "merge_commit_sha", "additions", "deletions", "changed_files", "updated_at"]
 
-    # Digest eligibility: opt-in per repo, and the digest reports what stamphog
+    # Digest eligibility: opt-in per repo, and the digest reports what stamp
     # approved, not everything that merged. Ineligible merges keep their facts but
     # stay out of the digest (blank audience_key).
     #
@@ -604,7 +604,7 @@ def _record_merged_pull_request(payload: dict[str, Any], delivery_id: str) -> No
     # normally `synchronize` supersedes and re-reviews, so this only closes that narrow gap.
     pr_head_sha = ((pr.get("head") or {}).get("sha") or "").strip()
     if not pr_head_sha:
-        logger.warning("stamphog_merged_pr_missing_head_sha", repo=repo, pr_number=pr_number)
+        logger.warning("stamp_merged_pr_missing_head_sha", repo=repo, pr_number=pr_number)
         approved = False
     else:
         # Writer pin: an auto-merge fires this webhook the instant GitHub records the approval, so
@@ -616,7 +616,7 @@ def _record_merged_pull_request(payload: dict[str, Any], delivery_id: str) -> No
                 pull_request=pr_obj,
                 verdict=ReviewVerdict.APPROVED,
                 head_sha=pr_head_sha,
-                # A dismissed approval is no longer stamphog's verdict — a same-head re-review may
+                # A dismissed approval is no longer stamp's verdict — a same-head re-review may
                 # have voided it and then refused, and the digest must not brand that merge approved.
                 approval_dismissed_at__isnull=True,
             )
@@ -630,7 +630,7 @@ def _record_merged_pull_request(payload: dict[str, Any], delivery_id: str) -> No
         update_fields.append("audience_key")
     else:
         logger.info(
-            "stamphog_merged_pr_not_digest_eligible",
+            "stamp_merged_pr_not_digest_eligible",
             repo=repo,
             pr_number=pr_number,
             digest_enabled=repo_config.digest_enabled,
@@ -640,7 +640,7 @@ def _record_merged_pull_request(payload: dict[str, Any], delivery_id: str) -> No
 
     if delivery_id:
         _mark_pr_event_processed(delivery_id)
-    logger.info("stamphog_merged_pr_recorded", repo=repo, pr_number=pr_number, team_id=team_id)
+    logger.info("stamp_merged_pr_recorded", repo=repo, pr_number=pr_number, team_id=team_id)
 
 
 def _resolve_installation_team_ids(installation_id: str) -> list[int]:
@@ -655,8 +655,8 @@ def _resolve_installation_team_ids(installation_id: str) -> list[int]:
     permanently skip the lifecycle mutation for a just-synced installation).
     """
     return list(
-        StamphogRepoConfig.objects.unscoped()
-        .using(router.db_for_write(StamphogRepoConfig))
+        StampRepoConfig.objects.unscoped()
+        .using(router.db_for_write(StampRepoConfig))
         .filter(provider="github", installation_id=installation_id)
         .values_list("team_id", flat=True)
         .distinct()
@@ -670,17 +670,17 @@ def _add_installation_repos(team_id: int, installation_id: str, repos: list[dict
     stays a human decision. Conflicts (another team owns the triple, or this team already has the repo)
     skip that one repo, never the batch: the same cross-team uniqueness the sync endpoint enforces.
     """
-    # Bind the transaction to the model's routed DB (stamphog_db_writer when the product DB is
+    # Bind the transaction to the model's routed DB (stamp_db_writer when the product DB is
     # configured, else default) — a bare atomic() would open on the default connection and leave
     # the create running outside any transaction on the product DB.
-    write_db = router.db_for_write(StamphogRepoConfig)
+    write_db = router.db_for_write(StampRepoConfig)
     # New rows inherit the connecting user from a sibling of the same installation — webhooks carry
     # no Insights identity, and the sandbox token for reviews is minted under this user. No sibling
     # with one set means the installation was never synced; the row stays null and reviews fail closed.
     # Writer pin: an add arriving right after the sync/restamp must see the just-committed identity,
     # or the new row is stored null and reviews fail at mint time once enabled.
     connected_by_user_id = (
-        StamphogRepoConfig.objects.for_team(team_id)
+        StampRepoConfig.objects.for_team(team_id)
         .using(write_db)
         .filter(provider="github", installation_id=installation_id, connected_by_user_id__isnull=False)
         .values_list("connected_by_user_id", flat=True)
@@ -691,7 +691,7 @@ def _add_installation_repos(team_id: int, installation_id: str, repos: list[dict
         if not full_name:
             continue
         exists = (
-            StamphogRepoConfig.objects.unscoped()
+            StampRepoConfig.objects.unscoped()
             .filter(provider="github", installation_id=installation_id, repository=full_name)
             .exists()
         )
@@ -699,7 +699,7 @@ def _add_installation_repos(team_id: int, installation_id: str, repos: list[dict
             continue
         try:
             with transaction.atomic(using=write_db):
-                StamphogRepoConfig.objects.for_team(team_id).create(
+                StampRepoConfig.objects.for_team(team_id).create(
                     team_id=team_id,
                     provider="github",
                     repository=full_name,
@@ -709,7 +709,7 @@ def _add_installation_repos(team_id: int, installation_id: str, repos: list[dict
                     connected_by_user_id=connected_by_user_id,
                 )
         except IntegrityError:
-            logger.info("stamphog_installation_repo_add_conflict", repository=full_name, team_id=team_id)
+            logger.info("stamp_installation_repo_add_conflict", repository=full_name, team_id=team_id)
 
 
 def _supersede_runs_for_configs(team_id: int, config_ids: list[Any]) -> None:
@@ -728,7 +728,7 @@ def _supersede_runs_for_configs(team_id: int, config_ids: list[Any]) -> None:
         .update(status=ReviewRunStatus.SUPERSEDED, updated_at=timezone.now())
     )
     if superseded:
-        logger.info("stamphog_repo_removal_superseded_runs", team_id=team_id, superseded=superseded)
+        logger.info("stamp_repo_removal_superseded_runs", team_id=team_id, superseded=superseded)
 
 
 def _disable_installation_repos(team_id: int, installation_id: str, repos: list[dict[str, Any]]) -> None:
@@ -739,19 +739,19 @@ def _disable_installation_repos(team_id: int, installation_id: str, repos: list[
     # Writer pin: this lookup gates the disable + supersede side effects; a lagged reader missing a
     # just-restamped row would leave the removed repo's config live and its runs posting.
     config_ids = list(
-        StamphogRepoConfig.objects.for_team(team_id)
-        .using(router.db_for_write(StamphogRepoConfig))
+        StampRepoConfig.objects.for_team(team_id)
+        .using(router.db_for_write(StampRepoConfig))
         .filter(provider="github", installation_id=installation_id, repository__in=names)
         .values_list("id", flat=True)
     )
     # updated_at explicitly: auto_now doesn't fire on queryset update().
     disabled = (
-        StamphogRepoConfig.objects.for_team(team_id)
+        StampRepoConfig.objects.for_team(team_id)
         .filter(id__in=config_ids)
         .update(enabled=False, digest_enabled=False, updated_at=timezone.now())
     )
     _supersede_runs_for_configs(team_id, config_ids)
-    logger.info("stamphog_installation_repos_removed", installation_id=installation_id, disabled=disabled)
+    logger.info("stamp_installation_repos_removed", installation_id=installation_id, disabled=disabled)
 
 
 @shared_task(ignore_result=True, max_retries=3, default_retry_delay=5)
@@ -771,12 +771,12 @@ def process_installation_event(payload: dict[str, Any], delivery_id: str) -> Non
     user's repo access. Rows always start disabled either way, so enabling reviews stays a human decision.
     """
     if delivery_id and _is_duplicate_pr_event(delivery_id):
-        logger.info("stamphog_installation_event_duplicate_skipped", delivery_id=delivery_id)
+        logger.info("stamp_installation_event_duplicate_skipped", delivery_id=delivery_id)
         return
 
     installation_id = str((payload.get("installation") or {}).get("id", ""))
     if not installation_id:
-        logger.warning("stamphog_installation_event_missing_installation")
+        logger.warning("stamp_installation_event_missing_installation")
         return
 
     # Retry (don't drop) on a transient DB error: the webhook is already ACKed, and a lifecycle
@@ -784,11 +784,11 @@ def process_installation_event(payload: dict[str, Any], delivery_id: str) -> Non
     try:
         team_ids = _resolve_installation_team_ids(installation_id)
     except Exception as e:
-        logger.exception("stamphog_installation_team_resolution_failed", delivery_id=delivery_id, error=str(e))
+        logger.exception("stamp_installation_team_resolution_failed", delivery_id=delivery_id, error=str(e))
         raise cast(Any, process_installation_event).retry(exc=e)
     if not team_ids:
         # No config carries this installation yet — the user-driven sync flow will bind it to a team.
-        logger.info("stamphog_installation_event_unbound", installation_id=installation_id)
+        logger.info("stamp_installation_event_unbound", installation_id=installation_id)
         return
 
     action = payload.get("action", "")
@@ -805,7 +805,7 @@ def process_installation_event(payload: dict[str, Any], delivery_id: str) -> Non
                 else:
                     # Ambiguous ownership: skip the auto-add, defer to the authenticated sync flow.
                     logger.info(
-                        "stamphog_installation_repo_add_ambiguous",
+                        "stamp_installation_repo_add_ambiguous",
                         installation_id=installation_id,
                         team_count=len(team_ids),
                     )
@@ -815,27 +815,27 @@ def process_installation_event(payload: dict[str, Any], delivery_id: str) -> Non
         elif action == "deleted":
             for team_id in team_ids:
                 uninstalled_ids = list(
-                    StamphogRepoConfig.objects.for_team(team_id)
-                    .using(router.db_for_write(StamphogRepoConfig))
+                    StampRepoConfig.objects.for_team(team_id)
+                    .using(router.db_for_write(StampRepoConfig))
                     .filter(provider="github", installation_id=installation_id)
                     .values_list("id", flat=True)
                 )
                 disabled = (
-                    StamphogRepoConfig.objects.for_team(team_id)
+                    StampRepoConfig.objects.for_team(team_id)
                     .filter(id__in=uninstalled_ids)
                     .update(enabled=False, digest_enabled=False, updated_at=timezone.now())
                 )
                 _supersede_runs_for_configs(team_id, uninstalled_ids)
                 logger.info(
-                    "stamphog_installation_uninstalled",
+                    "stamp_installation_uninstalled",
                     installation_id=installation_id,
                     team_id=team_id,
                     disabled=disabled,
                 )
         else:
-            logger.info("stamphog_installation_event_ignored", action=action)
+            logger.info("stamp_installation_event_ignored", action=action)
     except Exception as e:
-        logger.exception("stamphog_installation_event_failed", delivery_id=delivery_id, error=str(e))
+        logger.exception("stamp_installation_event_failed", delivery_id=delivery_id, error=str(e))
         raise cast(Any, process_installation_event).retry(exc=e)
 
     if delivery_id:
@@ -846,7 +846,7 @@ def process_installation_event(payload: dict[str, Any], delivery_id: str) -> Non
 def process_pull_request_event(payload: dict[str, Any], delivery_id: str) -> None:
     """Turn one verified pull_request webhook delivery into a queued ReviewRun."""
     if delivery_id and _is_duplicate_pr_event(delivery_id):
-        logger.info("stamphog_pr_event_duplicate_skipped", delivery_id=delivery_id)
+        logger.info("stamp_pr_event_duplicate_skipped", delivery_id=delivery_id)
         return
 
     action = payload.get("action", "")
@@ -859,10 +859,10 @@ def process_pull_request_event(payload: dict[str, Any], delivery_id: str) -> Non
             try:
                 _record_merged_pull_request(payload, delivery_id)
             except Exception as e:
-                logger.exception("stamphog_merged_pr_record_failed", delivery_id=delivery_id, error=str(e))
+                logger.exception("stamp_merged_pr_record_failed", delivery_id=delivery_id, error=str(e))
                 raise cast(Any, process_pull_request_event).retry(exc=e)
         else:
-            logger.info("stamphog_pr_event_closed_unmerged_ignored")
+            logger.info("stamp_pr_event_closed_unmerged_ignored")
         return
 
     # A base retarget arrives as `edited` with a `changes.base` entry. It changes the reviewed diff
@@ -870,7 +870,7 @@ def process_pull_request_event(payload: dict[str, Any], delivery_id: str) -> Non
     # explicit retraction below, because every head-keyed sweep is blind to a same-head approval.
     base_retargeted = action == "edited" and bool((payload.get("changes") or {}).get("base"))
     if action not in RELEVANT_PR_ACTIONS and not base_retargeted:
-        logger.info("stamphog_pr_event_action_ignored", action=action)
+        logger.info("stamp_pr_event_action_ignored", action=action)
         return
 
     installation_id = str((payload.get("installation") or {}).get("id", ""))
@@ -879,7 +879,7 @@ def process_pull_request_event(payload: dict[str, Any], delivery_id: str) -> Non
     pr_number = pr.get("number")
     if not installation_id or not repo or not pr_number:
         logger.warning(
-            "stamphog_pr_event_missing_fields",
+            "stamp_pr_event_missing_fields",
             has_installation=bool(installation_id),
             repo=repo,
             pr_number=pr_number,
@@ -895,7 +895,7 @@ def process_pull_request_event(payload: dict[str, Any], delivery_id: str) -> Non
             if retarget_config is not None:
                 _retract_approvals_on_base_retarget(retarget_config, pr)
         except Exception as e:
-            logger.exception("stamphog_pr_event_retarget_dismiss_failed", delivery_id=delivery_id, error=str(e))
+            logger.exception("stamp_pr_event_retarget_dismiss_failed", delivery_id=delivery_id, error=str(e))
             raise cast(Any, process_pull_request_event).retry(exc=e)
 
     # Cheap pre-sandbox drops (drafts, bots, fork/external authors) before we resolve config or spend a
@@ -911,7 +911,7 @@ def process_pull_request_event(payload: dict[str, Any], delivery_id: str) -> Non
         try:
             carve_out = _inbox_rereview_carve_out(installation_id, repo, pr, action, base_retargeted)
         except Exception as e:
-            logger.exception("stamphog_pr_event_inbox_carve_out_failed", delivery_id=delivery_id, error=str(e))
+            logger.exception("stamp_pr_event_inbox_carve_out_failed", delivery_id=delivery_id, error=str(e))
             carve_out_error = e
     inbox_review = carve_out.provenance
     if skip_reason is not None and inbox_review is None:
@@ -934,7 +934,7 @@ def process_pull_request_event(payload: dict[str, Any], delivery_id: str) -> Non
                     )
             except Exception as e:
                 logger.exception(
-                    "stamphog_pr_event_untrusted_skip_dismiss_failed", delivery_id=delivery_id, error=str(e)
+                    "stamp_pr_event_untrusted_skip_dismiss_failed", delivery_id=delivery_id, error=str(e)
                 )
                 raise cast(Any, process_pull_request_event).retry(exc=e)
         if carve_out_error is not None:
@@ -942,7 +942,7 @@ def process_pull_request_event(payload: dict[str, Any], delivery_id: str) -> Non
             # retries fail. Retry so the carve-out re-review is re-attempted once the failure clears.
             raise cast(Any, process_pull_request_event).retry(exc=carve_out_error)
         logger.info(
-            "stamphog_pr_event_skipped",
+            "stamp_pr_event_skipped",
             repo=repo,
             pr_number=pr_number,
             reason="inbox_opt_out" if carve_out.opted_out else skip_reason,
@@ -951,16 +951,16 @@ def process_pull_request_event(payload: dict[str, Any], delivery_id: str) -> Non
             _mark_pr_event_processed(delivery_id)
         return
 
-    # Creation is guarded against cross-team duplicates (see StamphogRepoConfigViewSet). Retry (don't
+    # Creation is guarded against cross-team duplicates (see StampRepoConfigViewSet). Retry (don't
     # drop) on a transient DB error: this is the first DB touch on the main path, and the webhook was
     # already ACKed, so an unhandled blip here would silently lose the delivery.
     try:
         repo_config = _resolve_repo_config(installation_id, repo)
     except Exception as e:
-        logger.exception("stamphog_pr_event_config_resolution_failed", delivery_id=delivery_id, error=str(e))
+        logger.exception("stamp_pr_event_config_resolution_failed", delivery_id=delivery_id, error=str(e))
         raise cast(Any, process_pull_request_event).retry(exc=e)
     if not repo_config:
-        logger.info("stamphog_pr_event_repo_not_configured", repo=repo, installation_id=installation_id)
+        logger.info("stamp_pr_event_repo_not_configured", repo=repo, installation_id=installation_id)
         return
     if not repo_config.enabled:
         # Disabling a repo opts out of reviews, but a standing approval from before the disable must
@@ -970,10 +970,10 @@ def process_pull_request_event(payload: dict[str, Any], delivery_id: str) -> Non
                 _retract_stale_approvals_on_skip(repo_config, pr, _UNTRUSTED_SKIP_DISMISS_MESSAGE)
             except Exception as e:
                 logger.exception(
-                    "stamphog_pr_event_disabled_skip_dismiss_failed", delivery_id=delivery_id, error=str(e)
+                    "stamp_pr_event_disabled_skip_dismiss_failed", delivery_id=delivery_id, error=str(e)
                 )
                 raise cast(Any, process_pull_request_event).retry(exc=e)
-        logger.info("stamphog_pr_event_repo_disabled", repo=repo)
+        logger.info("stamp_pr_event_repo_disabled", repo=repo)
         if delivery_id:
             _mark_pr_event_processed(delivery_id)
         return
@@ -989,9 +989,9 @@ def process_pull_request_event(payload: dict[str, Any], delivery_id: str) -> Non
             try:
                 _retract_stale_approvals_on_skip(repo_config, pr, _LABEL_SKIP_DISMISS_MESSAGE)
             except Exception as e:
-                logger.exception("stamphog_pr_event_label_skip_dismiss_failed", delivery_id=delivery_id, error=str(e))
+                logger.exception("stamp_pr_event_label_skip_dismiss_failed", delivery_id=delivery_id, error=str(e))
                 raise cast(Any, process_pull_request_event).retry(exc=e)
-        logger.info("stamphog_pr_event_skipped", repo=repo, pr_number=pr_number, reason=mode_skip_reason)
+        logger.info("stamp_pr_event_skipped", repo=repo, pr_number=pr_number, reason=mode_skip_reason)
         if delivery_id:
             _mark_pr_event_processed(delivery_id)
         return
@@ -1008,10 +1008,10 @@ def process_pull_request_event(payload: dict[str, Any], delivery_id: str) -> Non
     except GitHubRateLimitError as e:
         # Honor GitHub's own backoff hint: the default 5s retry delay lands inside the same rate
         # window and burns the attempt budget without ever succeeding.
-        logger.warning("stamphog_pr_event_author_permission_rate_limited", delivery_id=delivery_id)
+        logger.warning("stamp_pr_event_author_permission_rate_limited", delivery_id=delivery_id)
         raise cast(Any, process_pull_request_event).retry(exc=e, countdown=max(e.retry_after or 0, 60))
     except Exception as e:
-        logger.exception("stamphog_pr_event_author_permission_failed", delivery_id=delivery_id, error=str(e))
+        logger.exception("stamp_pr_event_author_permission_failed", delivery_id=delivery_id, error=str(e))
         raise cast(Any, process_pull_request_event).retry(exc=e)
     if author_below_write:
         # Same stale-approval hazard as the label skip: a head change that never reaches the workflow
@@ -1020,9 +1020,9 @@ def process_pull_request_event(payload: dict[str, Any], delivery_id: str) -> Non
             try:
                 _retract_stale_approvals_on_skip(repo_config, pr, _AUTHOR_SKIP_DISMISS_MESSAGE)
             except Exception as e:
-                logger.exception("stamphog_pr_event_author_skip_dismiss_failed", delivery_id=delivery_id, error=str(e))
+                logger.exception("stamp_pr_event_author_skip_dismiss_failed", delivery_id=delivery_id, error=str(e))
                 raise cast(Any, process_pull_request_event).retry(exc=e)
-        logger.info("stamphog_pr_event_skipped", repo=repo, pr_number=pr_number, reason="author_below_write")
+        logger.info("stamp_pr_event_skipped", repo=repo, pr_number=pr_number, reason="author_below_write")
         if delivery_id:
             _mark_pr_event_processed(delivery_id)
         return
@@ -1039,7 +1039,7 @@ def process_pull_request_event(payload: dict[str, Any], delivery_id: str) -> Non
         try:
             resumed = _resume_existing_delivery_run(delivery_id, team_id, repo)
         except Exception as e:
-            logger.exception("stamphog_pr_event_restart_queued_run_failed", delivery_id=delivery_id, error=str(e))
+            logger.exception("stamp_pr_event_restart_queued_run_failed", delivery_id=delivery_id, error=str(e))
             raise cast(Any, process_pull_request_event).retry(exc=e)
         if resumed:
             _mark_pr_event_processed(delivery_id)
@@ -1059,7 +1059,7 @@ def process_pull_request_event(payload: dict[str, Any], delivery_id: str) -> Non
             .first()
         )
         if stored_updated_at is not None and incoming_updated_at < stored_updated_at:
-            logger.info("stamphog_pr_event_stale_payload", repo=repo, pr_number=pr_number, action=action)
+            logger.info("stamp_pr_event_stale_payload", repo=repo, pr_number=pr_number, action=action)
             if delivery_id:
                 _mark_pr_event_processed(delivery_id)
             return
@@ -1085,7 +1085,7 @@ def process_pull_request_event(payload: dict[str, Any], delivery_id: str) -> Non
                 and pr_obj.payload_updated_at is not None
                 and pr_obj.payload_updated_at > incoming_updated_at
             ):
-                logger.info("stamphog_pr_event_stale_payload_locked", repo=repo, pr_number=pr_number, action=action)
+                logger.info("stamp_pr_event_stale_payload_locked", repo=repo, pr_number=pr_number, action=action)
                 if delivery_id:
                     _mark_pr_event_processed(delivery_id)
                 return
@@ -1119,12 +1119,12 @@ def process_pull_request_event(payload: dict[str, Any], delivery_id: str) -> Non
             try:
                 _resume_existing_delivery_run(delivery_id, team_id, repo)
             except Exception as e:
-                logger.exception("stamphog_pr_event_restart_queued_run_failed", delivery_id=delivery_id, error=str(e))
+                logger.exception("stamp_pr_event_restart_queued_run_failed", delivery_id=delivery_id, error=str(e))
                 raise cast(Any, process_pull_request_event).retry(exc=e)
             _mark_pr_event_processed(delivery_id)
         return
     except Exception as e:
-        logger.exception("stamphog_pr_event_create_run_failed", repo=repo, pr_number=pr_number, error=str(e))
+        logger.exception("stamp_pr_event_create_run_failed", repo=repo, pr_number=pr_number, error=str(e))
         raise cast(Any, process_pull_request_event).retry(exc=e)
 
     # Arm the cooldown only once a label-triggered run actually queued, so a skipped or failed
@@ -1133,7 +1133,7 @@ def process_pull_request_event(payload: dict[str, Any], delivery_id: str) -> Non
         cache.set(_label_cooldown_key(repo_config, pr_number), True, timeout=STAMPFN_LABEL_REREVIEW_COOLDOWN_SECONDS)
 
     logger.info(
-        "stamphog_pr_event_queued",
+        "stamp_pr_event_queued",
         repo=repo,
         pr_number=pr_number,
         action=action,
@@ -1150,8 +1150,8 @@ def process_inbox_pr_review(
 ) -> None:
     """Run the first hosted review of a self-driving inbox PR.
 
-    Queued through the ``queue_inbox_pr_review`` facade after review_hog's TaskRun receiver found an
-    assigned reviewer with the ``stamphog_review_inbox_prs`` toggle on — re-checked below at
+    Queued through the ``queue_inbox_pr_review`` facade after review's TaskRun receiver found an
+    assigned reviewer with the ``stamp_review_inbox_prs`` toggle on — re-checked below at
     execution time through the same resolver hook the webhook leg uses. The webhook path can't do the
     first review, because the PR is a bot-authored draft and that path filters both out, and the
     verdict has to land while the PR is still a draft so it's there at Inbox triage time. Later
@@ -1160,7 +1160,7 @@ def process_inbox_pr_review(
     There is no webhook payload here, so the PR is fetched from GitHub. The rest mirrors
     ``process_pull_request_event``'s sequence (upsert, supersede, create, start on commit) with inbox
     provenance stamped on the run. It quietly does nothing without a synced and enabled config for
-    the PR's repository, which keeps it inert for teams without the Stamphog App installed. The
+    the PR's repository, which keeps it inert for teams without the Stamp App installed. The
     receiver re-fires on every TaskRun output save carrying the PR URL, so the dedupe keys on the
     PR's current head: a live or delivered run at that head is a no-op (it only restarts a stranded
     QUEUED run's workflow), while a refire after a head the webhook never delivered, such as a lost
@@ -1175,12 +1175,12 @@ def process_inbox_pr_review(
     """
     parsed = _parse_pr_url(pr_url)
     if parsed is None:
-        logger.warning("stamphog_inbox_pr_unparseable_url", team_id=team_id)
+        logger.warning("stamp_inbox_pr_unparseable_url", team_id=team_id)
         return
     pr_repository, pr_number = parsed
     if pr_repository.strip().lower() != repository.strip().lower():
         logger.warning(
-            "stamphog_inbox_pr_repository_mismatch",
+            "stamp_inbox_pr_repository_mismatch",
             team_id=team_id,
             task_repository=repository,
             pr_repository=pr_repository,
@@ -1189,10 +1189,10 @@ def process_inbox_pr_review(
 
     # Writer-pinned like every read that gates run creation (reader-lag invariant); iexact because
     # tasks stores repository slugs lowercased while configs keep GitHub's casing.
-    write_db = router.db_for_write(StamphogRepoConfig)
+    write_db = router.db_for_write(StampRepoConfig)
     try:
         repo_config = (
-            StamphogRepoConfig.objects.for_team(team_id)
+            StampRepoConfig.objects.for_team(team_id)
             .using(write_db)
             .filter(provider="github", repository__iexact=repository, enabled=True, connected_by_user_id__isnull=False)
             .exclude(installation_id="")
@@ -1200,35 +1200,35 @@ def process_inbox_pr_review(
             .first()
         )
     except Exception as e:
-        logger.exception("stamphog_inbox_pr_config_resolution_failed", team_id=team_id, error=str(e))
+        logger.exception("stamp_inbox_pr_config_resolution_failed", team_id=team_id, error=str(e))
         raise cast(Any, process_inbox_pr_review).retry(exc=e)
     if repo_config is None:
-        logger.info("stamphog_inbox_pr_repo_not_reviewable", team_id=team_id, repository=repository)
+        logger.info("stamp_inbox_pr_repo_not_reviewable", team_id=team_id, repository=repository)
         return
 
     # Retry rather than drop: this first review has no webhook redelivery behind it, so a transient
     # GitHub blip must not lose it. The fetch comes first because the dedupe keys on the current head.
     try:
-        pr = StamphogGitHubClient(repo_config.installation_id).get_pr(repo_config.repository, pr_number)
+        pr = StampGitHubClient(repo_config.installation_id).get_pr(repo_config.repository, pr_number)
     except GitHubRateLimitError as e:
-        logger.warning("stamphog_inbox_pr_fetch_rate_limited", repository=repository, pr_number=pr_number)
+        logger.warning("stamp_inbox_pr_fetch_rate_limited", repository=repository, pr_number=pr_number)
         raise cast(Any, process_inbox_pr_review).retry(exc=e, countdown=max(e.retry_after or 0, 60))
     except Exception as e:
-        logger.exception("stamphog_inbox_pr_fetch_failed", repository=repository, pr_number=pr_number, error=str(e))
+        logger.exception("stamp_inbox_pr_fetch_failed", repository=repository, pr_number=pr_number, error=str(e))
         raise cast(Any, process_inbox_pr_review).retry(exc=e)
     if (pr.get("state") or "") != "open":
         # A late TaskRun output save can re-fire the receiver long after the PR closed or merged.
-        logger.info("stamphog_inbox_pr_not_open", repository=repository, pr_number=pr_number)
+        logger.info("stamp_inbox_pr_not_open", repository=repository, pr_number=pr_number)
         return
     head_sha = ((pr.get("head") or {}).get("sha") or "").strip()
     if not head_sha:
         # The head-keyed dedupe below would collide every refire on "", so bail rather than guess.
-        logger.warning("stamphog_inbox_pr_missing_head_sha", repository=repository, pr_number=pr_number)
+        logger.warning("stamp_inbox_pr_missing_head_sha", repository=repository, pr_number=pr_number)
         return
     # TaskRun.output.pr_url routed us here and any team member can write it, so re-verify author and
     # head against GitHub. repo_config.repository has GitHub's casing, which the fork check needs.
     if not _is_self_driving_pr(pr, repo_config.repository):
-        logger.warning("stamphog_inbox_pr_not_self_driving", repository=repository, pr_number=pr_number)
+        logger.warning("stamp_inbox_pr_not_self_driving", repository=repository, pr_number=pr_number)
         return
     # The binding that counts: GitHub's head ref against the branch the server stamped into
     # protected run state at creation. The Celery args only queued this job; a PR whose head ref
@@ -1240,7 +1240,7 @@ def process_inbox_pr_review(
         team_id=team_id, repository=repo_config.repository, head_branch=head_ref or None
     )
     if linked is None or str(linked.run_id) != task_run_id:
-        logger.warning("stamphog_inbox_pr_not_linked", repository=repository, pr_number=pr_number)
+        logger.warning("stamp_inbox_pr_not_linked", repository=repository, pr_number=pr_number)
         return
     # Execution-time opt-in re-check, mirroring the webhook leg: the receiver checked the toggle
     # when it queued this job, but broker latency and the fetch retries above can stretch that gap
@@ -1254,7 +1254,7 @@ def process_inbox_pr_review(
         resolver(team_id, str(linked.signal_report_id), acting_user_id) if resolver is not None else None
     )
     if acting_reviewer_id is None:
-        logger.info("stamphog_inbox_pr_opt_out", repository=repository, pr_number=pr_number)
+        logger.info("stamp_inbox_pr_opt_out", repository=repository, pr_number=pr_number)
         return
 
     # Server-derived values from the verified linkage, not the Celery args, so both legs stamp
@@ -1278,7 +1278,7 @@ def process_inbox_pr_review(
                 and pr_obj.payload_updated_at is not None
                 and pr_obj.payload_updated_at > incoming_updated_at
             ):
-                logger.info("stamphog_inbox_pr_stale_snapshot", repository=repository, pr_number=pr_number)
+                logger.info("stamp_inbox_pr_stale_snapshot", repository=repository, pr_number=pr_number)
                 return
             # Dedupe repeat fires against the current head; the row lock serializes races. A live or
             # delivered run is already handled; a QUEUED one lost its workflow start, so restart it.
@@ -1296,7 +1296,7 @@ def process_inbox_pr_review(
                     existing_run_id = str(existing.id)
                     transaction.on_commit(lambda: _start_review_workflow(existing_run_id, team_id), using=run_write_db)
                 logger.info(
-                    "stamphog_inbox_pr_already_reviewed",
+                    "stamp_inbox_pr_already_reviewed",
                     repository=repository,
                     pr_number=pr_number,
                     existing_status=existing.status,
@@ -1316,11 +1316,11 @@ def process_inbox_pr_review(
             # through the dedupe above and restarts the still-QUEUED run.
             transaction.on_commit(lambda: _start_review_workflow(review_run_id, team_id), using=run_write_db)
     except Exception as e:
-        logger.exception("stamphog_inbox_pr_create_run_failed", repository=repository, pr_number=pr_number)
+        logger.exception("stamp_inbox_pr_create_run_failed", repository=repository, pr_number=pr_number)
         raise cast(Any, process_inbox_pr_review).retry(exc=e)
 
     logger.info(
-        "stamphog_inbox_pr_review_queued",
+        "stamp_inbox_pr_review_queued",
         repository=repository,
         pr_number=pr_number,
         review_run_id=review_run_id,

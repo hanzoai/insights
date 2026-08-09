@@ -130,7 +130,7 @@ export function SnapshotCard({
             data-attr="visual-review-snapshot-card"
         >
             <div
-                // Thumbnails are bounded by pixelhog at THUMB_WIDTH (200) ×
+                // Thumbnails are bounded by pixelscript at THUMB_WIDTH (200) ×
                 // THUMB_HEIGHT (140), so we know the box can never overflow.
                 // Fix the height to the cap and align top so taller content
                 // anchors consistently across cards; shorter content lets

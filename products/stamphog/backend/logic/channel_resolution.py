@@ -1,9 +1,9 @@
 """Auto-provision a Slack DigestChannel when the workspace has a channel named like an audience.
 
 Channel destination is auto-resolved, never pre-created by a human: if the team's connected Slack
-workspace has a channel named exactly like an audience_key (a GitHub team slug), stamphog creates
+workspace has a channel named exactly like an audience_key (a GitHub team slug), stamp creates
 an enabled DigestChannel row for it. A "repo:" audience_key resolves differently — it matches the
-channel its repo declared under `digest:` in `.stamphog/policy.yml` instead (see
+channel its repo declared under `digest:` in `.stamp/policy.yml` instead (see
 logic/digest_config.py). Humans
 only ever correct or disable rows afterward — see models.DigestChannel and logic/audiences.py for
 how the audience_key itself is produced.
@@ -20,7 +20,7 @@ import structlog
 from insights.models.integration import Integration, SlackIntegration
 
 from ..facade.enums import ChannelResolutionSource
-from ..models import DigestChannel, StamphogRepoConfig
+from ..models import DigestChannel, StampRepoConfig
 from .digest_config import load_repo_digest_config
 
 logger = structlog.get_logger(__name__)
@@ -62,7 +62,7 @@ def _fetch_channel_map(integration: Integration, *, exclude_shared: bool) -> dic
 
 def _declared_repo_channel_name(team_id: int, audience_key: str) -> str | None:
     """For a "repo:" audience_key, the Slack channel name its repo declared under ``digest:`` in
-    ``.stamphog/policy.yml`` — checked before any Slack API call, so an undeclared repo costs one
+    ``.stamp/policy.yml`` — checked before any Slack API call, so an undeclared repo costs one
     GitHub file fetch, not a Slack channel list. None if the repo isn't configured, isn't
     digest-enabled, or hasn't declared a channel.
     """
@@ -73,8 +73,8 @@ def _declared_repo_channel_name(team_id: int, audience_key: str) -> str | None:
     # Writer pin: this gate decides an enabled channel plus the immediate Slack post — a lagged
     # reader returning a stale digest_enabled=True row would post a digest the user just opted out of.
     repo_config = (
-        StamphogRepoConfig.objects.for_team(team_id)
-        .using(router.db_for_write(StamphogRepoConfig))
+        StampRepoConfig.objects.for_team(team_id)
+        .using(router.db_for_write(StampRepoConfig))
         .filter(repository=repository, digest_enabled=True)
         .first()
     )
@@ -119,14 +119,14 @@ def resolve_slack_destination(
     try:
         channel_map = _fetch_channel_map(integration, exclude_shared=exclude_shared)
     except Exception:
-        logger.warning("stamphog_channel_resolution_list_channels_failed", team_id=team_id, exc_info=True)
+        logger.warning("stamp_channel_resolution_list_channels_failed", team_id=team_id, exc_info=True)
         return None
 
     channel = channel_map.get(channel_name)
     if channel is None:
         if audience_key.startswith(_REPO_AUDIENCE_PREFIX):
             logger.info(
-                "stamphog_channel_resolution_declared_channel_not_found",
+                "stamp_channel_resolution_declared_channel_not_found",
                 team_id=team_id,
                 audience_key=audience_key,
                 channel_name=channel_name,
@@ -138,7 +138,7 @@ def resolve_slack_destination(
 def auto_provision_channel(team_id: int, audience_key: str) -> DigestChannel | None:
     """Create a DigestChannel for (team, audience_key) if a Slack destination resolves.
 
-    Repo-declared channels (``digest:`` in .stamphog config, read from the default branch) are the
+    Repo-declared channels (``digest:`` in .stamp config, read from the default branch) are the
     maintainer's explicit pick and provision enabled. A bare name match provisions DISABLED, pending
     a human enable in the UI: any workspace member can create a public channel named after a GitHub
     team slug, so auto-posting to a name-matched channel would let a squatter receive private repo
@@ -150,12 +150,12 @@ def auto_provision_channel(team_id: int, audience_key: str) -> DigestChannel | N
     auto-provisioning must never resurrect it.
     """
     if DigestChannel.objects.for_team(team_id).filter(audience_key=audience_key).exists():
-        logger.info("stamphog_channel_resolution_row_exists", team_id=team_id, audience_key=audience_key)
+        logger.info("stamp_channel_resolution_row_exists", team_id=team_id, audience_key=audience_key)
         return None
 
     destination = resolve_slack_destination(team_id, audience_key)
     if destination is None:
-        logger.info("stamphog_channel_resolution_no_match", team_id=team_id, audience_key=audience_key)
+        logger.info("stamp_channel_resolution_no_match", team_id=team_id, audience_key=audience_key)
         return None
     slack_integration_id, channel, resolution_source = destination
 
@@ -172,11 +172,11 @@ def auto_provision_channel(team_id: int, audience_key: str) -> DigestChannel | N
     except IntegrityError:
         # Lost a create race — another concurrent provisioning attempt, or a human row landed
         # in between the existence check above and this create. Nothing lost.
-        logger.info("stamphog_channel_resolution_race_lost", team_id=team_id, audience_key=audience_key)
+        logger.info("stamp_channel_resolution_race_lost", team_id=team_id, audience_key=audience_key)
         return None
 
     logger.info(
-        "stamphog_channel_resolution_provisioned",
+        "stamp_channel_resolution_provisioned",
         team_id=team_id,
         audience_key=audience_key,
         slack_channel_id=channel["id"],

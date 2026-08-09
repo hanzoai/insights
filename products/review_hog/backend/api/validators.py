@@ -52,7 +52,7 @@ class ReviewValidatorConfigSelectSerializer(serializers.Serializer):
 
 
 class ReviewValidatorConfigViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
-    """Per-user selection of ReviewHog's single active review validator for a project.
+    """Per-user selection of Review's single active review validator for a project.
 
     A validator is any team `review-script-validation-*` `LLMSkill` (canonical or custom — handled
     identically at run time). The skill itself is team-level; this surface only controls **which

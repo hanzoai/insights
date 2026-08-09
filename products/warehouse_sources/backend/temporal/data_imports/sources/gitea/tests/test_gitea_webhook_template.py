@@ -11,7 +11,7 @@ from products.warehouse_sources.backend.temporal.data_imports.sources.gitea.webh
 class TestGiteaWarehouseWebhookTemplate(BaseInsightsFunctionTemplateTest):
     template = template
 
-    def createHogGlobals(self, globals=None) -> dict:
+    def createScriptGlobals(self, globals=None) -> dict:
         data: dict = {
             "request": {
                 "method": "POST",

@@ -6,7 +6,7 @@ from unittest.mock import patch
 from insights.models import Person
 from insights.models.person.missing_person import uuidFromDistinctId
 from insights.models.person.util import get_person_by_distinct_id, get_person_by_id
-from insights.personinsights_client.fake_client import FakePersonHogClient, fake_personinsights_client
+from insights.personinsights_client.fake_client import FakePersonClient, fake_personinsights_client
 from insights.test.persons import add_distinct_id, create_person
 
 
@@ -22,7 +22,7 @@ class TestSplitPerson(BaseTest):
 
     def _setup_person(
         self,
-        fake: FakePersonHogClient,
+        fake: FakePersonClient,
         distinct_ids: list[str],
         mock_create_pdi,
         mock_create_person,

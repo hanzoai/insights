@@ -1,5 +1,5 @@
 """
-Token management and request validation for the SupportHog Microsoft Teams bot.
+Token management and request validation for the Support Microsoft Teams bot.
 
 Handles:
 - Bot Framework JWT validation (inbound activities from Azure Bot Service)
@@ -55,11 +55,11 @@ TRUSTED_TEAMS_SERVICE_URL_HOST_SUFFIXES = (
 BOTFRAMEWORK_SINGLETENANT_TOKEN_URL_TEMPLATE = "https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
 GRAPH_TOKEN_URL = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
 
-JWKS_CACHE_KEY = "supporthog:teams:jwks"
+JWKS_CACHE_KEY = "support:teams:jwks"
 JWKS_CACHE_TTL_SECONDS = 60 * 60  # 1 hour
-BOT_TOKEN_CACHE_KEY = "supporthog:teams:bot_token"
+BOT_TOKEN_CACHE_KEY = "support:teams:bot_token"
 BOT_TOKEN_CACHE_TTL_SECONDS = 50 * 60  # 50 min (tokens live ~1h)
-GRAPH_REFRESH_LOCK_KEY_PREFIX = "supporthog:teams:graph_refresh_lock"
+GRAPH_REFRESH_LOCK_KEY_PREFIX = "support:teams:graph_refresh_lock"
 GRAPH_REFRESH_LOCK_TIMEOUT_SECONDS = 30
 GRAPH_REFRESH_LOCK_BLOCKING_TIMEOUT_SECONDS = 10
 
@@ -89,7 +89,7 @@ GRAPH_REFRESH_SCOPES_READONLY = (
     "Team.ReadBasic.All Channel.ReadBasic.All User.ReadBasic.All ChannelMessage.Read.All offline_access openid profile"
 )
 
-SUPPORTFN_TEAMS_GRAPH_MESSAGE_KEY_PREFIX = "supporthog:teams:graph-msg:"
+SUPPORTFN_TEAMS_GRAPH_MESSAGE_KEY_PREFIX = "support:teams:graph-msg:"
 # Long TTL: polled thread replies and outbound Graph posts must stay deduped across
 # the every-minute sweep (and Bot Framework-style retries on transient failures).
 SUPPORTFN_TEAMS_GRAPH_MESSAGE_TTL_SECONDS = 30 * 24 * 60 * 60
