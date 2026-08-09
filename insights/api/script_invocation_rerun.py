@@ -3,7 +3,7 @@ Rerun endpoint serializers shared by `InsightsFunctionViewSet` and `InsightsFlow
 
 These define the request/response shape for `POST .../{kind}/{id}/rerun`. The
 view validates input, then proxies through to the Node CDP worker via
-`rerun_hog_invocations` in `insights.plugins.plugin_server_api`. The worker
+`rerun_script_invocations` in `insights.plugins.plugin_server_api`. The worker
 reads matching rows from Datastore `hog_invocation_results`, rehydrates from
 the stored `invocation_globals`, and re-enqueues onto cyclotron.
 """
@@ -25,7 +25,7 @@ INSIGHTS_INVOCATION_RERUN_MAX_COUNT = get_from_env("INSIGHTS_INVOCATION_RERUN_MA
 RERUN_MAX_WINDOW_DAYS = 30
 
 
-class HogInvocationRerunFilterSerializer(serializers.Serializer):
+class ScriptInvocationRerunFilterSerializer(serializers.Serializer):
     """Filter shape for the rerun endpoint. `window_start`/`window_end` are required."""
 
     window_start = serializers.DateTimeField(required=True, help_text="Inclusive lower bound on `scheduled_at` (UTC).")
@@ -80,10 +80,10 @@ class HogInvocationRerunFilterSerializer(serializers.Serializer):
         return attrs
 
 
-class HogInvocationRerunRequestSerializer(serializers.Serializer):
+class ScriptInvocationRerunRequestSerializer(serializers.Serializer):
     """Rerun invocations of a script function or script flow from their stored payloads."""
 
-    filter = HogInvocationRerunFilterSerializer(
+    filter = ScriptInvocationRerunFilterSerializer(
         required=True,
         help_text=(
             "Required. `window_start` / `window_end` pin the query to a small set of date "
@@ -93,7 +93,7 @@ class HogInvocationRerunRequestSerializer(serializers.Serializer):
     )
 
 
-class HogInvocationRerunResponseSerializer(serializers.Serializer):
+class ScriptInvocationRerunResponseSerializer(serializers.Serializer):
     """
     Response from the rerun endpoint. The endpoint only enqueues a wrapper
     job onto the cyclotron `rerun` queue — the actual Datastore paging and

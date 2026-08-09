@@ -54,7 +54,7 @@ async def run_oneshot_review(
     non-retryable. ``step_name`` is stamped on the captured ``$ai_generation`` event as ``ai_stage``
     so dumps and cost queries can attribute the call to its pipeline stage.
     """
-    client = get_async_anthropic_gateway_client(product="review_hog", team_id=team_id)
+    client = get_async_anthropic_gateway_client(product="review", team_id=team_id)
     async with client:
         try:
             response = await client.messages.parse(

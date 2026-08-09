@@ -20,7 +20,7 @@ from products.ai_observability.backend.models.evaluation_configs import (
     TRACE_EVAL_MAX_WINDOW_SECONDS,
     TRACE_EVAL_MIN_WINDOW_SECONDS,
 )
-from products.ai_observability.backend.script import compile_ai_observability_hog
+from products.ai_observability.backend.script import compile_ai_observability_script
 from products.insights_ai.backend.max_tool import MaxTool
 
 TOOL_DESCRIPTION = f"""Test Script evaluation code against sample data from the last {EVALUATION_TEST_LOOKBACK_DAYS} days.
@@ -82,7 +82,7 @@ def _format_sample(
     return lines
 
 
-class RunHogEvalTestArgs(BaseModel):
+class RunScriptEvalTestArgs(BaseModel):
     source: str = Field(description="Script evaluation source code to compile and test")
     sample_count: int = Field(
         default=3,
@@ -111,10 +111,10 @@ class RunHogEvalTestArgs(BaseModel):
     )
 
 
-class RunHogEvalTestTool(MaxTool):
+class RunScriptEvalTestTool(MaxTool):
     name: str = AssistantTool.RUN_FN_EVAL_TEST.value
     description: str = TOOL_DESCRIPTION
-    args_schema: type[BaseModel] = RunHogEvalTestArgs
+    args_schema: type[BaseModel] = RunScriptEvalTestArgs
 
     def get_required_resource_access(self):
         return [("llm_analytics", "viewer")]
@@ -128,10 +128,10 @@ class RunHogEvalTestTool(MaxTool):
         quiet_period_seconds: int = SESSION_EVAL_DEFAULT_QUIET_PERIOD_SECONDS,
     ) -> tuple[str, Any]:
         from insights.temporal.ai_observability.message_utils import extract_text_from_messages
-        from insights.temporal.ai_observability.run_evaluation import run_hog_eval
+        from insights.temporal.ai_observability.run_evaluation import run_script_eval
 
         try:
-            bytecode = compile_ai_observability_hog(source, "destination")
+            bytecode = compile_ai_observability_script(source, "destination")
         except Exception as e:
             return (f"Compilation error: {e}", None)
 
@@ -185,7 +185,7 @@ class RunHogEvalTestTool(MaxTool):
             query=query,
             placeholders={},
             team=team,
-            query_type="RunHogEvalTest",
+            query_type="RunScriptEvalTest",
             fall_back_to_events=True,
         )
         if not response.results:
@@ -240,7 +240,7 @@ class RunHogEvalTestTool(MaxTool):
             properties = event_data["properties"]
             event_type = event_data["event"]
 
-            result = run_hog_eval(bytecode, event_data, allows_na=True)
+            result = run_script_eval(bytecode, event_data, allows_na=True)
 
             if event_type == "$ai_generation":
                 input_raw = properties.get("$ai_input") or properties.get("$ai_input_state", "")
@@ -279,9 +279,9 @@ class RunHogEvalTestTool(MaxTool):
         return ("\n".join(lines), None)
 
     async def _run_over_traces(self, bytecode: list[Any], sample_count: int, window_seconds: int) -> tuple[str, Any]:
-        from insights.temporal.ai_observability.run_trace_evaluation import run_hog_eval_over_recent_traces
+        from insights.temporal.ai_observability.run_trace_evaluation import run_script_eval_over_recent_traces
 
-        trace_results = await database_sync_to_async(run_hog_eval_over_recent_traces)(
+        trace_results = await database_sync_to_async(run_script_eval_over_recent_traces)(
             team=self._team,
             bytecode=bytecode,
             condition_filter=None,
@@ -307,9 +307,9 @@ class RunHogEvalTestTool(MaxTool):
     async def _run_over_sessions(
         self, bytecode: list[Any], sample_count: int, quiet_period_seconds: int
     ) -> tuple[str, Any]:
-        from insights.temporal.ai_observability.run_session_evaluation import run_hog_eval_over_recent_sessions
+        from insights.temporal.ai_observability.run_session_evaluation import run_script_eval_over_recent_sessions
 
-        session_results = await database_sync_to_async(run_hog_eval_over_recent_sessions)(
+        session_results = await database_sync_to_async(run_script_eval_over_recent_sessions)(
             team=self._team,
             bytecode=bytecode,
             condition_filter=None,

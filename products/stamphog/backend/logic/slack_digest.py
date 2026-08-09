@@ -71,7 +71,7 @@ def _build_blocks(summary: DigestSummary) -> list[dict]:
     overflow = len(summary.prs) - _MAX_PR_BLOCKS
     if overflow > 0:
         blocks.append({"type": "section", "text": {"type": "mrkdwn", "text": f"…and {overflow} more merged PRs."}})
-    blocks.append({"type": "context", "elements": [{"type": "mrkdwn", "text": "via stamphog"}]})
+    blocks.append({"type": "context", "elements": [{"type": "mrkdwn", "text": "via stamp"}]})
     return blocks
 
 

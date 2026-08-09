@@ -1,7 +1,7 @@
 import { IconOpenSidebar } from '@hanzo/icons'
 import { Banner, Button } from '@hanzo/elements'
 
-import { SupportHeroHog } from 'lib/components/mascots'
+import { SupportHeroScript } from 'lib/components/mascots'
 import { urls } from 'scenes/urls'
 
 export function ConversationsDisabledBanner(): JSX.Element {
@@ -9,7 +9,7 @@ export function ConversationsDisabledBanner(): JSX.Element {
         <Banner type="info" hideIcon={true}>
             <div className="flex gap-8 p-8 lg:flex-row justify-center flex-wrap">
                 <div className="hidden lg:flex justify-center items-center w-full lg:w-50">
-                    <SupportHeroHog className="h-[200px] w-[200px]" />
+                    <SupportHeroScript className="h-[200px] w-[200px]" />
                 </div>
                 <div className="flex flex-col gap-2 flex-shrink max-w-180">
                     <h2 className="text-lg font-semibold">Welcome to Support</h2>

@@ -1,9 +1,9 @@
-"""Facade re-export for the stamphog Temporal surface.
+"""Facade re-export for the stamp Temporal surface.
 
-The worker registers ``WORKFLOWS``/``ACTIVITIES`` for the stamphog task queue. Isolated
+The worker registers ``WORKFLOWS``/``ACTIVITIES`` for the stamp task queue. Isolated
 from ``facade/api.py`` so ``temporalio`` never lands on the light data-surface import path.
 """
 
-from products.stamphog.backend.temporal.registry import ACTIVITIES, WORKFLOWS
+from products.stamp.backend.temporal.registry import ACTIVITIES, WORKFLOWS
 
 __all__ = ["ACTIVITIES", "WORKFLOWS"]

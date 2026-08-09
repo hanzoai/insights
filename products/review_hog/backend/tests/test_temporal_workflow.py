@@ -1,4 +1,4 @@
-"""Workflow-level tests for the ReviewHog Temporal pipeline.
+"""Workflow-level tests for the Review Temporal pipeline.
 
 Activities are replaced with `@activity.defn` stand-ins (matching the real activity names) so these
 exercise the real orchestration + the real fan-out children without touching the DB or a sandbox.

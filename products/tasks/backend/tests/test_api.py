@@ -425,30 +425,30 @@ class TestTaskCreatorScoping(BaseTaskAPITest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["id"], str(task.id))
 
-    def test_retrieve_hogdesk_task_owned_by_another_user_is_visible(self):
-        # HogDesk Code threads are pinned to a support ticket via a shared ticket
+    def test_retrieve_desk_task_owned_by_another_user_is_visible(self):
+        # Desk Code threads are pinned to a support ticket via a shared ticket
         # tag; any agent opening the ticket must be able to load the same task.
-        other_user = self.create_organization_user("hogdesk-owner")
+        other_user = self.create_organization_user("desk-owner")
         task = Task.objects.create(
             team=self.team,
             created_by=other_user,
-            title="HogDesk Task",
+            title="Desk Task",
             description="Started from a support ticket",
-            origin_product=Task.OriginProduct.HOGDESK,
+            origin_product=Task.OriginProduct.Desk,
         )
 
         response = self.client.get(f"/v1/projects/@current/tasks/{task.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["id"], str(task.id))
 
-    def test_list_runs_hogdesk_task_owned_by_another_user_succeeds(self):
-        other_user = self.create_organization_user("hogdesk-owner")
+    def test_list_runs_desk_task_owned_by_another_user_succeeds(self):
+        other_user = self.create_organization_user("desk-owner")
         task = Task.objects.create(
             team=self.team,
             created_by=other_user,
-            title="HogDesk Task",
+            title="Desk Task",
             description="Started from a support ticket",
-            origin_product=Task.OriginProduct.HOGDESK,
+            origin_product=Task.OriginProduct.Desk,
         )
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.COMPLETED)
 
@@ -1547,8 +1547,8 @@ class TestTaskAPI(BaseTaskAPITest):
         task = Task.objects.get(id=data["id"])
         self.assertEqual(task.origin_product, Task.OriginProduct.USER_CREATED)
 
-    def test_create_task_with_hogdesk_origin_product(self):
-        # HogDesk creates Code tasks from a support ticket's Code chat with this
+    def test_create_task_with_desk_origin_product(self):
+        # Desk creates Code tasks from a support ticket's Code chat with this
         # origin. Ensure the value round-trips through the API — the serializer
         # validates origin_product against OriginProduct.choices and 400s an
         # unknown value, so this is the regression that guards the enum addition.
@@ -1557,7 +1557,7 @@ class TestTaskAPI(BaseTaskAPITest):
             {
                 "title": "New Task",
                 "description": "New Description",
-                "origin_product": "hogdesk",
+                "origin_product": "desk",
                 "repository": "insights/insights",
             },
             format="json",
@@ -1565,10 +1565,10 @@ class TestTaskAPI(BaseTaskAPITest):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         data = response.json()
-        self.assertEqual(data["origin_product"], Task.OriginProduct.HOGDESK)
+        self.assertEqual(data["origin_product"], Task.OriginProduct.Desk)
 
         task = Task.objects.get(id=data["id"])
-        self.assertEqual(task.origin_product, Task.OriginProduct.HOGDESK)
+        self.assertEqual(task.origin_product, Task.OriginProduct.Desk)
 
     def test_create_task_with_insights_ai_origin_product(self):
         response = self.client.post(
@@ -3533,7 +3533,7 @@ class TestTaskAPI(BaseTaskAPITest):
             ("low",),
             ("medium",),
             ("high",),
-            # xhigh is load-bearing: ReviewHog pins it for its one-shot and review runs.
+            # xhigh is load-bearing: Review pins it for its one-shot and review runs.
             ("xhigh",),
             ("ultracode",),
         ]
@@ -3573,7 +3573,7 @@ class TestTaskAPI(BaseTaskAPITest):
         self, reasoning_effort, mock_workflow, mock_capture
     ):
         # claude-sonnet-4-6 supports low/medium/high but not xhigh/ultracode (claude-sonnet-5
-        # accepts the full set, ReviewHog pins its xhigh) - this pins the "Supported values:
+        # accepts the full set, Review pins its xhigh) - this pins the "Supported values:
         # <non-empty list>" message and confirms the rejection capture also fires for a model
         # with some supported efforts.
         task = self.create_task()

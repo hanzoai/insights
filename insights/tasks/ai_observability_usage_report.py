@@ -93,7 +93,7 @@ class TeamMetrics:
     ai_evaluation_count: int = 0
     ai_is_error_count: int = 0
     ai_llm_judge_evaluation_count: int = 0
-    ai_hog_evaluation_count: int = 0
+    ai_script_evaluation_count: int = 0
     ai_sentiment_evaluation_count: int = 0
     ai_trace_summary_count: int = 0
     ai_generation_summary_count: int = 0
@@ -342,7 +342,7 @@ def _combine_all_metrics_results(results_list: list) -> dict[int, TeamMetrics]:
 
             # Evaluation runtime counts (indices 27-29)
             metrics.ai_llm_judge_evaluation_count += row[27] or 0
-            metrics.ai_hog_evaluation_count += row[28] or 0
+            metrics.ai_script_evaluation_count += row[28] or 0
             metrics.ai_sentiment_evaluation_count += row[29] or 0
 
     return team_metrics
@@ -405,7 +405,7 @@ def get_all_ai_metrics(
             countIf({prop("$ai_is_error")} = 'true') as ai_is_error_count,
             -- Evaluation counts
             countIf(event = '$ai_evaluation' AND {prop("$ai_evaluation_runtime")} = 'llm_judge') as ai_llm_judge_evaluation_count,
-            countIf(event = '$ai_evaluation' AND {prop("$ai_evaluation_runtime")} = 'script') as ai_hog_evaluation_count,
+            countIf(event = '$ai_evaluation' AND {prop("$ai_evaluation_runtime")} = 'script') as ai_script_evaluation_count,
             countIf(event = '$ai_evaluation' AND {prop("$ai_evaluation_runtime")} = 'sentiment') as ai_sentiment_evaluation_count
         FROM {events_read_table(use_new)}
         WHERE team_id IN %(team_ids)s
@@ -815,7 +815,7 @@ def _get_all_ai_observability_reports(
                 "ai_evaluation_count": 0,
                 "ai_is_error_count": 0,
                 "ai_llm_judge_evaluation_count": 0,
-                "ai_hog_evaluation_count": 0,
+                "ai_script_evaluation_count": 0,
                 "ai_sentiment_evaluation_count": 0,
                 "ai_trace_summary_count": 0,
                 "ai_generation_summary_count": 0,
@@ -862,7 +862,7 @@ def _get_all_ai_observability_reports(
             report["ai_evaluation_count"] += metrics.ai_evaluation_count
             report["ai_is_error_count"] += metrics.ai_is_error_count
             report["ai_llm_judge_evaluation_count"] += metrics.ai_llm_judge_evaluation_count
-            report["ai_hog_evaluation_count"] += metrics.ai_hog_evaluation_count
+            report["ai_script_evaluation_count"] += metrics.ai_script_evaluation_count
             report["ai_sentiment_evaluation_count"] += metrics.ai_sentiment_evaluation_count
             report["ai_trace_summary_count"] += metrics.ai_trace_summary_count
             report["ai_generation_summary_count"] += metrics.ai_generation_summary_count

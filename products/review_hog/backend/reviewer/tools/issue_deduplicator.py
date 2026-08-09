@@ -109,7 +109,7 @@ async def deduplicate_issues(
     A deterministic positional pre-filter keeps positionally-isolated findings without an LLM call;
     only file+line colliders (vs another finding, any prior inline comment, or an earlier turn's
     finding) reach the single LLM dedupe call. That call drops findings a prior inline comment
-    already raised — from any reviewer, bot or human, ReviewHog's own included — and findings the
+    already raised — from any reviewer, bot or human, Review's own included — and findings the
     previous turn already found and ruled on (`prior_findings`, each with its validator verdict),
     so a still-present dismissed/below-threshold issue doesn't burn another validation turn. The
     dedupe prompt is pure text (no code context), so within the one-shot gate that call is a direct

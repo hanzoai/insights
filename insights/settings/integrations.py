@@ -45,13 +45,13 @@ GITHUB_APP_PRIVATE_KEY = get_from_env("GITHUB_APP_PRIVATE_KEY", "")
 # which is separate from the private key used for App-as-App JWT signing.
 GITHUB_APP_CLIENT_SECRET = get_from_env("GITHUB_APP_CLIENT_SECRET", "")
 
-# Stamphog runs as its own dedicated GitHub App (separate identity from the core
+# Stamp runs as its own dedicated GitHub App (separate identity from the core
 # GITHUB_APP_* above), so it carries its own App id, JWT-signing private key, and
-# webhook secret. Empty defaults keep the app importable when Stamphog is unconfigured.
+# webhook secret. Empty defaults keep the app importable when Stamp is unconfigured.
 STAMPFN_GITHUB_APP_ID = get_from_env("STAMPFN_GITHUB_APP_ID", "")
 STAMPFN_GITHUB_APP_PRIVATE_KEY = get_from_env("STAMPFN_GITHUB_APP_PRIVATE_KEY", "")
 STAMPFN_GITHUB_APP_WEBHOOK_SECRET = get_from_env("STAMPFN_GITHUB_APP_WEBHOOK_SECRET", "")
-# OAuth client id/secret for the Stamphog App's user-to-server authorization flow (enabled via
+# OAuth client id/secret for the Stamp App's user-to-server authorization flow (enabled via
 # "Request user authorization during installation"). Used to exchange the post-install `code` for a
 # user access token and prove the caller actually owns the installation before its repos are bound to
 # their team. Separate from the JWT-signing private key above. Empty until the App is provisioned, in

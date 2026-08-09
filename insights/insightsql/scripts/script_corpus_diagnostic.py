@@ -19,7 +19,7 @@ shared machinery lives in `_diagnostic_common.py`.
    `insightscli metabase:databases` (engine `postgres`, name containing
    `aurora`).
 2. **Download a redacted dump** via `insightscli metabase:query` to the
-   gitignored `insights/insightsql/scripts/.local/hog_corpus.json`. The
+   gitignored `insights/insightsql/scripts/.local/script_corpus.json`. The
    embedded SQL applies the same `regexp_replace` redaction chain the
    InsightsQL corpus uses (emails, UUIDs, IPv4/6, tokens, hex catch-all),
    server-side, so raw source never reaches the dump.
@@ -39,10 +39,10 @@ are sampled — the Postgres equivalent of the InsightsQL corpus's
 ## Usage
 
     # Default — auto-discover, download, run cpp-vs-rust parity:
-    PYTHONPATH=. python insights/insightsql/scripts/hog_corpus_diagnostic.py
+    PYTHONPATH=. python insights/insightsql/scripts/script_corpus_diagnostic.py
 
     # Iterate on a candidate parser without re-pulling the corpus:
-    PYTHONPATH=. python insights/insightsql/scripts/hog_corpus_diagnostic.py \\
+    PYTHONPATH=. python insights/insightsql/scripts/script_corpus_diagnostic.py \\
         --skip-download \\
         --candidate rust-allstar-json \\
         --write-failures /tmp/script-fails.script
@@ -73,7 +73,7 @@ from insights.insightsql.scripts._diagnostic_common import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_DUMP = REPO_ROOT / "insights" / "insightsql" / "scripts" / ".local" / "hog_corpus.json"
+DEFAULT_DUMP = REPO_ROOT / "insights" / "insightsql" / "scripts" / ".local" / "script_corpus.json"
 
 # Script functions are heavily template-instantiated, so unique `script`
 # sources number only a few thousand — well under any page ceiling.
@@ -282,7 +282,7 @@ def main() -> int:
         failures = shrink_failures(failures, rule="program", oracle=args.oracle, candidate=args.candidate)
     if failures:
         out_path = Path(args.write_failures) if args.write_failures else args.input.with_suffix(".failures.script")
-        write_failures(out_path, failures, REPO_ROOT, title="hog_corpus_failures")
+        write_failures(out_path, failures, REPO_ROOT, title="script_corpus_failures")
         print()
         print(f"Wrote {len(failures)} failing programs to {repo_relative(out_path, REPO_ROOT)}")
 

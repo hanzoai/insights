@@ -22,7 +22,7 @@ def _finding(title: str = "Off-by-one", file: str = "f.py") -> ReviewIssueFindin
 
 class TestFindFindingComment:
     def test_matches_by_path_and_title_heading(self):
-        # ReviewHog's comment body leads with "### {title}"; matching on that + path is how a finding
+        # Review's comment body leads with "### {title}"; matching on that + path is how a finding
         # maps to its posted comment without a stored id, and it must survive extra body content.
         comments: list[dict[str, Any]] = [{"id": 1, "path": "f.py", "body": "### Off-by-one\n\n![badge](x)"}]
         assert find_finding_comment(finding=_finding(), review_comments=comments) == comments[0]
@@ -42,7 +42,7 @@ class TestFindFindingComment:
         assert find_finding_comment(finding=_finding(), review_comments=comments) is None
 
 
-_OUR_BOT: dict[str, Any] = {"login": "reviewhog[bot]", "type": "Bot"}
+_OUR_BOT: dict[str, Any] = {"login": "review[bot]", "type": "Bot"}
 _OTHER_BOT: dict[str, Any] = {"login": "greptile-apps[bot]", "type": "Bot"}
 
 
@@ -58,7 +58,7 @@ class TestEngagementMethod:
 
     @override_settings(REVIEWFN_GITHUB_BOT_LOGIN=_OUR_BOT["login"])
     def test_our_own_reply_is_never_engagement(self):
-        # ReviewHog posts the finding comment itself, so counting its own follow-up would let the
+        # Review posts the finding comment itself, so counting its own follow-up would let the
         # feature grade its own homework. A fix it lands is captured as a commit the judge rules on.
         comment: dict[str, Any] = {"id": 1, "reactions": {"total_count": 0}}
         reply: dict[str, Any] = {"id": 2, "in_reply_to_id": 1, "user": _OUR_BOT}

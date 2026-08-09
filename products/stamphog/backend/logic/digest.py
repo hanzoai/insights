@@ -22,7 +22,7 @@ logger = structlog.get_logger(__name__)
 
 # Cheap, fast model — the digest is a summarization job, not deep reasoning.
 _DIGEST_MODEL = "claude-haiku-4-5"
-_SOURCE_PRODUCT = "stamphog_digest"
+_SOURCE_PRODUCT = "stamp_digest"
 
 
 @dataclass
@@ -144,7 +144,7 @@ def summarize_merged_prs(prs: list[PullRequest]) -> DigestSummary:
 
     team_id = prs[0].team_id
     try:
-        client = get_llm_client(product="stamphog", team_id=team_id)
+        client = get_llm_client(product="stamp", team_id=team_id)
         response = client.chat.completions.create(
             model=_DIGEST_MODEL,
             messages=[{"role": "user", "content": _build_prompt(prs)}],
@@ -154,5 +154,5 @@ def summarize_merged_prs(prs: list[PullRequest]) -> DigestSummary:
         content = response.choices[0].message.content or ""
         return _parse_llm_response(content, dict(enumerate(prs)))
     except Exception as e:
-        logger.warning("stamphog_digest_summarize_fallback", team_id=team_id, error=str(e))
+        logger.warning("stamp_digest_summarize_fallback", team_id=team_id, error=str(e))
         return _fallback_summary(prs)

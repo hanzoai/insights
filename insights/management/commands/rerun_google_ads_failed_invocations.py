@@ -21,14 +21,14 @@ from typing import Any
 
 from django.core.management.base import BaseCommand, CommandError
 
-from insights.plugins.plugin_server_api import rerun_hog_invocations
+from insights.plugins.plugin_server_api import rerun_script_invocations
 
 from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
 
 GOOGLE_ADS_TEMPLATE_ID = "template-google-ads"
 DEFAULT_ERROR_KIND = "http_4xx"
 
-# Matches RERUN_MAX_WINDOW_DAYS in insights/api/hog_invocation_rerun.py, which
+# Matches RERUN_MAX_WINDOW_DAYS in insights/api/script_invocation_rerun.py, which
 # is the Datastore TTL on hog_invocation_results. Anything past this either
 # 400s downstream or silently under-replays because the partitions are gone.
 MAX_WINDOW_DAYS = 30
@@ -152,7 +152,7 @@ class Command(BaseCommand):
                 continue
 
             try:
-                res = rerun_hog_invocations(
+                res = rerun_script_invocations(
                     team_id=team_id,
                     function_kind="insights_function",
                     function_id=fn_id,

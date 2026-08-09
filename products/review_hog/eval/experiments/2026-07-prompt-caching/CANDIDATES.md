@@ -9,7 +9,7 @@
 
 ## Locked constraints (user; 1-5 locked 2026-07-06, 6-9 late the same day, 5 amended 2026-07-07)
 
-1. **Quality is the moat. Not time, not money. ReviewHog must never generate bullshit.**
+1. **Quality is the moat. Not time, not money. Review must never generate bullshit.**
 2. **One-shot LLM calls for code investigation are permanently out of scope.** A single call cannot do detective work —
    follow a lead, verify a suspicion, hop the call graph when it needs to. Only chunking and dedup (pure text tasks) stay
    one-shot; every unit that investigates code — wave, blind-spot, validation — stays a sandbox agent with full,
@@ -20,7 +20,7 @@
 4. Scope: review stage only (wave + blind-spot), no validator experiments, no model downgrades; cost-first within the
    quality gate (a few minutes of wall-clock regression is acceptable if $/run drops); every arm passes the standard
    frozen-PR #62096 eval.
-5. Working mode (amended 2026-07-07): **one branch — everything happens on `signals/reviewhog`, no per-experiment
+5. Working mode (amended 2026-07-07): **one branch — everything happens on `signals/review`, no per-experiment
    branches.** Experiment code lands behind an on/off constant (the `constants.py` knob pattern); arm-vs-control runs
    toggle the constant; a losing experiment's commits are reverted, and the experiment folder keeps the record.
    Experiments still run iteratively, one at a time.
@@ -110,7 +110,7 @@ Post-veto re-aim: **arm 5 (sandbox-origin pair) is the load-bearing arm** — th
 sharing (T2/T3/#8); the direct-path breakpoint result now matters only for the one-shot chunking/dedup calls.
 
 Byte-identical `messages.create` requests (NOT `.parse`, structured outputs inject schema bytes; thinking off; ~10K-token
-document block with explicit `cache_control`) through `get_async_anthropic_gateway_client(product="review_hog")`.
+document block with explicit `cache_control`) through `get_async_anthropic_gateway_client(product="review")`.
 Arms: (1) same-process repeat (control: does the gateway forward `cache_control` at all);
 (2) two OS processes 2 min apart, **replicated >= 3x with fresh nonces, reported as a share RATE** (a gateway pooling
 multiple upstream keys would share probabilistically; a single trial gives a false binary);

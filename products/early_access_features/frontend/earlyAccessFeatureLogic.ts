@@ -510,7 +510,7 @@ export const earlyAccessFeatureLogic = kea<earlyAccessFeatureLogicType>([
             // kea-loaders calls the failure action with (error.message, error), so:
             //   `error` = the message string
             //   `errorObject` = the full ApiError instance
-            // The ApiError has .attr and .detail from exceptions_hog's response format.
+            // The ApiError has .attr and .detail from exceptions_script's response format.
             if (errorObject) {
                 const attr = errorObject.attr
                 const detail = errorObject.detail

@@ -598,7 +598,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
         savePlaceholderText: true,
         // Notification recipients
         setNotificationRecipients: (users: UserBasicType[]) => ({ users }),
-        // Slack channel settings (SupportHog)
+        // Slack channel settings (Support)
         connectSlack: (nextPath: string) => ({ nextPath }),
         setSlackChannels: (channelIds: string[]) => ({ channelIds }),
         loadSlackChannelsWithToken: true,
@@ -1514,7 +1514,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
                     actions.loadTeamsChannelsForTeam(teamId)
                 } else {
                     actions.setTeamsInstallStatus('error', teamId)
-                    toast.error('Failed to install SupportHog in the selected Teams group')
+                    toast.error('Failed to install Support in the selected Teams group')
                 }
             } catch (err: any) {
                 const detail = err?.data?.error ?? err?.detail ?? ''
@@ -1525,12 +1525,12 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
                 if (detail === 'catalog_not_configured') {
                     actions.setTeamsInstallStatus('error', teamId)
                     toast.error(
-                        'SupportHog Teams app is not configured on this Insights instance. Contact your administrator.'
+                        'Support Teams app is not configured on this Insights instance. Contact your administrator.'
                     )
                     return
                 }
                 actions.setTeamsInstallStatus('error', teamId)
-                toast.error('Failed to install SupportHog in the selected Teams group')
+                toast.error('Failed to install Support in the selected Teams group')
             }
         },
         addTeamsChannelPair: async ({ teamId, channelId }) => {

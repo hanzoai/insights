@@ -24,9 +24,9 @@ This report contains detailed analysis of 3 chunks with their associated issues 
 
 **Files:**
 
-- `ee/hogai/tools/actions/__init__.py`
-- `ee/hogai/tools/actions/core.py`
-- `ee/hogai/tools/actions/tool.py`
+- `ee/scriptai/tools/actions/__init__.py`
+- `ee/scriptai/tools/actions/core.py`
+- `ee/scriptai/tools/actions/tool.py`
 
 **Key Changes:**
 
@@ -36,7 +36,7 @@ This report contains detailed analysis of 3 chunks with their associated issues 
 
 ### Analysis
 
-**Goal:** This chunk adds the core business logic and Max tool wrapper package for action CRUD in Insights AI. It introduces ee/hogai/tools/actions as a new tool module exporting ListActionsTool, GetActionTool, CreateActionTool, UpdateActionTool, and DeleteActionTool. The synchronous core.py layer defines the Pydantic argument schemas, action step input normalization, compact formatting helpers, bounded list/search/pagination behavior, duplicate and blank name validation, create/update/delete operations, and user-facing ActionToolError failures that the async tool layer can convert into retryable Max errors.
+**Goal:** This chunk adds the core business logic and Max tool wrapper package for action CRUD in Insights AI. It introduces ee/scriptai/tools/actions as a new tool module exporting ListActionsTool, GetActionTool, CreateActionTool, UpdateActionTool, and DeleteActionTool. The synchronous core.py layer defines the Pydantic argument schemas, action step input normalization, compact formatting helpers, bounded list/search/pagination behavior, duplicate and blank name validation, create/update/delete operations, and user-facing ActionToolError failures that the async tool layer can convert into retryable Max errors.
 
 Architecturally, the implementation follows the existing MaxTool pattern: tool.py exposes LangChain/Max-compatible tool classes, declares resource-level access through get_required_resource_access, bridges sync Django ORM work with database_sync_to_async, and performs object-level access checks via MaxTool.check_object_access before reading, updating, or deleting an individual Action. The tool layer keeps permission orchestration and dangerous-operation approval separate from the core CRUD functions, while the core layer operates directly on products.actions.backend.models.action.Action. Reads return formatted plain-text summaries for the LLM; writes call Action.save so existing bytecode compilation, post-save worker reload behavior, file-system syncing, and model activity logging continue to run through the normal model path.
 
@@ -48,7 +48,7 @@ The integration points are the Insights AI tool registry, the generated Assistan
 
 **Priority:** should_fix
 
-**File:** `ee/hogai/tools/actions/core.py` (lines [LineRange(start=94, end=104), LineRange(start=224, end=231)])
+**File:** `ee/scriptai/tools/actions/core.py` (lines [LineRange(start=94, end=104), LineRange(start=224, end=231)])
 
 **Issue:** The new `_acting_user()` context is intended to attribute direct ORM saves to the Max user, but the Action activity-log receiver currently ignores the `user` emitted by `ModelActivityMixin` and logs `after_update.created_by` instead. As a result, Max updates and deletes by a user who did not create the action will still be recorded as if the creator performed them, so the advertised activity attribution does not actually work for the mutating tool paths.
 
@@ -56,7 +56,7 @@ The integration points are the Insights AI tool registry, the generated Assistan
 
 **Validation Result:** Valid
 
-**Argumentation:** The issue is valid. ee/hogai/tools/actions/core.py wraps create/update/delete saves in _acting_user(user), and ModelActivityMixin.save emits that value as the model_activity_signal user. However products/actions/backend/activity_logging.py.handle_action_change does not accept the user parameter and instead calls log_activity(user=after_update.created_by). For updates and soft deletes of an action originally created by someone else, the activity log will attribute the change to the creator, not the Max/tool actor. That defeats the PR's stated attribution behavior and leaves an inaccurate audit trail for mutating tool paths, and likely also affects existing REST/direct-save updates where the request user differs from created_by.
+**Argumentation:** The issue is valid. ee/scriptai/tools/actions/core.py wraps create/update/delete saves in _acting_user(user), and ModelActivityMixin.save emits that value as the model_activity_signal user. However products/actions/backend/activity_logging.py.handle_action_change does not accept the user parameter and instead calls log_activity(user=after_update.created_by). For updates and soft deletes of an action originally created by someone else, the activity log will attribute the change to the creator, not the Max/tool actor. That defeats the PR's stated attribution behavior and leaves an inaccurate audit trail for mutating tool paths, and likely also affects existing REST/direct-save updates where the request user differs from created_by.
 
 **Category:** bug
 
@@ -66,7 +66,7 @@ The integration points are the Insights AI tool registry, the generated Assistan
 
 **Priority:** should_fix
 
-**File:** `ee/hogai/tools/actions/core.py` (lines [LineRange(start=181, end=189), LineRange(start=195, end=200), LineRange(start=217, end=219)])
+**File:** `ee/scriptai/tools/actions/core.py` (lines [LineRange(start=181, end=189), LineRange(start=195, end=200), LineRange(start=217, end=219)])
 
 **Issue:** The tool path bypasses `ActionSerializer`, but only reimplements blank and duplicate checks. It checks `name.strip()` for blankness while still storing the original untrimmed value, which lets names like `" Signup "` bypass the duplicate check for `"Signup"`. It also does not enforce the model's `max_length=400`, so an overlong LLM-generated name can reach `action.save()` and fail as an uncaught database error instead of a retryable tool error.
 
@@ -74,7 +74,7 @@ The integration points are the Insights AI tool registry, the generated Assistan
 
 **Validation Result:** Valid
 
-**Argumentation:** The issue is valid. `ee/hogai/tools/actions/core.py` creates and updates `Action` directly, so it does not get DRF `CharField` normalization or model-field `max_length` validation from `ActionSerializer`. `_check_name_available()` only tests `name.strip()` for blankness, then queries and saves the original value, so `" Signup "` can coexist with the normalized REST-created `"Signup"` even though the tool is intended to mirror the REST action semantics. `Action.name` is `CharField(max_length=400)`, and Django model `save()` does not run full validation, so an overlong tool-provided name can reach Postgres and fail as an uncaught database error instead of being converted into `ActionToolError`/`MaxToolRetryableError`. This should be fixed in the tool/core validation path for consistency and better retry behavior.
+**Argumentation:** The issue is valid. `ee/scriptai/tools/actions/core.py` creates and updates `Action` directly, so it does not get DRF `CharField` normalization or model-field `max_length` validation from `ActionSerializer`. `_check_name_available()` only tests `name.strip()` for blankness, then queries and saves the original value, so `" Signup "` can coexist with the normalized REST-created `"Signup"` even though the tool is intended to mirror the REST action semantics. `Action.name` is `CharField(max_length=400)`, and Django model `save()` does not run full validation, so an overlong tool-provided name can reach Postgres and fail as an uncaught database error instead of being converted into `ActionToolError`/`MaxToolRetryableError`. This should be fixed in the tool/core validation path for consistency and better retry behavior.
 
 **Category:** bug
 
@@ -84,7 +84,7 @@ The integration points are the Insights AI tool registry, the generated Assistan
 
 **Priority:** should_fix
 
-**File:** `ee/hogai/tools/actions/core.py` (lines [LineRange(start=56, end=60), LineRange(start=148, end=150)])
+**File:** `ee/scriptai/tools/actions/core.py` (lines [LineRange(start=56, end=60), LineRange(start=148, end=150)])
 
 **Issue:** `limit` and `offset` are described as bounded pagination inputs, but the schema does not enforce those bounds and `list_actions()` uses them directly in a queryset slice. A negative `offset` or `limit` from the LLM can produce unsupported negative slicing instead of a useful retryable response, while `limit=0` is silently treated as the default because of `limit or DEFAULT_LIST_LIMIT`.
 
@@ -102,7 +102,7 @@ The integration points are the Insights AI tool registry, the generated Assistan
 
 **Priority:** should_fix
 
-**File:** `ee/hogai/tools/actions/tool.py` (lines [LineRange(start=113, end=126), LineRange(start=137, end=154)])
+**File:** `ee/scriptai/tools/actions/tool.py` (lines [LineRange(start=113, end=126), LineRange(start=137, end=154)])
 
 **Issue:** `UpdateActionTool` and `DeleteActionTool` require resource-level `action` editor access before `_arun_impl` runs. That is stricter than the REST `AccessControlPermission` contract, which allows non-create writes when the user either has resource-level editor access or has a specific object-level editor grant, followed by `has_object_permission` on the target object. A user with project-wide action viewer access plus editor access to one action can update that action through the REST API, but Max will deny the tool before `_fetch_action()` and `check_object_access()` can evaluate the object grant.
 
@@ -120,7 +120,7 @@ The integration points are the Insights AI tool registry, the generated Assistan
 
 **Priority:** should_fix
 
-**File:** `ee/hogai/tools/actions/tool.py` (lines [LineRange(start=116, end=127)])
+**File:** `ee/scriptai/tools/actions/tool.py` (lines [LineRange(start=116, end=127)])
 
 **Issue:** `UpdateActionTool` sends updates directly to `update_action`, and the core layer replaces all existing `action.steps` whenever `steps` is provided. Changing an action definition affects every insight, funnel, or other saved object that references that action, and `steps=[]` can effectively wipe the action definition. Unlike `DeleteActionTool`, this destructive Max operation does not require a fresh approval, so an LLM mistake or indirect instruction in prior tool output can mutate analytics semantics without the explicit confirmation used elsewhere for dangerous operations.
 
@@ -128,7 +128,7 @@ The integration points are the Insights AI tool registry, the generated Assistan
 
 **Validation Result:** Valid
 
-**Argumentation:** The issue is valid. UpdateActionTool currently treats every update as an ordinary editor operation, but ee/hogai/tools/actions/core.py replaces the entire action.steps collection whenever steps is not None, including steps=[]. Action definitions are reusable analytics primitives, so replacing or clearing steps can silently change the meaning of existing insights, funnels, and other saved references. DeleteActionTool already uses the dangerous-operation approval flow for a similarly destructive change, so step replacement should require the same fresh user confirmation with a preview of the existing and proposed definitions. If that approval is added, the payload path also needs attention: MaxTool._serialize_kwargs_for_storage only dumps top-level BaseModel values, so a list[ActionStepInput] in steps would leave nested Pydantic objects in the approval payload instead of plain JSON-compatible dicts.
+**Argumentation:** The issue is valid. UpdateActionTool currently treats every update as an ordinary editor operation, but ee/scriptai/tools/actions/core.py replaces the entire action.steps collection whenever steps is not None, including steps=[]. Action definitions are reusable analytics primitives, so replacing or clearing steps can silently change the meaning of existing insights, funnels, and other saved references. DeleteActionTool already uses the dangerous-operation approval flow for a similarly destructive change, so step replacement should require the same fresh user confirmation with a preview of the existing and proposed definitions. If that approval is added, the payload path also needs attention: MaxTool._serialize_kwargs_for_storage only dumps top-level BaseModel values, so a list[ActionStepInput] in steps would leave nested Pydantic objects in the approval payload instead of plain JSON-compatible dicts.
 
 **Category:** security
 
@@ -138,7 +138,7 @@ The integration points are the Insights AI tool registry, the generated Assistan
 
 **Priority:** should_fix
 
-**File:** `ee/hogai/tools/actions/core.py` (lines [LineRange(start=124, end=134), LineRange(start=160, end=160)])
+**File:** `ee/scriptai/tools/actions/core.py` (lines [LineRange(start=124, end=134), LineRange(start=160, end=160)])
 
 **Issue:** `MAX_LIST_LIMIT` caps the number of actions returned, but each listed action still includes the full description and a formatted summary of every step. Action descriptions are `TextField`s and `steps_json` can contain many long selectors, URLs, hrefs, or text values, so `list_actions(limit=100)` can still produce a very large tool response and blow up Max's context despite the intended pagination cap.
 
@@ -146,7 +146,7 @@ The integration points are the Insights AI tool registry, the generated Assistan
 
 **Validation Result:** Valid
 
-**Argumentation:** The issue is valid. In ee/hogai/tools/actions/core.py, MAX_LIST_LIMIT only limits the number of Action rows fetched. Each row is then rendered by _format_action without any size bound: description is an unbounded TextField, steps_json is an unbounded JSONField, and non-detailed list output still joins every step summary for every listed action. _format_step also includes raw URL, selector, text, href, and event values without truncation. Since MaxTool returns the string content directly and the tests only verify the row cap, list_actions(limit=100) can still produce an unexpectedly large tool result, increasing token cost or overflowing the assistant context. The same formatter is used for get/create/update responses and delete approval previews, so those paths can also produce oversized payloads, although list_actions is the clearest mismatch with the PR's bounded-listing claim.
+**Argumentation:** The issue is valid. In ee/scriptai/tools/actions/core.py, MAX_LIST_LIMIT only limits the number of Action rows fetched. Each row is then rendered by _format_action without any size bound: description is an unbounded TextField, steps_json is an unbounded JSONField, and non-detailed list output still joins every step summary for every listed action. _format_step also includes raw URL, selector, text, href, and event values without truncation. Since MaxTool returns the string content directly and the tests only verify the row cap, list_actions(limit=100) can still produce an unexpectedly large tool result, increasing token cost or overflowing the assistant context. The same formatter is used for get/create/update responses and delete approval previews, so those paths can also produce oversized payloads, although list_actions is the clearest mismatch with the PR's bounded-listing claim.
 
 **Category:** performance
 
@@ -156,7 +156,7 @@ The integration points are the Insights AI tool registry, the generated Assistan
 
 **Priority:** should_fix
 
-**File:** `ee/hogai/tools/actions/core.py` (lines [LineRange(start=67, end=83), LineRange(start=201, end=204), LineRange(start=222, end=225)])
+**File:** `ee/scriptai/tools/actions/core.py` (lines [LineRange(start=67, end=83), LineRange(start=201, end=204), LineRange(start=222, end=225)])
 
 **Issue:** The tool schemas allow an arbitrary number of action steps, arbitrary numbers of property filters, and unbounded step string fields. `create_action` and `update_action` then convert the full payload and call `Action.save()`, which synchronously refreshes bytecode for the full action definition. A large or accidental LLM tool call can spend significant CPU/memory compiling a huge OR expression, persist an oversized `steps_json`, and echo the result back into the agent context.
 
@@ -178,8 +178,8 @@ The integration points are the Insights AI tool registry, the generated Assistan
 
 **Files:**
 
-- `ee/hogai/tools/__init__.py`
-- `ee/hogai/chat_agent/toolkit.py`
+- `ee/scriptai/tools/__init__.py`
+- `ee/scriptai/chat_agent/toolkit.py`
 - `insights/schema_enums.py`
 - `frontend/src/queries/schema/schema-assistant-messages.ts`
 - `frontend/src/queries/schema.json`
@@ -192,9 +192,9 @@ The integration points are the Insights AI tool registry, the generated Assistan
 
 ### Analysis
 
-**Goal:** This configuration chunk wires the new action CRUD MaxTools into the existing HogAI tool system. `ee/hogai/tools/__init__.py` adds `ListActionsTool`, `GetActionTool`, `CreateActionTool`, `UpdateActionTool`, and `DeleteActionTool` to the lazy export map, `__all__`, and type-checking imports, so package-level imports resolve without eagerly loading every tool module. That follows the existing PEP 562 lazy-import pattern used to avoid tool import cycles and Django startup cost while keeping individual tools discoverable from `ee.hogai.tools`.
+**Goal:** This configuration chunk wires the new action CRUD MaxTools into the existing ScriptAI tool system. `ee/scriptai/tools/__init__.py` adds `ListActionsTool`, `GetActionTool`, `CreateActionTool`, `UpdateActionTool`, and `DeleteActionTool` to the lazy export map, `__all__`, and type-checking imports, so package-level imports resolve without eagerly loading every tool module. That follows the existing PEP 562 lazy-import pattern used to avoid tool import cycles and Django startup cost while keeping individual tools discoverable from `ee.scriptai.tools`.
 
-`ee/hogai/chat_agent/toolkit.py` imports the five classes and adds them to `DEFAULT_TOOLS`. `AgentToolkitManager` instantiates these common tools for normal chat-agent execution, and `DEFAULT_TOOLS` is also used in prompt/switch-mode descriptions, so the action tools become part of Max's common execution tool surface across non-plan agent modes. Execution still flows through `MaxTool`, where the action tool implementations provide resource-level access requirements and object-level checks; delete also participates in the dangerous-operation approval flow. The existing PR discussion flags one unresolved integration concern: this wiring exposes action capabilities through the conversation endpoint, while token-level `action:read` and `action:write` scopes are not carried into tool execution by this chunk.
+`ee/scriptai/chat_agent/toolkit.py` imports the five classes and adds them to `DEFAULT_TOOLS`. `AgentToolkitManager` instantiates these common tools for normal chat-agent execution, and `DEFAULT_TOOLS` is also used in prompt/switch-mode descriptions, so the action tools become part of Max's common execution tool surface across non-plan agent modes. Execution still flows through `MaxTool`, where the action tool implementations provide resource-level access requirements and object-level checks; delete also participates in the dangerous-operation approval flow. The existing PR discussion flags one unresolved integration concern: this wiring exposes action capabilities through the conversation endpoint, while token-level `action:read` and `action:write` scopes are not carried into tool execution by this chunk.
 
 `insights/schema_enums.py`, `frontend/src/queries/schema/schema-assistant-messages.ts`, and `frontend/src/queries/schema.json` update the shared `AssistantTool` contract with the five new tool names. This is required because `MaxTool.__init_subclass__` validates backend tool names against `insights.schema.AssistantTool`, and the frontend Max UI/types consume the generated assistant-message schema for typed tool calls. These schema updates keep backend registration, runtime tool-call validation, and frontend typing synchronized with the new action tool names.
 
@@ -204,7 +204,7 @@ The integration points are the Insights AI tool registry, the generated Assistan
 
 **Priority:** must_fix
 
-**File:** `ee/hogai/chat_agent/toolkit.py` (lines [LineRange(start=58, end=62)])
+**File:** `ee/scriptai/chat_agent/toolkit.py` (lines [LineRange(start=58, end=62)])
 
 **Issue:** Adding create_action, update_action, and delete_action to DEFAULT_TOOLS exposes them through ChatAgentToolkit, which AgentToolkitManager combines with every mode toolkit, including subagent runs. Subagent mode only swaps the mode-specific toolkit to read-only variants; it does not replace the common ChatAgentToolkit. That means autonomous subagents can now create or update persistent project actions even though the existing subagent presets explicitly exclude dangerous write tools such as UpsertDashboardTool, UpsertAlertTool, CreateSurveyTool, and EditSurveyTool.
 

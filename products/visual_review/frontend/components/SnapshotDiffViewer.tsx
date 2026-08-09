@@ -99,7 +99,7 @@ export function SnapshotDiffViewer({
     // the overlay and panel in that regime so the user sees the
     // underlying diff cleanly. Use `items.length` (post-merge count),
     // not `total` — total is the pre-merge raw count so it can be 21
-    // even after pixelhog merged everything into one regional cluster.
+    // even after pixelscript merged everything into one regional cluster.
     const DOMINANT_CLUSTER_PCT_THRESHOLD = 80
     const clusterSummary = snapshot.cluster_summary
     const isClusterDominant =

@@ -10,18 +10,18 @@ import { SceneExport } from 'scenes/sceneTypes'
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 
-import { ReviewModeEnumApi, type StamphogRepoConfigApi } from '../../generated/api.schemas'
-import { stamphogSceneLogic } from './stamphogSceneLogic'
+import { ReviewModeEnumApi, type StampRepoConfigApi } from '../../generated/api.schemas'
+import { stampSceneLogic } from './stampSceneLogic'
 
 export const scene: SceneExport = {
-    component: StamphogScene,
-    logic: stamphogSceneLogic,
+    component: StampScene,
+    logic: stampSceneLogic,
 }
 
 function ConnectRepositoryButton(): JSX.Element {
     // Authorize-first: the connect button opens the OAuth authorize URL. An already-installed user gets a
     // silent instant redirect back, so it never dead-ends on GitHub's "update installation" screen.
-    const { authorizeUrl, installInfoLoading } = useValues(stamphogSceneLogic)
+    const { authorizeUrl, installInfoLoading } = useValues(stampSceneLogic)
     return (
         <Button
             type="primary"
@@ -43,8 +43,8 @@ function ConnectRepositoryButton(): JSX.Element {
 
 function SyncedBanner(): JSX.Element | null {
     const { syncedRepos, skippedRepos, appNotInstalled, installUrl, discoveredInstallations } =
-        useValues(stamphogSceneLogic)
-    const { connectInstallation } = useActions(stamphogSceneLogic)
+        useValues(stampSceneLogic)
+    const { connectInstallation } = useActions(stampSceneLogic)
 
     // Discovery found several installations and bound nothing: the user picks which one this team
     // connects. The pick rides sessionStorage through one more (silent) authorize hop, and the
@@ -52,7 +52,7 @@ function SyncedBanner(): JSX.Element | null {
     if (discoveredInstallations.length > 0) {
         return (
             <Banner type="info">
-                <p className="font-medium">Stamphog is installed on several GitHub accounts</p>
+                <p className="font-medium">Stamp is installed on several GitHub accounts</p>
                 <p>Pick the one to connect to this project:</p>
                 <div className="flex gap-2 flex-wrap">
                     {discoveredInstallations.map((installation) => (
@@ -75,9 +75,9 @@ function SyncedBanner(): JSX.Element | null {
     if (appNotInstalled) {
         return (
             <Banner type="warning">
-                <p className="font-medium">Stamphog isn't installed on GitHub yet</p>
+                <p className="font-medium">Stamp isn't installed on GitHub yet</p>
                 <p>
-                    Install the Stamphog GitHub App on your organization to connect its repositories.
+                    Install the Stamp GitHub App on your organization to connect its repositories.
                     {installUrl && (
                         <>
                             {' '}
@@ -102,7 +102,7 @@ function SyncedBanner(): JSX.Element | null {
             {syncedRepos.length > 0 ? (
                 <>
                     <p className="font-medium">Connected {syncedRepos.length} repositories</p>
-                    <p>Stamphog isn't reviewing them yet. Turn on the ones you want reviewed in the table below.</p>
+                    <p>Stamp isn't reviewing them yet. Turn on the ones you want reviewed in the table below.</p>
                 </>
             ) : (
                 <p className="font-medium">No repositories connected</p>
@@ -116,8 +116,8 @@ function SyncedBanner(): JSX.Element | null {
     )
 }
 
-function ReviewModeCell({ repo, updating }: { repo: StamphogRepoConfigApi; updating: boolean }): JSX.Element {
-    const { setReviewMode, setTriggerLabel } = useActions(stamphogSceneLogic)
+function ReviewModeCell({ repo, updating }: { repo: StampRepoConfigApi; updating: boolean }): JSX.Element {
+    const { setReviewMode, setTriggerLabel } = useActions(stampSceneLogic)
 
     const saveTriggerLabel = (value: string): void => {
         const trimmed = value.trim()
@@ -160,10 +160,10 @@ function ReviewModeCell({ repo, updating }: { repo: StamphogRepoConfigApi; updat
 
 function RepoConfigsTable(): JSX.Element {
     const { filteredRepoConfigs, repoConfigs, repoConfigsLoading, updatingRepoIds, repoSearch } =
-        useValues(stamphogSceneLogic)
-    const { setRepoEnabled, setDigestEnabled, setRepoSearch } = useActions(stamphogSceneLogic)
+        useValues(stampSceneLogic)
+    const { setRepoEnabled, setDigestEnabled, setRepoSearch } = useActions(stampSceneLogic)
 
-    const columns: TableColumns<StamphogRepoConfigApi> = [
+    const columns: TableColumns<StampRepoConfigApi> = [
         {
             title: 'Repository',
             dataIndex: 'repository',
@@ -220,19 +220,19 @@ function RepoConfigsTable(): JSX.Element {
                 loading={repoConfigsLoading}
                 rowKey="id"
                 pagination={{ pageSize: 20 }}
-                emptyState="No repositories yet. Install the Stamphog GitHub App to get started."
+                emptyState="No repositories yet. Install the Stamp GitHub App to get started."
             />
         </div>
     )
 }
 
-export function StamphogScene(): JSX.Element {
+export function StampScene(): JSX.Element {
     return (
         <SceneContent>
             <SceneTitleSection
-                name="Stamphog"
+                name="Stamp"
                 description="Automated pull request reviews and merged-PR digests, per repository."
-                resourceType={{ type: 'stamphog' }}
+                resourceType={{ type: 'stamp' }}
                 actions={<ConnectRepositoryButton />}
             />
             <SyncedBanner />
@@ -244,4 +244,4 @@ export function StamphogScene(): JSX.Element {
     )
 }
 
-export default StamphogScene
+export default StampScene

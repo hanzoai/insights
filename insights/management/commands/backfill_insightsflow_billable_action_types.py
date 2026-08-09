@@ -79,15 +79,15 @@ class Command(BaseCommand):
 
             flows_to_update = []
 
-            for hogflow in page.object_list:
+            for flow in page.object_list:
                 try:
-                    if hogflow.actions:
+                    if flow.actions:
                         # Extract unique billable action types from the actions list
                         # Using centralized BILLABLE_ACTION_TYPES constant
                         billable_action_types = sorted(
                             {
                                 action.get("type", "")
-                                for action in hogflow.actions
+                                for action in flow.actions
                                 if isinstance(action, dict) and action.get("type") in BILLABLE_ACTION_TYPES
                             }
                         )
@@ -96,14 +96,14 @@ class Command(BaseCommand):
                         billable_action_types = []
 
                     # Only update if the computed value differs from the current value (compare as sets since order doesn't matter)
-                    if set(hogflow.billable_action_types or []) != set(billable_action_types):
-                        hogflow.billable_action_types = billable_action_types
-                        flows_to_update.append(hogflow)
+                    if set(flow.billable_action_types or []) != set(billable_action_types):
+                        flow.billable_action_types = billable_action_types
+                        flows_to_update.append(flow)
 
                 except Exception as e:
                     error_count += 1
                     logger.error(
-                        f"Error processing InsightsFlow id={hogflow.id}, team_id={hogflow.team_id}: {e}",
+                        f"Error processing InsightsFlow id={flow.id}, team_id={flow.team_id}: {e}",
                         exc_info=True,
                     )
 

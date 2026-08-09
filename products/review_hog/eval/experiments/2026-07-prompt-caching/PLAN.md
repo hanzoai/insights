@@ -45,8 +45,8 @@ Non-goals: NO pipeline changes, NO eval runs, NO harness (Insights Desktop repo)
 
 ## Working mode (locked with the user 2026-07-06)
 
-- Experiments run **iteratively and in isolation, one after another** — this round runs alone on its own branch off `signals/reviewhog`
-  (suggested: `signals/reviewhog-exp-caching-gate0`).
+- Experiments run **iteratively and in isolation, one after another** — this round runs alone on its own branch off `signals/review`
+  (suggested: `signals/review-exp-caching-gate0`).
 - If a later experiment's changes contradict earlier ones, stash the work after the experiment concludes, or better, keep each
   experiment on its own branch. Only decided winners merge back.
 - Only durable artifact expected to merge from THIS round: the `dump_result.py` extension (it is eval tooling, not pipeline code)
@@ -108,7 +108,7 @@ recently enabled sonnet-5 row; (e) per-path token-accounting convention differen
 
 Script (scratch, not committed to the pipeline): raw `client.messages.create` — NOT `.parse` (structured outputs inject schema bytes
 into the request), thinking OFF (adaptive thinking is incompatible with `max_tokens=64` and thinking config invalidates message-span
-breakpoints) — through `get_async_anthropic_gateway_client(product="review_hog", team_id=...)` (same path as
+breakpoints) — through `get_async_anthropic_gateway_client(product="review", team_id=...)` (same path as
 `reviewer/sandbox/direct_llm.py`; Bedrock fallback already off there). Payload: ~10K-token document block ending in an explicit
 `cache_control: {type: "ephemeral"}` breakpoint, `max_tokens=64`. **Every arm AND every trial salts the document with a unique nonce**
 so arms can never read each other's warm entries (reads refresh the sliding TTL free, silently contaminating creation baselines).

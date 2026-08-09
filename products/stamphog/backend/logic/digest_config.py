@@ -1,4 +1,4 @@
-"""Parses the repo-declared `digest:` section of `.stamphog/policy.yml` — the single Slack
+"""Parses the repo-declared `digest:` section of `.stamp/policy.yml` — the single Slack
 channel for ALL of a repo's merged-PR digests, if the repo owner wants to opt out of the
 audience cascade.
 
@@ -17,15 +17,15 @@ from typing import TYPE_CHECKING
 import yaml
 import structlog
 
-from .github_client import StamphogGitHubClient
+from .github_client import StampGitHubClient
 
 if TYPE_CHECKING:
-    from ..models import StamphogRepoConfig
+    from ..models import StampRepoConfig
 
 logger = structlog.get_logger(__name__)
 
 # Same file the gate policy lives in — the repo-facing config surface is one file.
-DIGEST_CONFIG_PATH = ".stamphog/policy.yml"
+DIGEST_CONFIG_PATH = ".stamp/policy.yml"
 
 
 @dataclass(frozen=True)
@@ -35,17 +35,17 @@ class RepoDigestConfig:
 
 def _parse_channel(digest_raw: object, repository: str) -> str | None:
     if not isinstance(digest_raw, dict):
-        logger.warning("stamphog_digest_config_not_a_mapping", repository=repository)
+        logger.warning("stamp_digest_config_not_a_mapping", repository=repository)
         return None
     channel = digest_raw.get("channel")
     if not isinstance(channel, str) or not channel.strip():
-        logger.warning("stamphog_digest_config_missing_channel", repository=repository)
+        logger.warning("stamp_digest_config_missing_channel", repository=repository)
         return None
     return channel.strip().lstrip("#").strip()
 
 
-def load_repo_digest_config(repo_config: StamphogRepoConfig) -> RepoDigestConfig | None:
-    """Fetch `.stamphog/policy.yml` from the repo's default branch and read its `digest:` section.
+def load_repo_digest_config(repo_config: StampRepoConfig) -> RepoDigestConfig | None:
+    """Fetch `.stamp/policy.yml` from the repo's default branch and read its `digest:` section.
 
     None means CONFIRMED absence or an unusable config: a missing file, no `digest` key, malformed
     YAML, or a bad `channel` value (warning logged so a repo owner's typo doesn't silently vanish).
@@ -54,7 +54,7 @@ def load_repo_digest_config(repo_config: StamphogRepoConfig) -> RepoDigestConfig
     merge to the author/team fallback instead of the declared channel. The merge-record Celery task
     retries on the raised error.
     """
-    raw_text = StamphogGitHubClient(repo_config.installation_id).get_default_branch_file(
+    raw_text = StampGitHubClient(repo_config.installation_id).get_default_branch_file(
         repo_config.repository, DIGEST_CONFIG_PATH
     )
     if raw_text is None:
@@ -63,11 +63,11 @@ def load_repo_digest_config(repo_config: StamphogRepoConfig) -> RepoDigestConfig
     try:
         parsed = yaml.safe_load(raw_text)
     except yaml.YAMLError:
-        logger.warning("stamphog_digest_config_invalid_yaml", repository=repo_config.repository, exc_info=True)
+        logger.warning("stamp_digest_config_invalid_yaml", repository=repo_config.repository, exc_info=True)
         return None
 
     if not isinstance(parsed, dict):
-        logger.warning("stamphog_digest_config_root_not_a_mapping", repository=repo_config.repository)
+        logger.warning("stamp_digest_config_root_not_a_mapping", repository=repo_config.repository)
         return None
     if "digest" not in parsed:
         return None

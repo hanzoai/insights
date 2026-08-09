@@ -11,12 +11,12 @@ from django.urls import reverse
 
 from insights.models.event_ingestion_restriction_config import EventIngestionRestrictionConfig
 from insights.models.team.team import Team
-from insights.models.tophog.queries import query_tophog_filter_options, query_tophog_metrics
+from insights.models.topfn.queries import query_topfn_filter_options, query_topfn_metrics
 
 logger = logging.getLogger(__name__)
 
-# Maps tophog key fields to EventIngestionRestrictionConfig filter fields, used both for
-# matching existing restrictions against a tophog entry and for prefilling the add form
+# Maps topfn key fields to EventIngestionRestrictionConfig filter fields, used both for
+# matching existing restrictions against a topfn entry and for prefilling the add form
 RESTRICTION_FILTER_FIELDS = {
     "distinct_id": "distinct_ids",
     "session_id": "session_ids",
@@ -24,7 +24,7 @@ RESTRICTION_FILTER_FIELDS = {
     "event_uuid": "event_uuids",
 }
 
-# Maps tophog pipeline names (INGESTION_PIPELINE deployment values) to
+# Maps topfn pipeline names (INGESTION_PIPELINE deployment values) to
 # EventIngestionRestrictionConfig pipeline values until the naming is unified
 TOPFN_TO_RESTRICTION_PIPELINE = {
     "analytics": "analytics",
@@ -76,7 +76,7 @@ def _format_key(key: dict[str, str]) -> str:
 
 
 def _resolve_team_tokens(keys: list[dict[str, str]]) -> dict[str, str]:
-    """Map team_id (as it appears in tophog keys) to the team's API token."""
+    """Map team_id (as it appears in topfn keys) to the team's API token."""
     team_ids = {key["team_id"] for key in keys if key.get("team_id", "").isdigit()}
     if not team_ids:
         return {}
@@ -91,20 +91,20 @@ def _key_token(key: dict[str, str], tokens_by_team_id: dict[str, str]) -> str:
     return tokens_by_team_id.get(key.get("team_id", ""), "")
 
 
-def _map_pipelines(tophog_pipelines: list[str]) -> list[str]:
-    return sorted({TOPFN_TO_RESTRICTION_PIPELINE[p] for p in tophog_pipelines if p in TOPFN_TO_RESTRICTION_PIPELINE})
+def _map_pipelines(topfn_pipelines: list[str]) -> list[str]:
+    return sorted({TOPFN_TO_RESTRICTION_PIPELINE[p] for p in topfn_pipelines if p in TOPFN_TO_RESTRICTION_PIPELINE})
 
 
-def _restrictions_page_url(token: str, key: dict[str, str], tophog_pipelines: list[str]) -> str:
-    """Link to the restrictions page for a tophog entry, carrying the full key for search and prefill."""
+def _restrictions_page_url(token: str, key: dict[str, str], topfn_pipelines: list[str]) -> str:
+    """Link to the restrictions page for a topfn entry, carrying the full key for search and prefill."""
     params = {"token": token, **{k: v for k, v in key.items() if k != "token"}}
-    if tophog_pipelines:
-        params["pipelines"] = ",".join(tophog_pipelines)
-    return reverse("tophog-restrictions") + "?" + urlencode(params)
+    if topfn_pipelines:
+        params["pipelines"] = ",".join(topfn_pipelines)
+    return reverse("topfn-restrictions") + "?" + urlencode(params)
 
 
 def _create_restriction_url(token: str, key: dict[str, str], restriction_pipelines: list[str]) -> str:
-    """Link to the event ingestion restriction add form, prefilled from a tophog key."""
+    """Link to the event ingestion restriction add form, prefilled from a topfn key."""
     params = {"token": token}
     for key_field, config_field in RESTRICTION_FILTER_FIELDS.items():
         value = key.get(key_field)
@@ -116,13 +116,13 @@ def _create_restriction_url(token: str, key: dict[str, str], restriction_pipelin
 
 
 def _restriction_matches(
-    restriction: EventIngestionRestrictionConfig, key: dict[str, str], tophog_pipelines: list[str]
+    restriction: EventIngestionRestrictionConfig, key: dict[str, str], topfn_pipelines: list[str]
 ) -> bool:
-    """Whether an existing restriction already covers the tophog entry described by key and pipelines.
+    """Whether an existing restriction already covers the topfn entry described by key and pipelines.
 
     Mirrors the ingestion matching semantics: an empty filter list matches everything,
     a non-empty list matches if it contains the entry's value (fields combine with AND).
-    Key fields absent from the tophog entry don't disqualify a restriction.
+    Key fields absent from the topfn entry don't disqualify a restriction.
 
     Pipelines require full coverage: every one of the entry's pipelines must map to a
     restriction pipeline the restriction applies to. Unmapped pipelines (e.g. ai, heatmaps)
@@ -130,8 +130,8 @@ def _restriction_matches(
     """
     if _extendable_fields(restriction, key):
         return False
-    if tophog_pipelines:
-        mapped = [TOPFN_TO_RESTRICTION_PIPELINE.get(p) for p in tophog_pipelines]
+    if topfn_pipelines:
+        mapped = [TOPFN_TO_RESTRICTION_PIPELINE.get(p) for p in topfn_pipelines]
         if None in mapped:
             return False
         if restriction.pipelines and not set(mapped) <= set(restriction.pipelines):
@@ -140,7 +140,7 @@ def _restriction_matches(
 
 
 def _extendable_fields(restriction: EventIngestionRestrictionConfig, key: dict[str, str]) -> list[str]:
-    """Filter fields whose configured values exclude the tophog entry's value.
+    """Filter fields whose configured values exclude the topfn entry's value.
 
     Only non-empty lists qualify: appending to an empty list would narrow a
     match-everything filter down to a single value instead of extending it.
@@ -155,7 +155,7 @@ def _extendable_fields(restriction: EventIngestionRestrictionConfig, key: dict[s
 
 
 def _extend_restriction(restriction: EventIngestionRestrictionConfig, key: dict[str, str]) -> list[str]:
-    """Append the tophog entry's key values to the restriction's filter lists; returns changed fields."""
+    """Append the topfn entry's key values to the restriction's filter lists; returns changed fields."""
     changed = _extendable_fields(restriction, key)
     for key_field, config_field in RESTRICTION_FILTER_FIELDS.items():
         if config_field in changed:
@@ -165,7 +165,7 @@ def _extend_restriction(restriction: EventIngestionRestrictionConfig, key: dict[
     return changed
 
 
-def tophog_dashboard_view(request):
+def topfn_dashboard_view(request):
     if not request.user.is_staff:
         raise PermissionDenied
 
@@ -183,9 +183,9 @@ def tophog_dashboard_view(request):
     error = ""
 
     try:
-        pipelines, lanes = query_tophog_filter_options(date_from, date_to)
+        pipelines, lanes = query_topfn_filter_options(date_from, date_to)
 
-        rows = query_tophog_metrics(
+        rows = query_topfn_metrics(
             date_from,
             date_to,
             pipeline=selected_pipeline or None,
@@ -209,7 +209,7 @@ def tophog_dashboard_view(request):
                 }
             )
     except Exception as e:
-        logger.exception("TopHog dashboard query failed")
+        logger.exception("TopFn dashboard query failed")
         error = str(e)
 
     # Build query string fragment for pipeline/lane filters (used in preset/mode links)
@@ -225,7 +225,7 @@ def tophog_dashboard_view(request):
 
     context = {
         **admin.site.each_context(request),
-        "title": "TopHog Dashboard",
+        "title": "TopFn Dashboard",
         "error": error,
         "metrics": dict(metrics),
         "pipelines": pipelines,
@@ -240,17 +240,17 @@ def tophog_dashboard_view(request):
         "base_url": request.path,
         "filter_qs": filter_qs,
     }
-    return render(request, "admin/tophog.html", context)
+    return render(request, "admin/topfn.html", context)
 
 
-def tophog_restrictions_view(request):
+def topfn_restrictions_view(request):
     if not request.user.is_staff:
         raise PermissionDenied
 
     token = request.GET.get("token", "")
     key = {k: v for k, v in request.GET.items() if k not in ("token", "pipelines") and v}
-    tophog_pipelines = [p for p in request.GET.get("pipelines", "").split(",") if p]
-    restriction_pipelines = _map_pipelines(tophog_pipelines)
+    topfn_pipelines = [p for p in request.GET.get("pipelines", "").split(",") if p]
+    restriction_pipelines = _map_pipelines(topfn_pipelines)
 
     if request.method == "POST":
         restriction = EventIngestionRestrictionConfig.objects.filter(
@@ -268,7 +268,7 @@ def tophog_restrictions_view(request):
             else:
                 messages.info(request, "Nothing to add — restriction unchanged.")
         # Rebuild the URL from parsed values instead of echoing request data (open-redirect hygiene)
-        return HttpResponseRedirect(_restrictions_page_url(token, key, tophog_pipelines))
+        return HttpResponseRedirect(_restrictions_page_url(token, key, topfn_pipelines))
 
     restrictions = (
         EventIngestionRestrictionConfig.objects.filter(token=token).order_by("restriction_type") if token else []
@@ -276,25 +276,25 @@ def tophog_restrictions_view(request):
     entries = [
         {
             "restriction": restriction,
-            "matches": _restriction_matches(restriction, key, tophog_pipelines),
+            "matches": _restriction_matches(restriction, key, topfn_pipelines),
             "extendable_fields": _extendable_fields(restriction, key),
             "edit_url": reverse("admin:insights_eventingestionrestrictionconfig_change", args=[restriction.pk]),
         }
         for restriction in restrictions
     ]
 
-    unmapped_pipelines = [p for p in tophog_pipelines if p not in TOPFN_TO_RESTRICTION_PIPELINE]
+    unmapped_pipelines = [p for p in topfn_pipelines if p not in TOPFN_TO_RESTRICTION_PIPELINE]
 
     context = {
         **admin.site.each_context(request),
-        "title": "TopHog Restrictions",
+        "title": "TopFn Restrictions",
         "token": token,
         "key": key,
-        "tophog_pipelines": tophog_pipelines,
+        "topfn_pipelines": topfn_pipelines,
         "restriction_pipelines": restriction_pipelines,
         "unmapped_pipelines": unmapped_pipelines,
         "entries": entries,
         "create_url": _create_restriction_url(token, key, restriction_pipelines) if token else "",
-        "dashboard_url": reverse("tophog-dashboard"),
+        "dashboard_url": reverse("topfn-dashboard"),
     }
-    return render(request, "admin/tophog_restrictions.html", context)
+    return render(request, "admin/topfn_restrictions.html", context)

@@ -19,11 +19,11 @@ from django.utils import timezone
 import structlog
 from celery import shared_task
 
-from products.stamphog.backend.facade.enums import DigestRunStatus
-from products.stamphog.backend.logic.channel_resolution import auto_provision_channel
-from products.stamphog.backend.logic.digest import summarize_merged_prs
-from products.stamphog.backend.logic.slack_digest import post_digest
-from products.stamphog.backend.models import DigestChannel, DigestRun, PullRequest
+from products.stamp.backend.facade.enums import DigestRunStatus
+from products.stamp.backend.logic.channel_resolution import auto_provision_channel
+from products.stamp.backend.logic.digest import summarize_merged_prs
+from products.stamp.backend.logic.slack_digest import post_digest
+from products.stamp.backend.models import DigestChannel, DigestRun, PullRequest
 
 logger = structlog.get_logger(__name__)
 
@@ -82,7 +82,7 @@ def send_digest_for_channel(digest_channel_id: str, team_id: int) -> None:
         .first()
     )
     if channel is None or not channel.enabled:
-        logger.info("stamphog_digest_channel_missing_or_disabled", digest_channel_id=digest_channel_id)
+        logger.info("stamp_digest_channel_missing_or_disabled", digest_channel_id=digest_channel_id)
         return
 
     # Bound the claim by a merged_at floor: audience_key + digest_run__isnull=True marks a PR
@@ -103,7 +103,7 @@ def send_digest_for_channel(digest_channel_id: str, team_id: int) -> None:
     # the Slack post. A second worker then blocks on the lock, re-reads, finds nothing unlinked,
     # and returns without posting. of=("self",) keeps the lock off the joined repo_config rows.
     #
-    # Bind every atomic block below to the model's routed DB (stamphog_db_writer when the product DB is
+    # Bind every atomic block below to the model's routed DB (stamp_db_writer when the product DB is
     # configured, else default) — a bare atomic() opens on the default connection, so the
     # select_for_update lock and writes would run outside any transaction on the product DB.
     now = timezone.now()
@@ -121,7 +121,7 @@ def send_digest_for_channel(digest_channel_id: str, team_id: int) -> None:
             .order_by("merged_at")[:DIGEST_MAX_PRS_PER_RUN]
         )
         if not prs:
-            logger.info("stamphog_digest_no_prs", audience_key=channel.audience_key, team_id=team_id)
+            logger.info("stamp_digest_no_prs", audience_key=channel.audience_key, team_id=team_id)
             return
 
         run = DigestRun.objects.for_team(team_id).create(
@@ -138,7 +138,7 @@ def send_digest_for_channel(digest_channel_id: str, team_id: int) -> None:
         # Unlink the claimed PRs (digest_run back to NULL) so the next run retries them — the retry
         # query filters digest_run__isnull=True, so leaving them linked to a FAILED run would hide
         # them forever. Unlinking keeps "Slack failure -> PRs stay retryable" intact.
-        logger.exception("stamphog_digest_post_failed", digest_channel_id=digest_channel_id, error=str(e))
+        logger.exception("stamp_digest_post_failed", digest_channel_id=digest_channel_id, error=str(e))
         with transaction.atomic(using=write_db):
             DigestRun.objects.for_team(team_id).filter(id=run.id).update(
                 status=DigestRunStatus.FAILED, summary=summary.to_dict(), error=str(e)
@@ -179,7 +179,7 @@ def send_digest_for_channel(digest_channel_id: str, team_id: int) -> None:
         )
         DigestChannel.objects.for_team(team_id).filter(id=channel.id).update(last_digest_at=now)
 
-    logger.info("stamphog_digest_posted", digest_channel_id=digest_channel_id, pr_count=len(prs), run_id=str(run.id))
+    logger.info("stamp_digest_posted", digest_channel_id=digest_channel_id, pr_count=len(prs), run_id=str(run.id))
 
 
 @shared_task(ignore_result=True)
@@ -245,7 +245,7 @@ def _reclaim_stale_pending_runs() -> None:
                 )
                 reclaimed += 1
     if reclaimed or finalized:
-        logger.info("stamphog_digest_reclaimed_stale_pending_runs", reclaimed=reclaimed, finalized=finalized)
+        logger.info("stamp_digest_reclaimed_stale_pending_runs", reclaimed=reclaimed, finalized=finalized)
 
 
 @shared_task(ignore_result=True)
@@ -264,7 +264,7 @@ def send_daily_digests() -> None:
     for channel_id, team_id in channels.iterator():
         send_digest_for_channel.delay(digest_channel_id=str(channel_id), team_id=team_id)
         count += 1
-    logger.info("stamphog_daily_digests_enqueued", channel_count=count)
+    logger.info("stamp_daily_digests_enqueued", channel_count=count)
 
     since = timezone.now() - timedelta(days=DIGEST_LOOKBACK_DAYS)
     # unscoped(): cross-team beat fan-out discovers every team's unprovisioned audiences in one
@@ -288,4 +288,4 @@ def send_daily_digests() -> None:
             continue
         provision_and_send_digest.delay(team_id=team_id, audience_key=audience_key)
         provisioned_count += 1
-    logger.info("stamphog_daily_digests_provisioning_enqueued", audience_count=provisioned_count)
+    logger.info("stamp_daily_digests_provisioning_enqueued", audience_count=provisioned_count)

@@ -42,10 +42,10 @@ export interface MessageAssetsParams {
 }
 
 export async function getMessageAssets(
-    hogFlowId: InsightsFlow['id'],
+    flowId: InsightsFlow['id'],
     params: MessageAssetsParams = {}
 ): Promise<MessageAsset[]> {
-    return await new ApiRequest().hogFlow(hogFlowId).withAction('assets').withQueryString(params).get()
+    return await new ApiRequest().flow(flowId).withAction('assets').withQueryString(params).get()
 }
 
 export interface PersonMessageAssetsParams {
@@ -82,9 +82,9 @@ export async function getPersonPushNotifications(
 }
 
 // Same-origin URL — used as an `<iframe src>` so the browser carries session auth.
-export function getMessageAssetContentUrl(hogFlowId: InsightsFlow['id'], invocationId: string, actionId: string): string {
+export function getMessageAssetContentUrl(flowId: InsightsFlow['id'], invocationId: string, actionId: string): string {
     return new ApiRequest()
-        .hogFlow(hogFlowId)
+        .flow(flowId)
         .withAction('assets/content')
         .withQueryString({ invocation_id: invocationId, action_id: actionId })
         .assembleFullUrl(true)

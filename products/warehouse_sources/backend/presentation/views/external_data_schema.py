@@ -1223,7 +1223,7 @@ class ExternalDataSchemaSerializer(UserAccessControlSerializerMixin, serializers
             return
 
         try:
-            hog_fn_result = get_or_create_webhook_insights_function(
+            script_fn_result = get_or_create_webhook_insights_function(
                 team=schema.team,
                 source=source_impl,
                 source_id=str(source.pk),
@@ -1231,16 +1231,16 @@ class ExternalDataSchemaSerializer(UserAccessControlSerializerMixin, serializers
                 config=config,
             )
 
-            if hog_fn_result.error or not hog_fn_result.insights_function:
+            if script_fn_result.error or not script_fn_result.insights_function:
                 raise ValidationError(
-                    f"Failed to set up webhook: {hog_fn_result.error or 'Unknown error'}. "
+                    f"Failed to set up webhook: {script_fn_result.error or 'Unknown error'}. "
                     "You can set up the webhook manually from the Webhook tab."
                 )
 
-            if hog_fn_result.insights_function_created:
+            if script_fn_result.insights_function_created:
                 # Only register the webhook if we're creating the script function when it didn't exist previously
                 result = create_and_register_webhook(
-                    source_impl, config, hog_fn_result, schema.team_id, api_version=effective_api_version
+                    source_impl, config, script_fn_result, schema.team_id, api_version=effective_api_version
                 )
                 if not result.success:
                     raise ValidationError(
@@ -1258,7 +1258,7 @@ class ExternalDataSchemaSerializer(UserAccessControlSerializerMixin, serializers
                         reconcile_result = reconcile_webhook_events(
                             source_impl,
                             config,
-                            hog_fn_result,
+                            script_fn_result,
                             schema.team_id,
                             [schema.name],
                             api_version=effective_api_version,

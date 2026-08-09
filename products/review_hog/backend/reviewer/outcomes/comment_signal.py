@@ -1,6 +1,6 @@
 """The engagement signal: did a finding's inline comment get a reply or a reaction?
 
-ReviewHog's published comments lead with ``### {finding.title}`` and anchor to the finding's file, so
+Review's published comments lead with ``### {finding.title}`` and anchor to the finding's file, so
 a finding maps to its posted comment exactly by (path, title) — no stored comment id, and robust to
 line drift after review (the match is on body content, not position). The one
 ``GET /pulls/{n}/comments`` list carries both an ``in_reply_to_id`` per comment and a ``reactions``
@@ -21,7 +21,7 @@ def _is_bot(user: dict[str, Any] | None) -> bool:
 def find_finding_comment(
     *, finding: ReviewIssueFinding, review_comments: list[dict[str, Any]]
 ) -> dict[str, Any] | None:
-    """The review comment ReviewHog posted for ``finding``, matched by path + exact heading, or None.
+    """The review comment Review posted for ``finding``, matched by path + exact heading, or None.
 
     The whole first line must equal ``### {title}`` — a prefix match would pair "Foo" with a comment
     headed "### Foobar". First match wins if two findings in a file share a title (rare); the outcome
@@ -46,7 +46,7 @@ def engagement_method(*, comment: dict[str, Any], review_comments: list[dict[str
     `comment_reply_agent` is any other bot, so a query that wants strictly-human engagement can select
     for it while the coarse `reacted` outcome keeps counting both.
 
-    ReviewHog's own replies are the exception and never count: it publishes the finding comment, so
+    Review's own replies are the exception and never count: it publishes the finding comment, so
     treating its own follow-up as engagement would let the feature grade its own homework. A fix it
     lands itself still shows up, as a commit in the post-review compare that the judge rules on —
     engagement is not where that belongs. Note `is_app_bot_author` can only single out our bot when

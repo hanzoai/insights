@@ -1,6 +1,6 @@
-"""Resolve ReviewHog's canonical pulled skills from a team's `LLMSkill` rows.
+"""Resolve Review's canonical pulled skills from a team's `LLMSkill` rows.
 
-ReviewHog's review **perspectives**, its **validation criteria**, and its **blind-spot check** are
+Review's review **perspectives**, its **validation criteria**, and its **blind-spot check** are
 stored and synced the way Signals' scouts store theirs: canonical `SKILL.md` on disk
 (`products/review_hog/skills/`) mirrored into per-team `LLMSkill` rows by `lazy_seed.sync_canonical_*`.
 Delivery is **pull** — the review / validation prompts instruct the sandbox agent to `skill-get` the
@@ -149,7 +149,7 @@ def load_perspectives_for_run(team_id: int, acting_user_id: int) -> list[LoadedP
             # Enabled config pointing at a dead skill (e.g. archived from the Skills UI): drop it
             # from this run instead of failing the review; restoring the skill resumes it.
             logger.warning(
-                "review_hog: enabled perspective '%s' has no live skill on team %s; skipping it this run",
+                "review: enabled perspective '%s' has no live skill on team %s; skipping it this run",
                 skill_name,
                 team_id,
             )
@@ -158,7 +158,7 @@ def load_perspectives_for_run(team_id: int, acting_user_id: int) -> list[LoadedP
             # A leftover config for a custom the acting user did not author (enabled before
             # visibility became author-only): skip it rather than run an invisible perspective.
             logger.warning(
-                "review_hog: enabled perspective '%s' was not authored by user %s on team %s; skipping it this run",
+                "review: enabled perspective '%s' was not authored by user %s on team %s; skipping it this run",
                 skill_name,
                 acting_user_id,
                 team_id,
@@ -234,7 +234,7 @@ def _load_single_active_skill(
         team_id, acting_user_id, prefix=prefix, canonical_names=(canonical_name,)
     ):
         logger.warning(
-            "review_hog: selected skill '%s' was not authored by user %s on team %s; falling back to canonical '%s'",
+            "review: selected skill '%s' was not authored by user %s on team %s; falling back to canonical '%s'",
             skill_name,
             acting_user_id,
             team_id,
@@ -252,7 +252,7 @@ def _load_single_active_skill(
     version = _live_version(skill_name)
     if version is None and skill_name != canonical_name:
         logger.warning(
-            "review_hog: selected skill '%s' has no live row on team %s; falling back to canonical '%s'",
+            "review: selected skill '%s' has no live row on team %s; falling back to canonical '%s'",
             skill_name,
             team_id,
             canonical_name,

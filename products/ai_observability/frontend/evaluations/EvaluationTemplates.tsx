@@ -17,7 +17,7 @@ import {
     IconWrench,
 } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -27,7 +27,7 @@ import { useOpenAi } from '~/scenes/max/useOpenAi'
 import { getEvaluationBackTarget, getEvaluationTemplateSelectionUrl } from './evaluationNavigation'
 import { EvaluationTemplate, defaultEvaluationTemplates } from './templates'
 
-const MascotJudge = pngHoggie()
+const MascotJudge = pngMascot()
 
 export const scene: SceneExport = {
     component: EvaluationTemplatesScene,

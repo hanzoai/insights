@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 
 import { CAPABILITIES } from 'lib/capabilities'
 import { Unavailable } from 'lib/components/Unavailable/Unavailable'
-import { MailHog } from 'lib/components/mascots'
+import { MailScript } from 'lib/components/mascots'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Button } from 'lib/elements/Button'
 import { Modal } from 'lib/elements/Modal'
@@ -94,7 +94,7 @@ export function ManageSubscriptions({
                                 <Unavailable capability="subscriptions" />
                             ) : (
                                 <SubscriptionEmptyState
-                                    illustration={<MailHog className="object-contain shrink-0 w-24 h-20" />}
+                                    illustration={<MailScript className="object-contain shrink-0 w-24 h-20" />}
                                     title={`${capitalizeFirstLetter(subscriptionResourceNoun)} subscriptions`}
                                     description={`Send an up-to-date snapshot of this ${subscriptionResourceNoun} to Slack or email on a schedule.`}
                                     actionLabel="Create subscription"

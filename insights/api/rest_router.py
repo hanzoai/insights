@@ -443,7 +443,7 @@ projects_router.register(
 
 projects_router.register(
     r"script",
-    script.HogViewSet,
+    script.ScriptViewSet,
     "script",
     ["team_id"],
 )

@@ -67,7 +67,7 @@ remove_cohort_members(cohort=cohort, persons=[person1])
 ## Why this exists
 
 Insights moved person/group reads from the Django ORM to a gRPC service (personinsights), which is now the
-sole source of truth. In tests, a `FakePersonHogClient` stands in for the real service, and the persons
+sole source of truth. In tests, a `FakePersonClient` stands in for the real service, and the persons
 DB is not used at all — the router blocks ORM access to persons-DB models while the fake is active.
 The helpers seed the fake (and Datastore for persons) so code under test reads consistent data.
 

@@ -1,4 +1,4 @@
-# stamphog — invariants for agents
+# stamp — invariants for agents
 
 Read [README.md](README.md) for the product shape first. This file is the contract: the
 invariants below were each earned through a real review finding — do not relax one without
@@ -6,7 +6,7 @@ understanding what it closes, and hold new code to all of them.
 
 ## The stale-approval invariant (the big one)
 
-**No stamphog approval may remain standing over commits it didn't review.** GitHub never
+**No stamp approval may remain standing over commits it didn't review.** GitHub never
 auto-dismisses approvals, so every path that skips, supersedes, or abandons a review after a
 head-changing event must retract standing approvals itself:
 
@@ -84,7 +84,7 @@ the engine (`review_pr.py::_refuse_bot_author`, mirrored by `review_local.py`), 
 Action's job gates — with ONE deliberate exception: a PR **positively linked** to a
 self-driving Inbox implementation run (a signal-report-carrying TaskRun at
 `ai_stage="implementation"`, matched through the tasks facade), one of whose assigned reviewers
-opted in via ReviewHog's per-user `stamphog_review_inbox_prs` toggle. Rules that keep the exception
+opted in via Review's per-user `stamp_review_inbox_prs` toggle. Rules that keep the exception
 narrow:
 
 - Identification is **server-attested task linkage plus server-attested PR identity** — both
@@ -117,10 +117,10 @@ narrow:
   provenance (`ReviewRun.output["inbox_review"]`), which only the two linkage-verified
   trigger paths stamp.
 - The initial review is the receiver leg (`process_inbox_pr_review`, entered via the
-  `queue_inbox_pr_review` facade after review_hog checked the toggles); the webhook leg
+  `queue_inbox_pr_review` facade after review checked the toggles); the webhook leg
   re-reviews only on synchronize / reopen / base retarget, re-checking them through the
-  `facade/inbox_hooks.py` resolver (registered by review_hog at app-ready — a direct import
-  of review_hog would be a dependency cycle). No registered resolver means fail-closed: no
+  `facade/inbox_hooks.py` resolver (registered by review at app-ready — a direct import
+  of review would be a dependency cycle). No registered resolver means fail-closed: no
   re-review. The gate is **any** assigned reviewer's opt-in, and both legs must resolve it
   identically: if one fired while the other saw "opted out", a push would retract a standing
   approval with somebody still opted in.
@@ -162,7 +162,7 @@ check the other; divergence here has produced real approve-when-should-wait find
 
 ## Tests
 
-`insightscli test products/stamphog/backend/tests/` (Django; `--reuse-db` after the first run) plus
+`insightscli test products/stamp/backend/tests/` (Django; `--reuse-db` after the first run) plus
 `tools/pr-approval-agent/` tests for engine changes. The integration tests drive the full chain
 through fakes (`tests/fakes.py`, `tests/conftest.py`) — extend the fakes rather than mocking
 internals, and prefer adding a parameterized case to an existing test over a new function.

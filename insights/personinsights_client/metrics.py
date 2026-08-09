@@ -29,18 +29,18 @@ PERSONFN_TEAM_MISMATCH_TOTAL = Counter(
 
 PERSONFN_ERRORS_TOTAL = Counter(
     "personinsights_errors_total",
-    "Total PersonHog gRPC errors — every failed gRPC attempt",
+    "Total Person gRPC errors — every failed gRPC attempt",
     labelnames=["method", "client", "error_type"],
 )
 
 PERSONFN_RETRIES_TOTAL = Counter(
     "personinsights_retries_total",
-    "Total PersonHog gRPC retries before success or exhaustion",
+    "Total Person gRPC retries before success or exhaustion",
     labelnames=["method", "client", "error_type"],
 )
 
 PERSONFN_TERMINAL_ERRORS_TOTAL = Counter(
     "personinsights_terminal_errors_total",
-    "PersonHog gRPC errors after retry exhaustion — the request was not fulfilled",
+    "Person gRPC errors after retry exhaustion — the request was not fulfilled",
     labelnames=["method", "client", "error_type"],
 )

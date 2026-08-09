@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 
 import { Spinner } from '@hanzo/elements'
 
-import { SupermanHog } from 'lib/components/mascots'
+import { SupermanScript } from 'lib/components/mascots'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { ErrorTrackingIssue } from '~/queries/schema/schema-general'
@@ -130,7 +130,7 @@ function ErrorTrackingWidgetBody({
                         className="flex max-w-xs flex-col items-center gap-2 px-2 text-balance"
                         data-attr="error-tracking-widget-empty-state"
                     >
-                        <SupermanHog className="size-20 shrink-0" />
+                        <SupermanScript className="size-20 shrink-0" />
                         <p className="m-0 text-base font-semibold text-primary">All clear!</p>
                         <p className="m-0 text-sm text-muted">
                             No issues matched your filters. That's a good thing. Enjoy the quiet.

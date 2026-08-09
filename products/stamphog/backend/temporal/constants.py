@@ -1,4 +1,4 @@
-"""Shared constants for the stamphog review workflow stack.
+"""Shared constants for the stamp review workflow stack.
 
 The workflow, its activities, and the client that starts it all read from here so
 there is a single source of truth for the task-queue name, activity timeouts, and
@@ -11,15 +11,15 @@ from datetime import timedelta
 
 from temporalio.common import RetryPolicy
 
-STAMPFN_TASK_QUEUE = "stamphog-task-queue"
+STAMPFN_TASK_QUEUE = "stamp-task-queue"
 
 # Where the target repo is cloned inside the review sandbox. The Action's review
 # engine is shipped into ENGINE_DIR (under the checkout, so its repo-root walk finds
 # the checkout and reads the injected trusted policy); the context JSON lands at
 # CONTEXT_PATH. Kept here so logic.reviewer.build_reviewer_invocation and
 # run_review_in_sandbox agree on paths.
-STAMPFN_SANDBOX_REPO_DIR = "/tmp/stamphog/target"
-STAMPFN_SANDBOX_WORKSPACE_DIR = "/tmp/stamphog/workspace"
+STAMPFN_SANDBOX_REPO_DIR = "/tmp/stamp/target"
+STAMPFN_SANDBOX_WORKSPACE_DIR = "/tmp/stamp/workspace"
 STAMPFN_SANDBOX_ENGINE_DIR = f"{STAMPFN_SANDBOX_REPO_DIR}/tools/pr-approval-agent"
 
 # Reviewer bots whose 👀 reaction means "review in flight" — the hosted workflow waits these out
@@ -39,22 +39,22 @@ STAMPFN_BOT_EYES_MAX_AGE_SECONDS = 45 * 60
 STAMPFN_BOT_REVIEW_POLL_SECONDS = 30
 STAMPFN_BOT_REVIEW_MAX_POLLS = 10  # ~300s budget at 30s per poll, matching the Action's wait budget
 
-# The GitHub label Stamphog adds to hand a refused/escalated PR to ReviewHog. ``review-script.yml``
-# routes this label (when applied by stamphog[bot] — the one sanctioned bot exempted from its
-# bot-labeler-skip) to the ReviewHog trigger endpoint. Kept here so the activity references the same
+# The GitHub label Stamp adds to hand a refused/escalated PR to Review. ``review-script.yml``
+# routes this label (when applied by stamp[bot] — the one sanctioned bot exempted from its
+# bot-labeler-skip) to the Review trigger endpoint. Kept here so the activity references the same
 # scalar the workflow gates on.
-STAMPFN_REVIEWFN_LABEL = "reviewhog"
+STAMPFN_REVIEWFN_LABEL = "review"
 # The insights-owners resolver package, expected by the engine as a sibling of its own dir
 # (gates.py resolves `../owners` for the insightscli-resolver ownership format).
 STAMPFN_SANDBOX_OWNERS_DIR = f"{STAMPFN_SANDBOX_REPO_DIR}/tools/owners"
-STAMPFN_SANDBOX_CONTEXT_PATH = f"{STAMPFN_SANDBOX_REPO_DIR}/.stamphog_review_context.json"
+STAMPFN_SANDBOX_CONTEXT_PATH = f"{STAMPFN_SANDBOX_REPO_DIR}/.stamp_review_context.json"
 
 # Trusted review-norms prose the engine reads as its reviewer system guidance, and
 # the gate policy entrypoint. Both are fetched from the target repo's DEFAULT branch
 # (never PR head) and written over the checkout's copies before the engine runs, so
 # a PR can't rewrite the policy or norms it is judged against.
-STAMPFN_REVIEW_GUIDANCE_PATH = ".stamphog/review-guidance.md"
-STAMPFN_POLICY_ENTRYPOINT = ".stamphog/policy.yml"
+STAMPFN_REVIEW_GUIDANCE_PATH = ".stamp/review-guidance.md"
+STAMPFN_POLICY_ENTRYPOINT = ".stamp/policy.yml"
 
 # Files pulled from the target repo's DEFAULT branch onto the run and injected into
 # the sandbox checkout (overwriting any PR-head copy) as the trusted policy surface.
@@ -63,7 +63,7 @@ STAMPFN_POLICY_PATHS: tuple[str, ...] = (STAMPFN_POLICY_ENTRYPOINT, STAMPFN_REVI
 # Optional per-repo files: fetched from the DEFAULT branch and ALWAYS wiped from the PR
 # head, but injected only when the default branch has them — there is no server-shipped
 # default (an absent steering.md just leaves the reviewer prompt unchanged).
-STAMPFN_STEERING_PATH = ".stamphog/steering.md"
+STAMPFN_STEERING_PATH = ".stamp/steering.md"
 STAMPFN_OPTIONAL_POLICY_PATHS: tuple[str, ...] = (STAMPFN_STEERING_PATH,)
 
 # Per-activity start-to-close timeouts.

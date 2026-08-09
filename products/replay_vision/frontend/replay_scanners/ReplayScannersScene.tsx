@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { Banner, Button, Input, Switch, Table, Tabs, Link, Spinner, SpinnerOverlay } from '@hanzo/elements'
 import { IconPencil, IconPlus, IconRefresh, IconSearch, IconTrash } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { NotFound } from 'lib/components/NotFound'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -35,7 +35,7 @@ import { VisionUsageTab } from './components/VisionUsageTab'
 import { type ScannersSorting, SCANNERS_PAGE_SIZE, replayScannersLogic } from './replayScannersLogic'
 import { ENABLED_OPTIONS, EnabledFilter, SCANNER_TYPE_OPTIONS, ScannerType, ReplayScanner } from './types'
 
-const MascotXRay = pngHoggie()
+const MascotXRay = pngMascot()
 
 const TYPE_OPTIONS: { value: ScannerType; label: string }[] = SCANNER_TYPE_OPTIONS.map(({ value, label }) => ({
     value,
@@ -293,7 +293,7 @@ export function ReplayScannersScene(): JSX.Element {
                 thingName="scanner"
                 description="Replay vision runs scanners over your completed sessions on a schedule or on demand. Describe what you want to look for and the model watches each recording for it — categorizing sessions, scoring intent, flagging bugs, or detecting any pattern you can put into a prompt. Each result lands as a queryable event you can build insights, alerts, and cohorts on."
                 secondaryDescription="Start from a template or build a fully custom scanner."
-                customHog={MascotXRay}
+                customScript={MascotXRay}
                 action={() => push(urls.replayVisionTemplates())}
             />
 

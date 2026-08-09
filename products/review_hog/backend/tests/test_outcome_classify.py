@@ -260,7 +260,7 @@ class TestClassifyReportDecision:
         assert classified == 1
         assert captured[0]["properties"]["outcome"] == "reacted"
         assert captured[0]["properties"]["classification_method"] == "comment_reply"
-        assert captured[0]["uuid"] == str(uuid5(NAMESPACE_URL, f"reviewhog_finding_outcome:{report.id}:{_ISSUE_KEY}"))
+        assert captured[0]["uuid"] == str(uuid5(NAMESPACE_URL, f"review_finding_outcome:{report.id}:{_ISSUE_KEY}"))
         assert order == ["flush", "mark"]
 
     def test_judge_calls_are_capped_per_report_and_spent_on_the_worst_findings(self):
@@ -422,7 +422,7 @@ class TestClassifyReportDecision:
     def test_event_carries_join_keys_and_finding_metadata(self):
         captured, _judge = self._run(inputs=self._inputs(comment=None, compare_files=_FAR))
         event = captured[0]
-        assert event["event"] == "reviewhog_finding_outcome"
+        assert event["event"] == "review_finding_outcome"
         assert event["distinct_id"] == "user-distinct"
         props = event["properties"]
         assert props["repository"] == "o/r"  # repository + pr_number are the InsightsQL join keys to provenance

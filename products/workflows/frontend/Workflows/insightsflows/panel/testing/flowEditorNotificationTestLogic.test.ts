@@ -5,7 +5,7 @@ import { initKeaTests } from '~/test/init'
 import { CyclotronJobInvocationGlobals } from '~/types'
 
 import { workflowLogic } from '../../../workflowLogic'
-import { hogFlowEditorNotificationTestLogic } from './hogFlowEditorNotificationTestLogic'
+import { flowEditorNotificationTestLogic } from './flowEditorNotificationTestLogic'
 
 jest.mock('~/queries/query', () => {
     const actual = jest.requireActual('~/queries/query')
@@ -15,8 +15,8 @@ jest.mock('~/queries/query', () => {
     }
 })
 
-describe('hogFlowEditorNotificationTestLogic', () => {
-    let logic: ReturnType<typeof hogFlowEditorNotificationTestLogic.build>
+describe('flowEditorNotificationTestLogic', () => {
+    let logic: ReturnType<typeof flowEditorNotificationTestLogic.build>
     let workflowLogicInstance: ReturnType<typeof workflowLogic.build>
 
     beforeEach(() => {
@@ -26,7 +26,7 @@ describe('hogFlowEditorNotificationTestLogic', () => {
         useMocks({
             get: {
                 '/v1/environments/:team_id/persons/': { results: [] },
-                '/v1/environments/@current/hog_flows/test-workflow-id/': {
+                '/v1/environments/@current/script_flows/test-workflow-id/': {
                     id: 'test-workflow-id',
                     team_id: 1,
                     name: 'Test Workflow',
@@ -43,7 +43,7 @@ describe('hogFlowEditorNotificationTestLogic', () => {
         workflowLogicInstance = workflowLogic({ id: 'test-workflow-id' })
         workflowLogicInstance.mount()
 
-        logic = hogFlowEditorNotificationTestLogic({ id: 'test-workflow-id' })
+        logic = flowEditorNotificationTestLogic({ id: 'test-workflow-id' })
         logic.mount()
     })
 
@@ -447,7 +447,7 @@ describe('hogFlowEditorNotificationTestLogic', () => {
 
             logic.unmount()
 
-            const newLogic = hogFlowEditorNotificationTestLogic({ id: 'test-workflow-id' })
+            const newLogic = flowEditorNotificationTestLogic({ id: 'test-workflow-id' })
             newLogic.mount()
 
             await expectLogic(newLogic).toMatchValues({

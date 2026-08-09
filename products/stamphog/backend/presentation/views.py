@@ -1,5 +1,5 @@
 """
-DRF views for stamphog.
+DRF views for stamp.
 
 Validate JSON via serializers, call facade methods,
 return serialized responses. No business logic here.
@@ -32,25 +32,25 @@ from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.auth import OAuthAccessTokenAuthentication, PersonalAPIKeyAuthentication
 from insights.models.scoping.manager import resolve_effective_team_id
 
-from products.stamphog.backend.facade.enums import TERMINAL_STATUSES, ReviewRunStatus
+from products.stamp.backend.facade.enums import TERMINAL_STATUSES, ReviewRunStatus
 
 from ..logic.github_client import (
-    StamphogGitHubError,
+    StampGitHubError,
     exchange_oauth_code_for_user_token,
     list_user_accessible_repositories,
     list_user_installations,
     user_can_access_installation,
 )
-from ..models import DigestChannel, DigestRun, PullRequest, ReviewRun, StamphogRepoConfig
+from ..models import DigestChannel, DigestRun, PullRequest, ReviewRun, StampRepoConfig
 from .serializers import (
     DigestChannelSerializer,
     DigestRunSerializer,
     PullRequestSerializer,
     ReviewRunSerializer,
-    StamphogInstallInfoSerializer,
-    StamphogRepoConfigSerializer,
-    StamphogSyncInstallationRequestSerializer,
-    StamphogSyncInstallationResponseSerializer,
+    StampInstallInfoSerializer,
+    StampRepoConfigSerializer,
+    StampSyncInstallationRequestSerializer,
+    StampSyncInstallationResponseSerializer,
 )
 
 logger = structlog.get_logger(__name__)
@@ -59,11 +59,11 @@ logger = structlog.get_logger(__name__)
 # GitHub round-trips ?state=... through the install redirect; sync_installation only accepts a fresh,
 # validly-signed token for the current team, so a stolen installation_id + code can't be replayed
 # against another team's session.
-_INSTALL_STATE_SALT = "stamphog-install-state"
+_INSTALL_STATE_SALT = "stamp-install-state"
 _INSTALL_STATE_MAX_AGE_SECONDS = 60 * 60
 
 
-def _adopt_preexisting_config(team_id: int, repository: str, installation_id: str) -> StamphogRepoConfig | None:
+def _adopt_preexisting_config(team_id: int, repository: str, installation_id: str) -> StampRepoConfig | None:
     """Bind a manually-created (installation-less) config to a now-verified installation.
 
     Reached when the installation sync hits the unique (team, repository) constraint: a row for this
@@ -83,8 +83,8 @@ def _adopt_preexisting_config(team_id: int, repository: str, installation_id: st
     # Writer pin: the writer-side unique constraint is what routed us here, so the row exists on the
     # writer — a lagged reader missing it would mark the repo skipped and leave it unbound forever.
     existing = (
-        StamphogRepoConfig.objects.for_team(team_id)
-        .using(router.db_for_write(StamphogRepoConfig))
+        StampRepoConfig.objects.for_team(team_id)
+        .using(router.db_for_write(StampRepoConfig))
         .filter(provider="github", repository=repository)
         .first()
     )
@@ -104,10 +104,10 @@ def _adopt_preexisting_config(team_id: int, repository: str, installation_id: st
     return existing
 
 
-class StamphogCanonicalTeamAccessPermission(BasePermission):
+class StampCanonicalTeamAccessPermission(BasePermission):
     """Authorize against the canonical (data-owning) team, not just the URL environment team.
 
-    stamphog rows canonicalize to the parent (project-root) team on save, so a request made against a
+    stamp rows canonicalize to the parent (project-root) team on save, so a request made against a
     child environment reads and writes the PARENT's data. The default team gate only checks membership
     of the URL team, so a user with access to the child but not the parent (or the reverse) would be
     authorized against one team while touching another's rows. Re-anchor the membership check to the
@@ -120,7 +120,7 @@ class StamphogCanonicalTeamAccessPermission(BasePermission):
     def has_permission(self, request: Request, view: APIView) -> bool:
         if not request.user.is_authenticated:
             return True  # IsAuthenticated handles the unauthenticated case first
-        assert isinstance(view, _StamphogTeamScopedViewSet)  # only ever attached to the shared base
+        assert isinstance(view, _StampTeamScopedViewSet)  # only ever attached to the shared base
         team = view.team
         # parent_team_id is null (or equals self) for a root team; then canonical == URL team and the
         # default membership gate already authorized the right team.
@@ -143,7 +143,7 @@ class StamphogCanonicalTeamAccessPermission(BasePermission):
         return level is not None
 
 
-class _StamphogTeamScopedViewSet(TeamAndOrgViewSetMixin):
+class _StampTeamScopedViewSet(TeamAndOrgViewSetMixin):
     """Shared base that exposes the canonical (parent) team id for queryset scoping.
 
     ProductTeamModel.save() rewrites new rows to the canonical team id (parent when the team is a
@@ -152,12 +152,12 @@ class _StamphogTeamScopedViewSet(TeamAndOrgViewSetMixin):
     stored. resolve_effective_team_id is the framework helper the model uses; self.team is already
     loaded by the permission checks, so this resolves cheaply and is cached for the request.
 
-    StamphogCanonicalTeamAccessPermission keeps authorization pointed at that same canonical team, so a
+    StampCanonicalTeamAccessPermission keeps authorization pointed at that same canonical team, so a
     caller can never be authorized against the child environment while reading/writing the parent's rows.
     """
 
     # Appended onto the default team/scope permission stack by get_permissions.
-    permission_classes = [StamphogCanonicalTeamAccessPermission]
+    permission_classes = [StampCanonicalTeamAccessPermission]
 
     @cached_property
     def canonical_team_id(self) -> int:
@@ -165,7 +165,7 @@ class _StamphogTeamScopedViewSet(TeamAndOrgViewSetMixin):
 
     def get_serializer_context(self) -> dict[str, Any]:
         # The mixin sets context["team_id"] to the RAW url team, but serializers validate team-scoped
-        # lookups (e.g. DigestChannel.slack_integration_id) against it. stamphog rows canonicalize to the
+        # lookups (e.g. DigestChannel.slack_integration_id) against it. stamp rows canonicalize to the
         # parent team on save, so those lookups must target the canonical team the row is stored under —
         # a child-environment request would otherwise validate against the wrong team's integrations.
         context = super().get_serializer_context()
@@ -180,19 +180,19 @@ class _StamphogTeamScopedViewSet(TeamAndOrgViewSetMixin):
         return True
 
 
-class StamphogRepoConfigViewSet(_StamphogTeamScopedViewSet, viewsets.ModelViewSet):
-    """Per-repo stamphog settings — enable/disable review, GitHub App installation, policy overrides."""
+class StampRepoConfigViewSet(_StampTeamScopedViewSet, viewsets.ModelViewSet):
+    """Per-repo stamp settings — enable/disable review, GitHub App installation, policy overrides."""
 
-    scope_object = "stamphog"
-    serializer_class = StamphogRepoConfigSerializer
+    scope_object = "stamp"
+    serializer_class = StampRepoConfigSerializer
     # Unscoped base: the fail-closed manager raises at class-body eval if scoped here.
     # safely_get_queryset re-applies the team filter per request.
-    queryset = StamphogRepoConfig.objects.unscoped()
+    queryset = StampRepoConfig.objects.unscoped()
 
-    def safely_get_queryset(self, queryset: QuerySet[StamphogRepoConfig]) -> QuerySet[StamphogRepoConfig]:
+    def safely_get_queryset(self, queryset: QuerySet[StampRepoConfig]) -> QuerySet[StampRepoConfig]:
         return queryset.filter(team_id=self.canonical_team_id).order_by("repository")
 
-    def perform_create(self, serializer: BaseSerializer[StamphogRepoConfig]) -> None:
+    def perform_create(self, serializer: BaseSerializer[StampRepoConfig]) -> None:
         # installation_id is read-only on this serializer, so a manual create can never claim an
         # installation the caller hasn't proven ownership of — only the verified sync_installation flow
         # sets it. A manually created config therefore carries an empty installation and won't resolve
@@ -208,21 +208,21 @@ class StamphogRepoConfigViewSet(_StamphogTeamScopedViewSet, viewsets.ModelViewSe
         # teams (the DB constraint is likewise restricted to non-empty installation_id). Only a real,
         # synced installation can already be owned elsewhere.
         already_claimed = bool(installation_id) and (
-            StamphogRepoConfig.objects.unscoped()
+            StampRepoConfig.objects.unscoped()
             .filter(provider=provider, installation_id=installation_id, repository=repository)
             .exclude(team_id=self.canonical_team_id)
             .exists()
         )
         if already_claimed:
             raise already_claimed_error
-        # unique_stamphog_installation_repo backs the check above at the DB level, so a race that slips
+        # unique_stamp_installation_repo backs the check above at the DB level, so a race that slips
         # past the read still fails closed here — surface it as the same 400, not a 500.
         try:
             serializer.save(team_id=self.team_id)
         except IntegrityError:
             raise already_claimed_error
 
-    def perform_destroy(self, instance: StamphogRepoConfig) -> None:
+    def perform_destroy(self, instance: StampRepoConfig) -> None:
         # Soft-disable rather than hard-delete (same tombstone pattern as digest channels). A hard
         # delete cascades away the PRs and review runs — including posted_review_id — so a push to a
         # previously approved PR could no longer resolve the config or dismiss the stale approval,
@@ -233,16 +233,16 @@ class StamphogRepoConfigViewSet(_StamphogTeamScopedViewSet, viewsets.ModelViewSe
         instance.save(update_fields=["enabled", "digest_enabled", "updated_at"])
         self._supersede_active_runs(instance)
 
-    def perform_update(self, serializer: BaseSerializer[StamphogRepoConfig]) -> None:
+    def perform_update(self, serializer: BaseSerializer[StampRepoConfig]) -> None:
         was_enabled = serializer.instance is not None and serializer.instance.enabled
         serializer.save()
         if was_enabled and serializer.instance is not None and not serializer.instance.enabled:
             self._supersede_active_runs(serializer.instance)
 
-    def _supersede_active_runs(self, instance: StamphogRepoConfig) -> None:
+    def _supersede_active_runs(self, instance: StampRepoConfig) -> None:
         # Disabling (or tombstone-deleting) a repo must also stop reviews already in flight: their
         # workflows never re-check enabled, so a queued/reviewing run could still post an approval
-        # after an admin removed stamphog from the repo. Every workflow step bails on SUPERSEDED.
+        # after an admin removed stamp from the repo. Every workflow step bails on SUPERSEDED.
         superseded = (
             ReviewRun.objects.for_team(self.canonical_team_id)
             .filter(pull_request__repo_config=instance)
@@ -250,10 +250,10 @@ class StamphogRepoConfigViewSet(_StamphogTeamScopedViewSet, viewsets.ModelViewSe
             .update(status=ReviewRunStatus.SUPERSEDED, updated_at=timezone.now())
         )
         if superseded:
-            logger.info("stamphog_repo_disable_superseded_runs", repository=instance.repository, superseded=superseded)
+            logger.info("stamp_repo_disable_superseded_runs", repository=instance.repository, superseded=superseded)
 
-    @extend_schema(responses={200: StamphogInstallInfoSerializer})
-    @action(detail=False, methods=["GET"], url_path="install_info", required_scopes=["stamphog:read"])
+    @extend_schema(responses={200: StampInstallInfoSerializer})
+    @action(detail=False, methods=["GET"], url_path="install_info", required_scopes=["stamp:read"])
     def install_info(self, request: Request, **kwargs) -> Response:
         # Deep link into GitHub's install page for the "Connect a repository" button. The state token
         # binds the eventual callback to THIS team and user: GitHub round-trips ?state=... back to the
@@ -276,35 +276,35 @@ class StamphogRepoConfigViewSet(_StamphogTeamScopedViewSet, viewsets.ModelViewSe
             authorize_url = (
                 f"https://github.com/login/oauth/authorize?client_id={quote(client_id)}&state={quote(state)}"
             )
-        data = StamphogInstallInfoSerializer(
+        data = StampInstallInfoSerializer(
             {"app_slug": slug, "install_url": install_url, "authorize_url": authorize_url}
         ).data
         return Response(data)
 
     def _sync_installation_repositories(
         self, installation_id: str, user_token: str
-    ) -> tuple[list[StamphogRepoConfig], list[str]]:
+    ) -> tuple[list[StampRepoConfig], list[str]]:
         """Bind every user-accessible repo in one installation to the current team. Returns (synced, skipped).
 
         Enumerate with the USER token, not the app installation token: bind only the repos this user can
         actually reach in the installation, so proving access to one repo can't attach repos they can't
         see. The app-token list would return every repo the installer selected regardless of this user.
-        Raises :class:`StamphogGitHubError` on an enumeration failure so the caller fails closed. Shared by
+        Raises :class:`StampGitHubError` on an enumeration failure so the caller fails closed. Shared by
         the explicit-id and discovery paths so both bind identically.
         """
         repositories = list_user_accessible_repositories(installation_id, user_token)
-        synced: list[StamphogRepoConfig] = []
+        synced: list[StampRepoConfig] = []
         skipped: list[str] = []
-        # Bind the per-row savepoint to the model's routed DB (stamphog_db_writer when the product DB is
+        # Bind the per-row savepoint to the model's routed DB (stamp_db_writer when the product DB is
         # configured, else default) — a bare atomic() opens on the default connection, so the get_or_create
         # would run outside any transaction on the product DB.
-        write_db = router.db_for_write(StamphogRepoConfig)
+        write_db = router.db_for_write(StampRepoConfig)
         for full_name in repositories:
             # Per-row savepoint: an IntegrityError only rolls back that row, leaving the rest of the
             # batch (and the outer autocommit context) intact.
             try:
                 with transaction.atomic(using=write_db):
-                    config, _ = StamphogRepoConfig.objects.for_team(self.team_id).get_or_create(
+                    config, _ = StampRepoConfig.objects.for_team(self.team_id).get_or_create(
                         provider="github",
                         installation_id=installation_id,
                         repository=full_name,
@@ -329,10 +329,10 @@ class StamphogRepoConfigViewSet(_StamphogTeamScopedViewSet, viewsets.ModelViewSe
         return synced, skipped
 
     @extend_schema(
-        request=StamphogSyncInstallationRequestSerializer,
-        responses={200: StamphogSyncInstallationResponseSerializer},
+        request=StampSyncInstallationRequestSerializer,
+        responses={200: StampSyncInstallationResponseSerializer},
     )
-    @action(detail=False, methods=["POST"], url_path="sync_installation", required_scopes=["stamphog:write"])
+    @action(detail=False, methods=["POST"], url_path="sync_installation", required_scopes=["stamp:write"])
     def sync_installation(self, request: Request, **kwargs) -> Response:
         # Custom action names fall outside the default read/write action classification, so without
         # explicit required_scopes this write would be reachable with no scope check at all.
@@ -348,7 +348,7 @@ class StamphogRepoConfigViewSet(_StamphogTeamScopedViewSet, viewsets.ModelViewSe
         #     installed anywhere the user can see, signalled via app_not_installed.
         # Either way ownership is proven by the code, never the caller-supplied (forgeable) id. A repo
         # already owned by another team is skipped, not fatal, so one shared repo can't block the batch.
-        request_serializer = StamphogSyncInstallationRequestSerializer(data=request.data)
+        request_serializer = StampSyncInstallationRequestSerializer(data=request.data)
         request_serializer.is_valid(raise_exception=True)
         installation_id = request_serializer.validated_data["installation_id"]
         code = request_serializer.validated_data["code"]
@@ -365,7 +365,7 @@ class StamphogRepoConfigViewSet(_StamphogTeamScopedViewSet, viewsets.ModelViewSe
             )
         if state_payload.get("team_id") != self.team_id:
             logger.warning(
-                "stamphog sync_installation: state team mismatch",
+                "stamp sync_installation: state team mismatch",
                 installation_id=installation_id,
                 team_id=self.team_id,
             )
@@ -375,14 +375,14 @@ class StamphogRepoConfigViewSet(_StamphogTeamScopedViewSet, viewsets.ModelViewSe
         # member's session (both pass the team check). Same 403 path as the team mismatch.
         if state_payload.get("user_id") != request.user.pk:
             logger.warning(
-                "stamphog sync_installation: state user mismatch",
+                "stamp sync_installation: state user mismatch",
                 installation_id=installation_id,
                 team_id=self.team_id,
             )
             raise PermissionDenied("This installation link was started by a different user.")
 
         # Fail closed: no proven ownership, no binding. A missing OAuth token (bad/expired code or unset
-        # Stamphog OAuth creds) is a 400; a valid user who simply can't reach an installation is a 403.
+        # Stamp OAuth creds) is a 400; a valid user who simply can't reach an installation is a 403.
         user_token = exchange_oauth_code_for_user_token(code)
         if user_token is None:
             raise ValidationError({"code": "Could not verify GitHub authorization. Reinstall the app and try again."})
@@ -393,16 +393,16 @@ class StamphogRepoConfigViewSet(_StamphogTeamScopedViewSet, viewsets.ModelViewSe
             # installation_id could bind its repos and hijack its webhooks.
             try:
                 owns_installation = user_can_access_installation(installation_id, user_token)
-            except StamphogGitHubError:
+            except StampGitHubError:
                 logger.warning(
-                    "stamphog sync_installation: installation ownership check failed",
+                    "stamp sync_installation: installation ownership check failed",
                     installation_id=installation_id,
                     team_id=self.team_id,
                 )
                 raise ValidationError({"installation_id": "Failed to verify installation access. Try again."})
             if not owns_installation:
                 logger.warning(
-                    "stamphog sync_installation: caller does not own installation",
+                    "stamp sync_installation: caller does not own installation",
                     installation_id=installation_id,
                     team_id=self.team_id,
                 )
@@ -413,15 +413,15 @@ class StamphogRepoConfigViewSet(_StamphogTeamScopedViewSet, viewsets.ModelViewSe
             # user can reach, so the list is itself the ownership proof — no per-id verification needed.
             try:
                 discovered = list_user_installations(user_token)
-            except StamphogGitHubError:
+            except StampGitHubError:
                 logger.warning(
-                    "stamphog sync_installation: discovering user installations failed", team_id=self.team_id
+                    "stamp sync_installation: discovering user installations failed", team_id=self.team_id
                 )
                 raise ValidationError({"code": "Failed to discover GitHub App installations. Try again."})
             if not discovered:
                 # The App isn't installed anywhere the user can see. Not an error: the frontend routes them
                 # to the GitHub install page (install_url) off app_not_installed.
-                data = StamphogSyncInstallationResponseSerializer(
+                data = StampSyncInstallationResponseSerializer(
                     {"synced": [], "skipped": [], "app_not_installed": True, "installations": []}
                 ).data
                 return Response(data)
@@ -431,22 +431,22 @@ class StamphogRepoConfigViewSet(_StamphogTeamScopedViewSet, viewsets.ModelViewSe
                 # here, and via the oldest-wins webhook resolution even blackhole another team's future
                 # connect. Bind nothing; the frontend re-runs the flow with an explicit installation_id
                 # (which the explicit path above verifies).
-                data = StamphogSyncInstallationResponseSerializer(
+                data = StampSyncInstallationResponseSerializer(
                     {"synced": [], "skipped": [], "app_not_installed": False, "installations": discovered}
                 ).data
                 return Response(data)
             installation_ids = [discovered[0]["id"]]
 
-        synced: list[StamphogRepoConfig] = []
+        synced: list[StampRepoConfig] = []
         skipped: list[str] = []
         for one_installation_id in installation_ids:
             try:
                 installation_synced, installation_skipped = self._sync_installation_repositories(
                     one_installation_id, user_token
                 )
-            except StamphogGitHubError:
+            except StampGitHubError:
                 logger.warning(
-                    "stamphog sync_installation: listing user-accessible repositories failed",
+                    "stamp sync_installation: listing user-accessible repositories failed",
                     installation_id=one_installation_id,
                     team_id=self.team_id,
                 )
@@ -460,20 +460,20 @@ class StamphogRepoConfigViewSet(_StamphogTeamScopedViewSet, viewsets.ModelViewSe
         # installer may be long gone). .update() bypasses auto_now, so updated_at is set by hand.
         restamp_ids = [config.id for config in synced if config.connected_by_user_id != request.user.pk]
         if restamp_ids:
-            StamphogRepoConfig.objects.for_team(self.team_id).filter(id__in=restamp_ids).update(
+            StampRepoConfig.objects.for_team(self.team_id).filter(id__in=restamp_ids).update(
                 connected_by_user_id=request.user.pk, updated_at=timezone.now()
             )
 
-        data = StamphogSyncInstallationResponseSerializer(
+        data = StampSyncInstallationResponseSerializer(
             {"synced": synced, "skipped": skipped, "app_not_installed": False, "installations": []}
         ).data
         return Response(data)
 
 
-class ReviewRunViewSet(_StamphogTeamScopedViewSet, viewsets.ReadOnlyModelViewSet):
-    """Read-only history of stamphog review runs, filterable by repository, PR number, and status."""
+class ReviewRunViewSet(_StampTeamScopedViewSet, viewsets.ReadOnlyModelViewSet):
+    """Read-only history of stamp review runs, filterable by repository, PR number, and status."""
 
-    scope_object = "stamphog"
+    scope_object = "stamp"
     serializer_class = ReviewRunSerializer
     # Unscoped base: the fail-closed manager raises at class-body eval if scoped here.
     # safely_get_queryset re-applies the team filter per request.
@@ -533,10 +533,10 @@ class ReviewRunViewSet(_StamphogTeamScopedViewSet, viewsets.ReadOnlyModelViewSet
         return super().list(request, **kwargs)
 
 
-class PullRequestViewSet(_StamphogTeamScopedViewSet, viewsets.ReadOnlyModelViewSet):
-    """Read-only pull requests stamphog knows about, filterable by PR number and merge state."""
+class PullRequestViewSet(_StampTeamScopedViewSet, viewsets.ReadOnlyModelViewSet):
+    """Read-only pull requests stamp knows about, filterable by PR number and merge state."""
 
-    scope_object = "stamphog"
+    scope_object = "stamp"
     serializer_class = PullRequestSerializer
     # Unscoped base: the fail-closed manager raises at class-body eval if scoped here.
     # safely_get_queryset re-applies the team filter per request.
@@ -581,10 +581,10 @@ class PullRequestViewSet(_StamphogTeamScopedViewSet, viewsets.ReadOnlyModelViewS
         return super().list(request, **kwargs)
 
 
-class DigestChannelViewSet(_StamphogTeamScopedViewSet, viewsets.ModelViewSet):
+class DigestChannelViewSet(_StampTeamScopedViewSet, viewsets.ModelViewSet):
     """Per-audience Slack destinations for the daily merged-PR digest."""
 
-    scope_object = "stamphog"
+    scope_object = "stamp"
     serializer_class = DigestChannelSerializer
     # Unscoped base: the fail-closed manager raises at class-body eval if scoped here.
     # safely_get_queryset re-applies the team filter per request.
@@ -611,10 +611,10 @@ class DigestChannelViewSet(_StamphogTeamScopedViewSet, viewsets.ModelViewSet):
         instance.save(update_fields=["enabled", "updated_at"])
 
 
-class DigestRunViewSet(_StamphogTeamScopedViewSet, viewsets.ReadOnlyModelViewSet):
+class DigestRunViewSet(_StampTeamScopedViewSet, viewsets.ReadOnlyModelViewSet):
     """Read-only history of posted (or attempted) digests, filterable by digest channel."""
 
-    scope_object = "stamphog"
+    scope_object = "stamp"
     serializer_class = DigestRunSerializer
     # Unscoped base: the fail-closed manager raises at class-body eval if scoped here.
     # safely_get_queryset re-applies the team filter per request.

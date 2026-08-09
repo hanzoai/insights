@@ -1,8 +1,8 @@
-"""Django app configuration for stamphog."""
+"""Django app configuration for stamp."""
 
 from django.apps import AppConfig
 
 
-class StamphogConfig(AppConfig):
-    name = "products.stamphog.backend"
-    label = "stamphog"
+class StampConfig(AppConfig):
+    name = "products.stamp.backend"
+    label = "stamp"

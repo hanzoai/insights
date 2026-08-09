@@ -1,6 +1,6 @@
 """The two GitHub reads outcome classification needs, through the gated egress client.
 
-Both are read-only and metered against the installation's budget like every other ReviewHog call.
+Both are read-only and metered against the installation's budget like every other Review call.
 """
 
 import logging
@@ -59,7 +59,7 @@ def fetch_review_comments(
     the one read that backs both "which findings were published" and the reacted signal.
 
     Capped at ``_MAX_REVIEW_COMMENTS``; the paginator is lazy, so stopping early also stops the
-    requests. GitHub returns these oldest-first, which is the order that degrades best: ReviewHog's
+    requests. GitHub returns these oldest-first, which is the order that degrades best: Review's
     own finding comments are posted before any reply to them, so a truncated read keeps the comments
     findings are paired by and can only lose late replies. A finding whose reply was cut then reads as
     judged or ignored rather than reacted, so say so rather than under-reporting engagement silently.

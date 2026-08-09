@@ -32,7 +32,7 @@ class TestJsonFormatter:
     def test_single_migration_full_shape(self):
         """Pins the full output contract for the simplest non-empty case,
         including the `app.name` label format and the `file_path` field that
-        stamphog uses to scope its deny-list bypass."""
+        stamp uses to scope its deny-list bypass."""
         report = json.loads(
             self.formatter.format_report(
                 [_risk("insights", "1125_x", score=1, file_path="insights/migrations/1125_x.py")]
@@ -62,7 +62,7 @@ class TestJsonFormatter:
         ],
     )
     def test_max_level_picks_highest_severity_present(self, scores: list[int], expected_max_level: str):
-        """`max_level` is what stamphog and the GitHub check read — must always
+        """`max_level` is what stamp and the GitHub check read — must always
         reflect the worst migration in the batch."""
         results = [_risk("insights", f"m{i}", score=s) for i, s in enumerate(scores)]
 

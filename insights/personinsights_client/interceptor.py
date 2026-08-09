@@ -45,7 +45,7 @@ PERSONFN_DJANGO_REQUEST_COUNT = Counter(
 
 
 def _method_name(client_call_details: grpc.ClientCallDetails) -> str:
-    # client_call_details.method is like "/personinsights.service.v1.PersonHogService/GetPerson"
+    # client_call_details.method is like "/personinsights.service.v1.PersonService/GetPerson"
     method: str = client_call_details.method or "unknown"
     return method.rsplit("/", 1)[-1]
 

@@ -14,7 +14,7 @@ import type {
     InsightsQLAutocompleteResponse,
     InsightsQLMetadataResponse,
     InsightsQLQueryResponse,
-    HogQueryResponse,
+    ScriptQueryResponse,
     LogAttributesQueryResponse,
     LogValuesQueryResponse,
     MetricsQueryResponse,
@@ -263,7 +263,7 @@ export interface accountsOverviewTilesLogicValues {
     accountsColumnGroups: AccountColumnGroup[] // accountsColumnConfigLogic
     accountsResponse:
         | ErrorTrackingQueryResponse
-        | HogQueryResponse
+        | ScriptQueryResponse
         | InsightsQLAutocompleteResponse
         | InsightsQLMetadataResponse
         | InsightsQLQueryResponse<any[]>
@@ -350,7 +350,7 @@ export interface accountsOverviewTilesLogicMeta {
         tileValues: (
             accountsResponse:
                 | ErrorTrackingQueryResponse
-                | HogQueryResponse
+                | ScriptQueryResponse
                 | InsightsQLAutocompleteResponse
                 | InsightsQLMetadataResponse
                 | InsightsQLQueryResponse<any[]>

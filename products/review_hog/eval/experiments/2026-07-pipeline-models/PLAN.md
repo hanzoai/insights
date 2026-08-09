@@ -80,7 +80,7 @@ Pre-flight (worker hot-reloaded, ngrok, MODAL_DOCKER, PR head check) → `run_re
 (`LABEL=<label> ... OUT_DIR=products/review_hog/eval/experiments/2026-07-pipeline-models/runs`)
 → **no-verdict check before reset** (validator-session deaths; repair = re-run `run_review`, skip-resume
 re-attempts only missing verdicts) → model verification (opus-gen collapse + sonnet validation sessions) →
-`reset_review_hog --yes`.
+`reset_review --yes`.
 
 ## Scoring
 

@@ -160,7 +160,7 @@ Two things conspire to bounce a deep link back to the unfiltered list, so keep b
 **Build the URL via the canonical helpers, never hand-build the path:**
 
 - Frontend: `urls.customerAnalyticsAccount(accountId, tab?)` (in the product manifest). Used by the notebook→Accounts breadcrumb.
-- Backend: `build_account_deeplink(account_id, tab=None)` in `backend/account_urls.py` — the single source of truth for the Python side, returning `/customer_analytics/accounts/<id>[/<tab>]`. Used by the usage-spike notification (`backend/services/usage_spike_notifications.py`, `tab='usage'`) and by the agent's entity-search results (`ee/hogai/context/entity_search/context.py`), so when Max/MCP references an account it found, the link opens that account rather than the list.
+- Backend: `build_account_deeplink(account_id, tab=None)` in `backend/account_urls.py` — the single source of truth for the Python side, returning `/customer_analytics/accounts/<id>[/<tab>]`. Used by the usage-spike notification (`backend/services/usage_spike_notifications.py`, `tab='usage'`) and by the agent's entity-search results (`ee/scriptai/context/entity_search/context.py`), so when Max/MCP references an account it found, the link opens that account rather than the list.
 
 Anywhere we know the account, prefer a deep-link over the bare list. The notification path is routed through `buildNotificationSourcePath` in `sidePanelNotificationsLogic.tsx`, which has **no** `customer_analytics` entry in `SOURCE_TYPE_TO_PATH` precisely so the precise `source_url` deep-link wins instead of a static accounts-list path. The notification `source_url` is project-relative — the notifications side panel adds the project prefix on navigation.
 
@@ -214,7 +214,7 @@ The tool is registered for the page regardless of agent mode. The Customer analy
 - `products/customer_analytics/backend/models` — the `Account` model (`external_id` = group key).
 - `products/customer_analytics/backend/` — `accounts_query_runner` (builds the list rows + cell tuples).
 - `products/customer_analytics/backend/max_tools/` — `OpenAccountTool` and other account Max tools.
-- `ee/hogai/core/agent_modes/presets/customer_analytics.py` — the Customer analytics agent mode (gated by the `customer-analytics-csp` flag).
+- `ee/scriptai/core/agent_modes/presets/customer_analytics.py` — the Customer analytics agent mode (gated by the `customer-analytics-csp` flag).
 
 ## Conventions
 

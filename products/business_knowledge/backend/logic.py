@@ -1620,7 +1620,7 @@ def get_always_on_context(team_id: int) -> "list[KnowledgeSearchResult]":
 
 def has_feature_flag(team: Team) -> bool:
     """The `product-business-knowledge` flag check, org-keyed. Canonical home for the
-    check — `ee/hogai/utils/feature_flags.py` delegates here."""
+    check — `ee/scriptai/utils/feature_flags.py` delegates here."""
     if settings.DEBUG:
         return True
     return feature_enabled_or_false(

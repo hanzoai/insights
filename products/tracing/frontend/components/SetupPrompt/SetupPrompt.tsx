@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 
 import { Button, Link, Spinner } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { useInterval } from 'lib/hooks/useInterval'
 import goImage from 'scenes/onboarding/shared/logos/go.svg'
@@ -17,7 +17,7 @@ import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-genera
 
 import { tracingIngestionLogic } from './tracingIngestionLogic'
 
-const MascotXRay = pngHoggie()
+const MascotXRay = pngMascot()
 
 const FRAMEWORK_LINKS: { name: string; image?: string; docsLink: string }[] = [
     { name: 'Node.js', image: nodejsImage, docsLink: 'https://opentelemetry.io/docs/languages/js/' },
@@ -90,7 +90,7 @@ const NoSpansPrompt = ({ className }: { className?: string }): JSX.Element | nul
             isEmpty={true}
             productKey={ProductKey.TRACING}
             className={className}
-            customHog={MascotXRay}
+            customScript={MascotXRay}
             actionElementOverride={
                 <div className="flex flex-col items-start gap-4">
                     <p className="text-sm text-secondary m-0">

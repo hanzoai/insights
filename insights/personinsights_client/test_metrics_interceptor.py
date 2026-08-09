@@ -10,7 +10,7 @@ from insights.personinsights_client.interceptor import MetricsInterceptor, _Muta
 
 
 def _make_call_details(
-    method: str = "/personinsights.service.v1.PersonHogService/GetPerson",
+    method: str = "/personinsights.service.v1.PersonService/GetPerson",
     timeout: float = 5.0,
 ) -> grpc.ClientCallDetails:
     return _MutableClientCallDetails(

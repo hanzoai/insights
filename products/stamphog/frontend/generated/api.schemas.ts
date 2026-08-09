@@ -10,7 +10,7 @@
 /**
  * * `manual` - MANUAL
  * * `slack_name_match` - SLACK_NAME_MATCH
- * * `stamphog_config` - STAMPFN_CONFIG
+ * * `stamp_config` - STAMPFN_CONFIG
  * * `owners_contact` - OWNERS_CONTACT
  */
 export type ResolutionSourceEnumApi = (typeof ResolutionSourceEnumApi)[keyof typeof ResolutionSourceEnumApi]
@@ -18,7 +18,7 @@ export type ResolutionSourceEnumApi = (typeof ResolutionSourceEnumApi)[keyof typ
 export const ResolutionSourceEnumApi = {
     Manual: 'manual',
     SlackNameMatch: 'slack_name_match',
-    StamphogConfig: 'stamphog_config',
+    StampConfig: 'stamp_config',
     OwnersContact: 'owners_contact',
 } as const
 
@@ -45,11 +45,11 @@ export interface DigestChannelApi {
      * @maxLength 255
      */
     slack_channel_name?: string
-    /** How this row was created: 'manual' (via this API), 'slack_name_match' (auto-provisioned because the workspace has a channel named exactly like the audience_key), 'stamphog_config' (auto-provisioned from the channel the repo declared under 'digest:' in .stamphog/policy.yml), or 'owners_contact' (reserved for the future owners.yaml contact.slack step, not implemented yet).
+    /** How this row was created: 'manual' (via this API), 'slack_name_match' (auto-provisioned because the workspace has a channel named exactly like the audience_key), 'stamp_config' (auto-provisioned from the channel the repo declared under 'digest:' in .stamp/policy.yml), or 'owners_contact' (reserved for the future owners.yaml contact.slack step, not implemented yet).
      *
      * * `manual` - MANUAL
      * * `slack_name_match` - SLACK_NAME_MATCH
-     * * `stamphog_config` - STAMPFN_CONFIG
+     * * `stamp_config` - STAMPFN_CONFIG
      * * `owners_contact` - OWNERS_CONTACT */
     readonly resolution_source: ResolutionSourceEnumApi
     /** Whether this channel is included in the daily digest fan-out. */
@@ -92,11 +92,11 @@ export interface PatchedDigestChannelApi {
      * @maxLength 255
      */
     slack_channel_name?: string
-    /** How this row was created: 'manual' (via this API), 'slack_name_match' (auto-provisioned because the workspace has a channel named exactly like the audience_key), 'stamphog_config' (auto-provisioned from the channel the repo declared under 'digest:' in .stamphog/policy.yml), or 'owners_contact' (reserved for the future owners.yaml contact.slack step, not implemented yet).
+    /** How this row was created: 'manual' (via this API), 'slack_name_match' (auto-provisioned because the workspace has a channel named exactly like the audience_key), 'stamp_config' (auto-provisioned from the channel the repo declared under 'digest:' in .stamp/policy.yml), or 'owners_contact' (reserved for the future owners.yaml contact.slack step, not implemented yet).
      *
      * * `manual` - MANUAL
      * * `slack_name_match` - SLACK_NAME_MATCH
-     * * `stamphog_config` - STAMPFN_CONFIG
+     * * `stamp_config` - STAMPFN_CONFIG
      * * `owners_contact` - OWNERS_CONTACT */
     readonly resolution_source?: ResolutionSourceEnumApi
     /** Whether this channel is included in the daily digest fan-out. */
@@ -154,7 +154,7 @@ export interface PaginatedDigestRunListApi {
     results: DigestRunApi[]
 }
 
-export interface StamphogPullRequestApi {
+export interface StampPullRequestApi {
     readonly id: string
     /** Full name of the repository this pull request belongs to. */
     readonly repository: string
@@ -196,13 +196,13 @@ export interface StamphogPullRequestApi {
     readonly updated_at: string
 }
 
-export interface PaginatedStamphogPullRequestListApi {
+export interface PaginatedStampPullRequestListApi {
     count: number
     /** @nullable */
     next?: string | null
     /** @nullable */
     previous?: string | null
-    results: StamphogPullRequestApi[]
+    results: StampPullRequestApi[]
 }
 
 /**
@@ -216,7 +216,7 @@ export const ReviewModeEnumApi = {
     Label: 'label',
 } as const
 
-export interface StamphogRepoConfigApi {
+export interface StampRepoConfigApi {
     readonly id: string
     /**
      * SCM provider this config talks to. Defaults to 'github'.
@@ -228,7 +228,7 @@ export interface StamphogRepoConfigApi {
      * @maxLength 255
      */
     repository: string
-    /** Whether stamphog actively reviews pull requests for this repo. */
+    /** Whether stamp actively reviews pull requests for this repo. */
     enabled?: boolean
     /** Provider app installation ID that authorizes API calls for this repo. Set only by the verified sync_installation flow; ignored on direct writes. */
     readonly installation_id: string
@@ -240,7 +240,7 @@ export interface StamphogRepoConfigApi {
      * * `label` - label */
     review_mode?: ReviewModeEnumApi
     /**
-     * Pull request label that triggers a review when review_mode is 'label'. Defaults to 'stamphog'.
+     * Pull request label that triggers a review when review_mode is 'label'. Defaults to 'stamp'.
      * @maxLength 100
      */
     trigger_label?: string
@@ -248,16 +248,16 @@ export interface StamphogRepoConfigApi {
     readonly updated_at: string
 }
 
-export interface PaginatedStamphogRepoConfigListApi {
+export interface PaginatedStampRepoConfigListApi {
     count: number
     /** @nullable */
     next?: string | null
     /** @nullable */
     previous?: string | null
-    results: StamphogRepoConfigApi[]
+    results: StampRepoConfigApi[]
 }
 
-export interface PatchedStamphogRepoConfigApi {
+export interface PatchedStampRepoConfigApi {
     readonly id?: string
     /**
      * SCM provider this config talks to. Defaults to 'github'.
@@ -269,7 +269,7 @@ export interface PatchedStamphogRepoConfigApi {
      * @maxLength 255
      */
     repository?: string
-    /** Whether stamphog actively reviews pull requests for this repo. */
+    /** Whether stamp actively reviews pull requests for this repo. */
     enabled?: boolean
     /** Provider app installation ID that authorizes API calls for this repo. Set only by the verified sync_installation flow; ignored on direct writes. */
     readonly installation_id?: string
@@ -281,7 +281,7 @@ export interface PatchedStamphogRepoConfigApi {
      * * `label` - label */
     review_mode?: ReviewModeEnumApi
     /**
-     * Pull request label that triggers a review when review_mode is 'label'. Defaults to 'stamphog'.
+     * Pull request label that triggers a review when review_mode is 'label'. Defaults to 'stamp'.
      * @maxLength 100
      */
     trigger_label?: string
@@ -292,8 +292,8 @@ export interface PatchedStamphogRepoConfigApi {
 /**
  * Static info the frontend needs to render the 'Connect a repository' button.
  */
-export interface StamphogInstallInfoApi {
-    /** URL-friendly slug of the dedicated Stamphog GitHub App, or blank if unconfigured. */
+export interface StampInstallInfoApi {
+    /** URL-friendly slug of the dedicated Stamp GitHub App, or blank if unconfigured. */
     readonly app_slug: string
     /** GitHub install URL (github.com/apps/<slug>/installations/new) the user opens to install the App, or blank if the App slug is unconfigured. Used for the genuinely-not-installed case; the primary 'Connect' button uses authorize_url instead. */
     readonly install_url: string
@@ -310,7 +310,7 @@ export interface StamphogInstallInfoApi {
  * installations are discovered server-side from the code, so the client never has to supply a
  * forgeable id.
  */
-export interface StamphogSyncInstallationRequestApi {
+export interface StampSyncInstallationRequestApi {
     /** GitHub App installation ID from the fresh-install Setup URL redirect. Optional: absent or blank means discover the caller's installations from the OAuth code instead (authorize-first flow). The id is not trusted on its own — ownership is always proven via the code. */
     installation_id?: string
     /** GitHub user-to-server OAuth code from the post-install redirect (present when the App has 'Request user authorization during installation' enabled). Exchanged server-side to prove the caller owns the installation before its repos are bound. */
@@ -322,7 +322,7 @@ export interface StamphogSyncInstallationRequestApi {
 /**
  * One installation of the App the authorizing user can reach, offered for an explicit pick.
  */
-export interface StamphogDiscoveredInstallationApi {
+export interface StampDiscoveredInstallationApi {
     /** GitHub installation id, as a string. */
     readonly id: string
     /** Login of the org or user account the installation lives on. */
@@ -332,15 +332,15 @@ export interface StamphogDiscoveredInstallationApi {
 /**
  * Result of syncing an installation: rows created/kept for this team, plus conflicting repos skipped.
  */
-export interface StamphogSyncInstallationResponseApi {
+export interface StampSyncInstallationResponseApi {
     /** Repo configs now bound to this team for the installation (created this call or already present). */
-    readonly synced: readonly StamphogRepoConfigApi[]
+    readonly synced: readonly StampRepoConfigApi[]
     /** Repository full names skipped because another team already owns them under this installation. */
     readonly skipped: readonly string[]
     /** True only on the discovery path (no installation_id) when the caller can reach no installation of this App — it isn't installed anywhere they can see. The frontend should route the user to the GitHub install page (install_url). Always false on the explicit installation_id path. */
     readonly app_not_installed: boolean
     /** Populated only on the discovery path when the caller can reach MORE than one installation of this App: nothing was bound, and the user must pick which installation to connect. The frontend re-runs the authorize flow and calls back with the chosen installation_id, which the explicit path verifies. Empty whenever a bind happened (or nothing was found). */
-    readonly installations: readonly StamphogDiscoveredInstallationApi[]
+    readonly installations: readonly StampDiscoveredInstallationApi[]
 }
 
 /**
@@ -404,8 +404,8 @@ export interface _GateResultSummaryApi {
  * must never read over the API. Only these derived, content-free fields are exposed.
  */
 export interface _ReviewOutputSummaryApi {
-    /** Version of the stamphog engine that produced this review, if it reported one. */
-    readonly stamphog_version: string
+    /** Version of the stamp engine that produced this review, if it reported one. */
+    readonly stamp_version: string
     /** Exit code of the reviewer process in the sandbox, if the run reached the sandbox stage. */
     readonly reviewer_exit_code: number
 }
@@ -449,7 +449,7 @@ export interface ReviewRunApi {
     readonly verdict: ReviewRunVerdictEnumApi
     /** Allowlisted deterministic gate outcome (gate_blocked, final_verdict). The nested gate, classification, and policy sub-objects are excluded — they carry changed-file paths and policy scopes, repository content a project member without repo access must not read. */
     readonly gate_result: _GateResultSummaryApi
-    /** Allowlisted, non-sensitive subset of the reviewer output blob (stamphog version, reviewer exit code). The raw reviewer stdout, PR payload, changed-file patches, and policy file contents are deliberately excluded — they carry repository content a project member without repo access must not read. */
+    /** Allowlisted, non-sensitive subset of the reviewer output blob (stamp version, reviewer exit code). The raw reviewer stdout, PR payload, changed-file patches, and policy file contents are deliberately excluded — they carry repository content a project member without repo access must not read. */
     readonly output: _ReviewOutputSummaryApi
     /** Error message if the run failed, blank otherwise. */
     readonly error: string
@@ -473,7 +473,7 @@ export interface PaginatedReviewRunListApi {
     results: ReviewRunApi[]
 }
 
-export type StamphogDigestChannelsListParams = {
+export type StampDigestChannelsListParams = {
     /**
      * Number of results to return per page.
      */
@@ -484,7 +484,7 @@ export type StamphogDigestChannelsListParams = {
     offset?: number
 }
 
-export type StamphogDigestRunsListParams = {
+export type StampDigestRunsListParams = {
     /**
      * Filter by digest channel ID.
      */
@@ -499,7 +499,7 @@ export type StamphogDigestRunsListParams = {
     offset?: number
 }
 
-export type StamphogPullRequestsListParams = {
+export type StampPullRequestsListParams = {
     /**
      * Number of results to return per page.
      */
@@ -518,7 +518,7 @@ export type StamphogPullRequestsListParams = {
     pr_number?: number
 }
 
-export type StamphogRepoConfigsListParams = {
+export type StampRepoConfigsListParams = {
     /**
      * Number of results to return per page.
      */
@@ -529,7 +529,7 @@ export type StamphogRepoConfigsListParams = {
     offset?: number
 }
 
-export type StamphogReviewRunsListParams = {
+export type StampReviewRunsListParams = {
     /**
      * Number of results to return per page.
      */

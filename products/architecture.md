@@ -89,7 +89,7 @@ Core sometimes needs behavior from a product, not data: query runners it dispatc
 These cross the boundary as classes — allowed only under all three rules:
 
 1. **Approved interface.**
-   The class implements a core-owned base from the approved list — today `QueryRunner` (`insights/insightsql_queries/query_runner.py`), `MaxTool` (`ee/hogai/tool.py`), Temporal's `@workflow.defn`/`@activity.defn`, and Celery's `@shared_task`.
+   The class implements a core-owned base from the approved list — today `QueryRunner` (`insights/insightsql_queries/query_runner.py`), `MaxTool` (`ee/scriptai/tool.py`), Temporal's `@workflow.defn`/`@activity.defn`, and Celery's `@shared_task`.
    Core code may rely only on the base's interface, never on product-specific members.
    Extending the list is a core PR: define the base and validate at the registration point.
    DRF viewsets are not part of this channel: they live in `presentation/`, register through `routes.py`, and never pass through the facade (facades must not import DRF) — their soundness is governed by the presentation rules above.
@@ -98,7 +98,7 @@ These cross the boundary as classes — allowed only under all three rules:
 3. **Validated registration.**
    Registration points check `issubclass(cls, Base)` and reject anything else.
    Import linters (tach, import-linter) see only the import graph; _what an object is_ can only be checked at runtime, at the door.
-   `ee/hogai/registry.py` (MaxTool) is the reference implementation: subclass auto-registration with validation.
+   `ee/scriptai/registry.py` (MaxTool) is the reference implementation: subclass auto-registration with validation.
 
 Django models never cross, with or without an approved base.
 A model cannot be narrowed: whatever interface it presents, the object still carries managers, `save()`/`delete()`, FK descriptors that query other tables on attribute access, and reverse relations added by other apps.

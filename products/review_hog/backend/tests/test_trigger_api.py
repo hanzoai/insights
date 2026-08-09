@@ -11,16 +11,16 @@ from insights.models.organization import OrganizationMembership
 from insights.models.team import Team
 from insights.models.user import User
 
-TRIGGER_URL = "/v1/review_hog/trigger/"
+TRIGGER_URL = "/v1/review/trigger/"
 _START = "products.review_hog.backend.api.trigger.start_review_pr_workflow"
 
 
 @override_settings(REVIEWFN_TRIGGER_TOKEN="secret-token")
-class TestReviewHogTriggerApi(APIBaseTest):
+class TestReviewTriggerApi(APIBaseTest):
     def setUp(self):
         super().setUp()
         # Let Postgres auto-assign IDs to avoid collisions with the sequence.
-        self.trigger_team = Team.objects.create(organization=self.organization, name="reviewhog trigger")
+        self.trigger_team = Team.objects.create(organization=self.organization, name="review trigger")
         self.run_user = User.objects.create(email="run-user@hanzo.ai")
         OrganizationMembership.objects.create(organization=self.organization, user=self.run_user)
         # Apply dynamic IDs via settings overrides

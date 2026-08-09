@@ -28,7 +28,7 @@ from products.conversations.backend.support_teams import clear_teams_token, save
 
 logger = structlog.get_logger(__name__)
 
-STATE_SALT = "conversations.supporthog.teams.oauth"
+STATE_SALT = "conversations.support.teams.oauth"
 STATE_MAX_AGE_SECONDS = 10 * 60
 
 TEAMS_OAUTH_SCOPES = (

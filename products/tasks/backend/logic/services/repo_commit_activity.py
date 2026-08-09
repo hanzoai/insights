@@ -83,7 +83,7 @@ def collect_repository_commit_activity(
     sandbox = get_sandbox_class().create(
         SandboxConfig(
             name=f"repo-activity-{team_id}",
-            # Git-only job, no agent server — the slim image boots faster (stamphog precedent).
+            # Git-only job, no agent server — the slim image boots faster (stamp precedent).
             template=SandboxTemplate.SLIM_BASE,
             # The token reaches the clone URL via ${GITHUB_TOKEN} expansion inside the
             # sandbox — never in the command string, which sandbox provider/timeout

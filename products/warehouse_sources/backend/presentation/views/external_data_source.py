@@ -3449,20 +3449,20 @@ class ExternalDataSourceViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixi
             return {"success": False, "webhook_url": None, "error": error, "pending_inputs": []}
 
         try:
-            hog_fn_result = get_or_create_webhook_insights_function(
+            script_fn_result = get_or_create_webhook_insights_function(
                 team=self.team,
                 source=source,
                 source_id=str(instance.pk),
                 eligible_schemas=eligible_schemas,
                 config=source_config,
             )
-            if hog_fn_result.error or hog_fn_result.insights_function is None:
-                return failure(hog_fn_result.error)
+            if script_fn_result.error or script_fn_result.insights_function is None:
+                return failure(script_fn_result.error)
 
             registration = create_and_register_webhook(
                 source,
                 source_config,
-                hog_fn_result,
+                script_fn_result,
                 self.team_id,
                 api_version=source.resolve_api_version(instance.api_version),
             )
@@ -3473,7 +3473,7 @@ class ExternalDataSourceViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixi
         if not registration.success:
             # The external registration failed (e.g. credentials can't create webhooks), so the
             # handler would never receive events — remove it and keep the polling defaults.
-            insights_function = hog_fn_result.insights_function
+            insights_function = script_fn_result.insights_function
             insights_function.deleted = True
             insights_function.enabled = False
             insights_function.save(update_fields=["deleted", "enabled"])
@@ -4744,7 +4744,7 @@ class ExternalDataSourceViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixi
 
         eligible_schemas = [s for s in db_schemas if s.name in webhook_source_schemas]
 
-        hog_fn_result = get_or_create_webhook_insights_function(
+        script_fn_result = get_or_create_webhook_insights_function(
             team=self.team,
             source=source,
             source_id=str(instance.pk),
@@ -4752,14 +4752,14 @@ class ExternalDataSourceViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixi
             config=config,
         )
 
-        if hog_fn_result.error:
+        if script_fn_result.error:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
-                data={"message": hog_fn_result.error},
+                data={"message": script_fn_result.error},
             )
 
         result = create_and_register_webhook(
-            source, config, hog_fn_result, self.team_id, api_version=effective_api_version
+            source, config, script_fn_result, self.team_id, api_version=effective_api_version
         )
 
         return Response(

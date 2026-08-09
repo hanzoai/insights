@@ -6,7 +6,7 @@ from parameterized import parameterized
 
 from insights.schema import (
     AutocompleteCompletionItemKind,
-    HogLanguage,
+    ScriptLanguage,
     InsightsQLAutocomplete,
     InsightsQLAutocompleteResponse,
     InsightsQLQuery,
@@ -49,7 +49,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         self, query: str, start: int, end: int, database: Optional[Database] = None
     ) -> InsightsQLAutocompleteResponse:
         autocomplete = InsightsQLAutocomplete(
-            kind="InsightsQLAutocomplete", query=query, language=HogLanguage.INSIGHTS_QL, startPosition=start, endPosition=end
+            kind="InsightsQLAutocomplete", query=query, language=ScriptLanguage.INSIGHTS_QL, startPosition=start, endPosition=end
         )
         return get_insightsql_autocomplete(query=autocomplete, team=self.team, database_arg=database)
 
@@ -57,7 +57,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query=query,
-            language=HogLanguage.INSIGHTS_QL_EXPR,
+            language=ScriptLanguage.INSIGHTS_QL_EXPR,
             sourceQuery=InsightsQLQuery(query="select * from events"),
             startPosition=start,
             endPosition=end,
@@ -70,7 +70,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query=query,
-            language=HogLanguage.INSIGHTS_TEMPLATE,
+            language=ScriptLanguage.INSIGHTS_TEMPLATE,
             globals={"event": "$pageview"},
             startPosition=start,
             endPosition=end,
@@ -81,7 +81,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query=query,
-            language=HogLanguage.INSIGHTS_JSON,
+            language=ScriptLanguage.INSIGHTS_JSON,
             globals={"event": "$pageview"},
             startPosition=start,
             endPosition=end,
@@ -94,7 +94,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query=query,
-            language=HogLanguage.HOG,
+            language=ScriptLanguage.HOG,
             globals={"event": "$pageview"},
             startPosition=start,
             endPosition=end,
@@ -450,7 +450,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         results = self._json(query=query, start=5, end=6, database=database)
         assert len(results.suggestions) == 0
 
-    def test_autocomplete_hog(self):
+    def test_autocomplete_script(self):
         database = Database.create_for(team=self.team)
 
         # 1
@@ -585,7 +585,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query="SELECT * FROM e",
-            language=HogLanguage.INSIGHTS_QL,
+            language=ScriptLanguage.INSIGHTS_QL,
             sourceQuery=InsightsQLQuery(query=source_query),
             startPosition=15,
             endPosition=15,

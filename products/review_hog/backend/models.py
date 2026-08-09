@@ -21,7 +21,7 @@ class ReviewReport(UUIDModel, TeamScopedRootMixin):
     """The living per-target review document.
 
     One row per `(team, repository, pr_number)` — or per `(team, repository, head_branch)` for a
-    PR-less branch target (`pr_number` NULL), which upgrades in place once its PR exists. ReviewHog
+    PR-less branch target (`pr_number` NULL), which upgrades in place once its PR exists. Review
     is loop-y — after the first pass it re-checks the target for new commits/comments and takes
     another turn — so the report is updated in place across turns and the watermark records what the
     latest turn already reviewed.
@@ -127,12 +127,12 @@ class ReviewReport(UUIDModel, TeamScopedRootMixin):
             ),
         ]
         indexes = [
-            models.Index(fields=["team", "status"], name="reviewhog_rpt_team_status_idx"),
-            models.Index(fields=["signal_report_id"], name="reviewhog_rpt_signal_rpt_idx"),
+            models.Index(fields=["team", "status"], name="review_rpt_team_status_idx"),
+            models.Index(fields=["signal_report_id"], name="review_rpt_signal_rpt_idx"),
             # Serves the "recent reviews" API: one user's reports, newest completed turn first.
-            models.Index(fields=["team", "acting_user", "-last_run_at"], name="reviewhog_rpt_recent_idx"),
+            models.Index(fields=["team", "acting_user", "-last_run_at"], name="review_rpt_recent_idx"),
             # Same API's everyone scope: the whole project's reports, newest completed turn first.
-            models.Index(fields=["team", "-last_run_at"], name="reviewhog_rpt_team_recent_idx"),
+            models.Index(fields=["team", "-last_run_at"], name="review_rpt_team_recent_idx"),
             # The outcome sweep's backlog: published, PR-bound, not yet stamped emitted. The whole
             # predicate lives in the condition, so the index holds only the working set and shrinks
             # as reports are classified; `team` leads it because the cross-team discovery reads
@@ -141,7 +141,7 @@ class ReviewReport(UUIDModel, TeamScopedRootMixin):
             # rather than a sort over every pending row.
             models.Index(
                 fields=["team", "-updated_at"],
-                name="reviewhog_rpt_unclassified_idx",
+                name="review_rpt_unclassified_idx",
                 condition=models.Q(
                     published_head_sha__isnull=False, pr_number__isnull=False, outcomes_emitted_at__isnull=True
                 ),
@@ -212,10 +212,10 @@ class ReviewReportArtefact(UUIDModel, TeamScopedRootMixin):
 
     class Meta:
         indexes = [
-            models.Index(fields=["report"], name="reviewhog_art_report_idx"),
-            models.Index(fields=["report", "type"], name="reviewhog_art_rpt_type_idx"),
+            models.Index(fields=["report"], name="review_art_report_idx"),
+            models.Index(fields=["report", "type"], name="review_art_rpt_type_idx"),
             # Latest-wins seeks: WHERE report=? AND type=? ORDER BY created_at DESC.
-            models.Index(fields=["report", "type", "-created_at"], name="reviewhog_art_rpt_type_ct_idx"),
+            models.Index(fields=["report", "type", "-created_at"], name="review_art_rpt_type_ct_idx"),
         ]
 
     @classmethod
@@ -296,7 +296,7 @@ class ReviewReportArtefact(UUIDModel, TeamScopedRootMixin):
 
 
 class ReviewSkillConfig(UUIDModel, TeamScopedRootMixin):
-    """Per-(team, user, review-skill) enablement for ReviewHog.
+    """Per-(team, user, review-skill) enablement for Review.
 
     One generic table for which review skills run for a user, discriminated by the skill-name prefix:
     `review-script-perspective-*` (the review perspectives — **multi-enable**, ≥1 must stay on), plus
@@ -309,7 +309,7 @@ class ReviewSkillConfig(UUIDModel, TeamScopedRootMixin):
     A skill is any team `LLMSkill` carrying the prefix (canonical or custom — handled identically);
     canonicals auto-seed on first resolve, customs are switched on via the config API. The skill itself
     stays team-level; this row only gates whether it runs for this user's PRs. Mirrors Signals'
-    `SignalScoutConfig` enable/disable, minus the schedule — ReviewHog is PR-triggered, not on a clock.
+    `SignalScoutConfig` enable/disable, minus the schedule — Review is PR-triggered, not on a clock.
     `skill_name` is the identity (mirrors scouts keying on it, never `created_by`).
     """
 
@@ -327,12 +327,12 @@ class ReviewSkillConfig(UUIDModel, TeamScopedRootMixin):
         ]
         indexes = [
             # The loaders seek WHERE team=? AND user=? AND enabled=true to resolve a run's skills.
-            models.Index(fields=["team", "user", "enabled"], name="reviewhog_skillcfg_lookup_idx"),
+            models.Index(fields=["team", "user", "enabled"], name="review_skillcfg_lookup_idx"),
         ]
 
 
 class ReviewUserSettings(UUIDModel, TeamScopedRootMixin):
-    """Per-(team, user) ReviewHog settings: what gets reviewed and how strict publishing is.
+    """Per-(team, user) Review settings: what gets reviewed and how strict publishing is.
 
     One row per user per project, created with defaults on first read. `review_labeled_prs` is the
     label trigger's opt-out — the workflow gates on the PR author's row (no row = the defaults).
@@ -340,10 +340,10 @@ class ReviewUserSettings(UUIDModel, TeamScopedRootMixin):
     to a run at acting-user resolution, so mid-run edits don't flip gates between body and publish.
     `review_inbox_prs` is the inbox trigger's opt-in (default off — the budget gate for 100%-coverage
     cost): checked cheaply at the TaskRun-completion receiver and re-checked off the resolve snapshot.
-    `stamphog_review_inbox_prs` is the same opt-in for hosted Stamphog (approve-first review with a
+    `stamp_review_inbox_prs` is the same opt-in for hosted Stamp (approve-first review with a
     real GitHub approval) on those same inbox PRs. It is a cross-product preference kept here so both
     toggles live on one row, and it only takes effect for teams with a synced, enabled
-    StamphogRepoConfig covering the PR's repository.
+    StampRepoConfig covering the PR's repository.
     """
 
     class UrgencyThreshold(models.TextChoices):
@@ -357,7 +357,7 @@ class ReviewUserSettings(UUIDModel, TeamScopedRootMixin):
     team = models.ForeignKey("insights.Team", on_delete=models.CASCADE, related_name="+", db_constraint=False)
     user = models.ForeignKey("insights.User", on_delete=models.CASCADE, related_name="+", db_constraint=False)
     review_inbox_prs = models.BooleanField(default=False, db_default=False)
-    stamphog_review_inbox_prs = models.BooleanField(default=False, db_default=False)
+    stamp_review_inbox_prs = models.BooleanField(default=False, db_default=False)
     review_labeled_prs = models.BooleanField(default=True, db_default=True)
     urgency_threshold = models.CharField(
         max_length=20,

@@ -319,7 +319,7 @@ const digestAction: VisionActionApi = {
     delivery_config: [{ type: 'webhook', url: 'https://hooks.example.com/replay-vision' }],
     next_run_at: '2026-05-13T09:00:00Z',
     last_run_at: '2026-05-12T09:00:00Z',
-    hog_flow_id: null,
+    script_flow_id: null,
     created_at: '2026-05-01T00:00:00Z',
     created_by: alice,
     updated_at: '2026-05-01T00:00:00Z',

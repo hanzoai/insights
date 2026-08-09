@@ -103,10 +103,10 @@ export const SKILL_CATEGORY_TABS: SkillCategoryTab[] = [
     },
     {
         key: 'review-script',
-        category: 'review_hog',
+        category: 'review',
         label: 'Code review',
         description:
-            "ReviewHog's code-review skills: the specialist perspectives applied in parallel when reviewing a pull request (logic & correctness, contracts & security, performance & reliability) and the validation criteria that decide which findings are worth surfacing. Edit a skill to retune it for your team.",
+            "Review's code-review skills: the specialist perspectives applied in parallel when reviewing a pull request (logic & correctness, contracts & security, performance & reliability) and the validation criteria that decide which findings are worth surfacing. Edit a skill to retune it for your team.",
     },
 ]
 

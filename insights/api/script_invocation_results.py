@@ -33,7 +33,7 @@ def tag_invocation_results_query(function_kind: str) -> None:
 # turn `WHERE status = …` into `argMax(status) = …` (aggregate-in-WHERE error).
 # We collapse in a subquery, then filter the raw columns in the inner WHERE and
 # the aggregated `latest_*` columns in the outer WHERE. Column order is matched
-# positionally against HogInvocationResult when building the dataclass.
+# positionally against ScriptInvocationResult when building the dataclass.
 _COLLAPSED_AGGREGATES = """
     invocation_id,
     argMax(status, version) AS latest_status,
@@ -50,7 +50,7 @@ _COLLAPSED_AGGREGATES = """
     argMax(is_deleted, version) AS latest_is_deleted
 """.strip()
 
-# Outer projection, in HogInvocationResult field order.
+# Outer projection, in ScriptInvocationResult field order.
 _OUTER_COLUMNS = """
     invocation_id,
     latest_status,
@@ -68,7 +68,7 @@ _OUTER_COLUMNS = """
 
 
 @dataclasses.dataclass(frozen=True)
-class HogInvocationResult:
+class ScriptInvocationResult:
     invocation_id: str
     status: str
     error_kind: str
@@ -84,7 +84,7 @@ class HogInvocationResult:
 
 
 @dataclasses.dataclass(frozen=True)
-class HogInvocationResultDetail(HogInvocationResult):
+class ScriptInvocationResultDetail(ScriptInvocationResult):
     # The triggering payload (event/person/groups) the run executed against, decoded from the
     # stored gzip+base64 blob into a JSON object so callers get structured data directly. Shape
     # is caller-defined and unbounded.
@@ -109,9 +109,9 @@ def _decode_invocation_globals(stored: str) -> dict[str, Any]:
     return parsed if isinstance(parsed, dict) else {}
 
 
-class HogInvocationResultSerializer(DataclassSerializer):
+class ScriptInvocationResultSerializer(DataclassSerializer):
     class Meta:
-        dataclass = HogInvocationResult
+        dataclass = ScriptInvocationResult
 
 
 @extend_schema_field(OpenApiTypes.OBJECT)
@@ -119,16 +119,16 @@ class InvocationGlobalsField(serializers.JSONField):
     pass
 
 
-class HogInvocationResultDetailSerializer(DataclassSerializer):
+class ScriptInvocationResultDetailSerializer(DataclassSerializer):
     invocation_globals = InvocationGlobalsField(
         help_text="The triggering payload (event/person/groups) the run executed against, as a JSON object."
     )
 
     class Meta:
-        dataclass = HogInvocationResultDetail
+        dataclass = ScriptInvocationResultDetail
 
 
-class HogInvocationResultsRequestSerializer(serializers.Serializer):
+class ScriptInvocationResultsRequestSerializer(serializers.Serializer):
     status = serializers.CharField(
         required=False,
         help_text="Comma-separated invocation statuses to include, e.g. 'failed' or 'success,failed'.",
@@ -172,8 +172,8 @@ def _build_invocation(row: tuple, detail: bool) -> Any:
         "is_retry": bool(row[11]),
     }
     if detail:
-        return HogInvocationResultDetail(**common, invocation_globals=_decode_invocation_globals(row[12]))
-    return HogInvocationResult(**common)
+        return ScriptInvocationResultDetail(**common, invocation_globals=_decode_invocation_globals(row[12]))
+    return ScriptInvocationResult(**common)
 
 
 def fetch_hog_invocation_results(
@@ -185,7 +185,7 @@ def fetch_hog_invocation_results(
     distinct_id: Optional[str] = None,
     after: Optional[datetime] = None,
     before: Optional[datetime] = None,
-) -> list[HogInvocationResult]:
+) -> list[ScriptInvocationResult]:
     """List a function's invocations, each collapsed to its latest lifecycle state."""
     where = [
         "team_id = %(team_id)s",
@@ -237,12 +237,12 @@ def fetch_hog_invocation_results(
     return [_build_invocation(row, detail=False) for row in results]
 
 
-def fetch_hog_invocation_result(
+def fetch_script_invocation_result(
     team_id: int,
     function_kind: str,
     function_id: str,
     invocation_id: str,
-) -> Optional[HogInvocationResultDetail]:
+) -> Optional[ScriptInvocationResultDetail]:
     """Fetch a single invocation by id, including its triggering payload."""
     kwargs = {
         "team_id": team_id,

@@ -1,4 +1,4 @@
-# ReviewHog — e2e run log (pseudo-evals)
+# Review — e2e run log (pseudo-evals)
 
 Purpose: record every end-to-end `run_review` so we can tell whether a prompt/code change
 **actually moved review quality**, instead of iterating blind.
@@ -17,11 +17,11 @@ Purpose: record every end-to-end `run_review` so we can tell whether a prompt/co
   [#62096](https://github.com/Insights/insights/pull/62096) was still open with a live branch on 2026-07-06).
   This is also the standing reminder that branch-ref checkout, not head_sha pinning, is the mechanism —
   merged-and-deleted PRs cannot be reviewed at all until the SHA-pin fix lands.
-- The **codebase-state label** = what changed in the reviewer (prompt/code) + the `signals/reviewhog`
+- The **codebase-state label** = what changed in the reviewer (prompt/code) + the `signals/review`
   working state ("uncommitted" while iterating). Quality is only comparable across runs at the **same**
   reviewed `head_sha`.
 - The agent appends an entry after each run (reads `ReviewReport` + `ReviewReportArtefact` on team 1);
-  `python manage.py reset_review_hog --yes` clears DB state between fresh runs.
+  `python manage.py reset_review --yes` clears DB state between fresh runs.
 
 > Reset to the #63625 baseline on 2026-06-25 (the earlier bootstrap runs were against #65862, a live
 > branch that moved mid-iteration — not reproducible, so cleared).
@@ -82,7 +82,7 @@ Purpose: record every end-to-end `run_review` so we can tell whether a prompt/co
     **publish** → completed (vs Scenario 1's validate+fetch-only early-exit).
   - DB: `run_count` 1 → **2**, `status=idle`; `head_sha` → **`0d93d3ff`**; `published_head_sha` → **`0d93d3ff`**.
   - GitHub: a fresh `insights-local-dev[bot]` **COMMENTED review pinned to `commit_id=0d93d3ff`** (the head_sha pin
-    works), **+2 new inline comments** (5 → 7). **Promo NOT re-posted** — still exactly **1** "ReviewHog Alpha"
+    works), **+2 new inline comments** (5 → 7). **Promo NOT re-posted** — still exactly **1** "Review Alpha"
     (`post_promo = published_head_sha is None` → False once a prior head was published; once-per-report gate holds
     across turns). Deduped against our own Friday inline comments + the other bot's (greptile-apps[bot]).
 - **Together with the same-SHA run below, this validates both repeated-run behaviors end-to-end:** unchanged head →
@@ -131,7 +131,7 @@ Purpose: record every end-to-end `run_review` so we can tell whether a prompt/co
 - **What landed (Phases 1–4):** non-blocking `start_review_pr_workflow` + per-run `publish` flag (retired
   `PUBLISH_REVIEW_ENABLED`) + `--publish` on `run_review`; PAT → **GitHub App installation token** for fetch + publish
   (worker no longer needs `GITHUB_TOKEN`); fork rejection (`PRMetadata.is_fork`, non-retryable, pre-report);
-  `head_sha`-pinned publish; shared-secret endpoint `POST /v1/review_hog/trigger`; `.github/workflows/review-script.yml`.
+  `head_sha`-pinned publish; shared-secret endpoint `POST /v1/review/trigger`; `.github/workflows/review-script.yml`.
 - **Adversarial review** (4-dimension finder → per-finding skeptic verify): 11 raw → **7 confirmed → 4 distinct**, all
   **fixed**: (A) re-trigger/`synchronize` raised `WorkflowAlreadyStartedError` → unhandled **500 / red CI check** →
   fixed with `id_conflict_policy=USE_EXISTING`; (B) `_installation_token` marked transient GitHub failures
@@ -148,7 +148,7 @@ Purpose: record every end-to-end `run_review` so we can tell whether a prompt/co
   passed (non-fork), 1 chunk → analyze + 3 perspectives. **1 raw finding** (Logic & Correctness `database.py:1625`),
   perspectives 2/3 found 0 → 1 post-dedup finding → validator marked it **`is_valid:False`** (dropped, "bug" but not
   surfaced) ⇒ **0 publishable ⇒ nothing posted to the PR** (correct). Confirmed via the installation token: no
-  ReviewHog review/promo on #63625. So the live `create_review` HTTP path is **not** exercised end-to-end until a
+  Review review/promo on #63625. So the live `create_review` HTTP path is **not** exercised end-to-end until a
   finding survives validation (it is covered by `test_publish_review`). NOTE: #63625's head has moved to `2f1a8aee…`
   (was frozen `243ddf40295c`), so it's no longer the old baseline code.
 - **Bug the e2e exposed + fixed:** `_publish` set `published_head_sha` even on a no-op publish (0 publishable),
@@ -159,20 +159,20 @@ Purpose: record every end-to-end `run_review` so we can tell whether a prompt/co
   7 chunks; 23 raw issues → 20 post-dedup → 20 validated → **6 `is_valid:True`** (oauth.py, run_wizard.py,
   wizard_pr_agent_prompt.md). **Posted to the PR as `insights-local-dev[bot]`** (verified by reading GitHub back via the
   installation token): a `COMMENTED` review **pinned to `commit 4e71e3328eb6` = the reviewed `head_sha`** (head_sha pin
-  ✅), inline comments on the valid findings, and **1** "ReviewHog Alpha" promo comment (once-per-report gate ✅).
+  ✅), inline comments on the valid findings, and **1** "Review Alpha" promo comment (once-per-report gate ✅).
   `published_head_sha == head_sha` ✅. This is the first end-to-end exercise of the live `create_review` HTTP path +
   installation-token publish + head_sha pin + promo gate on a real PR. Next: Stage 5b (push a new commit to a labeled
-  PR → re-review → confirm the dedup skips ReviewHog's own prior inline comments).
+  PR → re-review → confirm the dedup skips Review's own prior inline comments).
 
 ---
 
 ## 2026-06-25 · audit fixes — resilience (retries / 70% floor) — PR #63625 @ `243ddf40295c`
 
-- **ReviewHog under test:** post-audit resilience fixes — sandbox failures now **raise** so Temporal
+- **Review under test:** post-audit resilience fixes — sandbox failures now **raise** so Temporal
   retries actually fire (the executor no longer swallows them to `None`), dedup no longer
   bare-`RuntimeError`-aborts, a **70% fan-out failure floor** fails the run on a near-total wipeout
   instead of finalizing an empty report as success, and all activities + child workflows + the parent
-  retry uniformly. `signals/reviewhog`, uncommitted. **Fresh run (DB reset first)** so the whole
+  retry uniformly. `signals/review`, uncommitted. **Fresh run (DB reset first)** so the whole
   pipeline re-ran — no resume.
 - **Pipeline (exit 0, every stage):** `commit` 1 · `pr_snapshot` 1 · `chunk_set` 1 (1 chunk) ·
   `chunk_analysis` 1 · `perspective_result` **3/3** (no best-effort drops) · `issue_finding` 2 ·
@@ -189,10 +189,10 @@ Purpose: record every end-to-end `run_review` so we can tell whether a prompt/co
 
 ## 2026-06-25 · step 15 — Temporal single-turn workflow — PR #63625 @ `243ddf40295c`
 
-- **ReviewHog under test:** step 15 — the whole pipeline is now a Temporal `ReviewPRWorkflow` (parent +
+- **Review under test:** step 15 — the whole pipeline is now a Temporal `ReviewPRWorkflow` (parent +
   3 fan-out child workflows + activities; everything by-reference via the new `pr_snapshot` artefact;
   identity threaded explicitly, contextvar gone). `run_review` triggers + **blocks** on the workflow.
-  `signals/reviewhog`, uncommitted working tree.
+  `signals/review`, uncommitted working tree.
 - **Ran end-to-end through Temporal (exit 0)** — the workflow executed in the `video-export` worker
   (DEBUG-collapsed to `development-task-queue`), confirming `review-pr` + the 3 children are registered.
   `pr_snapshot:1` proves the fetch activity ran and the stage activities reloaded PR inputs from the DB.
@@ -207,9 +207,9 @@ chars`. Publish gated off.
 
 ## 2026-06-25 · step 13 — validator-as-pulled-skill — PR #63625 @ `243ddf40295c`
 
-- **ReviewHog under test:** step 13 — the validation keep/drop **criteria moved to a pulled LLMA skill**
+- **Review under test:** step 13 — the validation keep/drop **criteria moved to a pulled LLMA skill**
   (`review-script-validation-criteria`); `issue_validation` prompt is criteria-agnostic; both review skill sets
-  collapsed to one `review_hog` category / "Code review" tab. `signals/reviewhog`, uncommitted working tree.
+  collapsed to one `review` category / "Code review" tab. `signals/review`, uncommitted working tree.
 - **Pipeline:** 9/9 stages (exit 0). 1 chunk. Artefacts: `chunk_analysis` 1, `perspective_result` 2
   (one perspective×chunk dropped — best-effort, Modal flakiness), `issue_finding` 1, `validation_verdict` 1.
   Report body 4,448 chars.
@@ -230,8 +230,8 @@ chars`. Publish gated off.
 
 ## 2026-06-25 · baseline — PR #63625 @ `243ddf40295c`
 
-- **ReviewHog under test:** step 11 (A-lite agnostic prompts + trimmed context) **+** `combine_issues`
-  id re-stamp fix. `signals/reviewhog`, uncommitted working tree.
+- **Review under test:** step 11 (A-lite agnostic prompts + trimmed context) **+** `combine_issues`
+  id re-stamp fix. `signals/review`, uncommitted working tree.
 - **Pipeline:** 9/9 stages. 1 chunk (small PR). Artefacts: `chunk_analysis` 1, `perspective_result` 3 (3×1).
 - **Findings:** 1 · **Validator:** **1 kept / 0 dropped** · report body 2,173 chars.
 
@@ -248,7 +248,7 @@ chars`. Publish gated off.
   **verdict: keep sonnet-5 @ xhigh** — Sonnet: 14/44 verified-real (31.8%), stable, cheaper (caching);
   GLM: 7/36 (19.4%) but owns 3 of 4 confirmed must_fix incl. the flagship `task.internal` bug in BOTH runs.
 - **Side yields:** 2 confirmed must_fix bugs in the target PR; tasks-runner false-success bug (auth-failed
-  sandbox → validated-empty IssuesReview, defeats the failure floor); `review_hog` gateway product routing
+  sandbox → validated-empty IssuesReview, defeats the failure floor); `review` gateway product routing
   (agent + allowlist, kept); per-stage timing table in `dump_result.py` (kept); Sonnet-arm Opus-fallback
   contamination (~20% of finder gens, every Sonnet run) quantified.
 

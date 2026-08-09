@@ -4,7 +4,7 @@ import { Modal } from '@hanzo/elements'
 
 import { useWindowSize } from 'lib/hooks/useWindowSize'
 
-import { reviewHogSettingsLogic } from './reviewHogSettingsLogic'
+import { reviewSettingsLogic } from './reviewSettingsLogic'
 
 /**
  * "Detailed view" of the review pipeline, opened from the "How we review your PRs" section.
@@ -176,8 +176,8 @@ function GoldBandNumber({ children }: { children: string }): JSX.Element {
 }
 
 export function PipelineDetailModal(): JSX.Element {
-    const { pipelineDetailOpen } = useValues(reviewHogSettingsLogic)
-    const { closePipelineDetail } = useActions(reviewHogSettingsLogic)
+    const { pipelineDetailOpen } = useValues(reviewSettingsLogic)
+    const { closePipelineDetail } = useActions(reviewSettingsLogic)
     const { windowSize } = useWindowSize()
 
     // Modal caps itself at 90% of the viewport width and just under the viewport height; fit

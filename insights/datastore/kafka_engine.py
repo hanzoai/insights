@@ -26,7 +26,7 @@ CONSUMER_GROUP_PRECALCULATED_PERSON_PROPERTIES = (
     "datastore_precalculated_person_properties2" if _US else "datastore_precalculated_person_properties"
 )
 CONSUMER_GROUP_DISTINCT_ID_USAGE = "datastore_distinct_id_usage"
-CONSUMER_GROUP_TOPHOG = "datastore_tophog"
+CONSUMER_GROUP_TopFn = "datastore_topfn"
 CONSUMER_GROUP_AI_EVENTS = "datastore_ai_events" if _US else "group1"
 CONSUMER_GROUP_PROPERTY_VALUES = "datastore_property_values"
 CONSUMER_GROUP_FLAG_EVALUATIONS = "datastore_flag_evaluations"
@@ -34,7 +34,7 @@ CONSUMER_GROUP_FLAG_EVALUATIONS = "datastore_flag_evaluations"
 # WarpStream consumer groups (separate from MSK so both can coexist)
 CONSUMER_GROUP_LOG_ENTRIES_WS = "datastore_log_entries_ws"
 CONSUMER_GROUP_APP_METRICS2_WS = "datastore_app_metrics2_ws"
-CONSUMER_GROUP_TOPFN_WS = "datastore_tophog_ws"
+CONSUMER_GROUP_TOPFN_WS = "datastore_topfn_ws"
 CONSUMER_GROUP_PRECALCULATED_EVENTS_WS = "datastore_precalculated_events_ws"
 CONSUMER_GROUP_PRECALCULATED_PERSON_PROPERTIES_WS = "datastore_precalculated_person_properties_ws"
 CONSUMER_GROUP_EVENTS_JSON_WS = "datastore_events_json_ws"

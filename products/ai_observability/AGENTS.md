@@ -62,11 +62,11 @@ Two ways to fix it on a ViewSet with custom actions:
 - **Per-action override.** Pass `required_scopes=[...]` to `@action(...)`.
   Best when the scope for one action diverges from the rest of the
   ViewSet (e.g. a write-shaped endpoint that's safe enough to expose
-  with `:read`, like `EvaluationViewSet.test_hog`).
+  with `:read`, like `EvaluationViewSet.test_script`).
 
   ```python
   @action(detail=False, methods=["post"], required_scopes=["evaluation:read"])
-  def test_hog(self, request, **kwargs): ...
+  def test_script(self, request, **kwargs): ...
   ```
 
 When you add or rename a custom action, update one of the two — if you

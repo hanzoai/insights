@@ -1,6 +1,6 @@
 """Survey creation eval cases for the sandboxed coding agent.
 
-Intent mirrors ``ee/hogai/eval/ci/eval_surveys.py``. The CI version calls
+Intent mirrors ``ee/scriptai/eval/ci/eval_surveys.py``. The CI version calls
 Max's ``CreateSurveyTool`` directly and checks Django state. This version
 asks the sandboxed agent to create surveys through the Insights MCP
 ``survey-create`` tool and scores the payload/result it produced.

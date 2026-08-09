@@ -101,7 +101,7 @@ class TestTwoTierClassification:
         assert _classify(baseline, current) == ChangeKind.STRUCTURAL
 
     def test_size_mismatch_still_classifies_normally(self):
-        # Pixelhog pads to the bigger size and runs metrics over the
+        # Pixelscript pads to the bigger size and runs metrics over the
         # padded buffers — we still get a real pixel-tier classification
         # (the new content area shows up as differing pixels). The fact
         # that sizes differed is recorded separately on diff_metadata.
@@ -150,7 +150,7 @@ class TestClusterSummary:
         assert 0 <= c.centroid[0] <= 200 and 0 <= c.centroid[1] <= 200
 
     def test_size_mismatch_yields_clusters_for_new_content_area(self):
-        # Pixelhog pads to the bigger size; the new content area
+        # Pixelscript pads to the bigger size; the new content area
         # surfaces as a cluster of its own. That's the right answer
         # ("here's the new region") rather than something to hide.
         small = _make_png(100, 100, (200, 200, 200, 255))

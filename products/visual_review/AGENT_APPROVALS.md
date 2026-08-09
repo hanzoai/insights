@@ -1,5 +1,5 @@
 ---
-stamphog:
+stamp:
   size_gate:
     max_files: 50
 ---

@@ -39,7 +39,7 @@ def _stale_head_warning(
 
 
 class Command(BaseCommand):
-    help = "Publish an already-computed ReviewHog review to its PR (no re-review, no sandbox cost)."
+    help = "Publish an already-computed Review review to its PR (no re-review, no sandbox cost)."
 
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument("--pr-url", required=True, help="GitHub PR URL the review was computed for")
@@ -85,7 +85,7 @@ class Command(BaseCommand):
         run_index = report.run_count
         self.stdout.write(
             self.style.MIGRATE_HEADING(
-                f"ReviewHog ▶ publishing {repository}#{pr_number} · report {report.id} · head {head_sha[:12]}"
+                f"Review ▶ publishing {repository}#{pr_number} · report {report.id} · head {head_sha[:12]}"
             )
         )
         # A local-only ops command: always the default threshold (consider), not a per-user one —
@@ -104,11 +104,11 @@ class Command(BaseCommand):
             installation_id=installation_id,
         )
         if outcome.posted:
-            self.stdout.write(self.style.SUCCESS(f"ReviewHog ✓ published {repository}#{pr_number}"))
+            self.stdout.write(self.style.SUCCESS(f"Review ✓ published {repository}#{pr_number}"))
         else:
             self.stdout.write(
                 self.style.WARNING(
-                    f"ReviewHog · nothing posted for {repository}#{pr_number} "
+                    f"Review · nothing posted for {repository}#{pr_number} "
                     "(already published at this head, or no publishable findings)."
                 )
             )

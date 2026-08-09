@@ -12,7 +12,7 @@ and ``PersonDBRouter`` never routes elsewhere — it returns ``None`` and lets t
 default database stand.  So this client answers the same proto requests straight
 from the ORM.
 
-It presents the same call interface as ``PersonHogClient``: every method takes the
+It presents the same call interface as ``PersonClient``: every method takes the
 proto request and returns the proto response, built from the real proto message
 classes.  Call sites are identical either way, which is the whole point — the
 seam in ``client.py`` absorbs the difference and no caller changes.
@@ -212,7 +212,7 @@ def _delete(rows: QuerySet, batch_size: int | None = None) -> int:
 class LocalClient:
     """Serves the personinsights interface from the ORM.
 
-    Same method names, request types and response types as ``PersonHogClient``.
+    Same method names, request types and response types as ``PersonClient``.
     ``timeout`` arguments are accepted and ignored: there is no RPC to bound.
     """
 

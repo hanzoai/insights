@@ -24,8 +24,8 @@ import type {
     InsightsFunctionsMetricsRetrieveParams,
     InsightsFunctionsMetricsTotalsRetrieveParams,
     InsightsFunctionsRevisionsListParams,
-    HogInvocationRerunRequestApi,
-    HogInvocationRerunResponseApi,
+    ScriptInvocationRerunRequestApi,
+    ScriptInvocationRerunResponseApi,
     PaginatedInsightsFunctionMinimalListApi,
     PaginatedInsightsFunctionRevisionBasicListApi,
     PaginatedInsightsFunctionTemplateListApi,
@@ -396,14 +396,14 @@ export const getInsightsFunctionsRerunCreateUrl = (projectId: string, id: string
 export const insightsFunctionsRerunCreate = async (
     projectId: string,
     id: string,
-    hogInvocationRerunRequestApi: HogInvocationRerunRequestApi,
+    scriptInvocationRerunRequestApi: ScriptInvocationRerunRequestApi,
     options?: RequestInit
-): Promise<HogInvocationRerunResponseApi> => {
-    return apiMutator<HogInvocationRerunResponseApi>(getInsightsFunctionsRerunCreateUrl(projectId, id), {
+): Promise<ScriptInvocationRerunResponseApi> => {
+    return apiMutator<ScriptInvocationRerunResponseApi>(getInsightsFunctionsRerunCreateUrl(projectId, id), {
         ...options,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(hogInvocationRerunRequestApi),
+        body: JSON.stringify(scriptInvocationRerunRequestApi),
     })
 }
 

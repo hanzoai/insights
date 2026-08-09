@@ -529,11 +529,11 @@ class TestEvaluationConfigsApi(APIBaseTest):
         self.assertEqual(response.json()["attr"], "target_config")
 
     @parameterized.expand(["generation", "trace", "session"])
-    def test_test_hog_previews_every_target(self, target: str):
+    def test_test_script_previews_every_target(self, target: str):
         """Every target an evaluation can run on must also be previewable, or the editor can only
         check the code for some of them."""
         response = self.client.post(
-            f"/v1/environments/{self.team.id}/evaluations/test_hog/",
+            f"/v1/environments/{self.team.id}/evaluations/test_script/",
             {"source": "return true", "target": target},
         )
         self.assertEqual(response.status_code, 200, response.json())
@@ -543,7 +543,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
         """An empty session sample is a real answer at a long quiet period, so the caller has to be
         able to tell it apart from a broken preview."""
         response = self.client.post(
-            f"/v1/environments/{self.team.id}/evaluations/test_hog/",
+            f"/v1/environments/{self.team.id}/evaluations/test_script/",
             {"source": "return true", "target": "session", "target_config": {"quiet_period_seconds": 86400}},
             format="json",
         )
@@ -696,7 +696,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
     def test_db_constraint_blocks_model_config_on_non_judge_eval(self):
         # QuerySet.update() bypasses Evaluation.save(), so this exercises the DB constraint itself.
         mc = LLMModelConfiguration.objects.create(team=self.team, provider="openai", model="gpt-5-mini")
-        hog_eval = Evaluation.objects.create(
+        script_eval = Evaluation.objects.create(
             team=self.team,
             name="Script",
             evaluation_type="script",
@@ -705,7 +705,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
         )
 
         with self.assertRaises(IntegrityError), transaction.atomic():
-            Evaluation.objects.filter(id=hog_eval.id).update(model_configuration=mc)
+            Evaluation.objects.filter(id=script_eval.id).update(model_configuration=mc)
 
     @parameterized.expand(
         [
@@ -1029,7 +1029,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["attr"], "config")
 
-    def test_invalid_hog_source_returns_400_not_500(self):
+    def test_invalid_script_source_returns_400_not_500(self):
         # Malformed Script source passes serializer config validation (non-empty source) but fails
         # to compile in the model's save(). The compile failure must surface as a 400 validation
         # error, not an unhandled 500 — `|` is the exact character that triggered this in production.
@@ -1182,7 +1182,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
         self.assertEqual(response.status_code, 400)
 
 
-class TestTestHogEndpoint(APIBaseTest):
+class TestTestScriptEndpoint(APIBaseTest):
     EVENT_TIMESTAMP = "2026-07-20T12:34:56Z"
 
     def _mock_insightsql_response(self, count=1):
@@ -1213,11 +1213,11 @@ class TestTestHogEndpoint(APIBaseTest):
 
     @patch("products.ai_observability.backend.api.evaluations.report_user_action")
     @patch("insights.insightsql_queries.ai.ai_table_resolver.execute_insightsql_query")
-    def test_test_hog_loads_ai_input_and_output(self, mock_query, mock_report_user_action):
+    def test_test_script_loads_ai_input_and_output(self, mock_query, mock_report_user_action):
         mock_query.return_value = self._mock_insightsql_response(2)
 
         response = self.client.post(
-            f"/v1/environments/{self.team.id}/evaluations/test_hog/",
+            f"/v1/environments/{self.team.id}/evaluations/test_script/",
             {
                 "source": (
                     "return evaluation_events.1.output_text == '4' "
@@ -1247,27 +1247,27 @@ class TestTestHogEndpoint(APIBaseTest):
         self.assertEqual([field.chain for field in query.select[5:]], [[name] for name in HEAVY_COLUMN_NAMES])
         self.assertFalse(mock_report_user_action.call_args.args[2]["no_events"])
 
-    def test_test_hog_compilation_error(self):
+    def test_test_script_compilation_error(self):
         response = self.client.post(
-            f"/v1/environments/{self.team.id}/evaluations/test_hog/",
+            f"/v1/environments/{self.team.id}/evaluations/test_script/",
             {"source": "this is not valid script {{{{"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("Compilation error", response.json()["error"])
 
-    def test_test_hog_empty_source_rejected(self):
+    def test_test_script_empty_source_rejected(self):
         response = self.client.post(
-            f"/v1/environments/{self.team.id}/evaluations/test_hog/",
+            f"/v1/environments/{self.team.id}/evaluations/test_script/",
             {"source": ""},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @patch("insights.insightsql_queries.ai.ai_table_resolver.execute_insightsql_query")
-    def test_test_hog_no_events(self, mock_query):
+    def test_test_script_no_events(self, mock_query):
         mock_query.return_value = self._mock_insightsql_response(0)
 
         response = self.client.post(
-            f"/v1/environments/{self.team.id}/evaluations/test_hog/",
+            f"/v1/environments/{self.team.id}/evaluations/test_script/",
             {"source": "return true"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1275,11 +1275,11 @@ class TestTestHogEndpoint(APIBaseTest):
         self.assertIn("message", response.json())
 
     @patch("insights.insightsql_queries.ai.ai_table_resolver.execute_insightsql_query")
-    def test_test_hog_handles_runtime_error(self, mock_query):
+    def test_test_script_handles_runtime_error(self, mock_query):
         mock_query.return_value = self._mock_insightsql_response(1)
 
         response = self.client.post(
-            f"/v1/environments/{self.team.id}/evaluations/test_hog/",
+            f"/v1/environments/{self.team.id}/evaluations/test_script/",
             {"source": "return 42"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1289,11 +1289,11 @@ class TestTestHogEndpoint(APIBaseTest):
         self.assertIn("Must return boolean", results[0]["error"])
 
     @patch("insights.insightsql_queries.ai.ai_table_resolver.execute_insightsql_query")
-    def test_test_hog_uses_null_safe_comparisons(self, mock_query):
+    def test_test_script_uses_null_safe_comparisons(self, mock_query):
         mock_query.return_value = self._mock_insightsql_response(1)
 
         response = self.client.post(
-            f"/v1/environments/{self.team.id}/evaluations/test_hog/",
+            f"/v1/environments/{self.team.id}/evaluations/test_script/",
             {"source": "return properties.missing <= 1.0"},
         )
 
@@ -1303,15 +1303,15 @@ class TestTestHogEndpoint(APIBaseTest):
         self.assertFalse(results[0]["result"])
         self.assertIsNone(results[0]["error"])
 
-    @patch("products.ai_observability.backend.api.evaluations.run_hog_eval_over_recent_traces")
+    @patch("products.ai_observability.backend.api.evaluations.run_script_eval_over_recent_traces")
     @patch("insights.insightsql_queries.ai.ai_table_resolver.execute_insightsql_query")
-    def test_test_hog_trace_target_evaluates_whole_traces(self, mock_query, mock_run_over_traces):
+    def test_test_script_trace_target_evaluates_whole_traces(self, mock_query, mock_run_over_traces):
         # A trace-target request must run the trace path (whole-trace globals), not the
         # generation query — the gap this endpoint used to have.
-        from insights.temporal.ai_observability.run_trace_evaluation import TraceHogTestResult
+        from insights.temporal.ai_observability.run_trace_evaluation import TraceScriptTestResult
 
         mock_run_over_traces.return_value = [
-            TraceHogTestResult(
+            TraceScriptTestResult(
                 trace_id="trace-1",
                 verdict=True,
                 reasoning="ok",
@@ -1322,7 +1322,7 @@ class TestTestHogEndpoint(APIBaseTest):
         ]
 
         response = self.client.post(
-            f"/v1/environments/{self.team.id}/evaluations/test_hog/",
+            f"/v1/environments/{self.team.id}/evaluations/test_script/",
             {
                 "source": "return target.type == 'trace'",
                 "target": "trace",
@@ -1342,12 +1342,12 @@ class TestTestHogEndpoint(APIBaseTest):
         self.assertEqual(results[0]["trace_id"], "trace-1")
         self.assertTrue(results[0]["result"])
 
-    @patch("products.ai_observability.backend.api.evaluations.run_hog_eval_over_recent_traces")
-    def test_test_hog_trace_target_no_traces(self, mock_run_over_traces):
+    @patch("products.ai_observability.backend.api.evaluations.run_script_eval_over_recent_traces")
+    def test_test_script_trace_target_no_traces(self, mock_run_over_traces):
         mock_run_over_traces.return_value = []
 
         response = self.client.post(
-            f"/v1/environments/{self.team.id}/evaluations/test_hog/",
+            f"/v1/environments/{self.team.id}/evaluations/test_script/",
             {"source": "return true", "target": "trace"},
         )
 
@@ -1472,7 +1472,7 @@ class TestEnableBlockingWhenKeyRequired(APIBaseTest):
         self.assertIn("Add a provider API key", str(response.data))
         self.assertEqual(Evaluation.objects.filter(name="Doomed Eval").count(), 0)
 
-    def test_allows_enabling_hog_eval_without_key(self):
+    def test_allows_enabling_script_eval_without_key(self):
         eval_obj = Evaluation.objects.create(
             team=self.team,
             name="Script Eval",

@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 import structlog
 
-from insights.cdp.validation import compile_hog
+from insights.cdp.validation import compile_script
 
 from products.cdp.backend.models.insights_function_template import InsightsFunctionTemplate
 from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
@@ -40,7 +40,7 @@ class Command(BaseCommand):
             return
 
         # All migrated rows get the same code, so compile once upfront
-        bytecode = compile_hog(template.code, "transformation")
+        bytecode = compile_script(template.code, "transformation")
 
         queryset = InsightsFunction.objects.filter(
             type="transformation",

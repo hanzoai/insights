@@ -7,16 +7,16 @@ from insights.models.scoping import team_scope
 
 from products.review_hog.backend.models import ReviewUserSettings
 from products.skills.backend.models.skills import LLMSkill
-from products.stamphog.backend.models import StamphogRepoConfig
+from products.stamp.backend.models import StampRepoConfig
 
 
 class TestReviewUserSettingsAPI(APIBaseTest):
-    # The serializer resolves stamphog_connected off the stamphog product DB on every response.
-    databases = {"default", "stamphog_db_writer", "stamphog_db_reader"}
+    # The serializer resolves stamp_connected off the stamp product DB on every response.
+    databases = {"default", "stamp_db_writer", "stamp_db_reader"}
 
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/v1/projects/{self.team.id}/review_hog/settings/"
+        self.url = f"/v1/projects/{self.team.id}/review/settings/"
 
     def test_get_creates_the_row_with_defaults(self) -> None:
         # First read auto-creates the singleton with the model defaults, so the UI never special-cases
@@ -26,24 +26,24 @@ class TestReviewUserSettingsAPI(APIBaseTest):
         assert res.status_code == 200
         assert res.json() == {
             "review_inbox_prs": False,
-            "stamphog_review_inbox_prs": False,  # opt-in: a real approval must never be a default
+            "stamp_review_inbox_prs": False,  # opt-in: a real approval must never be a default
             "review_labeled_prs": True,
             "urgency_threshold": "consider",
             "can_trigger_reviews": False,  # REVIEWFN_TEAM_ID is unset in tests
-            "stamphog_connected": False,  # no synced+enabled repo config in this project
+            "stamp_connected": False,  # no synced+enabled repo config in this project
         }
         assert ReviewUserSettings.objects.for_team(self.team.id).filter(user_id=self.user.id).count() == 1
 
     def test_patch_updates_only_the_provided_fields(self) -> None:
         res = self.client.patch(
-            self.url, {"urgency_threshold": "must_fix", "stamphog_review_inbox_prs": True}, format="json"
+            self.url, {"urgency_threshold": "must_fix", "stamp_review_inbox_prs": True}, format="json"
         )
 
         assert res.status_code == 200
         assert res.json()["urgency_threshold"] == "must_fix"
         row = ReviewUserSettings.objects.for_team(self.team.id).get(user_id=self.user.id)
         assert row.urgency_threshold == "must_fix"
-        assert row.stamphog_review_inbox_prs is True
+        assert row.stamp_review_inbox_prs is True
         assert row.review_labeled_prs is True  # untouched field keeps its default
 
     @parameterized.expand(
@@ -57,11 +57,11 @@ class TestReviewUserSettingsAPI(APIBaseTest):
             ("no_connecting_user", True, "inst-1", None, False),
         ]
     )
-    def test_stamphog_connected_requires_a_synced_enabled_repo_config(
+    def test_stamp_connected_requires_a_synced_enabled_repo_config(
         self, _name, enabled, installation_id, connected_by_user_id, expected
     ) -> None:
         with team_scope(self.team.id):
-            StamphogRepoConfig.objects.create(
+            StampRepoConfig.objects.create(
                 team_id=self.team.id,
                 repository="insights/insights",
                 enabled=enabled,
@@ -72,7 +72,7 @@ class TestReviewUserSettingsAPI(APIBaseTest):
         res = self.client.get(self.url)
 
         assert res.status_code == 200
-        assert res.json()["stamphog_connected"] is expected
+        assert res.json()["stamp_connected"] is expected
 
     def test_patch_rejects_an_unknown_threshold(self) -> None:
         res = self.client.patch(self.url, {"urgency_threshold": "everything"}, format="json")
@@ -105,7 +105,7 @@ class TestReviewUserSettingsAPI(APIBaseTest):
         # raw-id create kwarg used to contradict each other: the row landed on the parent, the get
         # never matched, and every call after the first 500ed on the unique constraint.
         env = Team.objects.create(organization=self.organization, parent_team=self.team, name="env")
-        url = f"/v1/projects/{env.id}/review_hog/settings/"
+        url = f"/v1/projects/{env.id}/review/settings/"
 
         first = self.client.get(url)
         second = self.client.patch(url, {"urgency_threshold": "must_fix"}, format="json")

@@ -48,7 +48,7 @@ PERSONFN_BATCH_SIZE: int = settings.PERSONFN_BATCH_SIZE
 
 
 if TYPE_CHECKING:
-    from insights.personinsights_client.client import PersonHogClient
+    from insights.personinsights_client.client import PersonClient
     from insights.personinsights_client.proto.generated.personinsights.types.v1 import person_pb2
 
 
@@ -56,7 +56,7 @@ _get_client = require_personinsights_client
 
 
 def _get_persons_for_uuid_batch(
-    client: PersonHogClient,
+    client: PersonClient,
     team_id: int,
     batch: list[str],
     operation: str,
@@ -423,7 +423,7 @@ def get_persons_by_uuids(team_id: int, uuids: list[str], *, distinct_id_limit: i
     )
 
 
-def _distinct_ids_for_person(client: PersonHogClient, team_id: int, person_id: int, limit: int | None) -> list[str]:
+def _distinct_ids_for_person(client: PersonClient, team_id: int, person_id: int, limit: int | None) -> list[str]:
     # Callers needing only person fields (not distinct_ids) pass distinct_id_limit=0 to skip the
     # per-person distinct-id fetch, which is otherwise unbounded and pulls thousands of rows for
     # merge-heavy persons. A positive limit bounds the fetch; None leaves it unbounded.

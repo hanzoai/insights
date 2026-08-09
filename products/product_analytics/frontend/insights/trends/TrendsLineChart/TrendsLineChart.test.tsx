@@ -16,7 +16,7 @@ import {
     buildTrendsQuery,
     chart,
     createInsightTooltipAccessor,
-    getHogChart,
+    getScriptChart,
     getQuerySource,
     legend,
     personsModal,
@@ -307,7 +307,7 @@ describe('TrendsLineChart', () => {
             await screen.findByLabelText(/chart with/i)
             // Reference lines come exclusively from goalLines in this test (none configured),
             // so the count must be 0 — anything here would be a leaked alert overlay.
-            expect(getHogChart().referenceLines()).toHaveLength(0)
+            expect(getScriptChart().referenceLines()).toHaveLength(0)
         })
     })
 
@@ -346,8 +346,8 @@ describe('TrendsLineChart', () => {
             // chart's aria-label appears (like referenceLines/valueLabels below), so read
             // them through waitFor rather than synchronously.
             await waitFor(() => {
-                expect(getHogChart().xAxisLabel()).toBe('Signup date')
-                expect(getHogChart().yAxisLabel()).toBe('Unique users')
+                expect(getScriptChart().xAxisLabel()).toBe('Signup date')
+                expect(getScriptChart().yAxisLabel()).toBe('Unique users')
             })
         })
     })
@@ -365,9 +365,9 @@ describe('TrendsLineChart', () => {
             })
 
             await waitFor(() => {
-                expect(getHogChart().hasRightAxis).toBe(true)
+                expect(getScriptChart().hasRightAxis).toBe(true)
             })
-            expect(getHogChart().yRightTicks().length).toBeGreaterThan(0)
+            expect(getScriptChart().yRightTicks().length).toBeGreaterThan(0)
         })
     })
 
@@ -382,7 +382,7 @@ describe('TrendsLineChart', () => {
             await screen.findByLabelText(/chart with/i)
             await waitFor(
                 () => {
-                    const lines = getHogChart().referenceLines()
+                    const lines = getScriptChart().referenceLines()
                     expect(lines.map((l) => l.label)).toEqual(['Target'])
                     for (const line of lines) {
                         expect(line.orientation).toBe('horizontal')
@@ -402,11 +402,11 @@ describe('TrendsLineChart', () => {
             })
 
             await waitFor(() => {
-                const labels = getHogChart().valueLabels()
+                const labels = getScriptChart().valueLabels()
                 expect(labels.length).toBeGreaterThan(0)
             })
             // Pageview series is [45, 82, 134, 210, 95]; all non-zero => 5 labels.
-            const labels = getHogChart()
+            const labels = getScriptChart()
                 .valueLabels()
                 .map((l) => l.text)
             expect(labels).toContain('45')
@@ -429,9 +429,9 @@ describe('TrendsLineChart', () => {
             })
 
             await waitFor(() => {
-                expect(getHogChart().valueLabels().length).toBeGreaterThan(0)
+                expect(getScriptChart().valueLabels().length).toBeGreaterThan(0)
             })
-            const labels = getHogChart().valueLabels()
+            const labels = getScriptChart().valueLabels()
             for (const l of labels) {
                 expect(l.text).toMatch(/%/)
             }

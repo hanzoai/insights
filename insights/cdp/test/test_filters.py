@@ -415,9 +415,9 @@ class TestInsightsFunctionFilters(DatastoreTestMixin, APIBaseTest, QueryMatching
             ),
         ]
     )
-    def test_dotted_property_key_resolution(self, _name: str, filters: dict, hog_globals: dict, expected: bool):
+    def test_dotted_property_key_resolution(self, _name: str, filters: dict, script_globals: dict, expected: bool):
         bytecode = self.filters_to_bytecode(filters=filters)
-        assert execute_bytecode(bytecode, hog_globals).result is expected
+        assert execute_bytecode(bytecode, script_globals).result is expected
 
 
 class TestCohortExprHelpers(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
@@ -563,13 +563,13 @@ class TestCohortInlining(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         assert result.get("bytecode") is not None, f"Expected bytecode but got error: {result.get('bytecode_error')}"
 
         # The negated cohort should produce a NOT(...) expression that compiles to bytecode
-        hog_globals = {"person": {"properties": {"email": "test@other.com"}}}
-        res = execute_bytecode(result["bytecode"], hog_globals)
+        script_globals = {"person": {"properties": {"email": "test@other.com"}}}
+        res = execute_bytecode(result["bytecode"], script_globals)
         assert res.result is True
 
         # A person matching the cohort should be filtered out (NOT matches)
-        hog_globals = {"person": {"properties": {"email": "ben@hanzo.ai"}}}
-        res = execute_bytecode(result["bytecode"], hog_globals)
+        script_globals = {"person": {"properties": {"email": "ben@hanzo.ai"}}}
+        res = execute_bytecode(result["bytecode"], script_globals)
         assert res.result is False
 
     def test_person_property_cohort_mixed_with_regular_filters(self):
@@ -586,12 +586,12 @@ class TestCohortInlining(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         assert result.get("bytecode") is not None, f"Expected bytecode but got error: {result.get('bytecode_error')}"
 
         # Both filters should be applied: plan=enterprise AND email not containing @test.com
-        hog_globals = {"person": {"properties": {"plan": "enterprise", "email": "user@real.com"}}}
-        res = execute_bytecode(result["bytecode"], hog_globals)
+        script_globals = {"person": {"properties": {"plan": "enterprise", "email": "user@real.com"}}}
+        res = execute_bytecode(result["bytecode"], script_globals)
         assert res.result is True
 
-        hog_globals = {"person": {"properties": {"plan": "free", "email": "user@real.com"}}}
-        res = execute_bytecode(result["bytecode"], hog_globals)
+        script_globals = {"person": {"properties": {"plan": "free", "email": "user@real.com"}}}
+        res = execute_bytecode(result["bytecode"], script_globals)
         assert res.result is False
 
     def test_behavioral_cohort_still_errors(self):
@@ -694,12 +694,12 @@ class TestCohortInlining(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         result = compile_filters_bytecode({"filter_test_accounts": True}, self.team)
         assert result.get("bytecode") is not None, f"Expected bytecode but got error: {result.get('bytecode_error')}"
 
-        hog_globals = {"person": {"properties": {"role": "admin", "org": "internal"}}}
-        res = execute_bytecode(result["bytecode"], hog_globals)
+        script_globals = {"person": {"properties": {"role": "admin", "org": "internal"}}}
+        res = execute_bytecode(result["bytecode"], script_globals)
         assert res.result is True
 
-        hog_globals = {"person": {"properties": {"role": "user", "org": "internal"}}}
-        res = execute_bytecode(result["bytecode"], hog_globals)
+        script_globals = {"person": {"properties": {"role": "user", "org": "internal"}}}
+        res = execute_bytecode(result["bytecode"], script_globals)
         assert res.result is False
 
     def test_exclude_test_and_internal_user_cohorts(self):
@@ -736,20 +736,20 @@ class TestCohortInlining(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         assert "bytecode_error" not in result
 
         # Real external user — passes both filters
-        hog_globals = {"person": {"properties": {"$test_user": "false", "email": "customer@gmail.com"}}}
-        assert execute_bytecode(result["bytecode"], hog_globals).result is True
+        script_globals = {"person": {"properties": {"$test_user": "false", "email": "customer@gmail.com"}}}
+        assert execute_bytecode(result["bytecode"], script_globals).result is True
 
         # Test user — filtered out by the test users cohort negation
-        hog_globals = {"person": {"properties": {"$test_user": "true", "email": "customer@gmail.com"}}}
-        assert execute_bytecode(result["bytecode"], hog_globals).result is False
+        script_globals = {"person": {"properties": {"$test_user": "true", "email": "customer@gmail.com"}}}
+        assert execute_bytecode(result["bytecode"], script_globals).result is False
 
         # Internal user — filtered out by the internal users cohort negation
-        hog_globals = {"person": {"properties": {"$test_user": "false", "email": "alice@example.com"}}}
-        assert execute_bytecode(result["bytecode"], hog_globals).result is False
+        script_globals = {"person": {"properties": {"$test_user": "false", "email": "alice@example.com"}}}
+        assert execute_bytecode(result["bytecode"], script_globals).result is False
 
         # Both test and internal — also filtered out
-        hog_globals = {"person": {"properties": {"$test_user": "true", "email": "dev@example.com"}}}
-        assert execute_bytecode(result["bytecode"], hog_globals).result is False
+        script_globals = {"person": {"properties": {"$test_user": "true", "email": "dev@example.com"}}}
+        assert execute_bytecode(result["bytecode"], script_globals).result is False
 
     def test_cohort_with_or_structure_preserves_boolean_logic(self):
         cohort = Cohort.objects.create(
@@ -774,17 +774,17 @@ class TestCohortInlining(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         assert result.get("bytecode") is not None, f"Expected bytecode but got error: {result.get('bytecode_error')}"
 
         # External user — matches neither domain, passes filter
-        hog_globals = {"person": {"properties": {"email": "customer@gmail.com"}}}
-        assert execute_bytecode(result["bytecode"], hog_globals).result is True
+        script_globals = {"person": {"properties": {"email": "customer@gmail.com"}}}
+        assert execute_bytecode(result["bytecode"], script_globals).result is True
 
         # Matches first domain — filtered out
-        hog_globals = {"person": {"properties": {"email": "alice@example.com"}}}
-        assert execute_bytecode(result["bytecode"], hog_globals).result is False
+        script_globals = {"person": {"properties": {"email": "alice@example.com"}}}
+        assert execute_bytecode(result["bytecode"], script_globals).result is False
 
         # Matches second domain — also filtered out
         # (would incorrectly pass if OR was flattened to AND, since NOT(a AND b) != NOT(a OR b))
-        hog_globals = {"person": {"properties": {"email": "bot@test.io"}}}
-        assert execute_bytecode(result["bytecode"], hog_globals).result is False
+        script_globals = {"person": {"properties": {"email": "bot@test.io"}}}
+        assert execute_bytecode(result["bytecode"], script_globals).result is False
 
     def test_cohort_with_nested_and_or_structure(self):
         cohort = Cohort.objects.create(
@@ -815,20 +815,20 @@ class TestCohortInlining(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         assert result.get("bytecode") is not None, f"Expected bytecode but got error: {result.get('bytecode_error')}"
 
         # Matches both: internal domain AND engineer role
-        hog_globals = {"person": {"properties": {"email": "alice@example.com", "role": "engineer"}}}
-        assert execute_bytecode(result["bytecode"], hog_globals).result is True
+        script_globals = {"person": {"properties": {"email": "alice@example.com", "role": "engineer"}}}
+        assert execute_bytecode(result["bytecode"], script_globals).result is True
 
         # Matches domain but wrong role — fails the AND
-        hog_globals = {"person": {"properties": {"email": "alice@example.com", "role": "designer"}}}
-        assert execute_bytecode(result["bytecode"], hog_globals).result is False
+        script_globals = {"person": {"properties": {"email": "alice@example.com", "role": "designer"}}}
+        assert execute_bytecode(result["bytecode"], script_globals).result is False
 
         # Right role but external domain — fails the OR
-        hog_globals = {"person": {"properties": {"email": "alice@gmail.com", "role": "engineer"}}}
-        assert execute_bytecode(result["bytecode"], hog_globals).result is False
+        script_globals = {"person": {"properties": {"email": "alice@gmail.com", "role": "engineer"}}}
+        assert execute_bytecode(result["bytecode"], script_globals).result is False
 
         # Second OR branch works: test.io domain + engineer
-        hog_globals = {"person": {"properties": {"email": "bot@test.io", "role": "engineer"}}}
-        assert execute_bytecode(result["bytecode"], hog_globals).result is True
+        script_globals = {"person": {"properties": {"email": "bot@test.io", "role": "engineer"}}}
+        assert execute_bytecode(result["bytecode"], script_globals).result is True
 
     def test_empty_cohort_properties_falls_through(self):
         cohort = Cohort.objects.create(

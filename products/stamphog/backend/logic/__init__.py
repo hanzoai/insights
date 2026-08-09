@@ -1,1 +1,1 @@
-"""Business logic for stamphog: gates, policy, GitHub client, and reviewer."""
+"""Business logic for stamp: gates, policy, GitHub client, and reviewer."""

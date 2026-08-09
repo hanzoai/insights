@@ -653,7 +653,7 @@ export const getAnnouncementsChannelsListUrl = (projectId: string) => {
 }
 
 /**
- * Slack channels the SupportHog bot can post to, labeled by customer account name.
+ * Slack channels the Support bot can post to, labeled by customer account name.
  */
 export const announcementsChannelsList = async (
     projectId: string,

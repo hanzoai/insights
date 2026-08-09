@@ -14,10 +14,10 @@ import {
     evaluationsCreate,
     evaluationsPartialUpdate,
     evaluationsRetrieve,
-    evaluationsTestHogCreate,
+    evaluationsTestScriptCreate,
     llmAnalyticsEvaluationSummaryCreate,
 } from '../generated/api'
-import type { TestHogRequestApi, TestHogResultItemApi } from '../generated/api.schemas'
+import type { TestScriptRequestApi, TestScriptResultItemApi } from '../generated/api.schemas'
 import { parsePlaygroundProviderKeyId } from '../ModelPicker'
 import { LLMProviderKey, llmProviderKeysLogic } from '../settings/llmProviderKeysLogic'
 import type { EvaluationConfig as TeamEvaluationConfig } from '../settings/llmProviderKeysLogic'
@@ -34,7 +34,7 @@ import {
 } from './evaluationCapabilities'
 import { EvaluationBackTarget, getEvaluationBackTarget } from './evaluationNavigation'
 import { evaluationReportLogic, persistReportDraft } from './evaluationReportLogic'
-import { getHogEvalExample } from './hogEvalExamples'
+import { getScriptEvalExample } from './scriptEvalExamples'
 import { EvaluationTemplateKey, defaultEvaluationTemplates } from './templates'
 import type {
     EvaluationConditionSet,
@@ -46,7 +46,7 @@ import type {
     EvaluationTarget,
     EvaluationTargetConfig,
     EvaluationType,
-    HogEvaluation,
+    ScriptEvaluation,
     LLMJudgeEvaluation,
     ModelConfiguration,
     SentimentEvaluation,
@@ -88,7 +88,7 @@ function defaultStrategyForTarget(target: EvaluationTarget): EvaluationSettleStr
     return target === 'session' ? 'inactivity' : 'fixed_window'
 }
 
-export const DEFAULT_FN_SOURCE = getHogEvalExample('output_not_empty').source
+export const DEFAULT_FN_SOURCE = getScriptEvalExample('output_not_empty').source
 
 const LEGACY_FN_DEFAULT_SOURCES = [
     `// Check that the output is not empty
@@ -119,7 +119,7 @@ function toLLMJudgeEvaluation(evaluation: EvaluationConfig): LLMJudgeEvaluation 
     }
 }
 
-function toHogEvaluation(evaluation: EvaluationConfig): HogEvaluation {
+function toScriptEvaluation(evaluation: EvaluationConfig): ScriptEvaluation {
     return {
         ...evaluation,
         evaluation_type: 'script',
@@ -166,14 +166,14 @@ function filterEvaluationRuns(runs: EvaluationRun[], filter: EvaluationSummaryFi
     return completedRuns.filter((r) => r.sentiment_label?.toLowerCase() === filter)
 }
 
-type TestableHogEvaluation = HogEvaluation
+type TestableScriptEvaluation = ScriptEvaluation
 
-function isTestableHogEvaluation(evaluation: EvaluationConfig | null): evaluation is TestableHogEvaluation {
+function isTestableScriptEvaluation(evaluation: EvaluationConfig | null): evaluation is TestableScriptEvaluation {
     return evaluation?.evaluation_type === 'script'
 }
 
-function buildHogTestRequest(evaluation: TestableHogEvaluation): TestHogRequestApi {
-    const request: TestHogRequestApi = {
+function buildScriptTestRequest(evaluation: TestableScriptEvaluation): TestScriptRequestApi {
+    const request: TestScriptRequestApi = {
         source: evaluation.evaluation_config.source,
         sample_count: 5,
         allows_na: evaluation.output_config?.allows_na ?? false,
@@ -233,9 +233,9 @@ export interface llmEvaluationLogicValues {
     filteredEvaluationRuns: EvaluationRun[]
     formValid: boolean
     hasUnsavedChanges: boolean
-    hogTestMessage: string | null
-    hogTestResults: TestHogResultItemApi[] | null
-    hogTestResultsLoading: boolean
+    scriptTestMessage: string | null
+    scriptTestResults: TestScriptResultItemApi[] | null
+    scriptTestResultsLoading: boolean
     isForceRefresh: boolean
     isNewEvaluation: boolean
     maxContext: MaxContextInput[]
@@ -268,7 +268,7 @@ export interface llmEvaluationLogicActions {
         payload?: any
     } // llmProviderKeysLogic
     loadProviderKeys: () => any // llmProviderKeysLogic
-    clearHogTestResults: () => {
+    clearScriptTestResults: () => {
         value: true
     }
     generateEvaluationSummary: ({ forceRefresh }: { forceRefresh?: boolean }) => {
@@ -387,10 +387,10 @@ export interface llmEvaluationLogicActions {
     setEvaluationType: (evaluationType: EvaluationType) => {
         evaluationType: EvaluationType
     }
-    setHogSource: (source: string) => {
+    setScriptSource: (source: string) => {
         source: string
     }
-    setHogTestMessage: (message: string | null) => {
+    setScriptTestMessage: (message: string | null) => {
         message: string | null
     }
     setModelConfiguration: (modelConfiguration: ModelConfiguration | null) => {
@@ -402,19 +402,19 @@ export interface llmEvaluationLogicActions {
     setTriggerConditions: (conditions: EvaluationConditionSet[]) => {
         conditions: EvaluationConditionSet[]
     }
-    testHogOnSample: (_?: void) => void
-    testHogOnSampleFailure: (
+    testScriptOnSample: (_?: void) => void
+    testScriptOnSampleFailure: (
         error: string,
         errorObject?: any
     ) => {
         error: string
         errorObject?: any
     }
-    testHogOnSampleSuccess: (
-        hogTestResults: TestHogResultItemApi[] | null,
+    testScriptOnSampleSuccess: (
+        scriptTestResults: TestScriptResultItemApi[] | null,
         payload?: void
     ) => {
-        hogTestResults: TestHogResultItemApi[] | null
+        scriptTestResults: TestScriptResultItemApi[] | null
         payload?: void
     }
     toggleSummaryExpanded: () => {
@@ -513,7 +513,7 @@ export const llmEvaluationLogic = kea<llmEvaluationLogicType>([
         // Duration fields only — switching strategy must go through setSettleStrategy so the
         // bag is fully reseeded (the strategies carry disjoint fields).
         patchTargetConfig: (patch: Partial<Omit<EvaluationTargetConfig, 'strategy'>>) => ({ patch }),
-        setHogSource: (source: string) => ({ source }),
+        setScriptSource: (source: string) => ({ source }),
 
         // Tab navigation
         setActiveTab: (tab: string) => ({ tab }),
@@ -533,8 +533,8 @@ export const llmEvaluationLogic = kea<llmEvaluationLogicType>([
         selectModelFromPicker: (modelId: string, providerKeyId: string) => ({ modelId, providerKeyId }),
 
         // Script test actions
-        clearHogTestResults: true,
-        setHogTestMessage: (message: string | null) => ({ message }),
+        clearScriptTestResults: true,
+        setScriptTestMessage: (message: string | null) => ({ message }),
 
         // Evaluation summary actions
         setEvaluationSummaryFilter: (filter: EvaluationSummaryFilter, previousFilter: EvaluationSummaryFilter) => ({
@@ -547,33 +547,33 @@ export const llmEvaluationLogic = kea<llmEvaluationLogicType>([
     }),
 
     loaders(({ props, values, actions }) => ({
-        hogTestResults: [
-            null as TestHogResultItemApi[] | null,
+        scriptTestResults: [
+            null as TestScriptResultItemApi[] | null,
             {
-                testHogOnSample: async (_?: void, breakpoint?: () => void): Promise<TestHogResultItemApi[] | null> => {
+                testScriptOnSample: async (_?: void, breakpoint?: () => void): Promise<TestScriptResultItemApi[] | null> => {
                     const teamId = teamLogic.values.currentTeamId
                     if (!teamId) {
                         return null
                     }
                     const evaluation = values.evaluation
-                    if (!isTestableHogEvaluation(evaluation)) {
+                    if (!isTestableScriptEvaluation(evaluation)) {
                         return null
                     }
 
-                    const request = buildHogTestRequest(evaluation)
+                    const request = buildScriptTestRequest(evaluation)
                     const requestFingerprint = JSON.stringify(request)
-                    let results: TestHogResultItemApi[]
+                    let results: TestScriptResultItemApi[]
                     try {
-                        const response = await evaluationsTestHogCreate(teamId.toString(), request)
+                        const response = await evaluationsTestScriptCreate(teamId.toString(), request)
                         results = response.results.map((result) => ({
                             ...result,
                             reasoning: result.reasoning ?? '',
                         }))
                         // An empty sample is a real answer, not a failure. Without the API's
                         // explanation the panel is just an empty table, which reads as broken.
-                        actions.setHogTestMessage(results.length === 0 ? (response.message ?? null) : null)
+                        actions.setScriptTestMessage(results.length === 0 ? (response.message ?? null) : null)
                     } catch (e: unknown) {
-                        actions.setHogTestMessage(null)
+                        actions.setScriptTestMessage(null)
                         const message = e instanceof Error ? e.message : typeof e === 'string' ? e : 'Unknown error'
                         results = [
                             {
@@ -593,8 +593,8 @@ export const llmEvaluationLogic = kea<llmEvaluationLogicType>([
                     breakpoint?.()
                     const currentEvaluation = values.evaluation
                     if (
-                        !isTestableHogEvaluation(currentEvaluation) ||
-                        JSON.stringify(buildHogTestRequest(currentEvaluation)) !== requestFingerprint
+                        !isTestableScriptEvaluation(currentEvaluation) ||
+                        JSON.stringify(buildScriptTestRequest(currentEvaluation)) !== requestFingerprint
                     ) {
                         return null
                     }
@@ -715,7 +715,7 @@ export const llmEvaluationLogic = kea<llmEvaluationLogicType>([
                         return null
                     }
                     if (evaluationType === 'script') {
-                        return toHogEvaluation(state)
+                        return toScriptEvaluation(state)
                     }
                     if (evaluationType === 'sentiment') {
                         return toSentimentEvaluation(state)
@@ -752,7 +752,7 @@ export const llmEvaluationLogic = kea<llmEvaluationLogicType>([
                 },
                 patchTargetConfig: (state, { patch }) =>
                     state ? { ...state, target_config: { ...state.target_config, ...patch } } : null,
-                setHogSource: (state, { source }) =>
+                setScriptSource: (state, { source }) =>
                     state && state.evaluation_type === 'script'
                         ? { ...state, evaluation_config: { ...state.evaluation_config, source } }
                         : state,
@@ -760,22 +760,22 @@ export const llmEvaluationLogic = kea<llmEvaluationLogicType>([
                 saveEvaluationSuccess: (_, { evaluation }) => evaluation,
             },
         ],
-        hogTestResults: {
-            clearHogTestResults: () => null,
+        scriptTestResults: {
+            clearScriptTestResults: () => null,
             setAllowsNA: () => null,
             setEvaluationTarget: () => null,
             setEvaluationType: () => null,
-            setHogSource: () => null,
+            setScriptSource: () => null,
             setSettleStrategy: () => null,
             patchTargetConfig: () => null,
             setTriggerConditions: () => null,
         },
-        hogTestMessage: [
+        scriptTestMessage: [
             null as string | null,
             {
-                setHogTestMessage: (_, { message }) => message,
-                clearHogTestResults: () => null,
-                testHogOnSample: () => null,
+                setScriptTestMessage: (_, { message }) => message,
+                clearScriptTestResults: () => null,
+                testScriptOnSample: () => null,
             },
         ],
         selectedModel: [
@@ -831,7 +831,7 @@ export const llmEvaluationLogic = kea<llmEvaluationLogicType>([
                 setEvaluationTarget: () => true,
                 setSettleStrategy: () => true,
                 patchTargetConfig: () => true,
-                setHogSource: () => true,
+                setScriptSource: () => true,
                 saveEvaluationSuccess: () => false,
                 loadEvaluationSuccess: () => false,
                 resetEvaluation: () => false,
@@ -1336,7 +1336,7 @@ export const llmEvaluationLogic = kea<llmEvaluationLogicType>([
                         name: evaluation.name,
                         description: evaluation.description,
                         evaluation_type: evaluation.evaluation_type,
-                        hog_source: evaluation.evaluation_type === 'script' ? evaluation.evaluation_config.source : null,
+                        script_source: evaluation.evaluation_type === 'script' ? evaluation.evaluation_config.source : null,
                     }),
                 ]
             },

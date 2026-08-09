@@ -981,7 +981,7 @@ class TestSignalReportArtefactLogWriteViewSet(APIBaseTest):
         assert not SignalReportArtefact.objects.filter(report=report).exists()
 
     def test_post_rejects_system_generated_code_review_type(self):
-        # code_review receipts are written only by the ReviewHog workflow; accepting them through the
+        # code_review receipts are written only by the Review workflow; accepting them through the
         # API would let a caller fabricate review receipts for reviews that never ran. The payload is
         # schema-valid on purpose — the rejection must be type-based, not a validation accident.
         report = self._create_report()

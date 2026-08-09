@@ -271,10 +271,10 @@ export const workflowsLogic = kea<workflowsLogicType>([
             { results: [], count: 0 } as WorkflowsResult,
             {
                 loadWorkflows: async () => {
-                    return await api.hogFlows.getInsightsFlows(values.paramsFromFilters)
+                    return await api.flows.getInsightsFlows(values.paramsFromFilters)
                 },
                 toggleWorkflowStatus: async ({ workflow }) => {
-                    await api.hogFlows.updateInsightsFlow(workflow.id, {
+                    await api.flows.updateInsightsFlow(workflow.id, {
                         status: workflow.status === 'active' ? 'draft' : 'active',
                     })
                     // Reload instead of patching in place: the new status may no longer match the
@@ -283,7 +283,7 @@ export const workflowsLogic = kea<workflowsLogicType>([
                     return values.workflows
                 },
                 duplicateWorkflow: async ({ workflow }) => {
-                    await api.hogFlows.createInsightsFlow({
+                    await api.flows.createInsightsFlow({
                         ...workflow,
                         status: 'draft',
                         name: `${workflow.name} (copy)`,
@@ -308,7 +308,7 @@ export const workflowsLogic = kea<workflowsLogicType>([
                             status: 'danger',
                             onClick: async () => {
                                 try {
-                                    await api.hogFlows.updateInsightsFlow(workflow.id, {
+                                    await api.flows.updateInsightsFlow(workflow.id, {
                                         status: 'archived',
                                     })
                                     toast.success(`Workflow "${workflow.name}" archived`)
@@ -330,7 +330,7 @@ export const workflowsLogic = kea<workflowsLogicType>([
                 },
                 restoreWorkflow: async ({ workflow }) => {
                     try {
-                        await api.hogFlows.updateInsightsFlow(workflow.id, {
+                        await api.flows.updateInsightsFlow(workflow.id, {
                             status: 'draft',
                         })
                         toast.success(`Workflow "${workflow.name}" restored to draft status`)
@@ -356,9 +356,9 @@ export const workflowsLogic = kea<workflowsLogicType>([
                             status: 'danger',
                             onClick: async () => {
                                 try {
-                                    await api.hogFlows.deleteInsightsFlow(workflow.id)
+                                    await api.flows.deleteInsightsFlow(workflow.id)
                                     toast.success(`Workflow "${workflow.name}" deleted`)
-                                    deleteFromTree('hog_flow/', workflow.id)
+                                    deleteFromTree('script_flow/', workflow.id)
                                     actions.loadWorkflows()
                                 } catch (error: any) {
                                     toast.error(
@@ -439,10 +439,10 @@ export const workflowsLogic = kea<workflowsLogicType>([
                     status: 'danger',
                     onClick: async () => {
                         try {
-                            const result = await api.hogFlows.bulkDeleteInsightsFlows(ids)
+                            const result = await api.flows.bulkDeleteInsightsFlows(ids)
                             toast.success(`${result.deleted} workflow${result.deleted === 1 ? '' : 's'} deleted`)
                             for (const id of ids) {
-                                deleteFromTree('hog_flow/', id)
+                                deleteFromTree('script_flow/', id)
                             }
                             actions.clearArchivedWorkflowSelection()
                             actions.loadWorkflows()

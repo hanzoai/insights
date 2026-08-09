@@ -24,7 +24,7 @@ from insights.schema import (
     CachedRetentionQueryResponse,
     EventPropertyFilter,
     EventsQuery,
-    HogLanguage,
+    ScriptLanguage,
     InsightsQLAutocomplete,
     InsightsQLPropertyFilter,
     InsightsQLQuery,
@@ -198,7 +198,7 @@ class TestQuery(DatastoreTestMixin, APIBaseTest):
         query = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query="select event from events",
-            language=HogLanguage.INSIGHTS_QL,
+            language=ScriptLanguage.INSIGHTS_QL,
             startPosition=6,
             endPosition=6,
         )

@@ -1498,7 +1498,7 @@ class TestExternalDataSchema(APIBaseTest):
             table=table,
         )
 
-        mock_hog_fn_result = WebhookInsightsFunctionCreateResult(
+        mock_script_fn_result = WebhookInsightsFunctionCreateResult(
             insights_function=mock.MagicMock(),
             webhook_url="https://test.com/webhook",
             insights_function_created=False,
@@ -1514,7 +1514,7 @@ class TestExternalDataSchema(APIBaseTest):
             ),
             mock.patch(
                 "products.warehouse_sources.backend.presentation.views.external_data_schema.get_or_create_webhook_insights_function",
-                return_value=mock_hog_fn_result,
+                return_value=mock_script_fn_result,
             ),
         ):
             # The frontend sends null incremental fields alongside the switch — they must not
@@ -1758,7 +1758,7 @@ class TestExternalDataSchema(APIBaseTest):
         mock_insights_function = mock.MagicMock()
         mock_insights_function.id = uuid.uuid4()
         mock_insights_function.inputs = {"schema_mapping": {"value": {}}, "source_id": {"value": "test-source-id"}}
-        mock_hog_fn_result = WebhookInsightsFunctionCreateResult(
+        mock_script_fn_result = WebhookInsightsFunctionCreateResult(
             insights_function=mock_insights_function,
             webhook_url="https://test.com/webhook",
             insights_function_created=True,
@@ -1774,7 +1774,7 @@ class TestExternalDataSchema(APIBaseTest):
             ),
             mock.patch(
                 "products.warehouse_sources.backend.presentation.views.external_data_schema.get_or_create_webhook_insights_function",
-                return_value=mock_hog_fn_result,
+                return_value=mock_script_fn_result,
             ) as mock_get_or_create,
             mock.patch.object(
                 StripeSource, "create_webhook", return_value=WebhookCreationResult(success=True)
@@ -1807,7 +1807,7 @@ class TestExternalDataSchema(APIBaseTest):
         mock_insights_function.id = uuid.uuid4()
         mock_insights_function.inputs = {"schema_mapping": {"value": {}}, "source_id": {"value": "test-source-id"}}
         # insights_function_created=False → existing webhook, so the reconcile path (not create) runs.
-        mock_hog_fn_result = WebhookInsightsFunctionCreateResult(
+        mock_script_fn_result = WebhookInsightsFunctionCreateResult(
             insights_function=mock_insights_function,
             webhook_url="https://test.com/webhook",
             insights_function_created=False,
@@ -1823,7 +1823,7 @@ class TestExternalDataSchema(APIBaseTest):
             ),
             mock.patch(
                 "products.warehouse_sources.backend.presentation.views.external_data_schema.get_or_create_webhook_insights_function",
-                return_value=mock_hog_fn_result,
+                return_value=mock_script_fn_result,
             ),
             mock.patch.object(
                 StripeSource, "create_webhook", return_value=WebhookCreationResult(success=True)
@@ -1859,7 +1859,7 @@ class TestExternalDataSchema(APIBaseTest):
         mock_insights_function = mock.MagicMock()
         mock_insights_function.id = uuid.uuid4()
         mock_insights_function.inputs = {"schema_mapping": {"value": {}}, "source_id": {"value": "test-source-id"}}
-        mock_hog_fn_result = WebhookInsightsFunctionCreateResult(
+        mock_script_fn_result = WebhookInsightsFunctionCreateResult(
             insights_function=mock_insights_function,
             webhook_url="https://test.com/webhook",
             insights_function_created=False,
@@ -1875,7 +1875,7 @@ class TestExternalDataSchema(APIBaseTest):
             ),
             mock.patch(
                 "products.warehouse_sources.backend.presentation.views.external_data_schema.get_or_create_webhook_insights_function",
-                return_value=mock_hog_fn_result,
+                return_value=mock_script_fn_result,
             ),
             mock.patch.object(
                 StripeSource,
@@ -1912,7 +1912,7 @@ class TestExternalDataSchema(APIBaseTest):
         mock_insights_function = mock.MagicMock()
         mock_insights_function.id = uuid.uuid4()
         mock_insights_function.inputs = {"schema_mapping": {"value": {}}, "source_id": {"value": "test-source-id"}}
-        mock_hog_fn_result = WebhookInsightsFunctionCreateResult(
+        mock_script_fn_result = WebhookInsightsFunctionCreateResult(
             insights_function=mock_insights_function,
             webhook_url="https://test.com/webhook",
             insights_function_created=False,
@@ -1928,7 +1928,7 @@ class TestExternalDataSchema(APIBaseTest):
             ),
             mock.patch(
                 "products.warehouse_sources.backend.presentation.views.external_data_schema.get_or_create_webhook_insights_function",
-                return_value=mock_hog_fn_result,
+                return_value=mock_script_fn_result,
             ),
             mock.patch.object(StripeSource, "sync_webhook_events", side_effect=ValueError("Missing Stripe API key")),
             mock.patch.object(StripeSource, "get_schemas", return_value=mock_webhook_schemas),

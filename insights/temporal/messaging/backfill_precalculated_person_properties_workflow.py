@@ -235,7 +235,7 @@ class BackfillPrecalculatedPersonPropertiesInputs:
 
 def evaluate_combined_filters_sync(
     combined_bytecode: list[Any],
-    hog_globals: dict[str, Any],
+    script_globals: dict[str, Any],
     person_id: str,
     detailed_logging: bool = False,
 ) -> dict[str, Any]:
@@ -244,7 +244,7 @@ def evaluate_combined_filters_sync(
     Returns empty dict on error so the person is skipped without crashing the activity.
     """
     try:
-        bytecode_result: BytecodeResult = execute_bytecode(combined_bytecode, hog_globals)
+        bytecode_result: BytecodeResult = execute_bytecode(combined_bytecode, script_globals)
         result = bytecode_result.result
 
         if detailed_logging:
@@ -253,7 +253,7 @@ def evaluate_combined_filters_sync(
                 person_id=person_id,
                 result=result,
                 result_type=type(result).__name__,
-                person_properties=hog_globals.get("person", {}).get("properties", {}),
+                person_properties=script_globals.get("person", {}).get("properties", {}),
                 execution_successful=True,
                 execution_stdout=bytecode_result.stdout,
             )
@@ -281,7 +281,7 @@ def evaluate_combined_filters_sync(
 
 def evaluate_individual_filters_sync(
     filters: list[PersonPropertyFilter],
-    hog_globals: dict[str, Any],
+    script_globals: dict[str, Any],
     person_id: str,
     detailed_logging: bool = False,
 ) -> dict[str, Any]:
@@ -294,7 +294,7 @@ def evaluate_individual_filters_sync(
 
     for filter_obj in filters:
         try:
-            bytecode_result: BytecodeResult = execute_bytecode(filter_obj.bytecode, hog_globals)
+            bytecode_result: BytecodeResult = execute_bytecode(filter_obj.bytecode, script_globals)
             result = bytecode_result.result
 
             if detailed_logging:
@@ -334,7 +334,7 @@ def evaluate_individual_filters_sync(
 def evaluate_combined_filters_with_fallback_sync(
     combined_bytecode: list[Any],
     filters: list[PersonPropertyFilter],
-    hog_globals: dict[str, Any],
+    script_globals: dict[str, Any],
     person_id: str,
     detailed_logging: bool = False,
 ) -> dict[str, Any]:
@@ -345,7 +345,7 @@ def evaluate_combined_filters_with_fallback_sync(
     """
     # First, try the fast path with combined bytecode
     try:
-        bytecode_result: BytecodeResult = execute_bytecode(combined_bytecode, hog_globals)
+        bytecode_result: BytecodeResult = execute_bytecode(combined_bytecode, script_globals)
         result = bytecode_result.result
 
         if detailed_logging:
@@ -354,7 +354,7 @@ def evaluate_combined_filters_with_fallback_sync(
                 person_id=person_id,
                 result=result,
                 result_type=type(result).__name__,
-                person_properties=hog_globals.get("person", {}).get("properties", {}),
+                person_properties=script_globals.get("person", {}).get("properties", {}),
                 execution_successful=True,
                 execution_stdout=bytecode_result.stdout,
             )
@@ -390,7 +390,7 @@ def evaluate_combined_filters_with_fallback_sync(
         )
 
     # Fallback to individual filter execution for error isolation
-    return evaluate_individual_filters_sync(filters, hog_globals, person_id, detailed_logging)
+    return evaluate_individual_filters_sync(filters, script_globals, person_id, detailed_logging)
 
 
 @temporalio.activity.defn
@@ -629,13 +629,13 @@ async def backfill_precalculated_person_properties_activity(
 
                     # Evaluate all filters in a single VM call
                     person_filter_start = time.monotonic()
-                    hog_globals = {"person": {"properties": parsed_properties}}
+                    script_globals = {"person": {"properties": parsed_properties}}
 
                     filter_results = await asyncio.to_thread(
                         evaluate_combined_filters_with_fallback_sync,
                         combined_bytecode,
                         filters,
-                        hog_globals,
+                        script_globals,
                         person_id,
                         detailed_logging=detailed_logging_enabled,
                     )

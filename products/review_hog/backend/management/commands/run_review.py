@@ -7,7 +7,7 @@ from products.review_hog.backend.temporal.client import execute_review_pr_workfl
 
 
 class Command(BaseCommand):
-    help = "Run a single-turn PR review via the ReviewHog Temporal workflow"
+    help = "Run a single-turn PR review via the Review Temporal workflow"
 
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument(
@@ -46,8 +46,8 @@ class Command(BaseCommand):
         user_id = options["user_id"]
         publish = options["publish"]
         mode = "publish" if publish else "no-publish"
-        self.stdout.write(self.style.MIGRATE_HEADING(f"ReviewHog ▶ starting · {pr_url} · team {team_id} · {mode}"))
+        self.stdout.write(self.style.MIGRATE_HEADING(f"Review ▶ starting · {pr_url} · team {team_id} · {mode}"))
         report_id = execute_review_pr_workflow(
             pr_url=pr_url, team_id=team_id, user_id=user_id, publish=publish, acting_user_id=user_id
         )
-        self.stdout.write(self.style.SUCCESS(f"ReviewHog ✓ finished · report {report_id}"))
+        self.stdout.write(self.style.SUCCESS(f"Review ✓ finished · report {report_id}"))

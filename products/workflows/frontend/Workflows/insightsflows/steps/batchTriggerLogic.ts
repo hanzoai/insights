@@ -110,7 +110,7 @@ export const batchTriggerLogic = kea<batchTriggerLogicType>([
                     if (!props.filters) {
                         return null
                     }
-                    return await api.hogFlows.getBatchTriggerBlastRadius(props.filters, props.dedupeKey)
+                    return await api.flows.getBatchTriggerBlastRadius(props.filters, props.dedupeKey)
                 },
             },
         ],

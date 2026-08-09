@@ -309,7 +309,7 @@ def get_evaluator_config(
     config, the output schema — rather than inferring it from reasoning alone.
 
     Returns the row as a dict with ``evaluation_config`` and ``output_config``
-    expanded. Script code lives under ``evaluation_config.hog_source`` for runtime=script,
+    expanded. Script code lives under ``evaluation_config.script_source`` for runtime=script,
     llm_judge prompts under ``evaluation_config.prompt``.
     """
     from insights.models.team import Team

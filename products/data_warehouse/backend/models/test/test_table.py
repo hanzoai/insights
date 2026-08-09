@@ -969,7 +969,7 @@ class TestTable(BaseTest):
         assert isinstance(definition, InsightsQLDataWarehouseTable)
         assert definition.structure == "`id` String, `deal_details` Array(Tuple( String,  String,  Nullable(String)))"
 
-    def assert_raises_with_invalid_hog_column_type(self, column_type):
+    def assert_raises_with_invalid_script_column_type(self, column_type):
         credential = DataWarehouseCredential.objects.create(access_key="test", access_secret="test", team=self.team)
         table = DataWarehouseTable.objects.create(
             name="bla",

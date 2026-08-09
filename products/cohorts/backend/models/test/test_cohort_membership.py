@@ -434,7 +434,7 @@ class TestCountCohortMembers(BaseTest):
         get_active_fake().assert_not_called("count_cohort_members")
 
 
-class TestInsertUsersListWithBatchingPersonhog(BaseTest):
+class TestInsertUsersListWithBatchingPerson(BaseTest):
     CLASS_DATA_LEVEL_SETUP = False
 
     def _create_static_cohort(self) -> Cohort:

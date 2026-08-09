@@ -170,12 +170,12 @@ class Task(DeletedMetaFields, models.Model):
         SIGNALS_SCOUT = "signals_scout", "Signals Scout"
         # Conversations support reply pipeline — autonomous grounded draft replies.
         SUPPORT_REPLY = "support_reply", "Support Reply"
-        # HogDesk — the internal support desk client. Tasks it creates from a
+        # Desk — the internal support desk client. Tasks it creates from a
         # ticket's Code chat carry this origin (previously "support_queue", which
         # collided with the conversations support pipeline).
-        HOGDESK = "hogdesk", "HogDesk"
-        # ReviewHog PR reviewer — its sandbox steps (chunking/review/validation/dedup) spawn one task each.
-        REVIEW_HOG = "review_hog", "ReviewHog"
+        Desk = "desk", "Desk"
+        # Review PR reviewer — its sandbox steps (chunking/review/validation/dedup) spawn one task each.
+        REVIEW_HOG = "review", "Review"
         IMAGE_BUILDER = "image_builder", "Image Builder"
         # Loop firings: named, cloud-executed agent automations triggered by schedule,
         # GitHub event or API. See products/tasks/docs/LOOPS.md.

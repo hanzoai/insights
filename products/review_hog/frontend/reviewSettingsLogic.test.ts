@@ -6,9 +6,9 @@ import { urls } from 'scenes/urls'
 import { useMocks } from '~/mocks/jest'
 import { initKeaTests } from '~/test/init'
 
-import { ReviewHogReviewsListScope } from 'products/review_hog/frontend/generated/api.schemas'
+import { ReviewReviewsListScope } from 'products/review_hog/frontend/generated/api.schemas'
 
-import { MAX_REVIEWS_LIMIT, REVIEWS_PAGE_SIZE, reviewHogSettingsLogic } from './reviewHogSettingsLogic'
+import { MAX_REVIEWS_LIMIT, REVIEWS_PAGE_SIZE, reviewSettingsLogic } from './reviewSettingsLogic'
 
 /** A minimal review detail: only the fields the drawer selectors read. */
 function reviewDetail(id: string, runUrgencyThreshold: string | null): Record<string, any> {
@@ -31,34 +31,34 @@ const everyoneReviews = Array.from({ length: MAX_REVIEWS_LIMIT + REVIEWS_PAGE_SI
     in_progress: false,
 }))
 
-describe('reviewHogSettingsLogic', () => {
-    let logic: ReturnType<typeof reviewHogSettingsLogic.build>
+describe('reviewSettingsLogic', () => {
+    let logic: ReturnType<typeof reviewSettingsLogic.build>
 
     beforeEach(() => {
         useMocks({
             get: {
                 // The user has no reviews of their own; the project has a dozen.
-                '/v1/projects/:team_id/review_hog/reviews/': ({ request }) => {
+                '/v1/projects/:team_id/review/reviews/': ({ request }) => {
                     const url = new URL(request.url)
                     const limit = Number(url.searchParams.get('limit') ?? REVIEWS_PAGE_SIZE)
                     const pool =
-                        url.searchParams.get('scope') === ReviewHogReviewsListScope.Everyone ? everyoneReviews : []
+                        url.searchParams.get('scope') === ReviewReviewsListScope.Everyone ? everyoneReviews : []
                     return [200, { results: pool.slice(0, limit), has_more: pool.length > limit }]
                 },
-                '/v1/projects/:team_id/review_hog/reviews/perspective_stats/': () => [
+                '/v1/projects/:team_id/review/reviews/perspective_stats/': () => [
                     200,
                     { report_count: 0, perspectives: [] },
                 ],
-                '/v1/projects/:team_id/review_hog/settings/': () => [
+                '/v1/projects/:team_id/review/settings/': () => [
                     200,
                     { review_inbox_prs: false, review_labeled_prs: true, urgency_threshold: 'should_fix' },
                 ],
-                '/v1/projects/:team_id/review_hog/perspectives/': () => [200, []],
-                '/v1/projects/:team_id/review_hog/blind_spots/': () => [200, []],
-                '/v1/projects/:team_id/review_hog/validators/': () => [200, []],
+                '/v1/projects/:team_id/review/perspectives/': () => [200, []],
+                '/v1/projects/:team_id/review/blind_spots/': () => [200, []],
+                '/v1/projects/:team_id/review/validators/': () => [200, []],
             },
             post: {
-                '/v1/projects/:team_id/review_hog/reviews/trigger/': () => [
+                '/v1/projects/:team_id/review/reviews/trigger/': () => [
                     202,
                     { workflow_id: 'wf-1', status: 'started' },
                 ],
@@ -67,7 +67,7 @@ describe('reviewHogSettingsLogic', () => {
         // The scope reducers persist; without this a prior test's explicit choice leaks over.
         localStorage.clear()
         initKeaTests()
-        logic = reviewHogSettingsLogic()
+        logic = reviewSettingsLogic()
     })
 
     afterEach(() => {
@@ -80,7 +80,7 @@ describe('reviewHogSettingsLogic', () => {
         await expectLogic(logic)
             .toDispatchActions(['loadRecentReviewsSuccess', 'applyDefaultReviewsScope', 'loadRecentReviewsSuccess'])
             .toMatchValues({
-                reviewsScope: ReviewHogReviewsListScope.Everyone,
+                reviewsScope: ReviewReviewsListScope.Everyone,
                 // The auto-default is not an explicit choice — a later real one must still win.
                 hasUserChosenReviewsScope: false,
             })
@@ -119,7 +119,7 @@ describe('reviewHogSettingsLogic', () => {
         let triggerCalls = 0
         useMocks({
             post: {
-                '/v1/projects/:team_id/review_hog/reviews/trigger/': () => {
+                '/v1/projects/:team_id/review/reviews/trigger/': () => {
                     triggerCalls++
                     return [202, { workflow_id: 'wf-1', status: 'started' }]
                 },
@@ -143,7 +143,7 @@ describe('reviewHogSettingsLogic', () => {
     it('an already-reviewed PR informs without arming the watch', async () => {
         useMocks({
             post: {
-                '/v1/projects/:team_id/review_hog/reviews/trigger/': () => [
+                '/v1/projects/:team_id/review/reviews/trigger/': () => [
                     200,
                     { workflow_id: '', status: 'already_reviewed' },
                 ],
@@ -167,9 +167,9 @@ describe('reviewHogSettingsLogic', () => {
     it('a rejected trigger resets the in-flight flag and keeps the input for correction', async () => {
         useMocks({
             post: {
-                '/v1/projects/:team_id/review_hog/reviews/trigger/': () => [
+                '/v1/projects/:team_id/review/reviews/trigger/': () => [
                     403,
-                    { error: "ReviewHog reviews can't be started from this project yet" },
+                    { error: "Review reviews can't be started from this project yet" },
                 ],
             },
         })
@@ -199,7 +199,7 @@ describe('reviewHogSettingsLogic', () => {
         const statsScopes: (string | null)[] = []
         useMocks({
             get: {
-                '/v1/projects/:team_id/review_hog/reviews/perspective_stats/': ({ request }) => {
+                '/v1/projects/:team_id/review/reviews/perspective_stats/': ({ request }) => {
                     statsScopes.push(new URL(request.url).searchParams.get('scope'))
                     return [200, { report_count: 0, perspectives: [] }]
                 },
@@ -210,15 +210,15 @@ describe('reviewHogSettingsLogic', () => {
             .toDispatchActions(['loadRecentReviewsSuccess', 'applyDefaultReviewsScope', 'loadRecentReviewsSuccess'])
             .toFinishAllListeners()
         // The mount-time auto-default to Entire project already rescoped the stats.
-        expect(statsScopes[statsScopes.length - 1]).toBe(ReviewHogReviewsListScope.Everyone)
+        expect(statsScopes[statsScopes.length - 1]).toBe(ReviewReviewsListScope.Everyone)
 
-        logic.actions.setReviewsScope(ReviewHogReviewsListScope.Mine)
+        logic.actions.setReviewsScope(ReviewReviewsListScope.Mine)
         // Old data drops synchronously so neither the cards nor the list ever show the other
         // scope's content — even if the reload were to fail.
         expect(logic.values.perspectiveStats).toBeNull()
         expect(logic.values.recentReviews).toBeNull()
         await expectLogic(logic).toDispatchActions(['loadPerspectiveStatsSuccess'])
-        expect(statsScopes[statsScopes.length - 1]).toBe(ReviewHogReviewsListScope.Mine)
+        expect(statsScopes[statsScopes.length - 1]).toBe(ReviewReviewsListScope.Mine)
     })
 
     it('respects an explicit scope choice even when that scope is empty', async () => {
@@ -230,11 +230,11 @@ describe('reviewHogSettingsLogic', () => {
             'loadRecentReviewsSuccess',
         ])
 
-        await expectLogic(logic, () => logic.actions.setReviewsScope(ReviewHogReviewsListScope.Mine))
+        await expectLogic(logic, () => logic.actions.setReviewsScope(ReviewReviewsListScope.Mine))
             .toDispatchActions(['loadRecentReviewsSuccess'])
             .toNotHaveDispatchedActions(['applyDefaultReviewsScope'])
             .toMatchValues({
-                reviewsScope: ReviewHogReviewsListScope.Mine,
+                reviewsScope: ReviewReviewsListScope.Mine,
                 hasUserChosenReviewsScope: true,
                 recentReviews: [],
             })
@@ -266,7 +266,7 @@ describe('reviewHogSettingsLogic', () => {
 
         // A scope flip is a different list — it starts compact again.
         logic.actions.showMoreReviews()
-        logic.actions.setReviewsScope(ReviewHogReviewsListScope.Mine)
+        logic.actions.setReviewsScope(ReviewReviewsListScope.Mine)
         await expectLogic(logic).toMatchValues({ reviewsLimit: REVIEWS_PAGE_SIZE })
     })
 
@@ -276,11 +276,11 @@ describe('reviewHogSettingsLogic', () => {
         // published — the exact lie the stored snapshot exists to fix.
         useMocks({
             get: {
-                '/v1/projects/:team_id/review_hog/reviews/r-stamped/': () => [
+                '/v1/projects/:team_id/review/reviews/r-stamped/': () => [
                     200,
                     reviewDetail('r-stamped', 'must_fix'),
                 ],
-                '/v1/projects/:team_id/review_hog/reviews/r-old/': () => [200, reviewDetail('r-old', null)],
+                '/v1/projects/:team_id/review/reviews/r-old/': () => [200, reviewDetail('r-old', null)],
             },
         })
         logic.mount()
@@ -304,7 +304,7 @@ describe('reviewHogSettingsLogic', () => {
         // sync silently dead-ends every held-back-findings link already posted to GitHub.
         useMocks({
             get: {
-                '/v1/projects/:team_id/review_hog/reviews/r-9/': () => [200, reviewDetail('r-9', null)],
+                '/v1/projects/:team_id/review/reviews/r-9/': () => [200, reviewDetail('r-9', null)],
             },
         })
         logic.mount()
@@ -341,7 +341,7 @@ describe('reviewHogSettingsLogic', () => {
         // without the failure path the drawer would sit open on skeletons forever.
         useMocks({
             get: {
-                '/v1/projects/:team_id/review_hog/reviews/r-gone/': () => [404, { detail: 'Not found.' }],
+                '/v1/projects/:team_id/review/reviews/r-gone/': () => [404, { detail: 'Not found.' }],
             },
         })
         logic.mount()

@@ -1,4 +1,4 @@
-"""API endpoint for fetching Slack channels using the SupportHog bot token."""
+"""API endpoint for fetching Slack channels using the Support bot token."""
 
 from typing import Any
 

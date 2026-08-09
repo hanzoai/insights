@@ -4,11 +4,11 @@ import React from 'react'
 import { Skeleton } from '@hanzo/elements'
 import { IconLock } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { Button } from 'lib/elements/Button'
 import { cn } from 'lib/utils/css-classes'
 
-const MascotChart = pngHoggie()
+const MascotChart = pngMascot()
 
 export type WidgetCardBodyProps = React.HTMLAttributes<HTMLDivElement> & {
     locked?: boolean

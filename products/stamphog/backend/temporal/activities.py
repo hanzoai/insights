@@ -1,6 +1,6 @@
-"""Temporal activities for the stamphog review workflow.
+"""Temporal activities for the stamp review workflow.
 
-Each activity is keyed only by ``StamphogReviewInput`` (review_run_id + team_id) and
+Each activity is keyed only by ``StampReviewInput`` (review_run_id + team_id) and
 re-loads the ``ReviewRun`` it needs. Bulky data (the PR payload, changed files, fetched
 policy files, raw reviewer output) is persisted on ``ReviewRun.output`` between steps
 rather than threaded through the workflow, keeping every Temporal payload well under the
@@ -38,18 +38,18 @@ from insights.ph_client import ph_scoped_capture
 from insights.temporal.common.utils import asyncify
 from insights.temporal.oauth import create_oauth_access_token_for_user
 
-from products.stamphog.backend.facade.enums import TERMINAL_STATUSES, ReviewMode, ReviewRunStatus, ReviewVerdict
-from products.stamphog.backend.logic.approvals import dismiss_stale_approvals_for_head
-from products.stamphog.backend.logic.audiences import resolve_audience_key
-from products.stamphog.backend.logic.github_client import StamphogGitHubClient, expected_app_bot_login
-from products.stamphog.backend.logic.reviewer import (
+from products.stamp.backend.facade.enums import TERMINAL_STATUSES, ReviewMode, ReviewRunStatus, ReviewVerdict
+from products.stamp.backend.logic.approvals import dismiss_stale_approvals_for_head
+from products.stamp.backend.logic.audiences import resolve_audience_key
+from products.stamp.backend.logic.github_client import StampGitHubClient, expected_app_bot_login
+from products.stamp.backend.logic.reviewer import (
     ReviewerInvocation,
     ReviewerVerdict,
     build_reviewer_invocation,
     parse_reviewer_output,
 )
-from products.stamphog.backend.models import PullRequest, ReviewRun, StamphogRepoConfig
-from products.stamphog.backend.temporal.constants import (
+from products.stamp.backend.models import PullRequest, ReviewRun, StampRepoConfig
+from products.stamp.backend.temporal.constants import (
     STAMPFN_BOT_EYES_MAX_AGE_SECONDS,
     STAMPFN_OPTIONAL_POLICY_PATHS,
     STAMPFN_POLICY_ENTRYPOINT,
@@ -72,7 +72,7 @@ from products.tasks.backend.facade.sandbox import (
 # The Action's review engine on the server's own checkout. Read as data files at
 # runtime (never imported — the directory is hyphenated and lives outside the
 # import graph) and shipped into the sandbox checkout. activities.py is at
-# products/stamphog/backend/temporal/activities.py, so the repo root is five parents up.
+# products/stamp/backend/temporal/activities.py, so the repo root is five parents up.
 _SERVER_ENGINE_DIR = Path(__file__).resolve().parents[4] / "tools" / "pr-approval-agent"
 
 # Server-shipped default policy files, the base layer every repo's config sits on. Named by the
@@ -83,7 +83,7 @@ _POLICY_DEFAULTS_DIR = Path(__file__).resolve().parent.parent / "logic" / "polic
 
 
 @dataclass
-class StamphogReviewInput:
+class StampReviewInput:
     review_run_id: str
     team_id: int
 
@@ -95,7 +95,7 @@ class MarkReviewFailedInput:
     error: str
 
 
-def _load_run(input: StamphogReviewInput) -> ReviewRun:
+def _load_run(input: StampReviewInput) -> ReviewRun:
     # Pinned to the writer: every activity re-loads the run the previous step just wrote, and the
     # webhook task committed the row moments before the workflow started — a lagged product-DB
     # reader would miss it (or serve a stale status) and fail the run spuriously.
@@ -112,12 +112,12 @@ def _mint_reviewer_gateway_token(run: ReviewRun) -> str:
 
     Minted under the user who connected the repo's installation (the same creator-credential model
     tasks uses with ``task.created_by``), under the shared sandbox OAuth app, carrying only
-    ``llm_gateway:read`` plus the ``internal_run:read`` provenance marker — the gateway's stamphog
+    ``llm_gateway:read`` plus the ``internal_run:read`` provenance marker — the gateway's stamp
     route sets ``requires_server_credential`` and refuses OAuth tokens without the marker, so a
     user's own Desktop OAuth token can't reach the route. The marker is passed explicitly instead of
     ``include_internal_scopes=True`` to keep the rest of the internal bundle (``task:write``) out of
     a sandbox that runs an LLM over untrusted PR content. If that PR coaxes the reviewer into
-    leaking the token, it buys a few hours of stamphog-route LLM calls and nothing else — the
+    leaking the token, it buys a few hours of stamp-route LLM calls and nothing else — the
     worker's own long-lived credential never enters the sandbox. Fails closed when the repo was
     never synced or the connecting user is gone; re-syncing stamps a fresh identity.
     """
@@ -145,10 +145,10 @@ def _reviewer_environment(run: ReviewRun) -> dict[str, str]:
     gateway is mandatory for hosted runs — the engine's raw-Anthropic fallback exists for the GitHub
     Action runtime, where the env is the repo's own secrets, and an org-wide Anthropic key must never
     ride into a sandbox that runs an LLM over untrusted PR content. AI_GATEWAY_URL must point at the
-    gateway's stamphog product route (``https://<gateway>/stamphog/v1``): that route allowlists the
+    gateway's stamp product route (``https://<gateway>/stamp/v1``): that route allowlists the
     sandbox OAuth app the token is minted under, so a token presented anywhere else is refused.
 
-    INSIGHTS_API_KEY/INSIGHTS_HOST let the engine emit its stamphog_review_completed event and LLM
+    INSIGHTS_API_KEY/INSIGHTS_HOST let the engine emit its stamp_review_completed event and LLM
     traces from inside the sandbox. The capture key is a public project write token — the same class of
     token every frontend snippet ships — so its blast radius is event spam, not data access; it's still
     added to _llm_env_secrets so persisted output stays tidy. STAMPFN_EXTRA_PROPERTIES stamps the
@@ -167,14 +167,14 @@ def _reviewer_environment(run: ReviewRun) -> dict[str, str]:
         if value:
             env[key] = value
     extra_properties: dict[str, object] = {
-        "stamphog_runtime": "hosted",
-        "stamphog_team_id": run.team_id,
-        "stamphog_review_run_id": str(run.id),
+        "stamp_runtime": "hosted",
+        "stamp_team_id": run.team_id,
+        "stamp_review_run_id": str(run.id),
     }
     # Marks self-driving inbox reviews (never set for human PRs) so analytics can tell the engine's
     # completed events and LLM traces apart from reviews of human PRs.
     if (run.output or {}).get("inbox_review"):
-        extra_properties["stamphog_self_driving_review"] = True
+        extra_properties["stamp_self_driving_review"] = True
     env["STAMPFN_EXTRA_PROPERTIES"] = json.dumps(extra_properties, separators=(",", ":"))
     return env
 
@@ -210,14 +210,14 @@ def _resolve_sandbox_backend() -> str:
 
 @activity.defn
 @asyncify
-def fetch_review_context(input: StamphogReviewInput) -> dict:
+def fetch_review_context(input: StampReviewInput) -> dict:
     """Load the PR, its changed files, the author's merged PRs, and default-branch policy."""
     run = _load_run(input)
     pull_request = run.pull_request
     repo_config = pull_request.repo_config
     repo = repo_config.repository
 
-    client = StamphogGitHubClient(repo_config.installation_id)
+    client = StampGitHubClient(repo_config.installation_id)
     pr = client.get_pr(repo, pull_request.pr_number)
     files = client.get_pr_files(repo, pull_request.pr_number)
     # Reviews feed the engine's prerequisite gate — an active CHANGES_REQUESTED must block auto-approval.
@@ -263,8 +263,8 @@ def fetch_review_context(input: StamphogReviewInput) -> dict:
 
 @activity.defn
 @asyncify
-def dismiss_stale_approvals(input: StamphogReviewInput) -> dict:
-    """Retract every standing stamphog approval before this run reviews — old-head AND same-head.
+def dismiss_stale_approvals(input: StampReviewInput) -> dict:
+    """Retract every standing stamp approval before this run reviews — old-head AND same-head.
 
     GitHub never auto-dismisses an APPROVE review, so a prior run's approval keeps satisfying
     required reviews after a push (old head) or across a same-head re-review whose fresh verdict
@@ -286,7 +286,7 @@ def dismiss_stale_approvals(input: StamphogReviewInput) -> dict:
     # pending — if it refuses, an earlier same-head approval must not keep the PR mergeable. The
     # sweep's same-head exclusion remains for the skip paths, where no new review will run and the
     # current-head approval is still the delivered verdict.
-    message = "A new stamphog review started for this PR — the fresh verdict replaces this approval."
+    message = "A new stamp review started for this PR — the fresh verdict replaces this approval."
     dismissed = dismiss_stale_approvals_for_head(input.team_id, pull_request, repo_config, "", message=message)
 
     # Belt-and-braces GitHub-side sweep (see _sweep_own_github_approvals): the DB sweep above keys off
@@ -294,7 +294,7 @@ def dismiss_stale_approvals(input: StamphogReviewInput) -> dict:
     # that approved but crashed before persisting, or any other drift) is invisible to it and would stand
     # forever. keep_review_ids=frozenset() voids everything, regardless of head — the same all-heads
     # semantic the DB sweep uses at workflow start.
-    client = StamphogGitHubClient(repo_config.installation_id)
+    client = StampGitHubClient(repo_config.installation_id)
     github_dismissed = _sweep_own_github_approvals(
         client, repo_config, pull_request, message, keep_review_ids=frozenset()
     )
@@ -308,12 +308,12 @@ def dismiss_stale_approvals(input: StamphogReviewInput) -> dict:
 
 @activity.defn
 @asyncify
-def signal_review_started(input: StamphogReviewInput) -> dict:
-    """Post stamphog's own 👀 on the PR the moment this run commits to reviewing.
+def signal_review_started(input: StampReviewInput) -> dict:
+    """Post stamp's own 👀 on the PR the moment this run commits to reviewing.
 
     Mirrors the convention this same workflow reads off OTHER bots (``STAMPFN_TRUSTED_REACTOR_BOTS``,
     ``list_in_flight_reviewer_bots``): a fresh 👀 means "a review is in flight". Emitting it lets other
-    tooling (and a human watching the PR) see stamphog is actively working, the same signal every other
+    tooling (and a human watching the PR) see stamp is actively working, the same signal every other
     reviewer bot already gives. Runs right after ``dismiss_stale_approvals`` — the moment this run
     commits to reviewing — so the 👀 appears before the (possibly long) context fetch and sandbox run.
     Cosmetic only: ``add_pr_reaction`` fails open (see its docstring), so a reaction hiccup here never
@@ -325,7 +325,7 @@ def signal_review_started(input: StamphogReviewInput) -> dict:
         return {"reaction_id": None}
     pull_request = run.pull_request
     repo_config = pull_request.repo_config
-    client = StamphogGitHubClient(repo_config.installation_id)
+    client = StampGitHubClient(repo_config.installation_id)
     reaction_id = client.add_pr_reaction(repo_config.repository, pull_request.pr_number)
     run.output = {**(run.output or {}), "own_eyes_reaction_id": reaction_id}
     run.save(update_fields=["output", "updated_at"])
@@ -334,7 +334,7 @@ def signal_review_started(input: StamphogReviewInput) -> dict:
 
 @activity.defn
 @asyncify
-def list_in_flight_reviewer_bots(input: StamphogReviewInput) -> dict:
+def list_in_flight_reviewer_bots(input: StampReviewInput) -> dict:
     """Allowlisted reviewer bots with a fresh 👀 on the PR, refreshing the stored snapshot.
 
     The Action waits these bots out by polling GitHub from the runner; the hosted sandbox holds no
@@ -347,16 +347,16 @@ def list_in_flight_reviewer_bots(input: StamphogReviewInput) -> dict:
     if run.status == ReviewRunStatus.SUPERSEDED:
         return {"in_flight": []}
     repo_config = run.pull_request.repo_config
-    client = StamphogGitHubClient(repo_config.installation_id)
+    client = StampGitHubClient(repo_config.installation_id)
     reactions = client.get_pr_reactions(repo_config.repository, run.pull_request.pr_number)
     run.output = {**(run.output or {}), "pr_reactions": reactions}
     run.save(update_fields=["output", "updated_at"])
 
     now = timezone.now()
-    # Exclude stamphog's own bot login: STAMPFN_TRUSTED_REACTOR_BOTS is a hardcoded set of OTHER
+    # Exclude stamp's own bot login: STAMPFN_TRUSTED_REACTOR_BOTS is a hardcoded set of OTHER
     # reviewer bots' logins, so this app's own 👀 (posted by signal_review_started) can't collide
     # with it today — but that set is just literal strings, not a same-app check, so a future
-    # addition or a misconfigured STAMPFN_GITHUB_APP_SLUG could make stamphog wait out itself.
+    # addition or a misconfigured STAMPFN_GITHUB_APP_SLUG could make stamp wait out itself.
     own_login = (expected_app_bot_login() or "").lower()
     in_flight = sorted(
         {
@@ -376,7 +376,7 @@ def list_in_flight_reviewer_bots(input: StamphogReviewInput) -> dict:
 
 @activity.defn
 @asyncify
-def run_review_in_sandbox(input: StamphogReviewInput) -> dict:
+def run_review_in_sandbox(input: StampReviewInput) -> dict:
     """Provision a sandbox, clone the PR, run the full engine offline, stash its raw output."""
     run = _load_run(input)
 
@@ -428,7 +428,7 @@ def run_review_in_sandbox(input: StamphogReviewInput) -> dict:
         activity.logger.info(f"Skipping sandbox for superseded run {run.id} (superseded before REVIEWING)")
         return {"skipped": "superseded"}
 
-    client = StamphogGitHubClient(repo_config.installation_id)
+    client = StampGitHubClient(repo_config.installation_id)
     token = client._get_installation_token()
 
     invocation = build_reviewer_invocation(
@@ -456,7 +456,7 @@ def run_review_in_sandbox(input: StamphogReviewInput) -> dict:
     # is persisted or raised (_llm_env_secrets only covers worker-env values).
     gateway_token = environment["AI_GATEWAY_API_KEY"]
     config = SandboxConfig(
-        name=f"stamphog-review-{run.id}",
+        name=f"stamp-review-{run.id}",
         template=SandboxTemplate.SLIM_BASE,
         metadata={"review_run_id": str(run.id)},
         environment_variables=environment,
@@ -499,8 +499,8 @@ def run_review_in_sandbox(input: StamphogReviewInput) -> dict:
 
 
 def _sweep_own_github_approvals(
-    client: StamphogGitHubClient,
-    repo_config: StamphogRepoConfig,
+    client: StampGitHubClient,
+    repo_config: StampRepoConfig,
     pull_request: PullRequest,
     message: str,
     *,
@@ -551,12 +551,12 @@ def _peer_persisted_approval_ids(team_id: int, pull_request: PullRequest, run: R
 
 
 _TERMINAL_SWEEP_MESSAGE = (
-    "This stamphog run finished without approving — retracting an approval an earlier run left standing so "
+    "This stamp run finished without approving — retracting an approval an earlier run left standing so "
     "it can't satisfy required reviews over a verdict that no longer approves."
 )
 
 
-def _sweep_orphan_approvals_at_terminal(client: StamphogGitHubClient, run: ReviewRun, team_id: int) -> None:
+def _sweep_orphan_approvals_at_terminal(client: StampGitHubClient, run: ReviewRun, team_id: int) -> None:
     """Re-run the GitHub-side own-approvals sweep when a run ends WITHOUT a standing approval of its own.
 
     Closes the supersession orphan race: an older run can clear post_verdict's final guards, get superseded,
@@ -585,7 +585,7 @@ def _sweep_orphan_approvals_at_terminal(client: StamphogGitHubClient, run: Revie
         )
 
 
-def _dismiss_orphaned_approval(client: StamphogGitHubClient, run: ReviewRun, team_id: int) -> None:
+def _dismiss_orphaned_approval(client: StampGitHubClient, run: ReviewRun, team_id: int) -> None:
     """Retract an approval this run posted to GitHub but never recorded as its saved verdict.
 
     Reaching here means the run is being abandoned (superseded, or its head moved) after
@@ -611,7 +611,7 @@ def _dismiss_orphaned_approval(client: StamphogGitHubClient, run: ReviewRun, tea
     activity.logger.info(f"Run {run.id}: dismissed orphaned approval {run.posted_review_id}")
 
 
-def _remove_own_eyes_reaction(client: StamphogGitHubClient, run: ReviewRun) -> None:
+def _remove_own_eyes_reaction(client: StampGitHubClient, run: ReviewRun) -> None:
     """Remove this run's own "review in flight" 👀, if ``signal_review_started`` posted one.
 
     Called from the terminal activities (``post_verdict``'s completion path, ``mark_review_failed``)
@@ -647,7 +647,7 @@ def _remove_own_eyes_reaction(client: StamphogGitHubClient, run: ReviewRun) -> N
 
 @activity.defn
 @asyncify
-def post_verdict(input: StamphogReviewInput) -> dict:
+def post_verdict(input: StampReviewInput) -> dict:
     """Parse the engine output and post the approval or sticky comment."""
     run = _load_run(input)
     pull_request = run.pull_request
@@ -656,7 +656,7 @@ def post_verdict(input: StamphogReviewInput) -> dict:
     output = run.output or {}
     raw = output.get("reviewer_raw", "")
 
-    client = StamphogGitHubClient(repo_config.installation_id)
+    client = StampGitHubClient(repo_config.installation_id)
 
     # Don't post a verdict for a run that's no longer current. A push (synchronize) while this run was
     # in the sandbox supersedes it in the DB; and even before that flag commits, GitHub's head has
@@ -686,11 +686,11 @@ def post_verdict(input: StamphogReviewInput) -> dict:
     parsed = parse_reviewer_output(raw)
 
     run.gate_result = parsed.gate_result
-    if parsed.stamphog_version:
-        run.output = {**output, "stamphog_version": parsed.stamphog_version}
+    if parsed.stamp_version:
+        run.output = {**output, "stamp_version": parsed.stamp_version}
 
     update_fields = ["gate_result", "status", "verdict", "completed_at", "verdict_posted_at", "updated_at"]
-    if parsed.stamphog_version:
+    if parsed.stamp_version:
         update_fields.append("output")
 
     # Last look before any GitHub write: a same-head re-review delivery (e.g. a trigger-label re-add)
@@ -761,7 +761,7 @@ def post_verdict(input: StamphogReviewInput) -> dict:
         run.verdict = parsed.verdict
 
     # Keyed off parsed.verdict, not run.verdict: the gate-blocked branch overrides run.verdict to WAIT,
-    # but both the label-strip and the ReviewHog handoff below treat a gate-blocked refusal the same
+    # but both the label-strip and the Review handoff below treat a gate-blocked refusal the same
     # as an engine-refused one.
     is_refusal = parsed.verdict in (ReviewVerdict.REFUSED, ReviewVerdict.ESCALATE)
 
@@ -792,17 +792,17 @@ def post_verdict(input: StamphogReviewInput) -> dict:
         activity.logger.info(f"Run {run.id} superseded during verdict posting; verdict not saved")
         return {"verdict": "skipped_superseded"}
 
-    # Hand a refused/escalated PR to ReviewHog only AFTER the refusal verdict wins the terminal save
-    # above — running it before would trigger ReviewHog for a stale refusal that a superseding delivery
+    # Hand a refused/escalated PR to Review only AFTER the refusal verdict wins the terminal save
+    # above — running it before would trigger Review for a stale refusal that a superseding delivery
     # then overrode (a newer run might approve the same head). Same is_refusal condition as the
-    # trigger-label strip above, in both review modes: stamphog couldn't sign off, so a deeper
-    # second-opinion review is wanted. Adding the ReviewHog trigger label fires its workflow
-    # (review-script.yml exempts stamphog[bot] from the bot-labeler-skip that would otherwise strip it).
+    # trigger-label strip above, in both review modes: stamp couldn't sign off, so a deeper
+    # second-opinion review is wanted. Adding the Review trigger label fires its workflow
+    # (review-script.yml exempts stamp[bot] from the bot-labeler-skip that would otherwise strip it).
     # This is a secondary, cross-product notification that must never jeopardize the verdict — the
     # refusal is already durably saved, so it is single-shot best-effort: catching every exception (not
-    # just StamphogGitHubError) contains the client's own errors plus the GitHubRateLimitError /
+    # just StampGitHubError) contains the client's own errors plus the GitHubRateLimitError /
     # requests.RequestException the egress layer raises on rate limits and network blips, neither a
-    # subclass of StamphogGitHubError. The sticky upsert above is idempotent, so a missed handoff is a
+    # subclass of StampGitHubError. The sticky upsert above is idempotent, so a missed handoff is a
     # missed handoff, not corruption.
     if is_refusal:
         try:
@@ -811,7 +811,7 @@ def post_verdict(input: StamphogReviewInput) -> dict:
             # Format repo/pr into the message — activity.logger is a stdlib LoggerAdapter that
             # raises TypeError on arbitrary kwargs, which would escape this best-effort catch.
             activity.logger.exception(
-                f"stamphog: reviewhog handoff failed for {repo}#{pull_request.pr_number}; verdict still posted"
+                f"stamp: review handoff failed for {repo}#{pull_request.pr_number}; verdict still posted"
             )
 
     # Close the merge-before-approval race only AFTER this run's APPROVED verdict is durably saved. If
@@ -841,7 +841,7 @@ def post_verdict(input: StamphogReviewInput) -> dict:
 @asyncify
 def mark_review_failed(input: MarkReviewFailedInput) -> None:
     """Mark a run FAILED after an unrecoverable workflow error."""
-    run = _load_run(StamphogReviewInput(review_run_id=input.review_run_id, team_id=input.team_id))
+    run = _load_run(StampReviewInput(review_run_id=input.review_run_id, team_id=input.team_id))
     # A run that already reached a terminal state stays there: post_verdict saves COMPLETED (with the
     # approval already posted to GitHub) before its trailing digest stamp, so a late failure must not
     # rewrite a delivered outcome to FAILED — record the error for the logs and leave the status alone.
@@ -854,12 +854,12 @@ def mark_review_failed(input: MarkReviewFailedInput) -> None:
     # would ever retract the approval on a FAILED run. Dismiss BEFORE marking FAILED: if the
     # dismissal itself fails, this activity retries into a still-non-terminal run and tries again,
     # whereas the reverse order would hit the terminal guard above and orphan the approval forever.
-    client = StamphogGitHubClient(run.pull_request.repo_config.installation_id)
+    client = StampGitHubClient(run.pull_request.repo_config.installation_id)
     if run.verdict != ReviewVerdict.APPROVED and run.posted_review_id and run.approval_dismissed_at is None:
         _dismiss_orphaned_approval(client, run, input.team_id)
     # Persist only the first line, truncated: run.error is returned by the serializer to anyone with
-    # stamphog:read, and raw exception text can embed repository file content (a yaml.YAMLError over
-    # .stamphog/policy.yml echoes the offending source lines on its continuation lines). Full detail is
+    # stamp:read, and raw exception text can embed repository file content (a yaml.YAMLError over
+    # .stamp/policy.yml echoes the offending source lines on its continuation lines). Full detail is
     # already in the worker logs — the workflow logs the complete error before calling this activity.
     # Conditional like every terminal save (the load-time guard above can race an in-flight
     # supersession): a run that just went SUPERSEDED keeps that status, FAILED must not clobber it.
@@ -886,13 +886,13 @@ def mark_review_failed(input: MarkReviewFailedInput) -> None:
     with ph_scoped_capture() as capture:
         capture(
             distinct_id=pull_request.author_login or repo,
-            event="stamphog_review_failed",
+            event="stamp_review_failed",
             properties={
-                "stamphog_repo": repo,
-                "stamphog_pr_number": pull_request.pr_number,
-                "stamphog_team_id": input.team_id,
-                "stamphog_runtime": "hosted",
-                "stamphog_error": first_error_line,
+                "stamp_repo": repo,
+                "stamp_pr_number": pull_request.pr_number,
+                "stamp_team_id": input.team_id,
+                "stamp_runtime": "hosted",
+                "stamp_error": first_error_line,
             },
         )
 
@@ -1040,9 +1040,9 @@ def _overlay_policy_yaml(repo: str, default_text: str, repo_text: str | None) ->
     try:
         overlay = yaml.safe_load(repo_text)
     except yaml.YAMLError as exc:
-        raise RuntimeError(f"repo {repo} has malformed YAML in .stamphog/policy.yml: {exc}") from exc
+        raise RuntimeError(f"repo {repo} has malformed YAML in .stamp/policy.yml: {exc}") from exc
     if not isinstance(overlay, dict):
-        raise RuntimeError(f"repo {repo} .stamphog/policy.yml must be a YAML mapping to overlay the defaults")
+        raise RuntimeError(f"repo {repo} .stamp/policy.yml must be a YAML mapping to overlay the defaults")
     merged = {**yaml.safe_load(default_text), **overlay}
     # sort_keys=False keeps the default's section order stable in the dumped doc.
     return yaml.safe_dump(merged, sort_keys=False)
@@ -1075,7 +1075,7 @@ def _effective_policy_files(repo: str, policy_files: dict[str, str]) -> dict[str
 
 
 def _inject_policy_files(sandbox: SandboxBase, policy_files: dict[str, str]) -> None:
-    """Overwrite the checkout's ``.stamphog/*`` policy files with the trusted versions.
+    """Overwrite the checkout's ``.stamp/*`` policy files with the trusted versions.
 
     Written AFTER checkout, so the trusted default-branch policy and review norms win
     over whatever the (untrusted) PR head carried. The engine reads them from the tree
@@ -1154,11 +1154,11 @@ def _write_sandbox_file(sandbox: SandboxBase, path: str, content: str) -> None:
 
 
 def _stamp_digest_audience_if_merged(
-    repo_config: StamphogRepoConfig, pull_request: PullRequest, run: ReviewRun, pr_payload: dict
+    repo_config: StampRepoConfig, pull_request: PullRequest, run: ReviewRun, pr_payload: dict
 ) -> None:
     """Stamp the digest audience if the PR already merged before this approval landed.
 
-    The merge handler only stamps a merged PR's ``audience_key`` when a stamphog-approved run already
+    The merge handler only stamps a merged PR's ``audience_key`` when a stamp-approved run already
     exists. In the merge-before-approval race it records the merge with a blank audience and never
     revisits it, so a just-approved-and-already-merged PR would silently miss the digest. Re-reading the
     merge state here — the moment the approval is saved — closes that race from the approval side,
@@ -1183,7 +1183,7 @@ def _stamp_digest_audience_if_merged(
     pull_request.save(update_fields=["audience_key", "updated_at"])
 
 
-def _post_sticky(client: StamphogGitHubClient, repo: str, pull_request: PullRequest, body: str) -> None:
+def _post_sticky(client: StampGitHubClient, repo: str, pull_request: PullRequest, body: str) -> None:
     """Upsert the sticky comment and persist its id on the PR. Body is scrubbed before posting.
 
     Idempotent on retry: ``upsert_sticky_comment`` edits the existing comment (tracked via
@@ -1205,7 +1205,7 @@ def _approve_comment(parsed: ReviewerVerdict) -> str:
 
 
 def _verdict_comment(parsed: ReviewerVerdict) -> str:
-    body = f"**Stamphog review: {parsed.verdict}**\n\n{parsed.reasoning}".rstrip()
+    body = f"**Stamp review: {parsed.verdict}**\n\n{parsed.reasoning}".rstrip()
     if parsed.showstoppers:
         body += "\n\n**Showstoppers:**\n" + "\n".join(f"- {item}" for item in parsed.showstoppers)
     return body

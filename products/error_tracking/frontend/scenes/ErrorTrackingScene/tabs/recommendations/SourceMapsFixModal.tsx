@@ -9,7 +9,7 @@ import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { cn } from 'lib/utils/css-classes'
 
 import { RATING_SCALE, sourceMapsFixWizardLogic } from './sourceMapsFixWizardLogic'
-import { WizardHog } from './sourceMapsWizardVisuals'
+import { WizardScript } from './sourceMapsWizardVisuals'
 
 export function SourceMapsFixModal(): JSX.Element {
     const { isModalOpen } = useValues(sourceMapsFixWizardLogic)
@@ -20,7 +20,7 @@ export function SourceMapsFixModal(): JSX.Element {
         <Modal isOpen={isModalOpen} onClose={closeModal} width={540} simple>
             <div className="relative">
                 <div className="flex flex-col items-center gap-2 px-6 pt-8 pb-6 text-center bg-[radial-gradient(ellipse_at_top_left,rgba(43,111,244,0.18),transparent_55%),radial-gradient(ellipse_at_bottom_right,rgba(255,101,31,0.16),transparent_55%)]">
-                    <WizardHog castKey={castKey} className="w-24 h-24" />
+                    <WizardScript castKey={castKey} className="w-24 h-24" />
                     <h3 className="text-xl font-bold mb-0">Readable stack traces in one command</h3>
                     <p className="text-secondary text-sm mb-0 max-w-sm">
                         The wizard detects your framework, sets up automatic source map uploads in your project, and

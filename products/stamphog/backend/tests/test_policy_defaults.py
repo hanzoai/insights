@@ -13,8 +13,8 @@ sys.path.insert(0, str(_ENGINE_DIR))
 import gates  # noqa: E402
 import policy  # noqa: E402
 
-from products.stamphog.backend.temporal.activities import _effective_policy_files, _inject_policy_files  # noqa: E402
-from products.stamphog.backend.temporal.constants import (  # noqa: E402
+from products.stamp.backend.temporal.activities import _effective_policy_files, _inject_policy_files  # noqa: E402
+from products.stamp.backend.temporal.constants import (  # noqa: E402
     STAMPFN_POLICY_ENTRYPOINT,
     STAMPFN_REVIEW_GUIDANCE_PATH,
     STAMPFN_STEERING_PATH,
@@ -113,5 +113,5 @@ def test_inject_policy_files_wipes_optional_paths_from_pr_head() -> None:
     _inject_policy_files(_RecordingSandbox(), {})  # type: ignore[arg-type]
 
     wipes = [cmd for cmd in executed if cmd.startswith("rm -f")]
-    assert any(".stamphog/steering.md" in cmd for cmd in wipes)
-    assert any(".stamphog/policy.yml" in cmd for cmd in wipes)
+    assert any(".stamp/steering.md" in cmd for cmd in wipes)
+    assert any(".stamp/policy.yml" in cmd for cmd in wipes)

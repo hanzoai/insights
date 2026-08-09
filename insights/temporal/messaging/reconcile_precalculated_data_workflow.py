@@ -425,12 +425,12 @@ async def reconcile_team_precalculated_person_properties_activity(
                             distinct_ids_skipped_absent_person += 1
                             continue
                         current_properties = properties_by_person_id[current_person_id]
-                        hog_globals = {"person": {"properties": current_properties}}
+                        script_globals = {"person": {"properties": current_properties}}
                         filter_results = await asyncio.to_thread(
                             evaluate_combined_filters_with_fallback_sync,
                             combined_bytecode,
                             filters,
-                            hog_globals,
+                            script_globals,
                             current_person_id,
                         )
 

@@ -32,7 +32,7 @@ from insights.kafka_client.topics import (
     KAFKA_CDP_INTERNAL_EVENTS,
     KAFKA_DATASTORE_SESSION_RECORDING_EVENTS,
     KAFKA_DATASTORE_SESSION_REPLAY_EVENTS,
-    KAFKA_DATASTORE_TOPHOG,
+    KAFKA_DATASTORE_TopFn,
     KAFKA_COHORT_MEMBERSHIP_CHANGED,
     KAFKA_DOCUMENT_EMBEDDING_RESULTS_TOPIC,
     KAFKA_DOCUMENT_EMBEDDINGS_INPUT_TOPIC,
@@ -72,10 +72,10 @@ _DEFAULT_TOPIC_ROUTING: dict[str, KafkaClusterProfile] = {
     KAFKA_GROUPS: KafkaClusterProfile.INGESTION,
     KAFKA_LOG_ENTRIES: KafkaClusterProfile.INGESTION,
     KAFKA_APP_METRICS2: KafkaClusterProfile.INGESTION,
-    # tophog topic + ingestion-pointed CH _ws table were both pre-provisioned (topic in
-    # warpstream-ingestion topics.tf, kafka_tophog_ws via CH migration 0227); only the
+    # topfn topic + ingestion-pointed CH _ws table were both pre-provisioned (topic in
+    # warpstream-ingestion topics.tf, kafka_topfn_ws via CH migration 0227); only the
     # producer-side override was missing.
-    KAFKA_DATASTORE_TOPHOG: KafkaClusterProfile.INGESTION,
+    KAFKA_DATASTORE_TopFn: KafkaClusterProfile.INGESTION,
     # --- SHARED (Warpstream shared — low-volume / early-stage topics) ---
     KAFKA_METRICS_TIME_TO_SEE_DATA: KafkaClusterProfile.SHARED,
     KAFKA_ERROR_TRACKING_ISSUE_FINGERPRINT: KafkaClusterProfile.SHARED,
