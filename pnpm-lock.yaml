@@ -790,7 +790,7 @@ importers:
       '@hanzo/products-skills':
         specifier: workspace:*
         version: link:../products/skills
-      '@hanzo/products-stamphog':
+      '@hanzo/products-stamp':
         specifier: workspace:*
         version: link:../products/stamphog
       '@hanzo/products-streamlit-apps':
