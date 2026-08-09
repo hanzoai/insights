@@ -86,18 +86,18 @@ export class SourceWebhookError extends Error {
 export class CdpSourceWebhooksConsumer extends CdpConsumerBase<PluginsServerConfig> {
     protected name = 'CdpSourceWebhooksConsumer'
     private hogQueue: JobQueue
-    private hogflowQueue: JobQueue
+    private flowQueue: JobQueue
     private promiseScheduler: PromiseScheduler
 
     constructor(
         config: PluginsServerConfig,
         deps: CdpConsumerBaseDeps,
-        jobQueues: { hogQueue: JobQueue; hogflowQueue: JobQueue }
+        jobQueues: { hogQueue: JobQueue; flowQueue: JobQueue }
     ) {
         super(config, deps)
         this.promiseScheduler = new PromiseScheduler()
         this.hogQueue = jobQueues.hogQueue
-        this.hogflowQueue = jobQueues.hogflowQueue
+        this.flowQueue = jobQueues.flowQueue
     }
 
     public async getWebhook(webhookId: string): Promise<{ flow?: Flow; insightsFunction: InsightsFunctionType } | null> {
@@ -313,7 +313,7 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<PluginsServerConf
                     count: 1,
                 })
 
-                await this.hogflowQueue.queueInvocations([flowInvocation])
+                await this.flowQueue.queueInvocations([flowInvocation])
             } else {
                 addMetric({
                     metric_kind: 'failure',
@@ -492,11 +492,11 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<PluginsServerConf
     public override async start(): Promise<void> {
         await super.start()
         // Make sure we are ready to produce to cyclotron first
-        await Promise.all([this.hogQueue.startAsProducer(), this.hogflowQueue.startAsProducer()])
+        await Promise.all([this.hogQueue.startAsProducer(), this.flowQueue.startAsProducer()])
     }
 
     public override async stop(): Promise<void> {
-        await Promise.all([this.hogQueue.stopProducer(), this.hogflowQueue.stopProducer()])
+        await Promise.all([this.hogQueue.stopProducer(), this.flowQueue.stopProducer()])
         await this.promiseScheduler.waitForAllSettled()
         // IMPORTANT: super always comes last
         await super.stop()

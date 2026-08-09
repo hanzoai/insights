@@ -1,4 +1,4 @@
-import { DatastoreClient } from '@datastore/client'
+import { ClickHouseClient as DatastoreClient } from '@datastore/client'
 import { DateTime } from 'luxon'
 
 import { FlowManagerService } from '../services/flows/flow-manager.service'

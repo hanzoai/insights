@@ -467,63 +467,14 @@ def team_api_test_factory():
             mock_start_workflow.assert_not_called()
             self.assertTrue(Team.objects.filter(pk=team.pk).exists())
 
-        @freeze_time("2022-02-08")
-        def test_reset_token(self):
+        def test_there_is_no_way_to_reset_the_ingest_key(self):
+            # Cloud mints it and has no route that replaces one, so a reset here
+            # could only produce a key the ingest door refuses.
             self.organization_membership.level = OrganizationMembership.Level.ADMIN
             self.organization_membership.save()
 
-            self._assert_activity_log_is_empty()
-
-            self.team.api_token = "xyz"
-            self.team.save()
-
             response = self.client.patch(f"/v1/environments/{self.team.id}/reset_token/")
-            response_data = response.json()
-
-            self.team.refresh_from_db()
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertNotEqual(response_data["api_token"], "xyz")
-            self.assertEqual(response_data["api_token"], self.team.api_token)
-            self.assertTrue(response_data["api_token"].startswith("pk-"))
-
-            self._assert_activity_log(
-                [
-                    {
-                        "activity": "updated",
-                        "created_at": "2022-02-08T00:00:00Z",
-                        "detail": {
-                            "changes": [
-                                {
-                                    "action": "changed",
-                                    "after": self.team.api_token,
-                                    "before": "xyz",
-                                    "field": "api_token",
-                                    "type": "Team",
-                                },
-                            ],
-                            "name": "Default project",
-                            "short_id": None,
-                            "trigger": None,
-                            "type": None,
-                        },
-                        "item_id": str(self.team.pk),
-                        "scope": "Team",
-                        "user": {
-                            "email": "user1@hanzo.ai",
-                            "first_name": "",
-                        },
-                    },
-                ]
-            )
-
-        def test_reset_token_insufficient_privileges(self):
-            self.organization_membership.level = OrganizationMembership.Level.MEMBER
-            self.organization_membership.save()
-            self.team.api_token = "xyz"
-            self.team.save()
-
-            response = self.client.patch(f"/v1/environments/{self.team.id}/reset_token/")
-            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         @freeze_time("2022-02-08")
         def test_generate_secret_token(self):

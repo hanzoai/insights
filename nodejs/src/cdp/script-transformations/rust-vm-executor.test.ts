@@ -1,7 +1,7 @@
 import { logger } from '~/common/utils/logger'
 
 import { createExampleInvocation } from '../_tests/fixtures'
-import { resetScriptvmNodeModuleCacheForTests } from './rust-vm'
+import { resetScriptvmNodeModuleCacheForTests, type ScriptvmNodeModule } from './rust-vm'
 import { RustVmExecutor } from './rust-vm-executor'
 
 jest.mock('@hanzo/scriptvm-node', () => ({
@@ -9,7 +9,7 @@ jest.mock('@hanzo/scriptvm-node', () => ({
     executeSync: jest.fn(),
 }))
 
-const mockScriptvmNode = jest.mocked(jest.requireMock<typeof import('@hanzo/scriptvm-node')>('@hanzo/scriptvm-node'))
+const mockScriptvmNode = jest.mocked(jest.requireMock<ScriptvmNodeModule>('@hanzo/scriptvm-node'))
 
 const rustResult = (overrides: Partial<ReturnType<typeof mockScriptvmNode.executeSync>> = {}) => ({
     result: { properties: { a: 1 } },

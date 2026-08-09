@@ -70,9 +70,8 @@ class TestTeamAdminSetApiTokenView(BaseTest):
         assert context["team"].api_token == "pk-admin_test_old"
         assert context["title"] == f"Set API token - {self.team.name}"
 
-    @patch("insights.tasks.integrations.push_vercel_secrets.delay")
     @patch("insights.models.team.team.set_team_in_cache")
-    def test_post_with_valid_token_invokes_model_method_and_redirects(self, _mock_set_cache, _mock_push_vercel) -> None:
+    def test_post_with_valid_token_invokes_model_method_and_redirects(self, _mock_set_cache) -> None:
         http_request = self.factory.post(self.set_api_token_url, {"new_token": "pk-admin_test_new"})
         http_request.user = self.user
         _attach_messages(http_request)
@@ -247,7 +246,9 @@ class TestTeamAdminLLMGateway(BaseTest):
             setattr(self.team, field, timezone.now() - timedelta(days=1))
             self.team.save()
 
-        with patch("insights.storage.team_llm_gateway_policy_cache.update_team_llm_gateway_policy_cache") as mock_update:
+        with patch(
+            "insights.storage.team_llm_gateway_policy_cache.update_team_llm_gateway_policy_cache"
+        ) as mock_update:
             response = getattr(self.admin, view_name)(self._post(), str(self.team.pk))
 
         assert response.status_code == 302
