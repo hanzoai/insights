@@ -59,7 +59,7 @@ must be unique within the project. Lean toward:
 - **No version in the name** — versions are managed by the endpoint itself
 - **No "endpoint" in the name** — redundant
 
-The name appears in the URL: `/api/projects/{team_id}/endpoints/{name}/run`. It's not
+The name appears in the URL: `/v1/projects/{team_id}/endpoints/{name}/run`. It's not
 trivially renameable later (callers depend on the path) — get it right at creation.
 
 ### 3. Pick the query kind

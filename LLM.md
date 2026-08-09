@@ -130,12 +130,12 @@ Anonymous `/` used to bounce straight to SSO, so the product had no public face.
 `insights/urls.py:root` now branches: `home` (the SPA, unchanged) for an
 authenticated user, `templates/landing.html` for everyone else.
 
-Its CTAs point OUT to `hanzo.ai/pricing` on purpose — **`GET /api/billing` is
+Its CTAs point OUT to `hanzo.ai/pricing` on purpose — **`GET /v1/billing` is
 404 in this deployment**, so an in-app upgrade funnel would dead-end. There is
 also no Insights SKU in `@hanzo/plans` (its 11 tiers are compute), so no plan
 copy is written in the template; minting that SKU is a pricing decision, not a
 template edit. Tests in `insights/test/test_landing.py` fail the build if
-`/api/billing` or any third-party asset host reappears on the page (prod refuses
+`/v1/billing` or any third-party asset host reappears on the page (prod refuses
 third-party CDNs and fails SILENTLY).
 
 ## `preflight.cloud` is FALSE here — and that drove a real bug
@@ -675,7 +675,7 @@ those tables here.
 
 ## Why login 500s: the migration graph, and how to ask it what is wrong
 
-`POST /api/login` returns 500 on `column django_session.user_id does not exist`.
+`POST /v1/login` returns 500 on `column django_session.user_id does not exist`.
 That column comes from `insights_session`'s 0002/0003, and they have never
 applied — because `migrate` builds the WHOLE graph before running anything, so
 one unsatisfiable dependency anywhere blocks every migration in the tree.

@@ -275,7 +275,7 @@ Add `organization_id` to the JWT claims (same pattern as the existing `user_id` 
 
 **Branch: `yasen/notifications-backend`**
 
-Endpoint stays at `/api/environments/{team_id}/notifications/`.
+Endpoint stays at `/v1/environments/{team_id}/notifications/`.
 The viewset resolves the organization from the team ID.
 
 ### List (`GET /`)

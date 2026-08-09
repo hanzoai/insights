@@ -22,9 +22,9 @@ unit-testable against the real `git` binary without booting the app
 
 ## Endpoints
 
-- **Zip export** — `GET /api/projects/:team/llm_skills/name/:name/export` → `application/zip`,
+- **Zip export** — `GET /v1/projects/:team/llm_skills/name/:name/export` → `application/zip`,
   one spec-compliant skill directory nested under `:name/` (web-authenticated, `llm_skill:read`).
-- **Zip import** — `POST /api/projects/:team/llm_skills/import` (multipart `file` field, a spec
+- **Zip import** — `POST /v1/projects/:team/llm_skills/import` (multipart `file` field, a spec
   skill `.zip`) → creates the skill (web-authenticated, `llm_skill:write`). The inverse of
   export: `parse_skill_zip` reads `SKILL.md` frontmatter + bundled files. Round-trips with export.
 - **Install command** — `GET` (read connection state, no mint) + `POST` (mint/rotate the
@@ -93,11 +93,11 @@ polls reuse one synthesis and the cache invalidates automatically on any change.
    tunnel in front of `./bin/start` — `localhost` won't do).
 2. Get the ready-to-paste command (mints the per-user read-only credential and embeds it):
    the **Connect to Claude Code** button in the skills UI, `POST
-/api/environments/:team/llm_skills/marketplace/install-command`, or the
+/v1/environments/:team/llm_skills/marketplace/install-command`, or the
    `skill-store-install-command` MCP tool. The `phx_…` token is shown once.
 3. Create a skill (UI, API, or the `skill-create` MCP tool) so the marketplace is non-empty.
 4. In Claude Code, paste the command (it is the full
-   `/plugin marketplace add https://x-access-token:phx_…@<host>/api/projects/:team/llm_skills/marketplace.git`),
+   `/plugin marketplace add https://x-access-token:phx_…@<host>/v1/projects/:team/llm_skills/marketplace.git`),
    then install the `insights-skill-store` plugin and confirm a skill loads (`/insights-skill-store:<name>`).
 5. Publish a change to that skill → the plugin version advances. Trigger / wait for Claude
    Code's marketplace update and confirm the new `SKILL.md` content is pulled.

@@ -92,7 +92,7 @@ You are an expert product engineer specializing in Insights's comprehensive acti
 **API Integration Patterns:**
 
 - ActivityLogViewSet (`insights/api/advanced_activity_logs/viewset.py`) with team/org filtering and scope support
-- Two main endpoints: `/api/projects/@current/activity_log/` (basic) and `/api/projects/@current/advanced_activity_logs/` (full-featured)
+- Two main endpoints: `/v1/projects/@current/activity_log/` (basic) and `/v1/projects/@current/advanced_activity_logs/` (full-featured)
 - ActivityLogSerializer with user details and unread status calculation
 - Advanced activity logs API with field discovery, export functionality (CSV and XLSX formats)
 - Filter support for users, scopes, activities, search text, detail filters, date ranges, was_impersonated, is_system, and item_ids

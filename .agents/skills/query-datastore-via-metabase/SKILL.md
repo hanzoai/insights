@@ -100,7 +100,7 @@ it fans out across the cluster.
 
 For large result sets, use `--save <path>` so rows land in a file rather
 than streaming through the terminal/transcript. Default output is TSV;
-`--format json` gives you the raw `/api/dataset` response body.
+`--format json` gives you the raw `/v1/dataset` response body.
 
 If the DB ID is wrong, `metabase:query` exits non-zero with a pointer back
 to `metabase:databases`. Fail-fast is intentional — silently querying the
@@ -181,7 +181,7 @@ https://metabase.prod-eu.insights.dev/question/795-look-up-query-by-query-id?que
 ```
 
 The same can be reproduced programmatically with a `WHERE query_id = '...'`
-clause via `/api/dataset` against the right region's DB ID.
+clause via `/v1/dataset` against the right region's DB ID.
 
 ## Parsing Metabase responses
 

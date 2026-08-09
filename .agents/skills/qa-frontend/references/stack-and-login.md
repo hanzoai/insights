@@ -52,7 +52,7 @@ Fallback to repo-local logs under `.insights/.generated/logs/` only when phrocs 
 
 ## Login
 
-If a browser test needs realistic data or an isolated workspace, prefer the repo-local `run-insights` `POST /api/setup_test/organization_with_team/` recipe: call it from the browser page context, then log in from the page context with the returned `user_email` and password `12345678`. Use the returned `team_id` when constructing `/project/{team_id}/...` routes. This is setup for frontend QA, not a standalone backend/API test.
+If a browser test needs realistic data or an isolated workspace, prefer the repo-local `run-insights` `POST /v1/setup_test/organization_with_team/` recipe: call it from the browser page context, then log in from the page context with the returned `user_email` and password `12345678`. Use the returned `team_id` when constructing `/project/{team_id}/...` routes. This is setup for frontend QA, not a standalone backend/API test.
 
 When a dedicated setup workspace is not needed, default to the public Insights local-dev seed: `test@hanzo.ai` / `12345678`. These are documented in [`docs/published/handbook/engineering/manual-dev-setup.md`](../../../../docs/published/handbook/engineering/manual-dev-setup.md) and are seeded by `bin/start`. They exist only on dev stacks seeded that way (a laptop stack or a personal devbox), so falling back to them is safe.
 

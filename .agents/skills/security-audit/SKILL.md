@@ -44,7 +44,7 @@ If the target is ambiguous, state your interpretation at the top of the report a
 ### 1. Broken access control — almost always the highest-impact class in SaaS
 
 - Missing `permission_classes` / authentication on endpoints that read or mutate user data.
-- **Internal / admin / debug endpoints exposed on the public vhost.** `/api/_internal`, `/admin/*`, `/__debug__`, `/api/test`, impersonation routes, ops dashboards. If they're routed on the same host as the public API, they need the same authn/authz scrutiny — assume any unauthenticated route is reachable.
+- **Internal / admin / debug endpoints exposed on the public vhost.** `/v1/_internal`, `/admin/*`, `/__debug__`, `/v1/test`, impersonation routes, ops dashboards. If they're routed on the same host as the public API, they need the same authn/authz scrutiny — assume any unauthenticated route is reachable.
 - **Test / fixture / seed endpoints reachable in prod.** Routes guarded only by `DEBUG` or a non-prod env check, where the check is bypassable or accidentally enabled. Same severity as the privileged action they expose.
 - **Deprecated `v1` endpoints retained alongside hardened `v2`.** Old endpoints kept "for compatibility" often miss controls added later. Diff v1 vs v2 viewsets — same resource, different guards is the finding.
 - **Default-allow custom permission classes.** `has_permission` / `has_object_permission` methods that return `True` when no rule matches a new resource type. Silent allow on every model added later. Default-deny: return `False` and explicitly grant.
@@ -133,7 +133,7 @@ If the target is ambiguous, state your interpretation at the top of the report a
 
 - Open redirect: user-controlled `next` / `return_to` / `redirect_uri` not validated against an allowlist.
 - **Host header injection in absolute URL generation.** Password-reset and email-verification flows that build the link from `request.get_host()` or equivalent without an allowlist — attacker sets `Host:` to their own domain and the email contains a reset link to attacker.com. ATO at scale. Also check cache key composition for the same vector (cache poisoning).
-- **Path-prefix middleware vs router slash policy.** Prefix-matched denylists (e.g. `IMPERSONATION_BLOCKED_PATHS`) using `startswith` against entries with trailing slashes can be bypassed when the DRF router accepts both forms (`trailing_slash = r"/?"`). Requesting `/api/personal_api_keys` (no slash) routes to the same viewset but skips the prefix match. Audit every prefix-matched denylist against the router's slash policy and normalize both sides.
+- **Path-prefix middleware vs router slash policy.** Prefix-matched denylists (e.g. `IMPERSONATION_BLOCKED_PATHS`) using `startswith` against entries with trailing slashes can be bypassed when the DRF router accepts both forms (`trailing_slash = r"/?"`). Requesting `/v1/personal_api_keys` (no slash) routes to the same viewset but skips the prefix match. Audit every prefix-matched denylist against the router's slash policy and normalize both sides.
 - CORS: `*` combined with credentials, or origin reflected from the request without an allowlist. Also flag: `Access-Control-Allow-Credentials: true` with origin reflected from the request header; `null` origin accepted (sandboxed iframes, `file://`, redirected requests can present `Origin: null`); naive wildcard-subdomain regex (`.*\.insights\.com` matches `evilhanzo.ai` if the dot isn't escaped or the anchor is missing).
 - CSRF: state-changing endpoints exempted from CSRF without a compensating control (CORS, custom header check, signed token).
 - Cookies: missing `Secure` / `HttpOnly` / `SameSite` on session cookies.
@@ -241,7 +241,7 @@ Then for each finding:
   2. ...
   3. Sink — path/to/file.py:LINE (what happens with it)
 - Exploit:
-    POST /api/projects/123/foo/
+    POST /v1/projects/123/foo/
     {"target_id": 999}    # 999 belongs to tenant B; attacker is in tenant A
   Impact: <one sentence>
 - Fix: minimal change to close the bug, expressed in framework-idiomatic terms (e.g., "filter the queryset by self.context['get_team']().id", "use parameterized cursor.execute(sql, [user_id])", "validate URL host against ALLOWED_REDIRECT_HOSTS").

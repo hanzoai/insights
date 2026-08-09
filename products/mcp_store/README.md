@@ -86,7 +86,7 @@ A real end-to-end install (Gate B in the skill) is the only check that catches t
 
 Catalog icons are not committed image assets.
 Templates carry an `icon_domain` (the vendor's brand domain, e.g. `linear.app`).
-The frontend renders them through the authenticated proxy endpoint `GET /api/projects/:team_id/mcp_servers/icon/?domain=<domain>&theme=<light|dark>`.
+The frontend renders them through the authenticated proxy endpoint `GET /v1/projects/:team_id/mcp_servers/icon/?domain=<domain>&theme=<light|dark>`.
 The proxy fetches each brand icon from [logo.dev](https://logo.dev) through the egress-gated `CDPIconsService`.
 Logos are transparent retina PNGs matched to the active UI theme instead of logo.dev's default white-tiled JPGs.
 Icon bytes are never stored on Insights infrastructure because our logo.dev plan does not include a data-caching license.
@@ -105,7 +105,7 @@ To show brand icons on a self-hosted instance, create a logo.dev account, genera
 ## Auth models
 
 - **OAuth with DCR** (most modern remote servers): nothing to provision. Each install discovers OAuth metadata fresh and mints a per-user client via RFC 7591. Template `oauth_credentials`/`oauth_metadata` stay empty.
-- **OAuth without DCR** ("shared creds"): an operator registers one OAuth app with the vendor and pastes `client_id`/`client_secret` into Django admin (stored encrypted per template). The sync pre-fills `oauth_metadata` from discovery; installs then share the client while each user gets their own tokens. Redirect URI: `{SITE_URL}/api/mcp_store/oauth_redirect/`.
+- **OAuth without DCR** ("shared creds"): an operator registers one OAuth app with the vendor and pastes `client_id`/`client_secret` into Django admin (stored encrypted per template). The sync pre-fills `oauth_metadata` from discovery; installs then share the client while each user gets their own tokens. Redirect URI: `{SITE_URL}/v1/mcp_store/oauth_redirect/`.
 - **API key**: users supply their own key at install; nothing on the template.
 
 ## Operator runbook: activating a shared-creds server
