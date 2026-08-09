@@ -215,7 +215,7 @@ from products.replay_vision.backend.temporal import (
     WORKFLOWS as REPLAY_VISION_WORKFLOWS,
 )
 from products.replay_vision.backend.temporal.logs import build_vision_log_mirror
-from products.review_hog.backend.temporal import (
+from products.review.backend.temporal import (
     ACTIVITIES as REVIEW_FN_ACTIVITIES,
     WORKFLOWS as REVIEW_FN_WORKFLOWS,
 )
@@ -227,7 +227,7 @@ from products.signals.backend.temporal import (
     ACTIVITIES as SIGNALS_PRODUCT_ACTIVITIES,
     WORKFLOWS as SIGNALS_PRODUCT_WORKFLOWS,
 )
-from products.stamphog.backend.facade.temporal import (
+from products.stamp.backend.facade.temporal import (
     ACTIVITIES as STAMPFN_ACTIVITIES,
     WORKFLOWS as STAMPFN_WORKFLOWS,
 )
