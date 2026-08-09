@@ -1235,96 +1235,63 @@ def check_hog(root: str) -> int:
     return 1 if (leaked or paths) else 0
 
 
-# --- upstream packages --------------------------------------------------
+# --- upstream dependency specifiers --------------------------------------
 #
 # Everything above reads source. This reads *specifiers*, because a manifest
 # entry is the one place a rename cannot reach:
 #
 #     insights-rs = { package = "posthog-rs", version = "0.21.0" }
-#     "@hanzo/brand": "npm:@posthog/brand@0.9.1"
 #
-# Both read as ours everywhere in our source and install theirs on the machine.
-# The alias renames the symbol; the registry still serves upstream, and the
-# upstream name is what lands in the lockfile, in node_modules and site-packages
-# paths, and in any stack trace a customer is shown. Reporting that as PENDING
-# was right while the list was long and the answer per entry unknown; now that
-# the answer is known, an unlisted one is a regression rather than a backlog
-# item, so the default is refusal.
+# reads as ours in our source and installs theirs on the machine. The alias
+# renames the symbol; the registry still serves the upstream crate, and the
+# upstream name is what lands in the lockfile, the vendored path and the stack
+# trace. `--check` was green over that line for as long as it has existed.
 #
-# Keyed by package, not by file. A file-level exemption would excuse every
-# future dependency added to that file, which is the opposite of the point --
-# each upstream package we still take has to be named here and say why.
-UPSTREAM_DEPS = {
-    "@posthog/hogql-parser": (
-        "The WebAssembly build of the query parser. The source is already ours "
-        "(`common/insightsql_parser`, renamed grammar and all); only the "
-        "published artefact is still upstream's, and building it needs "
-        "emscripten. Retires when that package is published from our tree."
-    ),
-    "@posthog/mcp": (
-        "Analytics SDK for MCP servers. `services/mcp` already asks for a Hanzo "
-        "package instead; the override here is what drags it back upstream."
-    ),
-    "@posthog/siphash": (
-        "BSD-2-Clause, 57 kB, its own upstream repository -- forkable as-is, "
-        "and small enough that it is only waiting on somewhere to put it."
-    ),
-    "posthog-node": (
-        "The server SDK. `@hanzo/insights-node` is published and on the same "
-        "major line, so this is a repoint awaiting a verified server test."
-    ),
-    "drf-exceptions-hog": (
-        "Reimplement rather than fork: 386 LOC behind a single import in "
-        "`insights/exceptions.py`, and the error envelope it builds is already "
-        "our contract -- spelled out in `frontend/src/types.ts` and asserted by "
-        "50 test files. A fork would give one caller a second home."
-    ),
-    "pixelhog": (
-        "Fork: 2,720 lines of Rust, a port of mapbox/pixelmatch plus SSIM and "
-        "spatial clustering, checked against upstream's canonical fixtures. "
-        "Reimplementing re-derives someone else's port; the maturin wheel build "
-        "is the real cost either way."
-    ),
-    "posthog-rs": (
-        "Fork at 0.21.0, which the CLI compiles against unchanged. One consumer "
-        "(`cli`) -- the `rust` workspace declared it and no member ever used it. "
-        "The alias hides a `posthog-rs` User-Agent, a `$lib` property, four "
-        "request headers and a default ingestion host of us.i.posthog.com, none "
-        "of which a `package` key can reach."
-    ),
-    "posthog-symbol-data": (
-        "Fork: 386 LOC, and forking is what settles the container MAGIC, which "
-        "a reader in this tree already spells `insights_error_tracking` while "
-        "the crate still writes `posthog_error_tracking`."
-    ),
-    "pytest-split": (
-        "Fork or drop: a `tool.uv.sources` git entry that fetches from the "
-        "upstream org under a comment calling it ours. Not on a registry, so "
-        "only the URL and tag give it away."
-    ),
+# So each entry below is an upstream package we still take, keyed by the token
+# that gives it away, and carrying the decision that retires it. A specifier
+# that matches and is NOT listed fails: taking a new dependency from upstream
+# is a choice someone should have to write down, not one that lands quietly.
+OUTSTANDING: dict[str, str] = {
+    "drf-exceptions-hog": "reimplement: 386 LOC, one caller (insights/exceptions.py), and the "
+    "error envelope it builds is already our contract -- declared in frontend/src/types.ts "
+    "and asserted by 50 test files",
+    "pixelhog": "fork: 2,720 lines of Rust, a port of mapbox/pixelmatch plus SSIM and "
+    "clustering, proven against upstream's canonical fixtures. Reimplementing re-derives "
+    "someone else's port; the wheel build is the real cost either way",
+    "posthog-rs": "fork at 0.21.0: one consumer (cli/), and the alias hides a User-Agent, a "
+    "$lib property and a default ingestion host that all still say posthog",
+    "posthog-symbol-data": "fork: 386 LOC, but it fixes a container MAGIC that a reader in "
+    "this tree already disagrees with",
+    "pytest-split": "fork or drop: a git source that fetches from the upstream org, under a "
+    "comment that calls it ours",
+    "@posthog/hogql-parser": "publish ours: the source is already in this tree "
+    "(common/insightsql_parser, renamed grammar and all) and already carries our name and "
+    "version. Only the WebAssembly artefact is still upstream's, and building it needs emscripten",
+    "@posthog/mcp": "repoint: services/mcp already asks for a Hanzo package, and this override "
+    "is the only thing dragging it back upstream",
+    "@posthog/siphash": "fork: BSD-2-Clause, 57 kB, its own upstream repository -- small enough "
+    "that it is only waiting on somewhere to put it",
+    "posthog-node": "repoint: @hanzo/insights-node is published on the same major line, so this "
+    "is a version pin away, once a server test has run against it",
 }
 
-# `@posthog/core` and `@posthog/types` arrive only as dependencies of the
-# packages above, so they are not decisions of ours; they leave when their
-# parents do.
-UPSTREAM_RE = re.compile(r"@posthog/[a-z0-9][a-z0-9.-]*|(?<![\w-])posthog-[a-z0-9][a-z0-9.-]*")
-
-# The company outright, or the mascot as a suffix -- the shape the Python
-# packages take (`pixelhog`, `drf-exceptions-hog`), which UPSTREAM_RE misses
-# because none of them begin with `posthog-`. Deliberately not bare `hog`:
-# `hogland` is someone else's service, named as outstanding elsewhere in this
-# file rather than refused here.
+# `posthog` outright, or the mascot as a suffix -- the shape every one of these
+# packages takes (`statshog`, `pixelhog`, `drf-exceptions-hog`). Deliberately
+# not bare `hog`: `hogland` is someone else's service, named as outstanding
+# elsewhere in this file rather than refused here.
 UPSTREAM_NAME = re.compile(r"posthog|hog(?![A-Za-z])", re.IGNORECASE)
 
+# The tables whose entries resolve to something a package manager downloads.
+PY_DEP_TABLES = ("dependencies", "optional-dependencies", "dependency-groups")
 CARGO_DEP_TABLES = ("dependencies", "dev-dependencies", "build-dependencies")
 
 
 def _dep_strings(root: str, rel: str) -> list[tuple[str, str, str]]:
     """Every (dependency, what-it-resolves-to, where-it-was-written) in a manifest.
 
-    Parsed rather than grepped, because in TOML the name that resolves is the
-    alias *target*, the git URL or the tag, and only a parser tells those apart
-    from a comment sitting on the same line. The dependency's own key travels
+    Parsed rather than grepped: the name that resolves is the alias *target*,
+    the git URL or the tag, and only a parser tells those apart from a comment
+    that happens to sit on the same line. The dependency's own key travels
     alongside, so a finding is attributed to the dependency rather than to
     whichever of its fields happened to spell the brand.
     """
@@ -1364,62 +1331,96 @@ def _dep_strings(root: str, rel: str) -> list[tuple[str, str, str]]:
         for name in CARGO_DEP_TABLES:
             for key, dep in doc.get(name, {}).items():
                 table(dep, key, name)
+        for name in CARGO_DEP_TABLES:
             for key, dep in doc.get("workspace", {}).get(name, {}).items():
                 table(dep, key, f"workspace.{name}")
     return out
 
 
-def upstream_deps(root: str) -> dict[str, list[str]]:
-    """Upstream package names named by a manifest, mapped to the manifests.
+# npm spells the same aliasing two ways, and both end in a string starting
+# `npm:` -- a dependency whose value is `npm:@posthog/brand@0.9.1`, or a
+# workspace override that rewrites one for the whole tree. The prefix is what
+# makes the target unambiguous, so it is what we read.
+NPM_ALIAS = re.compile(r"""['"]?(?P<key>@?[\w.-]+(?:/[\w.-]+)?)['"]?\s*:\s*['"]?npm:(?P<target>@?[\w.-]+(?:/[\w.-]+)?)@""")
 
-    Two readers, because there are two manifest languages and each hides the
-    upstream name somewhere the other's reader cannot see: npm spells it in a
-    string anywhere in the file, TOML spells it in a field of a table.
+
+def _npm_dep_strings(root: str, rel: str) -> list[tuple[str, str, str]]:
+    """The same reading for package.json and pnpm-workspace.yaml.
+
+    A dependency resolves to its own key unless an `npm:` alias redirects it, so
+    both are yielded and the alias target is what gets matched against upstream.
     """
-    out: dict[str, list[str]] = {}
-    for rel in tracked_files(root):
-        if os.path.basename(rel) not in MANIFESTS:
-            continue
+    path = os.path.join(root, rel)
+    out: list[tuple[str, str, str]] = []
+    if os.path.basename(rel) == "package.json":
         try:
-            text = open(os.path.join(root, rel), encoding="utf-8", errors="ignore").read()
-        except OSError:
-            continue
-        for name in sorted(set(UPSTREAM_RE.findall(text))):
-            out.setdefault(name, []).append(rel)
-        if not rel.endswith((".toml",)):
-            continue
-        for key, value, where in _dep_strings(root, rel):
-            if not UPSTREAM_NAME.search(value):
-                continue
-            # A plain requirement and an alias target are package names and so
-            # identify themselves. A git URL, a tag or a rev is not a package
-            # name however much it spells the brand, so there the dependency's
-            # own key is the thing to name.
-            name = value if (value == key or where.endswith(".package")) else key
-            out.setdefault(name, []).append(f"{rel} ({where})")
+            doc = json.load(open(path, encoding="utf-8"))
+        except (OSError, ValueError):
+            return []
+        for section in DEP_SECTIONS:
+            for key, spec in (doc.get(section) or {}).items():
+                # `workspace:*` resolves inside this tree, so no registry serves
+                # it and no upstream name is involved -- which is the whole
+                # subject here. Our own `@hanzo/products-stamphog` is the case
+                # that proves it: the app keeps a name it cannot be renamed out
+                # of, and it is ours.
+                if isinstance(spec, str) and spec.startswith("workspace:"):
+                    continue
+                out.append((key, key, section))
+                if isinstance(spec, str) and spec.startswith("npm:"):
+                    out.append((key, spec[len("npm:") :].rsplit("@", 1)[0], f"{section}.{key}"))
+        return out
+    # pnpm-workspace.yaml: only the alias lines resolve to a package, and the
+    # `npm:` prefix is what tells them from every other key in the file.
+    try:
+        text = open(path, encoding="utf-8").read()
+    except OSError:
+        return []
+    for m in NPM_ALIAS.finditer(text):
+        out.append((m.group("key"), m.group("target"), "overrides"))
     return out
 
 
-def check_upstream(root: str) -> int:
-    """Refuse a manifest that names an upstream package we have not justified."""
-    found = upstream_deps(root)
-    unlisted = {k: v for k, v in found.items() if k not in UPSTREAM_DEPS}
-    if unlisted:
-        print(f"FAIL: {len(unlisted)} upstream packages are named by a manifest and not justified")
-        print("    Fork it under our own name, or record here why we still take it from upstream.")
-        for name, files in sorted(unlisted.items()):
-            print(f"    {name}  ({', '.join(sorted(set(files)))})")
-    # The justifications are the record of outstanding work, so a stale one has
-    # to surface: once a package is gone, its entry has to go too or the list
-    # slowly stops describing the tree.
-    stale = sorted(set(UPSTREAM_DEPS) - set(found))
-    if stale:
-        print(f"FAIL: {len(stale)} justified upstream packages are no longer used (drop the entry)")
-        for name in stale:
-            print(f"    {name}")
-    if found and not unlisted and not stale:
-        print(f"upstream: {len(found)} packages still taken from upstream, each justified")
-    return 1 if (unlisted or stale) else 0
+def check_upstream_deps(root: str) -> int:
+    """Refuse a dependency specifier that resolves to upstream and is unrecorded."""
+    unrecorded: list[tuple[str, str, str]] = []
+    seen: set[str] = set()
+    for rel in tracked_files(root):
+        base = os.path.basename(rel)
+        if base in ("package.json", "pnpm-workspace.yaml"):
+            strings = _npm_dep_strings(root, rel)
+        elif base in ("pyproject.toml", "Cargo.toml"):
+            strings = _dep_strings(root, rel)
+        else:
+            continue
+        for key, value, where in strings:
+            if not UPSTREAM_NAME.search(value):
+                continue
+            entry = next(
+                (k for k in OUTSTANDING if k.lower() in value.lower() or k.lower() in key.lower()),
+                None,
+            )
+            if entry is None:
+                unrecorded.append((rel, where, value))
+            else:
+                seen.add(entry)
+
+    if seen:
+        print(f"PENDING: {len(seen)} upstream packages are still specified, each with a decision:")
+        for name in sorted(seen):
+            print(f"    {name} -- {OUTSTANDING[name]}")
+    if retired := sorted(set(OUTSTANDING) - seen):
+        # A ledger that outlives the dependency starts granting permission for a
+        # name nothing takes any more, so removing the entry is part of the work.
+        print(f"FAIL: {len(retired)} ledger entries name a dependency no manifest takes")
+        for name in retired:
+            print(f"    {name} -- retired; drop it from OUTSTANDING")
+    if unrecorded:
+        print(f"FAIL: {len(unrecorded)} dependency specifiers resolve to upstream and are unrecorded")
+        print("    A rename in our manifest does not change what the registry serves.")
+        for rel, where, value in unrecorded:
+            print(f"    {rel}: {where} -> {value!r}")
+    return 1 if (unrecorded or retired) else 0
 
 
 def check_license(root: str) -> int:
@@ -1711,7 +1712,7 @@ def check(root: str) -> int:
     bad += check_mangled(root)
     bad += check_marks(root)
     bad += check_hog(root)
-    bad += check_upstream(root)
+    bad += check_upstream_deps(root)
     paths = [p for p in tracked_files(root) if "posthog" in p.lower()]
     if paths:
         bad += 1
