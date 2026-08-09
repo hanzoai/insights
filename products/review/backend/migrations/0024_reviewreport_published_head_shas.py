@@ -3,7 +3,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("review_hog", "0023_reviewreport_unclassified_idx"),
+        ("review", "0023_reviewreport_unclassified_idx"),
     ]
 
     operations = [
