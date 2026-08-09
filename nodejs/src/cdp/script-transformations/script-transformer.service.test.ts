@@ -17,7 +17,7 @@ import { createInsightsFunction, insertInsightsFunction } from '../_tests/fixtur
 import { insightsPluginGeoip } from '../legacy-plugins/_transformations/insights-plugin-geoip/template'
 import { propertyFilterPlugin } from '../legacy-plugins/_transformations/property-filter-plugin/template'
 import { InsightsFunctionTemplate } from '../types'
-import { resetScriptvmNodeModuleCacheForTests } from './rust-vm'
+import { resetScriptvmNodeModuleCacheForTests, type ScriptvmNodeModule } from './rust-vm'
 import type { HogTransformerServiceConfig } from './script-transformer.service'
 import { HogTransformerService, createHogTransformerService } from './script-transformer.service'
 
@@ -26,7 +26,7 @@ jest.mock('@hanzo/scriptvm-node', () => ({
     executeSync: jest.fn(),
 }))
 
-const mockScriptvmNode = jest.mocked(jest.requireMock<typeof import('@hanzo/scriptvm-node')>('@hanzo/scriptvm-node'))
+const mockScriptvmNode = jest.mocked(jest.requireMock<ScriptvmNodeModule>('@hanzo/scriptvm-node'))
 
 const createPluginEvent = (event: Partial<PluginEvent> = {}, teamId: number = 1): PluginEvent => {
     return {
