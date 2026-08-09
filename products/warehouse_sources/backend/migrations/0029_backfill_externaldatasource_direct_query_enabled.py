@@ -25,6 +25,13 @@ def forwards(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("warehouse_sources", "0028_externaldatasource_direct_query_enabled"),
+        # `access_method` is filtered on below, and it is `data_warehouse` that adds it:
+        # `insights_externaldatasource` is shaped by both apps' chains, and nothing orders
+        # them against each other, so on a fresh install this ran first and died at
+        # `column insights_externaldatasource.access_method does not exist`. Every database
+        # that already ran this had the column by then, which is why only a fresh build sees
+        # it. Naming the migration that adds the column is the ordering.
+        ("data_warehouse", "0026_externaldatasource_access_method"),
     ]
 
     operations = [
