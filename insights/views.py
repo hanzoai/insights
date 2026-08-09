@@ -263,10 +263,9 @@ def preflight_check(request: HttpRequest) -> JsonResponse:
             # alone, so an instance routed through our own gateway — which is what
             # build_async_anthropic_client prefers, and what pays — reported the
             # assistant as unavailable and told the user to go get a vendor key.
-            "assistant_available": bool(
-                (settings.AI_GATEWAY_URL and settings.AI_GATEWAY_API_KEY)
-                or os.environ.get("ANTHROPIC_API_KEY")
-            ),
+            # Our own gateway needs no key here: the caller's IAM token is the
+            # credential, so a configured URL is the whole condition.
+            "assistant_available": bool(settings.AI_GATEWAY_URL or os.environ.get("ANTHROPIC_API_KEY")),
             "site_url": settings.SITE_URL,
             "instance_preferences": settings.INSTANCE_PREFERENCES,
             "buffer_conversion_seconds": settings.BUFFER_CONVERSION_SECONDS,
