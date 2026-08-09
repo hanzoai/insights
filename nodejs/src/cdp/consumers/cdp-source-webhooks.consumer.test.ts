@@ -119,12 +119,12 @@ describe('SourceWebhooksConsumer', () => {
             hub.CDP_WATCHER_OBSERVE_RESULTS_BUFFER_TIME_MS = 50
             api = new CdpApi(hub, createCdpConsumerDeps(hub), {
                 hogQueue: createMockJobQueue(),
-                hogflowQueue: createMockJobQueue(),
+                flowQueue: createMockJobQueue(),
             })
             mockExecuteSpy = jest.spyOn(api['cdpSourceWebhooksConsumer']['hogExecutorAsync'], 'execute')
             mockQueueInvocationsSpy = jest.spyOn(api['cdpSourceWebhooksConsumer']['hogQueue'], 'queueInvocations')
             mockQueueHogflowInvocationsSpy = jest.spyOn(
-                api['cdpSourceWebhooksConsumer']['hogflowQueue'],
+                api['cdpSourceWebhooksConsumer']['flowQueue'],
                 'queueInvocations'
             )
             app = setupExpressApp()
@@ -563,7 +563,7 @@ describe('SourceWebhooksConsumer', () => {
                 // (this is what actually captures the event)
                 expect(mockQueueInvocationResults).not.toHaveBeenCalled()
 
-                // Verify the workflow invocation was queued to hogflowQueue
+                // Verify the workflow invocation was queued to flowQueue
                 expect(mockQueueHogflowInvocationsSpy).toHaveBeenCalledTimes(1)
                 const invocation = mockQueueHogflowInvocationsSpy.mock.calls[0][0][0]
 

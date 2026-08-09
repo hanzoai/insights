@@ -177,7 +177,7 @@ export class PluginServer implements NodeServer {
             serviceLoaders.push(async () => {
                 const consumer = new CdpEventsConsumer(this.config, cdpDeps!, {
                     hogQueue: kafkaQueue,
-                    hogflowQueue: postgresV2Queue,
+                    flowQueue: postgresV2Queue,
                 })
                 await consumer.start()
                 return consumer.service
@@ -188,7 +188,7 @@ export class PluginServer implements NodeServer {
             serviceLoaders.push(async () => {
                 const consumer = new CdpDatawarehouseEventsConsumer(this.config, cdpDeps!, {
                     hogQueue: kafkaQueue,
-                    hogflowQueue: postgresV2Queue,
+                    flowQueue: postgresV2Queue,
                 })
                 await consumer.start()
                 return consumer.service
@@ -240,7 +240,7 @@ export class PluginServer implements NodeServer {
                 const api = new CdpApi(
                     this.config,
                     cdpDeps!,
-                    { hogQueue: kafkaQueue, hogflowQueue: postgresV2Queue },
+                    { hogQueue: kafkaQueue, flowQueue: postgresV2Queue },
                     batchResolverProducer
                 )
                 this.lifecycle.expressApp.use('/', api.router())
