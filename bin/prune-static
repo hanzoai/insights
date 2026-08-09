@@ -85,7 +85,8 @@ def main() -> int:
 
     present = {o["Key"] for o in pages(s3, bucket, f"{prefix}/static/")}
     orphans = sorted(present - referenced)
-    stale = [m["Key"] for m in manifests if m not in keep]
+    kept_keys = {m["Key"] for m in keep}
+    stale = [m["Key"] for m in manifests if m["Key"] not in kept_keys]
 
     print(f"{len(manifests)} builds on record, {len(keep)} inside the {HORIZON.days}-day horizon "
           f"({keep[0]['LastModified']:%Y-%m-%d} .. {keep[-1]['LastModified']:%Y-%m-%d})")
@@ -98,11 +99,11 @@ def main() -> int:
             print("   ", key)
         return 0
 
-    deleted = 0
-    for keys in (lambda ks: [ks[i:i + 1000] for i in range(0, len(ks), 1000)])(orphans + stale):
-        s3.delete_objects(Bucket=bucket, Delete={"Objects": [{"Key": k} for k in keys]})
-        deleted += len(keys)
-    print(f"deleted {deleted}")
+    doomed = orphans + stale
+    for i in range(0, len(doomed), 1000):  # DeleteObjects takes at most 1000
+        batch = doomed[i:i + 1000]
+        s3.delete_objects(Bucket=bucket, Delete={"Objects": [{"Key": k} for k in batch]})
+    print(f"deleted {len(doomed)}")
     return 0
 
 
