@@ -169,7 +169,7 @@ def _validate_verdict(result: dict) -> dict:
     # This reviewer runs with LLM credentials in its environment (AI_GATEWAY_API_KEY /
     # ANTHROPIC_API_KEY), and Read/Grep/Glob are NOT path-restricted, so the agent can
     # in principle read those env values. What actually prevents key exfiltration to the
-    # PR / DB is the deterministic server-side output scrub in stamphog's activities.py
+    # PR / DB is the deterministic server-side output scrub in stamp's activities.py
     # (_scrub_credentials in run_review_in_sandbox and post_verdict), not this hook.
     # TODO: re-enable once the SDK hook bug is fixed.
 
@@ -188,13 +188,13 @@ ANTI_INJECTION_NOTICE = textwrap.dedent("""\
 
 
 def _load_review_guidance() -> str:
-    """Trusted review-norms prose, extracted to .stamphog/review-guidance.md.
+    """Trusted review-norms prose, extracted to .stamp/review-guidance.md.
 
     Recomposed with the operational scaffold tail below into REVIEWER_SYSTEM.
-    Edits to the file change the production prompt directly; the stamphog_policy
+    Edits to the file change the production prompt directly; the stamp_policy
     deny routes every such edit to human review.
 
-    An optional .stamphog/steering.md is appended under a marked section so a repo can
+    An optional .stamp/steering.md is appended under a marked section so a repo can
     extend the norms without replacing the whole guidance file. Trusted default-branch
     content in both runtimes (the hosted server wipes the PR-head copy before injecting);
     an absent file leaves the prompt byte-identical.
@@ -321,21 +321,21 @@ class Reviewer:
         )
 
         # Shared by both routes; the full set is always on the separate
-        # stamphog_review_completed event. Extras first so the base props win:
+        # stamp_review_completed event. Extras first so the base props win:
         # the hosted server stamps runtime/team context via STAMPFN_EXTRA_PROPERTIES,
         # absent in the Action.
         attribution = {
             **analytics_extra_properties(),
-            "stamphog_pr_number": pr.number,
-            "stamphog_repo": pr.repo,
-            "stamphog_author": pr.author,
-            "stamphog_tier": classification.get("tier", ""),
-            "stamphog_t1_subclass": classification.get("t1_subclass", ""),
-            "stamphog_breadth": classification.get("breadth", ""),
-            "stamphog_commit_type": classification.get("commit_type") or "",
-            "stamphog_gate_verdict": gate_context.get("gate_verdict", ""),
-            "stamphog_files_changed": len(pr.files),
-            "stamphog_lines_total": pr.lines_total,
+            "stamp_pr_number": pr.number,
+            "stamp_repo": pr.repo,
+            "stamp_author": pr.author,
+            "stamp_tier": classification.get("tier", ""),
+            "stamp_t1_subclass": classification.get("t1_subclass", ""),
+            "stamp_breadth": classification.get("breadth", ""),
+            "stamp_commit_type": classification.get("commit_type") or "",
+            "stamp_gate_verdict": gate_context.get("gate_verdict", ""),
+            "stamp_files_changed": len(pr.files),
+            "stamp_lines_total": pr.lines_total,
         }
 
         active_query = _apply_gateway_route(resolve_gateway_config(), attribution)
@@ -346,41 +346,41 @@ class Reviewer:
             active_query = _traced_query
             reviewers = sorted({_sanitize_untrusted(r["user"], max_len=50) for r in pr.reviews if r.get("user")})
             safe_labels = [_sanitize_untrusted(label, max_len=100) for label in pr.labels]
-            trace_name = f"stamphog PR #{pr.number}: {_sanitize_untrusted(pr.title, max_len=100)}"
+            trace_name = f"stamp PR #{pr.number}: {_sanitize_untrusted(pr.title, max_len=100)}"
             insights_kwargs = {
                 "insights_distinct_id": pr.author,
                 # Same extras-first merge as `attribution` above, for the traced route.
                 "insights_properties": {
                     **analytics_extra_properties(),
                     "$ai_trace_name": trace_name,
-                    "ai_product": "stamphog",
-                    "stamphog_version": STAMPFN_VERSION,
-                    "stamphog_pr_number": pr.number,
-                    "stamphog_pr_title": _sanitize_untrusted(pr.title, max_len=200),
-                    "stamphog_repo": pr.repo,
-                    "stamphog_author": pr.author,
-                    "stamphog_labels": safe_labels,
-                    "stamphog_draft": pr.draft,
-                    "stamphog_mergeable_state": pr.mergeable_state,
-                    "stamphog_base_sha": pr.base_sha,
-                    "stamphog_head_sha": pr.head_sha,
-                    "stamphog_files_changed": len(pr.files),
-                    "stamphog_lines_added": pr.lines_added,
-                    "stamphog_lines_deleted": pr.lines_deleted,
-                    "stamphog_lines_total": pr.lines_total,
-                    "stamphog_has_new_files": pr.has_new_files,
-                    "stamphog_reviewers": reviewers,
-                    "stamphog_reviews_count": len(pr.reviews),
-                    "stamphog_inline_comments_count": len(pr.review_comments),
-                    "stamphog_pr_reactions_count": len(pr.pr_reactions),
-                    "stamphog_tier": classification.get("tier", ""),
-                    "stamphog_t1_subclass": classification.get("t1_subclass", ""),
-                    "stamphog_breadth": classification.get("breadth", ""),
-                    "stamphog_commit_type": classification.get("commit_type") or "",
-                    "stamphog_deny_categories": classification.get("deny_categories", []),
-                    "stamphog_author_on_owning_team": classification.get("author_on_owning_team"),
-                    "stamphog_gate_verdict": gate_context.get("gate_verdict", ""),
-                    "stamphog_llm_verdict": "",
+                    "ai_product": "stamp",
+                    "stamp_version": STAMPFN_VERSION,
+                    "stamp_pr_number": pr.number,
+                    "stamp_pr_title": _sanitize_untrusted(pr.title, max_len=200),
+                    "stamp_repo": pr.repo,
+                    "stamp_author": pr.author,
+                    "stamp_labels": safe_labels,
+                    "stamp_draft": pr.draft,
+                    "stamp_mergeable_state": pr.mergeable_state,
+                    "stamp_base_sha": pr.base_sha,
+                    "stamp_head_sha": pr.head_sha,
+                    "stamp_files_changed": len(pr.files),
+                    "stamp_lines_added": pr.lines_added,
+                    "stamp_lines_deleted": pr.lines_deleted,
+                    "stamp_lines_total": pr.lines_total,
+                    "stamp_has_new_files": pr.has_new_files,
+                    "stamp_reviewers": reviewers,
+                    "stamp_reviews_count": len(pr.reviews),
+                    "stamp_inline_comments_count": len(pr.review_comments),
+                    "stamp_pr_reactions_count": len(pr.pr_reactions),
+                    "stamp_tier": classification.get("tier", ""),
+                    "stamp_t1_subclass": classification.get("t1_subclass", ""),
+                    "stamp_breadth": classification.get("breadth", ""),
+                    "stamp_commit_type": classification.get("commit_type") or "",
+                    "stamp_deny_categories": classification.get("deny_categories", []),
+                    "stamp_author_on_owning_team": classification.get("author_on_owning_team"),
+                    "stamp_gate_verdict": gate_context.get("gate_verdict", ""),
+                    "stamp_llm_verdict": "",
                 },
             }
             # Live ref: verdict updates below propagate to the trace ($ai_trace is
@@ -412,7 +412,7 @@ class Reviewer:
                 if message.structured_output:
                     structured_output = message.structured_output
                     # Stamp the LLM verdict onto the trace properties
-                    props["stamphog_llm_verdict"] = structured_output.get("verdict", "")
+                    props["stamp_llm_verdict"] = structured_output.get("verdict", "")
             elif isinstance(message, AssistantMessage):
                 for block in message.content:
                     if isinstance(block, ToolUseBlock) and self.verbose:

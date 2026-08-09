@@ -139,9 +139,9 @@ def get_scoped_models() -> tuple[dict[str, set[str]], set[str], set[str], set[st
         "Schedule",
         # --- Auto-scoped via ProductTeamModel (TeamScopedManager handles filtering) ---
         "SplineReticulator",  # CI scaffold (insightscli product:bootstrap)
-        # stamphog lives on a separate product DB; every model is a ProductTeamModel whose
+        # stamp lives on a separate product DB; every model is a ProductTeamModel whose
         # fail-closed manager (.for_team / safely_get_queryset) scopes every query by team_id.
-        "StamphogRepoConfig",
+        "StampRepoConfig",
         "PullRequest",
         "ReviewRun",
         "DigestChannel",

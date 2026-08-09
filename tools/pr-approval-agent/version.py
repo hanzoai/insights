@@ -1,4 +1,4 @@
-"""Stamphog release version.
+"""Stamp release version.
 
 Stamped onto the review-completed analytics event, the LLM trace properties,
 and the verdict comment's mechanics table, so verdict quality and reviewer
