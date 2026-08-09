@@ -173,11 +173,11 @@ describe('postgres parity', () => {
         await datastore.delayUntilEventIngested(() => datastore.fetchDistinctIdValues(person), 2)
         await datastore.delayUntilEventIngested(() => datastore.fetchDistinctIds(person), 2)
 
-        const clickHousePersons = (await datastore.fetchPersons(teamId)).map((row) => ({
+        const datastorePersons = (await datastore.fetchPersons(teamId)).map((row) => ({
             ...row,
             properties: parseJSON(row.properties), // avoids depending on key sort order
         }))
-        expect(clickHousePersons).toMatchObject([
+        expect(datastorePersons).toMatchObject([
             {
                 id: uuid,
                 created_at: expect.any(String), // '2021-02-04 00:18:26.472',
@@ -187,9 +187,9 @@ describe('postgres parity', () => {
                 is_deleted: 0,
             },
         ])
-        const clickHouseDistinctIds = await datastore.fetchDistinctIdValues(person)
-        expect(clickHouseDistinctIds).toEqual(expect.arrayContaining(['distinct1', 'distinct2']))
-        expect(clickHouseDistinctIds).toHaveLength(2)
+        const datastoreDistinctIds = await datastore.fetchDistinctIdValues(person)
+        expect(datastoreDistinctIds).toEqual(expect.arrayContaining(['distinct1', 'distinct2']))
+        expect(datastoreDistinctIds).toHaveLength(2)
 
         const postgresPersons = await fetchPersons(postgres, teamId)
         expect(postgresPersons).toEqual([
@@ -288,19 +288,19 @@ describe('postgres parity', () => {
             (await datastore.fetchPersons(teamId)).filter((p) => p.is_identified)
         )
 
-        const clickHousePersons = await datastore.fetchPersons(teamId)
+        const datastorePersons = await datastore.fetchPersons(teamId)
         const postgresPersons = await fetchPersons(postgres, teamId)
 
-        expect(clickHousePersons.filter((p) => p.team_id.toString() === teamId.toString()).length).toEqual(1)
+        expect(datastorePersons.filter((p) => p.team_id.toString() === teamId.toString()).length).toEqual(1)
         expect(postgresPersons.filter((p) => p.team_id.toString() === teamId.toString()).length).toEqual(1)
 
         expect(postgresPersons[0].is_identified).toEqual(true)
         expect(postgresPersons[0].version).toEqual(1)
         expect(postgresPersons[0].properties).toEqual({ replacedUserProp: 'propValue' })
 
-        expect(clickHousePersons[0].is_identified).toEqual(1)
-        expect(clickHousePersons[0].is_deleted).toEqual(0)
-        expect(clickHousePersons[0].properties).toEqual('{"replacedUserProp":"propValue"}')
+        expect(datastorePersons[0].is_identified).toEqual(1)
+        expect(datastorePersons[0].is_deleted).toEqual(0)
+        expect(datastorePersons[0].properties).toEqual('{"replacedUserProp":"propValue"}')
 
         // update date and boolean to false
 
@@ -325,17 +325,17 @@ describe('postgres parity', () => {
             (await datastore.fetchPersons(teamId)).filter((p) => !p.is_identified)
         )
 
-        const clickHousePersons2 = await datastore.fetchPersons(teamId)
+        const datastorePersons2 = await datastore.fetchPersons(teamId)
         const postgresPersons2 = await fetchPersons(postgres, teamId)
 
-        expect(clickHousePersons2.length).toEqual(1)
+        expect(datastorePersons2.length).toEqual(1)
         expect(postgresPersons2.length).toEqual(1)
 
         expect(postgresPersons2[0].is_identified).toEqual(false)
         expect(postgresPersons2[0].created_at.toISO()).toEqual(randomDate.toISO())
 
-        expect(clickHousePersons2[0].is_identified).toEqual(0)
-        expect(clickHousePersons2[0].created_at).toEqual(
+        expect(datastorePersons2[0].is_identified).toEqual(0)
+        expect(datastorePersons2[0].created_at).toEqual(
             // TODO: get rid of `+ '.000'` by removing the need for DatastoreSecondPrecision on CH persons
             castTimestampOrNow(randomDate, TimestampFormat.DatastoreSecondPrecision) + '.000'
         )
@@ -395,12 +395,12 @@ describe('postgres parity', () => {
         const [postgresPerson] = await fetchPersons(postgres, teamId)
 
         await datastore.delayUntilEventIngested(() => datastore.fetchDistinctIds(postgresPerson), 1)
-        const clickHouseDistinctIdValues = await datastore.fetchDistinctIdValues(postgresPerson)
+        const datastoreDistinctIdValues = await datastore.fetchDistinctIdValues(postgresPerson)
         const postgresDistinctIdValues = await fetchDistinctIdValues(postgres, postgresPerson)
 
         // check that all is in the right format
 
-        expect(clickHouseDistinctIdValues).toEqual(['distinct1'])
+        expect(datastoreDistinctIdValues).toEqual(['distinct1'])
         expect(postgresDistinctIdValues).toEqual(['distinct1'])
 
         const postgresDistinctIds = await fetchDistinctIds(postgres, postgresPerson)
@@ -435,18 +435,18 @@ describe('postgres parity', () => {
 
         await datastore.delayUntilEventIngested(() => datastore.fetchDistinctIdValues(postgresPerson), 2)
 
-        const clickHouseDistinctIdValues2 = await datastore.fetchDistinctIdValues(postgresPerson)
+        const datastoreDistinctIdValues2 = await datastore.fetchDistinctIdValues(postgresPerson)
         const postgresDistinctIdValues2 = await fetchDistinctIdValues(postgres, postgresPerson)
 
-        expect(clickHouseDistinctIdValues2).toEqual(['distinct1', 'anotherOne'])
+        expect(datastoreDistinctIdValues2).toEqual(['distinct1', 'anotherOne'])
         expect(postgresDistinctIdValues2).toEqual(['distinct1', 'anotherOne'])
 
         // check anotherPerson for their initial distinct id
 
-        const clickHouseDistinctIdValuesOther = await datastore.fetchDistinctIdValues(anotherPerson)
+        const datastoreDistinctIdValuesOther = await datastore.fetchDistinctIdValues(anotherPerson)
         const postgresDistinctIdValuesOther = await fetchDistinctIdValues(postgres, anotherPerson)
 
-        expect(clickHouseDistinctIdValuesOther).toEqual(['another_distinct_id'])
+        expect(datastoreDistinctIdValuesOther).toEqual(['another_distinct_id'])
         expect(postgresDistinctIdValuesOther).toEqual(['another_distinct_id'])
     })
 
@@ -520,7 +520,7 @@ describe('postgres parity', () => {
         // it got added
 
         // :TODO: Update version
-        const clickHouseDistinctIdValuesMoved = await datastore.fetchDistinctIdValues(anotherPerson)
+        const datastoreDistinctIdValuesMoved = await datastore.fetchDistinctIdValues(anotherPerson)
         const postgresDistinctIdValuesMoved = await fetchDistinctIdValues(postgres, anotherPerson)
         const newDatastoreDistinctIdValues = await datastore.delayUntilEventIngested(
             () => datastore.fetchDistinctIds(anotherPerson),
@@ -528,7 +528,7 @@ describe('postgres parity', () => {
         )
 
         expect(postgresDistinctIdValuesMoved).toEqual(expect.arrayContaining(['distinct1', 'another_distinct_id']))
-        expect(clickHouseDistinctIdValuesMoved).toEqual(expect.arrayContaining(['distinct1', 'another_distinct_id']))
+        expect(datastoreDistinctIdValuesMoved).toEqual(expect.arrayContaining(['distinct1', 'another_distinct_id']))
         expect(newDatastoreDistinctIdValues).toMatchObject([
             {
                 distinct_id: 'another_distinct_id',
@@ -548,11 +548,11 @@ describe('postgres parity', () => {
 
         // it got removed
 
-        const clickHouseDistinctIdValuesRemoved = await datastore.fetchDistinctIdValues(postgresPerson)
+        const datastoreDistinctIdValuesRemoved = await datastore.fetchDistinctIdValues(postgresPerson)
         const postgresDistinctIdValuesRemoved = await fetchDistinctIdValues(postgres, postgresPerson)
         const newDatastoreDistinctIdRemoved = await datastore.fetchDistinctIds(postgresPerson)
 
-        expect(clickHouseDistinctIdValuesRemoved).toEqual([])
+        expect(datastoreDistinctIdValuesRemoved).toEqual([])
         expect(postgresDistinctIdValuesRemoved).toEqual([])
         expect(newDatastoreDistinctIdRemoved).toEqual([])
 
@@ -568,10 +568,10 @@ describe('postgres parity', () => {
         await datastore.delayUntilEventIngested(async () =>
             (await datastore.fetchPersons(teamId)).length === 1 ? ['deleted!'] : []
         )
-        const clickHousePersons = await datastore.fetchPersons(teamId)
+        const datastorePersons = await datastore.fetchPersons(teamId)
         const postgresPersons = await fetchPersons(postgres, teamId)
 
-        expect(clickHousePersons.length).toEqual(1)
+        expect(datastorePersons.length).toEqual(1)
         expect(postgresPersons.length).toEqual(1)
     })
 })

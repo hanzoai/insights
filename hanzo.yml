@@ -18,7 +18,7 @@
 # linters need none of them, and pulling an Emscripten toolchain to run oxlint
 # is how a gate becomes slow enough that people start skipping it.
 #
-# Not the pytest or jest suites: those need Postgres, ClickHouse and Kafka
+# Not the pytest or jest suites: those need Postgres, Datastore and Kafka
 # (see ci-backend.yml standing them up as services). That is an integration
 # lane. A gate that is red for a missing database says nothing about the commit.
 # The second gate is cheap and catches a failure lint cannot see. An upstream
@@ -28,10 +28,10 @@
 # way on 08-01 and it was found on 08-08, two rebases later. Runs first because
 # it needs no install.
 test:
-  - name: fork inventory
-    run: python3 scripts/fork-inventory.py
-  - name: lint
-    run: |
-      set -e
-      pnpm install --frozen-lockfile --ignore-scripts
-      pnpm run lint
+    - name: fork inventory
+      run: python3 scripts/fork-inventory.py
+    - name: lint
+      run: |
+          set -e
+          pnpm install --frozen-lockfile --ignore-scripts
+          pnpm run lint

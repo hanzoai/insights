@@ -8,9 +8,9 @@ import {
     UUIDT,
     bufferToStream,
     bufferToUint32ArrayLE,
-    clickHouseTimestampToDateTime,
     cloneObject,
     createRandomUint32x4,
+    datastoreTimestampToDateTime,
     escapeDatastoreString,
     getPropertyValueByPath,
     groupBy,
@@ -322,9 +322,9 @@ describe('utils', () => {
         })
     })
 
-    describe('clickHouseTimestampToDateTime()', () => {
+    describe('datastoreTimestampToDateTime()', () => {
         it('casts to a datetime', () => {
-            expect(clickHouseTimestampToDateTime('2020-02-23 02:15:00.00' as DatastoreTimestamp)).toEqual(
+            expect(datastoreTimestampToDateTime('2020-02-23 02:15:00.00' as DatastoreTimestamp)).toEqual(
                 DateTime.fromISO('2020-02-23T02:15:00.000Z').toUTC()
             )
         })

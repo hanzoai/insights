@@ -12,9 +12,9 @@ import {
 import { KafkaConsumerInterface, RdKafkaConsumerConfig, createKafkaConsumer } from '~/common/kafka/consumer'
 import { InternalCaptureEvent } from '~/common/services/internal-capture'
 import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
+import { captureException } from '~/common/utils/insights'
 import { parseJSON } from '~/common/utils/json-parse'
 import { logger } from '~/common/utils/logger'
-import { captureException } from '~/common/utils/insights'
 import { UUIDT } from '~/common/utils/utils'
 
 import {
@@ -26,11 +26,7 @@ import {
     Team,
 } from '../../types'
 import { CdpInternalEventSchema } from '../schema'
-import {
-    hasEventOrActionTarget,
-    matchesWaitUntilCondition,
-    runFilterBytecode,
-} from '../services/flows/flow-utils'
+import { hasEventOrActionTarget, matchesWaitUntilCondition, runFilterBytecode } from '../services/flows/flow-utils'
 import { CyclotronPerson, FlowInvocationContext, InsightsFunctionInvocationGlobals, MinimalAppMetric } from '../types'
 import {
     convertInternalEventToInsightsFunctionInvocationGlobals,
@@ -591,27 +587,27 @@ export class CdpScriptflowSubscriptionMatcherConsumer<
         await Promise.all(
             messages.map(async (message) => {
                 try {
-                    const clickHouseEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
+                    const datastoreEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
                     // A job can be parked by distinct_id or person_id, so an event needs at least
                     // one of them to match anything. Drop only events that carry neither.
-                    if (!clickHouseEvent.person_id && !clickHouseEvent.distinct_id) {
+                    if (!datastoreEvent.person_id && !datastoreEvent.distinct_id) {
                         counterScriptflowMatcherEventSkipped.labels({ reason: 'no_identifiers' }).inc()
                         return
                     }
                     // The vast majority of events belong to teams with no wait_until_condition
                     // step and no event conversion goal. Bail on those via the in-memory flow
                     // cache before paying for getTeam + full globals conversion.
-                    const teamFlows = await this.flowManager.getFlowsForTeam(clickHouseEvent.team_id)
+                    const teamFlows = await this.flowManager.getFlowsForTeam(datastoreEvent.team_id)
                     if (!teamFlows.some(hasWaitUntilOrConversion)) {
                         counterScriptflowMatcherEventSkipped.labels({ reason: 'no_actionable_flow' }).inc()
                         return
                     }
-                    const team = await this.deps.teamManager.getTeam(clickHouseEvent.team_id)
+                    const team = await this.deps.teamManager.getTeam(datastoreEvent.team_id)
                     if (!team) {
                         counterScriptflowMatcherEventSkipped.labels({ reason: 'no_team' }).inc()
                         return
                     }
-                    events.push(convertToInsightsFunctionInvocationGlobals(clickHouseEvent, team, this.config.SITE_URL))
+                    events.push(convertToInsightsFunctionInvocationGlobals(datastoreEvent, team, this.config.SITE_URL))
                 } catch (e) {
                     logger.error('Error parsing message', e)
                     counterParseError.labels({ error: e.message }).inc()
@@ -685,7 +681,9 @@ export class CdpScriptflowSubscriptionMatcherConsumer<
                         counterScriptflowMatcherEventSkipped.labels({ reason: 'no_team' }).inc()
                         return
                     }
-                    events.push(convertInternalEventToInsightsFunctionInvocationGlobals(parsed, team, this.config.SITE_URL))
+                    events.push(
+                        convertInternalEventToInsightsFunctionInvocationGlobals(parsed, team, this.config.SITE_URL)
+                    )
                 } catch (e) {
                     logger.error('Error parsing internal event message', e)
                     counterParseError.labels({ error: e.message }).inc()
