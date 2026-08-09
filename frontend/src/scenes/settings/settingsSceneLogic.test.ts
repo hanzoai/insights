@@ -199,4 +199,18 @@ describe('settingsSceneLogic', () => {
         })
         expect(router.values.location.pathname).toMatch(/\/settings\/project$/)
     })
+
+    it('does not re-emit the URL it is already on when no section exists at the level', async () => {
+        // sections is empty until currentTeam/currentOrganization load. urlToAction then falls
+        // through to selectLevel, whose actionToUrl used to replace with urls.settings(level) --
+        // the URL it was already on -- re-entering urlToAction forever, one session-history entry
+        // per pass. The tab died with a flat JS heap because that history is not on the heap.
+        router.actions.push('/settings/project')
+        const pathnameBefore = router.values.location.pathname
+
+        logic.actions.selectLevel('project')
+        await expectLogic(logic).toFinishAllListeners()
+
+        expect(router.values.location.pathname).toEqual(pathnameBefore)
+    })
 })
