@@ -42,6 +42,7 @@ it is most load-bearing.
 from __future__ import annotations
 
 import concurrent.futures
+import hashlib
 import mimetypes
 import os
 import re
@@ -143,16 +144,21 @@ def main() -> int:
 
     # The manifest is what a prune reads to know this build is still referenced.
     # Written last, so a run that dies half way never claims keys it did not put.
-    s3.put_object(
-        Bucket=bucket,
-        Key=f"{prefix}/.builds/{version}.txt",
-        Body="\n".join(sorted(files)).encode(),
-        ContentType="text/plain",
-    )
+    #
+    # Keyed by version AND by a digest of the list, because a version alone is not
+    # a unique name for a tree. Measured on 1.52.116: the tag resolved to
+    # sha256:81c09eaf in the registry while the pin and the running pods were on
+    # sha256:2453b673 -- two images, one version string. Under a version-only key
+    # the second publish would erase the first one's list, and every file only the
+    # first tree had would look unreferenced and be pruned while it was still
+    # being served. Two trees now simply write two manifests, both retained.
+    body = "\n".join(sorted(files)).encode()
+    key = f"{prefix}/.builds/{version}-{hashlib.sha256(body).hexdigest()[:12]}.txt"
+    s3.put_object(Bucket=bucket, Key=key, Body=body, ContentType="text/plain")
 
     print(f"published {counts['put']} ({uploaded / 1048576:.1f} MB), "
           f"skipped {counts['skip']} already-published -> s3://{bucket}/{prefix}/static/")
-    print(f"build manifest: s3://{bucket}/{prefix}/.builds/{version}.txt")
+    print(f"build manifest: s3://{bucket}/{key}")
     return 0
 
 
