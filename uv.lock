@@ -3468,7 +3468,6 @@ dependencies = [
     { name = "social-auth-core" },
     { name = "sqlparse" },
     { name = "sshtunnel" },
-    { name = "statshog" },
     { name = "stripe" },
     { name = "structlog" },
     { name = "tbb", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
@@ -3744,7 +3743,6 @@ requires-dist = [
     { name = "social-auth-core", specifier = "~=4.8.7" },
     { name = "sqlparse", specifier = "==0.5.4" },
     { name = "sshtunnel", specifier = "==0.4.0" },
-    { name = "statshog", specifier = "==1.0.6" },
     { name = "stripe", specifier = "==12.2.0" },
     { name = "structlog", specifier = "==25.5.0" },
     { name = "tbb", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'", specifier = "==2022.3.1" },
@@ -7825,15 +7823,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/eb/e3/7c1dc7381d9f8ab7d854328ebfa884e62cb3f3d8549ddfd37c7814f42afa/starlette-1.3.1.tar.gz", hash = "sha256:05d0213193f2fbaae60e2ecb593b4add4262ad4e46536b54abe36f11a71724e0", size = 2703240, upload-time = "2026-06-12T09:23:11.602Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ec/bb/2799cc2ede3ed41131f8975621e7213dfc7ef4acbbaadfa440f32500c370/starlette-1.3.1-py3-none-any.whl", hash = "sha256:c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6", size = 73632, upload-time = "2026-06-12T09:23:10.017Z" },
-]
-
-[[package]]
-name = "statshog"
-version = "1.0.6"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/b3/88/20ee9ac030520c2817f93e545005b631283be05f990ae415c444beb52792/statshog-1.0.6.tar.gz", hash = "sha256:53f5cddd809266b13405206ee3717cc26d47663485611c0c1bcb1e8221469188", size = 26711, upload-time = "2021-05-07T11:50:02.903Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/70/af/c609ab70f4cba573c5c5aa6e091cdddafe2b36e037f37031fa5cef2e9bc6/statshog-1.0.6-py2.py3-none-any.whl", hash = "sha256:0b7948df83a0d5de68a2479f14679cd7d26cd28e2488779de19e0a099c4841d8", size = 13887, upload-time = "2021-05-07T11:49:59.822Z" },
 ]
 
 [[package]]
