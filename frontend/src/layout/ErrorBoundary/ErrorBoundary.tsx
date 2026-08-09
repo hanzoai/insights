@@ -4,7 +4,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
 import { IconCopy } from '@hanzo/icons'
-import { PostHogErrorBoundary as InsightsErrorBoundary, type PostHogErrorBoundaryFallbackProps as InsightsErrorBoundaryFallbackProps } from '@hanzo/react'
+import { InsightsErrorBoundary, type InsightsErrorBoundaryFallbackProps } from '@hanzo/react'
 
 import { SupportTicketExceptionEvent, supportLogic } from 'lib/components/Support/supportLogic'
 import { Banner } from 'lib/elements/Banner'

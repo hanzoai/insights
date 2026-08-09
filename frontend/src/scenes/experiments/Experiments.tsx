@@ -3,7 +3,6 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import * as experimentPng from '@hanzo/brand/hoggies/png/experiment'
 import { Input, Select, Tag, Tooltip, toast } from '@hanzo/elements'
 
 import { pngHoggie } from 'lib/brand/hoggies'
@@ -67,7 +66,7 @@ import { StatusTag } from './ExperimentView/StatusTag'
 import { Holdouts } from './Holdouts'
 import { SharedMetrics } from './SharedMetrics/SharedMetrics'
 
-const MascotExperiment = pngHoggie(experimentPng)
+const MascotExperiment = pngHoggie()
 
 export const scene: SceneExport = {
     component: Experiments,

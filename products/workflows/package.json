@@ -7,13 +7,13 @@
         "@hanzo/quill-charts": "workspace:*",
         "@hanzo/quill-components": "workspace:*",
         "@hanzo/quill-primitives": "workspace:*",
+        "insights-js": "catalog:",
         "kea": "catalog:",
         "kea-forms": "catalog:",
         "kea-loaders": "catalog:",
         "kea-router": "catalog:",
         "kea-subscriptions": "catalog:",
         "papaparse": "^5.4.1",
-        "insights-js": "catalog:",
         "use-debounce": "catalog:",
         "zod": "^4.0.0"
     },
@@ -24,7 +24,6 @@
         "kea-test-utils": "catalog:"
     },
     "peerDependencies": {
-        "@hanzo/brand": "catalog:",
         "@hanzo/icons": "catalog:",
         "@types/react": "*",
         "@xyflow/react": "*",

@@ -1,15 +1,14 @@
 import clsx from 'clsx'
 import React from 'react'
 
-import * as chartPng from '@hanzo/brand/hoggies/png/chart'
-import { IconLock } from '@hanzo/icons'
 import { Skeleton } from '@hanzo/elements'
+import { IconLock } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { Button } from 'lib/elements/Button'
 import { cn } from 'lib/utils/css-classes'
 
-const MascotChart = pngHoggie(chartPng)
+const MascotChart = pngHoggie()
 
 export type WidgetCardBodyProps = React.HTMLAttributes<HTMLDivElement> & {
     locked?: boolean

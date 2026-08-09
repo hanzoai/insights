@@ -177,18 +177,12 @@ overrides:
   '@hanzo/icons': npm:@hanzo/insights-icons@0.36.7
   '@hanzo/insightsql-parser': npm:@posthog/hogql-parser@1.3.75
   insights-js: npm:@hanzo/insights@1.358.1
-  posthog-js: npm:@hanzo/insights@1.358.1
   insights-js-lite: npm:@hanzo/insights-lite@4.2.2
-  '@hanzo/brand': npm:@posthog/brand@0.9.1
-  '@hanzo/react': npm:@posthog/react@1.9.0
+  '@hanzo/react': npm:@hanzo/insights-react@1.9.2
   '@datastore/client': npm:@clickhouse/client@^1.12.0
-  '@hanzo/cli': npm:@posthog/cli@^0.8.2
   '@hanzo/mcp-analytics': npm:@posthog/mcp@0.5.0
-  '@hanzo/rollup-plugin': npm:@posthog/rollup-plugin@^1.4.4
   '@hanzo/siphash': npm:@posthog/siphash@1.1.1
   insights-node: npm:posthog-node@5.25.0
-  insights-react-native: npm:posthog-react-native@^4.18.0
-  insights-react-native-session-replay: npm:posthog-react-native-session-replay@^1.6.0
 
 patchedDependencies:
   chartjs-plugin-crosshair@2.0.0:
@@ -472,12 +466,6 @@ importers:
         specifier: 6.0.3
         version: 6.0.3
 
-  common/sdk-peer:
-    dependencies:
-      '@hanzo/insights':
-        specifier: 1.358.1
-        version: 1.358.1
-
   common/storybook:
     dependencies:
       '@babel/runtime':
@@ -598,9 +586,6 @@ importers:
       '@floating-ui/react':
         specifier: ^0.27.19
         version: 0.27.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@hanzo/brand':
-        specifier: npm:@posthog/brand@0.9.1
-        version: '@posthog/brand@0.9.1(react@18.3.1)'
       '@hanzo/docs-onboarding':
         specifier: workspace:*
         version: link:../docs/onboarding
@@ -610,6 +595,9 @@ importers:
       '@hanzo/icons':
         specifier: npm:@hanzo/insights-icons@0.36.7
         version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+      '@hanzo/insights':
+        specifier: 1.358.1
+        version: 1.358.1
       '@hanzo/insights-rrweb':
         specifier: 0.0.26
         version: 0.0.26
@@ -839,8 +827,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/quill/packages/components
       '@hanzo/react':
-        specifier: npm:@posthog/react@1.9.0
-        version: '@posthog/react@1.9.0(@hanzo/insights@1.358.1)(@types/react@18.3.27)(react@18.3.1)'
+        specifier: npm:@hanzo/insights-react@1.9.2
+        version: '@hanzo/insights-react@1.9.2(@hanzo/insights@1.358.1)(@types/react@18.3.27)(react@18.3.1)'
       '@hanzo/replay-shared':
         specifier: workspace:*
         version: link:../common/replay-shared
@@ -1198,9 +1186,6 @@ importers:
       pmtiles:
         specifier: ^2.11.0
         version: 2.11.0
-      posthog-js:
-        specifier: npm:@hanzo/insights@1.358.1
-        version: '@hanzo/insights@1.358.1'
       query-selector-shadow-dom:
         specifier: 'catalog:'
         version: 1.0.1
@@ -2366,9 +2351,6 @@ importers:
 
   products/ai_gateway:
     dependencies:
-      '@hanzo/brand':
-        specifier: npm:@posthog/brand@0.9.1
-        version: '@posthog/brand@0.9.1(react@18.3.1)'
       '@hanzo/icons':
         specifier: npm:@hanzo/insights-icons@0.36.7
         version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
@@ -2406,9 +2388,6 @@ importers:
 
   products/ai_observability:
     dependencies:
-      '@hanzo/brand':
-        specifier: npm:@posthog/brand@0.9.1
-        version: '@posthog/brand@0.9.1(react@18.3.1)'
       '@hanzo/icons':
         specifier: npm:@hanzo/insights-icons@0.36.7
         version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
@@ -2488,9 +2467,6 @@ importers:
 
   products/alerts:
     dependencies:
-      '@hanzo/brand':
-        specifier: npm:@posthog/brand@0.9.1
-        version: '@posthog/brand@0.9.1(react@18.3.1)'
       '@hanzo/elements':
         specifier: '*'
         version: link:../../frontend/@hanzo/elements
@@ -2735,9 +2711,6 @@ importers:
       '@dnd-kit/utilities':
         specifier: '*'
         version: 3.2.1(react@18.3.1)
-      '@hanzo/brand':
-        specifier: npm:@posthog/brand@0.9.1
-        version: '@posthog/brand@0.9.1(react@18.3.1)'
       '@hanzo/icons':
         specifier: npm:@hanzo/insights-icons@0.36.7
         version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
@@ -2792,9 +2765,6 @@ importers:
 
   products/dashboards:
     dependencies:
-      '@hanzo/brand':
-        specifier: npm:@posthog/brand@0.9.1
-        version: '@posthog/brand@0.9.1(react@18.3.1)'
       '@hanzo/icons':
         specifier: npm:@hanzo/insights-icons@0.36.7
         version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
@@ -2926,9 +2896,6 @@ importers:
 
   products/data_warehouse:
     dependencies:
-      '@hanzo/brand':
-        specifier: npm:@posthog/brand@0.9.1
-        version: '@posthog/brand@0.9.1(react@18.3.1)'
       '@hanzo/elements':
         specifier: '*'
         version: link:../../frontend/@hanzo/elements
@@ -3497,9 +3464,6 @@ importers:
       '@dnd-kit/utilities':
         specifier: '*'
         version: 3.2.1(react@18.3.1)
-      '@hanzo/brand':
-        specifier: npm:@posthog/brand@0.9.1
-        version: '@posthog/brand@0.9.1(react@18.3.1)'
       '@hanzo/icons':
         specifier: npm:@hanzo/insights-icons@0.36.7
         version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
@@ -3619,9 +3583,6 @@ importers:
 
   products/mcp_analytics:
     dependencies:
-      '@hanzo/brand':
-        specifier: npm:@posthog/brand@0.9.1
-        version: '@posthog/brand@0.9.1(react@18.3.1)'
       '@hanzo/icons':
         specifier: npm:@hanzo/insights-icons@0.36.7
         version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
@@ -3692,9 +3653,6 @@ importers:
 
   products/metrics:
     dependencies:
-      '@hanzo/brand':
-        specifier: npm:@posthog/brand@0.9.1
-        version: '@posthog/brand@0.9.1(react@18.3.1)'
       '@hanzo/icons':
         specifier: npm:@hanzo/insights-icons@0.36.7
         version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
@@ -3896,9 +3854,6 @@ importers:
 
   products/replay_vision:
     dependencies:
-      '@hanzo/brand':
-        specifier: npm:@posthog/brand@0.9.1
-        version: '@posthog/brand@0.9.1(react@18.3.1)'
       '@hanzo/elements':
         specifier: '*'
         version: link:../../frontend/@hanzo/elements
@@ -4080,15 +4035,12 @@ importers:
 
   products/stamphog:
     dependencies:
-      '@hanzo/brand':
-        specifier: npm:@posthog/brand@0.9.1
-        version: '@posthog/brand@0.9.1(react@18.3.1)'
       '@hanzo/icons':
         specifier: npm:@hanzo/insights-icons@0.36.7
         version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/react':
-        specifier: npm:@posthog/react@1.9.0
-        version: '@posthog/react@1.9.0(@types/react@18.3.27)(posthog-js@common+sdk-peer)(react@18.3.1)'
+        specifier: npm:@hanzo/insights-react@1.9.2
+        version: '@hanzo/insights-react@1.9.2(@hanzo/insights@1.358.1)(@types/react@18.3.27)(react@18.3.1)'
       '@storybook/react':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.4.6(@testing-library/dom@10.4.0)(@types/react@18.3.27)(prettier@3.8.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@6.0.3)
@@ -4141,9 +4093,6 @@ importers:
 
   products/subscriptions:
     dependencies:
-      '@hanzo/brand':
-        specifier: npm:@posthog/brand@0.9.1
-        version: '@posthog/brand@0.9.1(react@18.3.1)'
       '@hanzo/icons':
         specifier: npm:@hanzo/insights-icons@0.36.7
         version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
@@ -4266,9 +4215,6 @@ importers:
 
   products/tracing:
     dependencies:
-      '@hanzo/brand':
-        specifier: npm:@posthog/brand@0.9.1
-        version: '@posthog/brand@0.9.1(react@18.3.1)'
       '@hanzo/icons':
         specifier: npm:@hanzo/insights-icons@0.36.7
         version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
@@ -4315,9 +4261,6 @@ importers:
 
   products/user_interviews:
     dependencies:
-      '@hanzo/brand':
-        specifier: npm:@posthog/brand@0.9.1
-        version: '@posthog/brand@0.9.1(react@18.3.1)'
       '@hanzo/icons':
         specifier: npm:@hanzo/insights-icons@0.36.7
         version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
@@ -4354,15 +4297,12 @@ importers:
 
   products/visual_review:
     dependencies:
-      '@hanzo/brand':
-        specifier: npm:@posthog/brand@0.9.1
-        version: '@posthog/brand@0.9.1(react@18.3.1)'
       '@hanzo/icons':
         specifier: npm:@hanzo/insights-icons@0.36.7
         version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/react':
-        specifier: npm:@posthog/react@1.9.0
-        version: '@posthog/react@1.9.0(@types/react@18.3.27)(posthog-js@common+sdk-peer)(react@18.3.1)'
+        specifier: npm:@hanzo/insights-react@1.9.2
+        version: '@hanzo/insights-react@1.9.2(@hanzo/insights@1.358.1)(@types/react@18.3.27)(react@18.3.1)'
       '@storybook/react':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.4.6(@testing-library/dom@10.4.0)(@types/react@18.3.27)(prettier@3.8.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@6.0.3)
@@ -4395,9 +4335,6 @@ importers:
 
   products/web_analytics:
     dependencies:
-      '@hanzo/brand':
-        specifier: npm:@posthog/brand@0.9.1
-        version: '@posthog/brand@0.9.1(react@18.3.1)'
       '@hanzo/elements':
         specifier: '*'
         version: link:../../frontend/@hanzo/elements
@@ -4472,9 +4409,6 @@ importers:
 
   products/workflows:
     dependencies:
-      '@hanzo/brand':
-        specifier: npm:@posthog/brand@0.9.1
-        version: '@posthog/brand@0.9.1(react@18.3.1)'
       '@hanzo/icons':
         specifier: npm:@hanzo/insights-icons@0.36.7
         version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
@@ -7231,6 +7165,16 @@ packages:
   '@hanzo/insights-lite@4.2.2':
     resolution: {integrity: sha512-FrZYbWcBQm2tu2tfJxyrHCfpQE5zmT0hY6vwK+u6akgrP7tpTRucrudfJgKpyJnXB95guZrsPuxGYW7eqmOjgw==}
 
+  '@hanzo/insights-react@1.9.2':
+    resolution: {integrity: sha512-fxm/VMOAZNiFTJ29jU69vf0IVXZ30rU2mM+6P5Mr/FzKtQINPg8GV6sjoILlQbCIolmcBiCnGpgieh/aj1vfxg==}
+    peerDependencies:
+      '@hanzo/insights': '>=1.257.2'
+      '@types/react': 18.3.27
+      react: 18.3.1
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
   '@hanzo/insights-rrdom@0.0.4':
     resolution: {integrity: sha512-WwgdPJ3J2O07Rrxh3mTEtQEensQNZf8N84R1MNlhPsy2ZuIizOK5Slhg2W9dedPEcPGyw5+4ZO+zwyWhenjCjw==}
 
@@ -9900,15 +9844,6 @@ packages:
   '@poppinss/exception@1.2.3':
     resolution: {integrity: sha512-dCED+QRChTVatE9ibtoaxc+WkdzOSjYTKi/+uacHWIsfodVfpsueo3+DKpgU5Px8qXjgmXkSvhXvSCz3fnP9lw==}
 
-  '@posthog/brand@0.9.1':
-    resolution: {integrity: sha512-Tml510NeanpPBVlZ6LTr3ghYAxiaEX1Qu3svMe++qK7rTQ68pbtr+zrdWasaS4wcJ7DET0E28YJ1us6jUHgo4w==}
-    engines: {node: '>=22.18'}
-    peerDependencies:
-      react: 18.3.1
-    peerDependenciesMeta:
-      react:
-        optional: true
-
   '@posthog/core@1.23.1':
     resolution: {integrity: sha512-GViD5mOv/mcbZcyzz3z9CS0R79JzxVaqEz4sP5Dsea178M/j3ZWe6gaHDZB9yuyGfcmIMQ/8K14yv+7QrK4sQQ==}
 
@@ -9924,16 +9859,6 @@ packages:
     peerDependencies:
       '@modelcontextprotocol/sdk': ^1.29.0
       posthog-node: ^5.0.0
-
-  '@posthog/react@1.9.0':
-    resolution: {integrity: sha512-lVdTsWT5+PtHBu44gSQ7QohbLjAYqHkFAIGAQ+HV8Eh9yj+OcnQ7mXCmyhaMlTBD3z7D0H1eWMp4vQaFnsIyWQ==}
-    peerDependencies:
-      '@types/react': 18.3.27
-      posthog-js: '>=1.257.2'
-      react: 18.3.1
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
 
   '@posthog/siphash@1.1.1':
     resolution: {integrity: sha512-JUFk57H89fOnHpF62FDyFGw4uXeHAX20OPfkLL8/iqg/xrVp5Q21LvJUDijmS5wt0avgUwXF2bxYgaZ5iWRmAg==}
@@ -25891,6 +25816,13 @@ snapshots:
     dependencies:
       '@hanzo/insights-core': 1.7.1
 
+  '@hanzo/insights-react@1.9.2(@hanzo/insights@1.358.1)(@types/react@18.3.27)(react@18.3.1)':
+    dependencies:
+      '@hanzo/insights': 1.358.1
+      react: 18.3.1
+    optionalDependencies:
+      '@types/react': 18.3.27
+
   '@hanzo/insights-rrdom@0.0.4':
     dependencies:
       '@hanzo/insights-rrweb-snapshot': 0.0.4
@@ -29241,10 +29173,6 @@ snapshots:
 
   '@poppinss/exception@1.2.3': {}
 
-  '@posthog/brand@0.9.1(react@18.3.1)':
-    optionalDependencies:
-      react: 18.3.1
-
   '@posthog/core@1.23.1':
     dependencies:
       cross-spawn: 7.0.6
@@ -29260,20 +29188,6 @@ snapshots:
       '@modelcontextprotocol/sdk': 1.29.0(@cfworker/json-schema@4.1.1)(zod@4.3.6)
       '@posthog/core': 1.45.1
       posthog-node: 5.46.1(rxjs@7.8.1)
-
-  '@posthog/react@1.9.0(@hanzo/insights@1.358.1)(@types/react@18.3.27)(react@18.3.1)':
-    dependencies:
-      posthog-js: '@hanzo/insights@1.358.1'
-      react: 18.3.1
-    optionalDependencies:
-      '@types/react': 18.3.27
-
-  '@posthog/react@1.9.0(@types/react@18.3.27)(posthog-js@common+sdk-peer)(react@18.3.1)':
-    dependencies:
-      posthog-js: link:common/sdk-peer
-      react: 18.3.1
-    optionalDependencies:
-      '@types/react': 18.3.27
 
   '@posthog/siphash@1.1.1': {}
 
