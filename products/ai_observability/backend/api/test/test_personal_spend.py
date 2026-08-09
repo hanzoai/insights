@@ -669,7 +669,7 @@ class TestPersonalSpendNonSessionAuth(APIBaseTest):
             organization=self.organization,
             user=self.user,
         )
-        token_value = f"pha_test_{generate_random_token_personal()[:24]}"
+        token_value = f"at-test_{generate_random_token_personal()[:24]}"
         OAuthAccessToken.objects.create(
             user=self.user,
             application=app,

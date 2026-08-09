@@ -673,7 +673,7 @@ describe('IngestionConsumer', () => {
 
             describe('with DROP_EVENTS_BY_TOKEN_DISTINCT_ID drops events with matching token:distinct_id when only event keys are listed', () => {
                 beforeEach(async () => {
-                    infra.config.DROP_EVENTS_BY_TOKEN_DISTINCT_ID = `${team.api_token}:distinct-id-to-ignore,phc_other:distinct-id-to-ignore`
+                    infra.config.DROP_EVENTS_BY_TOKEN_DISTINCT_ID = `${team.api_token}:distinct-id-to-ignore,pk-other:distinct-id-to-ignore`
                     ingester = await createIngestionConsumer(infra)
                 })
                 it('should drop events with matching token and distinct_id', async () => {
