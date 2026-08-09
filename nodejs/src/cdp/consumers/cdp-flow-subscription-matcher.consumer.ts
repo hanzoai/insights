@@ -256,8 +256,8 @@ export class CdpHogflowSubscriptionMatcherConsumer<
         // small and skips cyclotron entirely when a batch has none.
         const hogFlowsByTeam = await this.flowManager.getFlowsForTeams(teamIds)
         const flows: Record<string, Flow> = {}
-        for (const flows of Object.values(hogFlowsByTeam)) {
-            for (const flow of flows) {
+        for (const teamFlows of Object.values(hogFlowsByTeam)) {
+            for (const flow of teamFlows) {
                 if (hasWaitUntilOrConversion(flow)) {
                     flows[flow.id] = flow
                 }
@@ -766,8 +766,8 @@ export class CdpHogflowSubscriptionMatcherConsumer<
         const teamIds = [...new Set(moves.map((m) => m.teamId))]
         const hogFlowsByTeam = await this.flowManager.getFlowsForTeams(teamIds)
         const flows: Record<string, Flow> = {}
-        for (const flows of Object.values(hogFlowsByTeam)) {
-            for (const flow of flows) {
+        for (const teamFlows of Object.values(hogFlowsByTeam)) {
+            for (const flow of teamFlows) {
                 if (flow.actions.some((a: FlowAction) => a.type === 'wait_until_condition')) {
                     flows[flow.id] = flow
                 }

@@ -25,6 +25,7 @@ import structlog
 from opentelemetry import trace
 
 from insights.api.capture import capture_internal
+from insights.git import get_git_commit_short
 from insights.auth import AUTH_BRAND_COOKIE, apply_auth_brand_cookie, normalize_auth_brand
 from insights.cloud_utils import is_cloud
 from insights.email import is_email_available
@@ -223,6 +224,9 @@ def preflight_check(request: HttpRequest) -> JsonResponse:
         "object_storage": in_cloud or _traced("preflight.is_object_storage_available", is_object_storage_available),
         "public_egress_ip_addresses": settings.PUBLIC_EGRESS_IP_ADDRESSES,
         "wizard_cloud_run_available": bool(settings.WIZARD_CLOUD_RUN_OAUTH_CLIENT_ID),
+        # Which commit is serving. Deploy verification asks this; it used to sign in to read
+        # instance_status instead, which is a session for a fact that is not private.
+        "git_sha": get_git_commit_short() or None,
     }
     auth_brand = normalize_auth_brand(request.COOKIES.get(AUTH_BRAND_COOKIE))
     if auth_brand:
@@ -246,9 +250,15 @@ def preflight_check(request: HttpRequest) -> JsonResponse:
             if not in_cloud
             else None,
             "openai_available": bool(os.environ.get("OPENAI_API_KEY")),
-            # Max runs on Anthropic, so it needs its own signal — otherwise self-hosted instances
-            # render the assistant but fail at call time with no key configured.
-            "anthropic_available": bool(os.environ.get("ANTHROPIC_API_KEY")),
+            # Whether the assistant has somewhere to send a request, named for the
+            # question rather than for one vendor. It answered from ANTHROPIC_API_KEY
+            # alone, so an instance routed through our own gateway — which is what
+            # build_async_anthropic_client prefers, and what pays — reported the
+            # assistant as unavailable and told the user to go get a vendor key.
+            "assistant_available": bool(
+                (settings.AI_GATEWAY_URL and settings.AI_GATEWAY_API_KEY)
+                or os.environ.get("ANTHROPIC_API_KEY")
+            ),
             "site_url": settings.SITE_URL,
             "instance_preferences": settings.INSTANCE_PREFERENCES,
             "buffer_conversion_seconds": settings.BUFFER_CONVERSION_SECONDS,

@@ -67,7 +67,9 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
             # we calculate this here because otherwise it is non-deterministic when running locally
             # it can be overridden in tests by passing in options
             "openai_available": bool(os.environ.get("OPENAI_API_KEY")),
-            "anthropic_available": bool(os.environ.get("ANTHROPIC_API_KEY")),
+            "assistant_available": bool(
+                (settings.AI_GATEWAY_URL and settings.AI_GATEWAY_API_KEY) or os.environ.get("ANTHROPIC_API_KEY")
+            ),
             "is_test": True,
             **options,
         }
