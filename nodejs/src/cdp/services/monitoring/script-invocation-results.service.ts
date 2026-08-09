@@ -13,7 +13,7 @@ import type { CdpOutput } from '../../cdp-services'
 import { RerunFilter, RerunFunctionKind, rerunWrapperKindFor } from '../../rerun/rerun-job.types'
 import {
     CyclotronJobInvocation,
-    CyclotronJobInvocationInsightsFlow,
+    CyclotronJobInvocationFlow,
     CyclotronJobInvocationInsightsFunction,
     CyclotronJobInvocationResult,
 } from '../../types'
@@ -80,9 +80,8 @@ const isInsightsFunctionInvocation = (
     invocation: CyclotronJobInvocation
 ): invocation is CyclotronJobInvocationInsightsFunction => 'insightsFunction' in invocation
 
-const isInsightsFlowInvocation = (
-    invocation: CyclotronJobInvocation
-): invocation is CyclotronJobInvocationInsightsFlow => 'hogFlow' in invocation
+const isFlowInvocation = (invocation: CyclotronJobInvocation): invocation is CyclotronJobInvocationFlow =>
+    'flow' in invocation
 
 // Monotonic microsecond timestamp used as the row `version`. ReplacingMergeTree keeps the
 // row with the max `version` per key; without a monotonic version the 'running' + terminal
@@ -182,7 +181,7 @@ const extractTriggerFields = (
         }
     }
 
-    if (isInsightsFlowInvocation(invocation)) {
+    if (isFlowInvocation(invocation)) {
         const event = invocation.state?.event
         return {
             event_uuid: event?.uuid ?? '',
@@ -234,7 +233,7 @@ const serializeInvocationGlobals = (invocation: CyclotronJobInvocation): string 
         const { groups: _groups, person: _person, ...globals } = invocation.state.globals
         return JSON.stringify(stripInputs(globals))
     }
-    if (isInsightsFlowInvocation(invocation)) {
+    if (isFlowInvocation(invocation)) {
         // Script flow state can carry a per-action `currentAction.insightsFunctionState.globals.inputs`
         // — `stripInputs` walks the tree and removes those too.
         return JSON.stringify(stripInputs(invocation.state ?? {}))
@@ -303,14 +302,14 @@ export class HogInvocationResultsService {
         if (isInsightsFunctionInvocation(invocation)) {
             return invocation.insightsFunction.id
         }
-        if (isInsightsFlowInvocation(invocation)) {
-            return invocation.hogFlow.id
+        if (isFlowInvocation(invocation)) {
+            return invocation.flow.id
         }
         return invocation.functionId
     }
 
     private functionKindFor(invocation: CyclotronJobInvocation): 'insights_function' | 'hog_flow' {
-        return isInsightsFlowInvocation(invocation) ? 'hog_flow' : 'insights_function'
+        return isFlowInvocation(invocation) ? 'hog_flow' : 'insights_function'
     }
 
     /**
@@ -372,7 +371,7 @@ export class HogInvocationResultsService {
         // applies uniformly.
         const rerunAttempts = isInsightsFunctionInvocation(invocation)
             ? (invocation.state?.rerunAttempts ?? 0)
-            : isInsightsFlowInvocation(invocation)
+            : isFlowInvocation(invocation)
               ? (invocation.state?.rerunAttempts ?? 0)
               : 0
 
@@ -386,7 +385,7 @@ export class HogInvocationResultsService {
         // win the ReplacingMergeTree argMax, mislabeling the run's start time.
         let firstScheduledAt = isInsightsFunctionInvocation(invocation)
             ? invocation.state?.firstScheduledAt
-            : isInsightsFlowInvocation(invocation)
+            : isFlowInvocation(invocation)
               ? invocation.state?.firstScheduledAt
               : undefined
         const scheduledAtIso = isoMicroseconds(invocation.queueScheduledAt?.toJSDate() ?? now)
@@ -394,7 +393,7 @@ export class HogInvocationResultsService {
             firstScheduledAt = scheduledAtIso
             if (isInsightsFunctionInvocation(invocation)) {
                 invocation.state.firstScheduledAt = scheduledAtIso
-            } else if (isInsightsFlowInvocation(invocation) && invocation.state) {
+            } else if (isFlowInvocation(invocation) && invocation.state) {
                 invocation.state.firstScheduledAt = scheduledAtIso
             }
         }

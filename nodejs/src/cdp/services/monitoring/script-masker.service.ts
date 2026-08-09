@@ -4,7 +4,7 @@ import { RedisClientPipeline, RedisV2 } from '~/common/redis/redis-v2'
 
 import {
     CyclotronJobInvocation,
-    CyclotronJobInvocationInsightsFlow,
+    CyclotronJobInvocationFlow,
     CyclotronJobInvocationInsightsFunction,
     InsightsFunctionMasking,
 } from '../../types'
@@ -53,10 +53,8 @@ function isInsightsFunctionInvocation(
     return (invocation as CyclotronJobInvocationInsightsFunction).insightsFunction !== undefined
 }
 
-function isInsightsFlowInvocation(
-    invocation: CyclotronJobInvocation
-): invocation is CyclotronJobInvocationInsightsFlow {
-    return (invocation as CyclotronJobInvocationInsightsFlow).hogFlow !== undefined
+function isFlowInvocation(invocation: CyclotronJobInvocation): invocation is CyclotronJobInvocationFlow {
+    return (invocation as CyclotronJobInvocationFlow).flow !== undefined
 }
 
 // Helper to extract masking config from different types
@@ -65,8 +63,8 @@ function extractMaskingConfig(invocation: CyclotronJobInvocation): InsightsFunct
         return invocation.insightsFunction.masking || null
     }
 
-    if (isInsightsFlowInvocation(invocation)) {
-        return invocation.hogFlow.trigger_masking || null
+    if (isFlowInvocation(invocation)) {
+        return invocation.flow.trigger_masking || null
     }
 
     throw new Error('Unable to extract masking config from unknown invocation type')
@@ -76,7 +74,7 @@ function extractGlobals(invocation: CyclotronJobInvocation): Record<string, any>
     if (isInsightsFunctionInvocation(invocation)) {
         return invocation.state.globals
     }
-    if (isInsightsFlowInvocation(invocation)) {
+    if (isFlowInvocation(invocation)) {
         // For script flows, we need to construct globals from the filter globals and event
         return {
             event: invocation.state?.event,
@@ -92,14 +90,14 @@ function getEntityId(invocation: CyclotronJobInvocation): string {
     if (isInsightsFunctionInvocation(invocation)) {
         return invocation.insightsFunction.id
     }
-    if (isInsightsFlowInvocation(invocation)) {
-        return invocation.hogFlow.id
+    if (isFlowInvocation(invocation)) {
+        return invocation.flow.id
     }
     return invocation.functionId
 }
 
 function getTtl(invocation: CyclotronJobInvocation, maskingConfig: InsightsFunctionMasking): number {
-    const maxTtl = isInsightsFlowInvocation(invocation) ? MASKER_MAX_TTL_FN_FLOW : MASKER_MAX_TTL_FN_FUNCTION
+    const maxTtl = isFlowInvocation(invocation) ? MASKER_MAX_TTL_FN_FLOW : MASKER_MAX_TTL_FN_FUNCTION
     return Math.max(MASKER_MIN_TTL, Math.min(maxTtl, maskingConfig.ttl ?? maxTtl))
 }
 

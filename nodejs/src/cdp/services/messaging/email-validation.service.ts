@@ -3,7 +3,7 @@ import { Resolver } from 'node:dns/promises'
 import { domainToASCII } from 'node:url'
 import { Counter } from 'prom-client'
 
-import { InsightsFlowAction } from '~/cdp/schema/insightsflow'
+import { FlowAction } from '~/cdp/schema/flow'
 import { RedisV2 } from '~/common/redis/redis-v2'
 
 import { CyclotronJobInvocationInsightsFunction } from '../../types'
@@ -92,7 +92,7 @@ export class EmailValidationService {
      */
     public async getSkipReason(
         invocation: CyclotronJobInvocationInsightsFunction,
-        action: InsightsFlowAction
+        action: FlowAction
     ): Promise<string | null> {
         if (action.type !== 'function_email') {
             return null
