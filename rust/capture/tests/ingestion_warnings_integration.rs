@@ -27,7 +27,7 @@ use uuid::Uuid;
 use capture::v1::analytics::types::Event;
 use capture::v1::test_utils::{batch_payload, valid_event};
 
-const TOKEN: &str = "phc_warnings_integration_token";
+const TOKEN: &str = "pk-warnings_integration_token";
 
 /// The cross-language envelope pin. See the fixture's own `_comment`.
 const ENVELOPE_FIXTURE: &str =
@@ -91,7 +91,7 @@ async fn v1_validation_drop_emits_warning_envelope_to_kafka() -> Result<()> {
 #[tokio::test]
 async fn replay_validation_abort_emits_warning_envelope_to_kafka() -> Result<()> {
     setup_tracing();
-    let token = random_string("phc_replay_warn", 16);
+    let token = random_string("pk-replay_warn", 16);
     let events_topic = EphemeralTopic::new().await;
     let warnings_topic = EphemeralTopic::new().await;
     let server = ServerHandle::for_recordings_with_warnings(&events_topic, &warnings_topic).await;
@@ -150,7 +150,7 @@ async fn replay_validation_abort_emits_warning_envelope_to_kafka() -> Result<()>
 #[tokio::test]
 async fn legacy_processing_abort_emits_warning_envelope_to_kafka() -> Result<()> {
     setup_tracing();
-    let token = random_string("phc_legacy_warn", 16);
+    let token = random_string("pk-legacy_warn", 16);
     let events_topic = EphemeralTopic::new().await;
     let historical_topic = EphemeralTopic::new().await;
     let warnings_topic = EphemeralTopic::new().await;

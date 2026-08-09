@@ -10,8 +10,8 @@ describe('router-utils', () => {
         expect(altered).toEqual('/account/credential-review')
     })
     it('allows project urls to use an API key in place of numeric project id', () => {
-        const altered = addProjectIdIfMissing('/project/phc_gE7SWBNBgFbA4eQ154KPXebyB8KyLJuypR8jg1DSo9Z/replay', 123)
-        expect(altered).toEqual('/project/phc_gE7SWBNBgFbA4eQ154KPXebyB8KyLJuypR8jg1DSo9Z/replay')
+        const altered = addProjectIdIfMissing('/project/pk-gE7SWBNBgFbA4eQ154KPXebyB8KyLJuypR8jg1DSo9Z/replay', 123)
+        expect(altered).toEqual('/project/pk-gE7SWBNBgFbA4eQ154KPXebyB8KyLJuypR8jg1DSo9Z/replay')
     })
     it('does not redirect the instance-level feature flags staff tools URL to a project URL', () => {
         const altered = addProjectIdIfMissing('/feature_flags/staff', 123)

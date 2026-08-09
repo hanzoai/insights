@@ -821,12 +821,12 @@ class LLMSkillMarketplaceCommandSerializer(serializers.Serializer):
     token = serializers.CharField(
         allow_null=True,
         help_text=(
-            "The raw read-only `phx_` credential. Returned once, only when minted or rotated; "
+            "The raw read-only `sk-` credential. Returned once, only when minted or rotated; "
             "it cannot be retrieved again afterwards."
         ),
     )
     mask_value = serializers.CharField(
-        allow_null=True, help_text="Masked preview of the existing credential (e.g. phx_...abcd)."
+        allow_null=True, help_text="Masked preview of the existing credential (e.g. sk-...abcd)."
     )
     created_at = serializers.DateTimeField(allow_null=True, help_text="When the credential was created.")
     last_rolled_at = serializers.DateTimeField(allow_null=True, help_text="When the credential was last rotated.")

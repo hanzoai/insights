@@ -319,7 +319,7 @@ class TestUserAPI(APIBaseTest):
             PersonalAPIKey.objects.create(
                 user=self.user,
                 label="Test key",
-                secure_value=hash_key_value("phx_test_value_1234567890"),
+                secure_value=hash_key_value("sk-test_value_1234567890"),
                 scopes=["*"],
             )
         if with_passkey:
@@ -359,7 +359,7 @@ class TestUserAPI(APIBaseTest):
         PersonalAPIKey.objects.create(
             user=self.user,
             label="Test key",
-            secure_value=hash_key_value("phx_test_value_1234567890"),
+            secure_value=hash_key_value("sk-test_value_1234567890"),
             scopes=["*"],
         )
 

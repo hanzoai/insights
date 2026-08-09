@@ -924,7 +924,7 @@ mod tests {
 
         // Return TokenValidationError if personal apikey
         assert!(matches!(
-            parse_and_extract(r#"[{"event": "e", "token": "phx_hellothere"}]"#),
+            parse_and_extract(r#"[{"event": "e", "token": "sk-hellothere"}]"#),
             Err(CaptureError::TokenValidationError(
                 InvalidTokenReason::PersonalApiKey
             ))

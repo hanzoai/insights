@@ -726,7 +726,7 @@ class TestBuildSandboxConfig(BaseTest):
 class TestGetOtelLogsConfig(BaseTest):
     @parameterized.expand(
         [
-            ("dev_or_self_hosted", False, None, "https://example.ngrok.io/i/v1/logs", "phc_local"),
+            ("dev_or_self_hosted", False, None, "https://example.ngrok.io/i/v1/logs", "pk-local"),
             (
                 "cloud_us",
                 True,
@@ -739,7 +739,7 @@ class TestGetOtelLogsConfig(BaseTest):
                 True,
                 "EU",
                 "https://eu.i.hanzo.ai/i/v1/logs",
-                "phc_dZ4GK1LRjhB97XozMSkEwPXx7OVANaJEwLErkY1phUF",
+                "pk-dZ4GK1LRjhB97XozMSkEwPXx7OVANaJEwLErkY1phUF",
             ),
             (
                 "cloud_unknown_region_defaults_to_us",

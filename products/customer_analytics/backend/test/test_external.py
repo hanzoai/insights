@@ -86,7 +86,7 @@ class TestExternalAccountAPI(APIBaseTest):
             ("no_header", ""),
             ("bad_scheme", "Basic abc123"),
             ("empty_bearer", "Bearer "),
-            ("wrong_token", "Bearer phs_wrong_token"),
+            ("wrong_token", "Bearer sk-wrong_token"),
         ]
     )
     def test_get_rejects_invalid_auth(self, _name, auth_value):

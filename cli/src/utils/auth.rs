@@ -136,9 +136,9 @@ pub fn token_validator(token: &str) -> Result<Validation, CustomUserError> {
         return Ok(Validation::Invalid("Token cannot be empty".into()));
     };
 
-    if !token.starts_with("phx_") {
+    if !token.starts_with("sk-") {
         return Ok(Validation::Invalid(
-            "Token looks wrong, must start with 'phx_'".into(),
+            "Token looks wrong, must start with 'sk-'".into(),
         ));
     }
 
@@ -212,7 +212,7 @@ mod tests {
     #[test]
     fn try_source_requires_both_api_key_and_project_id() {
         let mut only_key = HashMap::new();
-        only_key.insert("INSIGHTS_CLI_API_KEY", "phx_abc");
+        only_key.insert("INSIGHTS_CLI_API_KEY", "sk-abc");
         assert!(try_source(lookup(&only_key)).is_none());
 
         let mut only_id = HashMap::new();
@@ -223,10 +223,10 @@ mod tests {
     #[test]
     fn try_source_accepts_legacy_aliases() {
         let mut map = HashMap::new();
-        map.insert("INSIGHTS_CLI_TOKEN", "phx_legacy");
+        map.insert("INSIGHTS_CLI_TOKEN", "sk-legacy");
         map.insert("INSIGHTS_CLI_ENV_ID", "42");
         let token = try_source(lookup(&map)).expect("should resolve");
-        assert_eq!(token.token, "phx_legacy");
+        assert_eq!(token.token, "sk-legacy");
         assert_eq!(token.env_id, "42");
         assert!(token.host.is_none());
     }
@@ -234,19 +234,19 @@ mod tests {
     #[test]
     fn try_source_prefers_canonical_over_legacy() {
         let mut map = HashMap::new();
-        map.insert("INSIGHTS_CLI_API_KEY", "phx_new");
-        map.insert("INSIGHTS_CLI_TOKEN", "phx_old");
+        map.insert("INSIGHTS_CLI_API_KEY", "sk-new");
+        map.insert("INSIGHTS_CLI_TOKEN", "sk-old");
         map.insert("INSIGHTS_CLI_PROJECT_ID", "1");
         map.insert("INSIGHTS_CLI_ENV_ID", "2");
         let token = try_source(lookup(&map)).unwrap();
-        assert_eq!(token.token, "phx_new");
+        assert_eq!(token.token, "sk-new");
         assert_eq!(token.env_id, "1");
     }
 
     #[test]
     fn try_source_host_is_optional() {
         let mut map = HashMap::new();
-        map.insert("INSIGHTS_CLI_API_KEY", "phx_abc");
+        map.insert("INSIGHTS_CLI_API_KEY", "sk-abc");
         map.insert("INSIGHTS_CLI_PROJECT_ID", "1");
         let token = try_source(lookup(&map)).unwrap();
         assert!(token.host.is_none());
@@ -255,7 +255,7 @@ mod tests {
     #[test]
     fn try_source_picks_up_host_from_same_source() {
         let mut map = HashMap::new();
-        map.insert("INSIGHTS_CLI_API_KEY", "phx_abc");
+        map.insert("INSIGHTS_CLI_API_KEY", "sk-abc");
         map.insert("INSIGHTS_CLI_PROJECT_ID", "1");
         map.insert("INSIGHTS_CLI_HOST", "https://eu.hanzo.ai");
         let token = try_source(lookup(&map)).unwrap();
@@ -292,18 +292,18 @@ mod tests {
     fn provider_prefers_process_env_over_env_file() {
         let _guard = ENV_TEST_LOCK.lock().unwrap();
         clear_env();
-        std::env::set_var("INSIGHTS_CLI_API_KEY", "phx_from_env");
+        std::env::set_var("INSIGHTS_CLI_API_KEY", "sk-from_env");
         std::env::set_var("INSIGHTS_CLI_PROJECT_ID", "111");
 
         let mut f = tempfile::NamedTempFile::new().unwrap();
-        writeln!(f, "INSIGHTS_CLI_API_KEY=phx_from_file").unwrap();
+        writeln!(f, "INSIGHTS_CLI_API_KEY=sk-from_file").unwrap();
         writeln!(f, "INSIGHTS_CLI_PROJECT_ID=222").unwrap();
 
         let provider = EnvVarProvider {
             env_file: Some(f.path().to_path_buf()),
         };
         let token = provider.get_credentials().unwrap();
-        assert_eq!(token.token, "phx_from_env");
+        assert_eq!(token.token, "sk-from_env");
         assert_eq!(token.env_id, "111");
 
         clear_env();
@@ -314,7 +314,7 @@ mod tests {
         let _guard = ENV_TEST_LOCK.lock().unwrap();
         clear_env();
         // Real key in the process env, but no project id — so the env-file fallback runs.
-        std::env::set_var("INSIGHTS_CLI_API_KEY", "phx_process_secret");
+        std::env::set_var("INSIGHTS_CLI_API_KEY", "sk-process_secret");
 
         let mut f = tempfile::NamedTempFile::new().unwrap();
         writeln!(f, "INSIGHTS_CLI_API_KEY=${{INSIGHTS_CLI_API_KEY}}").unwrap();
@@ -325,7 +325,7 @@ mod tests {
             env_file: Some(f.path().to_path_buf()),
         };
         let token = provider.get_credentials().unwrap();
-        assert_ne!(token.token, "phx_process_secret");
+        assert_ne!(token.token, "sk-process_secret");
         assert_eq!(token.token, "${INSIGHTS_CLI_API_KEY}");
         assert_eq!(token.host.as_deref(), Some("https://attacker.example"));
 
@@ -338,14 +338,14 @@ mod tests {
         clear_env();
 
         let mut f = tempfile::NamedTempFile::new().unwrap();
-        writeln!(f, "INSIGHTS_CLI_API_KEY=phx_from_file").unwrap();
+        writeln!(f, "INSIGHTS_CLI_API_KEY=sk-from_file").unwrap();
         writeln!(f, "INSIGHTS_CLI_PROJECT_ID=222").unwrap();
 
         let provider = EnvVarProvider {
             env_file: Some(f.path().to_path_buf()),
         };
         let token = provider.get_credentials().unwrap();
-        assert_eq!(token.token, "phx_from_file");
+        assert_eq!(token.token, "sk-from_file");
         assert_eq!(token.env_id, "222");
     }
 

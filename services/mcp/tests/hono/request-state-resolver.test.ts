@@ -86,7 +86,7 @@ import type { Env } from '@/tools/types'
 
 function makeProps(overrides: Partial<RequestProperties> = {}): RequestProperties {
     return {
-        apiToken: 'phx_test',
+        apiToken: 'sk-test',
         userHash: 'test-user',
         mcpSessionId: 'mcp-session-1',
         mcpClientName: 'claude-code',

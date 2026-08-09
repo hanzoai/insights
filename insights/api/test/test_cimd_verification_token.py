@@ -18,7 +18,7 @@ class TestCIMDVerificationTokenViewSet(APIBaseTest):
         response = self.client.post(self._url(), {"label": "Prod partner"}, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         body = response.json()
-        self.assertTrue(body["value"].startswith("phvt_"))
+        self.assertTrue(body["value"].startswith("vt-"))
         self.assertEqual(body["label"], "Prod partner")
         self.assertTrue(body["mask_value"].startswith("phvt"))
         self.assertIn("...", body["mask_value"])

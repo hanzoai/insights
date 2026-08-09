@@ -34,7 +34,7 @@ Before classifying a caller, follow it through every runtime boundary:
 4. Resolve the configured URL by host and path. Variable names are not proof: an `AI_GATEWAY_URL` can still contain a Python product-slug URL.
 5. Confirm the current call can succeed. A broad exception handler with a deterministic fallback can hide missing credentials or a route that never runs.
 
-A missing `phs_` credential is deployment work, not a parity blocker. Once the intended paying team is known, create a project secret with `llm_gateway:read` in the Insights dashboard and fund or configure that team wallet as part of the migration. A secret reference proves only that a credential is injected; verify ownership, scope, and funding during implementation or rollout.
+A missing `sk-` credential is deployment work, not a parity blocker. Once the intended paying team is known, create a project secret with `llm_gateway:read` in the Insights dashboard and fund or configure that team wallet as part of the migration. A secret reference proves only that a credential is injected; verify ownership, scope, and funding during implementation or rollout.
 
 ## Inventory each candidate
 

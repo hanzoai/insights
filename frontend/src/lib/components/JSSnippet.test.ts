@@ -44,17 +44,17 @@ describe('JavaScript snippet', () => {
         }
 
         const config = { api_host: 'https://us.i.hanzo.ai' }
-        insights.init('phc_first', config)
-        insights.init('phc_second', config, 'project2')
+        insights.init('pk-first', config)
+        insights.init('pk-second', config, 'project2')
 
         expect(insertedScripts).toHaveLength(1)
         expect(insights._i).toHaveLength(2)
-        expect(insights._i[0][0]).toBe('phc_first')
-        expect(insights._i[1][0]).toBe('phc_second')
+        expect(insights._i[0][0]).toBe('pk-first')
+        expect(insights._i[1][0]).toBe('pk-second')
         expect(insights._i[1][2]).toBe('project2')
 
         insertedScripts[0].onerror?.()
-        insights.init('phc_third', config, 'project3')
+        insights.init('pk-third', config, 'project3')
 
         expect(insertedScripts).toHaveLength(2)
         expect(insights._i).toHaveLength(3)

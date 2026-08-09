@@ -34,12 +34,12 @@ def test_no_gateway_returns_none_and_leaves_env_untouched():
 
 
 def test_gateway_mode_uses_plain_query_and_applies_env():
-    active = _apply_gateway_route(("https://gateway.us.hanzo.ai", "phs_secret"), {"stamphog_pr_number": 7})
+    active = _apply_gateway_route(("https://gateway.us.hanzo.ai", "sk-secret"), {"stamphog_pr_number": 7})
     # Plain query, not the traced wrapper (else the gateway's $ai_generation double-counts).
     assert active is reviewer.query
     assert os.environ["ANTHROPIC_BASE_URL"] == "https://gateway.us.hanzo.ai"
-    assert os.environ["ANTHROPIC_AUTH_TOKEN"] == "phs_secret"
-    assert os.environ["ANTHROPIC_API_KEY"] == "phs_secret"
+    assert os.environ["ANTHROPIC_AUTH_TOKEN"] == "sk-secret"
+    assert os.environ["ANTHROPIC_API_KEY"] == "sk-secret"
     headers = os.environ["ANTHROPIC_CUSTOM_HEADERS"]
     # Single X-Insights-Properties JSON blob; the slugless gateway ignores per-property headers.
     assert '"ai_product":"aio_stamphog"' in headers

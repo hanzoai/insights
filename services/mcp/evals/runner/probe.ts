@@ -6,7 +6,7 @@
  * one is not a failure.
  *
  * Usage:
- *   LIVE_MCP_URL=http://localhost:9876 LIVE_MCP_TOKEN=phx_... \
+ *   LIVE_MCP_URL=http://localhost:9876 LIVE_MCP_TOKEN=sk-... \
  *     pnpm exec tsx evals/runner/probe.ts [--out score.json]
  *
  * Exit code is non-zero when any required tool is missing or any probe

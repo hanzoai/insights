@@ -21,13 +21,13 @@ _UNSET = object()
 
 
 def _make_psak(team, label="psak", scopes=_UNSET):
-    # Token must match _SECRET_API_KEY_RE = r"^phs_[a-zA-Z0-9]+$", so only alphanumerics after phs_.
+    # Token must match _SECRET_API_KEY_RE = r"^sk-[a-zA-Z0-9]+$", so only alphanumerics after sk-.
     suffix = "".join(c for c in label if c.isalnum())
-    token = "phs_" + ("a" * 35) + suffix
+    token = "sk-" + ("a" * 35) + suffix
     psak = ProjectSecretAPIKey.objects.create(
         team=team,
         label=label,
-        mask_value=f"phs_...{suffix[:4]}",
+        mask_value=f"sk-...{suffix[:4]}",
         secure_value=hash_key_value(token),
         scopes=["endpoint:read"] if scopes is _UNSET else scopes,
     )
@@ -267,7 +267,7 @@ class TestEndpointViewSetPSAKAuth(DatastoreTestMixin, APIBaseTest):
             f"/v1/projects/{self.team.id}/endpoints/my_endpoint/run/",
             data={},
             content_type="application/json",
-            **self._auth_headers("phs_" + "z" * 35),
+            **self._auth_headers("sk-" + "z" * 35),
         )
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
