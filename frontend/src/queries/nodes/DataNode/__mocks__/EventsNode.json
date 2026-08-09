@@ -1,5 +1,5 @@
 {
-    "next": "http://localhost:8000/api/projects/4/events?limit=10&orderBy=%5B%22-timestamp%22%5D&before=2022-12-04T00%3A57%3A52.667000%2B00%3A00",
+    "next": "http://localhost:8000/v1/projects/4/events?limit=10&orderBy=%5B%22-timestamp%22%5D&before=2022-12-04T00%3A57%3A52.667000%2B00%3A00",
     "results": [
         {
             "id": "0184daa3-df62-0000-0ab9-513be2ed2570",

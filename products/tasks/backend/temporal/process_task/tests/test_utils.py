@@ -516,7 +516,7 @@ class TestFetchUserMcpServerConfigs(TestCase):
 
         configs = get_user_mcp_server_configs(self.TOKEN, self.TEAM_ID, self.USER_ID)
 
-        assert configs[0].url.startswith("https://us.hanzo.ai/api/")
+        assert configs[0].url.startswith("https://us.hanzo.ai/v1/")
 
     @patch(MOCK_API_URL)
     @patch(MOCK_FACADE)

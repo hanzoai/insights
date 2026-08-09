@@ -64,7 +64,7 @@ class TestCSVExporter(APIBaseTest):
             # API responses copied from https://github.com/Insights/insights/runs/7221634689?check_suite_focus=true
             mock_response.json.side_effect = [
                 {
-                    "next": "http://testserver/api/projects/169/events?orderBy=%5B%22-timestamp%22%5D&properties=%5B%7B%22key%22%3A%22%24browser%22%2C%22value%22%3A%5B%22Safari%22%5D%2C%22operator%22%3A%22exact%22%2C%22type%22%3A%22event%22%7D%5D&after=2022-07-06T19%3A27%3A43.206326&limit=1&before=2022-07-06T19%3A37%3A43.095295%2B00%3A00",
+                    "next": "http://testserver/v1/projects/169/events?orderBy=%5B%22-timestamp%22%5D&properties=%5B%7B%22key%22%3A%22%24browser%22%2C%22value%22%3A%5B%22Safari%22%5D%2C%22operator%22%3A%22exact%22%2C%22type%22%3A%22event%22%7D%5D&after=2022-07-06T19%3A27%3A43.206326&limit=1&before=2022-07-06T19%3A37%3A43.095295%2B00%3A00",
                     "results": [
                         {
                             "id": "e9ca132e-400f-4854-a83c-16c151b2f145",
@@ -79,7 +79,7 @@ class TestCSVExporter(APIBaseTest):
                     ],
                 },
                 {
-                    "next": "http://testserver/api/projects/169/events?orderBy=%5B%22-timestamp%22%5D&properties=%5B%7B%22key%22%3A%22%24browser%22%2C%22value%22%3A%5B%22Safari%22%5D%2C%22operator%22%3A%22exact%22%2C%22type%22%3A%22event%22%7D%5D&after=2022-07-06T19%3A27%3A43.206326&limit=1&before=2022-07-06T19%3A37%3A43.095279%2B00%3A00",
+                    "next": "http://testserver/v1/projects/169/events?orderBy=%5B%22-timestamp%22%5D&properties=%5B%7B%22key%22%3A%22%24browser%22%2C%22value%22%3A%5B%22Safari%22%5D%2C%22operator%22%3A%22exact%22%2C%22type%22%3A%22event%22%7D%5D&after=2022-07-06T19%3A27%3A43.206326&limit=1&before=2022-07-06T19%3A37%3A43.095279%2B00%3A00",
                     "results": [
                         {
                             "id": "1624228e-a4f1-48cd-aabc-6baa3ddb22e4",
@@ -369,7 +369,7 @@ class TestCSVExporter(APIBaseTest):
 
             first_page = Mock()
             first_page.json.return_value = {
-                "next": "http://testserver/api/cohort/1/persons?offset=512",
+                "next": "http://testserver/v1/cohort/1/persons?offset=512",
                 "results": [{"id": "abc", "distinct_id": "1"}],
             }
 

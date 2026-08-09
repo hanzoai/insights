@@ -704,12 +704,12 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
                 )
             response = self.client.get(f"/v1/projects/{self.team.id}/events/?distinct_id=1").json()
             assert len(response["results"]) == 100
-            assert f"http://testserver/api/projects/{self.team.id}/events/?distinct_id=1&before=" in unquote(
+            assert f"http://testserver/v1/projects/{self.team.id}/events/?distinct_id=1&before=" in unquote(
                 response["next"]
             )
             response = self.client.get(f"/v1/projects/{self.team.id}/events/?distinct_id=1").json()
             assert len(response["results"]) == 100
-            assert f"http://testserver/api/projects/{self.team.id}/events/?distinct_id=1&before=" in unquote(
+            assert f"http://testserver/v1/projects/{self.team.id}/events/?distinct_id=1&before=" in unquote(
                 response["next"]
             )
 
@@ -728,7 +728,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
             assert len(page2["results"]) == 100
             assert (
                 unquote(page2["next"])
-                == f"http://testserver/api/projects/{self.team.id}/events/?distinct_id=1&before=2020-12-30T12:03:53.829294+00:00"
+                == f"http://testserver/v1/projects/{self.team.id}/events/?distinct_id=1&before=2020-12-30T12:03:53.829294+00:00"
             )
 
             page3 = self.client.get(page2["next"]).json()

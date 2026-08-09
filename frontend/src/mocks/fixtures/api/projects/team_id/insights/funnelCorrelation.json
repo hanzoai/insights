@@ -3,9 +3,9 @@
         "events": [
             {
                 "success_count": 472,
-                "success_people_url": "http://localhost:8000/api/person/funnel/correlation/?breakdown_attribution_type=first_touch&breakdown_normalize_url=False&date_from=-7d&display=FunnelViz",
+                "success_people_url": "http://localhost:8000/v1/person/funnel/correlation/?breakdown_attribution_type=first_touch&breakdown_normalize_url=False&date_from=-7d&display=FunnelViz",
                 "failure_count": 9,
-                "failure_people_url": "http://localhost:8000/api/person/funnel/correlation/?breakdown_attribution_type=first_touch&breakdown_normalize_url=False&date_from=-7d&display=FunnelViz",
+                "failure_people_url": "http://localhost:8000/v1/person/funnel/correlation/?breakdown_attribution_type=first_touch&breakdown_normalize_url=False&date_from=-7d&display=FunnelViz",
                 "odds_ratio": 3006.964172813488,
                 "correlation_type": "success",
                 "event": {
@@ -16,9 +16,9 @@
             },
             {
                 "success_count": 60,
-                "success_people_url": "http://localhost:8000/api/person/funnel/correlation/?breakdown_attribution_type=first_touch&breakdown_normalize_url=False&date_from=-7d&display=FunnelViz",
+                "success_people_url": "http://localhost:8000/v1/person/funnel/correlation/?breakdown_attribution_type=first_touch&breakdown_normalize_url=False&date_from=-7d&display=FunnelViz",
                 "failure_count": 0,
-                "failure_people_url": "http://localhost:8000/api/person/funnel/correlation/?breakdown_attribution_type=first_touch&breakdown_normalize_url=False&date_from=-7d&display=FunnelViz",
+                "failure_people_url": "http://localhost:8000/v1/person/funnel/correlation/?breakdown_attribution_type=first_touch&breakdown_normalize_url=False&date_from=-7d&display=FunnelViz",
                 "odds_ratio": 2750.7485294117646,
                 "correlation_type": "success",
                 "event": {
@@ -29,9 +29,9 @@
             },
             {
                 "success_count": 65,
-                "success_people_url": "http://localhost:8000/api/person/funnel/correlation/?breakdown_attribution_type=first_touch&breakdown_normalize_url=False&date_from=-7d&display=FunnelViz",
+                "success_people_url": "http://localhost:8000/v1/person/funnel/correlation/?breakdown_attribution_type=first_touch&breakdown_normalize_url=False&date_from=-7d&display=FunnelViz",
                 "failure_count": 75,
-                "failure_people_url": "http://localhost:8000/api/person/funnel/correlation/?breakdown_attribution_type=first_touch&breakdown_normalize_url=False&date_from=-7d&display=FunnelViz",
+                "failure_people_url": "http://localhost:8000/v1/person/funnel/correlation/?breakdown_attribution_type=first_touch&breakdown_normalize_url=False&date_from=-7d&display=FunnelViz",
                 "odds_ratio": 35.41070956534874,
                 "correlation_type": "failure",
                 "event": {

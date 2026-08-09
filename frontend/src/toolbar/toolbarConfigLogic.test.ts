@@ -1509,7 +1509,7 @@ describe('toolbar toolbarConfigLogic', () => {
                 (c) => typeof c[0] === 'string' && c[0].includes('/uploaded_media/')
             )
             expect(uploadCalls).toHaveLength(1)
-            expect(uploadCalls[0][0]).toBe('https://us.hanzo.ai/api/projects/@current/uploaded_media/')
+            expect(uploadCalls[0][0]).toBe('https://us.hanzo.ai/v1/projects/@current/uploaded_media/')
 
             // Strong regression guard: no fetch (auth or otherwise) may target attacker host.
             const callsToAttacker = (global.fetch as jest.Mock).mock.calls.filter(
@@ -1609,14 +1609,14 @@ describe('toolbar toolbarConfigLogic', () => {
                 json: () => Promise.resolve({ results: [{ id: 1 }] }),
             } as any)
             const res = await toolbarFetch(
-                'https://us.hanzo.ai/api/element/stats/?page=2',
+                'https://us.hanzo.ai/v1/element/stats/?page=2',
                 'GET',
                 undefined,
                 'use-as-provided'
             )
             expect(res.status).toBe(200)
             const sentUrl = (global.fetch as jest.Mock).mock.calls[0][0]
-            expect(sentUrl).toBe('https://us.hanzo.ai/api/element/stats/?page=2')
+            expect(sentUrl).toBe('https://us.hanzo.ai/v1/element/stats/?page=2')
         })
 
         it('rejects cross-origin URLs with status 400 and results: []', async () => {

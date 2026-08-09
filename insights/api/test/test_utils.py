@@ -52,7 +52,7 @@ class TestUtils(BaseTest):
 
         self.assertEqual(
             format_paginated_url(request("/v1/some_url"), offset=0, page_size=10),
-            "http://testserver/api/some_url?offset=10",
+            "http://testserver/v1/some_url?offset=10",
         )
         self.assertEqual(
             format_paginated_url(request("/v1/some_url?offset=0"), offset=0, page_size=10),

@@ -34,7 +34,7 @@ You can test web analytics queries directly using Insights's `/query` API endpoi
 **Resources:**
 
 - [Insights Query API Documentation](https://hanzo.ai/docs/api/query)
-- [API Schema (Swagger UI)](https://app.hanzo.ai/api/schema/swagger-ui)
+- [API Schema (Swagger UI)](https://app.hanzo.ai/v1/schema/swagger-ui)
 
 ### 1. Create a personal API key
 
@@ -48,7 +48,7 @@ You can test web analytics queries directly using Insights's `/query` API endpoi
 #### Example: Web Overview Query
 
 ```bash
-curl -X POST https://app.hanzo.ai/api/projects/:project_id/query \
+curl -X POST https://app.hanzo.ai/v1/projects/:project_id/query \
   -H "Authorization: Bearer PERSONAL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -66,7 +66,7 @@ curl -X POST https://app.hanzo.ai/api/projects/:project_id/query \
 #### Example: Web Stats Table Query with Breakdown
 
 ```bash
-curl -X POST https://app.hanzo.ai/api/projects/:project_id/query \
+curl -X POST https://app.hanzo.ai/v1/projects/:project_id/query \
   -H "Authorization: Bearer PERSONAL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -86,7 +86,7 @@ curl -X POST https://app.hanzo.ai/api/projects/:project_id/query \
 #### Example: With Event Property Filter
 
 ```bash
-curl -X POST https://app.hanzo.ai/api/projects/:project_id/query \
+curl -X POST https://app.hanzo.ai/v1/projects/:project_id/query \
   -H "Authorization: Bearer PERSONAL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -114,7 +114,7 @@ curl -X POST https://app.hanzo.ai/api/projects/:project_id/query \
 This query powers the "Unique visitors" trend line in the web analytics graphs tab:
 
 ```bash
-curl -X POST https://app.hanzo.ai/api/projects/:project_id/query \
+curl -X POST https://app.hanzo.ai/v1/projects/:project_id/query \
   -H "Authorization: Bearer PERSONAL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -172,7 +172,7 @@ The examples above use high-level query types like `WebOverviewQuery` and `WebSt
 Use the `InsightsQLQuery` kind instead of web analytics-specific kinds:
 
 ```bash
-curl -s -X POST https://app.hanzo.ai/api/projects/:project_id/query \
+curl -s -X POST https://app.hanzo.ai/v1/projects/:project_id/query \
   -H "Authorization: Bearer PERSONAL_API_KEY" \
   -H "Content-Type: application/json" \
   -d @- <<'EOF'
@@ -227,7 +227,7 @@ LIMIT 50000
 **2. API request:**
 
 ```bash
-curl -X POST https://app.hanzo.ai/api/projects/123/query \
+curl -X POST https://app.hanzo.ai/v1/projects/123/query \
   -H "Authorization: Bearer PERSONAL_API_KEY" \
   -H "Content-Type: application/json" \
   -d @- <<'EOF'
