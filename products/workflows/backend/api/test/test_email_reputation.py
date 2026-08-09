@@ -55,7 +55,7 @@ class TestEmailReputationAPI(APIBaseTest):
             ),
             patch("products.workflows.backend.api.insights_flow.SESProvider", return_value=provider),
         ):
-            response = self.client.get(f"/api/projects/{self.team.id}/insights_flows/reputation{query}")
+            response = self.client.get(f"/v1/projects/{self.team.id}/insights_flows/reputation{query}")
         assert response.status_code == status.HTTP_200_OK
         return response.json()
 
@@ -125,7 +125,7 @@ class TestEmailReputationAPI(APIBaseTest):
             patch("products.workflows.backend.api.insights_flow.fetch_app_metric_totals_by_source", return_value={}),
             patch("products.workflows.backend.api.insights_flow.SESProvider", return_value=provider),
         ):
-            url = f"/api/projects/{self.team.id}/insights_flows/reputation"
+            url = f"/v1/projects/{self.team.id}/insights_flows/reputation"
             first = self.client.get(url)
             second = self.client.get(url)
 
@@ -198,7 +198,9 @@ class TestEmailReputationAPI(APIBaseTest):
         )
 
         data = self._get_reputation({str(unnamed.id): {"email_sent": 10}})
-        assert [(row["insights_flow_id"], row["insights_flow_name"]) for row in data["workflows"]] == [(str(unnamed.id), "")]
+        assert [(row["insights_flow_id"], row["insights_flow_name"]) for row in data["workflows"]] == [
+            (str(unnamed.id), "")
+        ]
 
     def test_reputation_endpoint_search_filters_before_the_cap(self):
         needle = self._create_flow("Quarterly newsletter")
@@ -296,7 +298,7 @@ class TestEmailReputationAccessControl(APIBaseTest):
             ),
             patch("products.workflows.backend.api.insights_flow.SESProvider", return_value=provider),
         ):
-            response = self.client.get(f"/api/projects/{self.team.id}/insights_flows/reputation")
+            response = self.client.get(f"/v1/projects/{self.team.id}/insights_flows/reputation")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()

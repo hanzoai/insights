@@ -23,7 +23,7 @@ const meta: Meta = {
                     can_create_org: true,
                     available_social_auth_providers: { oidc: true, saml: false },
                 },
-                '/api/environments/@current/': () => [
+                '/v1/environments/@current/': () => [
                     403,
                     {
                         code: 'project_unavailable',
@@ -54,7 +54,7 @@ export const AccessRevoked: Story = {
 
         useStorybookMocks({
             get: {
-                '/api/users/@me/': () => [
+                '/v1/users/@me/': () => [
                     200,
                     {
                         email: 'test@hanzo.ai',
@@ -70,7 +70,7 @@ export const AccessRevoked: Story = {
                         },
                     },
                 ],
-                'api/organizations/@current/': () => [
+                'v1/organizations/@current/': () => [
                     200,
                     {
                         membership_level: 15,
@@ -96,7 +96,7 @@ export const NoSelectableProjects: Story = {
 
         useStorybookMocks({
             get: {
-                '/api/users/@me/': () => [
+                '/v1/users/@me/': () => [
                     200,
                     {
                         email: 'test@hanzo.ai',
@@ -109,7 +109,7 @@ export const NoSelectableProjects: Story = {
                         team: null,
                     },
                 ],
-                'api/organizations/@current/': () => [
+                'v1/organizations/@current/': () => [
                     200,
                     {
                         membership_level: 1,

@@ -34,7 +34,7 @@ export interface InterviewExportPayload {
     shared: boolean
     /**
      * NOTE: `agent_context`, `questions`, and the Vapi credentials are intentionally NOT in
-     * this payload. They live behind `POST /api/user_interviews/share/<token>/start_call/`
+     * this payload. They live behind `POST /v1/user_interviews/share/<token>/start_call/`
      * so the personalized agent context never lands in the public HTML.
      */
 }
@@ -51,7 +51,7 @@ export interface ExportedData extends SharingConfigurationSettings {
     /**
      * Pre-serialized saved insights referenced by a shared notebook, keyed by `short_id`.
      * Each entry already includes computed `result`/`last_refresh`/etc. so the frontend can seed
-     * `cachedInsight` + `cachedResults` and avoid POSTing to `/api/projects/.../query/` (which
+     * `cachedInsight` + `cachedResults` and avoid POSTing to `/v1/projects/.../query/` (which
      * `SharingAccessTokenAuthentication` rejects).
      */
     insights?: Record<string, InsightModel>
@@ -74,7 +74,7 @@ export interface ExportedData extends SharingConfigurationSettings {
     exportToken?: string
     heatmap_url?: string
     heatmap_context?: HeatmapExportContext
-    /** Cohort id+name inlined for shared views, which can't reach /api/cohorts. */
+    /** Cohort id+name inlined for shared views, which can't reach /v1/cohorts. */
     cohorts?: Pick<CohortType, 'id' | 'name'>[]
     /** AI user interview payload — present only for `type === ExportType.Interview`. */
     interview?: InterviewExportPayload

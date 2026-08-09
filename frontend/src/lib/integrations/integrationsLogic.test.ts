@@ -17,7 +17,7 @@ describe('integrationsLogic — handleOauthCallback', () => {
 
     useMocks({
         get: {
-            '/api/environments/:team_id/integrations/': () => [200, { results: [] }],
+            '/v1/environments/:team_id/integrations/': () => [200, { results: [] }],
         },
     })
 
@@ -93,7 +93,7 @@ describe('integrationsLogic — handleOauthCallback', () => {
             document.cookie = 'ph_oauth_state=csrf-tok'
             useMocks({
                 post: {
-                    '/api/environments/:team_id/integrations/': ({ params }) => {
+                    '/v1/environments/:team_id/integrations/': ({ params }) => {
                         requestedTeamIds.push(String(params.team_id))
                         return [201, { id: 7, kind: 'slack' }]
                     },

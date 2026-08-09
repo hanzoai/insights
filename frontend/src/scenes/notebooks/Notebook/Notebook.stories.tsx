@@ -11,7 +11,7 @@ import { notebookTestTemplate } from './__mocks__/notebook-template-for-snapshot
 
 // a list of test cases to run, showing different types of content in notebooks
 const testCases: Record<string, NotebookType> = {
-    'api/projects/:team_id/notebooks/text-formats': notebookTestTemplate('text-formats', [
+    'v1/projects/:team_id/notebooks/text-formats': notebookTestTemplate('text-formats', [
         {
             type: 'paragraph',
             content: [
@@ -72,7 +72,7 @@ const testCases: Record<string, NotebookType> = {
             ],
         },
     ]),
-    'api/projects/:team_id/notebooks/headings': notebookTestTemplate('headings', [
+    'v1/projects/:team_id/notebooks/headings': notebookTestTemplate('headings', [
         {
             type: 'heading',
             attrs: {
@@ -110,7 +110,7 @@ const testCases: Record<string, NotebookType> = {
             ],
         },
     ]),
-    'api/projects/:team_id/notebooks/numbered-list': notebookTestTemplate('numbered-list', [
+    'v1/projects/:team_id/notebooks/numbered-list': notebookTestTemplate('numbered-list', [
         {
             type: 'orderedList',
             content: [
@@ -145,7 +145,7 @@ const testCases: Record<string, NotebookType> = {
             ],
         },
     ]),
-    'api/projects/:team_id/notebooks/bullet-list': notebookTestTemplate('bullet-list', [
+    'v1/projects/:team_id/notebooks/bullet-list': notebookTestTemplate('bullet-list', [
         {
             type: 'bulletList',
             content: [
@@ -180,7 +180,7 @@ const testCases: Record<string, NotebookType> = {
             ],
         },
     ]),
-    'api/projects/:team_id/notebooks/collapsed-headings': notebookTestTemplate('collapsible-headings', [
+    'v1/projects/:team_id/notebooks/collapsed-headings': notebookTestTemplate('collapsible-headings', [
         {
             type: 'heading',
             attrs: { level: 2, collapsed: true },
@@ -240,7 +240,7 @@ const testCases: Record<string, NotebookType> = {
             ],
         },
     ]),
-    'api/projects/:team_id/notebooks/recordings-playlist': notebookTestTemplate('recordings-playlist', [
+    'v1/projects/:team_id/notebooks/recordings-playlist': notebookTestTemplate('recordings-playlist', [
         {
             type: 'ph-recording-playlist',
             attrs: {
@@ -252,8 +252,8 @@ const testCases: Record<string, NotebookType> = {
             },
         },
     ]),
-    'api/projects/:team_id/notebooks/empty': notebookTestTemplate('empty', []),
-    'api/projects/:team_id/notebooks/flattened-table': notebookTestTemplate('flattened-table', [
+    'v1/projects/:team_id/notebooks/empty': notebookTestTemplate('empty', []),
+    'v1/projects/:team_id/notebooks/flattened-table': notebookTestTemplate('flattened-table', [
         {
             type: 'heading',
             attrs: { level: 1 },
@@ -289,7 +289,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             post: {
-                'api/environments/:team_id/query/InsightsQLQuery': {
+                'v1/environments/:team_id/query/InsightsQLQuery': {
                     datastore:
                         "SELECT nullIf(nullIf(events.`$session_id`, ''), 'null') AS session_id, any(events.properties) AS properties FROM events WHERE and(equals(events.team_id, 1), in(events.event, [%(insightsql_val_0)s, %(insightsql_val_1)s]), ifNull(in(session_id, [%(insightsql_val_2)s]), 0), ifNull(greaterOrEquals(toTimeZone(events.timestamp, %(insightsql_val_3)s), %(insightsql_val_4)s), 0), ifNull(lessOrEquals(toTimeZone(events.timestamp, %(insightsql_val_5)s), %(insightsql_val_6)s), 0)) GROUP BY session_id LIMIT 100 SETTINGS readonly=2, max_execution_time=60, allow_experimental_object_type=True",
                     columns: ['session_id', 'properties'],
@@ -308,7 +308,7 @@ const meta: Meta = {
                 },
             },
             get: {
-                'api/projects/:team_id/notebooks': {
+                'v1/projects/:team_id/notebooks': {
                     count: 1,
                     next: null,
                     previous: null,
@@ -357,8 +357,8 @@ const meta: Meta = {
                         },
                     ],
                 },
-                'api/projects/:team_id/notebooks/12345': notebook12345Json,
-                'api/environments/:team_id/session_recordings': {
+                'v1/projects/:team_id/notebooks/12345': notebook12345Json,
+                'v1/environments/:team_id/session_recordings': {
                     results: [
                         {
                             id: '018a8a51-a39d-7b18-897f-94054eec5f61',

@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
  * The API surface a signed-in user's session actually depends on.
  *
  * smoke.spec.ts opens scenes and catches anything that breaks while a scene
- * loads. That misses endpoints no scene calls on mount -- `POST /api/projects/:id/fn/`
+ * loads. That misses endpoints no scene calls on mount -- `POST /v1/projects/:id/fn/`
  * answered 500 in production for every request because of an unbound name, and
  * no amount of scene-mounting would have found it.
  *
@@ -21,27 +21,27 @@ import { expect, test } from '@playwright/test'
 // What this build carries. A 5xx is a fault anywhere; these must also not be 404,
 // because a missing route here means a product surface lost its backend.
 const CARRIED = [
-    '/api/users/@me/',
-    '/api/organizations/@current/',
-    '/api/projects/1/',
-    '/api/projects/1/event_definitions/?limit=5',
-    '/api/projects/1/property_definitions/?limit=5',
-    '/api/projects/1/insights/?limit=5',
-    '/api/projects/1/dashboards/?limit=5',
-    '/api/projects/1/feature_flags/?limit=5',
-    '/api/projects/1/cohorts/?limit=5',
-    '/api/projects/1/actions/?limit=5',
-    '/api/projects/1/annotations/?limit=5',
-    '/api/projects/1/surveys/?limit=5',
-    '/api/projects/1/notebooks/?limit=5',
-    '/api/projects/1/session_recordings/?limit=3',
+    '/v1/users/@me/',
+    '/v1/organizations/@current/',
+    '/v1/projects/1/',
+    '/v1/projects/1/event_definitions/?limit=5',
+    '/v1/projects/1/property_definitions/?limit=5',
+    '/v1/projects/1/insights/?limit=5',
+    '/v1/projects/1/dashboards/?limit=5',
+    '/v1/projects/1/feature_flags/?limit=5',
+    '/v1/projects/1/cohorts/?limit=5',
+    '/v1/projects/1/actions/?limit=5',
+    '/v1/projects/1/annotations/?limit=5',
+    '/v1/projects/1/surveys/?limit=5',
+    '/v1/projects/1/notebooks/?limit=5',
+    '/v1/projects/1/session_recordings/?limit=3',
 ]
 
 // Implemented in upstream's separately-licensed ee/ tree, which this fork does not
 // ship, so they have no viewset at all. Pinned as 404 rather than left unlisted:
 // if one of these starts answering 500 it means something half-wired it back, and
 // if one starts answering 200 the honest-state UI in capabilities.ts is now lying.
-const NOT_CARRIED = ['/api/projects/1/experiments/', '/api/projects/1/groups_types/']
+const NOT_CARRIED = ['/v1/projects/1/experiments/', '/v1/projects/1/groups_types/']
 
 test.describe('the API a session depends on', () => {
     for (const path of CARRIED) {

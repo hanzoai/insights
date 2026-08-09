@@ -7,7 +7,7 @@ from products.data_modeling.backend.facade.models import DataWarehouseSavedQuery
 class TestView(APIBaseTest):
     def test_create(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -37,7 +37,7 @@ class TestView(APIBaseTest):
 
     def test_view_doesnt_exist(self):
         view_1_response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -50,7 +50,7 @@ class TestView(APIBaseTest):
 
     def test_view_updated(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -62,7 +62,7 @@ class TestView(APIBaseTest):
         self.assertEqual(response.status_code, 201, response.content)
         view = response.json()
         view_1_response = self.client.patch(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/" + view["id"],
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/" + view["id"],
             {
                 "query": {
                     "kind": "InsightsQLQuery",
@@ -105,7 +105,7 @@ class TestView(APIBaseTest):
     @patch("insights.tasks.warehouse.get_client")
     def test_view_with_external_table(self, patch_get_columns_1, patch_get_columns_2, patch_get_client):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_tables/",
+            f"/v1/environments/{self.team.id}/warehouse_tables/",
             {
                 "name": "whatever",
                 "url_pattern": "https://your-org.s3.amazonaws.com/bucket/whatever.pqt",
@@ -120,7 +120,7 @@ class TestView(APIBaseTest):
         response = response.json()
 
         view_1_response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -133,6 +133,6 @@ class TestView(APIBaseTest):
 
         self.assertEqual(DataWarehouseSavedQuery.objects.all().count(), 1)
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/warehouse_tables/{response['id']}")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/warehouse_tables/{response['id']}")
 
         self.assertEqual(DataWarehouseSavedQuery.objects.all().count(), 1)

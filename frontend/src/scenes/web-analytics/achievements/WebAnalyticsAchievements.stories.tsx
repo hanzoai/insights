@@ -130,7 +130,7 @@ function buildTierShowcase(): AchievementsListResponseApi {
 const overviewDecorator = (streakThresholds: number[]): ReturnType<typeof mswDecorator> =>
     mswDecorator({
         get: {
-            '/api/projects/:team_id/web_analytics_achievements/overview/': () =>
+            '/v1/projects/:team_id/web_analytics_achievements/overview/': () =>
                 HttpResponse.json(buildOverview(streakThresholds)),
         },
     })
@@ -195,7 +195,7 @@ export const TierColors: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/web_analytics_achievements/overview/': () =>
+                '/v1/projects/:team_id/web_analytics_achievements/overview/': () =>
                     HttpResponse.json(buildTierShowcase()),
             },
         }),

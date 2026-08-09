@@ -1887,7 +1887,7 @@ class HedgeboxMatrix(Matrix):
                             "    const payload = { plan }",
                             "    const timeout = 8000",
                         ],
-                        "context_line": "    return api.post('/api/billing/checkout', payload, { timeout })",
+                        "context_line": "    return api.post('/v1/billing/checkout', payload, { timeout })",
                         "post_context": [
                             "}",
                         ],

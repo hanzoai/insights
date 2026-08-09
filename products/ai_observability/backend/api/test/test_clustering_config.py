@@ -8,11 +8,11 @@ from products.ai_observability.backend.models.clustering_config import Clusterin
 class TestClusteringConfigViewSet(APIBaseTest):
     def test_unauthenticated_user_cannot_access_config(self):
         self.client.logout()
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/clustering_config/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/clustering_config/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_can_get_clustering_config(self):
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/clustering_config/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/clustering_config/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertIn("event_filters", response.data)
@@ -23,7 +23,7 @@ class TestClusteringConfigViewSet(APIBaseTest):
     def test_get_creates_config_if_missing(self):
         self.assertEqual(ClusteringConfig.objects.filter(team=self.team).count(), 0)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/clustering_config/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/clustering_config/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertEqual(ClusteringConfig.objects.filter(team=self.team).count(), 1)
@@ -34,7 +34,7 @@ class TestClusteringConfigViewSet(APIBaseTest):
             event_filters=[{"key": "ai_product", "value": "insights_ai", "operator": "exact", "type": "event"}],
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/clustering_config/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/clustering_config/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["event_filters"]), 1)
         self.assertEqual(response.data["event_filters"][0]["key"], "ai_product")
@@ -43,7 +43,7 @@ class TestClusteringConfigViewSet(APIBaseTest):
         filters = [{"key": "$ai_model", "value": "gpt-4", "operator": "exact", "type": "event"}]
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/clustering_config/set_event_filters/",
+            f"/v1/environments/{self.team.id}/llm_analytics/clustering_config/set_event_filters/",
             {"event_filters": filters},
             format="json",
         )
@@ -60,7 +60,7 @@ class TestClusteringConfigViewSet(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/clustering_config/set_event_filters/",
+            f"/v1/environments/{self.team.id}/llm_analytics/clustering_config/set_event_filters/",
             {"event_filters": []},
             format="json",
         )
@@ -69,7 +69,7 @@ class TestClusteringConfigViewSet(APIBaseTest):
 
     def test_set_event_filters_requires_event_filters_field(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/clustering_config/set_event_filters/",
+            f"/v1/environments/{self.team.id}/llm_analytics/clustering_config/set_event_filters/",
             {},
             format="json",
         )
@@ -78,7 +78,7 @@ class TestClusteringConfigViewSet(APIBaseTest):
 
     def test_set_event_filters_rejects_non_list(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/clustering_config/set_event_filters/",
+            f"/v1/environments/{self.team.id}/llm_analytics/clustering_config/set_event_filters/",
             {"event_filters": "not a list"},
             format="json",
         )
@@ -92,11 +92,11 @@ class TestClusteringConfigViewSet(APIBaseTest):
         ]
 
         self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/clustering_config/set_event_filters/",
+            f"/v1/environments/{self.team.id}/llm_analytics/clustering_config/set_event_filters/",
             {"event_filters": filters},
             format="json",
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/clustering_config/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/clustering_config/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["event_filters"]), 2)

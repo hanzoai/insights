@@ -84,7 +84,7 @@ describe('wizardLogic', () => {
         it('sets view to invalid when authentication fails', async () => {
             useMocks({
                 post: {
-                    '/api/wizard/authenticate/': () => [400, { status: 0 }],
+                    '/v1/wizard/authenticate/': () => [400, { status: 0 }],
                 },
             })
 
@@ -104,7 +104,7 @@ describe('wizardLogic', () => {
         it('sets view to success when authentication succeeds', async () => {
             useMocks({
                 post: {
-                    '/api/wizard/authenticate/': () => [200, { status: 1 }],
+                    '/v1/wizard/authenticate/': () => [200, { status: 1 }],
                 },
             })
 

@@ -70,7 +70,7 @@ async function withRetry(fn) {
 }
 
 function endpointUrl(action, params = {}) {
-    const url = new URL(`${HOST}/api/projects/${PROJECT_ID}/engineering_analytics/${action}/`)
+    const url = new URL(`${HOST}/v1/projects/${PROJECT_ID}/engineering_analytics/${action}/`)
     for (const [k, v] of Object.entries(params)) {
         if (v !== undefined && v !== null && v !== '') {
             url.searchParams.set(k, v)
@@ -95,7 +95,7 @@ function fetchFlakyTests() {
 function insightsql(query, values) {
     return withRetry(() =>
         request(
-            `${HOST}/api/projects/${PROJECT_ID}/query/`,
+            `${HOST}/v1/projects/${PROJECT_ID}/query/`,
             {
                 method: 'POST',
                 headers: { ...AUTH_HEADERS, 'Content-Type': 'application/json' },

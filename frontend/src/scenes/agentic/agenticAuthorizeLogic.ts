@@ -173,7 +173,7 @@ export const agenticAuthorizeLogic = kea<agenticAuthorizeLogicType>([
             null as TeamBasicType[] | null,
             {
                 loadAllTeams: async () => {
-                    return await api.loadPaginatedResults('api/projects')
+                    return await api.loadPaginatedResults('v1/projects')
                 },
             },
         ],
@@ -181,7 +181,7 @@ export const agenticAuthorizeLogic = kea<agenticAuthorizeLogicType>([
             null as { partner_name: string; scopes: string[] } | null,
             {
                 loadPendingAuth: async () => {
-                    return await api.get(`api/agentic/authorize/pending/?state=${encodeURIComponent(values.state)}`)
+                    return await api.get(`v1/agentic/authorize/pending/?state=${encodeURIComponent(values.state)}`)
                 },
             },
         ],
@@ -207,7 +207,7 @@ export const agenticAuthorizeLogic = kea<agenticAuthorizeLogicType>([
             }),
             submit: async (formValues: AgenticAuthorizationFormValues) => {
                 try {
-                    const response = await api.create('api/agentic/authorize/confirm/', {
+                    const response = await api.create('v1/agentic/authorize/confirm/', {
                         state: values.state,
                         team_id: formValues.scoped_teams[0],
                     })

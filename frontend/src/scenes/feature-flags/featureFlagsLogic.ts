@@ -431,7 +431,7 @@ export const featureFlagsLogic = kea<featureFlagsLogicType>([
                     const params = values.paramsFromFilters
                     const filters = values.filters
                     const response = await api.get(
-                        `api/projects/${values.currentProjectId}/feature_flags/?${toParams(params)}`
+                        `v1/projects/${values.currentProjectId}/feature_flags/?${toParams(params)}`
                     )
                     // Drop a response that a newer request has already superseded, so slow-then-fast
                     // responses can't land out of order.
@@ -446,7 +446,7 @@ export const featureFlagsLogic = kea<featureFlagsLogicType>([
                 updateFeatureFlag: async ({ id, payload }: { id: number; payload: Partial<FeatureFlagType> }) => {
                     try {
                         const response = await api.update(
-                            `api/projects/${values.currentProjectId}/feature_flags/${id}`,
+                            `v1/projects/${values.currentProjectId}/feature_flags/${id}`,
                             payload
                         )
                         const updatedFlags = values.featureFlags.results.map((flag) =>
@@ -481,7 +481,7 @@ export const featureFlagsLogic = kea<featureFlagsLogicType>([
                 }) => {
                     try {
                         const response = await api.update(
-                            `api/projects/${values.currentProjectId}/feature_flags/${id}`,
+                            `v1/projects/${values.currentProjectId}/feature_flags/${id}`,
                             archived ? { archived: true, active: false } : { archived: false }
                         )
                         const updatedFlags = values.featureFlags.results.map((flag) =>

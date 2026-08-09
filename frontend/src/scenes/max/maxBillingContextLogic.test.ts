@@ -265,29 +265,29 @@ describe('maxBillingContextLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/billing/': mockBilling,
-                '/api/billing/usage/': mockBillingUsageResponse,
-                '/api/billing/spend/': mockBillingSpendResponse,
-                '/api/billing/usage_limit_alerts/': [],
-                '/api/billing/compute_spend': {},
-                '/api/organizations/@current/': {
+                '/v1/billing/': mockBilling,
+                '/v1/billing/usage/': mockBillingUsageResponse,
+                '/v1/billing/spend/': mockBillingSpendResponse,
+                '/v1/billing/usage_limit_alerts/': [],
+                '/v1/billing/compute_spend': {},
+                '/v1/organizations/@current/': {
                     id: '123',
                     name: 'Test Org',
                     membership_level: 15, // OrganizationMembershipLevel.Admin
                 },
-                '/api/environments/@current/team/': mockTeam,
-                '/api/insights/': { feature_flags: {} },
-                '/api/organizations/:organization_id/pipeline_destinations/': { results: mockDestinations },
-                '/api/environments/:team_id/pipeline-destinations': { results: mockDestinations },
-                '/api/environments/:team_id/plugin_configs': { results: [] },
-                '/api/organizations/:organization_id/plugins': { results: [] },
-                '/api/organizations/:organization_id/batch_exports': { results: [] },
-                '/api/projects/:project_id/pipeline_destination_configs/': { results: [] },
-                '/api/environments/:team_id/batch_exports/': { results: [] },
+                '/v1/environments/@current/team/': mockTeam,
+                '/v1/insights/': { feature_flags: {} },
+                '/v1/organizations/:organization_id/pipeline_destinations/': { results: mockDestinations },
+                '/v1/environments/:team_id/pipeline-destinations': { results: mockDestinations },
+                '/v1/environments/:team_id/plugin_configs': { results: [] },
+                '/v1/organizations/:organization_id/plugins': { results: [] },
+                '/v1/organizations/:organization_id/batch_exports': { results: [] },
+                '/v1/projects/:project_id/pipeline_destination_configs/': { results: [] },
+                '/v1/environments/:team_id/batch_exports/': { results: [] },
             },
             post: {
-                '/api/billing/usage': mockBillingUsageResponse,
-                '/api/billing/spend': mockBillingSpendResponse,
+                '/v1/billing/usage': mockBillingUsageResponse,
+                '/v1/billing/spend': mockBillingSpendResponse,
             },
         })
         initKeaTests()
@@ -478,7 +478,7 @@ describe('maxBillingContextLogic', () => {
             logic.unmount()
             useMocks({
                 get: {
-                    '/api/organizations/@current/': {
+                    '/v1/organizations/@current/': {
                         id: '123',
                         name: 'Test Org',
                         membership_level: 1, // OrganizationMembershipLevel.Member

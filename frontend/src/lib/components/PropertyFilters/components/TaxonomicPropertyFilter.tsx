@@ -210,7 +210,7 @@ export function TaxonomicPropertyFilter({
                 filter?.type === PropertyFilterType.DataWarehouse &&
                 dataWarehouseTableName &&
                 currentTeamId
-                    ? `api/environments/${currentTeamId}/data_warehouse/property_values?${toParams({
+                    ? `v1/environments/${currentTeamId}/data_warehouse/property_values?${toParams({
                           table_name: dataWarehouseTableName,
                           key: filter.key,
                       })}`

@@ -364,21 +364,21 @@ export const accessControlsLogic = kea<accessControlsLogicType>([
             null as AccessControlDefaultsResponse | null,
             {
                 loadDefaults: async () =>
-                    api.get<AccessControlDefaultsResponse>(`api/projects/${props.projectId}/access_control_defaults`),
+                    api.get<AccessControlDefaultsResponse>(`v1/projects/${props.projectId}/access_control_defaults`),
             },
         ],
         rolesData: [
             null as AccessControlRolesResponse | null,
             {
                 loadRoles: async () =>
-                    api.get<AccessControlRolesResponse>(`api/projects/${props.projectId}/access_control_roles`),
+                    api.get<AccessControlRolesResponse>(`v1/projects/${props.projectId}/access_control_roles`),
             },
         ],
         membersData: [
             null as AccessControlMembersResponse | null,
             {
                 loadMembers: async () =>
-                    api.get<AccessControlMembersResponse>(`api/projects/${props.projectId}/access_control_members`),
+                    api.get<AccessControlMembersResponse>(`v1/projects/${props.projectId}/access_control_members`),
             },
         ],
     })),

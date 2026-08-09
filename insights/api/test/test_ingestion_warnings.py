@@ -96,7 +96,7 @@ class TestIngestionWarningsAPI(DatastoreTestMixin, APIBaseTest):
 
     @freeze_time("2021-12-04T19:20:00Z")
     def test_ingestion_warnings_api(self):
-        response = self.client.get(f"/api/projects/{self.team.pk}/ingestion_warnings")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/ingestion_warnings")
         assert response.status_code == status.HTTP_200_OK
         assert (
             response.json()
@@ -165,7 +165,7 @@ class TestIngestionWarningsAPI(DatastoreTestMixin, APIBaseTest):
 
     @freeze_time("2021-12-04T19:20:00Z")
     def test_ingestion_warnings_api_search_by_type(self):
-        response = self.client.get(f"/api/projects/{self.team.pk}/ingestion_warnings?q=another_type")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/ingestion_warnings?q=another_type")
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
             "results": [
@@ -187,7 +187,7 @@ class TestIngestionWarningsAPI(DatastoreTestMixin, APIBaseTest):
 
     @freeze_time("2021-12-04T19:20:00Z")
     def test_ingestion_warnings_api_search_by_id(self):
-        response = self.client.get(f"/api/projects/{self.team.pk}/ingestion_warnings?q=x-uuid")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/ingestion_warnings?q=x-uuid")
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
             "results": [

@@ -120,10 +120,10 @@ def _make_run(team: Team, *, task_run_status: str | None = None, **overrides) ->
 
 class TestScoutHarnessRunsAPI(APIBaseTest):
     def _list_url(self) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/runs/"
+        return f"/v1/projects/{self.team.id}/signals/scout/runs/"
 
     def _detail_url(self, run_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/runs/{run_id}/"
+        return f"/v1/projects/{self.team.id}/signals/scout/runs/{run_id}/"
 
     def test_list_returns_runs_for_team_newest_first(self) -> None:
         older = _make_run(self.team)
@@ -255,7 +255,7 @@ def _make_emission(team: Team, run: SignalScoutRun, *, finding_id: str, **overri
 
 class TestScoutHarnessRunEmissionsAPI(APIBaseTest):
     def _emissions_url(self, run_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/runs/{run_id}/emissions/"
+        return f"/v1/projects/{self.team.id}/signals/scout/runs/{run_id}/emissions/"
 
     def test_returns_emissions_for_run_newest_first(self) -> None:
         run = _make_run(self.team, emitted_count=2, emitted_finding_ids=["f-a", "f-b"])
@@ -309,7 +309,7 @@ _FETCH_REPORT_IDS = "products.signals.backend.temporal.signal_queries.fetch_repo
 
 class TestScoutHarnessEmissionReportsAPI(APIBaseTest):
     def _url(self, run_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/runs/{run_id}/emissions/reports/"
+        return f"/v1/projects/{self.team.id}/signals/scout/runs/{run_id}/emissions/reports/"
 
     def test_pairs_each_finding_with_its_linked_report(self) -> None:
         run = _make_run(self.team, emitted_finding_ids=["f-a", "f-b"])
@@ -400,7 +400,7 @@ class TestScoutHarnessEmissionReportsAPI(APIBaseTest):
 
 class TestScoutHarnessEmissionsBatchAPI(APIBaseTest):
     def _url(self) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/runs/emissions/batch/"
+        return f"/v1/projects/{self.team.id}/signals/scout/runs/emissions/batch/"
 
     def test_batches_emissions_across_runs_newest_first(self) -> None:
         # The findings page opens one batched request instead of one per run; the response flattens
@@ -437,7 +437,7 @@ class TestScoutHarnessEmissionsBatchAPI(APIBaseTest):
 
 class TestScoutHarnessEmissionReportsBatchAPI(APIBaseTest):
     def _url(self) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/runs/emissions/reports/batch/"
+        return f"/v1/projects/{self.team.id}/signals/scout/runs/emissions/reports/batch/"
 
     def test_resolves_every_runs_links_in_one_datastore_call(self) -> None:
         # The whole point of the batch endpoint: the per-run page fired one Datastore query per run,
@@ -475,7 +475,7 @@ class TestScoutHarnessEmissionReportsBatchAPI(APIBaseTest):
 
 class TestScoutHarnessRecentEmissionsAPI(APIBaseTest):
     def _url(self) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/runs/emissions/recent/"
+        return f"/v1/projects/{self.team.id}/signals/scout/runs/emissions/recent/"
 
     def test_flattens_emissions_across_runs_newest_first_without_run_ids(self) -> None:
         # The cross-run reader: unlike the per-run `emissions` action (one run) and the batch action
@@ -540,7 +540,7 @@ class TestScoutHarnessRecentEmissionsAPI(APIBaseTest):
 
 class TestScoutHarnessFindingsSummaryAPI(APIBaseTest):
     def _url(self) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/runs/findings/summary/"
+        return f"/v1/projects/{self.team.id}/signals/scout/runs/findings/summary/"
 
     def test_summary_tallies_emitted_findings_across_scouts(self) -> None:
         # The cheap callout tally that replaced the client walking the whole paginated runs window:
@@ -626,7 +626,7 @@ class TestScoutHarnessEmitFindingAPI(APIBaseTest):
         _authenticate_as_scout(self)
 
     def _emit_signal_url(self, run_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/runs/{run_id}/emit-signal/"
+        return f"/v1/projects/{self.team.id}/signals/scout/runs/{run_id}/emit-signal/"
 
     def _payload(self, **overrides) -> dict:
         body: dict = {
@@ -726,7 +726,7 @@ class TestScoutHarnessStructuredOutputAPI(APIBaseTest):
         _authenticate_as_scout(self)
 
     def _record_url(self, run_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/runs/{run_id}/record-output/"
+        return f"/v1/projects/{self.team.id}/signals/scout/runs/{run_id}/record-output/"
 
     def _make_run_with_schema(self, team: Team | None = None, **config_overrides) -> SignalScoutRun:
         run = _make_run(team or self.team)
@@ -942,7 +942,7 @@ class TestScoutHarnessStructuredOutputAPI(APIBaseTest):
         SignalScoutRun.objects.filter(pk=run.pk).update(
             metadata={"structured_output_schema": _STRUCTURED_OUTPUT_SCHEMA, "report_channel": "none"}
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/signals/scout/runs/{run.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/signals/scout/runs/{run.id}/")
         assert response.status_code == status.HTTP_200_OK
         metadata = response.json()["metadata"]
         assert "structured_output_schema" not in metadata
@@ -1041,7 +1041,7 @@ class TestStructuredOutputSchemaValidation(SimpleTestCase):
 
 class TestScoutHarnessConfigStructuredOutputSchemaAPI(APIBaseTest):
     def _detail_url(self, config_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/configs/{config_id}/"
+        return f"/v1/projects/{self.team.id}/signals/scout/configs/{config_id}/"
 
     def test_patch_persists_schema_and_read_surfaces_it(self) -> None:
         # Wiring guard for the SimpleTestCase matrix above: the viewset actually routes
@@ -1123,10 +1123,10 @@ class TestScoutHarnessScratchpadAPI(APIBaseTest):
         _authenticate_as_scout(self)
 
     def _list_url(self) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/scratchpad/"
+        return f"/v1/projects/{self.team.id}/signals/scout/scratchpad/"
 
     def _forget_url(self) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/scratchpad/forget/"
+        return f"/v1/projects/{self.team.id}/signals/scout/scratchpad/forget/"
 
     def test_remember_creates_entry(self) -> None:
         body = {"key": "k1", "content": "checkout regression noise — already tracked"}
@@ -1247,10 +1247,10 @@ class TestScoutHarnessNotesAPI(APIBaseTest):
     # user-grantable `signal_scout` scopes, so any team member's session/PAK can write.
 
     def _list_url(self) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/notes/"
+        return f"/v1/projects/{self.team.id}/signals/scout/notes/"
 
     def _detail_url(self, note_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/notes/{note_id}/"
+        return f"/v1/projects/{self.team.id}/signals/scout/notes/{note_id}/"
 
     def _make_scout_skill(self, name: str = "signals-scout-web-analytics") -> None:
         LLMSkill.objects.create(team=self.team, name=name, description="scout", body="watch")
@@ -1359,7 +1359,7 @@ class TestScoutHarnessNotesAPI(APIBaseTest):
         env = Team.objects.create(organization=self.organization, parent_team=self.team, name="env")
         SignalScoutNote.objects.create(team=self.team, content="parent note")
 
-        response = self.client.get(f"/api/projects/{env.id}/signals/scout/notes/")
+        response = self.client.get(f"/v1/projects/{env.id}/signals/scout/notes/")
 
         assert response.status_code == status.HTTP_200_OK, response.content
         assert {row["content"] for row in response.json()} == {"parent note"}
@@ -1382,7 +1382,7 @@ class TestScoutHarnessNotesAPI(APIBaseTest):
         )
         self.client.logout()
 
-        response = self.client.get(f"/api/projects/{env.id}/signals/scout/notes/", HTTP_AUTHORIZATION=f"Bearer {raw}")
+        response = self.client.get(f"/v1/projects/{env.id}/signals/scout/notes/", HTTP_AUTHORIZATION=f"Bearer {raw}")
 
         assert response.status_code == status.HTTP_403_FORBIDDEN, response.content
 
@@ -1488,7 +1488,7 @@ class TestAgentHarnessProjectProfileAPI(APIBaseTest):
     """
 
     def _list_url(self) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/project_profile/current/"
+        return f"/v1/projects/{self.team.id}/signals/scout/project_profile/current/"
 
     def _seed_profile(self, *, team: Team | None = None) -> str:
         """Persist a real, schema-valid profile via the build path so a later read hits the
@@ -1621,10 +1621,10 @@ class TestRunCronScheduleValidation(SimpleTestCase):
 
 class TestScoutHarnessConfigAPI(APIBaseTest):
     def _list_url(self) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/configs/"
+        return f"/v1/projects/{self.team.id}/signals/scout/configs/"
 
     def _detail_url(self, config_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/configs/{config_id}/"
+        return f"/v1/projects/{self.team.id}/signals/scout/configs/{config_id}/"
 
     def _make_skill(self, name: str, team: Team | None = None) -> LLMSkill:
         return LLMSkill.objects.create(
@@ -2074,7 +2074,7 @@ class TestScoutHarnessConfigAPI(APIBaseTest):
         self.client.logout()
 
         response = self.client.patch(
-            f"/api/projects/{env.id}/signals/scout/configs/{config.id}/",
+            f"/v1/projects/{env.id}/signals/scout/configs/{config.id}/",
             data={"network_access": "full"},
             format="json",
             HTTP_AUTHORIZATION=f"Bearer {raw}",
@@ -2351,7 +2351,7 @@ class TestScoutHarnessConfigAPI(APIBaseTest):
         assert config.tags == ["revenue"]
 
     def _sync_url(self) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/configs/sync/"
+        return f"/v1/projects/{self.team.id}/signals/scout/configs/sync/"
 
     def test_sync_materializes_fleet_for_fresh_team(self) -> None:
         canonical_names = {c.name for c in discover_canonical_skills()}
@@ -2645,7 +2645,7 @@ class TestScoutHarnessMetadataAPI(APIBaseTest):
     resolved from the `signals-scout` flag payload so the UI shows the throttle dispatch applies."""
 
     def _url(self) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/metadata/current/"
+        return f"/v1/projects/{self.team.id}/signals/scout/metadata/current/"
 
     def _get(self, payload: dict | None):
         # The endpoint reads the flag payload via team_limits; stub it so enrollment + caps are
@@ -2763,7 +2763,7 @@ class TestScoutHarnessConfigRunAPI(APIBaseTest):
         self.addCleanup(flag.stop)
 
     def _run_url(self, config_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/configs/{config_id}/run/"
+        return f"/v1/projects/{self.team.id}/signals/scout/configs/{config_id}/run/"
 
     @parameterized.expand([("enabled", True), ("disabled", False)])
     def test_run_dispatches_and_returns_workflow_id(self, _name: str, enabled: bool) -> None:
@@ -2896,7 +2896,7 @@ class TestScoutHarnessMembersAPI(APIBaseTest):
         _authenticate_as_scout(self)
 
     def _url(self) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/members/"
+        return f"/v1/projects/{self.team.id}/signals/scout/members/"
 
     def test_lists_project_members_with_resolved_github_login(self) -> None:
         # self.user has a GitHub identity (login lowercased on resolution); a second member has
@@ -3045,7 +3045,7 @@ class TestScoutRunDerivedMetadata(APIBaseTest):
         # its Python repr, which turns a queryable object into unparseable prose.
         run = _make_run(self.team, metadata={"model": "some-model"})
         self._stamp(run)
-        response = self.client.get(f"/api/projects/{self.team.id}/signals/scout/runs/{run.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/signals/scout/runs/{run.id}/")
         assert response.status_code == status.HTTP_200_OK
         metadata = response.json()["metadata"]
         assert metadata["model"] == "some-model"

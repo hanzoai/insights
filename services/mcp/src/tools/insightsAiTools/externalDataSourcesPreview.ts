@@ -36,7 +36,7 @@ const tool = (): ToolBase<typeof schema, unknown> => ({
         // so forward the payload object untouched rather than spreading it.
         const result = await context.api.request<unknown>({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/external_data_sources/preview_resource/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_sources/preview_resource/`,
             body: {
                 source_type: params.source_type,
                 payload: params.payload,

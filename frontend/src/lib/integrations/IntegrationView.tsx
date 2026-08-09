@@ -120,7 +120,7 @@ export function IntegrationView({
                                     currentTeam?.id
                                         ? async () => {
                                               await api.create(
-                                                  `api/projects/${currentTeam.id}/integrations/github/prepare_callback/`,
+                                                  `v1/projects/${currentTeam.id}/integrations/github/prepare_callback/`,
                                                   {
                                                       next: urls.project(
                                                           currentTeam.id,

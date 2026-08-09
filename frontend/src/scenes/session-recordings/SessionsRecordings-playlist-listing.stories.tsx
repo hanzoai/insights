@@ -23,8 +23,8 @@ const meta: Meta = {
         mswDecorator({
             get: {
                 '/stats': () => [200, { users_on_product: 42, active_recordings: 7 }],
-                '/api/projects/:team_id/session_recording_playlists': recordingPlaylists,
-                '/api/environments/:team_id/session_recordings': ({ request }) => {
+                '/v1/projects/:team_id/session_recording_playlists': recordingPlaylists,
+                '/v1/environments/:team_id/session_recordings': ({ request }) => {
                     const version = new URL(request.url).searchParams.get('version')
                     return [
                         200,
@@ -37,7 +37,7 @@ const meta: Meta = {
                 },
             },
             post: {
-                '/api/environments/:team_id/query/:kind': recordingEventsJson,
+                '/v1/environments/:team_id/query/:kind': recordingEventsJson,
             },
         }),
     ],

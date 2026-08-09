@@ -125,9 +125,9 @@ def _to_info(
     agent_proxy_token: str | None = None,
 ) -> ActiveInstallationInfo:
     if agent_proxy_token is not None and installation.gateway_server_id is not None:
-        proxy_path = f"/api/mcp_store/gateway/servers/{installation.gateway_server_id}/proxy/"
+        proxy_path = f"/v1/mcp_store/gateway/servers/{installation.gateway_server_id}/proxy/"
     else:
-        proxy_path = f"/api/environments/{team_id}/mcp_server_installations/{installation.id}/proxy/"
+        proxy_path = f"/v1/environments/{team_id}/mcp_server_installations/{installation.id}/proxy/"
 
     return ActiveInstallationInfo(
         id=str(installation.id),

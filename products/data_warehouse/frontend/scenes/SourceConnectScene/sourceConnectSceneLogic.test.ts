@@ -79,7 +79,7 @@ describe('sourceConnectSceneLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/external_data_sources/wizard/': AVAILABLE_SOURCES,
+                '/v1/environments/:team_id/external_data_sources/wizard/': AVAILABLE_SOURCES,
             },
         })
         initKeaTests()

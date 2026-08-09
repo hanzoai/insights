@@ -31,10 +31,10 @@ class TestDataWarehouseTableAccessControl(WarehouseAccessControlTestMixin):
         )
 
     def _list_url(self) -> str:
-        return f"/api/environments/{self.team.pk}/warehouse_tables/"
+        return f"/v1/environments/{self.team.pk}/warehouse_tables/"
 
     def _detail_url(self) -> str:
-        return f"/api/environments/{self.team.pk}/warehouse_tables/{self.table.id}/"
+        return f"/v1/environments/{self.team.pk}/warehouse_tables/{self.table.id}/"
 
     @parameterized.expand(
         [

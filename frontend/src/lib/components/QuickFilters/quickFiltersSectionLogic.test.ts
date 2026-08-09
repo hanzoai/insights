@@ -60,7 +60,7 @@ describe('quickFiltersSectionLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/quick_filters/': { results: mockQuickFilters },
+                '/v1/environments/:team_id/quick_filters/': { results: mockQuickFilters },
             },
         })
         initKeaTests()

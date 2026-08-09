@@ -53,8 +53,8 @@ describe('OperatorValueSelect', () => {
         initKeaTests()
         useMocks({
             get: {
-                '/api/person/values': [],
-                '/api/event/values': [],
+                '/v1/person/values': [],
+                '/v1/event/values': [],
             },
         })
         unmountFeatureFlagLogic = featureFlagLogic.mount()

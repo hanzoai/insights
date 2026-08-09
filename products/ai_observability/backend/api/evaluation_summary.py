@@ -5,7 +5,7 @@ This ViewSet provides AI-powered summarization of evaluation results,
 identifying patterns in passing and failing evaluations.
 
 Endpoints:
-- POST /api/environments/:id/llm_analytics/evaluation_summary/ - Summarize evaluation runs
+- POST /v1/environments/:id/llm_analytics/evaluation_summary/ - Summarize evaluation runs
 """
 
 import time
@@ -343,7 +343,7 @@ Data is fetched server-side by evaluation ID to ensure data integrity.
         """
         Summarize evaluation runs.
 
-        POST /api/environments/:id/llm_analytics/evaluation_summary/
+        POST /v1/environments/:id/llm_analytics/evaluation_summary/
         """
         self._validate_feature_access(request)
 

@@ -79,14 +79,14 @@ export const jsSnippetVersionPinLogic = kea<jsSnippetVersionPinLogicType>([
                     if (!teamId) {
                         return null
                     }
-                    return await api.get(`api/projects/${teamId}/js-snippet/version`)
+                    return await api.get(`v1/projects/${teamId}/js-snippet/version`)
                 },
                 saveVersionPin: async ({ pin }: { pin: string | null }) => {
                     const teamId = teamLogic.values.currentTeamId
                     if (!teamId) {
                         return null
                     }
-                    const response = await api.update(`api/projects/${teamId}/js-snippet/version`, {
+                    const response = await api.update(`v1/projects/${teamId}/js-snippet/version`, {
                         js_snippet_version: pin,
                     })
                     toast.success('Snippet version updated')

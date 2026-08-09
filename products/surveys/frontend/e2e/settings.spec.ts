@@ -15,7 +15,7 @@ test.describe('Survey Settings', () => {
 
     async function toggleSurveysSettingsAndWaitResponse(page: Page): Promise<void> {
         const responsePromise = page.waitForResponse(
-            (resp) => resp.url().includes('/api/environments/') && resp.request().method() === 'PATCH'
+            (resp) => resp.url().includes('/v1/environments/') && resp.request().method() === 'PATCH'
         )
         await page.locator('[data-attr="opt-in-surveys-switch"]').click()
         await responsePromise

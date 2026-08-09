@@ -22,7 +22,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/users/@me': () => [
+                '/v1/users/@me': () => [
                     200,
                     {
                         ...MOCK_DEFAULT_USER,
@@ -31,7 +31,7 @@ const meta: Meta = {
                         },
                     },
                 ],
-                '/api/organizations/@current/': (): MockSignature => [
+                '/v1/organizations/@current/': (): MockSignature => [
                     200,
                     { ...MOCK_DEFAULT_ORGANIZATION, membership_level: OrganizationMembershipLevel.Owner },
                 ],
@@ -73,7 +73,7 @@ export const CurrentUserIsAdmin: Story = {
                         saml: false,
                     },
                 },
-                '/api/organizations/@current/': (): MockSignature => [
+                '/v1/organizations/@current/': (): MockSignature => [
                     200,
                     { ...MOCK_DEFAULT_ORGANIZATION, membership_level: OrganizationMembershipLevel.Admin },
                 ],
@@ -95,7 +95,7 @@ export const CurrentUserIsMember: Story = {
                         saml: false,
                     },
                 },
-                '/api/organizations/@current/': (): MockSignature => [
+                '/v1/organizations/@current/': (): MockSignature => [
                     200,
                     { ...MOCK_DEFAULT_ORGANIZATION, membership_level: OrganizationMembershipLevel.Member },
                 ],

@@ -27,11 +27,11 @@ describe('RepositorySelector', () => {
         })
         useMocks({
             get: {
-                '/api/environments/:team/integrations/': {
+                '/v1/environments/:team/integrations/': {
                     results: [{ id: 7, kind: 'github', display_name: 'acme', config: {} }],
                 },
                 // Gate the repo list so the loading → loaded transition is deterministic.
-                '/api/environments/:team/integrations/7/github_repos/': async () => {
+                '/v1/environments/:team/integrations/7/github_repos/': async () => {
                     await reposLoaded
                     return [
                         200,

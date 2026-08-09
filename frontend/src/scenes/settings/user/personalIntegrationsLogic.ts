@@ -348,7 +348,7 @@ export const personalIntegrationsLogic = kea<personalIntegrationsLogicType>([
                     // response — call `api.get` directly until the backend serializer
                     // is decorated to bypass pagination.
                     const response = await api.get<{ results: PersonalGitHubIntegration[] }>(
-                        'api/users/@me/integrations/'
+                        'v1/users/@me/integrations/'
                     )
                     return response.results
                 },
@@ -359,7 +359,7 @@ export const personalIntegrationsLogic = kea<personalIntegrationsLogicType>([
             {
                 loadSlackIntegrations: async () => {
                     const response = await api.get<{ results: PersonalSlackIntegration[] }>(
-                        'api/users/@me/integrations/?kind=slack'
+                        'v1/users/@me/integrations/?kind=slack'
                     )
                     return response.results
                 },

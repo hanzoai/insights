@@ -180,7 +180,7 @@ export const sharedMetricLogic = kea<sharedMetricLogicType>([
 
                 if (sharedMetricId) {
                     const response = await api.get(
-                        `api/projects/${values.currentProjectId}/experiment_saved_metrics/${sharedMetricId}`
+                        `v1/projects/${values.currentProjectId}/experiment_saved_metrics/${sharedMetricId}`
                     )
                     return response as SharedMetric
                 }
@@ -215,7 +215,7 @@ export const sharedMetricLogic = kea<sharedMetricLogicType>([
         createSharedMetric: async () => {
             try {
                 const response = await api.create(
-                    `api/projects/${values.currentProjectId}/experiment_saved_metrics/`,
+                    `v1/projects/${values.currentProjectId}/experiment_saved_metrics/`,
                     values.sharedMetric
                 )
                 if (response.id) {
@@ -230,7 +230,7 @@ export const sharedMetricLogic = kea<sharedMetricLogicType>([
         },
         updateSharedMetric: async ({ redirect = true }: { redirect?: boolean } = {}) => {
             const response = await api.update(
-                `api/projects/${values.currentProjectId}/experiment_saved_metrics/${values.sharedMetricId}`,
+                `v1/projects/${values.currentProjectId}/experiment_saved_metrics/${values.sharedMetricId}`,
                 values.sharedMetric
             )
             if (response.id) {
@@ -244,7 +244,7 @@ export const sharedMetricLogic = kea<sharedMetricLogicType>([
         deleteSharedMetric: async () => {
             try {
                 await api.delete(
-                    `api/projects/${values.currentProjectId}/experiment_saved_metrics/${values.sharedMetricId}`
+                    `v1/projects/${values.currentProjectId}/experiment_saved_metrics/${values.sharedMetricId}`
                 )
                 toast.success('Shared metric deleted successfully')
                 actions.loadSharedMetrics()

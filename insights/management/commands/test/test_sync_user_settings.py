@@ -270,7 +270,7 @@ class TestSyncUserSettingsCommand(BaseTest):
             call_command("sync_user_settings", **kwargs)
 
             urls = [call[0][0] for call in mock_get.call_args_list]
-            base = f"/api/projects/{expected_id}"
+            base = f"/v1/projects/{expected_id}"
             assert any(f"{base}/user_home_settings/" in url for url in urls)
             assert any(f"{base}/file_system_shortcuts/" in url for url in urls)
 

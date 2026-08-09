@@ -14,7 +14,7 @@ describe('clustersAdminLogic', () => {
         // floor lacks event_filters, which would corrupt its localEventFilters reducer.
         useMocks({
             get: {
-                '/api/environments/:team_id/llm_analytics/clustering_config/': {
+                '/v1/environments/:team_id/llm_analytics/clustering_config/': {
                     event_filters: [],
                     created_at: '2026-01-01T00:00:00Z',
                     updated_at: '2026-01-01T00:00:00Z',

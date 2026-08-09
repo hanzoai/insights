@@ -24,8 +24,8 @@ from parameterized import parameterized
 from rest_framework import status
 
 import insights.models.person.deletion
-from insights.datastore.client import sync_execute
 from insights.constants import AvailableFeature
+from insights.datastore.client import sync_execute
 from insights.models import Organization, Person, PropertyDefinition, Team
 from insights.models.async_deletion import AsyncDeletion, DeletionType
 from insights.models.person.missing_person import uuidFromDistinctId
@@ -56,7 +56,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         flush_persons_and_events()
 
         # with self.assertNumQueries(7):
-        response = self.client.get(f"/api/person/{person.pk}")
+        response = self.client.get(f"/v1/person/{person.pk}")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["id"], person.pk)
@@ -77,11 +77,11 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         _create_person(team=self.team, distinct_ids=["distinct_id_3"], properties={"name": "jane"})
 
         flush_persons_and_events()
-        response = self.client.get("/api/person/?search=another@gm")
+        response = self.client.get("/v1/person/?search=another@gm")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 1)
 
-        response = self.client.get("/api/person/?search=distinct_id_3")
+        response = self.client.get("/v1/person/?search=distinct_id_3")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 1)
 
@@ -94,7 +94,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             properties={"email": "someone@gmail.com"},
         )
         flush_persons_and_events()
-        response = self.client.get(f"/api/person/?search={person.uuid}")
+        response = self.client.get(f"/v1/person/?search={person.uuid}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 1)
 
@@ -115,7 +115,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         flush_persons_and_events()
 
         response = self.client.get(
-            "/api/person/?properties={}".format(
+            "/v1/person/?properties={}".format(
                 json.dumps(
                     [
                         {
@@ -132,7 +132,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertEqual(len(response.json()["results"]), 2)
 
         response = self.client.get(
-            "/api/person/?properties={}".format(
+            "/v1/person/?properties={}".format(
                 json.dumps(
                     [
                         {
@@ -173,7 +173,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
         flush_persons_and_events()
 
-        response = self.client.get("/api/person/values/?key=random_prop")
+        response = self.client.get("/v1/person/values/?key=random_prop")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()["results"]
         self.assertEqual(response_data[0]["name"], "asdf")
@@ -182,7 +182,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertEqual(response_data[1]["count"], 1)
         self.assertEqual(len(response_data), 2)
 
-        response = self.client.get("/api/person/values/?key=random_prop&value=qw")
+        response = self.client.get("/v1/person/values/?key=random_prop&value=qw")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["results"][0]["name"], "qwerty")
         self.assertEqual(response.json()["results"][0]["count"], 1)
@@ -203,7 +203,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         _create_person(distinct_ids=["u1"], team=self.team, properties={"country": "US"})
         flush_persons_and_events()
 
-        url = "/api/person/values/?key=country"
+        url = "/v1/person/values/?key=country"
         if param:
             url += f"&{param}"
 
@@ -236,7 +236,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         flush_persons_and_events()
 
         # Filter
-        response = self.client.get("/api/person/?email=another@gmail.com")
+        response = self.client.get("/v1/person/?email=another@gmail.com")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 1)
         self.assertEqual(response.json()["results"][0]["id"], str(person2.uuid))
@@ -263,7 +263,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         # Filter
         response = self.client.get(
-            "/api/person/?properties={}".format(
+            "/v1/person/?properties={}".format(
                 json.dumps([{"key": "some_prop", "value": "some_value", "type": "person"}])
             )
         )
@@ -292,32 +292,32 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         # Filter by distinct ID
         # with self.assertNumQueries(11):
-        response = self.client.get("/api/person/?distinct_id=distinct_id")  # must be exact matches
+        response = self.client.get("/v1/person/?distinct_id=distinct_id")  # must be exact matches
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 1)
         self.assertEqual(response.json()["results"][0]["id"], str(person1.uuid))
 
-        response = self.client.get("/api/person/?distinct_id=another_one")  # can search on any of the distinct IDs
+        response = self.client.get("/v1/person/?distinct_id=another_one")  # can search on any of the distinct IDs
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 1)
         self.assertEqual(response.json()["results"][0]["id"], str(person1.uuid))
 
         # Filter by email
-        response = self.client.get("/api/person/?email=another@gmail.com")
+        response = self.client.get("/v1/person/?email=another@gmail.com")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 1)
         self.assertEqual(response.json()["results"][0]["id"], str(person2.uuid))
 
         # Non-matches return an empty list
-        response = self.client.get("/api/person/?email=inexistent")
+        response = self.client.get("/v1/person/?email=inexistent")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 0)
 
-        response = self.client.get("/api/person/?distinct_id=inexistent")
+        response = self.client.get("/v1/person/?distinct_id=inexistent")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 0)
 
-        response = self.client.get("/api/person/?distinct_id=inexistent&include_total")
+        response = self.client.get("/v1/person/?distinct_id=inexistent&include_total")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {"results": [], "next": None, "previous": None, "count": 0})
 
@@ -336,14 +336,14 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         person: Person = _create_person(team=self.team, distinct_ids=["distinct_id"], immediate=True)
 
         # Filter by distinct ID
-        response = self.client.get("/api/person/?distinct_id=distinct_id")
+        response = self.client.get("/v1/person/?distinct_id=distinct_id")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 1)
         self.assertEqual(
             response.json()["results"][0]["id"], str(person.uuid)
         )  # note that even with shared distinct IDs, only the person from the same team is returned
 
-        response = self.client.get("/api/person/?distinct_id=x_another_one")
+        response = self.client.get("/v1/person/?distinct_id=x_another_one")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["results"], [])
 
@@ -365,13 +365,13 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 f"DELETE FROM insights_person WHERE team_id = {self.team.pk} AND id = {person.pk}" in query
             ),
         ):
-            response = self.client.delete(f"/api/person/{person.uuid}/")
+            response = self.client.delete(f"/v1/person/{person.uuid}/")
 
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         self.assertEqual(response.content, b"")  # Empty response
         self.assertIsNone(get_person_by_uuid(self.team.pk, str(person.uuid)))
 
-        response = self.client.delete(f"/api/person/{person.uuid}/")
+        response = self.client.delete(f"/v1/person/{person.uuid}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         self._assert_person_activity(
@@ -420,7 +420,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         _create_event(event="test", team=self.team, distinct_id="anonymous_id")
         _create_event(event="test", team=self.team, distinct_id="someone_else")
 
-        response = self.client.delete(f"/api/person/{person.uuid}/?delete_events=true")
+        response = self.client.delete(f"/v1/person/{person.uuid}/?delete_events=true")
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         self.assertEqual(response.content, b"")  # Empty response
         self.assertIsNone(get_person_by_uuid(self.team.pk, str(person.uuid)))
@@ -447,7 +447,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             immediate=True,
         )
 
-        response = self.client.delete(f"/api/person/{person.uuid}/?delete_recordings=true&delete_events=true")
+        response = self.client.delete(f"/v1/person/{person.uuid}/?delete_recordings=true&delete_events=true")
 
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         self.assertEqual(response.content, b"")  # Empty response
@@ -466,7 +466,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         _create_event(event="test", team=self.team, distinct_id="anonymous_id")
         _create_event(event="test", team=self.team, distinct_id="someone_else")
 
-        response = self.client.delete(f"/api/person/{person.uuid}/?delete_recordings=true&delete_events=true")
+        response = self.client.delete(f"/v1/person/{person.uuid}/?delete_recordings=true&delete_events=true")
 
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         self.assertEqual(response.content, b"")  # Empty response
@@ -503,7 +503,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         _create_event(event="test", team=self.team, distinct_id="someone_else")
 
         response = self.client.post(
-            f"/api/person/bulk_delete/", {"ids": [person.uuid, person2.uuid], "delete_events": True}
+            f"/v1/person/bulk_delete/", {"ids": [person.uuid, person2.uuid], "delete_events": True}
         )
 
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED, response.content)
@@ -516,7 +516,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertIsNone(get_person_by_uuid(self.team.pk, str(person.uuid)))
         self.assertIsNone(get_person_by_uuid(self.team.pk, str(person2.uuid)))
 
-        response = self.client.delete(f"/api/person/{person.uuid}/")
+        response = self.client.delete(f"/v1/person/{person.uuid}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         ch_persons = sync_execute(
@@ -549,7 +549,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         _create_event(event="test", team=self.team, distinct_id="anonymous_id")
         _create_event(event="test", team=self.team, distinct_id="someone_else")
 
-        response = self.client.post(f"/api/person/bulk_delete/", {"distinct_ids": ["anonymous_id", "person_2"]})
+        response = self.client.post(f"/v1/person/bulk_delete/", {"distinct_ids": ["anonymous_id", "person_2"]})
 
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED, response.content)
         data = response.json()
@@ -561,7 +561,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertIsNone(get_person_by_uuid(self.team.pk, str(person.uuid)))
         self.assertIsNone(get_person_by_distinct_id(self.team.pk, "person_2"))
 
-        response = self.client.delete(f"/api/person/{person.uuid}/")
+        response = self.client.delete(f"/v1/person/{person.uuid}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         ch_persons = sync_execute(
@@ -589,7 +589,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         flush_persons_and_events()
 
         response = self.client.post(
-            f"/api/person/bulk_delete/",
+            f"/v1/person/bulk_delete/",
             {"ids": [person.uuid], "delete_events": True, "keep_person": True},
         )
 
@@ -618,7 +618,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.post(
-            f"/api/person/bulk_delete/",
+            f"/v1/person/bulk_delete/",
             {"ids": [person.uuid], "delete_recordings": True},
         )
 
@@ -634,7 +634,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         """Test that bulk_delete rejects more than 1000 IDs"""
         # Test with ids
         response = self.client.post(
-            f"/api/person/bulk_delete/",
+            f"/v1/person/bulk_delete/",
             {"ids": [str(uuid4()) for _ in range(1001)]},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -642,7 +642,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         # Test with distinct_ids
         response = self.client.post(
-            f"/api/person/bulk_delete/",
+            f"/v1/person/bulk_delete/",
             {"distinct_ids": [f"id_{i}" for i in range(1001)]},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -651,7 +651,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def test_bulk_delete_validation_missing_ids(self):
         """Test that bulk_delete requires either ids or distinct_ids"""
         response = self.client.post(
-            f"/api/person/bulk_delete/",
+            f"/v1/person/bulk_delete/",
             {"delete_events": True},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -659,7 +659,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_bulk_delete_validation_rejects_both_ids_and_distinct_ids(self):
         response = self.client.post(
-            f"/api/person/bulk_delete/",
+            f"/v1/person/bulk_delete/",
             {"ids": [str(uuid4())], "distinct_ids": ["did_1"]},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -667,7 +667,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_bulk_delete_no_matching_persons(self):
         response = self.client.post(
-            f"/api/person/bulk_delete/",
+            f"/v1/person/bulk_delete/",
             {"ids": [str(uuid4()), str(uuid4())], "delete_events": True},
         )
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
@@ -688,11 +688,11 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         self.client.post(
-            f"/api/person/bulk_delete/",
+            f"/v1/person/bulk_delete/",
             {"ids": [person.uuid], "delete_events": True},
         )
 
-        response = self.client.get(f"/api/person/deletion_status/")
+        response = self.client.get(f"/v1/person/deletion_status/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data["count"], 1)
@@ -727,21 +727,21 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         # Filter pending
-        response = self.client.get(f"/api/person/deletion_status/?status=pending")
+        response = self.client.get(f"/v1/person/deletion_status/?status=pending")
         data = response.json()
         self.assertEqual(data["count"], 1)
         self.assertEqual(data["results"][0]["person_uuid"], str(person1.uuid))
         self.assertEqual(data["results"][0]["status"], "pending")
 
         # Filter completed
-        response = self.client.get(f"/api/person/deletion_status/?status=completed")
+        response = self.client.get(f"/v1/person/deletion_status/?status=completed")
         data = response.json()
         self.assertEqual(data["count"], 1)
         self.assertEqual(data["results"][0]["person_uuid"], str(person2.uuid))
         self.assertEqual(data["results"][0]["status"], "completed")
 
         # All
-        response = self.client.get(f"/api/person/deletion_status/")
+        response = self.client.get(f"/v1/person/deletion_status/")
         data = response.json()
         self.assertEqual(data["count"], 2)
 
@@ -769,7 +769,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             key=str(person2.uuid),
         )
 
-        response = self.client.get(f"/api/person/deletion_status/?person_uuid={person1.uuid}")
+        response = self.client.get(f"/v1/person/deletion_status/?person_uuid={person1.uuid}")
         data = response.json()
         self.assertEqual(data["count"], 1)
         self.assertEqual(data["results"][0]["person_uuid"], str(person1.uuid))
@@ -792,7 +792,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         mock_delete_person.side_effect = [Exception("DB connection lost"), None]
 
         response = self.client.post(
-            f"/api/person/bulk_delete/",
+            f"/v1/person/bulk_delete/",
             {"ids": [person1.uuid, person2.uuid]},
         )
 
@@ -806,12 +806,12 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_deletion_status_rejects_invalid_status(self):
         """Test that deletion_status returns 400 for invalid status filter"""
-        response = self.client.get(f"/api/person/deletion_status/?status=invalid")
+        response = self.client.get(f"/v1/person/deletion_status/?status=invalid")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_deletion_status_rejects_invalid_person_uuid(self):
         """Test that deletion_status returns 400 for non-UUID person_uuid"""
-        response = self.client.get(f"/api/person/deletion_status/?person_uuid=not-a-uuid")
+        response = self.client.get(f"/v1/person/deletion_status/?person_uuid=not-a-uuid")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_deletion_status_excludes_other_teams(self):
@@ -828,7 +828,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             key=str(uuid4()),
         )
 
-        response = self.client.get(f"/api/person/deletion_status/")
+        response = self.client.get(f"/v1/person/deletion_status/")
         data = response.json()
         self.assertEqual(data["count"], 1)
 
@@ -841,7 +841,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             immediate=True,
         )
 
-        response = self.client.delete(f"/api/person/{person.uuid}/?keep_person=true&delete_events=true")
+        response = self.client.delete(f"/v1/person/{person.uuid}/?keep_person=true&delete_events=true")
 
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         # Person should still exist when keep_person=true
@@ -866,7 +866,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 distinct_ids=["1", "2", "3"],
             )
 
-            self.client.post("/api/person/{}/split/".format(person1.pk), {"main_distinct_id": "1"})
+            self.client.post("/v1/person/{}/split/".format(person1.pk), {"main_distinct_id": "1"})
 
             split_calls = fake.assert_called("split_person", times=1)
             self.assertEqual(list(split_calls[0].request.distinct_ids_to_split), ["2", "3"])
@@ -924,7 +924,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 distinct_ids=["1", "2", "3"],
             )
 
-            response = self.client.post("/api/person/{}/split/".format(person1.pk))
+            response = self.client.post("/v1/person/{}/split/".format(person1.pk))
 
             # Without a main_distinct_id the first distinct_id stays; the rest split off
             split_calls = fake.assert_called("split_person", times=1)
@@ -952,7 +952,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             )
 
             response = self.client.post(
-                "/api/person/{}/split/".format(person1.pk),
+                "/v1/person/{}/split/".format(person1.pk),
                 {"distinct_ids_to_split": ["move1", "move2"]},
             )
             self.assertEqual(response.status_code, 201, response.content)
@@ -982,7 +982,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.post(
-            "/api/person/{}/split/".format(person1.pk),
+            "/v1/person/{}/split/".format(person1.pk),
             {"distinct_ids_to_split": ["a", "not_on_this_person"]},
         )
         self.assertEqual(response.status_code, 400)
@@ -1002,7 +1002,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.post(
-            "/api/person/{}/split/".format(person1.pk),
+            "/v1/person/{}/split/".format(person1.pk),
             {"distinct_ids_to_split": ["b"], "main_distinct_id": "a"},
         )
         self.assertEqual(response.status_code, 400)
@@ -1017,14 +1017,14 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         # Empty list.
         response = self.client.post(
-            "/api/person/{}/split/".format(person1.pk),
+            "/v1/person/{}/split/".format(person1.pk),
             {"distinct_ids_to_split": []},
         )
         self.assertEqual(response.status_code, 400)
 
         # Wrong type for the field.
         response = self.client.post(
-            "/api/person/{}/split/".format(person1.pk),
+            "/v1/person/{}/split/".format(person1.pk),
             {"distinct_ids_to_split": "a"},
             content_type="application/json",
         )
@@ -1032,7 +1032,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         # List with non-string entries.
         response = self.client.post(
-            "/api/person/{}/split/".format(person1.pk),
+            "/v1/person/{}/split/".format(person1.pk),
             {"distinct_ids_to_split": [1, 2]},
             content_type="application/json",
         )
@@ -1046,7 +1046,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             immediate=True,
         )
 
-        response = self.client.patch(f"/api/person/{person.uuid}", {"foo": "bar", "bar": "baz"})
+        response = self.client.patch(f"/v1/person/{person.uuid}", {"foo": "bar", "bar": "baz"})
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
@@ -1063,7 +1063,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             immediate=True,
         )
 
-        self.client.post(f"/api/person/{person.uuid}/update_property", {"key": "foo", "value": "bar"})
+        self.client.post(f"/v1/person/{person.uuid}/update_property", {"key": "foo", "value": "bar"})
 
         mock_capture.assert_called_once_with(
             token=self.team.api_token,
@@ -1092,7 +1092,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             immediate=True,
         )
 
-        self.client.post(f"/api/person/{person.uuid}/delete_property", {"$unset": unset}, format="json")
+        self.client.post(f"/v1/person/{person.uuid}/delete_property", {"$unset": unset}, format="json")
 
         mock_capture.assert_called_once_with(
             token=self.team.api_token,
@@ -1131,7 +1131,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             return_value=non_writable,
         ):
             response = self.client.post(
-                f"/api/person/{person.uuid}/delete_property",
+                f"/v1/person/{person.uuid}/delete_property",
                 body,
                 format="json",
             )
@@ -1153,7 +1153,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             return_value={"secret", "hidden"},
         ):
             response = self.client.post(
-                f"/api/person/{person.uuid}/delete_property",
+                f"/v1/person/{person.uuid}/delete_property",
                 {"$unset": ["foo", "secret", "hidden"]},
                 format="json",
             )
@@ -1168,7 +1168,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         mock_get_person.return_value = mock.Mock(distinct_ids=[])
 
         response = self.client.post(
-            f"/api/person/{uuid4()}/delete_property",
+            f"/v1/person/{uuid4()}/delete_property",
             {"$unset": "foo"},
             format="json",
         )
@@ -1186,7 +1186,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             immediate=True,
         )
 
-        self.client.post(f"/api/person/{person.id}/update_property", {"key": "foo", "value": "bar"})
+        self.client.post(f"/v1/person/{person.id}/update_property", {"key": "foo", "value": "bar"})
 
         mock_capture.assert_called_once_with(
             token=self.team.api_token,
@@ -1209,7 +1209,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             immediate=True,
         )
 
-        self.client.post(f"/api/person/{person.id}/delete_property", {"$unset": "foo"})
+        self.client.post(f"/v1/person/{person.id}/delete_property", {"$unset": "foo"})
 
         mock_capture.assert_called_once_with(
             token=self.team.api_token,
@@ -1233,7 +1233,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.post(
-            f"/api/person/{person.uuid}/update_property",
+            f"/v1/person/{person.uuid}/update_property",
             {"key": "foo", "value": None},
             format="json",
         )
@@ -1260,7 +1260,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.post(
-            f"/api/person/{person.uuid}/update_property",
+            f"/v1/person/{person.uuid}/update_property",
             {"key": "foo"},
             format="json",
         )
@@ -1277,7 +1277,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.post(
-            f"/api/person/{person.uuid}/update_property",
+            f"/v1/person/{person.uuid}/update_property",
             {"value": "bar"},
             format="json",
         )
@@ -1302,7 +1302,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
         flush_persons_and_events()
 
-        response = self.client.get("/api/person/").json()
+        response = self.client.get("/v1/person/").json()
 
         self.assertEqual(response["results"][0]["name"], "distinct_id2")
         self.assertEqual(response["results"][1]["name"], "distinct_id1")
@@ -1346,7 +1346,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
         flush_persons_and_events()
 
-        response = self.client.get("/api/person/").json()
+        response = self.client.get("/v1/person/").json()
 
         results = response["results"][::-1]  # results are in reverse order
         self.assertEqual(results[0]["name"], "someone")
@@ -1370,7 +1370,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
         flush_persons_and_events()
 
-        response = self.client.get("/api/person/").json()
+        response = self.client.get("/v1/person/").json()
 
         results = response["results"][::-1]  # results are in reverse order
         self.assertEqual(results[0]["name"], "someone@gmail.com")
@@ -1420,7 +1420,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
         cohort4.insert_users_by_list(["2"])
 
-        response = self.client.get(f"/api/person/cohorts/?person_id={person2.uuid}").json()
+        response = self.client.get(f"/v1/person/cohorts/?person_id={person2.uuid}").json()
         response["results"].sort(key=lambda cohort: cohort["name"])
         self.assertEqual(len(response["results"]), 3)
         self.assertLessEqual(
@@ -1451,7 +1451,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         cohort.calculate_people_ch(pending_version=0)
 
-        response = self.client.get(f"/api/person/cohorts/?person_id={person.uuid}").json()
+        response = self.client.get(f"/v1/person/cohorts/?person_id={person.uuid}").json()
         self.assertEqual(len(response["results"]), 1)
         self.assertLessEqual({"id": cohort.id, "count": 1, "name": cohort.name}.items(), response["results"][0].items())
 
@@ -1460,7 +1460,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         cohort.save()
         cohort.calculate_people_ch(pending_version=1)
 
-        response = self.client.get(f"/api/person/cohorts/?person_id={person.uuid}").json()
+        response = self.client.get(f"/v1/person/cohorts/?person_id={person.uuid}").json()
         self.assertEqual(len(response["results"]), 0)
 
     def test_person_cohorts_returns_minimal_fields(self) -> None:
@@ -1478,7 +1478,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
         cohort.calculate_people_ch(pending_version=0)
 
-        response = self.client.get(f"/api/person/cohorts/?person_id={person.uuid}")
+        response = self.client.get(f"/v1/person/cohorts/?person_id={person.uuid}")
         self.assertEqual(response.status_code, 200, response.json())
         data = response.json()
 
@@ -1500,7 +1500,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
         cohort.calculate_people_ch(pending_version=0)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/persons/cohorts/?person_id={person.uuid}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/persons/cohorts/?person_id={person.uuid}")
         self.assertEqual(response.status_code, 200, response.json())
         self.assertEqual(len(response.json()["results"]), 1)
         self.assertEqual(response.json()["results"][0]["name"], "cohort1")
@@ -1521,7 +1521,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 distinct_ids=["1", "2", "3"],
             )
 
-            response = self.client.post("/api/person/{}/split/".format(person.uuid)).json()
+            response = self.client.post("/v1/person/{}/split/".format(person.uuid)).json()
             self.assertTrue(response["success"])
 
         # Datastore ends up with the original person plus one new person per
@@ -1608,7 +1608,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 distinct_id_versions={"deleted_user": 2},
             )
 
-            response = self.client.post("/api/person/{}/split/".format(person_b.uuid)).json()
+            response = self.client.post("/v1/person/{}/split/".format(person_b.uuid)).json()
             self.assertTrue(response["success"])
 
         # Verify Datastore has the correct state
@@ -1662,12 +1662,12 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             immediate=True,
         )
 
-        created_person = self.client.get("/api/person/{}/".format(person.uuid)).json()
+        created_person = self.client.get("/v1/person/{}/".format(person.uuid)).json()
         created_person["properties"]["a"] = "b"
-        response = self.client.patch("/api/person/{}/".format(person.uuid), created_person)
+        response = self.client.patch("/v1/person/{}/".format(person.uuid), created_person)
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
-        self.client.get("/api/person/{}/".format(person.uuid))
+        self.client.get("/v1/person/{}/".format(person.uuid))
 
         self._assert_person_activity(
             person_id=person.uuid,
@@ -1713,11 +1713,11 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         flush_persons_and_events()
-        response = self.client.get("/api/person.csv")
+        response = self.client.get("/v1/person.csv")
         self.assertEqual(len(response.content.splitlines()), 3, response.content)
 
         response = self.client.get(
-            "/api/person.csv?properties={}".format(json.dumps([{"key": "$os", "value": "Windows", "type": "person"}]))
+            "/v1/person.csv?properties={}".format(json.dumps([{"key": "$os", "value": "Windows", "type": "person"}]))
         )
         self.assertEqual(len(response.content.splitlines()), 2)
 
@@ -1743,7 +1743,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         # The property-access-control feature check reuses the request's already-loaded team,
         # so listing persons no longer pays a per-request Team lookup (was 16).
         with self.assertNumQueries(15):
-            response = self.client.get("/api/person/?limit=10").json()
+            response = self.client.get("/v1/person/?limit=10").json()
         self.assertEqual(len(response["results"]), 9)
         returned_ids += [x["distinct_ids"][0] for x in response["results"]]
         response_next = self.client.get(response["next"]).json()
@@ -1755,7 +1755,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         # 15 as above, plus the include_total counting queries (was 20).
         with self.assertNumQueries(19):
-            response_include_total = self.client.get("/api/person/?limit=10&include_total").json()
+            response_include_total = self.client.get("/v1/person/?limit=10&include_total").json()
         self.assertEqual(response_include_total["count"], 20)  #  With `include_total`, the total count is returned too
 
     @freeze_time("2021-08-25T22:09:14.252Z")
@@ -1769,13 +1769,13 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             create_person(team=self.team, distinct_ids=[str(person_uuid)], uuid=person_uuid)
 
         expected = {str(person_uuid) for person_uuid in uuids}
-        full = [row["id"] for row in self.client.get("/api/person/?limit=100").json()["results"]]
+        full = [row["id"] for row in self.client.get("/v1/person/?limit=100").json()["results"]]
         self.assertEqual(set(full), expected)
         self.assertEqual(len(full), len(uuids))  # complete in a single page
 
         # Paging with a small limit must cover exactly the same set, once each.
         paged: list[str] = []
-        url: Optional[str] = "/api/person/?limit=2"
+        url: Optional[str] = "/v1/person/?limit=2"
         while url:
             page = self.client.get(url).json()
             paged += [row["id"] for row in page["results"]]
@@ -1788,7 +1788,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             team=self.team, distinct_ids=["123456789"]
         )
 
-        response = self.client.get(f"/api/person/{person.id}").json()
+        response = self.client.get(f"/v1/person/{person.id}").json()
 
         assert response["id"] == person.id
         assert response["uuid"] == str(person.uuid)
@@ -1799,14 +1799,14 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             team=self.team, distinct_ids=["123456789"]
         )
 
-        response = self.client.get(f"/api/person/{person.uuid}").json()
+        response = self.client.get(f"/v1/person/{person.uuid}").json()
 
         assert response["id"] == person.id
         assert response["uuid"] == str(person.uuid)
         assert response["distinct_ids"] == ["123456789"]
 
     def test_retrieve_person_by_distinct_id_with_useful_error(self):
-        response = self.client.get(f"/api/person/NOT_A_UUID").json()
+        response = self.client.get(f"/v1/person/NOT_A_UUID").json()
 
         assert (
             response["detail"]
@@ -1820,9 +1820,9 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         expected_status: int = status.HTTP_200_OK,
     ):
         if person_id:
-            url = f"/api/person/{person_id}/activity"
+            url = f"/v1/person/{person_id}/activity"
         else:
-            url = f"/api/person/activity"
+            url = f"/v1/person/activity"
 
         activity = self.client.get(url)
         self.assertEqual(activity.status_code, expected_status)
@@ -1853,7 +1853,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         flush_persons_and_events()
 
-        response = self.client.post(f"/api/person/{person.uuid}/delete_events/")
+        response = self.client.post(f"/v1/person/{person.uuid}/delete_events/")
 
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert response.content == b""  # Empty response
@@ -1872,7 +1872,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         # Use a valid UUID that doesn't exist in the database
         non_existent_uuid = "11111111-1111-1111-1111-111111111111"
 
-        response = self.client.post(f"/api/person/{non_existent_uuid}/delete_events/")
+        response = self.client.post(f"/v1/person/{non_existent_uuid}/delete_events/")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json()["detail"] == "Not found."
@@ -1908,7 +1908,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         # Phase 3: Reset
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/persons/reset_person_distinct_id/",
+            f"/v1/projects/{self.team.pk}/persons/reset_person_distinct_id/",
             {"distinct_id": "distinct_id"},
         )
         assert response.status_code == status.HTTP_202_ACCEPTED
@@ -1966,7 +1966,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         delete_person(person_deleted_1)
 
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/persons/reset_person_distinct_id/",
+            f"/v1/projects/{self.team.pk}/persons/reset_person_distinct_id/",
             {
                 "distinct_id": "distinct_id",
             },
@@ -2012,7 +2012,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         flush_persons_and_events()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/persons/batch_by_distinct_ids/",
+            f"/v1/environments/{self.team.id}/persons/batch_by_distinct_ids/",
             {"distinct_ids": ["user_1", "user_2"]},
             format="json",
         )
@@ -2034,7 +2034,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         flush_persons_and_events()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/persons/batch_by_distinct_ids/",
+            f"/v1/environments/{self.team.id}/persons/batch_by_distinct_ids/",
             {"distinct_ids": ["id_0"]},
             format="json",
         )
@@ -2054,7 +2054,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         flush_persons_and_events()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/persons/batch_by_distinct_ids/",
+            f"/v1/environments/{self.team.id}/persons/batch_by_distinct_ids/",
             {"distinct_ids": ["existing_user", "nonexistent_1", "nonexistent_2"]},
             format="json",
         )
@@ -2075,7 +2075,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         flush_persons_and_events()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/persons/batch_by_distinct_ids/",
+            f"/v1/environments/{self.team.id}/persons/batch_by_distinct_ids/",
             {"distinct_ids": ["id_a", "id_b"]},
             format="json",
         )
@@ -2088,7 +2088,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_batch_by_distinct_ids_empty_list(self) -> None:
         response = self.client.post(
-            f"/api/environments/{self.team.id}/persons/batch_by_distinct_ids/",
+            f"/v1/environments/{self.team.id}/persons/batch_by_distinct_ids/",
             {"distinct_ids": []},
             format="json",
         )
@@ -2098,7 +2098,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_batch_by_distinct_ids_invalid_input(self) -> None:
         response = self.client.post(
-            f"/api/environments/{self.team.id}/persons/batch_by_distinct_ids/",
+            f"/v1/environments/{self.team.id}/persons/batch_by_distinct_ids/",
             {"distinct_ids": "not_a_list"},
             format="json",
         )
@@ -2125,7 +2125,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         flush_persons_and_events()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/persons/batch_by_distinct_ids/",
+            f"/v1/environments/{self.team.id}/persons/batch_by_distinct_ids/",
             {"distinct_ids": ["my_team_user", "other_team_user"]},
             format="json",
         )
@@ -2147,7 +2147,7 @@ class TestPerson(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         flush_persons_and_events()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/persons/batch_by_distinct_ids/",
+            f"/v1/environments/{self.team.id}/persons/batch_by_distinct_ids/",
             {"distinct_ids": distinct_ids},
             format="json",
         )
@@ -2170,7 +2170,7 @@ class TestPersonFromDatastore(TestPerson):
                 properties={"$browser": "whatever", "$os": "Windows"},
             )
         returned_ids = []
-        response = self.client.get("/api/person/?limit=10").json()
+        response = self.client.get("/v1/person/?limit=10").json()
         self.assertEqual(len(response["results"]), 10)
         returned_ids += [x["distinct_ids"][0] for x in response["results"]]
         response_next = self.client.get(response["next"]).json()
@@ -2180,7 +2180,7 @@ class TestPersonFromDatastore(TestPerson):
         created_ids.reverse()  # ids are returned in desc order
         self.assertEqual(returned_ids, created_ids, returned_ids)
 
-        response_include_total = self.client.get("/api/person/?limit=10&include_total").json()
+        response_include_total = self.client.get("/v1/person/?limit=10&include_total").json()
         self.assertEqual(response_include_total["count"], 19)  #  With `include_total`, the total count is returned too
 
 
@@ -2221,7 +2221,7 @@ class TestPersonBatchRestrictedProperties(DatastoreTestMixin, APIBaseTest):
             result_key = str(person.uuid)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/persons/{action}/",
+            f"/v1/environments/{self.team.id}/persons/{action}/",
             body,
             format="json",
         )

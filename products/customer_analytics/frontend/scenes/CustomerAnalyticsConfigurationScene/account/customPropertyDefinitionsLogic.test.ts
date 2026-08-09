@@ -15,13 +15,13 @@ import type {
 
 import { customPropertyDefinitionsLogic } from './customPropertyDefinitionsLogic'
 
-const DEFINITIONS_URL = '/api/projects/:team_id/custom_property_definitions/'
-const DEFINITION_URL = '/api/projects/:team_id/custom_property_definitions/:id/'
-const SAVED_QUERIES_URL = '/api/environments/:team_id/warehouse_saved_queries/'
-const WAREHOUSE_TABLES_URL = '/api/environments/:team_id/warehouse_tables/'
-const SOURCES_URL = '/api/projects/:team_id/custom_property_sources/'
-const SOURCE_URL = '/api/projects/:team_id/custom_property_sources/:id/'
-const PROPERTY_DEFINITIONS_URL = '/api/projects/:team_id/property_definitions/'
+const DEFINITIONS_URL = '/v1/projects/:team_id/custom_property_definitions/'
+const DEFINITION_URL = '/v1/projects/:team_id/custom_property_definitions/:id/'
+const SAVED_QUERIES_URL = '/v1/environments/:team_id/warehouse_saved_queries/'
+const WAREHOUSE_TABLES_URL = '/v1/environments/:team_id/warehouse_tables/'
+const SOURCES_URL = '/v1/projects/:team_id/custom_property_sources/'
+const SOURCE_URL = '/v1/projects/:team_id/custom_property_sources/:id/'
+const PROPERTY_DEFINITIONS_URL = '/v1/projects/:team_id/property_definitions/'
 
 // Loosely-typed warehouse table — the logic only reads id/name/external_schema.id.
 const buildTable = (overrides: Record<string, any> = {}): any => ({

@@ -118,7 +118,7 @@ export function extractErrorDetail(body: unknown, status: number, fallback: stri
 
 function pathnameForLog(url: string): string {
     try {
-        // url may be a path ("/api/…") or an absolute pagination URL — both parse against a base.
+        // url may be a path ("/v1/…") or an absolute pagination URL — both parse against a base.
         return new URL(url, 'http://x').pathname
     } catch {
         return url
@@ -230,14 +230,14 @@ function apiDelete<T = unknown>(url: string, options: ToolbarApiOptions): Promis
     return request<T>('DELETE', url, undefined, options)
 }
 
-const PROJECT = '/api/projects/@current'
-const ENVIRONMENT = '/api/environments/@current'
+const PROJECT = '/v1/projects/@current'
+const ENVIRONMENT = '/v1/environments/@current'
 
 /**
  * `toolbarApi` is the single entry point for talking to the Insights API from the toolbar.
  *
  * Prefer the resource namespaces (`toolbarApi.actions.list()`, `toolbarApi.surveys.update(id, …)`):
- * they own the route strings so every `/api/projects/@current/…` path lives in exactly one place
+ * they own the route strings so every `/v1/projects/@current/…` path lives in exactly one place
  * and call sites read as intent rather than URLs. Each method takes the resource-specific arguments
  * (id, payload, query) plus a `ToolbarApiOptions` and returns the same `ToolbarApiResult<T>`, so
  * failure handling stays identical everywhere.
@@ -361,7 +361,7 @@ export const toolbarApi = {
             params: Record<string, any>,
             options: ToolbarApiOptions
         ): Promise<ToolbarApiResult<PaginatedResponse<ElementsEventType>>> =>
-            apiGet(`/api/element/stats/${encodeParams(params, '?')}`, options),
+            apiGet(`/v1/element/stats/${encodeParams(params, '?')}`, options),
         // Pagination URLs come from a response body — pinned to the uiHost/apiHost origin.
         page: (
             url: string,

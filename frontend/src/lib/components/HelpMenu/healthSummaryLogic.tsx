@@ -61,7 +61,7 @@ export const healthSummaryLogic = kea<healthSummaryLogicType>([
             {
                 loadHealthSummary: async (): Promise<HealthIssueSummary | null> => {
                     try {
-                        return await api.get(`api/environments/${values.currentTeamIdStrict}/health_issues/summary/`)
+                        return await api.get(`v1/environments/${values.currentTeamIdStrict}/health_issues/summary/`)
                     } catch {
                         return null
                     }

@@ -148,7 +148,7 @@ describe('hogFlowEditorTestLogic', () => {
 
     beforeEach(() => {
         initKeaTests()
-        useMocks({ get: { '/api/environments/:team_id/hog_flows/:id/': WORKFLOW_FIXTURE } })
+        useMocks({ get: { '/v1/environments/:team_id/hog_flows/:id/': WORKFLOW_FIXTURE } })
     })
 
     describe('groupTypesForTest gating on group_analytics', () => {
@@ -159,7 +159,7 @@ describe('hogFlowEditorTestLogic', () => {
 
         it('exposes all group types when group_analytics is available', () => {
             initKeaTests(true, undefined as any, undefined as any, orgWithFeatures([AvailableFeature.GROUP_ANALYTICS]))
-            useMocks({ get: { '/api/projects/:team/groups_types': MOCK_GROUP_TYPES } })
+            useMocks({ get: { '/v1/projects/:team/groups_types': MOCK_GROUP_TYPES } })
             useAvailableFeatures([AvailableFeature.GROUP_ANALYTICS])
             groupsModel.mount()
             groupsModel.actions.loadAllGroupTypesSuccess(MOCK_GROUP_TYPES)
@@ -173,7 +173,7 @@ describe('hogFlowEditorTestLogic', () => {
 
         it('resolves no group types without group_analytics, matching gated real execution', () => {
             initKeaTests(true, undefined as any, undefined as any, orgWithFeatures([]))
-            useMocks({ get: { '/api/projects/:team/groups_types': MOCK_GROUP_TYPES } })
+            useMocks({ get: { '/v1/projects/:team/groups_types': MOCK_GROUP_TYPES } })
             useAvailableFeatures([])
             groupsModel.mount()
             // Group types load ungated, mirroring groupsModel.afterMount in real usage

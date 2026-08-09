@@ -47,7 +47,7 @@ class CanvasAPIBaseTest(APIBaseTest):
 
     def _create_canvas(self, **overrides) -> str:
         body = {"name": "My canvas", "channel_id": str(self.channel.id), **overrides}
-        response = self.client.post(f"/api/projects/{self.team.id}/canvases/", body, format="json")
+        response = self.client.post(f"/v1/projects/{self.team.id}/canvases/", body, format="json")
         assert response.status_code == status.HTTP_201_CREATED, response.json()
         return cast(str, response.json()["id"])
 
@@ -58,7 +58,7 @@ class CanvasAPIBaseTest(APIBaseTest):
 
     def _publish(self, canvas_id: str, project: dict | None = None, **payload):
         return self.client.post(
-            f"/api/projects/{self.team.id}/canvases/{canvas_id}/publish/",
+            f"/v1/projects/{self.team.id}/canvases/{canvas_id}/publish/",
             {"project": project or self._project(), **payload},
             format="json",
         )
@@ -85,11 +85,11 @@ class TestCanvasCrud(CanvasAPIBaseTest):
             other_channel = Channel.objects.create(team=self.team, name="other")
         other_id = self._create_canvas(name="Other", channel_id=str(other_channel.id))
 
-        response = self.client.get(f"/api/projects/{self.team.id}/canvases/?channel={self.channel.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/canvases/?channel={self.channel.id}")
         ids = [row["id"] for row in response.json()["results"]]
         assert ids == [canvas_id]
 
-        response = self.client.get(f"/api/projects/{self.team.id}/canvases/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/canvases/")
         assert {row["id"] for row in response.json()["results"]} == {canvas_id, other_id}
 
     def test_personal_channel_canvases_are_invisible_to_other_users(self):
@@ -114,26 +114,26 @@ class TestCanvasCrud(CanvasAPIBaseTest):
             private_canvas_id = str(private_canvas.id)
 
         # The owner sees it in list and can read/write it.
-        response = self.client.get(f"/api/projects/{self.team.id}/canvases/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/canvases/")
         ids = {row["id"] for row in response.json()["results"]}
         assert {public_canvas_id, private_canvas_id} <= ids
-        assert self.client.get(f"/api/projects/{self.team.id}/canvases/{private_canvas_id}/").status_code == 200
-        assert self.client.get(f"/api/projects/{self.team.id}/canvases/{private_canvas_id}/source/").status_code == 200
+        assert self.client.get(f"/v1/projects/{self.team.id}/canvases/{private_canvas_id}/").status_code == 200
+        assert self.client.get(f"/v1/projects/{self.team.id}/canvases/{private_canvas_id}/source/").status_code == 200
 
         # A different user on the same team does not.
         other_user = self._create_user("teammate@example.com")
         self.client.force_login(other_user)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/canvases/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/canvases/")
         ids = {row["id"] for row in response.json()["results"]}
         assert private_canvas_id not in ids
         assert public_canvas_id in ids
 
         # Filtering by the personal channel id must not leak it either.
-        response = self.client.get(f"/api/projects/{self.team.id}/canvases/?channel={private_channel_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/canvases/?channel={private_channel_id}")
         assert response.json()["results"] == []
 
-        base = f"/api/projects/{self.team.id}/canvases/{private_canvas_id}"
+        base = f"/v1/projects/{self.team.id}/canvases/{private_canvas_id}"
         assert self.client.get(f"{base}/").status_code == 404
         assert self.client.get(f"{base}/source/").status_code == 404
         assert self.client.get(f"{base}/versions/").status_code == 404
@@ -144,7 +144,7 @@ class TestCanvasCrud(CanvasAPIBaseTest):
 
     def test_create_rejects_unknown_channel(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/canvases/",
+            f"/v1/projects/{self.team.id}/canvases/",
             {"name": "Bad", "channel_id": str(uuid4())},
             format="json",
         )
@@ -153,7 +153,7 @@ class TestCanvasCrud(CanvasAPIBaseTest):
     def test_partial_update_metadata(self):
         canvas_id = self._create_canvas()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/canvases/{canvas_id}/",
+            f"/v1/projects/{self.team.id}/canvases/{canvas_id}/",
             {"name": "Renamed", "context": "notes", "pinned": True},
             format="json",
         )
@@ -164,21 +164,21 @@ class TestCanvasCrud(CanvasAPIBaseTest):
         assert body["pinned"] is True
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/canvases/{canvas_id}/", {"pinned": False}, format="json"
+            f"/v1/projects/{self.team.id}/canvases/{canvas_id}/", {"pinned": False}, format="json"
         )
         assert response.json()["pinned"] is False
 
     def test_generation_task_pointer_validates_team(self):
         canvas_id = self._create_canvas()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/canvases/{canvas_id}/",
+            f"/v1/projects/{self.team.id}/canvases/{canvas_id}/",
             {"generation_task_id": str(uuid4())},
             format="json",
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/canvases/{canvas_id}/",
+            f"/v1/projects/{self.team.id}/canvases/{canvas_id}/",
             {"generation_task_id": None},
             format="json",
         )
@@ -186,16 +186,16 @@ class TestCanvasCrud(CanvasAPIBaseTest):
 
     def test_destroy_soft_deletes(self):
         canvas_id = self._create_canvas()
-        response = self.client.delete(f"/api/projects/{self.team.id}/canvases/{canvas_id}/")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/canvases/{canvas_id}/")
         assert response.status_code == status.HTTP_204_NO_CONTENT
-        assert self.client.get(f"/api/projects/{self.team.id}/canvases/{canvas_id}/").status_code == 404
+        assert self.client.get(f"/v1/projects/{self.team.id}/canvases/{canvas_id}/").status_code == 404
         assert Canvas.objects.unscoped().filter(id=canvas_id, deleted=True).exists()
 
 
 class TestCanvasSourceAndPublish(CanvasAPIBaseTest):
     def test_source_of_unpublished_canvas_is_synthetic_and_blank(self):
         canvas_id = self._create_canvas()
-        response = self.client.get(f"/api/projects/{self.team.id}/canvases/{canvas_id}/source/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/canvases/{canvas_id}/source/")
         body = response.json()
         assert body["current_version_id"] is None
         assert body["project"]["files"]["src/canvas.tsx"] == ""
@@ -217,7 +217,7 @@ class TestCanvasSourceAndPublish(CanvasAPIBaseTest):
         self.enqueue.assert_called_once_with(self.team.id, str(build.id))
 
         # The multi-file project round-trips from the stored version.
-        response = self.client.get(f"/api/projects/{self.team.id}/canvases/{canvas_id}/source/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/canvases/{canvas_id}/source/")
         body = response.json()
         assert body["current_version_id"] == version_id
         assert body["project"]["files"]["src/extra.ts"] == "export const x = 1"
@@ -293,7 +293,7 @@ class TestCanvasSourceAndPublish(CanvasAPIBaseTest):
         version_id = first.json()["current_version_id"]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/canvases/{canvas_id}/edit/",
+            f"/v1/projects/{self.team.id}/canvases/{canvas_id}/edit/",
             {
                 "operations": [{"path": "src/added.ts", "content": "export {}"}],
                 "expected_current_version_id": version_id,
@@ -302,7 +302,7 @@ class TestCanvasSourceAndPublish(CanvasAPIBaseTest):
         )
         assert response.status_code == status.HTTP_200_OK, response.json()
 
-        source = self.client.get(f"/api/projects/{self.team.id}/canvases/{canvas_id}/source/").json()
+        source = self.client.get(f"/v1/projects/{self.team.id}/canvases/{canvas_id}/source/").json()
         assert source["project"]["files"]["src/added.ts"] == "export {}"
         # The original component survives the per-file edit.
         assert "src/canvas.tsx" in source["project"]["files"]
@@ -310,7 +310,7 @@ class TestCanvasSourceAndPublish(CanvasAPIBaseTest):
     def test_edit_delete_of_missing_file_400s(self):
         canvas_id = self._create_canvas()
         response = self.client.post(
-            f"/api/projects/{self.team.id}/canvases/{canvas_id}/edit/",
+            f"/v1/projects/{self.team.id}/canvases/{canvas_id}/edit/",
             {
                 "operations": [{"path": "src/nope.ts", "content": None}],
                 "expected_current_version_id": None,
@@ -324,7 +324,7 @@ class TestCanvasSourceAndPublish(CanvasAPIBaseTest):
         canvas_id = self._create_canvas()
         Canvas.objects.unscoped().filter(id=canvas_id).update(legacy_code="export default () => null")
 
-        source = self.client.get(f"/api/projects/{self.team.id}/canvases/{canvas_id}/source/").json()
+        source = self.client.get(f"/v1/projects/{self.team.id}/canvases/{canvas_id}/source/").json()
         assert source["project"]["files"]["src/canvas.tsx"] == "export default () => null"
 
         response = self._publish(canvas_id, expected_current_version_id=None)
@@ -346,7 +346,7 @@ class TestCanvasRevertAndBuilds(CanvasAPIBaseTest):
     def test_revert_moves_head_and_queues_build(self):
         canvas_id, v1, v2 = self._published_canvas()
         response = self.client.post(
-            f"/api/projects/{self.team.id}/canvases/{canvas_id}/revert/",
+            f"/v1/projects/{self.team.id}/canvases/{canvas_id}/revert/",
             {"version_id": v1, "expected_current_version_id": v2},
             format="json",
         )
@@ -356,22 +356,22 @@ class TestCanvasRevertAndBuilds(CanvasAPIBaseTest):
 
     def test_versions_history_and_versioned_source(self):
         canvas_id, v1, v2 = self._published_canvas()
-        versions = self.client.get(f"/api/projects/{self.team.id}/canvases/{canvas_id}/versions/").json()["results"]
+        versions = self.client.get(f"/v1/projects/{self.team.id}/canvases/{canvas_id}/versions/").json()["results"]
         assert [v["id"] for v in versions] == [v2, v1]
         assert versions[1]["parent_version_id"] is None
 
-        old = self.client.get(f"/api/projects/{self.team.id}/canvases/{canvas_id}/source/?version_id={v1}").json()
+        old = self.client.get(f"/v1/projects/{self.team.id}/canvases/{canvas_id}/source/?version_id={v1}").json()
         assert "return null" in old["project"]["files"]["src/canvas.tsx"]
         # The head pointer is reported regardless of which version was read.
         assert old["current_version_id"] == v2
 
-        response = self.client.get(f"/api/projects/{self.team.id}/canvases/{canvas_id}/source/?version_id={uuid4()}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/canvases/{canvas_id}/source/?version_id={uuid4()}")
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_revert_rejects_foreign_version(self):
         canvas_id, _, v2 = self._published_canvas()
         response = self.client.post(
-            f"/api/projects/{self.team.id}/canvases/{canvas_id}/revert/",
+            f"/v1/projects/{self.team.id}/canvases/{canvas_id}/revert/",
             {"version_id": str(uuid4()), "expected_current_version_id": v2},
             format="json",
         )
@@ -398,7 +398,7 @@ class TestCanvasRevertAndBuilds(CanvasAPIBaseTest):
                     status=CanvasBuild.STATUS_FAILED,
                 )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/canvases/{canvas_id}/builds/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/canvases/{canvas_id}/builds/")
         body = response.json()
         assert body["published_build_id"] == str(published.id)
         assert str(published.id) in {build["id"] for build in body["builds"]}
@@ -418,7 +418,7 @@ class TestCanvasRevertAndBuilds(CanvasAPIBaseTest):
         build.artifact_object_prefix = None  # retention pruned the objects
         build.save()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/canvases/{canvas_id}/builds/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/canvases/{canvas_id}/builds/")
         record = next(b for b in response.json()["builds"] if b["id"] == str(build.id))
         assert record["build_status"] == "ready"
         assert record["artifact_url"] is None
@@ -430,7 +430,7 @@ class TestCanvasRevertAndBuilds(CanvasAPIBaseTest):
 
         def act(action: str, build_id=None):
             return self.client.post(
-                f"/api/projects/{self.team.id}/canvases/{canvas_id}/builds/action/",
+                f"/v1/projects/{self.team.id}/canvases/{canvas_id}/builds/action/",
                 {"action": action, "build_id": str(build_id or build.id)},
                 format="json",
             )

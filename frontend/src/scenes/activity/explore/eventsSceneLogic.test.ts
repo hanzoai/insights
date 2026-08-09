@@ -16,7 +16,7 @@ describe('eventsSceneLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/query': () => [200, { results: [] }],
+                '/v1/environments/:team_id/query': () => [200, { results: [] }],
             },
         })
         initKeaTests()

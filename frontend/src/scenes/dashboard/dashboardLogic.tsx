@@ -1493,7 +1493,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                         const shouldRefreshTilesAfterSave = filtersChanged || variablesChanged
 
                         const updatedDashboard: DashboardType<InsightModel> = await api.update(
-                            `api/environments/${values.currentTeamId}/dashboards/${props.id}`,
+                            `v1/environments/${values.currentTeamId}/dashboards/${props.id}`,
                             {
                                 filters: values.effectiveEditBarFilters,
                                 variables: values.effectiveDashboardVariableOverrides,
@@ -1531,7 +1531,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                 removeTile: async ({ tile }) => {
                     // The reducer drops the tile optimistically; here we only persist and roll back on failure.
                     try {
-                        await api.update(`api/environments/${values.currentTeamId}/dashboards/${props.id}`, {
+                        await api.update(`v1/environments/${values.currentTeamId}/dashboards/${props.id}`, {
                             tiles: [{ id: tile.id, deleted: true }],
                         })
                         dashboardsModel.actions.tileRemovedFromDashboard({
@@ -1579,7 +1579,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                         const { duplicateLayouts, tilesToUpdate } = calculateDuplicateLayout(values.layouts, tile.id)
 
                         const dashboard: DashboardType<InsightModel> = await api.update(
-                            `api/environments/${values.currentTeamId}/dashboards/${props.id}`,
+                            `v1/environments/${values.currentTeamId}/dashboards/${props.id}`,
                             {
                                 duplicate_tiles: [{ ...newTile, layouts: duplicateLayouts }],
                                 tiles: tilesToUpdate.length > 0 ? tilesToUpdate : undefined,
@@ -1600,7 +1600,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                         return values.dashboard
                     }
                     const dashboard: DashboardType<InsightModel> = await api.update(
-                        `api/environments/${teamLogic.values.currentTeamId}/dashboards/${props.id}/move_tile`,
+                        `v1/environments/${teamLogic.values.currentTeamId}/dashboards/${props.id}/move_tile`,
                         {
                             tile,
                             to_dashboard: toDashboard,
@@ -1641,7 +1641,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
 
                     try {
                         await api.create(
-                            `api/environments/${teamLogic.values.currentTeamId}/dashboards/${toDashboard}/copy_tile`,
+                            `v1/environments/${teamLogic.values.currentTeamId}/dashboards/${toDashboard}/copy_tile`,
                             { fromDashboardId: fromDashboard, tileId: tile.id }
                         )
 
@@ -2627,7 +2627,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                     variablesOverride?: Record<string, InsightsQLVariable>,
                     layoutSize?: 'sm' | 'xs'
                 ) =>
-                    `api/environments/${teamLogic.values.currentTeamId}/dashboards/${id}/?${toParams({
+                    `v1/environments/${teamLogic.values.currentTeamId}/dashboards/${id}/?${toParams({
                         refresh,
                         filters_override: filtersOverride,
                         variables_override: variablesOverride,
@@ -3139,7 +3139,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
             const previousColor = values.tiles.find((tile) => tile.id === tileId)?.color
             actions.setTileProperty(tileId, { color })
             try {
-                await api.update(`api/environments/${values.currentTeamId}/dashboards/${props.id}`, {
+                await api.update(`v1/environments/${values.currentTeamId}/dashboards/${props.id}`, {
                     tiles: [{ id: tileId, color }],
                 })
             } catch {
@@ -3157,7 +3157,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
             const newValue = previousValue === false
             actions.setTileProperty(tileId, { show_description: newValue })
             try {
-                await api.update(`api/environments/${values.currentTeamId}/dashboards/${props.id}`, {
+                await api.update(`v1/environments/${values.currentTeamId}/dashboards/${props.id}`, {
                     tiles: [{ id: tileId, show_description: newValue }],
                 })
             } catch {
@@ -3289,7 +3289,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
             // (and reflow the displaced tiles) server-side, so an inline insert is a single round trip.
             try {
                 const response: DashboardType<InsightModel> = await api.update(
-                    `api/environments/${values.currentTeamId}/dashboards/${props.id}`,
+                    `v1/environments/${values.currentTeamId}/dashboards/${props.id}`,
                     {
                         tiles: [...tilesToUpdate, { id: newTile.id, layouts: newTileLayout }],
                     }
@@ -3384,7 +3384,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                         dataAttr: 'undo-remove-tile-from-dashboard',
                         action: async () => {
                             try {
-                                await api.update(`api/environments/${values.currentTeamId}/dashboards/${props.id}`, {
+                                await api.update(`v1/environments/${values.currentTeamId}/dashboards/${props.id}`, {
                                     tiles: [{ id: tile.id, deleted: false }],
                                 })
 
@@ -3860,7 +3860,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                 })
 
                 const response = await api.create(
-                    `api/environments/${teamLogic.values.currentTeamId}/dashboards/${dashboardId}/widgets/batch/`,
+                    `v1/environments/${teamLogic.values.currentTeamId}/dashboards/${dashboardId}/widgets/batch/`,
                     { widgets: widgetsPayload }
                 )
                 const createdTiles = findNewlyAddedWidgetTiles(previousWidgetTileIds, response.tiles)
@@ -4126,7 +4126,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                 .filter((id): id is number => !!id)
 
             if (insightIds.length > 0 && values.currentTeamId && !isSharedView()) {
-                void api.create(`api/environments/${values.currentTeamId}/insights/viewed`, {
+                void api.create(`v1/environments/${values.currentTeamId}/insights/viewed`, {
                     insight_ids: insightIds,
                 })
             }
@@ -4329,7 +4329,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                     const wasIgnored = !!tile.filters_overrides?.ignoreDashboardFilters
                     const isIgnored = !!tileFilterOverrides.ignoreDashboardFilters
 
-                    await api.update(`api/environments/${teamLogic.values.currentTeamId}/dashboards/${props.id}`, {
+                    await api.update(`v1/environments/${teamLogic.values.currentTeamId}/dashboards/${props.id}`, {
                         tiles: [{ id: tile.id, filters_overrides: tileFilterOverrides }],
                     })
 

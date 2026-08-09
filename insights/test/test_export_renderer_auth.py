@@ -23,10 +23,10 @@ class TestExportRendererAuthentication(APIBaseTest):
 
     @parameterized.expand(
         [
-            ("session_recordings", "/api/environments/{team_id}/session_recordings"),
+            ("session_recordings", "/v1/environments/{team_id}/session_recordings"),
             (
                 "heatmaps",
-                "/api/environments/{team_id}/heatmaps?type=click&date_from=2024-01-01&url_exact=https://example.com&viewport_width_min=0",
+                "/v1/environments/{team_id}/heatmaps?type=click&date_from=2024-01-01&url_exact=https://example.com&viewport_width_min=0",
             ),
         ]
     )
@@ -41,8 +41,8 @@ class TestExportRendererAuthentication(APIBaseTest):
 
     @parameterized.expand(
         [
-            ("dashboards", "/api/projects/{team_id}/dashboards/"),
-            ("user_api", "/api/users/@me/"),
+            ("dashboards", "/v1/projects/{team_id}/dashboards/"),
+            ("user_api", "/v1/users/@me/"),
         ]
     )
     def test_export_renderer_token_rejected_on_non_opted_in_endpoint(self, _name: str, url_template: str):
@@ -66,7 +66,7 @@ class TestExportRendererAuthentication(APIBaseTest):
         client = self._unauthenticated_client()
         token = self._make_export_renderer_token()
         response = getattr(client, method)(
-            f"/api/environments/{self.team.id}/session_recordings",
+            f"/v1/environments/{self.team.id}/session_recordings",
             headers={"authorization": f"Bearer {token}"},
         )
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -79,7 +79,7 @@ class TestExportRendererAuthentication(APIBaseTest):
             InsightsJwtAudience.EXPORT_RENDERER,
         )
         response = client.get(
-            f"/api/environments/{self.team.id}/session_recordings",
+            f"/v1/environments/{self.team.id}/session_recordings",
             headers={"authorization": f"Bearer {token}"},
         )
         assert response.status_code == status.HTTP_401_UNAUTHORIZED

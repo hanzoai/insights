@@ -22,6 +22,7 @@ from insights.constants import AvailableFeature
 from insights.helpers.dashboard_templates import create_group_type_mapping_detail_dashboard
 from insights.models import Filter, Team, User
 from insights.models.activity_logging.activity_log import ActivityLog
+from insights.models.ee_models import AccessControl
 from insights.models.file_system.file_system_view_log import FileSystemViewLog
 from insights.models.group_type_mapping import (
     GROUP_TYPES_CACHE_KEY_PREFIX,
@@ -52,8 +53,6 @@ from products.dashboards.backend.models.dashboard_tile import ButtonTile, Dashbo
 from products.product_analytics.backend.api.insight import InsightSerializer
 from products.product_analytics.backend.models.insight import Insight
 from products.product_analytics.backend.models.insight_variable import InsightVariable
-
-from insights.models.ee_models import AccessControl
 
 valid_template: dict = {
     "template_name": "Sign up conversion template with variables",
@@ -116,7 +115,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         dashboard_id, _ = self.dashboard_api.create_dashboard({"name": "test"})
         mock_report_user_action.reset_mock()
 
-        self.client.get(f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/", HTTP_X_INSIGHTS_CLIENT="mcp")
+        self.client.get(f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/", HTTP_X_INSIGHTS_CLIENT="mcp")
 
         mock_report_user_action.assert_any_call(
             self.user,
@@ -131,7 +130,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         dashboard_id, _ = self.dashboard_api.create_dashboard({"name": "test"})
         mock_report_user_action.reset_mock()
 
-        self.client.get(f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/")
+        self.client.get(f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/")
 
         read_calls = [c for c in mock_report_user_action.call_args_list if c.args[1:2] == ("dashboard read",)]
         self.assertEqual(read_calls, [])
@@ -588,7 +587,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard.id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard.id}",
             {"name": "Updated dashboard"},
         )
 
@@ -675,9 +674,9 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         self.assertEqual(response["tiles"][0]["insight"]["result"], None)
 
         # cache results
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/{item.pk}?refresh=true").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/{item.pk}?refresh=true").json()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/{item2.pk}?refresh=true").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/{item2.pk}?refresh=true").json()
 
         # Now the dashboard has data without having to refresh
         response = self.dashboard_api.get_dashboard(dashboard.pk, query_params={"refresh": False, "use_cache": True})
@@ -1053,7 +1052,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         assert not FileSystem.objects.filter(team=self.team, type="insight", ref=insight.short_id).exists()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/",
             {"deleted": False},
             format="json",
         )
@@ -1110,12 +1109,12 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         self.assertEqual(response["tiles"][0]["insight"]["name"], "some_item")
         self.assertEqual(response["tiles"][0]["insight"]["query"]["source"]["dateRange"]["date_from"], "-14d")
 
-        item_response = self.client.get(f"/api/projects/{self.team.id}/insights/").json()
+        item_response = self.client.get(f"/v1/projects/{self.team.id}/insights/").json()
         self.assertEqual(item_response["results"][0]["name"], "some_item")
 
         # delete
         self.dashboard_api.soft_delete(insight_id, "insights")
-        items_response = self.client.get(f"/api/projects/{self.team.id}/insights/").json()
+        items_response = self.client.get(f"/v1/projects/{self.team.id}/insights/").json()
         self.assertEqual(len(items_response["results"]), 0)
 
         excludes_deleted_insights_response = self.dashboard_api.get_dashboard(dashboard_id)
@@ -1301,7 +1300,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
             expected_layouts_by_tile_id[tile["id"]] = new_layouts
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": layouts_payload},
             format="json",
         )
@@ -1360,7 +1359,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
 
         new_layouts = {"sm": {"h": 7, "i": str(valid_tile.id), "w": 8, "x": 1, "y": 2, "minH": 2, "minW": 2}}
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {
                 "tiles": [
                     {"id": valid_tile.id, "layouts": new_layouts},
@@ -1479,7 +1478,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
 
         self.dashboard_api.create_insight({"filters": {"hello": "test"}})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?user=true").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?user=true").json()
         self.assertEqual(response["count"], 1)
 
     def test_dashboard_item_layout(self):
@@ -2111,7 +2110,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         dashboard = Dashboard.objects.create(team=self.team, name="test dashboard", created_by=self.user)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/dashboards/{dashboard.id}/",
+            f"/v1/environments/{self.team.id}/dashboards/{dashboard.id}/",
             {"quick_filter_ids": value},
             format="json",
         )
@@ -2124,7 +2123,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         dashboard = Dashboard.objects.create(team=self.team, name="test dashboard", created_by=self.user)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/dashboards/{dashboard.id}/",
+            f"/v1/environments/{self.team.id}/dashboards/{dashboard.id}/",
             {"quick_filter_ids": [str(qf1.id), str(qf2.id)]},
             format="json",
         )
@@ -2144,7 +2143,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         self.dashboard_api.create_insight({"query": query_7d, "dashboards": [dashboard.pk]})
 
         # warms the query cache for these 7-day insights
-        response = self.client.post(f"/api/projects/{self.team.pk}/query/", data={"query": query_7d})
+        response = self.client.post(f"/v1/projects/{self.team.pk}/query/", data={"query": query_7d})
         self.assertEqual(response.status_code, 200)
 
         # confirm that the dashboard returns the cached result (8 days)
@@ -2169,7 +2168,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
             properties=[EventPropertyFilter(key="$browser", value="Mac OS X", operator=PropertyOperator.EXACT)],
             dateRange=DateRange(date_from="-24h"),
         ).model_dump()
-        response = self.client.post(f"/api/projects/{self.team.pk}/query/", data={"query": query_24h})
+        response = self.client.post(f"/v1/projects/{self.team.pk}/query/", data={"query": query_24h})
         self.assertEqual(response.status_code, 200)
 
         # confirm that the dashboard returns the cached result (2 days)
@@ -2179,7 +2178,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
     def test_invalid_properties(self):
         properties = "invalid_json"
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/trend/?properties={properties}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/trend/?properties={properties}")
 
         self.assertEqual(response.status_code, 400, response.content)
         self.assertDictEqual(
@@ -2211,7 +2210,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
     def test_patch_api_as_form_data(self):
         dashboard = Dashboard.objects.create(team=self.team, name="dashboard", created_by=self.user)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard.pk}/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard.pk}/",
             data="name=replaced",
             content_type="application/x-www-form-urlencoded",
         )
@@ -2264,7 +2263,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
 
     def test_hard_delete_is_forbidden(self) -> None:
         dashboard_id, _ = self.dashboard_api.create_dashboard({"name": "dashboard"})
-        api_response = self.client.delete(f"/api/projects/{self.team.id}/dashboards/{dashboard_id}")
+        api_response = self.client.delete(f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}")
         self.assertEqual(api_response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
         self.dashboard_api.get_dashboard(dashboard_id, expected_status=status.HTTP_200_OK)
 
@@ -2317,7 +2316,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
 
         tile_id = dashboard_one["tiles"][0]["id"]
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_two_id}/copy_tile",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_two_id}/copy_tile",
             {"fromDashboardId": dashboard_one_id, "tileId": tile_id},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -2346,7 +2345,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         tile_id = dashboard_one["tiles"][0]["id"]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_two_id}/copy_tile",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_two_id}/copy_tile",
             {"fromDashboardId": dashboard_one_id, "tileId": tile_id},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -2364,7 +2363,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         ]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_two_id}/copy_tile",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_two_id}/copy_tile",
             {"fromDashboardId": dashboard_one_id, "tileId": tile["id"]},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -2372,7 +2371,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         assert response.json()["tiles"][0]["text"]["body"] == "hello"
 
         response2 = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_two_id}/copy_tile",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_two_id}/copy_tile",
             {"fromDashboardId": dashboard_one_id, "tileId": tile["id"]},
         )
         assert response2.status_code == status.HTTP_400_BAD_REQUEST
@@ -2399,7 +2398,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         tile_id = dashboard_a["tiles"][0]["id"]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_b_id}/copy_tile",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_b_id}/copy_tile",
             {"fromDashboardId": dashboard_a_id, "tileId": tile_id},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -2424,7 +2423,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         assert len(dashboard_two["tiles"]) == 0
 
         patch_response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_one_id}/move_tile",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_one_id}/move_tile",
             {"tile": dashboard_one["tiles"][0], "to_dashboard": dashboard_two_id},
         )
         assert patch_response.status_code == status.HTTP_200_OK
@@ -2451,7 +2450,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
             layouts={},
         )
         patch_response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_a_id}/move_tile",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_a_id}/move_tile",
             {"tile": {"id": tile_a.id}, "to_dashboard": dashboard_b_id},
         )
         assert patch_response.status_code == status.HTTP_200_OK
@@ -2471,7 +2470,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         tile = dashboard["tiles"][0]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/move_tile",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/move_tile",
             {"tile": tile, "to_dashboard": other_dashboard.id},
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -2503,7 +2502,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         self.client.force_login(user2)
 
         move_response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_one_id}/move_tile",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_one_id}/move_tile",
             {"tile": tile, "to_dashboard": dashboard_two_id},
         )
         self.assertEqual(move_response.status_code, status.HTTP_403_FORBIDDEN)
@@ -2517,7 +2516,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         dashboard_id, _ = self.dashboard_api.create_dashboard({"name": "my dashboard"})
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [{"id": other_tile.id, "text": {"id": other_text.id, "body": "hijacked"}}]},
         )
         assert response.status_code != status.HTTP_200_OK
@@ -2540,7 +2539,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         tile_id = dashboard_json["tiles"][0]["id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [{"id": tile_id, "color": "blue", "insight_id": other_insight.id}]},
             format="json",
         )
@@ -2559,7 +2558,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         text_tile_on_b = dashboard_b_json["tiles"][0]["text"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_a_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_a_id}",
             {"tiles": [{"text": {"id": text_tile_on_b["id"], "body": "hijacked via dashboard A"}}]},
             format="json",
         )
@@ -2579,7 +2578,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         button_tile_on_b = dashboard_b_json["tiles"][0]["button_tile"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_a_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_a_id}",
             {
                 "tiles": [
                     {
@@ -2629,7 +2628,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
     @patch("products.dashboards.backend.api.dashboard.report_user_action")
     def test_create_from_template_json(self, mock_report_user_action) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/create_from_template_json",
+            f"/v1/projects/{self.team.id}/dashboards/create_from_template_json",
             {"template": valid_template, "creation_context": "onboarding"},
             headers={"Referer": "https://hanzo.ai/my-referer", "X-Insights-Session-Id": "my-session-id"},
         )
@@ -2683,7 +2682,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
     ) -> None:
         template = valid_template if scope_in_body is None else {**valid_template, "scope": scope_in_body}
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/create_from_template_json",
+            f"/v1/projects/{self.team.id}/dashboards/create_from_template_json",
             {"template": template},
         )
         assert response.status_code == 200, response.content
@@ -2707,7 +2706,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
             },
         }
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/create_from_template_json",
+            f"/v1/projects/{self.team.id}/dashboards/create_from_template_json",
             {"template": template},
         )
         assert response.status_code == 200, response.content
@@ -2716,7 +2715,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         template: dict = {**valid_template, "tiles": []}
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/create_from_template_json",
+            f"/v1/projects/{self.team.id}/dashboards/create_from_template_json",
             {"template": template},
         )
         assert response.status_code == 400, response.json()
@@ -2728,7 +2727,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         }
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/create_from_template_json",
+            f"/v1/projects/{self.team.id}/dashboards/create_from_template_json",
             {"template": template},
         )
         assert response.status_code == 200
@@ -2775,7 +2774,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         template: dict = {**valid_template, "tiles": [button_tile]}
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/create_from_template_json",
+            f"/v1/projects/{self.team.id}/dashboards/create_from_template_json",
             {"template": template},
         )
         assert response.status_code == 200, response.json()
@@ -2807,7 +2806,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         }
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/create_from_template_json",
+            f"/v1/projects/{self.team.id}/dashboards/create_from_template_json",
             {"template": template},
         )
         assert response.status_code == 200
@@ -2898,7 +2897,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         invalid_template = {"not a": "template"}
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/create_from_template_json",
+            f"/v1/projects/{self.team.id}/dashboards/create_from_template_json",
             {"template": invalid_template},
         )
         assert response.status_code == 400, response.json()
@@ -3100,7 +3099,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
 
         # Verify we can access visible dashboards
         self.client.force_login(user2)
-        response = self.client.get(f"/api/projects/{self.team.pk}/dashboards/")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/dashboards/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         dashboard_ids = [dashboard["id"] for dashboard in response.json()["results"]]
         self.assertIn(visible_dashboard.id, dashboard_ids)
@@ -3108,14 +3107,14 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
 
         # Verify we can access all dashboards as creator
         self.client.force_login(self.user)
-        response = self.client.get(f"/api/projects/{self.team.pk}/dashboards/")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/dashboards/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(visible_dashboard.id, [dashboard["id"] for dashboard in response.json()["results"]])
         self.assertIn(hidden_dashboard.id, [dashboard["id"] for dashboard in response.json()["results"]])
 
     def test_dashboard_create_in_folder(self):
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/",
+            f"/v1/projects/{self.team.id}/dashboards/",
             {
                 "name": "My Foldered Dashboard",
                 "_create_in_folder": "Marketing/Website/Conversion",
@@ -3353,7 +3352,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
 
         regular_response = self.dashboard_api.get_dashboard(dashboard_id)
 
-        sse_response = self.client.get(f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/stream_tiles/")
+        sse_response = self.client.get(f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/stream_tiles/")
         self.assertEqual(sse_response.status_code, 200)
 
         sse_content = b"".join(sse_response.streaming_content).decode("utf-8")  # type: ignore
@@ -3614,7 +3613,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
     def test_create_unlisted_dashboard_creates_tags(self):
         """Test that unlisted dashboards get tags"""
         response = self.client.post(
-            f"/api/environments/{self.team.id}/dashboards/create_unlisted_dashboard/",
+            f"/v1/environments/{self.team.id}/dashboards/create_unlisted_dashboard/",
             {"tag": "llm-analytics"},
             format="json",
         )
@@ -3634,7 +3633,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         """Test that creating duplicate unlisted dashboards returns 409"""
         # Create first dashboard
         response = self.client.post(
-            f"/api/environments/{self.team.id}/dashboards/create_unlisted_dashboard/",
+            f"/v1/environments/{self.team.id}/dashboards/create_unlisted_dashboard/",
             {"tag": "llm-analytics"},
             format="json",
         )
@@ -3642,7 +3641,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
 
         # Try to create duplicate
         response = self.client.post(
-            f"/api/environments/{self.team.id}/dashboards/create_unlisted_dashboard/",
+            f"/v1/environments/{self.team.id}/dashboards/create_unlisted_dashboard/",
             {"tag": "llm-analytics"},
             format="json",
         )
@@ -3669,7 +3668,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         )
 
         # Filter by unlisted
-        response = self.client.get(f"/api/environments/{self.team.id}/dashboards/?creation_mode=unlisted")
+        response = self.client.get(f"/v1/environments/{self.team.id}/dashboards/?creation_mode=unlisted")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ids = [d["id"] for d in response.json()["results"]]
         self.assertIn(unlisted.id, ids)
@@ -3677,7 +3676,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         self.assertNotIn(template.id, ids)
 
         # Filter by default
-        response = self.client.get(f"/api/environments/{self.team.id}/dashboards/?creation_mode=default")
+        response = self.client.get(f"/v1/environments/{self.team.id}/dashboards/?creation_mode=default")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ids = [d["id"] for d in response.json()["results"]]
         self.assertNotIn(unlisted.id, ids)
@@ -3692,7 +3691,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         tile2 = DashboardTile.objects.create(dashboard=dashboard, insight=insight2)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
+            f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
             {"tile_order": [tile2.pk, tile1.pk]},
             content_type="application/json",
         )
@@ -3713,7 +3712,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         dashboard = Dashboard.objects.create(team=self.team, name="Test Dashboard")
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
+            f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
             {"tile_order": [999999]},
             content_type="application/json",
         )
@@ -3725,7 +3724,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         tile = DashboardTile.objects.create(dashboard=dashboard, insight=insight)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
+            f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
             {"tile_order": [tile.pk]},
             content_type="application/json",
         )
@@ -3737,7 +3736,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         tile = DashboardTile.objects.create(dashboard=dashboard, insight=insight)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
+            f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
             {"tile_order": [tile.pk, tile.pk]},
             content_type="application/json",
         )
@@ -3748,7 +3747,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         dashboard = Dashboard.objects.create(team=self.team, name="Test Dashboard")
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
+            f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
             {"tile_order": []},
             content_type="application/json",
         )
@@ -3762,7 +3761,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         tile2 = DashboardTile.objects.create(dashboard=dashboard, text=text2)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
+            f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
             {"tile_order": [tile2.pk, tile1.pk]},
             content_type="application/json",
         )
@@ -3784,7 +3783,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
 
         # Reorder: text first, insight second
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
+            f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
             {"tile_order": [text_tile.pk, insight_tile.pk]},
             content_type="application/json",
         )
@@ -3814,7 +3813,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
+            f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
             {"tile_order": [tile2.pk, tile1.pk]},
             content_type="application/json",
         )
@@ -3851,7 +3850,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
+            f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
             {"tile_order": [tile1.pk, tile2.pk, tile3.pk]},
             content_type="application/json",
         )
@@ -3887,7 +3886,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
+            f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
             {"tile_order": [tile1.pk, tile2.pk, tile3.pk]},
             content_type="application/json",
         )
@@ -3939,7 +3938,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
+            f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
             {"tile_order": [tile1.pk, tile2.pk], "layout": layout_mode},
             content_type="application/json",
         )
@@ -3958,7 +3957,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         tile = DashboardTile.objects.create(dashboard=dashboard, insight=insight)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
+            f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/reorder_tiles/",
             {"tile_order": [tile.pk], "layout": "stacked"},
             content_type="application/json",
         )
@@ -3968,7 +3967,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         dashboard = Dashboard.objects.create(team=self.team, name="Test Dashboard")
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/create_text_tile/",
+            f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/create_text_tile/",
             {
                 "body": "## Section heading\n\nIntro markdown.",
                 "layouts": {"sm": {"x": 0, "y": 0, "w": 12, "h": 1}},
@@ -3982,7 +3981,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         self.assertEqual(body["text"]["body"], "## Section heading\n\nIntro markdown.")
         self.assertEqual(body["layouts"]["sm"], {"x": 0, "y": 0, "w": 12, "h": 1})
 
-        dashboard_response = self.client.get(f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/")
+        dashboard_response = self.client.get(f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/")
         self.assertEqual(dashboard_response.status_code, status.HTTP_200_OK)
         tiles = dashboard_response.json()["tiles"]
         self.assertEqual(len(tiles), 1)
@@ -3992,7 +3991,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         dashboard = Dashboard.objects.create(team=self.team, name="Test Dashboard")
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/create_text_tile/",
+            f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/create_text_tile/",
             {"body": "Just a divider"},
             content_type="application/json",
         )
@@ -4009,7 +4008,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         dashboard = Dashboard.objects.create(team=self.team, name="Test Dashboard")
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/create_text_tile/",
+            f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/create_text_tile/",
             {"body": body},
             content_type="application/json",
         )
@@ -4019,7 +4018,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         dashboard = Dashboard.objects.create(team=self.team, name="Test Dashboard", deleted=True)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/create_text_tile/",
+            f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/create_text_tile/",
             {"body": "Some text"},
             content_type="application/json",
         )
@@ -4035,7 +4034,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/update_text_tile/",
+            f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/update_text_tile/",
             {
                 "tile_id": tile.pk,
                 "body": "## Updated heading",
@@ -4064,7 +4063,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/update_text_tile/",
+            f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/update_text_tile/",
             {"tile_id": tile.pk, "body": "new body"},
             content_type="application/json",
         )
@@ -4087,7 +4086,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         tile = DashboardTile.objects.create(dashboard=dashboard, text=text)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/update_text_tile/",
+            f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/update_text_tile/",
             {"tile_id": tile.pk, "body": body},
             content_type="application/json",
         )
@@ -4102,7 +4101,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         tile = DashboardTile.objects.create(dashboard=dashboard, insight=insight)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/dashboards/{dashboard.pk}/update_text_tile/",
+            f"/v1/environments/{self.team.pk}/dashboards/{dashboard.pk}/update_text_tile/",
             {"tile_id": tile.pk, "body": "should fail"},
             content_type="application/json",
         )
@@ -4122,7 +4121,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         for name, dashboard_pk, tile_id in self._make_unknown_tile_id_args():
             with self.subTest(name):
                 response = self.client.post(
-                    f"/api/environments/{self.team.pk}/dashboards/{dashboard_pk}/update_text_tile/",
+                    f"/v1/environments/{self.team.pk}/dashboards/{dashboard_pk}/update_text_tile/",
                     {"tile_id": tile_id, "body": "should fail"},
                     content_type="application/json",
                 )
@@ -4135,7 +4134,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
 
         # Add insight to first dashboard
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/insights/{insight.pk}/",
+            f"/v1/environments/{self.team.pk}/insights/{insight.pk}/",
             {"dashboards": [dashboard1.pk]},
             content_type="application/json",
         )
@@ -4145,7 +4144,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
 
         # Append to second dashboard — must include both IDs (full replacement)
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/insights/{insight.pk}/",
+            f"/v1/environments/{self.team.pk}/insights/{insight.pk}/",
             {"dashboards": [dashboard1.pk, dashboard2.pk]},
             content_type="application/json",
         )
@@ -4165,7 +4164,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
 
         # Remove from dashboard2 by only including dashboard1
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/insights/{insight.pk}/",
+            f"/v1/environments/{self.team.pk}/insights/{insight.pk}/",
             {"dashboards": [dashboard1.pk]},
             content_type="application/json",
         )

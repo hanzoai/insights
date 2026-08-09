@@ -75,7 +75,7 @@ class TestMCPGatewayAuditAPI(APIBaseTest):
         )
 
     def _api_url(self, suffix: str = "") -> str:
-        base = f"/api/projects/{self.team.id}/mcp_gateway/audit/"
+        base = f"/v1/projects/{self.team.id}/mcp_gateway/audit/"
         return f"{base}{suffix}" if suffix else base
 
     def test_member_sees_only_calls_using_their_connections(self) -> None:

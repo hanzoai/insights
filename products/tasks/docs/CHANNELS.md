@@ -78,7 +78,7 @@ Thread messages inherit the task's visibility.
 
 ## API
 
-### `/api/projects/{id}/task_channels/`
+### `/v1/projects/{id}/task_channels/`
 
 - `GET /` — list channels: all live public channels plus the requester's
   personal channel. Listing lazily `get_or_create`s the personal `#me` channel,
@@ -95,7 +95,7 @@ Thread messages inherit the task's visibility.
 - `TaskSerializer` / `TaskDetailDTO` emit `channel`.
 - `GET /tasks/?channel=<uuid>` filters the list to a channel's feed.
 
-### `/api/projects/{id}/tasks/{task_id}/thread_messages/`
+### `/v1/projects/{id}/tasks/{task_id}/thread_messages/`
 
 - `GET /` — thread messages, ascending `created_at` (paginated).
 - `POST / {content}` — add a message as the requester. Anyone who can see the task can post.

@@ -38,7 +38,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
                 "trendsFilter": {"display": "BoldNumber"},
             },
         }
-        self.insight = self.client.post(f"/api/projects/{self.team.id}/insights", data=self.default_insight_data).json()
+        self.insight = self.client.post(f"/v1/projects/{self.team.id}/insights", data=self.default_insight_data).json()
 
     def test_create_and_delete_alert(self) -> None:
         creation_request = {
@@ -52,7 +52,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {"upper": 100}}},
             "calculation_interval": "daily",
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request)
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request)
 
         expected_alert_json = {
             "calculation_interval": "daily",
@@ -87,13 +87,13 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
         assert response.status_code == status.HTTP_201_CREATED, response.content
         assert response.json() == expected_alert_json
 
-        alerts = self.client.get(f"/api/projects/{self.team.id}/alerts")
+        alerts = self.client.get(f"/v1/projects/{self.team.id}/alerts")
         assert alerts.json()["results"] == [{**expected_alert_json, "checks": []}]
 
         alert_id = response.json()["id"]
-        self.client.delete(f"/api/projects/{self.team.id}/alerts/{alert_id}")
+        self.client.delete(f"/v1/projects/{self.team.id}/alerts/{alert_id}")
 
-        alerts = self.client.get(f"/api/projects/{self.team.id}/alerts")
+        alerts = self.client.get(f"/v1/projects/{self.team.id}/alerts")
         assert len(alerts.json()["results"]) == 0
 
     def test_alert_rejects_insight_without_viewer_access(self) -> None:
@@ -112,18 +112,18 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "calculation_interval": "daily",
         }
         # An alert created while access is allowed, so we can test the insight-swap update vector.
-        alert_id = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()["id"]
+        alert_id = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()["id"]
 
         with mock.patch(
             "insights.rbac.user_access_control.UserAccessControl.check_access_level_for_object",
             side_effect=deny_insight,
         ):
-            create = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request)
+            create = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request)
             update = self.client.patch(
-                f"/api/projects/{self.team.id}/alerts/{alert_id}", {"insight": self.insight["id"]}
+                f"/v1/projects/{self.team.id}/alerts/{alert_id}", {"insight": self.insight["id"]}
             )
             simulate = self.client.post(
-                f"/api/projects/{self.team.id}/alerts/simulate/",
+                f"/v1/projects/{self.team.id}/alerts/simulate/",
                 {"insight": self.insight["id"], "detector_config": {"type": "zscore", "threshold": 0.9}},
             )
 
@@ -144,17 +144,17 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {"upper": 100}}},
             "calculation_interval": "daily",
         }
-        alert_id = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()["id"]
+        alert_id = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()["id"]
 
         # Deny viewer access to every insight by emptying the viewable-insight queryset.
         with mock.patch(
             "insights.rbac.user_access_control.UserAccessControl.filter_queryset_by_access_level",
             side_effect=lambda queryset, *args, **kwargs: queryset.none(),
         ):
-            retrieve = self.client.get(f"/api/projects/{self.team.id}/alerts/{alert_id}")
-            listed = self.client.get(f"/api/projects/{self.team.id}/alerts")
-            update = self.client.patch(f"/api/projects/{self.team.id}/alerts/{alert_id}", {"name": "renamed"})
-            delete = self.client.delete(f"/api/projects/{self.team.id}/alerts/{alert_id}")
+            retrieve = self.client.get(f"/v1/projects/{self.team.id}/alerts/{alert_id}")
+            listed = self.client.get(f"/v1/projects/{self.team.id}/alerts")
+            update = self.client.patch(f"/v1/projects/{self.team.id}/alerts/{alert_id}", {"name": "renamed"})
+            delete = self.client.delete(f"/v1/projects/{self.team.id}/alerts/{alert_id}")
 
         assert retrieve.status_code == status.HTTP_404_NOT_FOUND, retrieve.content
         assert update.status_code == status.HTTP_404_NOT_FOUND, update.content
@@ -163,7 +163,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
 
     def test_create_alert_on_funnel_insight(self) -> None:
         funnel_insight = self.client.post(
-            f"/api/projects/{self.team.id}/insights",
+            f"/v1/projects/{self.team.id}/insights",
             data={
                 "query": {
                     "kind": "FunnelsQuery",
@@ -184,7 +184,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "calculation_interval": "daily",
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request)
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request)
         assert response.status_code == status.HTTP_201_CREATED, response.content
 
     def test_create_threshold_alert_rejects_empty_bounds(self) -> None:
@@ -197,7 +197,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {}}},
             "calculation_interval": "daily",
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request)
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request)
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.content
         assert "At least one threshold bound" in str(response.json())
 
@@ -223,7 +223,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "calculation_interval": "daily",
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request)
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request)
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.content
 
     def test_patch_alert_rejects_over_long_name(self) -> None:
@@ -236,8 +236,8 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {"upper": 100}}},
             "calculation_interval": "daily",
         }
-        alert_id = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()["id"]
-        response = self.client.patch(f"/api/projects/{self.team.id}/alerts/{alert_id}", {"name": "a" * 256})
+        alert_id = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()["id"]
+        response = self.client.patch(f"/v1/projects/{self.team.id}/alerts/{alert_id}", {"name": "a" * 256})
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.content
 
     def test_patch_legacy_empty_bounds_alert_without_touching_threshold(self) -> None:
@@ -257,7 +257,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             enabled=True,
         )
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{alert.id}",
+            f"/v1/projects/{self.team.id}/alerts/{alert.id}",
             {"enabled": False},
         )
         assert response.status_code == status.HTTP_200_OK, response.content
@@ -274,9 +274,9 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {"upper": 100}}},
             "calculation_interval": "daily",
         }
-        alert_id = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()["id"]
+        alert_id = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()["id"]
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{alert_id}",
+            f"/v1/projects/{self.team.id}/alerts/{alert_id}",
             {"threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {}}}},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.content
@@ -290,7 +290,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {}},
             "name": "alert name",
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request)
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
         another_team = Team.objects.create(
@@ -298,7 +298,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             api_token=self.CONFIG_API_TOKEN + "2",
         )
         another_team_insight = self.client.post(
-            f"/api/projects/{another_team.id}/insights", data=self.default_insight_data
+            f"/v1/projects/{another_team.id}/insights", data=self.default_insight_data
         ).json()
         creation_request = {
             "insight": str(another_team_insight["id"]),
@@ -308,7 +308,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {}},
             "name": "alert name",
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request)
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_create_and_list_alert(self) -> None:
@@ -322,16 +322,16 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {"upper": 100}}},
             "name": "alert name",
         }
-        alert = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()
+        alert = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()
 
-        list = self.client.get(f"/api/projects/{self.team.id}/alerts?insight={self.insight['id']}")
+        list = self.client.get(f"/v1/projects/{self.team.id}/alerts?insight={self.insight['id']}")
         assert list.status_code == status.HTTP_200_OK
         results = list.json()["results"]
         assert len(results) == 1
         assert results[0]["id"] == alert["id"]
 
         list_for_another_insight = self.client.get(
-            f"/api/projects/{self.team.id}/alerts?insight={self.insight['id'] + 1}"
+            f"/v1/projects/{self.team.id}/alerts?insight={self.insight['id'] + 1}"
         )
         assert list_for_another_insight.status_code == status.HTTP_200_OK
         assert len(list_for_another_insight.json()["results"]) == 0
@@ -357,7 +357,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {"upper": 100}}},
             "name": "checks limit test",
         }
-        alert = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()
+        alert = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()
         alert_obj = AlertConfiguration.objects.get(id=alert["id"])
 
         for i in range(total_checks):
@@ -367,7 +367,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
                 state=AlertState.NOT_FIRING,
             )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/alerts/{alert['id']}{query_param}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/alerts/{alert['id']}{query_param}")
         assert response.status_code == status.HTTP_200_OK
         body = response.json()
         assert len(body["checks"]) == expected_count
@@ -391,7 +391,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {"upper": 100}}},
             "name": "checks offset test",
         }
-        alert = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()
+        alert = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()
         alert_obj = AlertConfiguration.objects.get(id=alert["id"])
 
         now = datetime.now(UTC)
@@ -404,7 +404,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             AlertCheck.objects.filter(id=check.id).update(created_at=now - timedelta(seconds=8 - i))
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/alerts/{alert['id']}"
+            f"/v1/projects/{self.team.id}/alerts/{alert['id']}"
             f"?checks_limit={checks_limit}&checks_offset={checks_offset}"
         )
         assert response.status_code == status.HTTP_200_OK
@@ -421,7 +421,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {"upper": 100}}},
             "name": "checks date test",
         }
-        alert = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()
+        alert = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()
         alert_obj = AlertConfiguration.objects.get(id=alert["id"])
 
         now = datetime.now(UTC)
@@ -442,12 +442,12 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             )
 
         # Without date_from — returns last 5 (all of them)
-        response = self.client.get(f"/api/projects/{self.team.id}/alerts/{alert['id']}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/alerts/{alert['id']}")
         assert len(response.json()["checks"]) == 5
         assert response.json()["checks_total"] == 5
 
         # With date_from=-24h — only the 2 recent checks
-        response = self.client.get(f"/api/projects/{self.team.id}/alerts/{alert['id']}?checks_date_from=-24h")
+        response = self.client.get(f"/v1/projects/{self.team.id}/alerts/{alert['id']}?checks_date_from=-24h")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["checks_total"] == 2
         checks = response.json()["checks"]
@@ -464,7 +464,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {"upper": 100}}},
             "name": "checks window test",
         }
-        alert = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()
+        alert = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()
         alert_obj = AlertConfiguration.objects.get(id=alert["id"])
 
         now = datetime.now(UTC)
@@ -485,7 +485,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
 
         # Window from 4 days ago to 12 hours ago — should get checks with values 1.0, 2.0, 3.0 but not 4.0
         response = self.client.get(
-            f"/api/projects/{self.team.id}/alerts/{alert['id']}?checks_date_from=-4d&checks_date_to=-12h"
+            f"/v1/projects/{self.team.id}/alerts/{alert['id']}?checks_date_from=-4d&checks_date_to=-12h"
         )
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["checks_total"] == 3
@@ -510,15 +510,15 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
                 "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {"upper": 100}}},
                 "name": "alert name",
             }
-            self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request)
+            self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request)
 
-            alert_2 = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()
+            alert_2 = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()
 
             assert alert_2["code"] == "invalid_input"
 
     def test_alert_is_deleted_on_insight_update(self) -> None:
         another_insight = self.client.post(
-            f"/api/projects/{self.team.id}/insights", data=self.default_insight_data
+            f"/v1/projects/{self.team.id}/insights", data=self.default_insight_data
         ).json()
         creation_request = {
             "insight": another_insight["id"],
@@ -530,27 +530,27 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {"upper": 100}}},
             "name": "alert name",
         }
-        alert = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()
+        alert = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()
 
         updated_insight = deepcopy(self.default_insight_data)
         updated_insight["query"]["series"][0]["event"] = "$anotherEvent"
         self.client.patch(
-            f"/api/projects/{self.team.id}/insights/{another_insight['id']}",
+            f"/v1/projects/{self.team.id}/insights/{another_insight['id']}",
             data=updated_insight,
         ).json()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/alerts/{alert['id']}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/alerts/{alert['id']}")
         # alerts should not be deleted if the new insight version supports alerts
         assert response.status_code == status.HTTP_200_OK
 
         insight_without_alert_support = deepcopy(self.default_insight_data)
         insight_without_alert_support["query"] = {"kind": "RetentionQuery", "retentionFilter": {}}
         self.client.patch(
-            f"/api/projects/{self.team.id}/insights/{another_insight['id']}",
+            f"/v1/projects/{self.team.id}/insights/{another_insight['id']}",
             data=insight_without_alert_support,
         ).json()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/alerts/{alert['id']}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/alerts/{alert['id']}")
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_insightsql_alert_survives_insight_update_and_is_listed_on_insight(self) -> None:
@@ -560,10 +560,12 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
                 "source": {"kind": "InsightsQLQuery", "query": "select count() from events"},
             },
         }
-        insightsql_insight = self.client.post(f"/api/projects/{self.team.id}/insights", data=insightsql_insight_data).json()
+        insightsql_insight = self.client.post(
+            f"/v1/projects/{self.team.id}/insights", data=insightsql_insight_data
+        ).json()
 
         alert = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             {
                 "insight": insightsql_insight["id"],
                 "subscribed_users": [self.user.id],
@@ -575,22 +577,22 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
         ).json()
 
         # The insight response must list the alert inline — the UI trusts this list on reload.
-        insight_response = self.client.get(f"/api/projects/{self.team.id}/insights/{insightsql_insight['id']}").json()
+        insight_response = self.client.get(f"/v1/projects/{self.team.id}/insights/{insightsql_insight['id']}").json()
         assert [a["id"] for a in insight_response["alerts"]] == [alert["id"]]
 
         # Updating the insight while it stays SQL-backed must not cascade-delete the alert.
         updated = deepcopy(insightsql_insight_data)
         updated["query"]["source"]["query"] = "select count() + 1 from events"
-        self.client.patch(f"/api/projects/{self.team.id}/insights/{insightsql_insight['id']}", data=updated)
-        response = self.client.get(f"/api/projects/{self.team.id}/alerts/{alert['id']}")
+        self.client.patch(f"/v1/projects/{self.team.id}/insights/{insightsql_insight['id']}", data=updated)
+        response = self.client.get(f"/v1/projects/{self.team.id}/alerts/{alert['id']}")
         assert response.status_code == status.HTTP_200_OK
 
         # Changing to a kind that cannot carry alerts still cascades.
         self.client.patch(
-            f"/api/projects/{self.team.id}/insights/{insightsql_insight['id']}",
+            f"/v1/projects/{self.team.id}/insights/{insightsql_insight['id']}",
             data={"query": {"kind": "RetentionQuery", "retentionFilter": {}}},
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/alerts/{alert['id']}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/alerts/{alert['id']}")
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_funnel_alert_survives_insight_update_and_is_listed_on_insight(self) -> None:
@@ -603,10 +605,10 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
                 ],
             },
         }
-        funnel_insight = self.client.post(f"/api/projects/{self.team.id}/insights", data=funnel_insight_data).json()
+        funnel_insight = self.client.post(f"/v1/projects/{self.team.id}/insights", data=funnel_insight_data).json()
 
         alert = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             {
                 "insight": funnel_insight["id"],
                 "subscribed_users": [self.user.id],
@@ -618,22 +620,22 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
         ).json()
 
         # The insight response must list the alert inline — the UI trusts this list on reload.
-        insight_response = self.client.get(f"/api/projects/{self.team.id}/insights/{funnel_insight['id']}").json()
+        insight_response = self.client.get(f"/v1/projects/{self.team.id}/insights/{funnel_insight['id']}").json()
         assert [a["id"] for a in insight_response["alerts"]] == [alert["id"]]
 
         # Updating the insight while it stays funnel-backed must not cascade-delete the alert.
         updated = deepcopy(funnel_insight_data)
         updated["query"]["series"][1]["event"] = "$pageleave"
-        self.client.patch(f"/api/projects/{self.team.id}/insights/{funnel_insight['id']}", data=updated)
-        response = self.client.get(f"/api/projects/{self.team.id}/alerts/{alert['id']}")
+        self.client.patch(f"/v1/projects/{self.team.id}/insights/{funnel_insight['id']}", data=updated)
+        response = self.client.get(f"/v1/projects/{self.team.id}/alerts/{alert['id']}")
         assert response.status_code == status.HTTP_200_OK
 
         # Changing to a kind that cannot carry alerts still cascades.
         self.client.patch(
-            f"/api/projects/{self.team.id}/insights/{funnel_insight['id']}",
+            f"/v1/projects/{self.team.id}/insights/{funnel_insight['id']}",
             data={"query": {"kind": "RetentionQuery", "retentionFilter": {}}},
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/alerts/{alert['id']}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/alerts/{alert['id']}")
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_alert_survives_switch_between_alertable_kinds(self) -> None:
@@ -642,10 +644,10 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
         # query and auto-disables + notifies on mismatch (covered by the validation/auto-disable tests),
         # so the alert and its history survive the edit and the user can reconfigure it.
         trends_insight = self.client.post(
-            f"/api/projects/{self.team.id}/insights", data=self.default_insight_data
+            f"/v1/projects/{self.team.id}/insights", data=self.default_insight_data
         ).json()
         alert_id = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             {
                 "insight": trends_insight["id"],
                 "subscribed_users": [self.user.id],
@@ -658,7 +660,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
 
         # Switch the insight from trends to SQL — a different alertable kind.
         self.client.patch(
-            f"/api/projects/{self.team.id}/insights/{trends_insight['id']}",
+            f"/v1/projects/{self.team.id}/insights/{trends_insight['id']}",
             data={
                 "query": {
                     "kind": "DataVisualizationNode",
@@ -666,11 +668,11 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
                 }
             },
         )
-        assert self.client.get(f"/api/projects/{self.team.id}/alerts/{alert_id}").status_code == status.HTTP_200_OK
+        assert self.client.get(f"/v1/projects/{self.team.id}/alerts/{alert_id}").status_code == status.HTTP_200_OK
 
     def test_alert_is_deleted_on_insight_soft_delete(self) -> None:
         another_insight = self.client.post(
-            f"/api/projects/{self.team.id}/insights", data=self.default_insight_data
+            f"/v1/projects/{self.team.id}/insights", data=self.default_insight_data
         ).json()
         creation_request = {
             "insight": another_insight["id"],
@@ -680,7 +682,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {"upper": 100}}},
             "name": "alert name",
         }
-        alert = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()
+        alert = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()
         alert_id = alert["id"]
 
         linked_insights_function = InsightsFunction.objects.create(
@@ -696,12 +698,12 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
         )
 
         patch_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights/{another_insight['id']}",
+            f"/v1/projects/{self.team.id}/insights/{another_insight['id']}",
             data={"deleted": True},
         )
         assert patch_response.status_code == status.HTTP_200_OK
 
-        response = self.client.get(f"/api/projects/{self.team.id}/alerts/{alert_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/alerts/{alert_id}")
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
         linked_insights_function.refresh_from_db()
@@ -717,7 +719,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {"upper": 100}}},
             "name": "alert name",
         }
-        alert = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()
+        alert = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()
         alert_id = alert["id"]
 
         linked_insights_function = InsightsFunction.objects.create(
@@ -743,7 +745,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             },
         )
 
-        self.client.delete(f"/api/projects/{self.team.id}/alerts/{alert_id}")
+        self.client.delete(f"/v1/projects/{self.team.id}/alerts/{alert_id}")
 
         linked_insights_function.refresh_from_db()
         assert linked_insights_function.deleted is True
@@ -766,7 +768,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "state": AlertState.FIRING,
         }
 
-        alert = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()
+        alert = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()
         assert alert["state"] == AlertState.NOT_FIRING
 
         alert = AlertConfiguration.objects.get(pk=alert["id"])
@@ -777,7 +779,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
         assert firing_alert.state == AlertState.FIRING
 
         resolved_alert = self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{firing_alert.id}", {"snoozed_until": datetime.now()}
+            f"/v1/projects/{self.team.id}/alerts/{firing_alert.id}", {"snoozed_until": datetime.now()}
         ).json()
         assert resolved_alert["state"] == AlertState.SNOOZED
 
@@ -785,9 +787,9 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
         check = AlertCheck.objects.filter(alert_configuration=firing_alert.id).latest("created_at")
         assert check.state == AlertState.SNOOZED
 
-        self.client.patch(f"/api/projects/{self.team.id}/alerts/{firing_alert.id}", {"enabled": False})
+        self.client.patch(f"/v1/projects/{self.team.id}/alerts/{firing_alert.id}", {"enabled": False})
         disabled_and_snoozed_alert = self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{firing_alert.id}",
+            f"/v1/projects/{self.team.id}/alerts/{firing_alert.id}",
             {"snoozed_until": datetime.now()},
         ).json()
         assert disabled_and_snoozed_alert["enabled"] is False
@@ -796,26 +798,26 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
         assert disabled_check.state == AlertState.NOT_FIRING
 
         enabled_and_snoozed_alert = self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{firing_alert.id}",
+            f"/v1/projects/{self.team.id}/alerts/{firing_alert.id}",
             {"enabled": True, "snoozed_until": "1d"},
         ).json()
         assert enabled_and_snoozed_alert["enabled"] is True
         assert enabled_and_snoozed_alert["state"] == AlertState.SNOOZED
 
         snoozed_alert = self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{firing_alert.id}",
+            f"/v1/projects/{self.team.id}/alerts/{firing_alert.id}",
             {"snoozed_until": datetime.now()},
         ).json()
         assert snoozed_alert["state"] == AlertState.SNOOZED
 
         edited_snoozed_alert = self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{firing_alert.id}",
+            f"/v1/projects/{self.team.id}/alerts/{firing_alert.id}",
             {"threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {"upper": 200}}}},
         ).json()
         assert edited_snoozed_alert["state"] == AlertState.NOT_FIRING
 
         edited_and_snoozed_alert = self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{firing_alert.id}",
+            f"/v1/projects/{self.team.id}/alerts/{firing_alert.id}",
             {
                 "snoozed_until": "1d",
                 "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {"upper": 300}}},
@@ -866,7 +868,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
     def test_create_alert_rejects_invalid_config(self, _name, overrides, expected_error_fragment):
         pie_insight_data = deepcopy(self.default_insight_data)
         pie_insight_data["query"]["trendsFilter"]["display"] = "ActionsPie"
-        pie_insight = self.client.post(f"/api/projects/{self.team.id}/insights", data=pie_insight_data).json()
+        pie_insight = self.client.post(f"/v1/projects/{self.team.id}/insights", data=pie_insight_data).json()
 
         creation_request = {
             "insight": pie_insight["id"],
@@ -875,7 +877,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "name": "alert name",
             **overrides,
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request)
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request)
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.content
         assert expected_error_fragment in response.json()["detail"].lower()
 
@@ -910,20 +912,20 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "threshold": {"configuration": {"type": InsightThresholdType.ABSOLUTE, "bounds": {"upper": 100}}},
             "name": "alert name",
         }
-        alert = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()
+        alert = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()
         assert "id" in alert, alert
 
-        response = self.client.patch(f"/api/projects/{self.team.id}/alerts/{alert['id']}", overrides)
+        response = self.client.patch(f"/v1/projects/{self.team.id}/alerts/{alert['id']}", overrides)
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.content
         assert expected_error_fragment in str(response.content).lower()
 
     def test_patch_alert_rejects_detector_for_non_time_series(self) -> None:
         pie_insight_data = deepcopy(self.default_insight_data)
         pie_insight_data["query"]["trendsFilter"]["display"] = "ActionsPie"
-        pie_insight = self.client.post(f"/api/projects/{self.team.id}/insights", data=pie_insight_data).json()
+        pie_insight = self.client.post(f"/v1/projects/{self.team.id}/insights", data=pie_insight_data).json()
 
         alert = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             {
                 "insight": pie_insight["id"],
                 "subscribed_users": [self.user.id],
@@ -936,7 +938,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
         assert "id" in alert, alert
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{alert['id']}",
+            f"/v1/projects/{self.team.id}/alerts/{alert['id']}",
             {"detector_config": {"type": "zscore", "threshold": 0.95, "window": 30}},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.content
@@ -988,13 +990,13 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "name": "alert name",
             "calculation_interval": "weekly",
         }
-        alert = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()
+        alert = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()
         assert alert["calculation_interval"] == "weekly"
         scheduled_check = datetime(2027, 1, 1, tzinfo=UTC)
         AlertConfiguration.objects.filter(id=alert["id"]).update(next_check_at=scheduled_check)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{alert['id']}",
+            f"/v1/projects/{self.team.id}/alerts/{alert['id']}",
             patch_payload,
             content_type="application/json",
         )
@@ -1016,7 +1018,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "name": "quiet alert",
             "schedule_restriction": {"blocked_windows": [{"start": "22:00", "end": "07:00"}]},
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request)
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request)
         assert response.status_code == status.HTTP_201_CREATED, response.content
         assert response.json()["schedule_restriction"] == {
             "blocked_windows": [{"start": "22:00", "end": "07:00"}],
@@ -1037,7 +1039,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
                 ]
             },
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request)
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_patch_schedule_restriction_snaps_next_check_to_first_minute_outside_quiet_hours(self) -> None:
@@ -1052,12 +1054,12 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "calculation_interval": "hourly",
         }
         with freeze_time("2026-04-06T14:00:00Z"):
-            alert = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request, format="json").json()
+            alert = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request, format="json").json()
             AlertConfiguration.objects.filter(pk=alert["id"]).update(
                 next_check_at=datetime(2026, 4, 6, 15, 30, tzinfo=UTC),
             )
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/alerts/{alert['id']}",
+                f"/v1/projects/{self.team.id}/alerts/{alert['id']}",
                 {"schedule_restriction": {"blocked_windows": [{"start": "11:00", "end": "16:00"}]}},
                 format="json",
             )
@@ -1075,9 +1077,9 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "name": "alert",
             "schedule_restriction": {"blocked_windows": [{"start": "22:00", "end": "23:00"}]},
         }
-        alert = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()
+        alert = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()
         patch = self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{alert['id']}",
+            f"/v1/projects/{self.team.id}/alerts/{alert['id']}",
             {"schedule_restriction": {"blocked_windows": []}},
             format="json",
         )
@@ -1088,7 +1090,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
         data = deepcopy(self.default_insight_data)
         data["query"]["trendsFilter"] = {"display": "ActionsLineGraph"}
         data["query"]["interval"] = "day"
-        return self.client.post(f"/api/projects/{self.team.id}/insights", data=data).json()
+        return self.client.post(f"/v1/projects/{self.team.id}/insights", data=data).json()
 
     def _quiet_hours_alert_payload(self, insight_id: int, **extra: Any) -> dict[str, Any]:
         return {
@@ -1123,7 +1125,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
     ) -> None:
         creation_request = self._quiet_hours_alert_payload(self.insight["id"])
         creation_request["schedule_restriction"] = schedule_restriction
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request, format="json")
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.content
         assert "invalid schedule restriction" in str(response.content).lower()
 
@@ -1142,7 +1144,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             self.team.timezone = team_timezone
             self.team.save(update_fields=["timezone"])
             creation_request = self._quiet_hours_alert_payload(self.insight["id"])
-            response = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request, format="json")
+            response = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request, format="json")
             assert response.status_code == status.HTTP_201_CREATED, response.content
             assert response.json()["schedule_restriction"] == {
                 "blocked_windows": [{"start": "22:00", "end": "07:00"}],
@@ -1159,7 +1161,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
                 {"start": "10:40", "end": "11:15"},
             ]
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request, format="json")
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request, format="json")
         assert response.status_code == status.HTTP_201_CREATED, response.content
         assert response.json()["schedule_restriction"] == {
             "blocked_windows": [{"start": "10:30", "end": "11:15"}],
@@ -1181,7 +1183,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             calculation_interval=interval,
             skip_weekend=skip_weekend,
         )
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request, format="json")
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request, format="json")
         assert response.status_code == status.HTTP_201_CREATED, response.content
         data = response.json()
         assert data["calculation_interval"] == interval
@@ -1209,7 +1211,7 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "skip_weekend": True,
             "schedule_restriction": {"blocked_windows": [{"start": "09:00", "end": "17:00"}]},
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request, format="json")
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request, format="json")
         assert response.status_code == status.HTTP_201_CREATED, response.content
         data = response.json()
         assert data["config"]["check_ongoing_interval"] is True
@@ -1229,9 +1231,9 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
             "name": "patch me",
             "calculation_interval": "daily",
         }
-        alert = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()
+        alert = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{alert['id']}",
+            f"/v1/projects/{self.team.id}/alerts/{alert['id']}",
             {
                 "skip_weekend": True,
                 "schedule_restriction": {"blocked_windows": [{"start": "12:00", "end": "13:00"}]},
@@ -1249,14 +1251,14 @@ class TestAlert(APIBaseTest, QueryMatchingTest):
 
     def test_patch_alert_invalid_schedule_restriction_leaves_existing_unchanged(self) -> None:
         creation_request = self._quiet_hours_alert_payload(self.insight["id"])
-        alert = self.client.post(f"/api/projects/{self.team.id}/alerts", creation_request).json()
+        alert = self.client.post(f"/v1/projects/{self.team.id}/alerts", creation_request).json()
         bad = self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{alert['id']}",
+            f"/v1/projects/{self.team.id}/alerts/{alert['id']}",
             {"schedule_restriction": {"blocked_windows": [{"start": "10:00", "end": "10:00"}]}},
             format="json",
         )
         assert bad.status_code == status.HTTP_400_BAD_REQUEST, bad.content
-        refreshed = self.client.get(f"/api/projects/{self.team.id}/alerts/{alert['id']}")
+        refreshed = self.client.get(f"/v1/projects/{self.team.id}/alerts/{alert['id']}")
         assert refreshed.status_code == status.HTTP_200_OK
         assert refreshed.json()["schedule_restriction"] == {
             "blocked_windows": [{"start": "22:00", "end": "07:00"}],
@@ -1273,7 +1275,7 @@ class TestInvestigationAgentValidation(APIBaseTest):
                 "interval": "day",
             },
         }
-        self.insight = self.client.post(f"/api/projects/{self.team.id}/insights", data=self.insight_data).json()
+        self.insight = self.client.post(f"/v1/projects/{self.team.id}/insights", data=self.insight_data).json()
 
     def _base_alert_body(self, *, detector_config: dict[str, Any] | None, enabled: bool) -> dict[str, Any]:
         return {
@@ -1310,7 +1312,7 @@ class TestInvestigationAgentValidation(APIBaseTest):
         expected_error_attr: str | None,
     ) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             self._base_alert_body(detector_config=detector_config, enabled=enabled),
         )
         assert response.status_code == expected_status, response.content
@@ -1320,7 +1322,7 @@ class TestInvestigationAgentValidation(APIBaseTest):
     def test_investigation_gates_notifications_rejected_without_agent_enabled(self) -> None:
         body = self._base_alert_body(detector_config=None, enabled=False)
         body["investigation_gates_notifications"] = True
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", body)
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", body)
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.content
         assert "investigation_gates_notifications" in response.json().get("attr", "")
 
@@ -1341,7 +1343,7 @@ class TestAlertSimulate(APIBaseTest):
                 "interval": "day",
             },
         }
-        self.insight = self.client.post(f"/api/projects/{self.team.id}/insights", data=self.insight_data).json()
+        self.insight = self.client.post(f"/v1/projects/{self.team.id}/insights", data=self.insight_data).json()
 
     @mock.patch("products.alerts.backend.evaluation.detector.calculate_for_query_based_insight")
     def test_simulate_returns_valid_response(self, mock_calculate) -> None:
@@ -1367,7 +1369,7 @@ class TestAlertSimulate(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/alerts/simulate",
+            f"/v1/projects/{self.team.id}/alerts/simulate",
             {
                 "insight": self.insight["id"],
                 "detector_config": {"type": "zscore", "threshold": 0.9, "window": 30},
@@ -1390,7 +1392,7 @@ class TestAlertSimulate(APIBaseTest):
 
     def test_simulate_missing_detector_config_returns_400(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/alerts/simulate",
+            f"/v1/projects/{self.team.id}/alerts/simulate",
             {
                 "insight": self.insight["id"],
                 "series_index": 0,
@@ -1400,7 +1402,7 @@ class TestAlertSimulate(APIBaseTest):
 
     def test_simulate_invalid_detector_config_returns_400(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/alerts/simulate",
+            f"/v1/projects/{self.team.id}/alerts/simulate",
             {
                 "insight": self.insight["id"],
                 "detector_config": {"type": "nonexistent_detector"},
@@ -1434,7 +1436,7 @@ class TestAlertSimulate(APIBaseTest):
 
         checks_before = AlertCheck.objects.count()
         response = self.client.post(
-            f"/api/projects/{self.team.id}/alerts/simulate",
+            f"/v1/projects/{self.team.id}/alerts/simulate",
             {
                 "insight": self.insight["id"],
                 "detector_config": {"type": "zscore", "threshold": 0.9, "window": 30},
@@ -1449,7 +1451,7 @@ class TestAlertTestDelivery(APIBaseTest):
     def setUp(self):
         super().setUp()
         insight = self.client.post(
-            f"/api/projects/{self.team.id}/insights",
+            f"/v1/projects/{self.team.id}/insights",
             data={
                 "query": {
                     "kind": "TrendsQuery",
@@ -1459,7 +1461,7 @@ class TestAlertTestDelivery(APIBaseTest):
             },
         ).json()
         response = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             data={
                 "insight": insight["id"],
                 "name": "Testable alert",
@@ -1504,7 +1506,7 @@ class TestAlertTestDelivery(APIBaseTest):
         self._create_destination(alert_id="00000000-0000-0000-0000-000000000000")
         alert_before = AlertConfiguration.objects.get(id=self.alert["id"])
 
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts/{self.alert['id']}/test-delivery/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts/{self.alert['id']}/test-delivery/")
 
         assert response.status_code == status.HTTP_202_ACCEPTED, response.content
         assert response.json() == {
@@ -1533,7 +1535,7 @@ class TestAlertTestDelivery(APIBaseTest):
         alert = AlertConfiguration.objects.get(id=self.alert["id"])
         AlertSubscription.objects.create(alert_configuration=alert, user=self.user)
 
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts/{self.alert['id']}/test-delivery/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts/{self.alert['id']}/test-delivery/")
 
         assert response.status_code == status.HTTP_202_ACCEPTED, response.content
         assert response.json() == {
@@ -1554,7 +1556,7 @@ class TestAlertTestDelivery(APIBaseTest):
         AlertSubscription.objects.create(alert_configuration=alert, user=self.user)
         self._create_destination()
 
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts/{self.alert['id']}/test-delivery/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts/{self.alert['id']}/test-delivery/")
 
         assert response.status_code == status.HTTP_202_ACCEPTED, response.content
         assert response.json() == {
@@ -1568,7 +1570,7 @@ class TestAlertTestDelivery(APIBaseTest):
     def test_returns_service_unavailable_when_destination_fails_to_queue(self, mock_trigger) -> None:
         self._create_destination()
 
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts/{self.alert['id']}/test-delivery/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts/{self.alert['id']}/test-delivery/")
 
         assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE, response.content
         assert response.json() == {
@@ -1580,7 +1582,7 @@ class TestAlertTestDelivery(APIBaseTest):
     def test_rejects_test_delivery_without_active_destinations(self, mock_trigger) -> None:
         self._create_destination(enabled=False)
 
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts/{self.alert['id']}/test-delivery/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts/{self.alert['id']}/test-delivery/")
 
         assert response.status_code == status.HTTP_409_CONFLICT
         assert response.json() == {"detail": "Add an email recipient or active destination before sending a test."}
@@ -1592,7 +1594,7 @@ class TestAlertTestDelivery(APIBaseTest):
     def test_rate_limits_test_delivery_per_team(self, _mock_trigger, _rate_limit_enabled) -> None:
         cache.clear()
         self._create_destination()
-        endpoint = f"/api/projects/{self.team.id}/alerts/{self.alert['id']}/test-delivery/"
+        endpoint = f"/v1/projects/{self.team.id}/alerts/{self.alert['id']}/test-delivery/"
 
         assert self.client.post(endpoint).status_code == status.HTTP_202_ACCEPTED
         assert self.client.post(endpoint).status_code == status.HTTP_202_ACCEPTED
@@ -1747,7 +1749,12 @@ class TestAlertEventProperties(APIBaseTest):
             ),
             (
                 "insightsql_any_row_with_columns",
-                {"type": "InsightsQLAlertConfig", "evaluation": "any_row", "column": "errors", "label_column": "country"},
+                {
+                    "type": "InsightsQLAlertConfig",
+                    "evaluation": "any_row",
+                    "column": "errors",
+                    "label_column": "country",
+                },
                 {
                     "config_type": "InsightsQLAlertConfig",
                     "insightsql_evaluation": "any_row",
@@ -1784,7 +1791,7 @@ class TestAlertListFilters(APIBaseTest):
                 "trendsFilter": {"display": "BoldNumber"},
             },
         }
-        self.insight = self.client.post(f"/api/projects/{self.team.id}/insights", data=self.default_insight_data).json()
+        self.insight = self.client.post(f"/v1/projects/{self.team.id}/insights", data=self.default_insight_data).json()
 
     def _create_alert(self, name: str, user=None) -> AlertConfiguration:
         return AlertConfiguration.objects.create(
@@ -1798,7 +1805,7 @@ class TestAlertListFilters(APIBaseTest):
         self._create_alert("Revenue spike")
         self._create_alert("Unrelated alert")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/alerts", {"search": "Reven"})
+        response = self.client.get(f"/v1/projects/{self.team.id}/alerts", {"search": "Reven"})
         result_names = [alert["name"] for alert in response.json()["results"]]
 
         assert result_names == ["Revenue spike"]
@@ -1810,7 +1817,7 @@ class TestAlertListFilters(APIBaseTest):
         self._create_alert("Theirs", user=other_user)
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             {"created_by": str(other_user.uuid)},
         )
         result_names = [alert["name"] for alert in response.json()["results"]]
@@ -1825,7 +1832,7 @@ class TestAlertListFilters(APIBaseTest):
         self._create_alert("Unrelated", user=other_user)
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             {"search": "Revenue", "created_by": str(other_user.uuid)},
         )
         result_names = [alert["name"] for alert in response.json()["results"]]
@@ -1845,7 +1852,7 @@ class TestAlertListFilters(APIBaseTest):
         self._create_alert(alert_name)
         self._create_alert("Totally unrelated")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/alerts", {"search": search})
+        response = self.client.get(f"/v1/projects/{self.team.id}/alerts", {"search": search})
         results = response.json()["results"]
 
         match_type_by_name = {a["name"]: a["search_match_type"] for a in results}
@@ -1858,7 +1865,7 @@ class TestAlertListFilters(APIBaseTest):
         for name in ("revenue spike", "spike in revenue", "reveneu drop", "Unrelated alert"):
             self._create_alert(name)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/alerts", {"search": "revenue"})
+        response = self.client.get(f"/v1/projects/{self.team.id}/alerts", {"search": "revenue"})
         results = response.json()["results"]
 
         match_type_by_name = {a["name"]: a["search_match_type"] for a in results}
@@ -1870,7 +1877,7 @@ class TestAlertListFilters(APIBaseTest):
     def test_list_filter_by_search_match_type_absent_without_search(self) -> None:
         self._create_alert("Revenue spike")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/alerts")
+        response = self.client.get(f"/v1/projects/{self.team.id}/alerts")
         results = response.json()["results"]
 
         assert results
@@ -1883,7 +1890,7 @@ class TestAlertListFilters(APIBaseTest):
         ]
     )
     def test_list_filter_validation_errors(self, _name: str, query_params: dict[str, str], expected_attr: str) -> None:
-        response = self.client.get(f"/api/projects/{self.team.id}/alerts", query_params)
+        response = self.client.get(f"/v1/projects/{self.team.id}/alerts", query_params)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["attr"] == expected_attr
 
@@ -1894,7 +1901,7 @@ class TestAlertAPIKeyAccess(APIBaseTest):
     def setUp(self):
         super().setUp()
         self.insight = self.client.post(
-            f"/api/projects/{self.team.id}/insights",
+            f"/v1/projects/{self.team.id}/insights",
             data={
                 "query": {
                     "kind": "TrendsQuery",
@@ -1941,7 +1948,7 @@ class TestAlertAPIKeyAccess(APIBaseTest):
         api_key = self._create_api_key(scopes)
         self.client.logout()
 
-        endpoint = f"/api/projects/{self.team.id}/alerts{endpoint_suffix}".format(alert_id=self.alert.id)
+        endpoint = f"/v1/projects/{self.team.id}/alerts{endpoint_suffix}".format(alert_id=self.alert.id)
         response = getattr(self.client, http_method)(endpoint, HTTP_AUTHORIZATION=f"Bearer {api_key}")
 
         assert response.status_code == expected_status
@@ -1960,7 +1967,7 @@ class TestAlertAPIKeyAccess(APIBaseTest):
         self.client.logout()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/alerts/",
+            f"/v1/projects/{self.team.id}/alerts/",
             data={
                 "insight": self.insight["id"],
                 "subscribed_users": [self.user.id],
@@ -1988,7 +1995,7 @@ class TestAlertAPIKeyAccess(APIBaseTest):
         self.client.logout()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/alerts/simulate/",
+            f"/v1/projects/{self.team.id}/alerts/simulate/",
             data={"insight": self.insight["id"], "detector_config": {"type": "zscore", "threshold": 0.9}},
             HTTP_AUTHORIZATION=f"Bearer {api_key}",
         )
@@ -2018,7 +2025,7 @@ class TestAlertAPIKeyAccess(APIBaseTest):
         self.client.logout()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/alerts/simulate/",
+            f"/v1/projects/{self.team.id}/alerts/simulate/",
             data={
                 "insight": self.insight["id"],
                 "detector_config": {"type": "zscore", "threshold": 0.9, "window": 30},
@@ -2045,7 +2052,7 @@ class TestAlertRealTimeInterval(APIBaseTest):
                 "trendsFilter": {"display": "BoldNumber"},
             },
         }
-        self.insight = self.client.post(f"/api/projects/{self.team.id}/insights", data=self.default_insight_data).json()
+        self.insight = self.client.post(f"/v1/projects/{self.team.id}/insights", data=self.default_insight_data).json()
 
     def _creation_request(self, **overrides: Any) -> dict[str, Any]:
         payload = {
@@ -2071,23 +2078,23 @@ class TestAlertRealTimeInterval(APIBaseTest):
         self.organization.save()
 
     def test_create_real_time_rejected_without_billing_entitlement(self) -> None:
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", self._creation_request())
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", self._creation_request())
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Scale or Enterprise" in str(response.json())
 
     def test_create_real_time_succeeds_with_entitlement(self) -> None:
         self._enable_real_time_alerts()
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", self._creation_request())
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", self._creation_request())
         assert response.status_code == status.HTTP_201_CREATED, response.content
         assert response.json()["calculation_interval"] == AlertCalculationInterval.REAL_TIME
 
     def test_patch_real_time_succeeds_with_entitlement(self) -> None:
         self._enable_real_time_alerts()
-        create_response = self.client.post(f"/api/projects/{self.team.id}/alerts", self._creation_request())
+        create_response = self.client.post(f"/v1/projects/{self.team.id}/alerts", self._creation_request())
         alert_id = create_response.json()["id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{alert_id}",
+            f"/v1/projects/{self.team.id}/alerts/{alert_id}",
             {"name": "updated real time alert"},
         )
         assert response.status_code == status.HTTP_200_OK, response.content
@@ -2096,14 +2103,14 @@ class TestAlertRealTimeInterval(APIBaseTest):
 
     def test_patch_existing_real_time_rejected_after_entitlement_removed(self) -> None:
         self._enable_real_time_alerts()
-        create_response = self.client.post(f"/api/projects/{self.team.id}/alerts", self._creation_request())
+        create_response = self.client.post(f"/v1/projects/{self.team.id}/alerts", self._creation_request())
         alert_id = create_response.json()["id"]
 
         self.organization.available_product_features = []
         self.organization.save()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{alert_id}",
+            f"/v1/projects/{self.team.id}/alerts/{alert_id}",
             {"name": "still real time"},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -2111,50 +2118,50 @@ class TestAlertRealTimeInterval(APIBaseTest):
 
     def test_create_real_time_rejected_when_limit_reached(self) -> None:
         self._enable_real_time_alerts(limit=1)
-        first = self.client.post(f"/api/projects/{self.team.id}/alerts", self._creation_request())
+        first = self.client.post(f"/v1/projects/{self.team.id}/alerts", self._creation_request())
         assert first.status_code == status.HTTP_201_CREATED, first.content
 
-        second = self.client.post(f"/api/projects/{self.team.id}/alerts", self._creation_request(name="second"))
+        second = self.client.post(f"/v1/projects/{self.team.id}/alerts", self._creation_request(name="second"))
         assert second.status_code == status.HTTP_400_BAD_REQUEST
         assert "limit of 1 real-time alerts" in str(second.json())
 
     def test_real_time_limit_ignores_disabled_alerts(self) -> None:
         self._enable_real_time_alerts(limit=1)
-        first = self.client.post(f"/api/projects/{self.team.id}/alerts", self._creation_request())
+        first = self.client.post(f"/v1/projects/{self.team.id}/alerts", self._creation_request())
         assert first.status_code == status.HTTP_201_CREATED, first.content
 
         self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{first.json()['id']}",
+            f"/v1/projects/{self.team.id}/alerts/{first.json()['id']}",
             {"enabled": False},
         )
 
-        second = self.client.post(f"/api/projects/{self.team.id}/alerts", self._creation_request(name="second"))
+        second = self.client.post(f"/v1/projects/{self.team.id}/alerts", self._creation_request(name="second"))
         assert second.status_code == status.HTTP_201_CREATED, second.content
 
     def test_real_time_limit_ignores_other_intervals(self) -> None:
         self._enable_real_time_alerts(limit=1)
         daily = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             self._creation_request(name="daily", calculation_interval=AlertCalculationInterval.DAILY),
         )
         assert daily.status_code == status.HTTP_201_CREATED, daily.content
 
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", self._creation_request())
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", self._creation_request())
         assert response.status_code == status.HTTP_201_CREATED, response.content
 
     def test_patch_to_real_time_rejected_when_limit_reached(self) -> None:
         self._enable_real_time_alerts(limit=1)
-        real_time = self.client.post(f"/api/projects/{self.team.id}/alerts", self._creation_request())
+        real_time = self.client.post(f"/v1/projects/{self.team.id}/alerts", self._creation_request())
         assert real_time.status_code == status.HTTP_201_CREATED, real_time.content
 
         daily = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             self._creation_request(name="daily", calculation_interval=AlertCalculationInterval.DAILY),
         )
         assert daily.status_code == status.HTTP_201_CREATED, daily.content
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{daily.json()['id']}",
+            f"/v1/projects/{self.team.id}/alerts/{daily.json()['id']}",
             {"calculation_interval": AlertCalculationInterval.REAL_TIME},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -2162,17 +2169,17 @@ class TestAlertRealTimeInterval(APIBaseTest):
 
     def test_enable_real_time_rejected_when_limit_reached(self) -> None:
         self._enable_real_time_alerts(limit=1)
-        first = self.client.post(f"/api/projects/{self.team.id}/alerts", self._creation_request())
+        first = self.client.post(f"/v1/projects/{self.team.id}/alerts", self._creation_request())
         assert first.status_code == status.HTTP_201_CREATED, first.content
 
         disabled = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             self._creation_request(name="disabled", enabled=False),
         )
         assert disabled.status_code == status.HTTP_201_CREATED, disabled.content
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/alerts/{disabled.json()['id']}",
+            f"/v1/projects/{self.team.id}/alerts/{disabled.json()['id']}",
             {"enabled": True},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
