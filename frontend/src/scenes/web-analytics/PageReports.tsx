@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { FilterBar } from 'lib/components/FilterBar'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -11,7 +11,7 @@ import { PathCleaningToggle } from './PathCleaningToggle'
 import { Tiles } from './WebAnalyticsDashboard'
 import { WebAnalyticsCompareFilter, WebAnalyticsDomainSelector } from './WebAnalyticsFilters'
 
-const MascotXRay = pngHoggie()
+const MascotXRay = pngMascot()
 
 function NoUrlSelectedMessage(): JSX.Element {
     return (

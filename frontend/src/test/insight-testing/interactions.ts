@@ -5,9 +5,9 @@ import {
     clickAtIndex,
     createDefaultTooltipAccessor,
     type DefaultTooltipAccessor,
-    getHogChartTooltip,
+    getScriptChartTooltip,
     hoverUntilTooltip,
-    waitForHogChartTooltip,
+    waitForScriptChartTooltip,
 } from '@hanzo/quill-charts/testing'
 
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
@@ -161,7 +161,7 @@ export function getQuerySource(): TrendsQuery {
 
 export const chart = {
     /** Current chart tooltip element, or null if none is rendered. */
-    getTooltip: getHogChartTooltip,
+    getTooltip: getScriptChartTooltip,
     async hoverTooltip(
         index: number,
         totalLabels = trendsSeries.pageviews.labels.length
@@ -179,7 +179,7 @@ export const chart = {
     /** Click a row inside the pinned tooltip by matching its label text. Use
      *  after `clickAtIndex` has pinned a multi-series tooltip. */
     async clickTooltipRow(label: string | RegExp): Promise<void> {
-        const tooltip = await waitForHogChartTooltip()
+        const tooltip = await waitForScriptChartTooltip()
         // Each quill tooltip row renders its label twice — a visible copy plus an aria-hidden
         // measurement copy used for truncation layout — so match only the visible one.
         const matches = within(tooltip).getAllByText(label)

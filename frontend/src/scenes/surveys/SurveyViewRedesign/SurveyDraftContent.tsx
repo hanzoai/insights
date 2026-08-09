@@ -3,13 +3,13 @@ import { useValues } from 'kea'
 import { Button } from '@hanzo/elements'
 import { IconCheck, IconRocket } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { LaunchSurveyButton } from 'scenes/surveys/components/LaunchSurveyButton'
 import { surveyLogic } from 'scenes/surveys/surveyLogic'
 
 import { Survey, SurveyType } from '~/types'
 
-const MascotConstruction1 = pngHoggie()
+const MascotConstruction1 = pngMascot()
 
 interface ChecklistItem {
     title: string

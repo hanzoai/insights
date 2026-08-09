@@ -5,7 +5,7 @@ import { languages } from 'monaco-editor'
 import { insightsQLAutocompleteProvider } from 'lib/monaco/insightsQLAutocompleteProvider'
 import { insightsQLMetadataProvider } from 'lib/monaco/insightsQLMetadataProvider'
 
-import { HogLanguage } from '~/queries/schema/schema-general'
+import { ScriptLanguage } from '~/queries/schema/schema-general'
 
 import { conf as _conf, language as _language } from './script'
 
@@ -130,19 +130,19 @@ export const language: () => languages.IMonarchLanguage = () => ({
     },
 })
 
-export function initHogTemplateLanguage(monaco: Monaco): void {
-    if (!monaco.languages.getLanguages().some(({ id }: { id: string }) => id === 'hogTemplate')) {
+export function initScriptTemplateLanguage(monaco: Monaco): void {
+    if (!monaco.languages.getLanguages().some(({ id }: { id: string }) => id === 'scriptTemplate')) {
         monaco.languages.register({
-            id: 'hogTemplate',
+            id: 'scriptTemplate',
             mimetypes: ['application/script+template'],
         })
-        monaco.languages.setLanguageConfiguration('hogTemplate', conf())
-        monaco.languages.setMonarchTokensProvider('hogTemplate', language())
+        monaco.languages.setLanguageConfiguration('scriptTemplate', conf())
+        monaco.languages.setMonarchTokensProvider('scriptTemplate', language())
         monaco.languages.registerCompletionItemProvider(
-            'hogTemplate',
-            insightsQLAutocompleteProvider(HogLanguage.hogTemplate)
+            'scriptTemplate',
+            insightsQLAutocompleteProvider(ScriptLanguage.scriptTemplate)
         )
-        monaco.languages.registerCodeActionProvider('hogTemplate', insightsQLMetadataProvider())
+        monaco.languages.registerCodeActionProvider('scriptTemplate', insightsQLMetadataProvider())
     }
 }
 /* oxlint-enable no-useless-escape */

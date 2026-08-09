@@ -15,18 +15,18 @@ function NullMascot(props: MascotProps): JSX.Element | null {
     return null
 }
 
-export const BigLeaguesHog = NullMascot
-export const BurningMoneyHog = NullMascot
-export const ClimberHog1 = NullMascot
-export const ClimberHog2 = NullMascot
-export const ExplorerHog = NullMascot
-export const FeatureFlagHog = NullMascot
-export const HeartHog = NullMascot
-export const HogWelder = NullMascot
-export const MailHog = NullMascot
-export const SleepingHog = NullMascot
-export const StarHog = NullMascot
-export const SupermanHog = NullMascot
-export const SupportHeroHog = NullMascot
-export const WarningHog = NullMascot
-export const WavingHog = NullMascot
+export const BigLeaguesScript = NullMascot
+export const BurningMoneyScript = NullMascot
+export const ClimberScript1 = NullMascot
+export const ClimberScript2 = NullMascot
+export const ExplorerScript = NullMascot
+export const FeatureFlagScript = NullMascot
+export const HeartScript = NullMascot
+export const ScriptWelder = NullMascot
+export const MailScript = NullMascot
+export const SleepingScript = NullMascot
+export const StarScript = NullMascot
+export const SupermanScript = NullMascot
+export const SupportHeroScript = NullMascot
+export const WarningScript = NullMascot
+export const WavingScript = NullMascot

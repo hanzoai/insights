@@ -2,7 +2,7 @@ import { useActions } from 'kea'
 
 import { IconX } from '@hanzo/icons'
 
-import type { AssetSvgProps } from 'lib/brand/hoggies'
+import type { AssetSvgProps } from 'lib/brand/mascot'
 import { Button } from 'lib/elements/Button'
 
 import { navPanelAdvertisementLogic } from './NavPanelAdvertisementLogic'
@@ -28,15 +28,15 @@ export function isCampaignPayload(value: unknown): value is CampaignPayload {
 }
 
 export interface ProductPushDisplay {
-    /** Hoggie illustration shown in the promo card's hero image (a PNG, via `pngHoggie`) */
-    Hoggie: React.ComponentType<AssetSvgProps>
+    /** Mascot illustration shown in the promo card's hero image (a PNG, via `pngMascot`) */
+    Mascot: React.ComponentType<AssetSvgProps>
     /** Product brand color driving the hero's geometric background */
     accentColor: string
     /** Default promo copy, used when the campaign has no custom reason text */
     tagline: string
 }
 
-// Playful scattered shapes behind the hoggie, tinted white over the product's brand color
+// Playful scattered shapes behind the mascot, tinted white over the product's brand color
 function GeometricPattern(): JSX.Element {
     return (
         <svg
@@ -98,12 +98,12 @@ function GeometricPattern(): JSX.Element {
 }
 
 /**
- * Presentational product "script + text" hero: a Hoggie illustration over the product's brand-tinted
+ * Presentational product "script + text" hero: a Mascot illustration over the product's brand-tinted
  * geometric background, with a title and blurb below. Shared by the nav advertisement card and the
  * welcome dialog's flagship-products showcase so both read as one visual. ``topRight`` is an optional
  * slot for an overlay control (e.g. a dismiss button); the welcome showcase leaves it empty.
  */
-export function ProductHogHero({
+export function ProductScriptHero({
     hero,
     title,
     text,
@@ -121,7 +121,7 @@ export function ProductHogHero({
                 style={{ backgroundColor: hero.accentColor }}
             >
                 <GeometricPattern />
-                <hero.Hoggie className="relative h-20 w-auto" aria-hidden="true" />
+                <hero.Mascot className="relative h-20 w-auto" aria-hidden="true" />
                 <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-b from-transparent to-surface-primary" />
                 {topRight ? <div className="absolute top-1 right-1">{topRight}</div> : null}
             </div>
@@ -172,7 +172,7 @@ export function AdvertisementCard({
     return (
         <div className="overflow-hidden rounded border bg-surface-primary text-xs shadow-sm transition-shadow hover:shadow-md">
             {hero ? (
-                <ProductHogHero hero={hero} title={title} text={text} topRight={dismissButton} />
+                <ProductScriptHero hero={hero} title={title} text={text} topRight={dismissButton} />
             ) : (
                 <div className="flex flex-col gap-1 px-2 py-1.5">
                     <div className="flex items-start justify-between gap-2">

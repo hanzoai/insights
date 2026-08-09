@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import React, { useState } from 'react'
 
-import { printHogStringOutput } from '@hanzo/scriptvm'
+import { printScriptStringOutput } from '@hanzo/scriptvm'
 import { Button, Table, Tabs } from '@hanzo/elements'
 
 import { JSONViewer } from 'lib/components/JSONViewer'
@@ -10,7 +10,7 @@ import { SceneExport } from 'scenes/sceneTypes'
 
 import { renderInsightsQLX } from '~/queries/nodes/InsightsQLX/render'
 
-import { ReplChunk as ReplChunkType, hogReplLogic } from './hogReplLogic'
+import { ReplChunk as ReplChunkType, scriptReplLogic } from './scriptReplLogic'
 
 export interface ReplResultsTableProps {
     response: {
@@ -45,7 +45,7 @@ export function ReplResultsTable({ response }: ReplResultsTableProps): JSX.Eleme
                     {
                         key: 'raw',
                         label: 'Raw',
-                        content: <div>{printHogStringOutput(response)}</div>,
+                        content: <div>{printScriptStringOutput(response)}</div>,
                     },
                 ]}
             />
@@ -53,7 +53,7 @@ export function ReplResultsTable({ response }: ReplResultsTableProps): JSX.Eleme
     )
 }
 
-function printRichHogOutput(arg: any): JSX.Element | string {
+function printRichScriptOutput(arg: any): JSX.Element | string {
     if (typeof arg === 'object' && arg !== null) {
         if ('__hx_tag' in arg) {
             return renderInsightsQLX(arg)
@@ -62,7 +62,7 @@ function printRichHogOutput(arg: any): JSX.Element | string {
             return <ReplResultsTable response={arg} />
         }
     }
-    return printHogStringOutput(arg)
+    return printScriptStringOutput(arg)
 }
 
 interface ReplChunkProps {
@@ -114,7 +114,7 @@ export function ReplChunk({
                             <div key={index}>
                                 {line.map((arg, argIndex) => (
                                     <React.Fragment key={argIndex}>
-                                        {printRichHogOutput(arg)}
+                                        {printRichScriptOutput(arg)}
                                         {argIndex < line.length - 1 ? ' ' : ''}
                                     </React.Fragment>
                                 ))}
@@ -131,7 +131,7 @@ export function ReplChunk({
                     >
                         {'<'}
                     </span>
-                    <div className="flex-1 whitespace-pre-wrap ml-2">{printRichHogOutput(result)}</div>
+                    <div className="flex-1 whitespace-pre-wrap ml-2">{printRichScriptOutput(result)}</div>
                 </div>
             )}
             {status === 'error' && (
@@ -144,9 +144,9 @@ export function ReplChunk({
     )
 }
 
-export function HogRepl(): JSX.Element {
-    const { replChunks, currentCode, lastLocalGlobals } = useValues(hogReplLogic)
-    const { runCurrentCode, setCurrentCode, editFromHere } = useActions(hogReplLogic)
+export function ScriptRepl(): JSX.Element {
+    const { replChunks, currentCode, lastLocalGlobals } = useValues(scriptReplLogic)
+    const { runCurrentCode, setCurrentCode, editFromHere } = useActions(scriptReplLogic)
 
     return (
         <div className="p-4 bg-white text-black font-mono">
@@ -175,8 +175,8 @@ export function HogRepl(): JSX.Element {
                             onPressCmdEnter={runCurrentCode}
                             onPressUpNoValue={() => {
                                 // TRICKY: This function will be memoified, so find the actual latest value,
-                                // not the one we had in the HogRepl component's chunk when this first rendered.
-                                const replChunks: ReplChunkType[] = hogReplLogic.findMounted()?.values.replChunks ?? []
+                                // not the one we had in the ScriptRepl component's chunk when this first rendered.
+                                const replChunks: ReplChunkType[] = scriptReplLogic.findMounted()?.values.replChunks ?? []
                                 if (replChunks.length > 0) {
                                     editFromHere(replChunks.length - 1)
                                 }
@@ -196,6 +196,6 @@ export function HogRepl(): JSX.Element {
 }
 
 export const scene: SceneExport = {
-    component: HogRepl,
-    logic: hogReplLogic,
+    component: ScriptRepl,
+    logic: scriptReplLogic,
 }

@@ -55,7 +55,7 @@ import {
 } from './configuration/components/InsightsFunctionConfigurationButtons'
 import { InsightsFunctionIconEditable } from './configuration/InsightsFunctionIcon'
 import { humanizeInsightsFunctionType } from './script-function-utils'
-import { HogInvocations } from './invocations/HogInvocations'
+import { ScriptInvocations } from './invocations/ScriptInvocations'
 import { InsightsFunctionMetrics } from './metrics/InsightsFunctionMetrics'
 import { InsightsFunctionSkeleton } from './misc/InsightsFunctionSkeleton'
 import { InsightsFunctionRuns } from './runs/InsightsFunctionRuns'
@@ -530,7 +530,7 @@ export function InsightsFunctionScene(): JSX.Element {
             : {
                   label: 'Invocations',
                   key: 'invocations',
-                  content: <HogInvocations id={id} functionKind="insights_function" insightsFunctionType={type} />,
+                  content: <ScriptInvocations id={id} functionKind="insights_function" insightsFunctionType={type} />,
               },
 
         supportsBackfills && featureFlags[FEATURE_FLAGS.BACKFILL_WORKFLOWS_DESTINATION]

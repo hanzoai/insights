@@ -215,7 +215,7 @@ describe('ToolExecutor metrics', () => {
                         attr: 'actions__2__inputs__email',
                         code: 'invalid_input',
                         extra: undefined,
-                        url: 'https://us.hanzo.ai/v1/environments/2/hog_flows/',
+                        url: 'https://us.hanzo.ai/v1/environments/2/script_flows/',
                         method: 'POST',
                     })
                 }) as any

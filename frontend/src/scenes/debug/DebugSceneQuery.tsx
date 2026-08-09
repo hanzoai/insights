@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { HogDebug } from 'scenes/debug/HogDebug'
+import { ScriptDebug } from 'scenes/debug/ScriptDebug'
 import { InsightsQLDebug } from 'scenes/debug/InsightsQLDebug'
 import { Modifiers } from 'scenes/debug/Modifiers'
 import { QueryTabs } from 'scenes/debug/QueryTabs'
@@ -9,7 +9,7 @@ import { DataNodeLogicProps, dataNodeLogic } from '~/queries/nodes/DataNode/data
 import { insightVizDataNodeKey } from '~/queries/nodes/InsightViz/insightVizKeys'
 import { QueryEditor } from '~/queries/QueryEditor/QueryEditor'
 import { Node } from '~/queries/schema/schema-general'
-import { isDataTableNode, isInsightsQLQuery, isHogQuery, isInsightVizNode } from '~/queries/utils'
+import { isDataTableNode, isInsightsQLQuery, isScriptQuery, isInsightVizNode } from '~/queries/utils'
 
 interface DebugSceneQueryProps {
     queryKey: `new-${string}`
@@ -38,8 +38,8 @@ export function DebugSceneQuery({ query, setQuery, queryKey }: DebugSceneQueryPr
 
     return (
         <>
-            {isHogQuery(parsed) ? (
-                <HogDebug
+            {isScriptQuery(parsed) ? (
+                <ScriptDebug
                     queryKey={queryKey}
                     query={parsed}
                     setQuery={(query) => setQuery(JSON.stringify(query, null, 2))}

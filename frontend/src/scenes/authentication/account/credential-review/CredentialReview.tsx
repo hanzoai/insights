@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { Button } from '@hanzo/elements'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
-import { HeartHog } from 'lib/components/mascots'
+import { HeartScript } from 'lib/components/mascots'
 import { SceneExport } from 'scenes/sceneTypes'
 import { personalAPIKeysLogic } from 'scenes/settings/user/personalAPIKeysLogic'
 
@@ -25,7 +25,7 @@ export function CredentialReview(): JSX.Element {
                 <h2 className="text-lg">Welcome to Insights!</h2>
                 <h1 className="text-3xl font-bold">One more thing.</h1>
                 <div className="max-w-60 my-8">
-                    <HeartHog className="w-full h-full" />
+                    <HeartScript className="w-full h-full" />
                 </div>
                 <p className="mb-6 max-w-xl">
                     Your account was set up with the credentials listed below. Review each one and revoke anything you

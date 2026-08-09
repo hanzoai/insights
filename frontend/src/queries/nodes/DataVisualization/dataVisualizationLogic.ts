@@ -47,7 +47,7 @@ import type {
     InsightsQLAutocompleteResponse,
     InsightsQLMetadataResponse,
     InsightsQLQueryResponse,
-    HogQueryResponse,
+    ScriptQueryResponse,
     LogAttributesQueryResponse,
     LogValuesQueryResponse,
     MetricsQueryResponse,
@@ -420,7 +420,7 @@ const shouldUseFirstNumericColumnAsContinuousChartXAxis = (
 export interface dataVisualizationLogicValues {
     hasMoreData: boolean; // dataNodeLogic
     queryCancelled: boolean; // dataNodeLogic
-    response: ErrorTrackingQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null; // dataNodeLogic
+    response: ErrorTrackingQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null; // dataNodeLogic
     responseError: string | null; // dataNodeLogic
     responseLoading: boolean; // dataNodeLogic
     activeSceneId: string | null; // sceneLogic
@@ -560,7 +560,7 @@ export interface dataVisualizationLogicMeta {
         }, previousState: any) => void | Promise<void>;
     };
     __keaTypeGenInternalSelectorTypes: {
-        columns: (response: ErrorTrackingQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null) => Column[];
+        columns: (response: ErrorTrackingQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null) => Column[];
         numericalColumns: (columns: Column[]) => Column[];
         hasDateTimeColumns: (columns: Column[]) => boolean;
         dashboardId: (arg: any) => any;
@@ -570,15 +570,15 @@ export interface dataVisualizationLogicMeta {
         sourceFeatures: (query: DataVisualizationNode) => Set<QueryFeature>;
         isShowingCachedResults: (arg: any) => boolean;
         isTransposed: (query: DataVisualizationNode) => boolean;
-        yData: (selectedYAxis: (SelectedYAxis | null)[] | null, response: ErrorTrackingQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null, columns: Column[], chartSettings: ChartSettings) => AxisSeries<number | null>[];
-        xData: (selectedXAxis: string | null, response: ErrorTrackingQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null, columns: Column[]) => AxisSeries<string> | null;
-        sourceTabularColumns: (tabularColumnSettings: (SelectedYAxis | null)[] | null, response: ErrorTrackingQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null, columns: Column[]) => AxisSeries<any>[];
-        sourceTabularData: (sourceTabularColumns: AxisSeries<any>[], response: ErrorTrackingQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null, chartSettings: ChartSettings) => TableDataCell<any>[][];
+        yData: (selectedYAxis: (SelectedYAxis | null)[] | null, response: ErrorTrackingQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null, columns: Column[], chartSettings: ChartSettings) => AxisSeries<number | null>[];
+        xData: (selectedXAxis: string | null, response: ErrorTrackingQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null, columns: Column[]) => AxisSeries<string> | null;
+        sourceTabularColumns: (tabularColumnSettings: (SelectedYAxis | null)[] | null, response: ErrorTrackingQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null, columns: Column[]) => AxisSeries<any>[];
+        sourceTabularData: (sourceTabularColumns: AxisSeries<any>[], response: ErrorTrackingQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null, chartSettings: ChartSettings) => TableDataCell<any>[][];
         tabularColumns: (sourceTabularColumns: AxisSeries<any>[], sourceTabularData: TableDataCell<any>[][], isTransposed: boolean) => AxisSeries<any>[];
         tabularData: (sourceTabularColumns: AxisSeries<any>[], sourceTabularData: TableDataCell<any>[][], isTransposed: boolean) => TableDataCell<any>[][];
         dataVisualizationProps: (arg: any) => DataVisualizationLogicProps;
         effectiveVisualizationType: (visualizationType: ChartDisplayType, autoVisualizationType: ChartDisplayType) => ChartDisplayType;
-        autoVisualizationType: (columns: Column[], response: ErrorTrackingQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null) => ChartDisplayType;
+        autoVisualizationType: (columns: Column[], response: ErrorTrackingQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null) => ChartDisplayType;
         isTableVisualization: (effectiveVisualizationType: ChartDisplayType) => boolean;
         showTableSettings: (effectiveVisualizationType: ChartDisplayType) => boolean;
         isColumnPinned: (pinnedColumns: string[]) => (columnName: string) => boolean;
@@ -994,7 +994,7 @@ export const dataVisualizationLogic = kea<dataVisualizationLogicType>([
                     | import('~/queries/schema/schema-general').InsightsQLAutocompleteResponse
                     | import('~/queries/schema/schema-general').InsightsQLMetadataResponse
                     | import('~/queries/schema/schema-general').InsightsQLQueryResponse<any[]>
-                    | import('~/queries/schema/schema-general').HogQueryResponse
+                    | import('~/queries/schema/schema-general').ScriptQueryResponse
                     | import('~/queries/schema/schema-general').LogAttributesQueryResponse
                     | import('~/queries/schema/schema-general').LogValuesQueryResponse
                     | import('~/queries/schema/schema-general').MetricsQueryResponse
@@ -1098,7 +1098,7 @@ export const dataVisualizationLogic = kea<dataVisualizationLogicType>([
                     | import('~/queries/schema/schema-general').InsightsQLAutocompleteResponse
                     | import('~/queries/schema/schema-general').InsightsQLMetadataResponse
                     | import('~/queries/schema/schema-general').InsightsQLQueryResponse<any[]>
-                    | import('~/queries/schema/schema-general').HogQueryResponse
+                    | import('~/queries/schema/schema-general').ScriptQueryResponse
                     | import('~/queries/schema/schema-general').LogAttributesQueryResponse
                     | import('~/queries/schema/schema-general').LogValuesQueryResponse
                     | import('~/queries/schema/schema-general').MetricsQueryResponse
@@ -1179,7 +1179,7 @@ export const dataVisualizationLogic = kea<dataVisualizationLogicType>([
                     | import('~/queries/schema/schema-general').InsightsQLAutocompleteResponse
                     | import('~/queries/schema/schema-general').InsightsQLMetadataResponse
                     | import('~/queries/schema/schema-general').InsightsQLQueryResponse<any[]>
-                    | import('~/queries/schema/schema-general').HogQueryResponse
+                    | import('~/queries/schema/schema-general').ScriptQueryResponse
                     | import('~/queries/schema/schema-general').LogAttributesQueryResponse
                     | import('~/queries/schema/schema-general').LogValuesQueryResponse
                     | import('~/queries/schema/schema-general').MetricsQueryResponse
@@ -1244,7 +1244,7 @@ export const dataVisualizationLogic = kea<dataVisualizationLogicType>([
                     | import('~/queries/schema/schema-general').InsightsQLAutocompleteResponse
                     | import('~/queries/schema/schema-general').InsightsQLMetadataResponse
                     | import('~/queries/schema/schema-general').InsightsQLQueryResponse<any[]>
-                    | import('~/queries/schema/schema-general').HogQueryResponse
+                    | import('~/queries/schema/schema-general').ScriptQueryResponse
                     | import('~/queries/schema/schema-general').LogAttributesQueryResponse
                     | import('~/queries/schema/schema-general').LogValuesQueryResponse
                     | import('~/queries/schema/schema-general').MetricsQueryResponse
@@ -1280,7 +1280,7 @@ export const dataVisualizationLogic = kea<dataVisualizationLogicType>([
                     | import('~/queries/schema/schema-general').InsightsQLAutocompleteResponse
                     | import('~/queries/schema/schema-general').InsightsQLMetadataResponse
                     | import('~/queries/schema/schema-general').InsightsQLQueryResponse<any[]>
-                    | import('~/queries/schema/schema-general').HogQueryResponse
+                    | import('~/queries/schema/schema-general').ScriptQueryResponse
                     | import('~/queries/schema/schema-general').LogAttributesQueryResponse
                     | import('~/queries/schema/schema-general').LogValuesQueryResponse
                     | import('~/queries/schema/schema-general').MetricsQueryResponse
@@ -1481,7 +1481,7 @@ export const dataVisualizationLogic = kea<dataVisualizationLogicType>([
                     | import('~/queries/schema/schema-general').InsightsQLAutocompleteResponse
                     | import('~/queries/schema/schema-general').InsightsQLMetadataResponse
                     | import('~/queries/schema/schema-general').InsightsQLQueryResponse<any[]>
-                    | import('~/queries/schema/schema-general').HogQueryResponse
+                    | import('~/queries/schema/schema-general').ScriptQueryResponse
                     | import('~/queries/schema/schema-general').LogAttributesQueryResponse
                     | import('~/queries/schema/schema-general').LogValuesQueryResponse
                     | import('~/queries/schema/schema-general').MetricsQueryResponse

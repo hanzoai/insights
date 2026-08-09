@@ -29,12 +29,12 @@ export interface conditionalFormattingLogicActions {
         deleteRule: boolean | undefined;
         rule: ConditionalFormattingRule;
     }; // dataVisualizationLogic
-    compileHog: ({ script }: any) => any;
-    compileHogFailure: (error: string, errorObject?: any) => {
+    compileScript: ({ script }: any) => any;
+    compileScriptFailure: (error: string, errorObject?: any) => {
         error: string;
         errorObject?: any;
     };
-    compileHogSuccess: (script: any[], payload?: any) => {
+    compileScriptSuccess: (script: any[], payload?: any) => {
         script: any[];
         payload?: any;
     };
@@ -122,7 +122,7 @@ export const conditionalFormattingLogic = kea<conditionalFormattingLogicType>([
         script: [
             null as null | any[],
             {
-                compileHog: async ({ script }) => {
+                compileScript: async ({ script }) => {
                     const res = await api.script.create(script)
                     return res.bytecode
                 },
@@ -130,7 +130,7 @@ export const conditionalFormattingLogic = kea<conditionalFormattingLogicType>([
         ],
     }),
     listeners(({ actions, values }) => ({
-        compileHogSuccess: ({ script }) => {
+        compileScriptSuccess: ({ script }) => {
             actions.updateBytecode(script)
         },
         deleteRule: () => {
@@ -139,7 +139,7 @@ export const conditionalFormattingLogic = kea<conditionalFormattingLogicType>([
     })),
     subscriptions(({ actions }) => ({
         template: (template: FormattingTemplate, oldTemplate: FormattingTemplate | undefined) => {
-            actions.compileHog({ script: template.script })
+            actions.compileScript({ script: template.script })
 
             // If we've changed to a template with a disabled `input` field, then clear the input
             if (!oldTemplate?.hideInput && template.hideInput) {

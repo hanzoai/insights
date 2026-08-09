@@ -6,7 +6,7 @@ import { appMetricsLogic } from 'lib/components/AppMetrics/appMetricsLogic'
 import { AppMetricsTrends } from 'lib/components/AppMetrics/AppMetricsTrends'
 import { AppMetricSummary } from 'lib/components/AppMetrics/AppMetricSummary'
 
-const HOGFUNCTION_METRIC_KEYS = [
+const Function_METRIC_KEYS = [
     'succeeded',
     'failed',
     'inputs_failed',
@@ -17,7 +17,7 @@ const HOGFUNCTION_METRIC_KEYS = [
     'quota_limited',
 ] as const
 
-export const HOGFUNCTION_METRICS_INFO: Record<string, { name: string; description: string; color: string }> = {
+export const Function_METRICS_INFO: Record<string, { name: string; description: string; color: string }> = {
     succeeded: {
         name: 'Success',
         description: 'Total number of events processed successfully',
@@ -70,7 +70,7 @@ export function InsightsFunctionMetrics({ id }: { id: string }): JSX.Element {
         forceParams: {
             appSource: 'insights_function',
             appSourceId: id,
-            metricName: [...HOGFUNCTION_METRIC_KEYS],
+            metricName: [...Function_METRIC_KEYS],
             breakdownBy: 'metric_name',
         },
     })
@@ -84,15 +84,15 @@ export function InsightsFunctionMetrics({ id }: { id: string }): JSX.Element {
             </div>
 
             <div className="flex flex-row gap-2 flex-wrap justify-center">
-                {HOGFUNCTION_METRIC_KEYS.map((key) => (
+                {Function_METRIC_KEYS.map((key) => (
                     <AppMetricSummary
                         key={key}
-                        name={HOGFUNCTION_METRICS_INFO[key].name}
-                        description={HOGFUNCTION_METRICS_INFO[key].description}
+                        name={Function_METRICS_INFO[key].name}
+                        description={Function_METRICS_INFO[key].description}
                         loading={appMetricsTrendsLoading}
                         timeSeries={getSingleTrendSeries(key)}
                         previousPeriodTimeSeries={getSingleTrendSeries(key, true)}
-                        color={HOGFUNCTION_METRICS_INFO[key].color}
+                        color={Function_METRICS_INFO[key].color}
                         colorIfZero={getColorVar('muted')}
                         hideIfZero={!['succeeded', 'failed', 'inputs_failed', 'filtered'].includes(key)}
                     />

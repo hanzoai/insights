@@ -89,7 +89,7 @@ export enum NodeKind {
     EventsQuery = 'EventsQuery',
     SessionsQuery = 'SessionsQuery',
     PersonsNode = 'PersonsNode',
-    HogQuery = 'HogQuery',
+    ScriptQuery = 'ScriptQuery',
     InsightsQLQuery = 'InsightsQLQuery',
     InsightsQLMetadata = 'InsightsQLMetadata',
     InsightsQLAutocomplete = 'InsightsQLAutocomplete',
@@ -223,7 +223,7 @@ export type AnyDataNode =
     | InsightActorsQuery
     | InsightActorsQueryOptions
     | SessionsTimelineQuery
-    | HogQuery
+    | ScriptQuery
     | InsightsQLQuery
     | InsightsQLMetadata
     | InsightsQLAutocomplete
@@ -303,7 +303,7 @@ export type QuerySchema =
     | InsightActorsQuery
     | InsightActorsQueryOptions
     | SessionsTimelineQuery
-    | HogQuery
+    | ScriptQuery
     | InsightsQLQuery
     | InsightsQLMetadata
     | InsightsQLAutocomplete
@@ -438,7 +438,7 @@ export interface Node<R extends Record<string, any> = Record<string, any>> {
 
 export type AnyResponseType =
     | Record<string, any>
-    | HogQueryResponse
+    | ScriptQueryResponse
     | InsightsQLQueryResponse
     | InsightsQLMetadataResponse
     | InsightsQLAutocompleteResponse
@@ -617,7 +617,7 @@ export interface InsightsQLQuery extends DataNode<InsightsQLQueryResponse> {
     name?: string
 }
 
-export interface HogQueryResponse {
+export interface ScriptQueryResponse {
     results: any
     bytecode?: any[]
     coloredBytecode?: any[]
@@ -625,8 +625,8 @@ export interface HogQueryResponse {
     query_status?: never
 }
 
-export interface HogQuery extends DataNode<HogQueryResponse> {
-    kind: NodeKind.HogQuery
+export interface ScriptQuery extends DataNode<ScriptQueryResponse> {
+    kind: NodeKind.ScriptQuery
     code?: string
 }
 
@@ -803,19 +803,19 @@ export interface InsightsQLAutocompleteResponse {
     query_status?: never
 }
 
-export enum HogLanguage {
+export enum ScriptLanguage {
     script = 'script',
-    hogJson = 'hogJson',
+    scriptJson = 'scriptJson',
     insightsQL = 'insightsQL',
     insightsQLExpr = 'insightsQLExpr',
-    hogTemplate = 'hogTemplate',
+    scriptTemplate = 'scriptTemplate',
     liquid = 'liquid',
 }
 
 export interface InsightsQLMetadata extends DataNode<InsightsQLMetadataResponse> {
     kind: NodeKind.InsightsQLMetadata
     /** Language to validate */
-    language: HogLanguage
+    language: ScriptLanguage
     /** Query to validate */
     query: string
     /** Optional id of a direct-query-capable external data source to run against instead of Datastore — a pure-direct source, or a synced source with direct query enabled. */
@@ -835,7 +835,7 @@ export interface InsightsQLMetadata extends DataNode<InsightsQLMetadataResponse>
 export interface InsightsQLAutocomplete extends DataNode<InsightsQLAutocompleteResponse> {
     kind: NodeKind.InsightsQLAutocomplete
     /** Language to validate */
-    language: HogLanguage
+    language: ScriptLanguage
     /** Query to validate */
     query: string
     /** Optional id of a direct-query-capable external data source to run against instead of Datastore — a pure-direct source, or a synced source with direct query enabled. */
@@ -4242,7 +4242,7 @@ export type FileSystemIconType =
     | 'toolbar'
     | 'visual_review'
     | 'code_review'
-    | 'stamphog'
+    | 'stamp'
     | 'settings'
     | 'health'
     | 'inbox'
@@ -5719,7 +5719,7 @@ export interface EnsembleDetectorConfig {
  */
 export type DetectorConfig = SingleDetectorConfig | EnsembleDetectorConfig
 
-export interface HogCompileResponse {
+export interface ScriptCompileResponse {
     bytecode: any[]
     locals: any[]
 }
@@ -9050,7 +9050,7 @@ export enum ProductKey {
     PRODUCT_TOURS = 'product_tours',
     PULSE = 'pulse',
     REVENUE_ANALYTICS = 'revenue_analytics',
-    REVIEW_HOG = 'review_hog',
+    REVIEW_HOG = 'review',
     SESSION_REPLAY = 'session_replay',
     REPLAY_VISION = 'replay_vision',
     SITE_APPS = 'site_apps',

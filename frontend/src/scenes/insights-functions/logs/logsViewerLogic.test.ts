@@ -164,7 +164,7 @@ describe('logsViewerLogic', () => {
 
     describe('buildGroupedLogsQuery', () => {
         const makeParams = (overrides: Partial<LogEntryParams> = {}): LogEntryParams => ({
-            sourceType: 'hog_flow',
+            sourceType: 'script_flow',
             sourceId: 'batch-job-id',
             levels: ['INFO', 'ERROR'],
             searchGroups: [],

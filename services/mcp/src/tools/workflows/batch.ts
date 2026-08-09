@@ -13,7 +13,7 @@ async function fetchWorkflow(
 ): Promise<{ status: string | undefined; trigger: WorkflowTrigger }> {
     const workflow = await context.api.request<{ status?: string; trigger?: unknown }>({
         method: 'GET',
-        path: `/v1/projects/${encodeURIComponent(String(projectId))}/hog_flows/${encodeURIComponent(String(workflowId))}/`,
+        path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(workflowId))}/`,
     })
     return { status: workflow.status, trigger: (workflow.trigger ?? {}) as WorkflowTrigger }
 }
@@ -25,7 +25,7 @@ function triggerFilters(trigger: WorkflowTrigger): unknown {
 async function sizeAudience(context: Context, projectId: string, filters: unknown): Promise<BlastRadius> {
     return await context.api.request<BlastRadius>({
         method: 'POST',
-        path: `/v1/projects/${encodeURIComponent(String(projectId))}/hog_flows/user_blast_radius/`,
+        path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/user_blast_radius/`,
         body: { filters },
     })
 }
@@ -33,7 +33,7 @@ async function sizeAudience(context: Context, projectId: string, filters: unknow
 /**
  * Echo-back guard: the caller must have sized the audience with workflows-blast-radius and surfaced the
  * number to the user. We recompute it here and reject on drift or over-cap before any fan-out. The cap is
- * the per-team `limit` the blast-radius endpoint returns (HOGFLOW_BATCH_TRIGGER_LIMIT), which the batch
+ * the per-team `limit` the blast-radius endpoint returns (Flow_BATCH_TRIGGER_LIMIT), which the batch
  * consumer also enforces — so the run is rejected here rather than silently truncated downstream.
  */
 function assertAcknowledged(affected: number, acknowledged: number, limit: number): void {
@@ -115,7 +115,7 @@ export const workflowsRunBatch = (): ToolBase<typeof RunBatchSchema, unknown> =>
 
         return await context.api.request({
             method: 'POST',
-            path: `/v1/projects/${encodeURIComponent(String(projectId))}/hog_flows/${encodeURIComponent(String(params.workflow_id))}/batch_jobs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.workflow_id))}/batch_jobs/`,
             body: {
                 filters,
                 confirm_token: params.confirm_token,
@@ -183,7 +183,7 @@ export const workflowsScheduleCreate = (): ToolBase<typeof ScheduleCreateSchema,
 
         return await context.api.request({
             method: 'POST',
-            path: `/v1/projects/${encodeURIComponent(String(projectId))}/hog_flows/${encodeURIComponent(String(params.workflow_id))}/schedules/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(String(params.workflow_id))}/schedules/`,
             body: {
                 rrule: params.rrule,
                 starts_at: params.starts_at,

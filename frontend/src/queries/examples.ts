@@ -10,7 +10,7 @@ import {
     EventsQuery,
     FunnelsQuery,
     InsightsQLQuery,
-    HogQuery,
+    ScriptQuery,
     InsightVizNode,
     LifecycleQuery,
     Node,
@@ -357,13 +357,13 @@ const DataVisualization: DataVisualizationNode = {
     chartSettings: { goalLines: undefined },
 }
 
-const Script: HogQuery = {
-    kind: NodeKind.HogQuery,
+const Script: ScriptQuery = {
+    kind: NodeKind.ScriptQuery,
     code: 'return 1 + 2;',
 }
 
-const Hoggonacci: HogQuery = {
-    kind: NodeKind.HogQuery,
+const Scriptgonacci: ScriptQuery = {
+    kind: NodeKind.ScriptQuery,
     code: `fn fibonacci(number) {
     if (number < 2) {
         return number;
@@ -574,7 +574,7 @@ export const examples: Record<string, Node> = setLatestVersionsOnQuery({
     DataVisualization,
     InsightsQLForDataVisualization,
     Script,
-    Hoggonacci,
+    Scriptgonacci,
     DataWarehouse,
 })
 
