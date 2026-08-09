@@ -1,10 +1,9 @@
-from statshog.defaults.django import statsd
-
 from insights import settings
 from insights.api.services.query import logger
 from insights.datastore.client import sync_execute
 from insights.datastore.client.connection import default_client
 from insights.settings import DATASTORE_CLUSTER
+from insights.statsd import statsd
 
 
 def cancel_query_on_cluster(team_id: int, client_query_id: str) -> None:
