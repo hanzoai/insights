@@ -52,8 +52,15 @@ def _ms_to_datetime(value):
 def migrate_desktop_tree(apps, schema_editor):
     FileSystem = apps.get_model("insights", "FileSystem")
     FileSystemShortcut = apps.get_model("insights", "FileSystemShortcut")
-    FolderInstructions = apps.get_model("insights", "FileSystemFolderInstructions")
-    FolderContextGeneration = apps.get_model("insights", "FileSystemFolderContextGeneration")
+    try:
+        FolderInstructions = apps.get_model("insights", "FileSystemFolderInstructions")
+        FolderContextGeneration = apps.get_model("insights", "FileSystemFolderContextGeneration")
+    except LookupError:
+        # Both models were later deleted from `insights`, so the squashed `0001_initial` no
+        # longer carries them and this migration cannot ask historical state for them. Every
+        # database that had the desktop file system ran this migration while they existed; a
+        # database whose state lacks them never had one, so there is nothing here to move.
+        return
     Channel = apps.get_model("tasks", "Channel")
     ChannelInstructions = apps.get_model("tasks", "ChannelInstructions")
     ChannelContextGeneration = apps.get_model("tasks", "ChannelContextGeneration")
