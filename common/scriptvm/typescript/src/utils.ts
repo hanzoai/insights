@@ -142,7 +142,7 @@ export function convertJSToHog(x: any, found?: Map<any, any>): any {
     return x
 }
 
-export function convertHogToJS(x: any, found?: Map<any, any>): any {
+export function convertScriptToJS(x: any, found?: Map<any, any>): any {
     if (!found) {
         found = new Map()
     }
@@ -153,14 +153,14 @@ export function convertHogToJS(x: any, found?: Map<any, any>): any {
         const obj: Record<string, any> = {}
         found.set(x, obj)
         x.forEach((value, key) => {
-            obj[key] = convertHogToJS(value, found)
+            obj[key] = convertScriptToJS(value, found)
         })
         found.delete(x)
         return obj
     } else if (typeof x === 'object' && Array.isArray(x)) {
         const obj: any[] = []
         found.set(x, obj)
-        x.forEach((v) => obj.push(convertHogToJS(v, found)))
+        x.forEach((v) => obj.push(convertScriptToJS(v, found)))
         found.delete(x)
         return obj
     } else if (typeof x === 'object' && x !== null) {
@@ -170,7 +170,7 @@ export function convertHogToJS(x: any, found?: Map<any, any>): any {
         const obj: Record<string, any> = {}
         found.set(x, obj)
         for (const key in x) {
-            obj[key] = convertHogToJS(x[key], found)
+            obj[key] = convertScriptToJS(x[key], found)
         }
         found.delete(x)
         return obj

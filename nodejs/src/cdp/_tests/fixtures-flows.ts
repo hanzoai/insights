@@ -67,7 +67,7 @@ export const createExampleFlowInvocation = (
             groups: {},
             variables: context.variables || {},
         }),
-        queue: 'hogflow',
+        queue: 'flow',
         queuePriority: 0,
     }
 }

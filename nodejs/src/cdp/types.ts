@@ -185,7 +185,7 @@ export type InsightsFunctionFilterGlobals = {
     variables: Record<string, any> | undefined // For Flows, workflow-level variables
 }
 
-export type MetricLogSource = 'insights_function' | 'hog_flow' | 'legacy_plugin'
+export type MetricLogSource = 'insights_function' | 'flow' | 'legacy_plugin'
 
 export type LogEntryLevel = 'debug' | 'info' | 'warn' | 'error'
 
@@ -275,7 +275,7 @@ export interface InsightsFunctionTiming {
 }
 
 // IMPORTANT: All queue names should be lowercase and only [A-Z0-9] characters are allowed.
-export const CYCLOTRON_INVOCATION_JOB_QUEUES = ['script', 'hogoverflow', 'hogflow', 'email'] as const
+export const CYCLOTRON_INVOCATION_JOB_QUEUES = ['script', 'overflow', 'flow', 'email'] as const
 export type CyclotronJobQueueKind = (typeof CYCLOTRON_INVOCATION_JOB_QUEUES)[number]
 
 export const CYCLOTRON_JOB_QUEUE_SOURCES = ['postgres', 'postgres-v2', 'kafka'] as const
@@ -411,7 +411,7 @@ export type FlowInvocationContext = {
         routingOnlyReschedule?: boolean
         // Set when a wait_until_condition re-parks on its polling interval. Lets the handler
         // attribute a later condition match to the periodic poll (vs evaluate-on-entry) and emit
-        // the cdp_hogflow_wait_poll_only_advance metric — the signal that proves whether the poll
+        // the cdp_flow_wait_poll_only_advance metric — the signal that proves whether the poll
         // ever catches a wake the subscription streams missed, gating its eventual removal.
         pollReparked?: boolean
     }
@@ -589,7 +589,7 @@ export type WarehouseWebhookPayload = {
 
 export type MessageAssetRow = {
     team_id: number
-    function_kind: 'hog_flow' | 'insights_function'
+    function_kind: 'flow' | 'insights_function'
     function_id: string
     parent_run_id: string
     invocation_id: string

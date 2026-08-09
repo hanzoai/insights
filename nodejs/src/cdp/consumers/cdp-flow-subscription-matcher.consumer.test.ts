@@ -581,7 +581,7 @@ describe('CdpScriptflowSubscriptionMatcherConsumer', () => {
                     count: 1,
                     app_source_version: { id: expect.any(String), version: 1 },
                 }),
-                'hog_flow'
+                'flow'
             )
             // ...and emitted once as a billable $workflows_conversion event for the converting person.
             expect(matcher.queueConversionEventMock).toHaveBeenCalledTimes(1)
@@ -655,7 +655,7 @@ describe('CdpScriptflowSubscriptionMatcherConsumer', () => {
                     metric_name: 'conversion',
                     app_source_version: expectedVersion,
                 }),
-                'hog_flow'
+                'flow'
             )
             expect(matcher.queueConversionEventMock).toHaveBeenCalledWith(
                 expect.objectContaining({
@@ -721,7 +721,7 @@ describe('CdpScriptflowSubscriptionMatcherConsumer', () => {
             expect(matcher.queueAppMetricMock).toHaveBeenCalledTimes(1)
             expect(matcher.queueAppMetricMock).toHaveBeenCalledWith(
                 expect.objectContaining({ app_source_id: 'flow-1', metric_name: 'conversion', count: 1 }),
-                'hog_flow'
+                'flow'
             )
         })
 
@@ -775,7 +775,7 @@ describe('CdpScriptflowSubscriptionMatcherConsumer', () => {
             expect(matcher.queueAppMetricMock).toHaveBeenCalledTimes(1)
             expect(matcher.queueAppMetricMock).toHaveBeenCalledWith(
                 expect.objectContaining({ app_source_id: 'flow-1', metric_name: 'conversion', count: 1 }),
-                'hog_flow'
+                'flow'
             )
         })
 
@@ -871,7 +871,7 @@ describe('CdpScriptflowSubscriptionMatcherConsumer', () => {
                     // aggregate.
                     app_source_version: { id: 'flow-1', version: 2 },
                 }),
-                'hog_flow'
+                'flow'
             )
         })
 

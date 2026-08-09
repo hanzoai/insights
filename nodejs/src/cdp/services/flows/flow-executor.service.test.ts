@@ -317,7 +317,7 @@ describe('Scriptflow Executor', () => {
                     },
                     filterGlobals: expect.any(Object),
                     functionId: invocation.flow.id,
-                    queue: 'hogflow',
+                    queue: 'flow',
                     queueMetadata: undefined,
                     queueScheduledAt: undefined,
                     queueSource: undefined,

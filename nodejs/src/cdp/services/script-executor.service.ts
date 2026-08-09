@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { Histogram } from 'prom-client'
 
-import { ExecResult, convertHogToJS } from '@hanzo/scriptvm'
+import { ExecResult, convertScriptToJS } from '@hanzo/scriptvm'
 
 import { instrumented } from '~/common/tracing/tracing-utils'
 import { logger } from '~/common/utils/logger'
@@ -293,7 +293,7 @@ export class ScriptExecutorService {
 
                 // Store the result if execution finished
                 if (execRes.finished && Boolean(execRes.result)) {
-                    result.execResult = convertHogToJS(execRes.result)
+                    result.execResult = convertScriptToJS(execRes.result)
                 }
             } catch (e) {
                 addLog('error', `Error executing function on event ${eventId}: ${e}`)
@@ -304,7 +304,7 @@ export class ScriptExecutorService {
             result.invocation.state.vmState = execRes.state
 
             if (!execRes.finished) {
-                const args = (execRes.asyncFunctionArgs ?? []).map((arg) => convertHogToJS(arg))
+                const args = (execRes.asyncFunctionArgs ?? []).map((arg) => convertScriptToJS(arg))
                 if (!execRes.state) {
                     // NOTE: This shouldn't be possible so is more of a type sanity check
                     throw new Error('State should be provided for async function')

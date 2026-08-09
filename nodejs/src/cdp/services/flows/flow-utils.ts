@@ -140,7 +140,7 @@ export function isEvaluableCondition(condition?: {
 }
 
 const counterScriptflowFilterBytecodeError = new Counter({
-    name: 'cdp_hogflow_matcher_bytecode_error',
+    name: 'cdp_flow_matcher_bytecode_error',
     help: 'A wait_until_condition or conversion-goal filter threw during evaluation. Filter is treated as non-matching, so the workflow falls through to its timeout branch.',
 })
 

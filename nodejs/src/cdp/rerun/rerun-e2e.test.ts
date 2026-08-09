@@ -297,7 +297,7 @@ describe('CDP script invocation rerun e2e', () => {
         rerunWorker = new CdpRerunWorkerConsumer(
             { ...hub, CDP_CYCLOTRON_JOB_QUEUE_CONSUMER_MODE: 'postgres' },
             cdpDeps,
-            { insights_function: kafkaQueue, hog_flow: postgresV2Queue }
+            { insights_function: kafkaQueue, flow: postgresV2Queue }
         )
         await rerunWorker.start()
 
@@ -454,7 +454,7 @@ describe('CDP script invocation rerun e2e', () => {
         rerunWorker = new CdpRerunWorkerConsumer(
             { ...hub, CDP_CYCLOTRON_JOB_QUEUE_CONSUMER_MODE: 'postgres' },
             cdpDeps,
-            { insights_function: kafkaQueue, hog_flow: postgresV2Queue }
+            { insights_function: kafkaQueue, flow: postgresV2Queue }
         )
         await rerunWorker.start()
 
@@ -554,7 +554,7 @@ describe('CDP script invocation rerun e2e', () => {
             expect(mockFetch.mock.calls.filter(([url]) => String(url) === FLOW_WEBHOOK_URL).length).toBe(1)
         }, 15_000)
 
-        // Terminal 'succeeded' hog_flow row lands in Datastore via Kafka -> MV.
+        // Terminal 'succeeded' flow row lands in Datastore via Kafka -> MV.
         await waitForExpect(async () => {
             const rows = await datastore.query<PersistedRow>(
                 `SELECT invocation_id, status, is_retry, function_kind
@@ -569,14 +569,14 @@ describe('CDP script invocation rerun e2e', () => {
              FROM hog_invocation_results
              WHERE team_id = ${team.id} AND function_id = '${flow.id}' AND status = 'succeeded'`
         )
-        expect(originalRows[0].function_kind).toBe('hog_flow')
+        expect(originalRows[0].function_kind).toBe('flow')
         expect(originalRows[0].is_retry).toBe(0)
         const originalInvocationId = originalRows[0].invocation_id
 
         // ── 2. Mimic Django POST /rerun for the flow, scoped to this invocation ─────
         const windowStart = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
         const windowEnd = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-        const rerunJobId = await rerunManager.enqueue(team.id, 'hog_flow', flow.id, {
+        const rerunJobId = await rerunManager.enqueue(team.id, 'flow', flow.id, {
             filter: {
                 window_start: windowStart,
                 window_end: windowEnd,
@@ -585,11 +585,11 @@ describe('CDP script invocation rerun e2e', () => {
             },
         })
 
-        // ── 3. Rerun worker drains the wrapper job (hog_flow -> postgres-v2) ────────
+        // ── 3. Rerun worker drains the wrapper job (flow -> postgres-v2) ────────
         rerunWorker = new CdpRerunWorkerConsumer(
             { ...hub, CDP_CYCLOTRON_JOB_QUEUE_CONSUMER_MODE: 'postgres' },
             cdpDeps,
-            { insights_function: kafkaQueue, hog_flow: postgresV2Queue }
+            { insights_function: kafkaQueue, flow: postgresV2Queue }
         )
         await rerunWorker.start()
 

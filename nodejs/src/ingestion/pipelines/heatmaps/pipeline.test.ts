@@ -146,7 +146,7 @@ describe('HeatmapsPipeline', () => {
                     mockKafkaProducer,
                     'test'
                 ),
-                [TOPFN_OUTPUT]: new SingleIngestionOutput(TOPFN_OUTPUT, 'tophog_test', mockKafkaProducer, 'test'),
+                [TOPFN_OUTPUT]: new SingleIngestionOutput(TOPFN_OUTPUT, 'topfn_test', mockKafkaProducer, 'test'),
             }),
             topFn: createNoopTopFn(),
             teamManager: mockTeamManager,

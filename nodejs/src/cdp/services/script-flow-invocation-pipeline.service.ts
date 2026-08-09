@@ -98,8 +98,8 @@ export class FlowInvocationPipeline {
                         globals
                     )
 
-                    this.deps.insightsFunctionMonitoringService.queueAppMetrics(metrics, 'hog_flow')
-                    this.deps.insightsFunctionMonitoringService.queueLogs(logs, 'hog_flow')
+                    this.deps.insightsFunctionMonitoringService.queueAppMetrics(metrics, 'flow')
+                    this.deps.insightsFunctionMonitoringService.queueLogs(logs, 'flow')
 
                     return invocations
                 })
@@ -137,7 +137,7 @@ export class FlowInvocationPipeline {
                 try {
                     const rateLimit = rateLimits[index][1]
                     if (rateLimit.isRateLimited) {
-                        counterRateLimited.labels({ kind: 'hog_flow', function_id: item.functionId }).inc()
+                        counterRateLimited.labels({ kind: 'flow', function_id: item.functionId }).inc()
                         this.deps.insightsFunctionMonitoringService.queueAppMetric(
                             {
                                 team_id: item.teamId,
@@ -147,7 +147,7 @@ export class FlowInvocationPipeline {
                                 count: 1,
                                 app_source_version: { id: item.flow.id, version: item.flow.version },
                             },
-                            'hog_flow'
+                            'flow'
                         )
 
                         const eventUuid = item.state?.event?.uuid
@@ -158,11 +158,11 @@ export class FlowInvocationPipeline {
                             level: 'warn',
                             message: `Workflow invocation dropped due to rate limiting for [Person:${personId ?? 'unknown'}] on [Event:${eventUuid ?? 'unknown'}]`,
                             team_id: item.teamId,
-                            log_source: 'hog_flow',
+                            log_source: 'flow',
                             log_source_id: item.functionId,
                             instance_id: item.id,
                         }
-                        this.deps.insightsFunctionMonitoringService.queueLogs([logEntry], 'hog_flow')
+                        this.deps.insightsFunctionMonitoringService.queueLogs([logEntry], 'flow')
 
                         logger.warn('⚠️', 'Scriptflow invocation rate limited', {
                             teamId: item.teamId,
@@ -200,7 +200,7 @@ export class FlowInvocationPipeline {
                             count: 1,
                             app_source_version: { id: item.flow.id, version: item.flow.version },
                         },
-                        'hog_flow'
+                        'flow'
                     )
                     return
                 }
@@ -224,7 +224,7 @@ export class FlowInvocationPipeline {
                 count: 1,
                 app_source_version: { id: item.flow.id, version: item.flow.version },
             })),
-            'hog_flow'
+            'flow'
         )
 
         const triggeredInvocationsMetrics: MinimalAppMetric[] = []
@@ -240,7 +240,7 @@ export class FlowInvocationPipeline {
             })
         })
 
-        this.deps.insightsFunctionMonitoringService.queueAppMetrics(triggeredInvocationsMetrics, 'hog_flow')
+        this.deps.insightsFunctionMonitoringService.queueAppMetrics(triggeredInvocationsMetrics, 'flow')
 
         return notMaskedInvocations
     }

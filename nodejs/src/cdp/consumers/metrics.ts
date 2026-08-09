@@ -19,7 +19,7 @@ export const counterInsightsFunctionStateOnEvent = new Counter({
 })
 
 export const counterBatchFlowTriggerFailed = new Counter({
-    name: 'cdp_batch_hog_flow_trigger_failed',
+    name: 'cdp_batch_flow_trigger_failed',
     help: 'A batch script flow run failed during audience resolution and was skipped',
-    labelNames: ['hog_flow_id', 'reason'],
+    labelNames: ['flow_id', 'reason'],
 })

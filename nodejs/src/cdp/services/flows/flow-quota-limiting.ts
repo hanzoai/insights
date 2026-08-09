@@ -7,7 +7,7 @@ import { CyclotronJobInvocationFlow } from '../../types'
 import { InsightsFunctionMonitoringService } from '../monitoring/script-function-monitoring.service'
 
 export const counterFlowQuotaLimited = new Counter({
-    name: 'cdp_hog_flow_quota_limited',
+    name: 'cdp_flow_quota_limited',
     help: 'A script flow invocation was quota limited',
     labelNames: ['team_id'],
 })
@@ -83,7 +83,7 @@ export async function shouldBlockFlowDueToQuota(
                 count: 1,
                 app_source_version: { id: item.flow.id, version: item.flow.version },
             },
-            'hog_flow'
+            'flow'
         )
         return true
     }

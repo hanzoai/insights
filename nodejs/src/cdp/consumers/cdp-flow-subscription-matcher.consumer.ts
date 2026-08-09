@@ -49,17 +49,17 @@ import { counterParseError } from './metrics'
 const startAtLatest = { ['auto.offset.reset' as keyof RdKafkaConsumerConfig]: 'latest' as never }
 
 const counterScriptflowMatcherCandidatesEvaluated = new Counter({
-    name: 'cdp_hogflow_matcher_candidates_evaluated',
+    name: 'cdp_flow_matcher_candidates_evaluated',
     help: 'Parked flow jobs the matcher loaded from cyclotron and evaluated against a batch.',
 })
 
 const counterScriptflowMatcherJobsWoken = new Counter({
-    name: 'cdp_hogflow_matcher_jobs_woken',
+    name: 'cdp_flow_matcher_jobs_woken',
     help: 'Parked flow jobs the matcher woke because an incoming event matched.',
 })
 
 const counterScriptflowMatcherConversionsCounted = new Counter({
-    name: 'cdp_hogflow_matcher_conversions_counted',
+    name: 'cdp_flow_matcher_conversions_counted',
     help: 'Event-based conversions counted by the matcher (deduped to once per run via conversionCounted).',
 })
 
@@ -68,7 +68,7 @@ const counterScriptflowMatcherConversionsCounted = new Counter({
 // person/event updates (keyed on the new id) can't wake it. We re-key such waits onto the survivor;
 // this counts the re-keyed jobs.
 const counterScriptflowMatcherJobsRekeyedOnMove = new Counter({
-    name: 'cdp_hogflow_matcher_jobs_rekeyed_on_distinct_id_move',
+    name: 'cdp_flow_matcher_jobs_rekeyed_on_distinct_id_move',
     help: 'Parked wait_until_condition jobs re-keyed to the surviving person after a distinct_id was repointed by a merge.',
 })
 
@@ -78,7 +78,7 @@ const counterScriptflowMatcherJobsRekeyedOnMove = new Counter({
 // for a team with a wait flow, which is the load this path adds; 'filled' is the jobs it actually anchored.
 // A 'seen' rate far above 'filled' is expected — watch the gap for query cost, not correctness.
 const counterScriptflowMatcherFirstMapping = new Counter({
-    name: 'cdp_hogflow_matcher_first_mapping_total',
+    name: 'cdp_flow_matcher_first_mapping_total',
     help: 'distinct_id first mappings processed for parked waits with no person anchor, by outcome.',
     labelNames: ['outcome'],
 })
@@ -86,7 +86,7 @@ const counterScriptflowMatcherFirstMapping = new Counter({
 // Latency of the cyclotron lookup for parked jobs. Watch this for cyclotron-node
 // read pressure as the wait-until-event feature ramps.
 const histogramScriptflowMatcherFindParkedJobs = new Histogram({
-    name: 'cdp_hogflow_matcher_find_parked_jobs_seconds',
+    name: 'cdp_flow_matcher_find_parked_jobs_seconds',
     help: 'Duration of the findParkedJobs cyclotron query.',
     labelNames: ['stream'],
     buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5],
@@ -97,7 +97,7 @@ const histogramScriptflowMatcherFindParkedJobs = new Histogram({
 type WakeSource = 'events' | 'person' | 'internal_events'
 
 const counterScriptflowMatcherEventSkipped = new Counter({
-    name: 'cdp_hogflow_matcher_event_skipped',
+    name: 'cdp_flow_matcher_event_skipped',
     help: 'An incoming event was dropped before matching: no identifiers (distinct_id or person_id), or unknown team.',
     labelNames: ['reason'],
 })
@@ -415,8 +415,8 @@ export class CdpScriptflowSubscriptionMatcherConsumer<
         // filter further scopes to flows the matcher can act on.
         //
         // We deliberately do NOT filter by queue_name: a parked wait can sit on a queue
-        // other than 'hogflow'. When a step (e.g. email) routes the invocation to a
-        // dedicated queue, the following wait parks on that queue, so a queue_name='hogflow'
+        // other than 'flow'. When a step (e.g. email) routes the invocation to a
+        // dedicated queue, the following wait parks on that queue, so a queue_name='flow'
         // filter would silently miss it. function_id already scopes to flow jobs, and
         // waking the job (scheduled = NOW()) lets whichever worker owns that queue resume it.
         const stopTimer = histogramScriptflowMatcherFindParkedJobs.startTimer({ stream: source })
@@ -570,7 +570,7 @@ export class CdpScriptflowSubscriptionMatcherConsumer<
             // Queue metrics/events only after the dedup write commits: if the transaction rolled back,
             // the run is still uncounted in state, so a retry must be free to count it (no double-count).
             for (const metric of conversionMetrics) {
-                this.insightsFunctionMonitoringService.queueAppMetric(metric, 'hog_flow')
+                this.insightsFunctionMonitoringService.queueAppMetric(metric, 'flow')
             }
             await Promise.all(
                 conversionEvents.map((event) => this.invocationResultsService.capturedEventsService.queueEvent(event))

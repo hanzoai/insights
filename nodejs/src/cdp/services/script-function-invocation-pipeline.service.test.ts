@@ -181,7 +181,7 @@ describe('InsightsFunctionInvocationPipeline', () => {
 
         expect(result).toHaveLength(1)
         expect(result[0].queuePriority).toBe(2)
-        expect(result[0].queue).toBe('hogoverflow')
+        expect(result[0].queue).toBe('overflow')
     })
 
     it('drops quota-limited invocations', async () => {
