@@ -571,7 +571,7 @@ describe('Surveys generated tools', { concurrent: false }, () => {
         const projectId = await context.stateManager.getProjectId()
         const flag = await context.api.request<{ id: number }>({
             method: 'POST',
-            path: `/api/projects/${projectId}/feature_flags/`,
+            path: `/v1/projects/${projectId}/feature_flags/`,
             body: {
                 key: `survey-test-flag-${Date.now()}`,
                 name: 'Survey test flag',

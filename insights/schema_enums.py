@@ -2710,8 +2710,8 @@ class MascotActorSkinOption(StrEnum):
 class HogLanguage(StrEnum):
     HOG = "script"
     INSIGHTS_JSON = "hogJson"
-    INSIGHTS_QL = "hogQL"
-    INSIGHTS_QL_EXPR = "hogQLExpr"
+    INSIGHTS_QL = "insightsQL"
+    INSIGHTS_QL_EXPR = "insightsQLExpr"
     INSIGHTS_TEMPLATE = "hogTemplate"
     LIQUID = "liquid"
 

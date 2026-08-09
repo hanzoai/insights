@@ -34,11 +34,11 @@ const meta: Meta = {
                 },
                 '/stats': {},
                 '/events': {},
-                '/api/billing/': {
+                '/v1/billing/': {
                     ...billingJson,
                 },
-                '/api/environments/:team_id/integrations/domain-connect/check': domainConnectJson,
-                '/api/environments/:team_id/external_data_sources/wizard': () => {
+                '/v1/environments/:team_id/integrations/domain-connect/check': domainConnectJson,
+                '/v1/environments/:team_id/external_data_sources/wizard': () => {
                     return [
                         200,
                         {
@@ -98,7 +98,7 @@ const meta: Meta = {
                 },
             },
             patch: {
-                '/api/environments/:team_id/add_product_intent/': {},
+                '/v1/environments/:team_id/add_product_intent/': {},
             },
         }),
     ],
@@ -316,7 +316,7 @@ export const BillingPlans: Story = {
 
         useStorybookMocks({
             get: {
-                '/api/billing/': {
+                '/v1/billing/': {
                     ...billingUnsubscribedJson,
                 },
             },

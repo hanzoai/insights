@@ -70,9 +70,9 @@ describe('impersonationNoticeLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/users/@me/': () => [200, MOCK_DEFAULT_USER],
+                '/v1/users/@me/': () => [200, MOCK_DEFAULT_USER],
                 '/admin/auth_check': () => [200, {}],
-                '/api/organizations/:org/members/': () => [200, { results: [], count: 0 }],
+                '/v1/organizations/:org/members/': () => [200, { results: [], count: 0 }],
             },
             post: {
                 '/admin/login/user/:id/': () => [200, {}],
@@ -152,7 +152,7 @@ describe('impersonationNoticeLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/users/@me/': () => [200, MOCK_IMPERSONATED_USER],
+                    '/v1/users/@me/': () => [200, MOCK_IMPERSONATED_USER],
                 },
             })
             userLogic.actions.loadUserSuccess(MOCK_IMPERSONATED_USER)
@@ -212,7 +212,7 @@ describe('impersonationNoticeLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/users/@me/': () => [200, MOCK_IMPERSONATED_USER],
+                    '/v1/users/@me/': () => [200, MOCK_IMPERSONATED_USER],
                     '/admin/auth_check': () => [200, {}],
                 },
                 post: {
@@ -290,7 +290,7 @@ describe('impersonationNoticeLogic', () => {
             useMocks({
                 get: {
                     '/admin/auth_check': () => [401, {}],
-                    '/api/users/@me/': () => [200, MOCK_IMPERSONATED_USER],
+                    '/v1/users/@me/': () => [200, MOCK_IMPERSONATED_USER],
                 },
                 post: {
                     '/admin/login/user/:id/': () => [200, {}],
@@ -329,7 +329,7 @@ describe('impersonationNoticeLogic', () => {
             useMocks({
                 get: {
                     '/admin/auth_check': () => [401, {}],
-                    '/api/users/@me/': () => [200, MOCK_IMPERSONATED_USER],
+                    '/v1/users/@me/': () => [200, MOCK_IMPERSONATED_USER],
                 },
                 post: {
                     '/admin/login/user/:id/': () => [200, {}],
@@ -427,10 +427,10 @@ describe('impersonationNoticeLogic', () => {
     })
 
     describe('setPageVisible listener', () => {
-        it('probes /api/users/@me/ and dispatches loadUserSuccess when session was renewed', async () => {
+        it('probes /v1/users/@me/ and dispatches loadUserSuccess when session was renewed', async () => {
             useMocks({
                 get: {
-                    '/api/users/@me/': () => [200, MOCK_IMPERSONATED_USER],
+                    '/v1/users/@me/': () => [200, MOCK_IMPERSONATED_USER],
                 },
             })
             logic.actions.setSessionExpired({
@@ -446,7 +446,7 @@ describe('impersonationNoticeLogic', () => {
                 .toFinishAllListeners()
         })
 
-        it('does not probe /api/users/@me/ when there is no expired session', async () => {
+        it('does not probe /v1/users/@me/ when there is no expired session', async () => {
             const fetchSpy = jest.spyOn(globalThis, 'fetch')
 
             await expectLogic(logic, () => {
@@ -454,7 +454,7 @@ describe('impersonationNoticeLogic', () => {
             }).toFinishAllListeners()
 
             const probed = fetchSpy.mock.calls.some(
-                ([url]) => typeof url === 'string' && url.includes('/api/users/@me/')
+                ([url]) => typeof url === 'string' && url.includes('/v1/users/@me/')
             )
             expect(probed).toBe(false)
             fetchSpy.mockRestore()
@@ -470,17 +470,17 @@ describe('impersonationNoticeLogic', () => {
             }).toFinishAllListeners()
 
             const probed = fetchSpy.mock.calls.some(
-                ([url]) => typeof url === 'string' && url.includes('/api/users/@me/')
+                ([url]) => typeof url === 'string' && url.includes('/v1/users/@me/')
             )
             expect(probed).toBe(false)
             expect(logic.values.expiredSessionInfo).toEqual(expiredInfo)
             fetchSpy.mockRestore()
         })
 
-        it('keeps overlay up when /api/users/@me/ returns 401 on page focus', async () => {
+        it('keeps overlay up when /v1/users/@me/ returns 401 on page focus', async () => {
             useMocks({
                 get: {
-                    '/api/users/@me/': () => [401, {}],
+                    '/v1/users/@me/': () => [401, {}],
                 },
             })
             const expiredInfo = {
@@ -510,7 +510,7 @@ describe('impersonationNoticeLogic', () => {
             }
             useMocks({
                 get: {
-                    '/api/users/@me/': () => [200, staleUser],
+                    '/v1/users/@me/': () => [200, staleUser],
                 },
             })
             const expiredInfo = {
@@ -545,7 +545,7 @@ describe('impersonationNoticeLogic', () => {
             useMocks({
                 get: {
                     '/admin/auth_check': () => [200, {}],
-                    '/api/users/@me/': () => [200, MOCK_IMPERSONATED_USER],
+                    '/v1/users/@me/': () => [200, MOCK_IMPERSONATED_USER],
                 },
                 post: {
                     '/admin/login/user/:id/': () => [200, {}],
@@ -575,7 +575,7 @@ describe('impersonationNoticeLogic', () => {
             useMocks({
                 get: {
                     '/admin/auth_check': () => [401, {}],
-                    '/api/users/@me/': () => [200, MOCK_IMPERSONATED_USER],
+                    '/v1/users/@me/': () => [200, MOCK_IMPERSONATED_USER],
                 },
                 post: {
                     '/admin/login/user/:id/': () => [200, {}],
@@ -622,7 +622,7 @@ describe('impersonationNoticeLogic', () => {
         it('clears overlay when page regains focus and session was renewed in another tab', async () => {
             // Scenario: Tab 1 has an expired overlay for User A.
             // In another tab, staff starts impersonating User B.
-            // When Tab 1 regains focus, the listener probes /api/users/@me/ directly
+            // When Tab 1 regains focus, the listener probes /v1/users/@me/ directly
             // and hands the fresh user to loadUserSuccess, which clears the overlay.
 
             const userFromOtherTab: UserType = {
@@ -632,7 +632,7 @@ describe('impersonationNoticeLogic', () => {
             }
             useMocks({
                 get: {
-                    '/api/users/@me/': () => [200, userFromOtherTab],
+                    '/v1/users/@me/': () => [200, userFromOtherTab],
                 },
             })
             logic.actions.setSessionExpired({
@@ -655,12 +655,12 @@ describe('impersonationNoticeLogic', () => {
 
         it('keeps overlay when page regains focus but session is not impersonated', async () => {
             // Scenario: Tab 1 has an expired overlay. The other tab logged out
-            // of impersonation entirely. When Tab 1 regains focus, /api/users/@me/
+            // of impersonation entirely. When Tab 1 regains focus, /v1/users/@me/
             // returns a non-impersonated staff user — the overlay should stay.
 
             useMocks({
                 get: {
-                    '/api/users/@me/': () => [200, MOCK_DEFAULT_USER],
+                    '/v1/users/@me/': () => [200, MOCK_DEFAULT_USER],
                 },
             })
             const expiredInfo = {
@@ -758,7 +758,7 @@ describe('impersonationNoticeLogic', () => {
             useMocks({
                 get: {
                     '/admin/auth_check': () => [200, {}],
-                    '/api/users/@me/': () => [200, MOCK_IMPERSONATED_USER],
+                    '/v1/users/@me/': () => [200, MOCK_IMPERSONATED_USER],
                 },
                 post: {
                     '/admin/login/user/:id/': () => [200, {}],

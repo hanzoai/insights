@@ -10,13 +10,12 @@ from insights.cdp.templates.insights_function_template import sync_template_to_d
 from insights.cdp.templates.slack.template_slack import template as template_slack
 from insights.constants import AvailableFeature
 from insights.models import Integration, Organization, OrganizationMembership, Team
+from insights.models.ee_models import AccessControl
 
 from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
 from products.customer_analytics.backend.logic.event_stream_destination import _NO_MEMBERS_SENTINEL
 from products.customer_analytics.backend.models import EventStream, EventStreamMember, TeamCustomerAnalyticsConfig
 from products.customer_analytics.backend.test.factories import create_account
-
-from insights.models.ee_models import AccessControl
 
 
 class TestEventStreamViewSet(APIBaseTest):
@@ -29,7 +28,7 @@ class TestEventStreamViewSet(APIBaseTest):
         self.integration = Integration.objects.create(
             team=self.team, kind="slack", config={"team": {"id": "T123"}}, sensitive_config={"access_token": "x"}
         )
-        self.base_url = f"/api/projects/{self.team.id}/event_streams/"
+        self.base_url = f"/v1/projects/{self.team.id}/event_streams/"
         self.valid_data = {
             "enabled": True,
             "event_names": ["$pageview", "dashboard_created"],
@@ -332,7 +331,7 @@ class TestEventStreamViewSet(APIBaseTest):
         function = self._destination(stream)
         self.assertTrue(function.enabled)
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/accounts/{account.id}/")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/accounts/{account.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         function.refresh_from_db()
@@ -345,7 +344,7 @@ class TestEventStreamViewSet(APIBaseTest):
         self.client.post(f"{self.base_url}{stream['id']}/add_account/", {"account_id": str(account.id)}, format="json")
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/accounts/{account.id}/", {"external_id": "org-acme-2"}, format="json"
+            f"/v1/projects/{self.team.id}/accounts/{account.id}/", {"external_id": "org-acme-2"}, format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())

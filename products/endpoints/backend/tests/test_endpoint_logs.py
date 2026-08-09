@@ -78,7 +78,7 @@ class TestEndpointExecutionLogs(DatastoreTestMixin, APIBaseTest):
 
         with mock.patch("products.endpoints.backend.logic.execution.log_endpoint_execution") as mock_log:
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/", {}, format="json"
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/", {}, format="json"
             )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -97,7 +97,7 @@ class TestEndpointExecutionLogs(DatastoreTestMixin, APIBaseTest):
 
         with mock.patch("products.endpoints.backend.logic.execution.log_endpoint_execution") as mock_log:
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/", {}, format="json"
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/", {}, format="json"
             )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -113,7 +113,7 @@ class TestEndpointExecutionLogs(DatastoreTestMixin, APIBaseTest):
 
         with mock.patch("products.endpoints.backend.logic.execution.log_endpoint_execution") as mock_log:
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/", {}, format="json"
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/", {}, format="json"
             )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -127,7 +127,7 @@ class TestEndpointExecutionLogs(DatastoreTestMixin, APIBaseTest):
 
         with mock.patch("products.endpoints.backend.logic.execution.log_endpoint_execution") as mock_log:
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
                 {"refresh": "hey"},
                 format="json",
             )
@@ -163,7 +163,7 @@ class TestEndpointExecutionLogs(DatastoreTestMixin, APIBaseTest):
 
         with mock.patch("products.endpoints.backend.logic.execution.log_endpoint_execution") as mock_log:
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/", body, format="json"
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/", body, format="json"
             )
 
         self.assertEqual(response.status_code, expected_status)
@@ -180,7 +180,7 @@ class TestEndpointExecutionLogs(DatastoreTestMixin, APIBaseTest):
 
         with mock.patch("products.endpoints.backend.logic.execution.log_endpoint_execution") as mock_log:
             response = self.client.post(
-                f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+                f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
                 {"refresh": "direct"},
                 format="json",
             )
@@ -205,7 +205,7 @@ class TestEndpointExecutionLogs(DatastoreTestMixin, APIBaseTest):
             timestamp="2026-01-01 12:00:00",
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/logs/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/logs/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
@@ -228,7 +228,7 @@ class TestEndpointExecutionLogs(DatastoreTestMixin, APIBaseTest):
             )
 
         results = self.client.get(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/logs/", {"level": "ERROR"}
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/logs/", {"level": "ERROR"}
         ).json()["results"]
 
         self.assertEqual(len(results), 1)
@@ -253,13 +253,13 @@ class TestEndpointExecutionLogs(DatastoreTestMixin, APIBaseTest):
             level="info",
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/{other_endpoint.name}/logs/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/{other_endpoint.name}/logs/")
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_logs_action_rejects_invalid_limit(self):
         endpoint = self._create_insightsql_endpoint("logs_bad_limit", "SELECT 1")
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/logs/", {"limit": 999})
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/logs/", {"limit": 999})
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

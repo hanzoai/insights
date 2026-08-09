@@ -20,13 +20,13 @@ const meta: Meta<ProductSetupPopoverProps> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/organizations/@current/': {
+                '/v1/organizations/@current/': {
                     ...MOCK_DEFAULT_ORGANIZATION,
                     created_at: new Date().toISOString(),
                 },
             },
             patch: {
-                '/api/environments/@current/': {},
+                '/v1/environments/@current/': {},
             },
         }),
     ],

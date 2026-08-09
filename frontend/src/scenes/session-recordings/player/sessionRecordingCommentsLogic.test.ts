@@ -19,8 +19,8 @@ describe('sessionRecordingCommentsLogic', () => {
         capturedCommentsQuery = null
         setupSessionRecordingTest({
             getMocks: {
-                '/api/environments/:team_id/session_recordings/1/': {},
-                '/api/projects/:team_id/comments': ({ request }) => {
+                '/v1/environments/:team_id/session_recordings/1/': {},
+                '/v1/projects/:team_id/comments': ({ request }) => {
                     capturedCommentsQuery = new URL(request.url).searchParams
                     return [200, { results: [] }]
                 },

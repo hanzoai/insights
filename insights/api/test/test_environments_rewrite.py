@@ -8,9 +8,9 @@ from rest_framework import status
 from insights.middleware import EnvironmentsRewriteMiddleware
 from insights.models.organization import OrganizationMembership
 
-# EnvironmentsRewriteMiddleware serves /api/environments/* through the equivalent /api/projects/*
+# EnvironmentsRewriteMiddleware serves /v1/environments/* through the equivalent /v1/projects/*
 # viewset (same id — Project ↔ primary Team are 1:1 and share it) via an in-process path rewrite.
-# The rewrite is unconditional (there are no /api/environments/* routes left to fall back to) and
+# The rewrite is unconditional (there are no /v1/environments/* routes left to fall back to) and
 # deliberately not a 307/308 — many API clients don't follow redirects — so the client gets a normal
 # 200 on the original URL with method, body, and query string intact.
 
@@ -33,43 +33,43 @@ class TestRewriteMechanism(SimpleTestCase):
         return seen, response
 
     def test_env_path_with_projects_counterpart_is_rewritten(self):
-        seen, response = self._run("/api/environments/@current/")
-        # Downstream resolves against /api/projects, not the original /api/environments path.
-        self.assertEqual(seen["path"], "/api/projects/@current/")
-        self.assertEqual(seen["path_info"], "/api/projects/@current/")
+        seen, response = self._run("/v1/environments/@current/")
+        # Downstream resolves against /v1/projects, not the original /v1/environments path.
+        self.assertEqual(seen["path"], "/v1/projects/@current/")
+        self.assertEqual(seen["path_info"], "/v1/projects/@current/")
         self.assertEqual(response["Deprecation"], "true")
-        self.assertEqual(response["Link"], '</api/projects/@current/>; rel="successor-version"')
+        self.assertEqual(response["Link"], '</v1/projects/@current/>; rel="successor-version"')
 
     def test_successor_link_preserves_query_string(self):
-        _, response = self._run("/api/environments/@current/", query_string="format=json")
-        self.assertEqual(response["Link"], '</api/projects/@current/?format=json>; rel="successor-version"')
+        _, response = self._run("/v1/environments/@current/", query_string="format=json")
+        self.assertEqual(response["Link"], '</v1/projects/@current/?format=json>; rel="successor-version"')
 
     def test_env_path_without_projects_counterpart_is_not_rewritten(self):
-        # No /api/projects counterpart — the rewrite is skipped and no deprecation headers are added.
-        seen, response = self._run("/api/environments/@current/does_not_exist_anywhere/")
-        self.assertEqual(seen["path"], "/api/environments/@current/does_not_exist_anywhere/")
+        # No /v1/projects counterpart — the rewrite is skipped and no deprecation headers are added.
+        seen, response = self._run("/v1/environments/@current/does_not_exist_anywhere/")
+        self.assertEqual(seen["path"], "/v1/environments/@current/does_not_exist_anywhere/")
         self.assertNotIn("Deprecation", response)
 
     def test_non_environments_path_is_untouched(self):
-        seen, response = self._run("/api/projects/@current/")
-        self.assertEqual(seen["path"], "/api/projects/@current/")
+        seen, response = self._run("/v1/projects/@current/")
+        self.assertEqual(seen["path"], "/v1/projects/@current/")
         self.assertNotIn("Deprecation", response)
 
 
 class TestEnvironmentsRewriteIntegration(APIBaseTest):
     def test_read_is_served_transparently_with_deprecation_headers(self):
-        response = self.client.get("/api/environments/@current/")
+        response = self.client.get("/v1/environments/@current/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # No redirect — the client gets the response on the original URL.
         self.assertNotIn("Location", response)
         self.assertEqual(response["Deprecation"], "true")
-        self.assertEqual(response["Link"], '</api/projects/@current/>; rel="successor-version"')
+        self.assertEqual(response["Link"], '</v1/projects/@current/>; rel="successor-version"')
 
     def test_write_round_trips_method_and_body(self):
         # Renaming is admin-only, so run as an admin here — this test covers the rewrite, not the permission check.
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
-        response = self.client.patch("/api/environments/@current/", {"name": "renamed via env alias"}, format="json")
+        response = self.client.patch("/v1/environments/@current/", {"name": "renamed via env alias"}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["name"], "renamed via env alias")
 
@@ -79,7 +79,7 @@ class TestSunsetHeader(SimpleTestCase):
         def get_response(request):
             return HttpResponse("ok")
 
-        request = RequestFactory().get("/api/environments/@current/")
+        request = RequestFactory().get("/v1/environments/@current/")
         return EnvironmentsRewriteMiddleware(get_response)(request).get("Sunset")
 
     @override_settings(API_ENVIRONMENTS_SUNSET_DATE="2026-07-31")

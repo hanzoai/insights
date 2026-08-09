@@ -37,7 +37,7 @@ test.describe('Personal API keys', () => {
         })
 
         await test.step('the key authorizes an API request', async () => {
-            const resp = await request.get('/api/users/@me/', {
+            const resp = await request.get('/v1/users/@me/', {
                 headers: { Authorization: `Bearer ${apiKey}` },
             })
             expect(resp.status()).toBe(200)
@@ -53,7 +53,7 @@ test.describe('Personal API keys', () => {
         })
 
         await test.step('the deleted key no longer authorizes', async () => {
-            const resp = await request.get('/api/users/@me/', {
+            const resp = await request.get('/v1/users/@me/', {
                 headers: { Authorization: `Bearer ${apiKey}` },
             })
             expect(resp.status()).toBe(401)

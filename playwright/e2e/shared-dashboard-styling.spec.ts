@@ -28,7 +28,7 @@ async function createSharedInsight(
         },
     }
 
-    const insightResponse = await page.request.post(`/api/projects/${workspace.team_id}/insights/`, {
+    const insightResponse = await page.request.post(`/v1/projects/${workspace.team_id}/insights/`, {
         headers: { Authorization: `Bearer ${workspace.personal_api_key}`, 'Content-Type': 'application/json' },
         data: payload,
     })
@@ -36,7 +36,7 @@ async function createSharedInsight(
     const insightData = await insightResponse.json()
 
     const sharingResponse = await page.request.patch(
-        `/api/projects/${workspace.team_id}/insights/${insightData.id}/sharing`,
+        `/v1/projects/${workspace.team_id}/insights/${insightData.id}/sharing`,
         {
             headers: { Authorization: `Bearer ${workspace.personal_api_key}`, 'Content-Type': 'application/json' },
             data: { enabled: true },

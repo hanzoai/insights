@@ -41,12 +41,12 @@ describe('teamLogic', () => {
             } as unknown as AppContext
             useMocks({
                 get: {
-                    '/api/projects/@current': () => [500, {}],
+                    '/v1/projects/@current': () => [500, {}],
                 },
                 patch: {
-                    // Only /api/projects is mocked: a name-only update must not hit the
-                    // deprecated /api/environments endpoint
-                    '/api/projects/:id': async ({ request }) => [
+                    // Only /v1/projects is mocked: a name-only update must not hit the
+                    // deprecated /v1/environments endpoint
+                    '/v1/projects/:id': async ({ request }) => [
                         200,
                         { ...MOCK_DEFAULT_PROJECT, ...((await request.json()) as Record<string, any>) },
                     ],
@@ -74,13 +74,13 @@ describe('teamLogic', () => {
             initKeaTests()
             useMocks({
                 get: {
-                    '/api/environments/:id/user_product_list': () => [200, { results: [], count: 0 }],
+                    '/v1/environments/:id/user_product_list': () => [200, { results: [], count: 0 }],
                 },
                 patch: {
                     // Simulates the race hit in production: `complete_product_onboarding` serializes
                     // the team from a snapshot taken before the concurrent onboarding-completion
                     // PATCH committed, so its response arrives without the completion fields.
-                    '/api/environments/:id/complete_product_onboarding': () => [
+                    '/v1/environments/:id/complete_product_onboarding': () => [
                         200,
                         {
                             ...MOCK_DEFAULT_TEAM,
@@ -117,7 +117,7 @@ describe('teamLogic', () => {
             await expectLogic(logic).toDispatchActions(['loadCurrentTeamSuccess'])
             useMocks({
                 patch: {
-                    '/api/environments/:id/complete_product_onboarding': () => [
+                    '/v1/environments/:id/complete_product_onboarding': () => [
                         200,
                         {
                             ...MOCK_DEFAULT_TEAM,

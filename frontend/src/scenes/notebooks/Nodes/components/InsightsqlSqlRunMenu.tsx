@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconChevronDown, IconPlay } from '@hanzo/icons'
 import { Button, MenuItems, MenuOverlay } from '@hanzo/elements'
+import { IconChevronDown, IconPlay } from '@hanzo/icons'
 
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 
@@ -9,25 +9,25 @@ import { notebookSettingsLogic } from '../../Notebook/notebookSettingsLogic'
 import { isKernelUiEnabled } from '../../utils'
 import { NotebookRunMode, buildRunMenuItems } from './runMenuItems'
 
-export type HogqlSqlRunMode = NotebookRunMode
+export type InsightsqlSqlRunMode = NotebookRunMode
 
-type HogqlSqlRunMenuProps = {
+type InsightsqlSqlRunMenuProps = {
     isFresh: boolean
     isStale: boolean
     loading: boolean
     queued: boolean
     disabledReason?: string
-    onRun: (mode: HogqlSqlRunMode) => void
+    onRun: (mode: InsightsqlSqlRunMode) => void
 }
 
-export const HogqlSqlRunMenu = ({
+export const InsightsqlSqlRunMenu = ({
     isFresh,
     isStale,
     loading,
     queued,
     disabledReason,
     onRun,
-}: HogqlSqlRunMenuProps): JSX.Element => {
+}: InsightsqlSqlRunMenuProps): JSX.Element => {
     const { featureFlags } = useValues(featureFlagLogic)
     const { showKernelInfo } = useValues(notebookSettingsLogic)
     const { setShowKernelInfo } = useActions(notebookSettingsLogic)

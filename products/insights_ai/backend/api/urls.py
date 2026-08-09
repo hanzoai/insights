@@ -1,7 +1,7 @@
-"""Assistant routes, served at `/v1/` — not under `/api/`.
+"""Assistant routes, served at `/v1/` — not under `/v1/`.
 
 The client normalizes a URL by appending a trailing slash, so every pattern here
-accepts one optionally, the way the DRF router does for `/api/`.
+accepts one optionally, the way the DRF router does for `/v1/`.
 
 `parent_lookup_team_id` is not decoration: it is the kwarg name
 `TeamAndOrgViewSetMixin` reads to learn which project was asked for, and then

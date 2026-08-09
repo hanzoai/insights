@@ -232,27 +232,27 @@ export const organizationLogic = kea<organizationLogicType>([
                         return null
                     }
                     try {
-                        return await api.get('api/organizations/@current')
+                        return await api.get('v1/organizations/@current')
                     } catch {
                         return null
                     }
                 },
-                createOrganization: async (name: string) => await api.create('api/organizations/', { name }),
+                createOrganization: async (name: string) => await api.create('v1/organizations/', { name }),
                 updateOrganization: async (payload: OrganizationUpdatePayload) => {
                     if (!values.currentOrganization) {
                         throw new Error('Current organization has not been loaded yet.')
                     }
                     const updatedOrganization = await api.update(
-                        `api/organizations/${values.currentOrganization.id}`,
+                        `v1/organizations/${values.currentOrganization.id}`,
                         payload
                     )
                     userLogic.actions.loadUser()
                     return updatedOrganization
                 },
                 completeOnboarding: async () =>
-                    await api.create(`api/organizations/${values.currentOrganization!.id}/onboarding/`, {}),
+                    await api.create(`v1/organizations/${values.currentOrganization!.id}/onboarding/`, {}),
                 migrateAccessControlVersion: async () => {
-                    await api.create(`api/organizations/${values.currentOrganization!.id}/migrate_access_control/`, {})
+                    await api.create(`v1/organizations/${values.currentOrganization!.id}/migrate_access_control/`, {})
                     window.location.reload()
                     return values.currentOrganization // Return current organization state since the page will reload anyway
                 },
@@ -352,7 +352,7 @@ export const organizationLogic = kea<organizationLogicType>([
         },
         deleteOrganization: async ({ organizationId, redirectPath }) => {
             try {
-                await api.delete(`api/organizations/${organizationId}`)
+                await api.delete(`v1/organizations/${organizationId}`)
                 actions.deleteOrganizationSuccess({ redirectPath })
             } catch (e) {
                 const apiError = e as ApiError

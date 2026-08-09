@@ -86,15 +86,15 @@ describe('addToDashboardModalLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/': {
+                '/v1/environments/:team_id/insights/': {
                     results: [MOCK_INSIGHT],
                 },
-                '/api/environments/:team_id/dashboards/': {
+                '/v1/environments/:team_id/dashboards/': {
                     results: [],
                 },
             },
             patch: {
-                '/api/environments/:team_id/insights/:id': async ({ request }) => {
+                '/v1/environments/:team_id/insights/:id': async ({ request }) => {
                     const payload = (await request.json()) as Record<string, any>
                     return [200, { ...MOCK_INSIGHT, ...payload }]
                 },
@@ -151,10 +151,10 @@ describe('addToDashboardModalLogic', () => {
         }
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/': {
+                '/v1/environments/:team_id/insights/': {
                     results: [insightOnlyOnDash2],
                 },
-                '/api/environments/:team_id/dashboards/': {
+                '/v1/environments/:team_id/dashboards/': {
                     results: [
                         mkDashboard(1, 'Pinned other', true, OTHER_USER_UUID),
                         mkDashboard(2, 'Current mine', false, MOCK_USER_UUID),
@@ -164,7 +164,7 @@ describe('addToDashboardModalLogic', () => {
                 },
             },
             patch: {
-                '/api/environments/:team_id/insights/:id': async ({ request }) => {
+                '/v1/environments/:team_id/insights/:id': async ({ request }) => {
                     const payload = (await request.json()) as Record<string, any>
                     return [200, { ...insightOnlyOnDash2, ...payload }]
                 },
@@ -205,10 +205,10 @@ describe('addToDashboardModalLogic', () => {
         }
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/': {
+                '/v1/environments/:team_id/insights/': {
                     results: [insightOnlyOnDash2],
                 },
-                '/api/environments/:team_id/dashboards/': {
+                '/v1/environments/:team_id/dashboards/': {
                     results: [
                         mkDashboard(2, 'Current', false, MOCK_USER_UUID),
                         mkDashboard(1, 'No creator', false, null),
@@ -217,7 +217,7 @@ describe('addToDashboardModalLogic', () => {
                 },
             },
             patch: {
-                '/api/environments/:team_id/insights/:id': async ({ request }) => {
+                '/v1/environments/:team_id/insights/:id': async ({ request }) => {
                     const payload = (await request.json()) as Record<string, any>
                     return [200, { ...insightOnlyOnDash2, ...payload }]
                 },
@@ -256,10 +256,10 @@ describe('addToDashboardModalLogic', () => {
         }
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/': {
+                '/v1/environments/:team_id/insights/': {
                     results: [insightOnlyOnDash2],
                 },
-                '/api/environments/:team_id/dashboards/': {
+                '/v1/environments/:team_id/dashboards/': {
                     results: [
                         mkDashboard(2, 'Current', false, MOCK_USER_UUID),
                         mkDashboard(3, 'Unpinned mine', false, MOCK_USER_UUID),
@@ -269,7 +269,7 @@ describe('addToDashboardModalLogic', () => {
                 },
             },
             patch: {
-                '/api/environments/:team_id/insights/:id': async ({ request }) => {
+                '/v1/environments/:team_id/insights/:id': async ({ request }) => {
                     const payload = (await request.json()) as Record<string, any>
                     return [200, { ...insightOnlyOnDash2, ...payload }]
                 },

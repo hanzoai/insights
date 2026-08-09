@@ -44,11 +44,11 @@ class TestTeamDeletionSideEffects(NonAtomicBaseTest):
         team: Team = Team.objects.create_with_data(initiating_user=self.user, organization=self.organization)
 
         with execute_deletion_workflows_inline():
-            response = self.client.delete(f"/api/environments/{team.id}")
+            response = self.client.delete(f"/v1/environments/{team.id}")
         assert response.status_code == 204
 
         # The team was deleted, so its activity can no longer be viewed via the API even though it was recorded
-        deleted_team_activity_response = self.client.get(f"/api/environments/{team.id}/activity")
+        deleted_team_activity_response = self.client.get(f"/v1/environments/{team.id}/activity")
         assert deleted_team_activity_response.status_code == 404
 
         # We can't query by API but can prove the deletion was recorded in the activity log
@@ -153,7 +153,7 @@ class TestTeamDeletionSideEffects(NonAtomicBaseTest):
         )
 
         with execute_deletion_workflows_inline():
-            response = self.client.delete(f"/api/environments/{team.id}")
+            response = self.client.delete(f"/v1/environments/{team.id}")
         self.assertEqual(response.status_code, 204)
         self.assertFalse(Team.objects.filter(id=team.id).exists())
 
@@ -195,7 +195,7 @@ class TestTeamDeletionSideEffects(NonAtomicBaseTest):
             activities=ACTIVITIES,
         ):
             response = self.client.post(
-                f"/api/environments/{team.id}/batch_exports",
+                f"/v1/environments/{team.id}/batch_exports",
                 json.dumps(batch_export_data),
                 content_type="application/json",
             )
@@ -203,10 +203,10 @@ class TestTeamDeletionSideEffects(NonAtomicBaseTest):
             batch_export_id = response.json()["id"]
 
             with execute_deletion_workflows_inline():
-                response = self.client.delete(f"/api/environments/{team.id}")
+                response = self.client.delete(f"/v1/environments/{team.id}")
             assert response.status_code == 204, response.json()
 
-            response = self.client.get(f"/api/environments/{team.id}/batch_exports/{batch_export_id}")
+            response = self.client.get(f"/v1/environments/{team.id}/batch_exports/{batch_export_id}")
             assert response.status_code == 404, response.json()
 
             with self.assertRaises(RPCError):
@@ -240,7 +240,7 @@ class TestTeamDeletionSideEffects(NonAtomicBaseTest):
             activities=ACTIVITIES,
         ):
             response = self.client.post(
-                f"/api/environments/{team.id}/batch_exports",
+                f"/v1/environments/{team.id}/batch_exports",
                 json.dumps(batch_export_data),
                 content_type="application/json",
             )
@@ -248,7 +248,7 @@ class TestTeamDeletionSideEffects(NonAtomicBaseTest):
             batch_export_id = response.json()["id"]
 
             # Delete the batch export first (this soft-deletes it and removes the Temporal schedule)
-            response = self.client.delete(f"/api/environments/{team.id}/batch_exports/{batch_export_id}")
+            response = self.client.delete(f"/v1/environments/{team.id}/batch_exports/{batch_export_id}")
             assert response.status_code == 204
 
             with self.assertRaises(RPCError):
@@ -256,7 +256,7 @@ class TestTeamDeletionSideEffects(NonAtomicBaseTest):
 
             # Now delete the team - this should succeed
             with execute_deletion_workflows_inline():
-                response = self.client.delete(f"/api/environments/{team.id}")
+                response = self.client.delete(f"/v1/environments/{team.id}")
             assert response.status_code == 204
 
     @patch("insights.temporal.common.schedule.delete_schedule")
@@ -277,7 +277,7 @@ class TestTeamDeletionSideEffects(NonAtomicBaseTest):
         mock_sync_connect.return_value = mock_temporal
 
         with execute_deletion_workflows_inline():
-            response = self.client.delete(f"/api/environments/{team.id}")
+            response = self.client.delete(f"/v1/environments/{team.id}")
         assert response.status_code == 204
 
         mock_delete_schedule.assert_called_once_with(mock_temporal, schedule_id=str(saved_query.id))
@@ -305,5 +305,5 @@ class TestTeamDeletionSideEffects(NonAtomicBaseTest):
         )
 
         with execute_deletion_workflows_inline():
-            response = self.client.delete(f"/api/environments/{team.id}")
+            response = self.client.delete(f"/v1/environments/{team.id}")
         assert response.status_code == 204

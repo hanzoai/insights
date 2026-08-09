@@ -83,7 +83,7 @@ describe('the dashboards model', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/environments/:team_id/dashboards/': () => {
+                '/v1/environments/:team_id/dashboards/': () => {
                     return [
                         200,
                         {
@@ -191,13 +191,13 @@ describe('the dashboards model', () => {
         initKeaTests(true, { ...MOCK_DEFAULT_TEAM, primary_dashboard: primaryDashboardId })
         useMocks({
             get: {
-                '/api/environments/:team_id/dashboards/': {
+                '/v1/environments/:team_id/dashboards/': {
                     count: 0,
                     results: [],
                 },
             },
             patch: {
-                '/api/environments/:team_id/dashboards/:id/': {
+                '/v1/environments/:team_id/dashboards/:id/': {
                     id: primaryDashboardId,
                     name: 'My Dashboard',
                     deleted: true,
@@ -220,13 +220,13 @@ describe('the dashboards model', () => {
         initKeaTests(true, { ...MOCK_DEFAULT_TEAM, primary_dashboard: primaryDashboardId })
         useMocks({
             get: {
-                '/api/environments/:team_id/dashboards/': {
+                '/v1/environments/:team_id/dashboards/': {
                     count: 0,
                     results: [],
                 },
             },
             patch: {
-                '/api/environments/:team_id/dashboards/:id/': {
+                '/v1/environments/:team_id/dashboards/:id/': {
                     id: 99,
                     name: 'Other Dashboard',
                     deleted: true,

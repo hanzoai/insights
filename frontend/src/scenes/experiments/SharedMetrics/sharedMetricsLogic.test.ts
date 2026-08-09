@@ -21,7 +21,7 @@ describe('sharedMetricsLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team_id/experiment_saved_metrics': ({ request }) => {
+                '/v1/projects/:team_id/experiment_saved_metrics': ({ request }) => {
                     const url = new URL(request.url)
                     return [
                         200,

@@ -33,12 +33,12 @@ export const insightSceneStoryParameters = {
 /** API mocks the insight scene needs beyond the insight itself (editor taxonomy, persons). */
 export const insightSceneMswDecorator = mswDecorator({
     get: {
-        '/api/environments/:team_id/persons/retention': sampleRetentionPeopleResponse,
-        '/api/environments/:team_id/persons/properties': samplePersonProperties,
-        '/api/projects/:team_id/groups_types': [],
+        '/v1/environments/:team_id/persons/retention': sampleRetentionPeopleResponse,
+        '/v1/environments/:team_id/persons/properties': samplePersonProperties,
+        '/v1/projects/:team_id/groups_types': [],
     },
     post: {
-        '/api/projects/:team_id/cohorts/': { id: 1 },
+        '/v1/projects/:team_id/cohorts/': { id: 1 },
     },
 })
 
@@ -119,7 +119,7 @@ export function createInsightStory(
 
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/insights/': () => [
+                '/v1/environments/:team_id/insights/': () => [
                     200,
                     {
                         count: 1,
@@ -135,7 +135,7 @@ export function createInsightStory(
                 ],
             },
             post: {
-                '/api/environments/:team_id/query/:kind/': ({ params }) => [
+                '/v1/environments/:team_id/query/:kind/': ({ params }) => [
                     200,
                     {
                         cache_key: params.query,

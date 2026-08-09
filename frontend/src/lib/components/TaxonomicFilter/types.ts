@@ -152,10 +152,10 @@ export interface TaxonomicFilterProps {
     initialSearchQuery?: string
     /** Allow users to select events that haven't been captured yet (default: false) */
     allowNonCapturedEvents?: boolean
-    hogQLGlobals?: Record<string, any>
+    insightsQLGlobals?: Record<string, any>
     /** When true, the SQL expression tab shows a hint about using `AS column_name`
      * or `-- column_name` to get a readable breakdown label. Only shown for long expressions. */
-    hogQLExpressionShowBreakdownLabelHint?: boolean
+    insightsQLExpressionShowBreakdownLabelHint?: boolean
     /** Optionally customize definition popover contents for selected items. */
     definitionPopoverRenderer?: DefinitionPopoverRenderer
     /** Override the group-level minSearchQueryLength for all groups in this instance. */
@@ -199,7 +199,7 @@ export interface DataWarehousePopoverField {
     label: string
     description?: string
     allowInsightsQL?: boolean
-    hogQLOnly?: boolean
+    insightsQLOnly?: boolean
     optional?: boolean
     tableName?: string
     type?: DatabaseSerializedFieldType

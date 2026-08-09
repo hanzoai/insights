@@ -29,7 +29,7 @@ describe('apiStatusLogic', () => {
         it('skips auto-logout on 401 for impersonated users', async () => {
             useMocks({
                 get: {
-                    '/api/users/@me/': () => [401, {}],
+                    '/v1/users/@me/': () => [401, {}],
                 },
             })
             initKeaTests()
@@ -56,7 +56,7 @@ describe('apiStatusLogic', () => {
             const submitSpy = jest.spyOn(HTMLFormElement.prototype, 'submit').mockImplementation()
             useMocks({
                 get: {
-                    '/api/users/@me/': () => [401, {}],
+                    '/v1/users/@me/': () => [401, {}],
                 },
             })
             initKeaTests()

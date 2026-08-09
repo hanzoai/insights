@@ -23,8 +23,9 @@ from parameterized import parameterized
 from insights.insightsql import ast
 from insights.insightsql.parser import parse_select
 
-from insights.datastore.client.execute_async import QueryNotFoundError
 from insights.constants import AvailableFeature
+from insights.datastore.client.execute_async import QueryNotFoundError
+from insights.models.ee_models import AccessControl
 from insights.models.organization import OrganizationMembership
 from insights.models.scoping import team_scope
 from insights.models.user import User
@@ -70,8 +71,6 @@ from products.notebooks.backend.temporal.sql_v2 import (
     dispatch_sql_v2_run_activity,
     mark_sql_v2_run_failed_activity,
 )
-
-from insights.models.ee_models import AccessControl
 
 
 def _restrict_query_access(test: APIBaseTest) -> None:
@@ -418,7 +417,7 @@ class TestSQLV2Run(APIBaseTest):
     def setUp(self):
         super().setUp()
         self.notebook = Notebook.objects.create(team=self.team, short_id="nbrun01")
-        self.run_url = f"/api/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sql_v2/run/"
+        self.run_url = f"/v1/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sql_v2/run/"
 
     @patch("products.notebooks.backend.presentation.views.notebook.start_sql_v2_run_workflow")
     @patch("products.notebooks.backend.presentation.views.notebook.enqueue_direct_run")
@@ -480,7 +479,7 @@ class TestSQLV2Run(APIBaseTest):
         self.assertEqual(response.status_code, 200)
         run_id = response.json()["run_id"]
 
-        result_url = f"/api/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sql_v2/runs/{run_id}/"
+        result_url = f"/v1/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sql_v2/runs/{run_id}/"
         body = self.client.get(result_url).json()
         self.assertEqual(body["status"], NotebookNodeRun.Status.DONE)
         envelope = body["result"]
@@ -707,7 +706,7 @@ class TestSQLV2RunOnAConnection(APIBaseTest):
     def setUp(self):
         super().setUp()
         self.notebook = Notebook.objects.create(team=self.team, short_id="nbconn1")
-        self.run_url = f"/api/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sql_v2/run/"
+        self.run_url = f"/v1/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sql_v2/run/"
         self.source_id = UUIDT()
         # The source is another product's model, which this one may not import (tach). Notebooks
         # only ever reaches it through core's resolver, so stub that seam: what this suite owns is
@@ -844,7 +843,7 @@ class TestSQLV2RunOnAConnection(APIBaseTest):
                 envelope={"status": "ok", "columns": ["id"], "first_page": [[1]]},
                 status=NotebookNodeRun.Status.DONE,
             )
-        url = f"/api/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sql_v2/runs/{run.id}/"
+        url = f"/v1/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sql_v2/runs/{run.id}/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["result"]["first_page"], [[1]])
@@ -869,7 +868,7 @@ class TestSQLV2RunOnAConnection(APIBaseTest):
             )
         self.mock_resolve_source.return_value = None
 
-        url = f"/api/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sql_v2/runs/{run.id}/"
+        url = f"/v1/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sql_v2/runs/{run.id}/"
         self.assertEqual(self.client.get(url).status_code, 403)
 
         run.refresh_from_db()
@@ -1001,7 +1000,7 @@ class TestSQLV2RunPage(APIBaseTest):
 
     def _get(self, run_id: str, offset=50, limit=50):
         return self.client.get(
-            f"/api/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sql_v2/runs/{run_id}/page/",
+            f"/v1/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sql_v2/runs/{run_id}/page/",
             {"offset": offset, "limit": limit},
         )
 
@@ -1204,7 +1203,7 @@ class TestSQLV2RunResult(APIBaseTest):
         self.notebook = Notebook.objects.create(team=self.team, short_id="nbres01")
 
     def _url(self, run_id: str) -> str:
-        return f"/api/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sql_v2/runs/{run_id}/"
+        return f"/v1/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sql_v2/runs/{run_id}/"
 
     def _create_run(self, status, envelope=None, error="") -> NotebookNodeRun:
         with team_scope(self.team.id):
@@ -1324,7 +1323,7 @@ class TestSQLV2RunInterrupt(APIBaseTest):
             )
 
     def _url(self, run_id: str) -> str:
-        return f"/api/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sql_v2/runs/{run_id}/interrupt/"
+        return f"/v1/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sql_v2/runs/{run_id}/interrupt/"
 
     def _create_runtime(self, user=None) -> KernelRuntime:
         return KernelRuntime.objects.create(
@@ -2550,12 +2549,12 @@ class TestSQLV2NodeRunMetrics(APIBaseTest):
         # The "why was it slow: queue wait vs Datastore" split rides QueryStatus into the
         # envelope; if the attach (or a QueryStatus field) silently changes, the phase
         # decomposition disappears from every dashboard while the run still completes.
-        run_url = f"/api/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sql_v2/run/"
+        run_url = f"/v1/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sql_v2/run/"
         response = self.client.post(run_url, data={"node_id": "n1", "code": "select 1 as a"}, format="json")
         self.assertEqual(response.status_code, 200)
         run_id = response.json()["run_id"]
         body = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sql_v2/runs/{run_id}/"
+            f"/v1/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sql_v2/runs/{run_id}/"
         ).json()
         self.assertEqual(body["status"], NotebookNodeRun.Status.DONE)
 

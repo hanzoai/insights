@@ -1,6 +1,6 @@
 {
     "count": 25,
-    "next": "http://localhost:8000/api/insight/?limit=15&offset=15&order=-created_at&saved=true",
+    "next": "http://localhost:8000/v1/insight/?limit=15&offset=15&order=-created_at&saved=true",
     "previous": null,
     "results": [
         {

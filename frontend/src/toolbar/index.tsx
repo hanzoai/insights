@@ -108,7 +108,7 @@ export async function loadToolbar(toolbarParams: ToolbarParams, insights?: Insig
             canonicalizeApiHost(insights.config?.api_host) ||
             canonicalizeApiHost(toolbarParams.apiURL) ||
             window.location.origin
-        const flagsUrl = `${trimmedHost}/api/user/get_toolbar_preloaded_flags?key=${toolbarParams.toolbarFlagsKey}`
+        const flagsUrl = `${trimmedHost}/v1/user/get_toolbar_preloaded_flags?key=${toolbarParams.toolbarFlagsKey}`
 
         // The flags preload is best-effort and the toolbar degrades cleanly without it.
         // Every failure mode here is request-shaped (transient network failure, ad blocker,

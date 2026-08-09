@@ -74,7 +74,7 @@ class TestRemovePersonFromStaticCohort(APIBaseTest):
         cohort.insert_users_by_list(["d1"])
 
         resp = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort.id}/remove_person_from_static_cohort",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort.id}/remove_person_from_static_cohort",
             {"person_id": str(person.uuid)},
             format="json",
         )
@@ -87,7 +87,7 @@ class TestRemovePersonFromStaticCohort(APIBaseTest):
         cohort = Cohort.objects.create(team=self.team, name="static", is_static=True)
 
         resp = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort.id}/remove_person_from_static_cohort",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort.id}/remove_person_from_static_cohort",
             {"person_id": UUID_NONEXISTENT},
             format="json",
         )

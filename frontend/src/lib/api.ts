@@ -229,6 +229,7 @@ import type {
 import type { SymbolSetOrder } from 'products/error_tracking/frontend/scenes/ErrorTrackingConfigurationScene/symbol_sets/symbolSetLogic'
 import type { ErrorTrackingRecommendation } from 'products/error_tracking/frontend/scenes/ErrorTrackingScene/tabs/recommendations/types'
 import type { CopyFlagsResponseApi } from 'products/feature_flags/frontend/generated/api.schemas'
+import type { Task, TaskListParams, TaskRun, TaskUpsertProps } from 'products/insights_ai/frontend/types/taskTypes'
 import type {
     GitHubBranchesResponseApi,
     GitHubReposResponseApi,
@@ -236,7 +237,6 @@ import type {
 import type { LogExplanation } from 'products/logs/frontend/components/LogsViewer/LogDetailsModal/Tabs/ExploreWithAI/types'
 import type { BulkAddOptOutsResultApi, BulkOptOutEntryApi } from 'products/messaging/frontend/generated/api.schemas'
 import type { NotebookCollabCursorApi } from 'products/notebooks/frontend/generated/api.schemas'
-import type { Task, TaskListParams, TaskRun, TaskUpsertProps } from 'products/insights_ai/frontend/types/taskTypes'
 import type {
     ColumnConfigurationApi,
     PaginatedColumnConfigurationListApi,
@@ -482,7 +482,7 @@ export class ApiRequest {
     }
 
     public assembleFullUrl(includeLeadingSlash = false): string {
-        return (includeLeadingSlash ? '/api/' : 'api/') + this.assembleEndpointUrl()
+        return (includeLeadingSlash ? '/v1/' : 'v1/') + this.assembleEndpointUrl()
     }
 
     // Generic endpoint composition
@@ -2085,11 +2085,11 @@ const normalizeUrl = (url: string): string => {
 const prepareUrl = (url: string): string => {
     let output = normalizeUrl(url)
 
-    // OAuth mode: route the data API to the selected region's host. Only `/api/*` is rewritten —
+    // OAuth mode: route the data API to the selected region's host. Only `/v1/*` is rewritten —
     // it's what the cloud CORS allowlist covers. Other endpoints (e.g. `/_preflight/`) aren't
     // cross-origin accessible, so they stay same-origin on the local instance.
     const backendHost = getBackendHost()
-    if (backendHost && output.startsWith('/api/')) {
+    if (backendHost && output.startsWith('/v1/')) {
         output = backendHost + output
     }
 
@@ -2136,7 +2136,7 @@ function tracingHeaders({ includeDistinctId = false } = {}): Record<string, stri
     }
 }
 
-const PROJECT_ID_REGEX = /\/api\/(project|environment)s\/(\w+)(?:$|[/?#])/
+const PROJECT_ID_REGEX = /\/v1\/(project|environment)s\/(\w+)(?:$|[/?#])/
 
 const ensureProjectIdNotInvalid = (url: string): void => {
     const projectIdMatch = PROJECT_ID_REGEX.exec(url)
@@ -2169,13 +2169,9 @@ function getDistinctId(): string | undefined {
 }
 
 /**
- * The assistant's threads, at `/v1/`.
- *
- * Built here rather than through `ApiRequest`, whose `assembleFullUrl` prefixes
- * `api/` by design — that prefix is where this fork's inherited endpoints live,
- * and new surfaces are versioned at the root instead. The project id is a path
- * segment because it names which project is being asked for; the server
- * authorizes it against the caller rather than trusting it.
+ * The assistant's threads. The project id is a path segment because it names
+ * which project is being asked for; the server authorizes it against the caller
+ * rather than trusting it.
  */
 function assistantConversationsUrl(): string {
     return `/v1/projects/${ApiConfig.getCurrentTeamId()}/assistant/conversations`
@@ -3432,7 +3428,7 @@ const api = {
             return new ApiRequest().cohorts().assembleEndpointUrl()
         },
         determineListUrl(cohortId: number | 'new', params: PersonListParams): string {
-            return `/api/cohort/${cohortId}/persons?${toParams(params)}`
+            return `/v1/cohort/${cohortId}/persons?${toParams(params)}`
         },
         async listPaginated(
             params: {
@@ -6922,22 +6918,22 @@ const api = {
             queryKind?: string
         }
     ): Promise<InsightsQLQueryResponse<T>> {
-        const hogQLQuery: InsightsQLQuery = setLatestVersionsOnQuery({
+        const insightsQLQuery: InsightsQLQuery = setLatestVersionsOnQuery({
             ...queryOptions?.queryParams,
             kind: NodeKind.InsightsQLQuery,
             query,
             tags,
         })
-        if (queryOptions?.queryKind && queryOptions.queryKind !== hogQLQuery.kind) {
+        if (queryOptions?.queryKind && queryOptions.queryKind !== insightsQLQuery.kind) {
             throw new Error(
-                `Query kind mismatch: path kind "${queryOptions.queryKind}" does not match body kind "${hogQLQuery.kind}".`
+                `Query kind mismatch: path kind "${queryOptions.queryKind}" does not match body kind "${insightsQLQuery.kind}".`
             )
         }
 
-        return await new ApiRequest().query(undefined, hogQLQuery.kind).create({
+        return await new ApiRequest().query(undefined, insightsQLQuery.kind).create({
             ...queryOptions?.requestOptions,
             data: {
-                query: hogQLQuery,
+                query: insightsQLQuery,
                 client_query_id: queryOptions?.clientQueryId,
                 refresh: queryOptions?.refresh,
                 filters_override: queryOptions?.filtersOverride,

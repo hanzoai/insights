@@ -61,7 +61,7 @@ class TestPersonPropertiesTimeline(DatastoreTestMixin, APIBaseTest):
         expected_status: int = status.HTTP_200_OK,
     ) -> PropertiesTimelineResult:
         url = (
-            f"/api/person/{TEST_PERSON_ID}/properties_timeline"
+            f"/v1/person/{TEST_PERSON_ID}/properties_timeline"
             f"?events={json.dumps(events or [])}&actions={json.dumps(actions or [])}"
             f"&properties={json.dumps(properties or [])}&display={display}"
             f"&date_from={date_from or ''}&date_to={date_to or ''}&interval={interval or ''}"

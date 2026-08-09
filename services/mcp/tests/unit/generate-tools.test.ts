@@ -24,7 +24,7 @@ function makeSpec(overrides: Partial<OpenApiSpec> = {}): OpenApiSpec {
 function makeResolved(overrides: Partial<ResolvedOperation> = {}): ResolvedOperation {
     return {
         method: 'GET',
-        path: '/api/projects/{project_id}/things/',
+        path: '/v1/projects/{project_id}/things/',
         operation: {
             operationId: 'things_list',
             parameters: [],
@@ -47,22 +47,22 @@ describe('extractPathParams', () => {
     const cases = [
         {
             name: 'returns empty for path without params',
-            url: '/api/projects/things/',
+            url: '/v1/projects/things/',
             expected: [],
         },
         {
             name: 'excludes project_id',
-            url: '/api/projects/{project_id}/things/',
+            url: '/v1/projects/{project_id}/things/',
             expected: [],
         },
         {
             name: 'extracts non-project_id params',
-            url: '/api/projects/{project_id}/things/{id}/',
+            url: '/v1/projects/{project_id}/things/{id}/',
             expected: ['id'],
         },
         {
             name: 'extracts multiple params',
-            url: '/api/projects/{project_id}/things/{thing_id}/sub/{sub_id}/',
+            url: '/v1/projects/{project_id}/things/{thing_id}/sub/{sub_id}/',
             expected: ['thing_id', 'sub_id'],
         },
     ]
@@ -275,7 +275,7 @@ describe('generateToolCode with input_schema', () => {
         }
         const resolved = makeResolved({
             method: 'PATCH',
-            path: '/api/projects/{project_id}/things/{id}/',
+            path: '/v1/projects/{project_id}/things/{id}/',
         })
 
         const result = generateToolCode(
@@ -300,7 +300,7 @@ describe('generateToolCode with input_schema', () => {
         }
         const resolved = makeResolved({
             method: 'GET',
-            path: '/api/projects/{project_id}/things/{id}/',
+            path: '/v1/projects/{project_id}/things/{id}/',
         })
 
         const result = generateToolCode(
@@ -1047,7 +1047,7 @@ describe('param_overrides aliases', () => {
         }
         const resolved = makeResolved({
             method: 'GET',
-            path: '/api/projects/{project_id}/things/{id}/',
+            path: '/v1/projects/{project_id}/things/{id}/',
             operation: {
                 operationId: 'things_retrieve',
                 parameters: [
@@ -1278,7 +1278,7 @@ describe('system_prompt_hint flows into tool definitions', () => {
         }
         const resolved: ResolvedOperation = {
             method: 'POST',
-            path: '/api/projects/{project_id}/logs/query/',
+            path: '/v1/projects/{project_id}/logs/query/',
             operation: { operationId: 'logs_query_create', description: 'Query logs' },
         }
         const definitions = generateDefinitionsJson([
@@ -1554,7 +1554,7 @@ describe('generateToolCode with response filtering', () => {
         }
         const resolved = makeResolved({
             method: 'GET',
-            path: '/api/projects/{project_id}/things/{id}/',
+            path: '/v1/projects/{project_id}/things/{id}/',
         })
 
         const result = generateToolCode(
@@ -1581,7 +1581,7 @@ describe('generateToolCode with response filtering', () => {
         }
         const resolved = makeResolved({
             method: 'GET',
-            path: '/api/projects/{project_id}/things/{id}/',
+            path: '/v1/projects/{project_id}/things/{id}/',
         })
 
         const result = generateToolCode(
@@ -1715,7 +1715,7 @@ describe('path parameter encoding', () => {
             enabled: true,
         }
         const resolved = makeResolved({
-            path: '/api/organizations/{organization_id}/members/',
+            path: '/v1/organizations/{organization_id}/members/',
             operation: {
                 operationId: 'members_list',
                 parameters: [{ name: 'organization_id', in: 'path', required: true, schema: { type: 'string' } }],
@@ -1743,7 +1743,7 @@ describe('path parameter encoding', () => {
         }
         const resolved = makeResolved({
             method: 'GET',
-            path: '/api/projects/{project_id}/things/{id}/',
+            path: '/v1/projects/{project_id}/things/{id}/',
             operation: {
                 operationId: 'things_retrieve',
                 parameters: [
@@ -1777,7 +1777,7 @@ describe('path parameter encoding', () => {
         }
         const resolved = makeResolved({
             method: 'GET',
-            path: '/api/projects/{project_id}/things/{id}/',
+            path: '/v1/projects/{project_id}/things/{id}/',
             operation: {
                 operationId: 'things_retrieve',
                 parameters: [
@@ -1890,7 +1890,7 @@ describe('generateToolCode with confirmed_action', () => {
     function makePatchResolved(): ResolvedOperation {
         return {
             method: 'PATCH',
-            path: '/api/organizations/{id}/',
+            path: '/v1/organizations/{id}/',
             operation: { operationId: 'organizations_partial_update', parameters: [] },
         }
     }
@@ -2004,7 +2004,7 @@ describe('generateToolCode with confirmed_action', () => {
             makeConfirmedConfig(),
             makeResolved({
                 method: 'POST',
-                path: '/api/projects/{project_id}/metrics/{name}/approve/',
+                path: '/v1/projects/{project_id}/metrics/{name}/approve/',
                 operation: {
                     operationId: 'organizations_partial_update',
                     parameters: [
@@ -2032,7 +2032,7 @@ describe('generateToolCode with confirmed_action', () => {
             makeConfirmedConfig(),
             makeResolved({
                 method: 'POST',
-                path: '/api/projects/{project_id}/metrics/{name}/approve/',
+                path: '/v1/projects/{project_id}/metrics/{name}/approve/',
                 operation: {
                     operationId: 'organizations_partial_update',
                     parameters: [
@@ -2082,7 +2082,7 @@ describe('generateToolCode with confirmed_action', () => {
 describe('optional param with state fallback', () => {
     const resolved = (): ResolvedOperation =>
         makeResolved({
-            path: '/api/organizations/{organization_id}/things/{id}/',
+            path: '/v1/organizations/{organization_id}/things/{id}/',
             operation: {
                 operationId: 'things_retrieve',
                 parameters: [

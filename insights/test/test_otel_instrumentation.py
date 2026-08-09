@@ -248,7 +248,7 @@ class TestOtelInstrumentation(SimpleTestCase):
         mock_span = mock.Mock()
         mock_span.is_recording.return_value = True
         mock_request = mock.Mock(method=request_method)
-        mock_request.resolver_match.route = "api/projects/<int:team_id>/insights/"
+        mock_request.resolver_match.route = "v1/projects/<int:team_id>/insights/"
         mock_response = mock.Mock()
         mock_response.status_code = 200
 

@@ -122,7 +122,7 @@ const funnelAlert = makeAlert({
     },
 })
 
-const hogQLAlert = makeAlert({
+const insightsQLAlert = makeAlert({
     id: 'alert-insightsql',
     name: 'Queue depth above 1,000',
     checks: makeChecks([720, 810, 760, 880, 920, 1050, 980, 1200]),
@@ -176,7 +176,7 @@ interface AlertTypeStoryProps {
 const storyAlerts: Record<StoryInsightType, AlertType> = {
     trends: trendsAlert,
     funnel: funnelAlert,
-    insightsql: hogQLAlert,
+    insightsql: insightsQLAlert,
 }
 
 const alertsById = Object.fromEntries(Object.values(storyAlerts).map((alert) => [alert.id, alert]))
@@ -214,11 +214,11 @@ export const EditAlert: EditAlertVariant = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/alerts/:alert_id/': (request) => [
+                '/v1/environments/:team_id/alerts/:alert_id/': (request) => [
                     200,
                     alertsById[request.params.alert_id as string],
                 ],
-                '/api/projects/:team_id/insights_functions/': EMPTY_PAGINATED_RESPONSE,
+                '/v1/projects/:team_id/insights_functions/': EMPTY_PAGINATED_RESPONSE,
             },
         }),
     ],
@@ -304,7 +304,7 @@ export const CreateWizard: CreateWizardVariant = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/insights_functions/': EMPTY_PAGINATED_RESPONSE,
+                '/v1/projects/:team_id/insights_functions/': EMPTY_PAGINATED_RESPONSE,
             },
         }),
     ],

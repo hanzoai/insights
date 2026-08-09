@@ -82,7 +82,10 @@ export interface nonInsightsFunctionsLogicActions {
     }
 }
 
-export type nonInsightsFunctionsLogicType = MakeLogicType<nonInsightsFunctionsLogicValues, nonInsightsFunctionsLogicActions>
+export type nonInsightsFunctionsLogicType = MakeLogicType<
+    nonInsightsFunctionsLogicValues,
+    nonInsightsFunctionsLogicActions
+>
 
 export const nonInsightsFunctionsLogic = kea<nonInsightsFunctionsLogicType>([
     path((key) => ['scenes', 'data-pipelines', 'utils', 'nonInsightsFunctionsLogic', key]),
@@ -110,16 +113,16 @@ export const nonInsightsFunctionsLogic = kea<nonInsightsFunctionsLogicType>([
                 loadInsightsFunctionPluginsDestinations: async () => {
                     const [pluginConfigs, plugins] = await Promise.all([
                         api.loadPaginatedResults<PluginConfigTypeNew>(
-                            `api/projects/${values.currentProjectId}/pipeline_destination_configs`
+                            `v1/projects/${values.currentProjectId}/pipeline_destination_configs`
                         ),
                         api.loadPaginatedResults<PluginType>(
-                            `api/organizations/${values.currentOrganizationId}/pipeline_destinations`
+                            `v1/organizations/${values.currentOrganizationId}/pipeline_destinations`
                         ),
                     ])
 
                     const pluginsById = Object.fromEntries(plugins.map((plugin) => [plugin.id, plugin]))
 
-                    const hogfunctions: InsightsFunctionType[] = []
+                    const insightsfunctions: InsightsFunctionType[] = []
 
                     for (const pluginConfig of pluginConfigs) {
                         const plugin = pluginsById[pluginConfig.plugin]
@@ -133,7 +136,7 @@ export const nonInsightsFunctionsLogic = kea<nonInsightsFunctionsLogicType>([
                             // Do nothing
                         }
 
-                        hogfunctions.push({
+                        insightsfunctions.push({
                             id: `plugin-${pluginConfig.id}`,
                             name: pluginConfig.name || plugin?.name || 'Unknown app',
                             description: pluginConfig.description || plugin?.description || '',
@@ -148,7 +151,7 @@ export const nonInsightsFunctionsLogic = kea<nonInsightsFunctionsLogicType>([
                         })
                     }
 
-                    return hogfunctions
+                    return insightsfunctions
                 },
             },
         ],
@@ -160,16 +163,16 @@ export const nonInsightsFunctionsLogic = kea<nonInsightsFunctionsLogicType>([
                 loadInsightsFunctionPluginsSiteApps: async () => {
                     const [pluginConfigs, plugins] = await Promise.all([
                         api.loadPaginatedResults<PluginConfigTypeNew>(
-                            `api/projects/${values.currentProjectId}/pipeline_frontend_apps_configs`
+                            `v1/projects/${values.currentProjectId}/pipeline_frontend_apps_configs`
                         ),
                         api.loadPaginatedResults<PluginType>(
-                            `api/organizations/${values.currentOrganizationId}/pipeline_frontend_apps`
+                            `v1/organizations/${values.currentOrganizationId}/pipeline_frontend_apps`
                         ),
                     ])
 
                     const pluginsById = Object.fromEntries(plugins.map((plugin) => [plugin.id, plugin]))
 
-                    const hogfunctions: InsightsFunctionType[] = []
+                    const insightsfunctions: InsightsFunctionType[] = []
 
                     for (const pluginConfig of pluginConfigs) {
                         const plugin = pluginsById[pluginConfig.plugin]
@@ -183,7 +186,7 @@ export const nonInsightsFunctionsLogic = kea<nonInsightsFunctionsLogicType>([
                             // Do nothing
                         }
 
-                        hogfunctions.push({
+                        insightsfunctions.push({
                             id: `plugin-${pluginConfig.id}`,
                             name: pluginConfig.name || plugin?.name || 'Unknown app',
                             description: pluginConfig.description || plugin?.description || '',
@@ -198,7 +201,7 @@ export const nonInsightsFunctionsLogic = kea<nonInsightsFunctionsLogicType>([
                         })
                     }
 
-                    return hogfunctions
+                    return insightsfunctions
                 },
             },
         ],

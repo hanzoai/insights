@@ -16,7 +16,7 @@ from products.skills.backend.models.skills import LLMSkill, LLMSkillFile
 
 class TestSignalScoutCreateAPI(APIBaseTest):
     def _url(self) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/"
+        return f"/v1/projects/{self.team.id}/signals/scout/"
 
     def _payload(self) -> dict:
         return {
@@ -198,7 +198,7 @@ class TestSignalScoutCreateAPI(APIBaseTest):
         payload = self._payload()
 
         response = self.client.post(
-            f"/api/projects/{environment.id}/signals/scout/",
+            f"/v1/projects/{environment.id}/signals/scout/",
             data=payload,
             format="json",
         )
@@ -216,7 +216,7 @@ class TestSignalScoutCreateAPI(APIBaseTest):
         with patch("products.signals.backend.scout_harness.views.UserAccessControl") as user_access_control:
             user_access_control.return_value.check_access_level_for_resource.return_value = False
             response = self.client.post(
-                f"/api/projects/{environment.id}/signals/scout/",
+                f"/v1/projects/{environment.id}/signals/scout/",
                 data=self._payload(),
                 format="json",
             )

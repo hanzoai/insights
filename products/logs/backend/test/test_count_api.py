@@ -31,7 +31,7 @@ class TestCountApi(DatastoreTestMixin, APIBaseTest):
             """)
 
     def _count(self, query_params, expected_status=status.HTTP_200_OK):
-        response = self.client.post(f"/api/projects/{self.team.id}/logs/count", data={"query": query_params})
+        response = self.client.post(f"/v1/projects/{self.team.id}/logs/count", data={"query": query_params})
         self.assertEqual(response.status_code, expected_status)
         return response.json() if expected_status == status.HTTP_200_OK else response
 
@@ -111,7 +111,7 @@ class TestCountApi(DatastoreTestMixin, APIBaseTest):
 
         count_result = self._count(params)
         sparkline_response = self.client.post(
-            f"/api/projects/{self.team.id}/logs/sparkline",
+            f"/v1/projects/{self.team.id}/logs/sparkline",
             data={"query": params},
         )
         self.assertEqual(sparkline_response.status_code, status.HTTP_200_OK)

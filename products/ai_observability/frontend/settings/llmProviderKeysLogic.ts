@@ -483,7 +483,7 @@ export const llmProviderKeysLogic = kea<llmProviderKeysLogicType>([
                     }
                     // nosemgrep: prefer-codegen-api
                     return await api.get(
-                        `/api/environments/${teamId}/llm_analytics/provider_keys/${keyId}/dependent_configs/`
+                        `/v1/environments/${teamId}/llm_analytics/provider_keys/${keyId}/dependent_configs/`
                     )
                 },
             },
@@ -516,7 +516,7 @@ export const llmProviderKeysLogic = kea<llmProviderKeysLogicType>([
                         }
                         // nosemgrep: prefer-codegen-api
                         const response = await api.create(
-                            `/api/environments/${teamId}/llm_analytics/provider_key_validations/`,
+                            `/v1/environments/${teamId}/llm_analytics/provider_key_validations/`,
                             body
                         )
                         return response
@@ -544,7 +544,7 @@ export const llmProviderKeysLogic = kea<llmProviderKeysLogicType>([
                         return null
                     }
                     // nosemgrep: prefer-codegen-api
-                    return await api.get(`/api/environments/${teamId}/llm_analytics/evaluation_config/`)
+                    return await api.get(`/v1/environments/${teamId}/llm_analytics/evaluation_config/`)
                 },
             },
         ],
@@ -557,7 +557,7 @@ export const llmProviderKeysLogic = kea<llmProviderKeysLogicType>([
                         return []
                     }
                     // nosemgrep: prefer-codegen-api
-                    const response = await api.get(`/api/environments/${teamId}/llm_analytics/provider_keys/`)
+                    const response = await api.get(`/v1/environments/${teamId}/llm_analytics/provider_keys/`)
                     return response.results
                 },
                 createProviderKey: async ({
@@ -571,7 +571,7 @@ export const llmProviderKeysLogic = kea<llmProviderKeysLogicType>([
                     }
                     // nosemgrep: prefer-codegen-api
                     const response = await api.create(
-                        `/api/environments/${teamId}/llm_analytics/provider_keys/`,
+                        `/v1/environments/${teamId}/llm_analytics/provider_keys/`,
                         payload
                     )
                     actions.setNewKeyModalOpen(false)
@@ -591,7 +591,7 @@ export const llmProviderKeysLogic = kea<llmProviderKeysLogicType>([
                     }
                     // nosemgrep: prefer-codegen-api
                     const response = await api.update(
-                        `/api/environments/${teamId}/llm_analytics/provider_keys/${id}/`,
+                        `/v1/environments/${teamId}/llm_analytics/provider_keys/${id}/`,
                         payload
                     )
                     actions.setEditingKey(null)
@@ -609,8 +609,8 @@ export const llmProviderKeysLogic = kea<llmProviderKeysLogicType>([
                         return values.providerKeys
                     }
                     const url = replacementKeyId
-                        ? `/api/environments/${teamId}/llm_analytics/provider_keys/${id}/?replacement_key_id=${encodeURIComponent(replacementKeyId)}`
-                        : `/api/environments/${teamId}/llm_analytics/provider_keys/${id}/`
+                        ? `/v1/environments/${teamId}/llm_analytics/provider_keys/${id}/?replacement_key_id=${encodeURIComponent(replacementKeyId)}`
+                        : `/v1/environments/${teamId}/llm_analytics/provider_keys/${id}/`
                     // nosemgrep: prefer-codegen-api
                     await api.delete(url)
                     // If deleted key was active, reload config to reflect change
@@ -626,7 +626,7 @@ export const llmProviderKeysLogic = kea<llmProviderKeysLogicType>([
                     }
                     // nosemgrep: prefer-codegen-api
                     const response = await api.create(
-                        `/api/environments/${teamId}/llm_analytics/provider_keys/${id}/validate/`,
+                        `/v1/environments/${teamId}/llm_analytics/provider_keys/${id}/validate/`,
                         {}
                     )
                     if (response.state === 'ok') {

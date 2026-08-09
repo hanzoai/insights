@@ -39,7 +39,7 @@ describe('tasksLogic', () => {
     let logic: ReturnType<typeof tasksLogic.build>
 
     beforeEach(() => {
-        useMocks({ get: { '/api/projects/:team_id/tasks/': () => [200, { results: [], count: 0 }] } })
+        useMocks({ get: { '/v1/projects/:team_id/tasks/': () => [200, { results: [], count: 0 }] } })
         initKeaTests()
         userLogic.mount()
         userLogic.actions.loadUserSuccess(MOCK_DEFAULT_USER)
@@ -111,7 +111,7 @@ describe('tasksLogic', () => {
         it('discards a page that resolves after tasksNext has already moved on', async () => {
             const task1 = createMockTask('task-1')
             logic.actions.loadTasksSuccess([task1])
-            logic.actions.setTasksNext('/api/projects/1/tasks/?cursor=page-2')
+            logic.actions.setTasksNext('/v1/projects/1/tasks/?cursor=page-2')
 
             let resolvePage2: (value: unknown) => void = () => {}
             jest.spyOn(api, 'get').mockImplementationOnce(() => new Promise((resolve) => (resolvePage2 = resolve)))
@@ -131,7 +131,7 @@ describe('tasksLogic', () => {
         // Regression coverage: without clearing `tasksNext` on failure, `hasMore` stays true forever
         // and the infinite-scroll spinner never goes away after a failed page load.
         it('clears tasksNext on failure so the list stops reporting more pages', async () => {
-            logic.actions.setTasksNext('/api/projects/1/tasks/?cursor=page-2')
+            logic.actions.setTasksNext('/v1/projects/1/tasks/?cursor=page-2')
             // Deliberate loader failure — kea-loaders would log it
             silenceKeaLoadersErrors()
             jest.spyOn(api, 'get').mockRejectedValueOnce(new Error('network error'))

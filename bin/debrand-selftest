@@ -262,6 +262,124 @@ with tempfile.TemporaryDirectory() as tmp:
         debrand.CONTENT_ALLOWLIST = saved_allow
 
 
+print("\nretired spellings")
+
+# The rename runs once, on the way in. Nothing stopped a retired name walking
+# back afterwards, and `--check` stayed green while it did, because it only
+# looked for the company's name and these are the mascot's.
+with tempfile.TemporaryDirectory() as tmp:
+    subprocess.run(["git", "init", "-q", tmp], check=True)
+
+    def write(rel: str, body: str) -> None:
+        for name in os.listdir(tmp):
+            if name != ".git":
+                subprocess.run(["rm", "-rf", os.path.join(tmp, name)], check=True)
+        path = os.path.join(tmp, rel)
+        os.makedirs(os.path.dirname(path) or tmp, exist_ok=True)
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(body)
+        subprocess.run(["git", "add", "-A"], cwd=tmp, check=True, capture_output=True)
+
+    write("cli.py", 'ENV = "INSIGHTSCLI_DEBUG"\nq = "InsightsQL"\n')
+    check("a converged tree passes", quiet(debrand.check_hog, tmp), 0)
+
+    # An env var read under two names is two names, so the old prefix is
+    # refused rather than aliased.
+    write("cli.py", 'if os.environ.get("HOGLI_DEBUG"):\n    pass\n')
+    check("the retired env prefix is refused", quiet(debrand.check_hog, tmp), 1)
+
+    # Every casing, because the table was seven whole-word pairs deep and still
+    # missing four of them.
+    for spelling in ("HOGQL", "HogQL", "Hogql", "hogQL", "hogQl", "HogQl", "hogql"):
+        write("q.ts", f"import {{ parse }} from './{spelling}Parser'\n")
+        check(f"...and the query language spelled {spelling}", quiet(debrand.check_hog, tmp), 1)
+    for spelling in ("HOGVM", "HogVM", "Hogvm", "hogVm", "hogvm"):
+        write("vm.ts", f"export const {spelling}_STL = []\n")
+        check(f"...and the VM spelled {spelling}", quiet(debrand.check_hog, tmp), 1)
+
+    write("run.sh", 'exec bin/hog "$1"\n')
+    check("...and the language's bare word", quiet(debrand.check_hog, tmp), 1)
+    write("cli.py", 'if not name.endswith(".hoge"):\n    raise ValueError(name)\n')
+    check("...and its compiled extension", quiet(debrand.check_hog, tmp), 1)
+
+    # The third name a previous pass invented, which called the script language
+    # after the SQL dialect. Refused so it cannot go back to having two.
+    write("test.sh", "for f in tests/*.iql; do run $f; done\n")
+    check("...and the extension that named it after the wrong language", quiet(debrand.check_hog, tmp), 1)
+
+    # The distinction the whole `hogfunction` rule turns on: joined to a word on
+    # its left it is the Postgres table, and renaming that is a schema change no
+    # rename may make. `--check` has to draw the same line the rule does, or the
+    # guard fails a tree the rule is right to leave alone.
+    write("m.py", 'CREATE = "SELECT id FROM insights_hogfunction WHERE team_id = %s"\n')
+    check("a physical table name is not a leak", quiet(debrand.check_hog, tmp), 0)
+    write("m.py", 'name="unique_hogfunction_revision_version"\n')
+    check("...nor is a constraint built on it", quiet(debrand.check_hog, tmp), 0)
+    write("logic.ts", "path(() => ['scenes', 'pipeline', 'hogfunctions'])\n")
+    check("...but a label at a token boundary is", quiet(debrand.check_hog, tmp), 1)
+
+    # A migration's filename is its identity in `django_migrations`, frozen for
+    # the same reason MIGRATION_RE refuses to rename one.
+    write("app/migrations/0002_alter_hogfunction_batch_export.py", "operations = []\n")
+    check("a migration filename is frozen, not failed", quiet(debrand.check_hog, tmp), 0)
+    write("app/hogfunction/views.py", "handler = None\n")
+    check("...while any other path is refused", quiet(debrand.check_hog, tmp), 1)
+
+    # Third-party package names cannot be renamed by us, so they are reported
+    # for a decision rather than exempted -- an exemption is a decision someone
+    # made, and nobody has made this one.
+    write("pyproject.toml", 'dependencies = ["drf-exceptions-hog==0.4.0"]\n')
+    check("a dependency manifest is pending, not failed", quiet(debrand.check_hog, tmp), 0)
+
+
+# The two module systems are one defect wearing two syntaxes. TypeScript went
+# unchecked and 190 specifiers named files that had been renamed away, which is
+# the whole CDP consumer graph -- the event worker, not the web boot.
+#
+# Rooted at an empty directory, not at this repo: `ts_file` asks the filesystem
+# whether a specifier names a directory, so against the real tree these cases
+# would answer differently the day someone adds a directory that happens to
+# match, and a test that depends on what else is on disk is not a test.
+with tempfile.TemporaryDirectory() as tmp:
+    check(
+        "a stale TypeScript specifier is repointed at where the file went",
+        debrand.ts_ref_target(
+            "./services/insightsflows/hogflow-utils",
+            "nodejs/src/cdp/cdp-api.ts",
+            {"nodejs/src/cdp/services/insightsflows/insightsflow-utils.ts"},
+            tmp,
+        ),
+        "./services/insightsflows/insightsflow-utils",
+    )
+    check(
+        "...through the alias spelling too",
+        debrand.ts_ref_target(
+            "~/cdp/schema/hogflow",
+            "nodejs/src/cdp/types.ts",
+            {"nodejs/src/cdp/schema/insightsflow.ts"},
+            tmp,
+        ),
+        "~/cdp/schema/insightsflow",
+    )
+    # Renaming a specifier no rule can resolve would be a guess, and a guess
+    # wires the app to the wrong module without saying so.
+    check(
+        "a specifier that resolves is left alone",
+        debrand.ts_ref_target(
+            "./insightsflow-utils",
+            "nodejs/src/cdp/a.ts",
+            {"nodejs/src/cdp/insightsflow-utils.ts"},
+            tmp,
+        ),
+        None,
+    )
+    check(
+        "...and so is one that resolves under neither spelling",
+        debrand.ts_ref_target("./gone", "nodejs/src/cdp/a.ts", set(), tmp),
+        None,
+    )
+
+
 # Applying the rules to an already-converged tree has to be a no-op, or every
 # rerun produces a diff and convergence never terminates.
 sample = "from insights.insightsql import datastore  # @hanzo/elements, InsightsFunction\n"

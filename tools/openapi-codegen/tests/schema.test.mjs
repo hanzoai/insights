@@ -14,7 +14,7 @@ const buildSpec = () => ({
         version: '1.0.0',
     },
     paths: {
-        '/api/widgets/': {
+        '/v1/widgets/': {
             post: {
                 operationId: 'widgets_create',
                 requestBody: {
@@ -103,7 +103,7 @@ describe('filterSchemaByOperationIds', () => {
 
     it('preserves component parameters referenced by filtered operations', () => {
         const spec = buildSpec()
-        spec.paths['/api/widgets/'].post.parameters = [
+        spec.paths['/v1/widgets/'].post.parameters = [
             { $ref: '#/components/parameters/ProjectIdPath' },
             { $ref: '#/components/parameters/FormatQuery' },
             { $ref: '#/components/parameters/FilterParam' },
@@ -154,7 +154,7 @@ describe('filterSchemaByOperationIds', () => {
 
     it('keeps response status keys and only description when includeResponseSchemas is false', () => {
         const spec = buildSpec()
-        spec.paths['/api/widgets/'].post.responses = {
+        spec.paths['/v1/widgets/'].post.responses = {
             200: {
                 description: 'Created',
                 headers: {
@@ -183,7 +183,7 @@ describe('filterSchemaByOperationIds', () => {
         const filtered = filterSchemaByOperationIds(spec, new Set(['widgets_create']), {
             includeResponseSchemas: false,
         })
-        const responses = filtered.paths['/api/widgets/'].post.responses
+        const responses = filtered.paths['/v1/widgets/'].post.responses
 
         expect(Object.keys(responses)).toEqual(['200', '400', '404'])
         expect(responses['200']).toEqual({ description: 'Created' })
@@ -233,7 +233,7 @@ describe('discoverCatalogEntryConfigPropertyKeys', () => {
                 config_schema: { $ref: '#/components/schemas/ErrorTrackingListWidgetConfig' },
             },
         }
-        spec.paths['/api/widget_catalog/'] = {
+        spec.paths['/v1/widget_catalog/'] = {
             get: {
                 operationId: 'widget_catalog_retrieve',
                 responses: {
@@ -298,7 +298,7 @@ describe('discoverCatalogEntryConfigPropertyKeys', () => {
                 config_schema: { $ref: '#/components/schemas/ErrorTrackingListWidgetConfig' },
             },
         }
-        spec.paths['/api/widget_catalog/'] = {
+        spec.paths['/v1/widget_catalog/'] = {
             get: {
                 operationId: 'widget_catalog_retrieve',
                 responses: {

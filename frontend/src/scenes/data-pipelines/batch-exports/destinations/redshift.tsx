@@ -111,7 +111,7 @@ export const redshiftDefinition: DestinationDefinition = {
         }
         return result
     },
-    eventTableOverrides: { teamIdHogql: 'toInt32(team_id)' },
+    eventTableOverrides: { teamIdInsightsql: 'toInt32(team_id)' },
     Fields: function RedshiftFields({ isNew, formValues }) {
         return (
             <>
@@ -148,10 +148,11 @@ export const redshiftDefinition: DestinationDefinition = {
                     label="Semi-structured data type"
                     info={
                         <>
-                            Different Insights models have semi-structured data fields in them, like "events.properties".
-                            We can export these fields to Redshift as a "SUPER" type column, or a "VARCHAR" column. We
-                            recommend "SUPER" over "VARCHAR" as "VARCHAR" has a strict length limit that applies on the
-                            entire document, whereas with "SUPER" the limit applies on each value in the document.
+                            Different Insights models have semi-structured data fields in them, like
+                            "events.properties". We can export these fields to Redshift as a "SUPER" type column, or a
+                            "VARCHAR" column. We recommend "SUPER" over "VARCHAR" as "VARCHAR" has a strict length limit
+                            that applies on the entire document, whereas with "SUPER" the limit applies on each value in
+                            the document.
                         </>
                     }
                 >
@@ -198,11 +199,7 @@ export const redshiftDefinition: DestinationDefinition = {
                             <Field name="redshift_s3_bucket" label="S3 bucket name" className="flex-1">
                                 <Input placeholder="e.g. my-bucket" />
                             </Field>
-                            <Field
-                                name="redshift_s3_bucket_region_name"
-                                label="S3 bucket region"
-                                className="flex-1"
-                            >
+                            <Field name="redshift_s3_bucket_region_name" label="S3 bucket region" className="flex-1">
                                 <Select options={AWS_ONLY_REGION_OPTIONS} />
                             </Field>
                         </div>
@@ -263,11 +260,7 @@ export const redshiftDefinition: DestinationDefinition = {
 
                         {formValues.authorization_mode === 'Credentials' && (
                             <div className="flex gap-4">
-                                <Field
-                                    name="redshift_aws_access_key_id"
-                                    label="AWS Access Key ID"
-                                    className="flex-1"
-                                >
+                                <Field name="redshift_aws_access_key_id" label="AWS Access Key ID" className="flex-1">
                                     <Input
                                         placeholder={isNew ? 'e.g. AKIAIOSFODNN7EXAMPLE' : 'Leave unchanged'}
                                         autoComplete="off"

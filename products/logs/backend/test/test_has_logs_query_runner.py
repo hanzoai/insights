@@ -23,7 +23,7 @@ class TestHasLogsQueryRunner(DatastoreTestMixin, APIBaseTest):
     def test_has_logs_answers_no_when_the_table_is_not_there(self):
         # A deployment without a logs table still has an answer to "does this team
         # have logs", and it is no. Before this, the query raised straight out of a
-        # plain GET: /api/environments/:id/logs/has_logs/ returned 500 and the logs
+        # plain GET: /v1/environments/:id/logs/has_logs/ returned 500 and the logs
         # scene reported a server error where it should have shown an empty state.
         with patch(
             "products.logs.backend.has_logs_query_runner.execute_insightsql_query",
@@ -75,7 +75,7 @@ class TestHasLogsAPI(DatastoreTestMixin, APIBaseTest):
         sync_execute(f"TRUNCATE TABLE IF EXISTS logs32")
         cache.delete(f"team:{self.team.id}:has_logs")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/logs/has_logs")
+        response = self.client.get(f"/v1/projects/{self.team.id}/logs/has_logs")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {"hasLogs": False})
 
@@ -91,13 +91,13 @@ class TestHasLogsAPI(DatastoreTestMixin, APIBaseTest):
                 {json.dumps(log_item)}
             """)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/logs/has_logs")
+        response = self.client.get(f"/v1/projects/{self.team.id}/logs/has_logs")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {"hasLogs": True})
 
     def test_has_logs_api_requires_authentication(self):
         self.client.logout()
-        response = self.client.get(f"/api/projects/{self.team.id}/logs/has_logs")
+        response = self.client.get(f"/v1/projects/{self.team.id}/logs/has_logs")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_has_logs_api_caches_positive_results(self):
@@ -121,7 +121,7 @@ class TestHasLogsAPI(DatastoreTestMixin, APIBaseTest):
         ):
             mock_runner.return_value.run.return_value = True
 
-            response = self.client.get(f"/api/projects/{self.team.id}/logs/has_logs")
+            response = self.client.get(f"/v1/projects/{self.team.id}/logs/has_logs")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.json(), {"hasLogs": True})
             self.assertEqual(mock_runner.return_value.run.call_count, 1)
@@ -130,7 +130,7 @@ class TestHasLogsAPI(DatastoreTestMixin, APIBaseTest):
             assert mock_report.call_args[0][2]["has_logs"] is True
 
             # Second call should use cache, not hit the runner again
-            response = self.client.get(f"/api/projects/{self.team.id}/logs/has_logs")
+            response = self.client.get(f"/v1/projects/{self.team.id}/logs/has_logs")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.json(), {"hasLogs": True})
             self.assertEqual(mock_runner.return_value.run.call_count, 1)
@@ -145,13 +145,13 @@ class TestHasLogsAPI(DatastoreTestMixin, APIBaseTest):
             mock_runner.return_value.run.return_value = False
 
             # First call returns False
-            response = self.client.get(f"/api/projects/{self.team.id}/logs/has_logs")
+            response = self.client.get(f"/v1/projects/{self.team.id}/logs/has_logs")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.json(), {"hasLogs": False})
             self.assertEqual(mock_runner.return_value.run.call_count, 1)
 
             # Second call should NOT use cache, should hit the runner again
-            response = self.client.get(f"/api/projects/{self.team.id}/logs/has_logs")
+            response = self.client.get(f"/v1/projects/{self.team.id}/logs/has_logs")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.json(), {"hasLogs": False})
             self.assertEqual(mock_runner.return_value.run.call_count, 2)

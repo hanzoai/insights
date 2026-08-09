@@ -24,18 +24,18 @@ describe('insightSceneLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/trend/': { result: ['result from api'] },
-                '/api/environments/:team_id/insights/': {
+                '/v1/environments/:team_id/insights/trend/': { result: ['result from api'] },
+                '/v1/environments/:team_id/insights/': {
                     results: [{ id: 42, short_id: Insight42, result: ['result from api'] }],
                 },
             },
             post: {
-                '/api/environments/:team_id/insights/funnel/': { result: ['result from api'] },
-                '/api/environments/:team_id/insights/': async ({ request }) => [
+                '/v1/environments/:team_id/insights/funnel/': { result: ['result from api'] },
+                '/v1/environments/:team_id/insights/': async ({ request }) => [
                     200,
                     { id: 12, short_id: Insight12, ...((await request.json()) as any) },
                 ],
-                '/api/environments/:team_id/query/upgrade/': { query: {} },
+                '/v1/environments/:team_id/query/upgrade/': { query: {} },
             },
         })
         initKeaTests()
@@ -241,7 +241,7 @@ describe('insightSceneLogic', () => {
 
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/': {
+                '/v1/environments/:team_id/insights/': {
                     results: [{ id: 42, short_id: Insight42, result: ['result from api'], query: savedQuery }],
                 },
             },
@@ -363,8 +363,8 @@ describe('insightSceneLogic', () => {
     it('remounts when URL insight id disagrees with dashboard tile id on the mounted editor (save-as regression)', async () => {
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/trend/': { result: ['result from api'] },
-                '/api/environments/:team_id/insights/': ({ request }) => {
+                '/v1/environments/:team_id/insights/trend/': { result: ['result from api'] },
+                '/v1/environments/:team_id/insights/': ({ request }) => {
                     const shortId = new URL(request.url).searchParams.get('short_id') || ''
                     const id = shortId === '12' ? 12 : 42
                     const sid = (shortId === '12' ? Insight12 : Insight42) as InsightShortId
@@ -384,12 +384,12 @@ describe('insightSceneLogic', () => {
                 },
             },
             post: {
-                '/api/environments/:team_id/insights/funnel/': { result: ['result from api'] },
-                '/api/environments/:team_id/insights/': async ({ request }) => [
+                '/v1/environments/:team_id/insights/funnel/': { result: ['result from api'] },
+                '/v1/environments/:team_id/insights/': async ({ request }) => [
                     200,
                     { id: 12, short_id: Insight12, ...((await request.json()) as any) },
                 ],
-                '/api/environments/:team_id/query/upgrade/': { query: {} },
+                '/v1/environments/:team_id/query/upgrade/': { query: {} },
             },
         })
 
@@ -434,10 +434,10 @@ describe('insightSceneLogic', () => {
             .mockReturnValue([200, { results: [{ id: 42, short_id: Insight42, result: ['result from api'] }] }])
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/': insightApiCall,
+                '/v1/environments/:team_id/insights/': insightApiCall,
             },
             post: {
-                '/api/environments/:team_id/query/upgrade/': { query: {} },
+                '/v1/environments/:team_id/query/upgrade/': { query: {} },
             },
         })
 
@@ -518,10 +518,10 @@ describe('insightSceneLogic', () => {
             .mockReturnValue([200, { results: [{ id: 42, short_id: Insight42, result: ['result from api'] }] }])
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/': insightApiCall,
+                '/v1/environments/:team_id/insights/': insightApiCall,
             },
             post: {
-                '/api/environments/:team_id/query/upgrade/': { query: {} },
+                '/v1/environments/:team_id/query/upgrade/': { query: {} },
             },
         })
 

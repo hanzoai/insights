@@ -16,16 +16,16 @@ describe('observationsDockLogic', () => {
         observeCalls = 0
         useMocks({
             get: {
-                '/api/projects/:team/vision/scanners/': async () => {
+                '/v1/projects/:team/vision/scanners/': async () => {
                     await new Promise<void>((resolve) => {
                         releaseScanners = resolve
                     })
                     return [200, { results: [] }]
                 },
-                '/api/projects/:team/vision/observations/': () => [200, { results: [] }],
+                '/v1/projects/:team/vision/observations/': () => [200, { results: [] }],
             },
             post: {
-                '/api/projects/:team/vision/scanners/:id/observe/': async () => {
+                '/v1/projects/:team/vision/scanners/:id/observe/': async () => {
                     observeCalls += 1
                     // Hold the request open so a second click lands while the first is still in flight.
                     await new Promise<void>((resolve) => {

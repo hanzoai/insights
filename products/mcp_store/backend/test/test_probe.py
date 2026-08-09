@@ -138,7 +138,7 @@ class TestProbeMCPServer(SimpleTestCase):
         self.assertEqual(query["response_type"], ["code"])
         self.assertEqual(query["code_challenge_method"], ["S256"])
         self.assertIn("code_challenge", query)
-        self.assertTrue(query["redirect_uri"][0].endswith("/api/mcp_store/oauth_redirect/"))
+        self.assertTrue(query["redirect_uri"][0].endswith("/v1/mcp_store/oauth_redirect/"))
 
     def test_oauth_without_registration_endpoint_is_oauth_shared(self):
         metadata = {k: v for k, v in AUTH_SERVER_METADATA_BODY.items() if k != "registration_endpoint"}

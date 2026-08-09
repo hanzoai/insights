@@ -30,7 +30,7 @@ def _not(child: dict) -> dict:
 
 class TestEventFilterConfigAPI(APIBaseTest):
     def _url(self, team_id: int | None = None) -> str:
-        return f"/api/environments/{team_id or self.team.id}/event_filter/"
+        return f"/v1/environments/{team_id or self.team.id}/event_filter/"
 
     # -- List (GET) --
 

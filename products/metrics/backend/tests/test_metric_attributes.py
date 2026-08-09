@@ -51,7 +51,7 @@ class TestMetricAttributesAPI(DatastoreTestMixin, APIBaseTest):
         )
 
     def _get(self, action: str, params: dict | None = None):
-        return self.client.get(f"/api/projects/{self.team.id}/metrics/{action}", params or {})
+        return self.client.get(f"/v1/projects/{self.team.id}/metrics/{action}", params or {})
 
     def test_attributes_merges_datapoint_and_resource_keys(self):
         response = self._get("attributes")

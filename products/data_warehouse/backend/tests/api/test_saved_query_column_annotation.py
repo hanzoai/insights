@@ -4,13 +4,12 @@ from parameterized import parameterized
 
 from insights.constants import AvailableFeature
 from insights.models import OrganizationMembership
+from insights.models.ee_models import AccessControl
 
 from products.data_modeling.backend.facade.models import (
     DataWarehouseSavedQuery,
     DataWarehouseSavedQueryColumnAnnotation,
 )
-
-from insights.models.ee_models import AccessControl
 
 
 class TestDataWarehouseSavedQueryColumnAnnotation(APIBaseTest):
@@ -24,7 +23,7 @@ class TestDataWarehouseSavedQueryColumnAnnotation(APIBaseTest):
         )
 
     def _url(self, suffix: str = "") -> str:
-        return f"/api/projects/{self.team.pk}/saved_query_column_annotations/{suffix}"
+        return f"/v1/projects/{self.team.pk}/saved_query_column_annotations/{suffix}"
 
     def test_create_sets_user_edited(self):
         response = self.client.post(

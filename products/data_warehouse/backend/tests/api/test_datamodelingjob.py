@@ -51,7 +51,7 @@ class TestDataModelingJob(APIBaseTest):
         )
 
     def test_list_data_modeling_jobs(self):
-        response = self.client.get(f"/api/environments/{self.team.pk}/data_modeling_jobs/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/data_modeling_jobs/")
         self.assertEqual(response.status_code, 200)
 
         data = response.json()
@@ -73,7 +73,7 @@ class TestDataModelingJob(APIBaseTest):
         self.assertIsNotNone(first_job["updated_at"])
 
     def test_retrieve_data_modeling_job(self):
-        response = self.client.get(f"/api/environments/{self.team.pk}/data_modeling_jobs/{self.job1.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/data_modeling_jobs/{self.job1.id}/")
         self.assertEqual(response.status_code, 200)
 
         data = response.json()
@@ -90,7 +90,7 @@ class TestDataModelingJob(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.pk}/data_modeling_jobs/?saved_query_id={self.saved_query.id}"
+            f"/v1/environments/{self.team.pk}/data_modeling_jobs/?saved_query_id={self.saved_query.id}"
         )
         self.assertEqual(response.status_code, 200)
 
@@ -101,7 +101,7 @@ class TestDataModelingJob(APIBaseTest):
         self.assertNotIn(str(other_job.id), [job["id"] for job in results])
 
         response = self.client.get(
-            f"/api/environments/{self.team.pk}/data_modeling_jobs/?saved_query_id={other_saved_query.id}"
+            f"/v1/environments/{self.team.pk}/data_modeling_jobs/?saved_query_id={other_saved_query.id}"
         )
         self.assertEqual(response.status_code, 200)
 
@@ -121,7 +121,7 @@ class TestDataModelingJob(APIBaseTest):
                 last_run_at=timezone.now(),
             )
 
-        base_url = f"/api/environments/{self.team.pk}/data_modeling_jobs/?saved_query_id={paged_query.id}"
+        base_url = f"/v1/environments/{self.team.pk}/data_modeling_jobs/?saved_query_id={paged_query.id}"
 
         first_page = self.client.get(f"{base_url}&limit=10&offset=0").json()
         self.assertEqual(first_page["count"], 12)
@@ -136,10 +136,10 @@ class TestDataModelingJob(APIBaseTest):
         self.assertEqual(first_ids & second_ids, set())
 
     def test_cannot_access_other_teams_jobs(self):
-        response = self.client.get(f"/api/environments/{self.team.pk}/data_modeling_jobs/{self.other_team_job.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/data_modeling_jobs/{self.other_team_job.id}/")
         self.assertEqual(response.status_code, 404)
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/data_modeling_jobs/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/data_modeling_jobs/")
         self.assertEqual(response.status_code, 200)
 
         job_ids = [job["id"] for job in response.json()["results"]]

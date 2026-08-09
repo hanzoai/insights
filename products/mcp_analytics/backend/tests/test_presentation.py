@@ -94,7 +94,7 @@ class TestMCPAnalyticsPresentation(_MCPAnalyticsTeamScopedTestMixin, APIBaseTest
         self.client.logout()
 
         request = getattr(self.client, method)
-        response = request(f"/api/environments/{self.team.id}/mcp_analytics/{path}", payload, format="json")
+        response = request(f"/v1/environments/{self.team.id}/mcp_analytics/{path}", payload, format="json")
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -116,13 +116,13 @@ class TestMCPAnalyticsPresentation(_MCPAnalyticsTeamScopedTestMixin, APIBaseTest
     ) -> None:
         with patch("hanzo_insights.feature_enabled", return_value=False):
             request = getattr(self.client, method)
-            response = request(f"/api/environments/{self.team.id}/mcp_analytics/{path}", payload, format="json")
+            response = request(f"/v1/environments/{self.team.id}/mcp_analytics/{path}", payload, format="json")
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_create_feedback_submission(self) -> None:
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_analytics/feedback/",
+            f"/v1/environments/{self.team.id}/mcp_analytics/feedback/",
             {
                 "goal": "understand why feature flag releases keep failing",
                 "feedback": "I need a better explanation of rollout blast radius before changing a flag.",
@@ -156,14 +156,14 @@ class TestMCPAnalyticsPresentation(_MCPAnalyticsTeamScopedTestMixin, APIBaseTest
         ]
     )
     def test_feedback_validation_errors(self, _name: str, payload: dict[str, str], field: str) -> None:
-        response = self.client.post(f"/api/environments/{self.team.id}/mcp_analytics/feedback/", payload, format="json")
+        response = self.client.post(f"/v1/environments/{self.team.id}/mcp_analytics/feedback/", payload, format="json")
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["attr"] == field
 
     def test_create_missing_capability_submission_defaults_blocked(self) -> None:
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_analytics/missing_capabilities/",
+            f"/v1/environments/{self.team.id}/mcp_analytics/missing_capabilities/",
             {
                 "goal": "debug why my survey is not showing",
                 "missing_capability": "I need a tool that explains survey eligibility for a specific user.",
@@ -192,7 +192,7 @@ class TestMCPAnalyticsPresentation(_MCPAnalyticsTeamScopedTestMixin, APIBaseTest
     )
     def test_missing_capability_validation_errors(self, _name: str, payload: dict[str, str], field: str) -> None:
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_analytics/missing_capabilities/", payload, format="json"
+            f"/v1/environments/{self.team.id}/mcp_analytics/missing_capabilities/", payload, format="json"
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -200,7 +200,7 @@ class TestMCPAnalyticsPresentation(_MCPAnalyticsTeamScopedTestMixin, APIBaseTest
 
     def test_intent_clusters_returns_empty_idle_when_no_snapshot(self) -> None:
         with patch("hanzo_insights.feature_enabled", return_value=True):
-            response = self.client.get(f"/api/environments/{self.team.id}/mcp_analytics/intent_clusters/")
+            response = self.client.get(f"/v1/environments/{self.team.id}/mcp_analytics/intent_clusters/")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -239,7 +239,7 @@ class TestMCPAnalyticsPresentation(_MCPAnalyticsTeamScopedTestMixin, APIBaseTest
         )
 
         with patch("hanzo_insights.feature_enabled", return_value=True):
-            response = self.client.get(f"/api/environments/{self.team.id}/mcp_analytics/intent_clusters/")
+            response = self.client.get(f"/v1/environments/{self.team.id}/mcp_analytics/intent_clusters/")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -310,7 +310,7 @@ class TestMCPAnalyticsPresentation(_MCPAnalyticsTeamScopedTestMixin, APIBaseTest
         )
 
         with patch("hanzo_insights.feature_enabled", return_value=True):
-            response = self.client.get(f"/api/environments/{self.team.id}/mcp_analytics/intent_clusters/")
+            response = self.client.get(f"/v1/environments/{self.team.id}/mcp_analytics/intent_clusters/")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -376,7 +376,7 @@ class TestMCPAnalyticsPresentation(_MCPAnalyticsTeamScopedTestMixin, APIBaseTest
         )
 
         with patch("hanzo_insights.feature_enabled", return_value=True):
-            response = self.client.get(f"/api/environments/{self.team.id}/mcp_analytics/intent_clusters/?tool=flag_get")
+            response = self.client.get(f"/v1/environments/{self.team.id}/mcp_analytics/intent_clusters/?tool=flag_get")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -407,7 +407,7 @@ class TestMCPAnalyticsPresentation(_MCPAnalyticsTeamScopedTestMixin, APIBaseTest
         )
 
         with patch("hanzo_insights.feature_enabled", return_value=True):
-            response = self.client.get(f"/api/environments/{self.team.id}/mcp_analytics/intent_clusters/?tool=nope")
+            response = self.client.get(f"/v1/environments/{self.team.id}/mcp_analytics/intent_clusters/?tool=nope")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -426,7 +426,7 @@ class TestMCPAnalyticsPresentation(_MCPAnalyticsTeamScopedTestMixin, APIBaseTest
             patch("hanzo_insights.feature_enabled", return_value=True),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/mcp_analytics/intent_clusters/recompute/", {}, format="json"
+                f"/v1/environments/{self.team.id}/mcp_analytics/intent_clusters/recompute/", {}, format="json"
             )
 
         assert response.status_code == status.HTTP_202_ACCEPTED
@@ -456,7 +456,7 @@ class TestMCPAnalyticsPresentation(_MCPAnalyticsTeamScopedTestMixin, APIBaseTest
         )
         with patch("insights.temporal.common.client.async_connect", new=AsyncMock(return_value=mock_client)):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/mcp_analytics/intent_clusters/recompute/", {}, format="json"
+                f"/v1/environments/{self.team.id}/mcp_analytics/intent_clusters/recompute/", {}, format="json"
             )
 
         assert response.status_code == status.HTTP_202_ACCEPTED
@@ -487,7 +487,7 @@ class TestMCPAnalyticsPresentation(_MCPAnalyticsTeamScopedTestMixin, APIBaseTest
         mock_client.start_workflow = AsyncMock(return_value=MagicMock())
         with patch("insights.temporal.common.client.async_connect", new=AsyncMock(return_value=mock_client)):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/mcp_analytics/intent_clusters/recompute/", {}, format="json"
+                f"/v1/environments/{self.team.id}/mcp_analytics/intent_clusters/recompute/", {}, format="json"
             )
 
         assert response.status_code == status.HTTP_202_ACCEPTED
@@ -506,7 +506,7 @@ class TestMCPAnalyticsPresentation(_MCPAnalyticsTeamScopedTestMixin, APIBaseTest
             patch("hanzo_insights.feature_enabled", return_value=True),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/mcp_analytics/intent_clusters/recompute/", {}, format="json"
+                f"/v1/environments/{self.team.id}/mcp_analytics/intent_clusters/recompute/", {}, format="json"
             )
 
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -531,7 +531,7 @@ class TestMCPAnalyticsPresentation(_MCPAnalyticsTeamScopedTestMixin, APIBaseTest
             summary="Should not leak",
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/mcp_analytics/feedback/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/mcp_analytics/feedback/")
 
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["results"]) == 1
@@ -554,8 +554,8 @@ class TestMCPAnalyticsPresentation(_MCPAnalyticsTeamScopedTestMixin, APIBaseTest
             blocked=False,
         )
 
-        feedback_response = self.client.get(f"/api/environments/{self.team.id}/mcp_analytics/feedback/")
-        missing_response = self.client.get(f"/api/environments/{self.team.id}/mcp_analytics/missing_capabilities/")
+        feedback_response = self.client.get(f"/v1/environments/{self.team.id}/mcp_analytics/feedback/")
+        missing_response = self.client.get(f"/v1/environments/{self.team.id}/mcp_analytics/missing_capabilities/")
 
         assert feedback_response.status_code == status.HTTP_200_OK
         assert missing_response.status_code == status.HTTP_200_OK
@@ -576,7 +576,7 @@ class TestMCPAnalyticsPresentation(_MCPAnalyticsTeamScopedTestMixin, APIBaseTest
                 summary=f"Feedback entry {index}",
             )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/mcp_analytics/feedback/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/mcp_analytics/feedback/")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -588,7 +588,7 @@ class TestMCPAnalyticsPresentation(_MCPAnalyticsTeamScopedTestMixin, APIBaseTest
 class TestMCPSessionIntentEndpoint(_MCPAnalyticsTeamScopedTestMixin, APIBaseTest):
     # The mcp-analytics feature flag is enabled for the whole test by the mixin's setUp.
     def _url(self, session_id: str) -> str:
-        return f"/api/environments/{self.team.id}/mcp_analytics/sessions/{session_id}/generate_intent/"
+        return f"/v1/environments/{self.team.id}/mcp_analytics/sessions/{session_id}/generate_intent/"
 
     def test_requires_authentication(self) -> None:
         self.client.logout()
@@ -665,12 +665,12 @@ class TestMCPSessionToolCallsEndpoint(_MCPAnalyticsTeamScopedTestMixin, Datastor
             )
 
         with patch("hanzo_insights.feature_enabled", return_value=True):
-            listed = self.client.get(f"/api/environments/{self.team.id}/mcp_analytics/sessions/", {"date_from": "-7d"})
+            listed = self.client.get(f"/v1/environments/{self.team.id}/mcp_analytics/sessions/", {"date_from": "-7d"})
             assert listed.status_code == status.HTTP_200_OK
             session = next(s for s in listed.json()["results"] if s["session_id"] == session_id)
             # Hand the serialized session_start straight back, exactly as the UI does.
             response = self.client.get(
-                f"/api/environments/{self.team.id}/mcp_analytics/sessions/{session_id}/tool_calls/",
+                f"/v1/environments/{self.team.id}/mcp_analytics/sessions/{session_id}/tool_calls/",
                 {"date_from": session["session_start"]},
             )
 
@@ -783,7 +783,7 @@ class TestMCPAnalyticsCrossTeamIsolation(_MCPAnalyticsTeamScopedTestMixin, APIBa
         ]
     )
     def test_other_teams_submissions_never_appear_in_own_list(self, _name: str, path: str, leaked: str) -> None:
-        response = self.client.get(f"/api/environments/{self.team.id}/mcp_analytics/{path}")
+        response = self.client.get(f"/v1/environments/{self.team.id}/mcp_analytics/{path}")
 
         assert response.status_code == status.HTTP_200_OK
         summaries = [entry["summary"] for entry in response.json()["results"]]
@@ -812,14 +812,14 @@ class TestMCPAnalyticsCrossTeamIsolation(_MCPAnalyticsTeamScopedTestMixin, APIBa
         self, _name: str, method: str, path: str, payload: dict[str, str] | None
     ) -> None:
         request = getattr(self.client, method)
-        response = request(f"/api/environments/{self.other_team.id}/mcp_analytics/{path}", payload, format="json")
+        response = request(f"/v1/environments/{self.other_team.id}/mcp_analytics/{path}", payload, format="json")
 
         # Not a member of the other org's team: the request is rejected before any data is read.
         assert response.status_code in (status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND)
 
     def test_creating_in_own_team_does_not_touch_other_team(self) -> None:
         self.client.post(
-            f"/api/environments/{self.team.id}/mcp_analytics/feedback/",
+            f"/v1/environments/{self.team.id}/mcp_analytics/feedback/",
             {"goal": "understand usage", "feedback": "My team's feedback"},
             format="json",
         )
@@ -844,13 +844,13 @@ class TestMCPAnalyticsPersonalAPIKeyAccess(_MCPAnalyticsTeamScopedTestMixin, API
 
     def test_read_scope_can_list_submissions(self) -> None:
         self._auth_with_pak(["mcp_analytics:read"])
-        response = self.client.get(f"/api/environments/{self.team.id}/mcp_analytics/feedback/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/mcp_analytics/feedback/")
         assert response.status_code == status.HTTP_200_OK, response.content
 
     def test_write_scope_can_create_submission(self) -> None:
         self._auth_with_pak(["mcp_analytics:write"])
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_analytics/feedback/",
+            f"/v1/environments/{self.team.id}/mcp_analytics/feedback/",
             {"goal": "understand usage", "feedback": "Need clearer results"},
             format="json",
         )
@@ -859,7 +859,7 @@ class TestMCPAnalyticsPersonalAPIKeyAccess(_MCPAnalyticsTeamScopedTestMixin, API
     def test_read_scope_cannot_create_submission(self) -> None:
         self._auth_with_pak(["mcp_analytics:read"])
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_analytics/feedback/",
+            f"/v1/environments/{self.team.id}/mcp_analytics/feedback/",
             {"goal": "understand usage", "feedback": "Need clearer results"},
             format="json",
         )
@@ -881,5 +881,5 @@ class TestMCPAnalyticsPersonalAPIKeyAccess(_MCPAnalyticsTeamScopedTestMixin, API
     ) -> None:
         self._auth_with_pak(["insight:read"])
         request = getattr(self.client, method)
-        response = request(f"/api/environments/{self.team.id}/mcp_analytics/{path}", payload, format="json")
+        response = request(f"/v1/environments/{self.team.id}/mcp_analytics/{path}", payload, format="json")
         assert response.status_code == status.HTTP_403_FORBIDDEN, response.content

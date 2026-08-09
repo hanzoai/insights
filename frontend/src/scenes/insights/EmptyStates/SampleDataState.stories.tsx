@@ -37,7 +37,7 @@ export const WizardInstalling: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/tasks/': () => [
+                '/v1/projects/:team_id/tasks/': () => [
                     200,
                     {
                         count: 1,
@@ -69,7 +69,7 @@ export const WithSetupPullRequest: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/tasks/': () => [
+                '/v1/projects/:team_id/tasks/': () => [
                     200,
                     {
                         count: 1,

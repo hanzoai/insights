@@ -388,7 +388,7 @@ class TestCoderConfig:
     @pytest.mark.parametrize(
         "env_key, env_value, expected_url",
         [
-            ("HOGLI_DEVBOX_CODER_URL", "https://env.example.com", "https://env.example.com"),
+            ("INSIGHTSCLI_DEVBOX_CODER_URL", "https://env.example.com", "https://env.example.com"),
             ("CODER_URL", "https://coder-env.example.com", "https://coder-env.example.com"),
         ],
     )
@@ -399,17 +399,18 @@ class TestCoderConfig:
         env_value: str,
         expected_url: str,
     ) -> None:
-        monkeypatch.delenv("HOGLI_DEVBOX_CODER_URL", raising=False)
+        monkeypatch.delenv("INSIGHTSCLI_DEVBOX_CODER_URL", raising=False)
         monkeypatch.delenv("CODER_URL", raising=False)
         monkeypatch.setenv(env_key, env_value)
 
         with patch(
-            "insightscli_commands.devbox.coder.load_manifest", return_value={"metadata": {"devbox": {"coder_url": "ignored"}}}
+            "insightscli_commands.devbox.coder.load_manifest",
+            return_value={"metadata": {"devbox": {"coder_url": "ignored"}}},
         ):
             assert coder.get_coder_url() == expected_url
 
     def test_get_coder_url_falls_back_to_manifest_metadata(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.delenv("HOGLI_DEVBOX_CODER_URL", raising=False)
+        monkeypatch.delenv("INSIGHTSCLI_DEVBOX_CODER_URL", raising=False)
         monkeypatch.delenv("CODER_URL", raising=False)
 
         with patch(
@@ -444,7 +445,7 @@ class TestCoderVersion:
     """Test Coder CLI version pinning and mismatch warnings."""
 
     def test_get_server_version_queries_buildinfo(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.delenv("HOGLI_DEVBOX_CODER_VERSION", raising=False)
+        monkeypatch.delenv("INSIGHTSCLI_DEVBOX_CODER_VERSION", raising=False)
         monkeypatch.setattr(coder, "get_coder_url", lambda: "https://coder.example.com")
 
         mock_resp = MagicMock()

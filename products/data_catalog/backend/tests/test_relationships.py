@@ -252,7 +252,7 @@ class TestRelationshipProposalSerializer(SimpleTestCase):
 class TestRelationshipAPI(APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/api/projects/{self.team.id}/data_catalog/relationship_proposals/"
+        self.url = f"/v1/projects/{self.team.id}/data_catalog/relationship_proposals/"
 
     def test_create_proposal(self) -> None:
         response = self.client.post(self.url, _JOIN, format="json")

@@ -185,8 +185,8 @@ class TeamLogsConfigSerializer(serializers.ModelSerializer):
 
 def handle_logs_config(request: request.Request, team: Team) -> response.Response:
     """Shared handler for the logs_config action — exposed under both the team/environment
-    and project routers so the canonical /api/projects/ URL resolves alongside the legacy
-    /api/environments/ alias. Both endpoints operate on the env-scoped TeamLogsConfig
+    and project routers so the canonical /v1/projects/ URL resolves alongside the legacy
+    /v1/environments/ alias. Both endpoints operate on the env-scoped TeamLogsConfig
     keyed by team_id."""
     config = get_or_create_team_extension(team, TeamLogsConfig)
 
@@ -201,7 +201,7 @@ def handle_logs_config(request: request.Request, team: Team) -> response.Respons
 
 def handle_evaluation_context_suggestions(request: request.Request, team: Team) -> response.Response:
     """Shared handler for the evaluation_context_suggestions action — exposed under both the
-    team/environment and project routers so /api/projects/ and /api/environments/ cannot drift apart.
+    team/environment and project routers so /v1/projects/ and /v1/environments/ cannot drift apart.
 
     Hide an evaluation context name from the flag editor's suggestion list, or restore it.
     POST hides the name; DELETE restores it. The underlying context row and any flags already
@@ -2511,7 +2511,7 @@ class RootTeamViewSet(TeamViewSet):
     destroy=extend_schema(deprecated=True),
 )
 class ProjectEnvironmentsViewSet(TeamViewSet):
-    """Deprecated: use /api/environments/{id}/ instead."""
+    """Deprecated: use /v1/environments/{id}/ instead."""
 
     def initial(self, request: request.Request, *args, **kwargs) -> None:
         raise exceptions.PermissionDenied(
@@ -2639,7 +2639,7 @@ class PremiumMultiEnvironmentPermission(BasePermission):
             project = view.project
         except KeyError:  # KeyError occurs when "project_id" is not in parents_query_dict
             raise exceptions.ValidationError(
-                "Environments must be created under a specific project. Send the POST request to /api/projects/<project_id>/environments/ instead."
+                "Environments must be created under a specific project. Send the POST request to /v1/projects/<project_id>/environments/ instead."
             )
 
         if request.data.get("is_demo"):

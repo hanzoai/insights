@@ -69,10 +69,10 @@ describe('runningTimeLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/experiments': { count: 0, next: null, previous: null, results: [] },
-                '/api/projects/:team/experiment_holdouts': { count: 0, next: null, previous: null, results: [] },
-                '/api/projects/:team/experiment_saved_metrics': { count: 0, next: null, previous: null, results: [] },
-                '/api/projects/:team/experiments/:id': experiment,
+                '/v1/projects/:team/experiments': { count: 0, next: null, previous: null, results: [] },
+                '/v1/projects/:team/experiment_holdouts': { count: 0, next: null, previous: null, results: [] },
+                '/v1/projects/:team/experiment_saved_metrics': { count: 0, next: null, previous: null, results: [] },
+                '/v1/projects/:team/experiments/:id': experiment,
             },
         })
         initKeaTests()

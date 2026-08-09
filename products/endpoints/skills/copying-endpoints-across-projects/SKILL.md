@@ -67,7 +67,7 @@ Present a short summary to the user before copying: what the query returns, its 
 
 **Cross-project:** confirm the target project belongs to the same org and the user has editor access there. The copy will be created in whatever project is active at `endpoint-create` time, so plan to switch the active project to the target between step 2 and step 6.
 
-**Same-project duplicate:** the new endpoint needs a **different name** — names are unique within a project and the URL path (`/api/projects/{team_id}/endpoints/{name}/run`) depends on it. Agree a new name with the user.
+**Same-project duplicate:** the new endpoint needs a **different name** — names are unique within a project and the URL path (`/v1/projects/{team_id}/endpoints/{name}/run`) depends on it. Agree a new name with the user.
 
 Either way, run `endpoints-get-all` in the target project and check whether the intended name already exists. If it does, stop and ask: creating over an existing name is not a safe silent action. Get the name right up front — it's baked into the caller URL and not trivially renameable later.
 

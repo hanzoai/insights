@@ -99,7 +99,7 @@ class TestObservationCreateTask(_VisionAPITestCase):
         # The session route's get_object only checks the observation row; materializing a restricted
         # scanner's finding into a task must object-check the scanner, or a session-recording reader
         # could extract a scanner they can't access.
-        session_route_url = f"/api/environments/{self.team.id}/vision/observations/{self.observation.id}/create_task/"
+        session_route_url = f"/v1/environments/{self.team.id}/vision/observations/{self.observation.id}/create_task/"
         with (
             patch(
                 "insights.rbac.user_access_control.UserAccessControl.check_access_level_for_object",

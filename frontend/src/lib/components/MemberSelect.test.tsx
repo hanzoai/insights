@@ -33,7 +33,7 @@ describe('MemberSelect', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/organizations/:organization_id/members/': {
+                '/v1/organizations/:organization_id/members/': {
                     results: [member('1', MOCK_DEFAULT_BASIC_USER, 8), member('2', MOCK_SECOND_BASIC_USER, 1)],
                 },
             },

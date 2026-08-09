@@ -53,8 +53,8 @@ describe('cohortCalculationHistorySceneLogic', () => {
 
     useMocks({
         get: {
-            '/api/cohort/:id/calculation_history/': () => [200, mockHistoryResponse],
-            '/api/cohort/:id/': () => [200, mockCohort],
+            '/v1/cohort/:id/calculation_history/': () => [200, mockHistoryResponse],
+            '/v1/cohort/:id/': () => [200, mockCohort],
         },
     })
 
@@ -84,7 +84,7 @@ describe('cohortCalculationHistorySceneLogic', () => {
             await expectLogic(logic).toDispatchActions(['loadCalculationHistory', 'loadCohort']).toFinishAllListeners()
 
             expect(api.get).toHaveBeenCalledTimes(2)
-            expect(api.get).toHaveBeenCalledWith('api/cohort/123/calculation_history/?limit=100&offset=0')
+            expect(api.get).toHaveBeenCalledWith('v1/cohort/123/calculation_history/?limit=100&offset=0')
             expect(logic.values.calculationHistory).toEqual([mockHistoryRecord])
             expect(logic.values.totalRecords).toBe(1)
             expect(logic.values.cohort).toEqual(mockCohort)
@@ -124,7 +124,7 @@ describe('cohortCalculationHistorySceneLogic', () => {
                 .toMatchValues({ page: 2 })
                 .toFinishAllListeners()
 
-            expect(api.get).toHaveBeenCalledWith('api/cohort/123/calculation_history/?limit=100&offset=100')
+            expect(api.get).toHaveBeenCalledWith('v1/cohort/123/calculation_history/?limit=100&offset=100')
         })
 
         it('should update limit state and reload data when setLimit is called', async () => {
@@ -135,7 +135,7 @@ describe('cohortCalculationHistorySceneLogic', () => {
                 .toMatchValues({ limit: 50 })
                 .toFinishAllListeners()
 
-            expect(api.get).toHaveBeenCalledWith('api/cohort/123/calculation_history/?limit=50&offset=0')
+            expect(api.get).toHaveBeenCalledWith('v1/cohort/123/calculation_history/?limit=50&offset=0')
         })
 
         const paginationTestCases = [
@@ -158,7 +158,7 @@ describe('cohortCalculationHistorySceneLogic', () => {
                     .toFinishAllListeners()
 
                 expect(api.get).toHaveBeenLastCalledWith(
-                    `api/cohort/123/calculation_history/?limit=${limit}&offset=${expectedOffset}`
+                    `v1/cohort/123/calculation_history/?limit=${limit}&offset=${expectedOffset}`
                 )
             })
         })
@@ -262,7 +262,7 @@ describe('cohortCalculationHistorySceneLogic', () => {
             api.get.mockResolvedValue(mockHistoryResponse)
             await initLogic({ cohortId: 456 })
 
-            expect(api.get).toHaveBeenCalledWith('api/cohort/456/calculation_history/?limit=100&offset=0')
+            expect(api.get).toHaveBeenCalledWith('v1/cohort/456/calculation_history/?limit=100&offset=0')
         })
 
         it('should handle pagination parameters correctly in API calls', async () => {
@@ -279,7 +279,7 @@ describe('cohortCalculationHistorySceneLogic', () => {
                 logic.actions.setLimit(25)
             }).toFinishAllListeners()
 
-            expect(api.get).toHaveBeenLastCalledWith('api/cohort/789/calculation_history/?limit=25&offset=50')
+            expect(api.get).toHaveBeenLastCalledWith('v1/cohort/789/calculation_history/?limit=25&offset=50')
         })
     })
 })

@@ -122,12 +122,12 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/tasks/': listResponse(TASKS),
-                '/api/projects/:team_id/tasks/repositories/': { repositories: ['Insights/insights'] },
+                '/v1/projects/:team_id/tasks/': listResponse(TASKS),
+                '/v1/projects/:team_id/tasks/repositories/': { repositories: ['Insights/insights'] },
                 // Exact ids (not `:id`) so they never shadow the `repositories` action route.
-                '/api/projects/:team_id/tasks/task-3/': TASKS[2],
-                '/api/projects/:team_id/tasks/task-3/runs/': { count: 0, next: null, previous: null, results: [] },
-                '/api/environments/:team_id/integrations/': { results: [] },
+                '/v1/projects/:team_id/tasks/task-3/': TASKS[2],
+                '/v1/projects/:team_id/tasks/task-3/runs/': { count: 0, next: null, previous: null, results: [] },
+                '/v1/environments/:team_id/integrations/': { results: [] },
             },
         }),
     ],
@@ -162,15 +162,15 @@ export const NewTaskWithRepository: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/integrations/': { results: [GITHUB_INTEGRATION] },
-                '/api/environments/:team_id/integrations/1/github_repos': {
+                '/v1/environments/:team_id/integrations/': { results: [GITHUB_INTEGRATION] },
+                '/v1/environments/:team_id/integrations/1/github_repos': {
                     repositories: [
                         { id: 1, name: 'insights', full_name: 'Insights/insights' },
                         { id: 2, name: 'hanzo.ai', full_name: 'Insights/hanzo.ai' },
                     ],
                     has_more: false,
                 },
-                '/api/environments/:team_id/integrations/1/github_branches': {
+                '/v1/environments/:team_id/integrations/1/github_branches': {
                     branches: ['master', 'release'],
                     default_branch: 'master',
                     has_more: false,
@@ -195,12 +195,12 @@ export const Loading: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/tasks/': async () => {
+                '/v1/projects/:team_id/tasks/': async () => {
                     await delay('infinite')
                     return HttpResponse.json(listResponse([]))
                 },
-                '/api/projects/:team_id/tasks/repositories/': { repositories: [] },
-                '/api/environments/:team_id/integrations/': { results: [] },
+                '/v1/projects/:team_id/tasks/repositories/': { repositories: [] },
+                '/v1/environments/:team_id/integrations/': { results: [] },
             },
         }),
     ],
@@ -211,10 +211,10 @@ export const ListLoadError: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/tasks/': () =>
+                '/v1/projects/:team_id/tasks/': () =>
                     HttpResponse.json({ detail: 'Could not load tasks.' }, { status: 500 }),
-                '/api/projects/:team_id/tasks/repositories/': { repositories: [] },
-                '/api/environments/:team_id/integrations/': { results: [] },
+                '/v1/projects/:team_id/tasks/repositories/': { repositories: [] },
+                '/v1/environments/:team_id/integrations/': { results: [] },
             },
         }),
     ],
@@ -229,11 +229,11 @@ export const TaskDetailLoading: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/tasks/task-1/': async () => {
+                '/v1/projects/:team_id/tasks/task-1/': async () => {
                     await delay('infinite')
                     return HttpResponse.json(TASKS[0])
                 },
-                '/api/projects/:team_id/tasks/task-1/runs/': async () => {
+                '/v1/projects/:team_id/tasks/task-1/runs/': async () => {
                     await delay('infinite')
                     return HttpResponse.json({ count: 0, next: null, previous: null, results: [] })
                 },
@@ -250,9 +250,9 @@ export const TaskNotFound: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/tasks/missing-task/': () =>
+                '/v1/projects/:team_id/tasks/missing-task/': () =>
                     HttpResponse.json({ detail: 'Not found.' }, { status: 404 }),
-                '/api/projects/:team_id/tasks/missing-task/runs/': () =>
+                '/v1/projects/:team_id/tasks/missing-task/runs/': () =>
                     HttpResponse.json({ detail: 'Not found.' }, { status: 404 }),
             },
         }),
@@ -267,9 +267,9 @@ export const TaskLoadError: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/tasks/task-1/': () =>
+                '/v1/projects/:team_id/tasks/task-1/': () =>
                     HttpResponse.json({ detail: 'Could not load task.' }, { status: 500 }),
-                '/api/projects/:team_id/tasks/task-1/runs/': { count: 0, next: null, previous: null, results: [] },
+                '/v1/projects/:team_id/tasks/task-1/runs/': { count: 0, next: null, previous: null, results: [] },
             },
         }),
     ],
@@ -283,8 +283,8 @@ export const TaskRunsLoadError: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/tasks/task-1/': TASKS[0],
-                '/api/projects/:team_id/tasks/task-1/runs/': () =>
+                '/v1/projects/:team_id/tasks/task-1/': TASKS[0],
+                '/v1/projects/:team_id/tasks/task-1/runs/': () =>
                     HttpResponse.json({ detail: 'Could not load task runs.' }, { status: 500 }),
             },
         }),
@@ -299,9 +299,9 @@ export const TaskRunNotFound: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/tasks/task-1/': TASKS[0],
-                '/api/projects/:team_id/tasks/task-1/runs/': { count: 0, next: null, previous: null, results: [] },
-                '/api/projects/:team_id/tasks/task-1/runs/00000000-0000-4000-8000-000000000001/': () =>
+                '/v1/projects/:team_id/tasks/task-1/': TASKS[0],
+                '/v1/projects/:team_id/tasks/task-1/runs/': { count: 0, next: null, previous: null, results: [] },
+                '/v1/projects/:team_id/tasks/task-1/runs/00000000-0000-4000-8000-000000000001/': () =>
                     HttpResponse.json({ detail: 'Not found.' }, { status: 404 }),
             },
         }),
@@ -313,9 +313,9 @@ export const Empty: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/tasks/': listResponse([]),
-                '/api/projects/:team_id/tasks/repositories/': { repositories: [] },
-                '/api/environments/:team_id/integrations/': { results: [] },
+                '/v1/projects/:team_id/tasks/': listResponse([]),
+                '/v1/projects/:team_id/tasks/repositories/': { repositories: [] },
+                '/v1/environments/:team_id/integrations/': { results: [] },
             },
         }),
     ],

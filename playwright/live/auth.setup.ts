@@ -36,7 +36,7 @@ setup('sign in through Hanzo IAM', async ({ page }) => {
     expect(page.url(), 'IAM sent us back to the login error scene').not.toContain('error_code')
 
     // Prove the session resolves to the account we meant, rather than trusting the URL.
-    const me = await page.request.get('/api/users/@me/')
+    const me = await page.request.get('/v1/users/@me/')
     expect(me.status()).toBe(200)
     expect((await me.json()).email).toBe(USERNAME)
 

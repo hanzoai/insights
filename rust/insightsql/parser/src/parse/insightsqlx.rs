@@ -339,7 +339,7 @@ impl<'a, E: Emitter + Clone> Parser<'a, E> {
                 // each kept text Constant over its raw byte span.
                 let text_start = self.last_consumed_end;
                 let text = self.consume_insightsqlx_text()?;
-                // cpp's `VISIT(HogqlxTagElementNested)` drops child text
+                // cpp's `VISIT(InsightsqlxTagElementNested)` drops child text
                 // runs that contain a newline AND are entirely whitespace —
                 // any pretty-printed multi-line INSIGHTSQLX literal lands here.
                 // Pure-space / pure-tab runs (no newline) are kept. Mixed

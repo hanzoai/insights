@@ -90,13 +90,13 @@ describe('ApiClient.request query serialization', () => {
         const mockFetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({}), { status: 200 }))
         vi.stubGlobal('fetch', mockFetch)
         const client = new ApiClient({ apiToken: 'token', baseUrl: 'https://example.com' })
-        await client.request({ method: 'GET', path: '/api/test/', query })
+        await client.request({ method: 'GET', path: '/v1/test/', query })
         return mockFetch.mock.calls[0]![0] as string
     }
 
     it('passes pre-joined CSV strings through verbatim', async () => {
         const url = await requestUrl({ type: 'internal_destination,transformation' })
-        expect(url).toBe('https://example.com/api/test/?type=internal_destination%2Ctransformation')
+        expect(url).toBe('https://example.com/v1/test/?type=internal_destination%2Ctransformation')
     })
 
     it('JSON-stringifies arrays and objects for json.loads()-style backends', async () => {

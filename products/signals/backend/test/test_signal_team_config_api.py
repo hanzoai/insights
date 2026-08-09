@@ -13,7 +13,7 @@ class TestSignalTeamConfigAPI(APIBaseTest):
         self.config = SignalTeamConfig.objects.get(team=self.team)
 
     def _url(self) -> str:
-        return f"/api/projects/{self.team.id}/signals/config/"
+        return f"/v1/projects/{self.team.id}/signals/config/"
 
     def test_get_config_includes_default_slack_notification_channel(self):
         response = self.client.get(self._url())

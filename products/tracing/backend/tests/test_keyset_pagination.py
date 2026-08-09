@@ -200,7 +200,7 @@ class TestTraceSpansDurationOrdering(_TraceSpansTestBase):
         # Hits the real endpoint so the VIEW's pagination (limit+1 over-fetch, hasMore, keep-top-N,
         # offset) is exercised end-to-end — the runner-level tests above don't cover that layer.
         response = self.client.post(
-            f"/api/projects/{self.team.id}/tracing/spans/query/",
+            f"/v1/projects/{self.team.id}/tracing/spans/query/",
             {
                 "query": {
                     "dateRange": {"date_from": DATE_FROM, "date_to": DATE_TO},

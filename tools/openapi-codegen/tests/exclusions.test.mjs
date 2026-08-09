@@ -6,7 +6,7 @@ describe('applyNestedExclusions', () => {
     it('removes a nested property via wildcard path (array items)', () => {
         const spec = {
             paths: {
-                '/api/projects/{project_id}/actions/': {
+                '/v1/projects/{project_id}/actions/': {
                     post: {
                         operationId: 'actions_create',
                         requestBody: {
@@ -55,7 +55,7 @@ describe('applyNestedExclusions', () => {
 
         // The operation's inlined copy should have the field removed
         const inlinedBody =
-            spec.paths['/api/projects/{project_id}/actions/'].post.requestBody.content['application/json'].schema
+            spec.paths['/v1/projects/{project_id}/actions/'].post.requestBody.content['application/json'].schema
         expect(inlinedBody).not.toHaveProperty('$ref')
         const inlinedStep = inlinedBody.properties.steps.items
         expect(inlinedStep).not.toHaveProperty('$ref')
@@ -68,7 +68,7 @@ describe('applyNestedExclusions', () => {
     it('removes a deep nested property via double wildcard', () => {
         const spec = {
             paths: {
-                '/api/things/': {
+                '/v1/things/': {
                     post: {
                         operationId: 'things_create',
                         requestBody: {
@@ -110,7 +110,7 @@ describe('applyNestedExclusions', () => {
         applyNestedExclusions(spec, new Map([['things_create', ['steps.*.properties.*.value']]]))
 
         const innerProps =
-            spec.paths['/api/things/'].post.requestBody.content['application/json'].schema.properties.steps.items
+            spec.paths['/v1/things/'].post.requestBody.content['application/json'].schema.properties.steps.items
                 .properties.properties.items.properties
         expect(innerProps).not.toHaveProperty('value')
         expect(innerProps).toHaveProperty('key')
@@ -119,7 +119,7 @@ describe('applyNestedExclusions', () => {
     it('removes a property via object path (no wildcard)', () => {
         const spec = {
             paths: {
-                '/api/things/': {
+                '/v1/things/': {
                     post: {
                         operationId: 'things_create',
                         requestBody: {
@@ -149,7 +149,7 @@ describe('applyNestedExclusions', () => {
         applyNestedExclusions(spec, new Map([['things_create', ['config.remove']]]))
 
         const configProps =
-            spec.paths['/api/things/'].post.requestBody.content['application/json'].schema.properties.config.properties
+            spec.paths['/v1/things/'].post.requestBody.content['application/json'].schema.properties.config.properties
         expect(configProps).not.toHaveProperty('remove')
         expect(configProps).toHaveProperty('keep')
     })
@@ -157,7 +157,7 @@ describe('applyNestedExclusions', () => {
     it('resolves $ref at the request body level', () => {
         const spec = {
             paths: {
-                '/api/things/': {
+                '/v1/things/': {
                     post: {
                         operationId: 'things_create',
                         requestBody: {
@@ -191,7 +191,7 @@ describe('applyNestedExclusions', () => {
         expect(spec.components.schemas.Thing.required).toContain('secret')
 
         // The operation's body should have an inlined clone without 'secret'
-        const inlinedBody = spec.paths['/api/things/'].post.requestBody.content['application/json'].schema
+        const inlinedBody = spec.paths['/v1/things/'].post.requestBody.content['application/json'].schema
         expect(inlinedBody).not.toHaveProperty('$ref')
         expect(inlinedBody.properties).not.toHaveProperty('secret')
         expect(inlinedBody.required).toEqual(['name'])
@@ -200,7 +200,7 @@ describe('applyNestedExclusions', () => {
     it('deletes required array when all required fields are excluded', () => {
         const spec = {
             paths: {
-                '/api/things/': {
+                '/v1/things/': {
                     post: {
                         operationId: 'things_create',
                         requestBody: {
@@ -225,7 +225,7 @@ describe('applyNestedExclusions', () => {
 
         applyNestedExclusions(spec, new Map([['things_create', ['only_field']]]))
 
-        const bodySchema = spec.paths['/api/things/'].post.requestBody.content['application/json'].schema
+        const bodySchema = spec.paths['/v1/things/'].post.requestBody.content['application/json'].schema
         expect(bodySchema.properties).not.toHaveProperty('only_field')
         expect(bodySchema).not.toHaveProperty('required')
     })
@@ -233,7 +233,7 @@ describe('applyNestedExclusions', () => {
     it('is a no-op for nonexistent paths', () => {
         const spec = {
             paths: {
-                '/api/things/': {
+                '/v1/things/': {
                     post: {
                         operationId: 'things_create',
                         requestBody: {
@@ -257,7 +257,7 @@ describe('applyNestedExclusions', () => {
         expect(() => applyNestedExclusions(spec, new Map([['things_create', ['nonexistent.*.field']]]))).not.toThrow()
 
         expect(
-            spec.paths['/api/things/'].post.requestBody.content['application/json'].schema.properties
+            spec.paths['/v1/things/'].post.requestBody.content['application/json'].schema.properties
         ).toHaveProperty('name')
     })
 
@@ -277,7 +277,7 @@ describe('applyNestedExclusions', () => {
     it('handles empty exclusions map', () => {
         const spec = {
             paths: {
-                '/api/things/': {
+                '/v1/things/': {
                     post: {
                         operationId: 'things_create',
                         requestBody: {
@@ -298,14 +298,14 @@ describe('applyNestedExclusions', () => {
 
         applyNestedExclusions(spec, new Map())
         expect(
-            spec.paths['/api/things/'].post.requestBody.content['application/json'].schema.properties
+            spec.paths['/v1/things/'].post.requestBody.content['application/json'].schema.properties
         ).toHaveProperty('name')
     })
 
     it('does not mutate shared component schemas across operations', () => {
         const spec = {
             paths: {
-                '/api/things/': {
+                '/v1/things/': {
                     post: {
                         operationId: 'things_create',
                         requestBody: {
@@ -317,7 +317,7 @@ describe('applyNestedExclusions', () => {
                         },
                     },
                 },
-                '/api/things/{id}/': {
+                '/v1/things/{id}/': {
                     get: {
                         operationId: 'things_retrieve',
                         responses: {
@@ -353,19 +353,19 @@ describe('applyNestedExclusions', () => {
         expect(spec.components.schemas.Thing.required).toContain('deleted')
 
         // The create operation's body should be an inlined schema without 'deleted'
-        const createBody = spec.paths['/api/things/'].post.requestBody.content['application/json'].schema
+        const createBody = spec.paths['/v1/things/'].post.requestBody.content['application/json'].schema
         expect(createBody).not.toHaveProperty('$ref')
         expect(createBody.properties).not.toHaveProperty('deleted')
 
         // The retrieve response still references the shared component
-        const retrieveSchema = spec.paths['/api/things/{id}/'].get.responses[200].content['application/json'].schema
+        const retrieveSchema = spec.paths['/v1/things/{id}/'].get.responses[200].content['application/json'].schema
         expect(retrieveSchema).toHaveProperty('$ref', '#/components/schemas/Thing')
     })
 
     it('clones nested $ref schemas without mutating the component', () => {
         const spec = {
             paths: {
-                '/api/things/': {
+                '/v1/things/': {
                     post: {
                         operationId: 'things_create',
                         requestBody: {
@@ -407,7 +407,7 @@ describe('applyNestedExclusions', () => {
         expect(spec.components.schemas.ThingFilters.required).toContain('bytecode')
 
         // The operation's inlined schema should have bytecode removed from filters
-        const inlinedBody = spec.paths['/api/things/'].post.requestBody.content['application/json'].schema
+        const inlinedBody = spec.paths['/v1/things/'].post.requestBody.content['application/json'].schema
         expect(inlinedBody).not.toHaveProperty('$ref')
         const inlinedFilters = inlinedBody.properties.filters
         expect(inlinedFilters).not.toHaveProperty('$ref')

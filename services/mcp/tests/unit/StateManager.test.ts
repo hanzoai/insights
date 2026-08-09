@@ -244,7 +244,7 @@ describe('StateManager', () => {
         })
 
         it('falls back to the first scoped team when the user has no active team', async () => {
-            // Regression: `/api/users/@me/` returns `team: null` when the user
+            // Regression: `/v1/users/@me/` returns `team: null` when the user
             // has no `current_team` (newly provisioned account, left last
             // org). Reading `.id` on the null team would 500 the whole request
             // before any tool dispatch.
@@ -478,7 +478,7 @@ describe('StateManager', () => {
 
         it('skips the org fetch when the API key lacks organization:read', async () => {
             // Pre-#58726 behaviour: every MCP session init with a project-scoped
-            // personal API key would 403 on `/api/organizations/{id}/` and
+            // personal API key would 403 on `/v1/organizations/{id}/` and
             // dogpile error tracking. The scope guard short-circuits before the
             // HTTP call so no exception is captured and the org is treated as
             // best-effort missing.
@@ -592,7 +592,7 @@ describe('StateManager', () => {
             'falls back to users/@me consent when the org is unreachable and the current org owns the active project (flag %s)',
             async (flag, expected) => {
                 // Team-scoped tokens (e.g. sandbox OAuth tokens) can never fetch
-                // `/api/organizations/{id}/`, so getCachedOrFetchOrg yields undefined.
+                // `/v1/organizations/{id}/`, so getCachedOrFetchOrg yields undefined.
                 vi.spyOn(stateManager, 'getCachedOrFetchOrg').mockResolvedValue(undefined)
                 vi.spyOn(stateManager, 'getCachedOrFetchUser').mockResolvedValue({
                     ...mockUser,
@@ -707,7 +707,7 @@ describe('StateManager', () => {
 
         it('falls back to users/@me features when the org is unreachable and the current org owns the active project', async () => {
             // Team-scoped tokens (e.g. sandbox OAuth tokens) can never fetch
-            // `/api/organizations/{id}/`, so getCachedOrFetchOrg yields undefined.
+            // `/v1/organizations/{id}/`, so getCachedOrFetchOrg yields undefined.
             vi.spyOn(stateManager, 'getCachedOrFetchOrg').mockResolvedValue(undefined)
             vi.spyOn(stateManager, 'getCachedOrFetchUser').mockResolvedValue({
                 ...mockUser,

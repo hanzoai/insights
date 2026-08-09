@@ -142,7 +142,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
                     base_time + relativedelta(seconds=time_offset),
                 )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings")
         assert response.status_code == status.HTTP_200_OK, response.json()
         results = response.json()["results"]
 
@@ -172,7 +172,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         self.produce_replay_summary("user2", "new_session", base_time + relativedelta(seconds=60))
         self.produce_replay_summary("user3", "middle_session", base_time + relativedelta(seconds=30))
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
 
@@ -193,7 +193,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         base_time = (now() - relativedelta(days=1)).replace(microsecond=0)
         self.produce_replay_summary("test_user", "test_session", base_time)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings")
         assert response.status_code == status.HTTP_200_OK
         result = response.json()["results"][0]
 
@@ -256,7 +256,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         query_string = f"?order={order_field}"
         if order_direction:
             query_string += f"&order_direction={order_direction}"
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings{query_string}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings{query_string}")
         assert response.status_code == status.HTTP_200_OK, response.json()
         response_data = response.json()
 
@@ -289,7 +289,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         session_id_two = f"test_get_session_recordings-2"
         self.produce_replay_summary("user2", session_id_two, base_time + relativedelta(seconds=20))
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings")
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
 
@@ -313,7 +313,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
                 "user_modified_filters": '{"my_filter": "something"}',
             }
         )
-        self.client.get(f"/api/projects/{self.team.id}/session_recordings?{params_string}")
+        self.client.get(f"/v1/projects/{self.team.id}/session_recordings?{params_string}")
 
         assert len(mock_query_lister.call_args_list) == 1
         query_passed_to_mock: RecordingsQuery = mock_query_lister.call_args_list[0][0][0]
@@ -351,7 +351,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         # we want to get the various queries that django runs once and then caches out of the way
         # otherwise chance and changes outside of here can cause snapshots to flap
         # so we call the API once and then use query snapshot as a context manager _after_ that
-        self.client.get(f"/api/projects/{self.team.id}/session_recordings")
+        self.client.get(f"/v1/projects/{self.team.id}/session_recordings")
 
         with (
             freeze_time("2022-06-03T12:00:00.000Z"),
@@ -362,7 +362,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             snapshot_postgres_queries_context(self),
         ):
             # request once without counting queries, to warm the caches that make the count vary otherwise
-            self.client.get(f"/api/projects/{self.team.id}/session_recordings")
+            self.client.get(f"/v1/projects/{self.team.id}/session_recordings")
 
             base_time = (now() - relativedelta(days=1)).replace(microsecond=0)
             num_queries = FuzzyInt(7, 26)  # PoE on or off adds queries here :shrug:
@@ -375,7 +375,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
                     session_id=f"{i}",
                 )
                 with self.assertNumQueries(num_queries):
-                    self.client.get(f"/api/projects/{self.team.id}/session_recordings")
+                    self.client.get(f"/v1/projects/{self.team.id}/session_recordings")
 
     def _person_with_snapshots(self, base_time: datetime, distinct_id: str = "user", session_id: str = "1") -> None:
         create_person(
@@ -404,7 +404,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         self.produce_replay_summary("user", "other_team", base_time, team_id=another_team.pk)
         self.produce_replay_summary("user", "current_team", base_time)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings")
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
 
@@ -492,7 +492,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             summary={"content": "existing summary"},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings")
         assert response.status_code == status.HTTP_200_OK, response.json()
 
         has_summary_by_session_id = {
@@ -511,7 +511,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         self.produce_replay_summary("d1", "1", base_time)
         self.produce_replay_summary("d2", "2", base_time + relativedelta(seconds=30))
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings")
         response_data = response.json()
 
         assert [r["person"]["id"] for r in response_data["results"]] == [p.pk, p.pk]
@@ -541,7 +541,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             base_time + relativedelta(seconds=30),
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings")
         response_data = response.json()
 
         assert [(r["id"], r["viewed"]) for r in response_data["results"]] == [
@@ -559,11 +559,11 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         self.produce_replay_summary("u1", "unviewed", base_time + relativedelta(seconds=30))
         SessionRecordingViewed.objects.create(team=self.team, user=self.user, session_id="viewed")
 
-        without_filter = self.client.get(f"/api/projects/{self.team.id}/session_recordings")
+        without_filter = self.client.get(f"/v1/projects/{self.team.id}/session_recordings")
         assert sorted(self._result_ids(without_filter)) == ["unviewed", "viewed"]
 
         with_filter = self.client.get(
-            f"/api/projects/{self.team.id}/session_recordings?hide_viewed_recordings=current-user"
+            f"/v1/projects/{self.team.id}/session_recordings?hide_viewed_recordings=current-user"
         )
         assert self._result_ids(with_filter) == ["unviewed"]
 
@@ -576,12 +576,12 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
         # current-user mode keeps it (this user hasn't viewed it)
         current_user = self.client.get(
-            f"/api/projects/{self.team.id}/session_recordings?hide_viewed_recordings=current-user"
+            f"/v1/projects/{self.team.id}/session_recordings?hide_viewed_recordings=current-user"
         )
         assert sorted(self._result_ids(current_user)) == ["unviewed", "viewed-by-other"]
 
         # any-user mode excludes it
-        any_user = self.client.get(f"/api/projects/{self.team.id}/session_recordings?hide_viewed_recordings=any-user")
+        any_user = self.client.get(f"/v1/projects/{self.team.id}/session_recordings?hide_viewed_recordings=any-user")
         assert self._result_ids(any_user) == ["unviewed"]
 
     @parameterized.expand([("from_datastore", False), ("persisted_to_s3", True)])
@@ -600,7 +600,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         # ordering has to survive skipping that branch.
         requested = ["gamma", "alpha", "beta"]
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recordings?session_ids={json.dumps(requested)}"
+            f"/v1/projects/{self.team.id}/session_recordings?session_ids={json.dumps(requested)}"
         )
         assert self._result_ids(response) == requested
 
@@ -611,8 +611,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
         # Pinned recordings request explicit session_ids; hide-viewed must not strip them.
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recordings"
-            f'?hide_viewed_recordings=current-user&session_ids=["viewed"]'
+            f'/v1/projects/{self.team.id}/session_recordings?hide_viewed_recordings=current-user&session_ids=["viewed"]'
         )
         assert self._result_ids(response) == ["viewed"]
 
@@ -624,7 +623,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
         # The explicitly-selected recording is prepended even though it's viewed.
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recordings"
+            f"/v1/projects/{self.team.id}/session_recordings"
             f"?hide_viewed_recordings=current-user&session_recording_id=viewed"
         )
         assert sorted(self._result_ids(response)) == ["unviewed", "viewed"]
@@ -641,7 +640,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         SessionRecordingViewed.objects.create(team=self.team, user=self.user, session_id="viewed-newest")
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recordings?hide_viewed_recordings=current-user&limit=2"
+            f"/v1/projects/{self.team.id}/session_recordings?hide_viewed_recordings=current-user&limit=2"
         )
         assert self._result_ids(response) == ["unviewed-mid", "unviewed-old"]
 
@@ -666,20 +665,20 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             active_milliseconds=50 * 1000 * 0.5,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings")
         response_data = response.json()
         # Make sure it starts not viewed
         assert response_data["results"][0]["viewed"] is False
         assert response_data["results"][0]["id"] == "1"
 
         # can get it directly
-        get_session_response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/1")
+        get_session_response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/1")
         assert get_session_response.status_code == 200
         assert get_session_response.json()["viewed"] is False
         assert get_session_response.json()["id"] == "1"
 
         # being loaded doesn't mark it as viewed
-        all_sessions_response = self.client.get(f"/api/projects/{self.team.id}/session_recordings")
+        all_sessions_response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings")
         response_data = all_sessions_response.json()
         # Make sure it remains not viewed
         assert response_data["results"][0]["viewed"] is False
@@ -710,13 +709,13 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         )
 
         # Verify initial state
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/{session_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/{session_id}")
         assert response.status_code == 200
         assert response.json()["viewed"] is False
 
         # Update viewed state
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/session_recordings/{session_id}",
+            f"/v1/projects/{self.team.id}/session_recordings/{session_id}",
             {"viewed": True},
         )
         assert update_response.status_code == 200
@@ -724,7 +723,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
         # Verify updated state
         # We don't get the viewed state back in the retrieve endpoint, so we need to list them
-        final_view_response = self.client.get(f"/api/projects/{self.team.id}/session_recordings")
+        final_view_response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings")
         response_data = final_view_response.json()
         assert response_data["results"][0]["viewed"] is True
         assert response_data["results"][0]["id"] == "test_update_viewed_state"
@@ -746,7 +745,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
         # Update analyzed state
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/session_recordings/{session_id}",
+            f"/v1/projects/{self.team.id}/session_recordings/{session_id}",
             {"analyzed": True},
         )
         assert update_response.status_code == 200
@@ -769,7 +768,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
         # Attempt to update with invalid data
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/session_recordings/{session_id}",
+            f"/v1/projects/{self.team.id}/session_recordings/{session_id}",
             {"invalid_field": True},
         )
         assert update_response.status_code == 400
@@ -779,7 +778,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
         # Attempt to update a non-existent session recording
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/session_recordings/{nonexistent_session_id}",
+            f"/v1/projects/{self.team.id}/session_recordings/{nonexistent_session_id}",
             {"viewed": True},
         )
         assert update_response.status_code == 404
@@ -809,7 +808,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             session_id=session_recording_id,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/{session_recording_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/{session_recording_id}")
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json() == {
             "id": session_recording_id,
@@ -873,7 +872,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             kafka_timestamp=now() - timedelta(minutes=ingested_minutes_ago),
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/{session_recording_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/{session_recording_id}")
 
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json()["ongoing"] is expected_ongoing
@@ -907,7 +906,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             summary={"content": "existing summary"},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/{session_recording_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/{session_recording_id}")
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json()["has_summary"] is True
 
@@ -941,7 +940,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             extra_summary_context={"focus_area": "checkout"},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/{session_recording_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/{session_recording_id}")
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json()["has_summary"] is False
 
@@ -964,7 +963,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
                 session_id=session_recording_id,
             )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/{session_recording_id}/viewed")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/{session_recording_id}/viewed")
         response_data = response.json()
 
         assert response_data == {
@@ -990,7 +989,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
                 session_id=session_recording_id,
             )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/{session_recording_id}/viewed")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/{session_recording_id}/viewed")
         response_data = response.json()
 
         assert response_data == {
@@ -1007,14 +1006,14 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             side_effect=Exception("Connection refused"),
         ):
             response = self.client.get(
-                f"/api/projects/{self.team.id}/session_recordings/{session_recording_id}/capture_diagnostics"
+                f"/v1/projects/{self.team.id}/session_recordings/{session_recording_id}/capture_diagnostics"
             )
 
         assert response.status_code == 200
         assert response.json() == {"properties": None}
 
     def test_get_single_session_recording_viewed_stats_can_404(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/12345/viewed")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/12345/viewed")
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
             "viewed": False,
@@ -1029,10 +1028,10 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             now() - relativedelta(days=1),
             team_id=another_team.pk,
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/id_no_team_leaking")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/id_no_team_leaking")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/id_no_team_leaking/snapshots")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/id_no_team_leaking/snapshots")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.json())
 
     def test_session_recording_with_no_person(self):
@@ -1044,7 +1043,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             distinct_id="d1",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/id_no_person")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/id_no_person")
         response_data = response.json()
 
         self.assertEqual(
@@ -1092,10 +1091,10 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         assert recording._person is None
 
     def test_session_recording_doesnt_exist(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/non_existent_id")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/non_existent_id")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/non_existent_id/snapshots")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/non_existent_id/snapshots")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_request_to_another_teams_endpoint_returns_401(self):
@@ -1107,7 +1106,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             now() - relativedelta(days=1),
             team_id=another_team.pk,
         )
-        response = self.client.get(f"/api/projects/{another_team.pk}/session_recordings/id_no_team_leaking")
+        response = self.client.get(f"/v1/projects/{another_team.pk}/session_recordings/id_no_team_leaking")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     @parameterized.expand(
@@ -1141,7 +1140,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
             # Fetch playlist
             params_string = urlencode({"session_ids": '["1", "2", "3"]', "version": api_version})
-            response = self.client.get(f"/api/projects/{self.team.id}/session_recordings?{params_string}")
+            response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings?{params_string}")
             assert response.status_code == status.HTTP_200_OK
             response_data = response.json()
 
@@ -1161,12 +1160,12 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             self.produce_replay_summary("user", "old-session", now() - relativedelta(days=10))
 
             params_string = urlencode({"session_ids": '["old-session"]'})
-            response = self.client.get(f"/api/projects/{self.team.id}/session_recordings?{params_string}")
+            response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings?{params_string}")
             assert response.status_code == status.HTTP_200_OK
             assert [r["id"] for r in response.json()["results"]] == ["old-session"]
 
             # without explicit session_ids the default date range still hides it
-            response = self.client.get(f"/api/projects/{self.team.id}/session_recordings")
+            response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings")
             assert response.status_code == status.HTTP_200_OK
             assert response.json()["results"] == []
 
@@ -1183,7 +1182,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
             # Fetch playlist
             params_string = urlencode({"session_ids": "[]"})
-            response = self.client.get(f"/api/projects/{self.team.id}/session_recordings?{params_string}")
+            response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings?{params_string}")
             assert response.status_code == status.HTTP_200_OK
             response_data = response.json()
 
@@ -1195,10 +1194,10 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
     )
     def test_delete_session_recording(self, _mock_delete_via_recording_api):
         self.produce_replay_summary("user", "1", now() - relativedelta(days=1), team_id=self.team.pk)
-        response = self.client.delete(f"/api/projects/{self.team.id}/session_recordings/1")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/session_recordings/1")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         # Deleting again is idempotent (recording-api returns already_deleted)
-        response = self.client.delete(f"/api/projects/{self.team.id}/session_recordings/1")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/session_recordings/1")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_get_matching_events_for_must_not_send_multiple_session_ids(self) -> None:
@@ -1206,7 +1205,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             f'session_ids=["{str(uuid7())}", "{str(uuid7())}"]',
         ]
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recordings/matching_events?{'&'.join(query_params)}"
+            f"/v1/projects/{self.team.id}/session_recordings/matching_events?{'&'.join(query_params)}"
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
@@ -1217,7 +1216,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         }
 
     def test_get_matching_events_for_must_send_a_single_session_id_filter(self) -> None:
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/matching_events?")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/matching_events?")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "attr": None,
@@ -1232,7 +1231,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         ]
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recordings/matching_events?{'&'.join(query_params)}"
+            f"/v1/projects/{self.team.id}/session_recordings/matching_events?{'&'.join(query_params)}"
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
@@ -1250,7 +1249,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         ]
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recordings/matching_events?{'&'.join(query_params)}"
+            f"/v1/projects/{self.team.id}/session_recordings/matching_events?{'&'.join(query_params)}"
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -1261,7 +1260,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             'events=[{"id": "$pageview", "type": "events", "order": 0, "name": "$pageview"}]',
         ]
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recordings/matching_events?{'&'.join(query_params)}"
+            f"/v1/projects/{self.team.id}/session_recordings/matching_events?{'&'.join(query_params)}"
         )
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {"results": []}
@@ -1302,7 +1301,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         ]
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recordings/matching_events?{'&'.join(query_params)}"
+            f"/v1/projects/{self.team.id}/session_recordings/matching_events?{'&'.join(query_params)}"
         )
 
         assert response.status_code == status.HTTP_200_OK, response.json()
@@ -1355,7 +1354,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         ]
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recordings/matching_events?{'&'.join(query_params)}"
+            f"/v1/projects/{self.team.id}/session_recordings/matching_events?{'&'.join(query_params)}"
         )
 
         assert response.status_code == status.HTTP_200_OK, response.json()
@@ -1443,7 +1442,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         ]
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recordings/matching_events?{'&'.join(query_params)}"
+            f"/v1/projects/{self.team.id}/session_recordings/matching_events?{'&'.join(query_params)}"
         )
 
         assert response.status_code == status.HTTP_200_OK, response.json()
@@ -1461,7 +1460,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             ]
         )
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recordings?{query_params}",
+            f"/v1/projects/{self.team.id}/session_recordings?{query_params}",
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert (
@@ -1487,7 +1486,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
     @patch("insights.session_recordings.queries.session_recording_list_from_query.SessionRecordingListFromQuery.run")
     def test_session_recordings_query_errors(self, _name, exception, expected_message, mock_run):
         mock_run.side_effect = exception
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings")
         assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
         assert response.json() == {
             "attr": None,
@@ -1517,7 +1516,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         self, _name, exception, expected_status, expected_detail_substring, mock_run
     ):
         mock_run.side_effect = exception
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings")
         assert response.status_code == expected_status
         # the real reason must reach the client, not a generic "internal server error"
         assert expected_detail_substring in response.json()["detail"]
@@ -1540,7 +1539,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             self.produce_replay_summary("user", session_id, now() - relativedelta(days=1))
 
             response = self.client.get(
-                f"/api/projects/{self.team.id}/session_recordings/{session_id}/snapshots?blob_v2=true"
+                f"/v1/projects/{self.team.id}/session_recordings/{session_id}/snapshots?blob_v2=true"
             )
 
             # Verify the error was called multiple times and we get 503
@@ -1567,7 +1566,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
         # Bulk delete
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/bulk_delete",
+            f"/v1/projects/{self.team.id}/session_recordings/bulk_delete",
             {"session_recording_ids": session_ids},
         )
 
@@ -1604,7 +1603,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
     )
     def test_bulk_delete_validation_errors(self, test_name, request_data, expected_error_message):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/bulk_delete",
+            f"/v1/projects/{self.team.id}/session_recordings/bulk_delete",
             request_data,
         )
 
@@ -1629,7 +1628,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             self.produce_replay_summary("user1", session_id, base_time)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/bulk_delete",
+            f"/v1/projects/{self.team.id}/session_recordings/bulk_delete",
             {"session_recording_ids": session_ids},
         )
 
@@ -1658,7 +1657,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             self.produce_replay_summary("user1", session_id, base_time)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/bulk_delete",
+            f"/v1/projects/{self.team.id}/session_recordings/bulk_delete",
             {"session_recording_ids": session_ids},
         )
 
@@ -1670,7 +1669,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         session_ids = ["nonexistent_1", "nonexistent_2"]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/bulk_delete",
+            f"/v1/projects/{self.team.id}/session_recordings/bulk_delete",
             {"session_recording_ids": session_ids},
         )
 
@@ -1700,7 +1699,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         session_ids = ["bulk_delete_mixed_existing", "bulk_delete_mixed_nonexistent"]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/bulk_delete",
+            f"/v1/projects/{self.team.id}/session_recordings/bulk_delete",
             {"session_recording_ids": session_ids},
         )
 
@@ -1730,7 +1729,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         assert not SessionRecording.objects.filter(team=self.team, session_id=session_id).exists()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/bulk_delete",
+            f"/v1/projects/{self.team.id}/session_recordings/bulk_delete",
             {"session_recording_ids": [session_id]},
         )
 
@@ -1758,7 +1757,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             self.produce_replay_summary("user1", session_id, base_time)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/bulk_delete",
+            f"/v1/projects/{self.team.id}/session_recordings/bulk_delete",
             {"session_recording_ids": session_ids},
         )
 
@@ -1788,7 +1787,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
         # Try to bulk delete from current team
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/bulk_delete",
+            f"/v1/projects/{self.team.id}/session_recordings/bulk_delete",
             {"session_recording_ids": [session_id]},
         )
 
@@ -1815,7 +1814,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
         # Bulk mark as viewed
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/bulk_viewed",
+            f"/v1/projects/{self.team.id}/session_recordings/bulk_viewed",
             {"session_recording_ids": session_ids},
         )
 
@@ -1854,7 +1853,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
         # Bulk mark all as viewed (including already viewed ones)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/bulk_viewed",
+            f"/v1/projects/{self.team.id}/session_recordings/bulk_viewed",
             {"session_recording_ids": session_ids},
         )
 
@@ -1897,7 +1896,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
         # Bulk mark as not viewed
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/bulk_not_viewed",
+            f"/v1/projects/{self.team.id}/session_recordings/bulk_not_viewed",
             {"session_recording_ids": session_ids},
         )
 
@@ -1941,7 +1940,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
         # Bulk mark all as not viewed (including one that wasn't viewed)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/bulk_not_viewed",
+            f"/v1/projects/{self.team.id}/session_recordings/bulk_not_viewed",
             {"session_recording_ids": session_ids},
         )
 
@@ -1969,7 +1968,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
                 "session_recording_id": "session_b",
             }
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings?{params_string}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings?{params_string}")
 
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
@@ -1998,7 +1997,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         # Specify session1 explicitly via session_recording_id
         # It should also match the filters, so we test deduplication
         params_string = urlencode({"session_recording_id": "session1"})
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings?{params_string}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings?{params_string}")
 
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
@@ -2017,7 +2016,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
         # Specify a nonexistent recording via session_recording_id
         params_string = urlencode({"session_recording_id": "nonexistent_session"})
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings?{params_string}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings?{params_string}")
 
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
@@ -2081,7 +2080,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
         # Bulk delete both recordings
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/bulk_delete",
+            f"/v1/projects/{self.team.id}/session_recordings/bulk_delete",
             {"session_recording_ids": [session_id_old, session_id_recent]},
         )
 
@@ -2120,7 +2119,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
         # Bulk delete with date_from parameter set to -30d (should find the recording)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/bulk_delete",
+            f"/v1/projects/{self.team.id}/session_recordings/bulk_delete",
             {"session_recording_ids": [session_id], "date_from": "-30d"},
         )
 
@@ -2144,7 +2143,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
         # Try to delete with date_from=-3d (should not find the 15-day-old recording)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/bulk_delete",
+            f"/v1/projects/{self.team.id}/session_recordings/bulk_delete",
             {"session_recording_ids": [session_id_2], "date_from": "-3d"},
         )
 
@@ -2277,7 +2276,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             params["session_ids"] = json.dumps(config["session_ids"])
 
         params_string = urlencode(params)
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings?{params_string}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings?{params_string}")
 
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
@@ -2304,7 +2303,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         self.produce_replay_summary("user2", "existing_session_2", base_time)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/batch_check_exists",
+            f"/v1/projects/{self.team.id}/session_recordings/batch_check_exists",
             {
                 "session_ids": [
                     "existing_session_1",
@@ -2352,7 +2351,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
     )
     def test_batch_check_exists_validation_errors(self, _test_name, request_data, expected_error_message):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/batch_check_exists",
+            f"/v1/projects/{self.team.id}/session_recordings/batch_check_exists",
             request_data,
         )
 
@@ -2372,7 +2371,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         self.produce_replay_summary("user1", "current_team_session", base_time)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/batch_check_exists",
+            f"/v1/projects/{self.team.id}/session_recordings/batch_check_exists",
             {"session_ids": ["other_team_session", "current_team_session"]},
         )
 
@@ -2398,7 +2397,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
         # First request - should query Datastore and cache result
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/batch_check_exists",
+            f"/v1/projects/{self.team.id}/session_recordings/batch_check_exists",
             {"session_ids": [session_id]},
         )
 
@@ -2420,7 +2419,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         cache.delete(cache_key)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/batch_check_exists",
+            f"/v1/projects/{self.team.id}/session_recordings/batch_check_exists",
             {"session_ids": [session_id]},
         )
 
@@ -2453,7 +2452,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/batch_check_exists",
+            f"/v1/projects/{self.team.id}/session_recordings/batch_check_exists",
             {
                 "session_ids": [outcome_session, no_outcome_session, unknown_session],
                 "include_outcomes": True,
@@ -2471,7 +2470,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
     def test_batch_check_exists_omits_outcomes_by_default(self):
         """Existing callers that don't opt in must keep the historical response shape."""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/batch_check_exists",
+            f"/v1/projects/{self.team.id}/session_recordings/batch_check_exists",
             {"session_ids": ["any_session"]},
         )
 
@@ -2492,7 +2491,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/batch_check_exists",
+            f"/v1/projects/{self.team.id}/session_recordings/batch_check_exists",
             {"session_ids": [shared_session_id], "include_outcomes": True},
         )
 
@@ -2521,7 +2520,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
 
         mock_execute_summarize.side_effect = mock_video_stream
 
-        response = self.client.post(f"/api/projects/{self.team.id}/session_recordings/{session_id}/summarize")
+        response = self.client.post(f"/v1/projects/{self.team.id}/session_recordings/{session_id}/summarize")
 
         assert response.status_code == status.HTTP_200_OK
         # Consume streaming response to trigger the generator
@@ -2577,7 +2576,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         mock_execute_summarize.side_effect = mock_video_stream
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/{session_id}/summarize",
+            f"/v1/projects/{self.team.id}/session_recordings/{session_id}/summarize",
             data=body,
             content_type="application/json",
         )
@@ -2610,7 +2609,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             timestamp=now() - timedelta(hours=1),
         )
 
-        response = self.client.post(f"/api/projects/{self.team.id}/session_recordings/{session_id}/summarize/cancel")
+        response = self.client.post(f"/v1/projects/{self.team.id}/session_recordings/{session_id}/summarize/cancel")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {"cancelled": True}
@@ -2628,7 +2627,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             session_id=session_id,
             timestamp=now() - timedelta(hours=1),
         )
-        url = f"/api/projects/{self.team.id}/session_recordings/{session_id}/summarize/cancel"
+        url = f"/v1/projects/{self.team.id}/session_recordings/{session_id}/summarize/cancel"
         self.client.logout()
 
         response = self.client.post(url)
@@ -2660,7 +2659,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             timestamp=now() - timedelta(hours=1),
         )
 
-        response = self.client.post(f"/api/projects/{self.team.id}/session_recordings/{session_id}/summarize/cancel")
+        response = self.client.post(f"/v1/projects/{self.team.id}/session_recordings/{session_id}/summarize/cancel")
 
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         body = response.json()
@@ -2677,7 +2676,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         session_id = "delete_via_api_test"
         self.produce_replay_summary("user", session_id, now() - relativedelta(days=1), team_id=self.team.pk)
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/session_recordings/{session_id}")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/session_recordings/{session_id}")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         mock_delete_via_recording_api.assert_called_once()
@@ -2692,7 +2691,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         session_id = "delete_api_failure_test"
         self.produce_replay_summary("user", session_id, now() - relativedelta(days=1), team_id=self.team.pk)
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/session_recordings/{session_id}")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/session_recordings/{session_id}")
 
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         mock_delete_via_recording_api.assert_called_once()
@@ -2714,7 +2713,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             self.produce_replay_summary("user1", session_id, base_time)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/bulk_delete",
+            f"/v1/projects/{self.team.id}/session_recordings/bulk_delete",
             {"session_recording_ids": session_ids},
         )
 
@@ -2747,7 +2746,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             self.produce_replay_summary("user1", session_id, base_time)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/bulk_delete",
+            f"/v1/projects/{self.team.id}/session_recordings/bulk_delete",
             {"session_recording_ids": session_ids},
         )
 

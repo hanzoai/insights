@@ -257,7 +257,7 @@ class DjangoAPI:
         if is_static:
             data["is_static"] = "true"
         resp = self.session.post(
-            f"{self.base_url}/api/projects/{self.team_id}/cohorts/",
+            f"{self.base_url}/v1/projects/{self.team_id}/cohorts/",
             data=data,
         )
         assert resp.status_code == 201, f"Failed to create cohort: {resp.text}"
@@ -270,7 +270,7 @@ class DjangoAPI:
         active: bool = True,
     ) -> dict[str, Any]:
         resp = self.session.post(
-            f"{self.base_url}/api/projects/{self.team_id}/feature_flags/",
+            f"{self.base_url}/v1/projects/{self.team_id}/feature_flags/",
             json={"key": key, "name": key, "filters": filters, "active": active},
         )
         assert resp.status_code == 201, f"Failed to create flag: {resp.text}"
@@ -284,13 +284,13 @@ class DjangoAPI:
         """
         for resource in ["feature_flags", "cohorts"]:
             resp = self.session.get(
-                f"{self.base_url}/api/projects/{self.team_id}/{resource}/",
+                f"{self.base_url}/v1/projects/{self.team_id}/{resource}/",
                 params={"limit": 1000},
             )
             if not resp.ok:
                 continue
             for item in resp.json().get("results", []):
-                url = f"{self.base_url}/api/projects/{self.team_id}/{resource}/{item['id']}/"
+                url = f"{self.base_url}/v1/projects/{self.team_id}/{resource}/{item['id']}/"
                 if resource == "feature_flags":
                     self.session.patch(url, json={"deleted": True})
                 else:

@@ -660,12 +660,12 @@ export function createDefaultPropertyFilter(
     }
 
     if (propertyType === PropertyFilterType.InsightsQL) {
-        const hogQLProperty: InsightsQLPropertyFilter = {
+        const insightsQLProperty: InsightsQLPropertyFilter = {
             type: propertyType,
             key: String(propertyKey),
             value: null, // must specify something to be compatible with existing types
         }
-        return hogQLProperty
+        return insightsQLProperty
     }
 
     if (propertyType === PropertyFilterType.Flag) {

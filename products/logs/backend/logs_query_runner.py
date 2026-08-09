@@ -664,7 +664,7 @@ class LogsQueryRunner(AnalyticsQueryRunner[LogsQueryResponse], LogsQueryRunnerMi
         # LogsQuery is registered in get_query_runner solely for server-side CSV export.
         # The export runs via ExportedAsset + Celery and attributes the read to the export
         # owner (LimitContext.EXPORT), which must be allowed through. Block everything else —
-        # i.e. user-initiated queries via the generic /api/projects/:id/query/ endpoint —
+        # i.e. user-initiated queries via the generic /v1/projects/:id/query/ endpoint —
         # until the LogsQuery schema is stable and ready to be a public API.
         if self.limit_context == LimitContext.EXPORT:
             return True

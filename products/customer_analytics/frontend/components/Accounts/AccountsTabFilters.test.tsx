@@ -20,9 +20,9 @@ describe('AccountsTabFilters', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/organizations/:organization_id/members/': () => [200, { results: [] }],
-                '/api/projects/:team_id/tags': () => [200, []],
-                '/api/environments/:team_id/column_configurations': () => [200, { results: [] }],
+                '/v1/organizations/:organization_id/members/': () => [200, { results: [] }],
+                '/v1/projects/:team_id/tags': () => [200, []],
+                '/v1/environments/:team_id/column_configurations': () => [200, { results: [] }],
             },
         })
         initKeaTests()

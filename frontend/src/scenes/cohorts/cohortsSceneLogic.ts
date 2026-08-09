@@ -308,7 +308,7 @@ export const cohortsSceneLogic = kea<cohortsSceneLogicType>([
             const exportCommand = {
                 export_format: ExporterFormat.CSV,
                 export_context: {
-                    path: `/api/cohort/${id}/persons`,
+                    path: `/v1/cohort/${id}/persons`,
                     columns,
                     filename: cohort?.name ? `cohort-${cohort.name}` : 'cohort',
                 } as { path: string; columns?: string[]; filename?: string },

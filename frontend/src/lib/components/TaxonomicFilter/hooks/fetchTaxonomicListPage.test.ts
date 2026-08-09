@@ -10,7 +10,7 @@ jest.mock('lib/api', () => ({
 const apiGet = jest.requireMock('lib/api').default.get as jest.Mock
 
 function group(type: TaxonomicFilterGroupType): TaxonomicFilterGroup {
-    return { type, name: type, endpoint: `api/projects/1/${type}`, searchAlias: 'search' } as TaxonomicFilterGroup
+    return { type, name: type, endpoint: `v1/projects/1/${type}`, searchAlias: 'search' } as TaxonomicFilterGroup
 }
 
 describe('fetchTaxonomicListPage exclude_stale', () => {

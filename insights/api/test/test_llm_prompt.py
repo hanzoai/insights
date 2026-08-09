@@ -51,7 +51,7 @@ class TestLLMPromptAPI(APIBaseTest):
 
     def test_create_prompt_with_unique_name_succeeds(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/",
+            f"/v1/environments/{self.team.id}/llm_prompts/",
             data={
                 "name": "my-prompt",
                 "prompt": "You are a helpful assistant.",
@@ -71,7 +71,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="my-prompt")
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/",
+            f"/v1/environments/{self.team.id}/llm_prompts/",
             data={"name": "my-prompt", "prompt": "Duplicate prompt"},
             format="json",
         )
@@ -85,7 +85,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="archived-prompt", version=2, is_latest=False, deleted=True)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/",
+            f"/v1/environments/{self.team.id}/llm_prompts/",
             data={"name": "archived-prompt", "prompt": "New active prompt"},
             format="json",
         )
@@ -96,7 +96,7 @@ class TestLLMPromptAPI(APIBaseTest):
 
     def test_create_prompt_ignores_deleted_field(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/",
+            f"/v1/environments/{self.team.id}/llm_prompts/",
             data={"name": "my-prompt", "prompt": "Prompt content", "deleted": True},
             format="json",
         )
@@ -110,7 +110,7 @@ class TestLLMPromptAPI(APIBaseTest):
         oversized_prompt = "x" * (MAX_PROMPT_PAYLOAD_BYTES + 1)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/",
+            f"/v1/environments/{self.team.id}/llm_prompts/",
             data={"name": "oversized-prompt", "prompt": oversized_prompt},
             format="json",
         )
@@ -123,7 +123,7 @@ class TestLLMPromptAPI(APIBaseTest):
         prompt = self.create_prompt_version(name="original-name")
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/llm_prompts/{prompt.id}/",
+            f"/v1/environments/{self.team.id}/llm_prompts/{prompt.id}/",
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -132,7 +132,7 @@ class TestLLMPromptAPI(APIBaseTest):
         prompt = self.create_prompt_version(name="my-prompt", prompt="Original content")
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/{prompt.id}/",
+            f"/v1/environments/{self.team.id}/llm_prompts/{prompt.id}/",
             data={"prompt": "Updated content", "base_version": 1},
             format="json",
         )
@@ -144,7 +144,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="prompt-a", version=2, is_latest=True, prompt="v2")
         self.create_prompt_version(name="prompt-b", version=1, is_latest=True, prompt="only")
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/")
 
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
@@ -166,7 +166,7 @@ class TestLLMPromptAPI(APIBaseTest):
     def test_list_content_mode(self, mode, has_prompt, has_preview):
         self.create_prompt_version(name="content-prompt", prompt="x" * 200)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/?content={mode}")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/?content={mode}")
 
         assert response.status_code == status.HTTP_200_OK
         prompt = response.json()["results"][0]
@@ -179,7 +179,7 @@ class TestLLMPromptAPI(APIBaseTest):
     def test_list_includes_outline_parsed_from_prompt_markdown(self):
         self.create_prompt_version(name="outlined", prompt="# Role\nYou are helpful.\n## Tools\nsearch")
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/")
 
         assert response.status_code == status.HTTP_200_OK
         prompt = response.json()["results"][0]
@@ -191,7 +191,7 @@ class TestLLMPromptAPI(APIBaseTest):
     def test_list_outline_is_present_even_when_content_none(self):
         self.create_prompt_version(name="outlined", prompt="# Role\n# Output")
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/?content=none")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/?content=none")
 
         assert response.status_code == status.HTTP_200_OK
         prompt = response.json()["results"][0]
@@ -202,7 +202,7 @@ class TestLLMPromptAPI(APIBaseTest):
     def test_list_outline_empty_for_non_markdown_prompt(self):
         self.create_prompt_version(name="plain", prompt="just text, no headings")
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["results"][0]["outline"] == []
@@ -211,7 +211,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="small", prompt="abc")
         self.create_prompt_version(name="large", prompt="x" * 50)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/?order_by=-prompt_size_bytes")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/?order_by=-prompt_size_bytes")
 
         assert response.status_code == status.HTTP_200_OK
         names = [prompt["name"] for prompt in response.json()["results"]]
@@ -232,11 +232,11 @@ class TestLLMPromptAPI(APIBaseTest):
         )
 
         if use_matching_user is None:
-            url = f"/api/environments/{self.team.id}/llm_prompts/?created_by_id=abc"
+            url = f"/v1/environments/{self.team.id}/llm_prompts/?created_by_id=abc"
         elif use_matching_user:
-            url = f"/api/environments/{self.team.id}/llm_prompts/?created_by_id={self.user.id}"
+            url = f"/v1/environments/{self.team.id}/llm_prompts/?created_by_id={self.user.id}"
         else:
-            url = f"/api/environments/{self.team.id}/llm_prompts/?created_by_id=999999"
+            url = f"/v1/environments/{self.team.id}/llm_prompts/?created_by_id=999999"
 
         response = self.client.get(url)
 
@@ -248,7 +248,7 @@ class TestLLMPromptAPI(APIBaseTest):
         first_version = self.create_prompt_version(name="test-prompt", version=1, is_latest=False, prompt="v1")
         latest_version = self.create_prompt_version(name="test-prompt", version=2, is_latest=True, prompt="v2")
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/test-prompt/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/test-prompt/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["id"] == str(latest_version.id)
@@ -264,7 +264,7 @@ class TestLLMPromptAPI(APIBaseTest):
     def test_fetch_prompt_by_name_includes_outline(self):
         self.create_prompt_version(name="outlined", prompt="# Role\n## Tools")
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/outlined/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/outlined/")
 
         assert response.status_code == status.HTTP_200_OK
         body = response.json()
@@ -281,7 +281,7 @@ class TestLLMPromptAPI(APIBaseTest):
     def test_fetch_prompt_by_name_respects_content_mode(self, mode, has_prompt, has_preview):
         self.create_prompt_version(name="outlined", prompt="# Role\n" + ("x" * 300))
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/outlined/?content={mode}")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/outlined/?content={mode}")
 
         assert response.status_code == status.HTTP_200_OK
         body = response.json()
@@ -295,7 +295,7 @@ class TestLLMPromptAPI(APIBaseTest):
         first_version = self.create_prompt_version(name="test-prompt", version=1, is_latest=False, prompt="v1")
         self.create_prompt_version(name="test-prompt", version=2, is_latest=True, prompt="v2")
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/test-prompt/?version=1")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/test-prompt/?version=1")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["id"] == str(first_version.id)
@@ -310,8 +310,8 @@ class TestLLMPromptAPI(APIBaseTest):
         from insights.storage.llm_prompt_cache import llm_prompts_hypercache
 
         with patch.object(llm_prompts_hypercache, "load_fn", wraps=llm_prompts_hypercache.load_fn) as mock_load_fn:
-            first_response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/cached-prompt/")
-            second_response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/cached-prompt/")
+            first_response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/cached-prompt/")
+            second_response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/cached-prompt/")
 
         assert first_response.status_code == status.HTTP_200_OK
         assert second_response.status_code == status.HTTP_200_OK
@@ -322,15 +322,15 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="cached-prompt", version=2, is_latest=True, prompt="v2")
         from insights.storage.llm_prompt_cache import llm_prompts_hypercache
 
-        latest_response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/cached-prompt/")
+        latest_response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/cached-prompt/")
         assert latest_response.status_code == status.HTTP_200_OK
 
         with patch.object(llm_prompts_hypercache, "load_fn", wraps=llm_prompts_hypercache.load_fn) as mock_load_fn:
             first_response = self.client.get(
-                f"/api/environments/{self.team.id}/llm_prompts/name/cached-prompt/?version=1"
+                f"/v1/environments/{self.team.id}/llm_prompts/name/cached-prompt/?version=1"
             )
             second_response = self.client.get(
-                f"/api/environments/{self.team.id}/llm_prompts/name/cached-prompt/?version=1"
+                f"/v1/environments/{self.team.id}/llm_prompts/name/cached-prompt/?version=1"
             )
 
         assert first_response.status_code == status.HTTP_200_OK
@@ -341,7 +341,7 @@ class TestLLMPromptAPI(APIBaseTest):
         original = self.create_prompt_version(name="publish-prompt", version=1, is_latest=True, prompt="v1")
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/name/publish-prompt/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/publish-prompt/",
             data={"prompt": "v2", "base_version": 1},
             format="json",
         )
@@ -362,7 +362,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="publish-prompt", version=1, is_latest=True, prompt="v1")
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/name/publish-prompt/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/publish-prompt/",
             data={"prompt": "v2", "base_version": 1, "version_description": "Tightened the refusal criteria"},
             format="json",
         )
@@ -370,7 +370,7 @@ class TestLLMPromptAPI(APIBaseTest):
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["version_description"] == "Tightened the refusal criteria"
 
-        resolve_response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/resolve/name/publish-prompt/")
+        resolve_response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/resolve/name/publish-prompt/")
         assert resolve_response.status_code == status.HTTP_200_OK
         versions = resolve_response.json()["versions"]
         assert [v["version_description"] for v in versions] == ["Tightened the refusal criteria", None]
@@ -378,9 +378,11 @@ class TestLLMPromptAPI(APIBaseTest):
     def test_update_prompt_by_name_falls_back_when_post_publish_refresh_misses_row(self):
         first_version = self.create_prompt_version(name="publish-prompt", version=1, is_latest=True, prompt="v1")
 
-        with patch("insights.api.services.llm_prompt.get_active_prompt_queryset", return_value=LLMPrompt.objects.none()):
+        with patch(
+            "insights.api.services.llm_prompt.get_active_prompt_queryset", return_value=LLMPrompt.objects.none()
+        ):
             response = self.client.patch(
-                f"/api/environments/{self.team.id}/llm_prompts/name/publish-prompt/",
+                f"/v1/environments/{self.team.id}/llm_prompts/name/publish-prompt/",
                 data={"prompt": "v2", "base_version": 1},
                 format="json",
             )
@@ -398,7 +400,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="publish-prompt", version=2, is_latest=True, prompt="v2")
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/name/publish-prompt/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/publish-prompt/",
             data={"prompt": "stale", "base_version": 1},
             format="json",
         )
@@ -411,7 +413,7 @@ class TestLLMPromptAPI(APIBaseTest):
         oversized_prompt = "x" * (MAX_PROMPT_PAYLOAD_BYTES + 1)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/name/publish-prompt/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/publish-prompt/",
             data={"prompt": oversized_prompt, "base_version": 1},
             format="json",
         )
@@ -424,7 +426,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="publish-prompt", version=MAX_PROMPT_VERSION, is_latest=True, prompt="v-limit")
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/name/publish-prompt/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/publish-prompt/",
             data={"prompt": "v-over-limit", "base_version": MAX_PROMPT_VERSION},
             format="json",
         )
@@ -437,7 +439,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="edit-prompt", version=1, is_latest=True, prompt="You are a helpful assistant.")
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/name/edit-prompt/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/edit-prompt/",
             data={
                 "edits": [{"old": "helpful assistant", "new": "expert coding assistant"}],
                 "base_version": 1,
@@ -454,7 +456,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="multi-edit", version=1, is_latest=True, prompt="Hello world. Goodbye world.")
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/name/multi-edit/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/multi-edit/",
             data={
                 "edits": [
                     {"old": "Hello world", "new": "Hi there"},
@@ -493,7 +495,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="edit-error", version=1, is_latest=True, prompt=prompt)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/name/edit-error/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/edit-error/",
             data={"edits": edits, "base_version": 1},
             format="json",
         )
@@ -518,7 +520,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="combo-edit", version=1, is_latest=True, prompt="v1")
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/name/combo-edit/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/combo-edit/",
             data=data,
             format="json",
         )
@@ -529,7 +531,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="size-edit", version=1, is_latest=True, prompt="small")
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/name/size-edit/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/size-edit/",
             data={
                 "edits": [{"old": "small", "new": "x" * (MAX_PROMPT_PAYLOAD_BYTES + 1)}],
                 "base_version": 1,
@@ -549,7 +551,7 @@ class TestLLMPromptAPI(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/name/json-edit/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/json-edit/",
             data={
                 "edits": [{"old": "You are helpful.", "new": "You are an expert."}],
                 "base_version": 1,
@@ -566,9 +568,9 @@ class TestLLMPromptAPI(APIBaseTest):
         api_key = self.create_personal_api_key_with_scopes(["llm_prompt:read"])
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {api_key}")
 
-        read_response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/publish-prompt/")
+        read_response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/publish-prompt/")
         write_response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/name/publish-prompt/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/publish-prompt/",
             data={"prompt": "v2", "base_version": 1},
             format="json",
         )
@@ -581,7 +583,7 @@ class TestLLMPromptAPI(APIBaseTest):
         latest = self.create_prompt_version(name="versions-prompt", version=2, is_latest=True, prompt="v2")
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/llm_prompts/resolve/name/versions-prompt/?version=1"
+            f"/v1/environments/{self.team.id}/llm_prompts/resolve/name/versions-prompt/?version=1"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -603,7 +605,7 @@ class TestLLMPromptAPI(APIBaseTest):
                 is_latest=version == 3,
             )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/resolve/name/paged-prompt/?limit=2")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/resolve/name/paged-prompt/?limit=2")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -625,7 +627,7 @@ class TestLLMPromptAPI(APIBaseTest):
                 selected = prompt
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/llm_prompts/resolve/name/paged-prompt/?version=1&limit=2"
+            f"/v1/environments/{self.team.id}/llm_prompts/resolve/name/paged-prompt/?version=1&limit=2"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -647,7 +649,7 @@ class TestLLMPromptAPI(APIBaseTest):
             )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/llm_prompts/resolve/name/paged-prompt/?before_version=2&limit=2"
+            f"/v1/environments/{self.team.id}/llm_prompts/resolve/name/paged-prompt/?before_version=2&limit=2"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -659,7 +661,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="paged-prompt", version=1, prompt="v1", is_latest=True)
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/llm_prompts/resolve/name/paged-prompt/?offset=0&before_version=1"
+            f"/v1/environments/{self.team.id}/llm_prompts/resolve/name/paged-prompt/?offset=0&before_version=1"
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -669,13 +671,13 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="archive-prompt", version=1, is_latest=False, prompt="v1")
         self.create_prompt_version(name="archive-prompt", version=2, is_latest=True, prompt="v2")
 
-        response = self.client.post(f"/api/environments/{self.team.id}/llm_prompts/name/archive-prompt/archive/")
+        response = self.client.post(f"/v1/environments/{self.team.id}/llm_prompts/name/archive-prompt/archive/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert LLMPrompt.objects.filter(team=self.team, name="archive-prompt", deleted=False).count() == 0
 
         recreate_response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/",
+            f"/v1/environments/{self.team.id}/llm_prompts/",
             data={"name": "archive-prompt", "prompt": "fresh"},
             format="json",
         )
@@ -688,20 +690,20 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="archive-prompt", version=2, is_latest=True, prompt="v2")
 
         with patch("insights.api.services.llm_prompt.transaction.on_commit", side_effect=lambda callback: callback()):
-            first_latest = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/archive-prompt/")
+            first_latest = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/archive-prompt/")
             first_version = self.client.get(
-                f"/api/environments/{self.team.id}/llm_prompts/name/archive-prompt/?version=1"
+                f"/v1/environments/{self.team.id}/llm_prompts/name/archive-prompt/?version=1"
             )
             archive_response = self.client.post(
-                f"/api/environments/{self.team.id}/llm_prompts/name/archive-prompt/archive/"
+                f"/v1/environments/{self.team.id}/llm_prompts/name/archive-prompt/archive/"
             )
 
         assert first_latest.status_code == status.HTTP_200_OK
         assert first_version.status_code == status.HTTP_200_OK
         assert archive_response.status_code == status.HTTP_204_NO_CONTENT
 
-        second_latest = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/archive-prompt/")
-        second_version = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/archive-prompt/?version=1")
+        second_latest = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/archive-prompt/")
+        second_version = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/archive-prompt/?version=1")
 
         assert second_latest.status_code == status.HTTP_404_NOT_FOUND
         assert second_version.status_code == status.HTTP_404_NOT_FOUND
@@ -722,7 +724,7 @@ class TestLLMPromptAPI(APIBaseTest):
             patch("insights.api.services.llm_prompt.invalidate_prompt_version_caches") as mock_invalidate_versions,
             patch("insights.tasks.llm_prompt_cache.invalidate_archived_prompt_versions_cache_task.delay") as mock_delay,
         ):
-            response = self.client.post(f"/api/environments/{self.team.id}/llm_prompts/name/archive-prompt/archive/")
+            response = self.client.post(f"/v1/environments/{self.team.id}/llm_prompts/name/archive-prompt/archive/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         mock_invalidate_latest.assert_called_once_with(self.team.id, "archive-prompt")
@@ -736,7 +738,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="resolve-prompt", version=2, is_latest=True, prompt="v2")
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/llm_prompts/resolve/name/resolve-prompt/?version=1"
+            f"/v1/environments/{self.team.id}/llm_prompts/resolve/name/resolve-prompt/?version=1"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -749,7 +751,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="resolve-prompt", version=2, is_latest=True, prompt="v2")
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/llm_prompts/resolve/name/resolve-prompt/"
+            f"/v1/environments/{self.team.id}/llm_prompts/resolve/name/resolve-prompt/"
             f"?version=1&version_id={historical.id}"
         )
 
@@ -766,7 +768,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="resolve-prompt", version=1, is_latest=True, prompt="new")
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/llm_prompts/resolve/name/resolve-prompt/"
+            f"/v1/environments/{self.team.id}/llm_prompts/resolve/name/resolve-prompt/"
             f"?version=1&version_id={historical.id}"
         )
 
@@ -778,7 +780,7 @@ class TestLLMPromptAPI(APIBaseTest):
         api_key = self.create_personal_api_key_with_scopes(["llm_prompt:read"])
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {api_key}")
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/resolve/name/test-prompt/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/resolve/name/test-prompt/")
 
         assert response.status_code == status.HTTP_200_OK
 
@@ -788,7 +790,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="test-prompt", version=1, is_latest=False, prompt="v1")
         latest = self.create_prompt_version(name="test-prompt", version=2, is_latest=True, prompt="v2")
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/test-prompt/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/test-prompt/")
 
         assert response.status_code == status.HTTP_200_OK
         mock_capture_internal.assert_called_once()
@@ -800,7 +802,7 @@ class TestLLMPromptAPI(APIBaseTest):
         assert properties["prompt_first_version_created_at"] == response.json()["first_version_created_at"]
 
     def test_fetch_prompt_by_name_not_found(self):
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/non-existent/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/non-existent/")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert "not found" in response.json()["detail"].lower()
@@ -816,13 +818,13 @@ class TestLLMPromptAPI(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/other-team-prompt/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/other-team-prompt/")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_create_prompt_with_reserved_name_new_fails(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/",
+            f"/v1/environments/{self.team.id}/llm_prompts/",
             data={"name": "new", "prompt": "Content"},
             format="json",
         )
@@ -833,7 +835,7 @@ class TestLLMPromptAPI(APIBaseTest):
 
     def test_create_prompt_with_invalid_name_fails(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/",
+            f"/v1/environments/{self.team.id}/llm_prompts/",
             data={"name": "invalid name with spaces", "prompt": "Content"},
             format="json",
         )
@@ -843,7 +845,7 @@ class TestLLMPromptAPI(APIBaseTest):
         assert "Only letters, numbers, hyphens (-) and underscores (_) are allowed" in response.json()["detail"]
 
     def test_get_by_name_patch_uses_write_scope(self):
-        request = APIRequestFactory().patch("/api/environments/1/llm_prompts/name/example/")
+        request = APIRequestFactory().patch("/v1/environments/1/llm_prompts/name/example/")
         view = LLMPromptViewSet()
         view.action = "get_by_name"
         assert view.dangerously_get_required_scopes(request, view) == ["llm_prompt:write"]
@@ -878,7 +880,7 @@ class TestLLMPromptAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/name/original/duplicate/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/original/duplicate/",
             data={"new_name": "copy-of-original"},
             format="json",
         )
@@ -895,7 +897,7 @@ class TestLLMPromptAPI(APIBaseTest):
 
     def test_duplicate_prompt_returns_404_for_nonexistent_source(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/name/nonexistent/duplicate/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/nonexistent/duplicate/",
             data={"new_name": "copy"},
             format="json",
         )
@@ -907,7 +909,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="taken-name", version=1, is_latest=True, prompt="other")
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/name/original/duplicate/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/original/duplicate/",
             data={"new_name": "taken-name"},
             format="json",
         )
@@ -921,7 +923,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="original", version=1, is_latest=True, prompt="content")
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/name/original/duplicate/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/original/duplicate/",
             data={"new_name": "invalid name with spaces"},
             format="json",
         )
@@ -932,7 +934,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="original", version=1, is_latest=True, prompt="content")
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/name/original/duplicate/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/original/duplicate/",
             data={"new_name": "copy"},
             format="json",
         )
@@ -947,7 +949,7 @@ class TestLLMPromptAPI(APIBaseTest):
         self.create_prompt_version(name="archived-name", version=1, is_latest=False, deleted=True)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/name/original/duplicate/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/original/duplicate/",
             data={"new_name": "archived-name"},
             format="json",
         )
@@ -958,30 +960,30 @@ class TestLLMPromptAPI(APIBaseTest):
 
     def test_prompt_lifecycle_events_are_activity_logged_into_the_history_stream(self):
         create = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/",
+            f"/v1/environments/{self.team.id}/llm_prompts/",
             data={"name": "my-prompt", "prompt": "v1 content"},
             format="json",
         )
         assert create.status_code == status.HTTP_201_CREATED
         publish = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/name/my-prompt/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/my-prompt/",
             data={"prompt": "v2 content", "base_version": 1, "version_description": "tightened wording"},
             format="json",
         )
         assert publish.status_code == status.HTTP_200_OK
         label = self.client.put(
-            f"/api/environments/{self.team.id}/llm_prompts/name/my-prompt/labels/production/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/my-prompt/labels/production/",
             data={"version": 2},
             format="json",
         )
         assert label.status_code == status.HTTP_201_CREATED
         duplicate = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/name/my-prompt/duplicate/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/my-prompt/duplicate/",
             data={"new_name": "my-prompt-copy"},
             format="json",
         )
         assert duplicate.status_code == status.HTTP_201_CREATED
-        archive = self.client.post(f"/api/environments/{self.team.id}/llm_prompts/name/my-prompt/archive/")
+        archive = self.client.post(f"/v1/environments/{self.team.id}/llm_prompts/name/my-prompt/archive/")
         assert archive.status_code == status.HTTP_204_NO_CONTENT
 
         entries = ActivityLog.objects.filter(team_id=self.team.id, scope="LLMPrompt")
@@ -1011,7 +1013,7 @@ class TestLLMPromptAPI(APIBaseTest):
         # The History tab queries both scopes by the shared item_id in one request;
         # lifecycle and label entries must come back as one merged stream.
         history = self.client.get(
-            f"/api/projects/{self.team.id}/activity_log/?scopes=LLMPrompt,LLMPromptLabel&item_id=my-prompt"
+            f"/v1/projects/{self.team.id}/activity_log/?scopes=LLMPrompt,LLMPromptLabel&item_id=my-prompt"
         )
         assert history.status_code == status.HTTP_200_OK
         rows = history.json()["results"]
@@ -1043,14 +1045,14 @@ class TestLLMPromptConfigAPI(APIBaseTest):
 
     def test_create_prompt_with_config_persists_it_and_fetch_returns_it(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/",
+            f"/v1/environments/{self.team.id}/llm_prompts/",
             data={"name": "with-config", "prompt": "content", "config": {"model": "gpt-4o", "temperature": 0}},
             format="json",
         )
         assert response.status_code == status.HTTP_201_CREATED
         assert response.json()["config"] == {"model": "gpt-4o", "temperature": 0}
 
-        fetch_response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/with-config/")
+        fetch_response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/with-config/")
         assert fetch_response.status_code == status.HTTP_200_OK
         assert fetch_response.json()["config"] == {"model": "gpt-4o", "temperature": 0}
 
@@ -1064,7 +1066,7 @@ class TestLLMPromptConfigAPI(APIBaseTest):
     def test_fetch_prompt_by_name_content_mode_controls_config(self, mode: str, has_config: bool):
         self.create_prompt_version(name="config-prompt", config={"model": "gpt-4o"})
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/config-prompt/?content={mode}")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/config-prompt/?content={mode}")
 
         assert response.status_code == status.HTTP_200_OK
         assert ("config" in response.json()) is has_config
@@ -1081,7 +1083,7 @@ class TestLLMPromptConfigAPI(APIBaseTest):
         self.create_prompt_version(name="carry-prompt", prompt="v1", config={"temperature": 0.7})
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/name/carry-prompt/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/carry-prompt/",
             data={**payload, "base_version": 1},
             format="json",
         )
@@ -1096,7 +1098,7 @@ class TestLLMPromptConfigAPI(APIBaseTest):
         self.create_prompt_version(name="clear-prompt", prompt="v1", config={"temperature": 0.7})
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/name/clear-prompt/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/clear-prompt/",
             data={"prompt": "v2", "config": None, "base_version": 1},
             format="json",
         )
@@ -1109,7 +1111,7 @@ class TestLLMPromptConfigAPI(APIBaseTest):
         self.create_prompt_version(name="config-only", prompt="unchanged", config={"temperature": 0.2})
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/name/config-only/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/config-only/",
             data={"config": {"temperature": 0.9}, "base_version": 1},
             format="json",
         )
@@ -1125,7 +1127,7 @@ class TestLLMPromptConfigAPI(APIBaseTest):
         self.create_prompt_version(name="bad-config", prompt="v1")
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_prompts/name/bad-config/",
+            f"/v1/environments/{self.team.id}/llm_prompts/name/bad-config/",
             data={"prompt": "v2", "config": "gpt-4o", "base_version": 1},
             format="json",
         )
@@ -1136,7 +1138,7 @@ class TestLLMPromptConfigAPI(APIBaseTest):
 
     def test_create_rejects_non_object_config(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_prompts/",
+            f"/v1/environments/{self.team.id}/llm_prompts/",
             data={"name": "bad-config", "prompt": "content", "config": ["gpt-4o"]},
             format="json",
         )
@@ -1151,7 +1153,7 @@ class TestLLMPromptConfigAPI(APIBaseTest):
         self.create_prompt_version(name="legacy-cached", prompt="v1", config={"model": "gpt-4o"})
         cache_key = prompt_latest_cache_key(self.team.id, "legacy-cached")
 
-        first_response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/legacy-cached/")
+        first_response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/legacy-cached/")
         assert first_response.status_code == status.HTTP_200_OK
 
         cached_entry = llm_prompts_hypercache.get_from_cache(cache_key)
@@ -1160,7 +1162,7 @@ class TestLLMPromptConfigAPI(APIBaseTest):
         legacy_entry.pop("config", None)
         llm_prompts_hypercache.set_cache_value(cache_key, legacy_entry)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/legacy-cached/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/legacy-cached/")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["config"] is None
 
@@ -1249,13 +1251,13 @@ class TestLLMPromptLabelsAPI(APIBaseTest):
         )
 
     def _label_url(self, prompt_name: str, label_name: str) -> str:
-        return f"/api/environments/{self.team.id}/llm_prompts/name/{prompt_name}/labels/{label_name}/"
+        return f"/v1/environments/{self.team.id}/llm_prompts/name/{prompt_name}/labels/{label_name}/"
 
     def _set_label(self, prompt_name: str, label_name: str, version: int):
         return self.client.put(self._label_url(prompt_name, label_name), data={"version": version}, format="json")
 
     def _resolve_labels_by_version(self, prompt_name: str) -> dict[int, list[str]]:
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/resolve/name/{prompt_name}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/resolve/name/{prompt_name}/")
         assert response.status_code == status.HTTP_200_OK
         return {entry["version"]: entry["labels"] for entry in response.json()["versions"]}
 
@@ -1332,7 +1334,7 @@ class TestLLMPromptLabelsAPI(APIBaseTest):
         self.create_prompt_version(version=3)
         assert self._set_label("my-prompt", "production", 1).status_code == status.HTTP_201_CREATED
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/resolve/name/my-prompt/?limit=1")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/resolve/name/my-prompt/?limit=1")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -1347,7 +1349,7 @@ class TestLLMPromptLabelsAPI(APIBaseTest):
         assert self._set_label("prompt-b", "staging", 1).status_code == status.HTTP_201_CREATED
 
         with CaptureQueriesContext(connection) as queries:
-            response = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/")
+            response = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/")
 
         assert response.status_code == status.HTTP_200_OK
         labels_by_prompt = {entry["name"]: entry["all_labels"] for entry in response.json()["results"]}
@@ -1363,13 +1365,13 @@ class TestLLMPromptLabelsAPI(APIBaseTest):
         self.create_prompt_version(version=1)
         assert self._set_label("my-prompt", "production", 1).status_code == status.HTTP_201_CREATED
 
-        response = self.client.post(f"/api/environments/{self.team.id}/llm_prompts/name/my-prompt/archive/")
+        response = self.client.post(f"/v1/environments/{self.team.id}/llm_prompts/name/my-prompt/archive/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert LLMPromptLabel.objects.filter(team=self.team).count() == 0
 
     def _fetch_by_label(self, prompt_name: str, label_name: str):
-        return self.client.get(f"/api/environments/{self.team.id}/llm_prompts/name/{prompt_name}/?label={label_name}")
+        return self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/name/{prompt_name}/?label={label_name}")
 
     def _set_label_committed(self, prompt_name: str, label_name: str, version: int):
         # Cache invalidation rides on transaction.on_commit, which TestCase never fires
@@ -1415,7 +1417,7 @@ class TestLLMPromptLabelsAPI(APIBaseTest):
         self._set_label("my-prompt", "production", 1)
 
         both_params = self.client.get(
-            f"/api/environments/{self.team.id}/llm_prompts/name/my-prompt/?label=production&version=1"
+            f"/v1/environments/{self.team.id}/llm_prompts/name/my-prompt/?label=production&version=1"
         )
         # Invalid names must be rejected before any cache touch — an unvalidated fetch
         # writes a miss sentinel under a caller-controlled key and silently 404s.
@@ -1439,7 +1441,7 @@ class TestLLMPromptLabelsAPI(APIBaseTest):
         # Archive removes labels via a queryset delete — its post_delete signals must
         # clear the label cache entries too, not just the explicit delete endpoint path.
         with self.captureOnCommitCallbacks(execute=True):
-            self.client.post(f"/api/environments/{self.team.id}/llm_prompts/name/my-prompt/archive/")
+            self.client.post(f"/v1/environments/{self.team.id}/llm_prompts/name/my-prompt/archive/")
         assert self._fetch_by_label("my-prompt", "production").status_code == status.HTTP_404_NOT_FOUND
 
     def test_label_changes_are_activity_logged_with_version_movement(self):
@@ -1472,7 +1474,7 @@ class TestLLMPromptLabelsAPI(APIBaseTest):
         entry = ActivityLog.objects.get(team_id=self.team.id, scope="LLMPromptLabel")
         assert entry.item_id == "a" * 39 + "#2816597888e4a0d3a36b82b83316ab32"
         # The History tab queries by the serializer-provided key; it must match what was logged.
-        resolve = self.client.get(f"/api/environments/{self.team.id}/llm_prompts/resolve/name/{long_name}/")
+        resolve = self.client.get(f"/v1/environments/{self.team.id}/llm_prompts/resolve/name/{long_name}/")
         assert resolve.json()["prompt"]["activity_item_id"] == entry.item_id
 
     def test_long_prompt_names_sharing_a_prefix_get_distinct_activity_keys(self):
@@ -1492,7 +1494,7 @@ class TestLLMPromptLabelsAPI(APIBaseTest):
         self.create_prompt_version(version=1)
         self._set_label("my-prompt", "production", 1)
 
-        self.client.post(f"/api/environments/{self.team.id}/llm_prompts/name/my-prompt/archive/")
+        self.client.post(f"/v1/environments/{self.team.id}/llm_prompts/name/my-prompt/archive/")
 
         deletions = ActivityLog.objects.filter(team_id=self.team.id, scope="LLMPromptLabel", activity="deleted")
         assert deletions.count() == 1

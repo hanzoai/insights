@@ -22,11 +22,11 @@ describe('PropertyValue', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/event/values': {
+                '/v1/event/values': {
                     results: [{ name: 'Chrome' }, { name: 'Firefox' }, { name: 'Safari' }],
                     refreshing: false,
                 },
-                '/api/environments/:team/events/values': {
+                '/v1/environments/:team/events/values': {
                     results: [{ name: 'Chrome' }, { name: 'Firefox' }, { name: 'Safari' }],
                     refreshing: false,
                 },

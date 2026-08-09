@@ -18,7 +18,7 @@ export interface ExpiredSessionInfo {
     email: string
     userId: number
     // Captured when the countdown fired so we can later confirm a fresh
-    // /api/users/@me/ response represents an actual renewal, not the same
+    // /v1/users/@me/ response represents an actual renewal, not the same
     // already-expired session echoing back.
     isImpersonatedUntil: string | null
     // Snapshotted at expiry so the re-impersonate modal can pre-fill it; the live
@@ -378,12 +378,12 @@ export const impersonationNoticeLogic = kea<impersonationNoticeLogicType>([
                 return
             }
             if (values.expiredSessionInfo) {
-                // Probe /api/users/@me/ directly rather than dispatching loadUser:
+                // Probe /v1/users/@me/ directly rather than dispatching loadUser:
                 // loadUser's failure path sets user=null, which would unmount the
                 // app and the overlay along with it. On success we hand the fetched
                 // user to loadUserSuccess ourselves so userLogic stays in sync.
                 try {
-                    const freshUser = await api.get<UserType>('api/users/@me/')
+                    const freshUser = await api.get<UserType>('v1/users/@me/')
                     if (freshUser?.is_impersonated) {
                         actions.loadUserSuccess(freshUser)
                     }

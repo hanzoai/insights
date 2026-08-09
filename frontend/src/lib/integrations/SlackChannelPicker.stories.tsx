@@ -78,8 +78,8 @@ const meta: Meta<StoryArgs> = {
     render: ({ recentlySubscribedChannelIds }) => {
         useStorybookMocks({
             get: {
-                '/api/projects/:id/integrations/:intId/channels': { channels },
-                '/api/environments/:id/integrations/:intId/channels': { channels },
+                '/v1/projects/:id/integrations/:intId/channels': { channels },
+                '/v1/environments/:id/integrations/:intId/channels': { channels },
             },
         })
         return <OrderingScene recentlySubscribedChannelIds={recentlySubscribedChannelIds} />

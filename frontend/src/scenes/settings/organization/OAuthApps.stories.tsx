@@ -16,7 +16,7 @@ export const Empty: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/organizations/:organization_id/oauth_applications/': {
+                '/v1/organizations/:organization_id/oauth_applications/': {
                     count: 0,
                     next: null,
                     previous: null,
@@ -32,7 +32,7 @@ export const WithApps: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/organizations/:organization_id/oauth_applications/': {
+                '/v1/organizations/:organization_id/oauth_applications/': {
                     count: 2,
                     next: null,
                     previous: null,
