@@ -260,10 +260,23 @@ rollout finishes.
   chunks nobody has published.
 - **Retention is 30 days**, held by `bin/prune-static` (weekly, in
   `.hanzo/workflows/prune-static.yml`) and read from the per-build manifests in
-  `s3://cdn/insights/.builds/`, never from object age: a chunk unchanged across
+  `s3://cdn/insights-builds/`, never from object age: a chunk unchanged across
   two hundred builds has the OLDEST `LastModified` in the bucket precisely
   because it is the most stable thing in it, so an S3 lifecycle rule would delete
   the load-bearing assets first and leave the churn.
+- **The manifests are a SIBLING prefix, not `insights/.builds/`.** A
+  percent-encoded `../` reaches out of `static/` inside the middleware
+  (`/static/%2e%2e%2f.builds/<v>.txt` returned one, 200). It cannot climb past
+  the middleware's root, so only public filenames were ever reachable — but a
+  record of the tree does not belong inside the tree, and a sibling prefix puts
+  it out of reach by construction rather than by a path-cleaning rule.
+- **A version string does not name a tree.** Both forge mirrors run the deploy
+  workflow, the concurrency group is per-repo, and two builds routinely compute
+  the same next patch and push that tag with different digests — measured on
+  1.52.116 (`2453b673` ran while the registry resolved the tag to `81c09eaf`);
+  universe records the same for the plugin image. Manifests are therefore keyed
+  `<version>-<sha12 of the list>`, so two trees write two manifests instead of
+  one erasing the other's record and stranding its files for the prune.
 - **`analytics.hanzo.ai` and `sentry.hanzo.ai` are NOT part of this.** They share
   the cloud _ingest_ routers with insights, but their `/static/` goes to entirely
   different backends (`analytics.hanzo.svc` and `cloud-api-hanzo-ai`). Carving
