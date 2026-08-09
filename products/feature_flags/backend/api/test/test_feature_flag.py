@@ -3804,7 +3804,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
         self.assertEqual(
             first_page_json["next"],
-            f"http://testserver/api/projects/{self.team.id}/feature_flags/activity?page=2&limit=10",
+            f"http://testserver/v1/projects/{self.team.id}/feature_flags/activity?page=2&limit=10",
         )
         self.assertEqual(first_page_json["previous"], None)
 
@@ -3820,7 +3820,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         self.assertEqual(second_page_json["next"], None)
         self.assertEqual(
             second_page_json["previous"],
-            f"http://testserver/api/projects/{self.team.id}/feature_flags/activity?page=1&limit=10",
+            f"http://testserver/v1/projects/{self.team.id}/feature_flags/activity?page=1&limit=10",
         )
 
     def test_paging_specific_feature_flag_activity(self):
@@ -3849,7 +3849,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         )
         self.assertEqual(
             first_page_json["next"],
-            f"http://testserver/api/projects/{self.team.id}/feature_flags/{flag_id}/activity?page=2&limit=10",
+            f"http://testserver/v1/projects/{self.team.id}/feature_flags/{flag_id}/activity?page=2&limit=10",
         )
         self.assertEqual(first_page_json["previous"], None)
 
@@ -3866,7 +3866,7 @@ class TestFeatureFlag(APIBaseTest, DatastoreTestMixin):
         self.assertEqual(second_page_json["next"], None)
         self.assertEqual(
             second_page_json["previous"],
-            f"http://testserver/api/projects/{self.team.id}/feature_flags/{flag_id}/activity?page=1&limit=10",
+            f"http://testserver/v1/projects/{self.team.id}/feature_flags/{flag_id}/activity?page=1&limit=10",
         )
 
     def test_get_flags_with_specified_token(self):

@@ -1574,7 +1574,7 @@ class TestExportHeatmapSSRFValidation(APIBaseTest):
             ("external_url", "https://example.com/page"),
             (
                 "screenshot_api_url",
-                "https://us.hanzo.ai/api/environments/1/heatmap_screenshots/42/content/?width=1400",
+                "https://us.hanzo.ai/v1/environments/1/heatmap_screenshots/42/content/?width=1400",
             ),
         ]
     )

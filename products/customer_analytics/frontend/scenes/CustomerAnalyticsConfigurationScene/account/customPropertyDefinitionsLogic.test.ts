@@ -378,7 +378,7 @@ describe('customPropertyDefinitionsLogic', () => {
                             200,
                             {
                                 count: 101,
-                                next: 'http://localhost/api/environments/1/warehouse_tables/?offset=100',
+                                next: 'http://localhost/v1/environments/1/warehouse_tables/?offset=100',
                                 results: Array.from({ length: 100 }, (_, i) =>
                                     buildTable({ id: `t${i}`, name: `t${i}` })
                                 ),
