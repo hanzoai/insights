@@ -3,15 +3,15 @@ import { Message } from 'node-rdkafka'
 import { KAFKA_EVENTS_JSON } from '~/common/config/kafka-topics'
 import { KafkaConsumerInterface, createKafkaConsumer } from '~/common/kafka/consumer'
 import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
+import { captureException } from '~/common/utils/insights'
 import { parseJSON } from '~/common/utils/json-parse'
 import { logger } from '~/common/utils/logger'
-import { captureException } from '~/common/utils/insights'
 
 import { convertToInsightsFunctionInvocationGlobals } from '../../cdp/utils'
 import { HealthCheckResult, PluginsServerConfig, RawDatastoreEvent } from '../../types'
+import { JobQueue } from '../services/job-queue/job-queue.interface'
 import { FlowInvocationPipeline } from '../services/script-flow-invocation-pipeline.service'
 import { InsightsFunctionInvocationPipeline } from '../services/script-function-invocation-pipeline.service'
-import { JobQueue } from '../services/job-queue/job-queue.interface'
 import { CyclotronJobInvocation, InsightsFunctionInvocationGlobals, InsightsFunctionTypeType } from '../types'
 import { CdpConsumerBase, CdpConsumerBaseDeps } from './cdp-base.consumer'
 import { counterParseError } from './metrics'
@@ -131,19 +131,22 @@ export class CdpEventsConsumer<
         await Promise.all(
             messages.map(async (message) => {
                 try {
-                    const clickHouseEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
+                    const datastoreEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
 
                     const [teamInsightsFunctions, teamFlows, team] = await Promise.all([
-                        this.insightsFunctionManager.getInsightsFunctionsForTeam(clickHouseEvent.team_id, this.scriptTypes),
-                        this.flowManager.getFlowsForTeam(clickHouseEvent.team_id),
-                        this.deps.teamManager.getTeam(clickHouseEvent.team_id),
+                        this.insightsFunctionManager.getInsightsFunctionsForTeam(
+                            datastoreEvent.team_id,
+                            this.scriptTypes
+                        ),
+                        this.flowManager.getFlowsForTeam(datastoreEvent.team_id),
+                        this.deps.teamManager.getTeam(datastoreEvent.team_id),
                     ])
 
                     if ((!teamInsightsFunctions.length && !teamFlows.length) || !team) {
                         return
                     }
 
-                    events.push(convertToInsightsFunctionInvocationGlobals(clickHouseEvent, team, this.config.SITE_URL))
+                    events.push(convertToInsightsFunctionInvocationGlobals(datastoreEvent, team, this.config.SITE_URL))
                 } catch (e) {
                     logger.error('Error parsing message', e)
                     counterParseError.labels({ error: e.message }).inc()
