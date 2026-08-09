@@ -42,19 +42,19 @@
             "chunk_id": 2,
             "files": [
                 {
-                    "filename": "products/stamp/backend/facade/api.py"
+                    "filename": "products/stamphog/backend/facade/api.py"
                 },
                 {
-                    "filename": "products/stamp/backend/facade/inbox_hooks.py"
+                    "filename": "products/stamphog/backend/facade/inbox_hooks.py"
                 },
                 {
-                    "filename": "products/stamp/backend/tasks/tasks.py"
+                    "filename": "products/stamphog/backend/tasks/tasks.py"
                 },
                 {
-                    "filename": "products/stamp/backend/temporal/activities.py"
+                    "filename": "products/stamphog/backend/temporal/activities.py"
                 },
                 {
-                    "filename": "products/stamp/backend/logic/reviewer.py"
+                    "filename": "products/stamphog/backend/logic/reviewer.py"
                 },
                 {
                     "filename": "products/tasks/backend/facade/api.py"
@@ -105,10 +105,10 @@
             "chunk_id": 4,
             "files": [
                 {
-                    "filename": "products/stamp/AGENTS.md"
+                    "filename": "products/stamphog/AGENTS.md"
                 },
                 {
-                    "filename": "products/stamp/README.md"
+                    "filename": "products/stamphog/README.md"
                 }
             ],
             "chunk_type": "documentation",

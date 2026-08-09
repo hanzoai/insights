@@ -17,7 +17,7 @@ from temporalio import workflow
 
 from insights.temporal.common.base import InsightsWorkflow
 
-from products.stamp.backend.temporal.constants import (
+from products.stamphog.backend.temporal.constants import (
     ACTIVITY_RETRY_POLICY,
     FETCH_CONTEXT_TIMEOUT,
     MARK_FAILED_TIMEOUT,
@@ -29,7 +29,7 @@ from products.stamp.backend.temporal.constants import (
 )
 
 with temporalio.workflow.unsafe.imports_passed_through():
-    from products.stamp.backend.temporal.activities import (
+    from products.stamphog.backend.temporal.activities import (
         MarkReviewFailedInput,
         StampReviewInput,
         dismiss_stale_approvals,

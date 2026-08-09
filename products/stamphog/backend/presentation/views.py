@@ -32,7 +32,7 @@ from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.auth import OAuthAccessTokenAuthentication, PersonalAPIKeyAuthentication
 from insights.models.scoping.manager import resolve_effective_team_id
 
-from products.stamp.backend.facade.enums import TERMINAL_STATUSES, ReviewRunStatus
+from products.stamphog.backend.facade.enums import TERMINAL_STATUSES, ReviewRunStatus
 
 from ..logic.github_client import (
     StampGitHubError,
