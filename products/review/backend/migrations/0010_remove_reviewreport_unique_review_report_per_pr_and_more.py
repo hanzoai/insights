@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("insights", "0001_initial"),
-        ("review_hog", "0009_reviewreport_acting_user"),
+        ("review", "0009_reviewreport_acting_user"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

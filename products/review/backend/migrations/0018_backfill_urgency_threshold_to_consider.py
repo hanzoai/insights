@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("review_hog", "0017_alter_reviewusersettings_urgency_threshold"),
+        ("review", "0017_alter_reviewusersettings_urgency_threshold"),
     ]
 
     # 0017 flips the default to `consider` for future rows; this flips the existing ones, in its
@@ -13,9 +13,9 @@ class Migration(migrations.Migration):
     # Reverse is a no-op: a hard reset can't restore the prior per-row values.
     operations = [
         migrations.RunSQL(
-            sql="-- migration-analyzer: safe reason=review_hog_reviewusersettings is a tiny per-user settings table "
+            sql="-- migration-analyzer: safe reason=review_reviewusersettings is a tiny per-user settings table "
             "(staff-only alpha, no persisted rows yet)\n"
-            "UPDATE review_hog_reviewusersettings SET urgency_threshold = 'consider' "
+            "UPDATE review_reviewusersettings SET urgency_threshold = 'consider' "
             "WHERE urgency_threshold <> 'consider';",
             reverse_sql=migrations.RunSQL.noop,
         ),
