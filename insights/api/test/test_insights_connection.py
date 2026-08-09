@@ -66,7 +66,7 @@ class TestInsightsConnectionForward:
         assert response.json() == {"status": 200, "data": {"results": [1, 2, 3]}}
         method, url = mock_request.call_args[0][0], mock_request.call_args[0][1]
         assert method == "GET"
-        assert url == "https://eu.hanzo.ai/api/projects/2/insights/"
+        assert url == "https://eu.hanzo.ai/v1/projects/2/insights/"
         assert mock_request.call_args[1]["headers"]["Authorization"] == "Bearer AT"
         assert mock_request.call_args[1]["params"] == {"limit": "5"}
         assert mock_request.call_args[1]["allow_redirects"] is False

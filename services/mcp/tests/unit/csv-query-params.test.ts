@@ -96,7 +96,7 @@ describe('ApiClient.request query serialization', () => {
 
     it('passes pre-joined CSV strings through verbatim', async () => {
         const url = await requestUrl({ type: 'internal_destination,transformation' })
-        expect(url).toBe('https://example.com/api/test/?type=internal_destination%2Ctransformation')
+        expect(url).toBe('https://example.com/v1/test/?type=internal_destination%2Ctransformation')
     })
 
     it('JSON-stringifies arrays and objects for json.loads()-style backends', async () => {

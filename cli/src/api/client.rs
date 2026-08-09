@@ -31,7 +31,7 @@ mod tests {
     fn api_error(body: &str) -> ClientError {
         ClientError::ApiError(
             400,
-            Box::new(Url::parse("https://example.com/api/test").unwrap()),
+            Box::new(Url::parse("https://example.com/v1/test").unwrap()),
             body.to_string(),
         )
     }

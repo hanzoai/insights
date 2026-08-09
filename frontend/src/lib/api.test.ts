@@ -275,7 +275,7 @@ describe('API helper', () => {
         it('attaches the bearer token to requests routed to the OAuth backend host', async () => {
             await api.get('/v1/projects/2/insights/')
             const [url, options] = fakeFetch.mock.calls[0]
-            expect(url).toEqual('https://us.hanzo.ai/api/projects/2/insights/')
+            expect(url).toEqual('https://us.hanzo.ai/v1/projects/2/insights/')
             expect(options.headers.Authorization).toEqual('Bearer oauth-token')
         })
 

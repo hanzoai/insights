@@ -232,3 +232,7 @@ rust/cohort-stream-processor/cohort-store/
 
 # Redis persistence snapshot dropped by a locally running redis-server
 dump.rdb
+
+# Compiled InsightsQL parser: build output, not source
+common/insightsql_parser/build/
+common/insightsql_parser/*.so

@@ -35,7 +35,7 @@ describe('sharedMetricModalLogic', () => {
                             200,
                             {
                                 count: 3,
-                                next: `http://localhost/api/projects/997/experiment_saved_metrics?limit=${MODAL_PAGE_SIZE}&offset=${MODAL_PAGE_SIZE}&search=${search}`,
+                                next: `http://localhost/v1/projects/997/experiment_saved_metrics?limit=${MODAL_PAGE_SIZE}&offset=${MODAL_PAGE_SIZE}&search=${search}`,
                                 previous: null,
                                 results: [
                                     metric(1, NodeKind.ExperimentMetric, ['main']),
@@ -157,7 +157,7 @@ describe('sharedMetricModalLogic', () => {
                             200,
                             {
                                 count: 2,
-                                next: `http://localhost/api/projects/997/experiment_saved_metrics?limit=${MODAL_PAGE_SIZE}&offset=${MODAL_PAGE_SIZE}`,
+                                next: `http://localhost/v1/projects/997/experiment_saved_metrics?limit=${MODAL_PAGE_SIZE}&offset=${MODAL_PAGE_SIZE}`,
                                 previous: null,
                                 results: [metric(1, NodeKind.ExperimentMetric, ['main', 'shared'])],
                             },

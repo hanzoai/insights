@@ -342,7 +342,7 @@ class TestElement(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         page_one_response_json = page_one_response.json()
         assert (
             page_one_response_json["next"]
-            == "http://testserver/api/element/stats/?paginate_response=true&limit=1&offset=1"
+            == "http://testserver/v1/element/stats/?paginate_response=true&limit=1&offset=1"
         )
         limit_to_one_results = page_one_response_json["results"]
         assert limit_to_one_results == [expected_autocapture_data_response_results[0]]
@@ -353,7 +353,7 @@ class TestElement(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         page_two_response_json = page_two_response.json()
         assert (
             page_two_response_json["next"]
-            == "http://testserver/api/element/stats/?paginate_response=true&limit=1&offset=2"
+            == "http://testserver/v1/element/stats/?paginate_response=true&limit=1&offset=2"
         )
         limit_to_one_results_page_two = page_two_response_json["results"]
         assert limit_to_one_results_page_two == [expected_autocapture_data_response_results[1]]
