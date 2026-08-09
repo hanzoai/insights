@@ -16,6 +16,7 @@ use uuid::Uuid;
 
 use crate::{
     api::client::PHClient,
+    api_proxy::ANALYTICS_HOST,
     utils::auth::{env_id_validator, get_token, host_validator, token_validator},
 };
 
@@ -167,6 +168,10 @@ pub fn init_insights_telemetry() {
         .build()
         .expect("Building error tracking config succeeds");
     let ph_config = insights_rs::ClientOptionsBuilder::default()
+        // Named explicitly. Unset, the client falls back to the crate's own
+        // ingestion endpoint, which is upstream's -- so leaving this off sends
+        // our command telemetry and captured panics to another company.
+        .host(ANALYTICS_HOST.to_string())
         .api_key(token.to_string())
         .request_timeout_seconds(5) // It's a CLI, 5 seconds is an eternity
         .error_tracking(error_tracking)
