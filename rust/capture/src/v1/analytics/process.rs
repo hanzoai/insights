@@ -1650,7 +1650,7 @@ mod tests {
 
     fn ctx_with_skew(server_received_at: DateTime<Utc>, skew: Duration) -> RequestContext {
         RequestContext {
-            api_token: "phc_test".to_string(),
+            api_token: "pk-test".to_string(),
             user_agent: "test/1.0".to_string(),
             content_type: "application/json".to_string(),
             content_encoding: None,
@@ -1764,7 +1764,7 @@ mod tests {
         let mut events = vec![wrapped_event("$pageview", "user-1")];
         let now_ts = Utc::now().timestamp();
 
-        apply_restrictions(&service, "phc_token", now_ts, false, &mut events).await;
+        apply_restrictions(&service, "pk-token", now_ts, false, &mut events).await;
 
         let ev = find_by_did(&events, "user-1");
         assert_eq!(ev.result, EventResult::Ok);
@@ -1775,7 +1775,7 @@ mod tests {
     #[tokio::test]
     async fn restrictions_drop_event() {
         let service = restriction_service(
-            "phc_token",
+            "pk-token",
             vec![Restriction {
                 restriction_type: RestrictionType::DropEvent,
                 scope: RestrictionScope::AllEvents,
@@ -1790,7 +1790,7 @@ mod tests {
         ];
         let now_ts = Utc::now().timestamp();
 
-        apply_restrictions(&service, "phc_token", now_ts, false, &mut events).await;
+        apply_restrictions(&service, "pk-token", now_ts, false, &mut events).await;
 
         for ev in &events {
             assert_eq!(ev.result, EventResult::Drop);
@@ -1801,7 +1801,7 @@ mod tests {
     #[tokio::test]
     async fn restrictions_skip_malformed_events() {
         let service = restriction_service(
-            "phc_token",
+            "pk-token",
             vec![Restriction {
                 restriction_type: RestrictionType::DropEvent,
                 scope: RestrictionScope::AllEvents,
@@ -1815,7 +1815,7 @@ mod tests {
         let mut events = vec![malformed, wrapped_event("$pageview", "user-valid")];
         let now_ts = Utc::now().timestamp();
 
-        apply_restrictions(&service, "phc_token", now_ts, false, &mut events).await;
+        apply_restrictions(&service, "pk-token", now_ts, false, &mut events).await;
 
         // malformed event stays Drop with original destination, not re-evaluated
         let mal = find_by_did(&events, &malformed_did);
@@ -1830,7 +1830,7 @@ mod tests {
     #[tokio::test]
     async fn restrictions_force_overflow() {
         let service = restriction_service(
-            "phc_token",
+            "pk-token",
             vec![Restriction {
                 restriction_type: RestrictionType::ForceOverflow,
                 scope: RestrictionScope::AllEvents,
@@ -1842,7 +1842,7 @@ mod tests {
         let mut events = vec![wrapped_event("$pageview", "user-1")];
         let now_ts = Utc::now().timestamp();
 
-        apply_restrictions(&service, "phc_token", now_ts, false, &mut events).await;
+        apply_restrictions(&service, "pk-token", now_ts, false, &mut events).await;
 
         let ev = find_by_did(&events, "user-1");
         assert_eq!(ev.result, EventResult::Ok);
@@ -1865,7 +1865,7 @@ mod tests {
     ) {
         let service = restriction_service_for_pipeline(
             restriction_pipeline,
-            "phc_token",
+            "pk-token",
             vec![Restriction {
                 restriction_type: RestrictionType::ForceOverflow,
                 scope: RestrictionScope::AllEvents,
@@ -1880,7 +1880,7 @@ mod tests {
 
         apply_restrictions(
             &service,
-            "phc_token",
+            "pk-token",
             now_ts,
             ai_events_overflow_enabled,
             &mut events,
@@ -1895,7 +1895,7 @@ mod tests {
     #[tokio::test]
     async fn restrictions_redirect_to_dlq() {
         let service = restriction_service(
-            "phc_token",
+            "pk-token",
             vec![Restriction {
                 restriction_type: RestrictionType::RedirectToDlq,
                 scope: RestrictionScope::AllEvents,
@@ -1907,7 +1907,7 @@ mod tests {
         let mut events = vec![wrapped_event("$pageview", "user-1")];
         let now_ts = Utc::now().timestamp();
 
-        apply_restrictions(&service, "phc_token", now_ts, false, &mut events).await;
+        apply_restrictions(&service, "pk-token", now_ts, false, &mut events).await;
 
         let ev = find_by_did(&events, "user-1");
         assert_eq!(ev.result, EventResult::Ok);
@@ -1917,7 +1917,7 @@ mod tests {
     #[tokio::test]
     async fn restrictions_redirect_to_custom_topic() {
         let service = restriction_service(
-            "phc_token",
+            "pk-token",
             vec![Restriction {
                 restriction_type: RestrictionType::RedirectToTopic,
                 scope: RestrictionScope::AllEvents,
@@ -1929,7 +1929,7 @@ mod tests {
         let mut events = vec![wrapped_event("$pageview", "user-1")];
         let now_ts = Utc::now().timestamp();
 
-        apply_restrictions(&service, "phc_token", now_ts, false, &mut events).await;
+        apply_restrictions(&service, "pk-token", now_ts, false, &mut events).await;
 
         let ev = find_by_did(&events, "user-1");
         assert_eq!(ev.result, EventResult::Ok);
@@ -1942,7 +1942,7 @@ mod tests {
     #[tokio::test]
     async fn restrictions_force_disable_person_processing() {
         let service = restriction_service(
-            "phc_token",
+            "pk-token",
             vec![Restriction {
                 restriction_type: RestrictionType::SkipPersonProcessing,
                 scope: RestrictionScope::AllEvents,
@@ -1954,7 +1954,7 @@ mod tests {
         let mut events = vec![wrapped_event("$pageview", "user-1")];
         let now_ts = Utc::now().timestamp();
 
-        apply_restrictions(&service, "phc_token", now_ts, false, &mut events).await;
+        apply_restrictions(&service, "pk-token", now_ts, false, &mut events).await;
 
         let ev = find_by_did(&events, "user-1");
         assert_eq!(ev.result, EventResult::Ok);
@@ -1965,7 +1965,7 @@ mod tests {
     #[tokio::test]
     async fn restrictions_dlq_wins_over_overflow_and_custom() {
         let service = restriction_service(
-            "phc_token",
+            "pk-token",
             vec![
                 Restriction {
                     restriction_type: RestrictionType::ForceOverflow,
@@ -1989,7 +1989,7 @@ mod tests {
         let mut events = vec![wrapped_event("$pageview", "user-1")];
         let now_ts = Utc::now().timestamp();
 
-        apply_restrictions(&service, "phc_token", now_ts, false, &mut events).await;
+        apply_restrictions(&service, "pk-token", now_ts, false, &mut events).await;
 
         let ev = find_by_did(&events, "user-1");
         assert_eq!(ev.result, EventResult::Ok);
@@ -1999,7 +1999,7 @@ mod tests {
     #[tokio::test]
     async fn restrictions_unmatched_token_passthrough() {
         let service = restriction_service(
-            "phc_other_token",
+            "pk-other_token",
             vec![Restriction {
                 restriction_type: RestrictionType::DropEvent,
                 scope: RestrictionScope::AllEvents,
@@ -2011,7 +2011,7 @@ mod tests {
         let mut events = vec![wrapped_event("$pageview", "user-1")];
         let now_ts = Utc::now().timestamp();
 
-        apply_restrictions(&service, "phc_token", now_ts, false, &mut events).await;
+        apply_restrictions(&service, "pk-token", now_ts, false, &mut events).await;
 
         let ev = find_by_did(&events, "user-1");
         assert_eq!(ev.result, EventResult::Ok);
@@ -2076,7 +2076,7 @@ mod tests {
         #[case] expected_dest: Destination,
     ) {
         let service = restriction_service(
-            "phc_token",
+            "pk-token",
             vec![Restriction {
                 restriction_type: RestrictionType::DropEvent,
                 scope: RestrictionScope::AllEvents,
@@ -2090,7 +2090,7 @@ mod tests {
         let mut events = vec![ev];
         let now_ts = Utc::now().timestamp();
 
-        apply_restrictions(&service, "phc_token", now_ts, false, &mut events).await;
+        apply_restrictions(&service, "pk-token", now_ts, false, &mut events).await;
 
         assert_eq!(events[0].result, EventResult::Ok);
         assert_eq!(events[0].destination, expected_dest);
@@ -2101,7 +2101,7 @@ mod tests {
     #[tokio::test]
     async fn restrictions_analytics_drop_does_not_cross_into_errortracking() {
         let service = restriction_service(
-            "phc_token",
+            "pk-token",
             vec![Restriction {
                 restriction_type: RestrictionType::DropEvent,
                 scope: RestrictionScope::AllEvents,
@@ -2117,7 +2117,7 @@ mod tests {
         events[1].destination = Destination::ExceptionErrorTracking;
         let now_ts = Utc::now().timestamp();
 
-        apply_restrictions(&service, "phc_token", now_ts, false, &mut events).await;
+        apply_restrictions(&service, "pk-token", now_ts, false, &mut events).await;
 
         // Analytics event gets dropped by analytics-pipeline restriction
         assert_eq!(events[0].result, EventResult::Drop);
@@ -2136,7 +2136,7 @@ mod tests {
     async fn restrictions_errortracking_drop_only_affects_exceptions() {
         let service = restriction_service_for_pipeline(
             Pipeline::ErrorTracking,
-            "phc_token",
+            "pk-token",
             vec![Restriction {
                 restriction_type: RestrictionType::DropEvent,
                 scope: RestrictionScope::AllEvents,
@@ -2152,7 +2152,7 @@ mod tests {
         events[0].destination = Destination::ExceptionErrorTracking;
         let now_ts = Utc::now().timestamp();
 
-        apply_restrictions(&service, "phc_token", now_ts, false, &mut events).await;
+        apply_restrictions(&service, "pk-token", now_ts, false, &mut events).await;
 
         assert_eq!(
             events[0].result,
@@ -2168,7 +2168,7 @@ mod tests {
     async fn restrictions_exception_force_overflow_ignored() {
         let service = restriction_service_for_pipeline(
             Pipeline::ErrorTracking,
-            "phc_token",
+            "pk-token",
             vec![Restriction {
                 restriction_type: RestrictionType::ForceOverflow,
                 scope: RestrictionScope::AllEvents,
@@ -2181,7 +2181,7 @@ mod tests {
         events[0].destination = Destination::ExceptionErrorTracking;
         let now_ts = Utc::now().timestamp();
 
-        apply_restrictions(&service, "phc_token", now_ts, false, &mut events).await;
+        apply_restrictions(&service, "pk-token", now_ts, false, &mut events).await;
 
         assert_eq!(events[0].result, EventResult::Ok);
         assert_eq!(
@@ -2195,7 +2195,7 @@ mod tests {
     async fn restrictions_exception_skip_person_processing() {
         let service = restriction_service_for_pipeline(
             Pipeline::ErrorTracking,
-            "phc_token",
+            "pk-token",
             vec![Restriction {
                 restriction_type: RestrictionType::SkipPersonProcessing,
                 scope: RestrictionScope::AllEvents,
@@ -2208,7 +2208,7 @@ mod tests {
         events[0].destination = Destination::ExceptionErrorTracking;
         let now_ts = Utc::now().timestamp();
 
-        apply_restrictions(&service, "phc_token", now_ts, false, &mut events).await;
+        apply_restrictions(&service, "pk-token", now_ts, false, &mut events).await;
 
         assert_eq!(events[0].result, EventResult::Ok);
         assert_eq!(events[0].destination, Destination::ExceptionErrorTracking);
@@ -2219,7 +2219,7 @@ mod tests {
     async fn restrictions_exception_redirect_to_dlq() {
         let service = restriction_service_for_pipeline(
             Pipeline::ErrorTracking,
-            "phc_token",
+            "pk-token",
             vec![Restriction {
                 restriction_type: RestrictionType::RedirectToDlq,
                 scope: RestrictionScope::AllEvents,
@@ -2232,7 +2232,7 @@ mod tests {
         events[0].destination = Destination::ExceptionErrorTracking;
         let now_ts = Utc::now().timestamp();
 
-        apply_restrictions(&service, "phc_token", now_ts, false, &mut events).await;
+        apply_restrictions(&service, "pk-token", now_ts, false, &mut events).await;
 
         assert_eq!(events[0].result, EventResult::Ok);
         assert_eq!(events[0].destination, Destination::Dlq);
@@ -2242,7 +2242,7 @@ mod tests {
     async fn restrictions_exception_redirect_to_custom_topic() {
         let service = restriction_service_for_pipeline(
             Pipeline::ErrorTracking,
-            "phc_token",
+            "pk-token",
             vec![Restriction {
                 restriction_type: RestrictionType::RedirectToTopic,
                 scope: RestrictionScope::AllEvents,
@@ -2255,7 +2255,7 @@ mod tests {
         events[0].destination = Destination::ExceptionErrorTracking;
         let now_ts = Utc::now().timestamp();
 
-        apply_restrictions(&service, "phc_token", now_ts, false, &mut events).await;
+        apply_restrictions(&service, "pk-token", now_ts, false, &mut events).await;
 
         assert_eq!(events[0].result, EventResult::Ok);
         assert_eq!(
@@ -2268,7 +2268,7 @@ mod tests {
     async fn restrictions_exception_dlq_wins_over_custom_topic() {
         let service = restriction_service_for_pipeline(
             Pipeline::ErrorTracking,
-            "phc_token",
+            "pk-token",
             vec![
                 Restriction {
                     restriction_type: RestrictionType::RedirectToTopic,
@@ -2288,7 +2288,7 @@ mod tests {
         events[0].destination = Destination::ExceptionErrorTracking;
         let now_ts = Utc::now().timestamp();
 
-        apply_restrictions(&service, "phc_token", now_ts, false, &mut events).await;
+        apply_restrictions(&service, "pk-token", now_ts, false, &mut events).await;
 
         assert_eq!(events[0].result, EventResult::Ok);
         assert_eq!(events[0].destination, Destination::Dlq);
@@ -2374,7 +2374,7 @@ mod tests {
 
     fn td_context() -> RequestContext {
         let mut ctx = test_utils::test_context();
-        ctx.api_token = "phc_tok".to_string();
+        ctx.api_token = "pk-tok".to_string();
         ctx
     }
 
@@ -2398,7 +2398,7 @@ mod tests {
 
     #[tokio::test]
     async fn td_limits_one_distinct_id_over_limit() {
-        let limiter = mock_limiter(vec!["phc_tok:user-2"]);
+        let limiter = mock_limiter(vec!["pk-tok:user-2"]);
         let ctx = td_context();
         let mut events = vec![
             wrapped_event("$pageview", "user-1"),
@@ -2421,7 +2421,7 @@ mod tests {
 
     #[tokio::test]
     async fn td_limits_skips_already_invalid_events() {
-        let limiter = mock_limiter(vec!["phc_tok:user-1"]);
+        let limiter = mock_limiter(vec!["pk-tok:user-1"]);
         let ctx = td_context();
         let mut events = vec![malformed_wrapped_event()];
 
@@ -2435,7 +2435,7 @@ mod tests {
 
     #[tokio::test]
     async fn td_limits_multiple_events_same_distinct_id_all_limited() {
-        let limiter = mock_limiter(vec!["phc_tok:user-1"]);
+        let limiter = mock_limiter(vec!["pk-tok:user-1"]);
         let ctx = td_context();
         let mut events = vec![
             wrapped_event("$pageview", "user-1"),
@@ -2466,7 +2466,7 @@ mod tests {
 
     #[tokio::test]
     async fn td_limits_mixed_valid_and_pre_dropped_events() {
-        let limiter = mock_limiter(vec!["phc_tok:user-2"]);
+        let limiter = mock_limiter(vec!["pk-tok:user-2"]);
         let ctx = td_context();
         let pre_drop = wrapped_event("$pageview", "user-1");
         let pre_drop_uuid = pre_drop.uuid;
@@ -2503,9 +2503,9 @@ mod tests {
     #[tokio::test]
     async fn burst_overflow_then_global_limit_still_warns() {
         let mut ctx = test_utils::test_context();
-        ctx.api_token = "phc_tok".to_string();
+        ctx.api_token = "pk-tok".to_string();
         let burst = overflow_limiter(1, 1, None);
-        let global = mock_limiter(vec!["phc_tok:user-1"]);
+        let global = mock_limiter(vec!["pk-tok:user-1"]);
         let mut events = vec![
             wrapped_event("$pageview", "user-1"),
             wrapped_event("$pageview", "user-1"),
@@ -2536,7 +2536,7 @@ mod tests {
         // against the shared limiter -- its volume must count toward the per-key
         // window exactly as it does on the legacy path -- but the redundant
         // stamping (Warning result, overflow reroute) is skipped.
-        let (limiter, calls) = mock_limiter_with_log(vec!["phc_tok:user-1"]);
+        let (limiter, calls) = mock_limiter_with_log(vec!["pk-tok:user-1"]);
         let ctx = td_context();
         let mut events = vec![
             wrapped_event("$pageview", "user-1"),
@@ -2553,7 +2553,7 @@ mod tests {
             calls
                 .lock()
                 .unwrap()
-                .contains(&"phc_tok:user-1".to_string()),
+                .contains(&"pk-tok:user-1".to_string()),
             "already-disabled event must still be consulted so its volume counts"
         );
         // ...but its stamping is untouched: result stays Ok, no overflow reroute.
@@ -2593,7 +2593,7 @@ mod tests {
         seen.sort();
         assert_eq!(
             seen,
-            vec!["phc_tok:user-1".to_string(), "phc_tok:user-2".to_string()],
+            vec!["pk-tok:user-1".to_string(), "pk-tok:user-2".to_string()],
             "limiter must be consulted for every non-Drop event and no others"
         );
         assert_eq!(
@@ -2617,7 +2617,7 @@ mod tests {
         // `outcome="allowed"` and the legacy per-event counter. Three events
         // share one over-limit distinct_id and one shares another; the tally
         // must report 4 limited events across 2 distinct_ids, not 2.
-        let limiter = mock_limiter(vec!["phc_tok:hot-1", "phc_tok:hot-2"]);
+        let limiter = mock_limiter(vec!["pk-tok:hot-1", "pk-tok:hot-2"]);
         let ctx = td_context();
         let mut events = vec![
             wrapped_event("$pageview", "hot-1"),
@@ -2644,8 +2644,8 @@ mod tests {
     // several hot keys any single pick would be arbitrary, so the count stands
     // in for them.
     #[rstest::rstest]
-    #[case::one_hot_key(vec!["phc_tok:hot-1"], vec!["hot-1", "hot-1", "cool-1"], 2, 1, Some("hot-1"))]
-    #[case::several_hot_keys(vec!["phc_tok:hot-1", "phc_tok:hot-2"], vec!["hot-1", "hot-2", "cool-1"], 2, 2, None)]
+    #[case::one_hot_key(vec!["pk-tok:hot-1"], vec!["hot-1", "hot-1", "cool-1"], 2, 1, Some("hot-1"))]
+    #[case::several_hot_keys(vec!["pk-tok:hot-1", "pk-tok:hot-2"], vec!["hot-1", "hot-2", "cool-1"], 2, 2, None)]
     #[tokio::test]
     async fn td_limits_emit_a_warning_naming_the_hot_key(
         #[case] limited_keys: Vec<&str>,
@@ -2703,7 +2703,7 @@ mod tests {
         // A globally rate-limited historical event still gets person processing
         // disabled, but stays on the historical lane (matches the legacy sink,
         // where the AnalyticsHistorical arm never overflows).
-        let limiter = mock_limiter(vec!["phc_tok:user-1"]);
+        let limiter = mock_limiter(vec!["pk-tok:user-1"]);
         let ctx = td_context();
         let mut events =
             vec![wrapped_event("$pageview", "user-1")
@@ -2955,7 +2955,7 @@ mod tests {
     #[tokio::test]
     async fn apply_restrictions_preserves_order() {
         let service = restriction_service(
-            "phc_token",
+            "pk-token",
             vec![Restriction {
                 restriction_type: RestrictionType::DropEvent,
                 scope: RestrictionScope::AllEvents,
@@ -2971,7 +2971,7 @@ mod tests {
         ];
         let now_ts = Utc::now().timestamp();
 
-        apply_restrictions(&service, "phc_token", now_ts, false, &mut events).await;
+        apply_restrictions(&service, "pk-token", now_ts, false, &mut events).await;
 
         assert_eq!(
             distinct_id_sequence(&events),
@@ -2987,7 +2987,7 @@ mod tests {
     async fn apply_token_distinct_id_limits_preserves_order_with_interleaved_limits() {
         // Limit slots 1 and 3 only — verifies interleaved limited/non-limited
         // entries don't shuffle.
-        let limiter = mock_limiter(vec!["phc_tok:user-pos-1", "phc_tok:user-pos-3"]);
+        let limiter = mock_limiter(vec!["pk-tok:user-pos-1", "pk-tok:user-pos-3"]);
         let ctx = td_context();
         let mut events = vec![
             wrapped_event("$pageview", "user-pos-0"),
@@ -3055,7 +3055,7 @@ mod tests {
             EventRestrictionService::new(vec![Pipeline::Analytics], StdDuration::from_secs(300));
         service.update(RestrictionManager::new()).await;
         let now_ts = Utc::now().timestamp();
-        apply_restrictions(&service, "phc_token", now_ts, false, &mut events).await;
+        apply_restrictions(&service, "pk-token", now_ts, false, &mut events).await;
         assert_eq!(
             distinct_id_sequence(&events),
             expected,
@@ -3064,8 +3064,8 @@ mod tests {
 
         // Stage 3: token+distinct_id limits — limit one Ok mid-batch.
         let mut tdctx = test_utils::test_context();
-        tdctx.api_token = "phc_tok".to_string();
-        let limiter = mock_limiter(vec!["phc_tok:user-pos-2"]);
+        tdctx.api_token = "pk-tok".to_string();
+        let limiter = mock_limiter(vec!["pk-tok:user-pos-2"]);
         apply_token_distinct_id_limits(&limiter, &tdctx, None, &mut events).await;
         assert_eq!(
             distinct_id_sequence(&events),
@@ -3115,9 +3115,9 @@ mod tests {
     #[test]
     fn overflow_force_limited_by_full_key() {
         let mut ctx = test_utils::test_context();
-        ctx.api_token = "phc_tok".to_string();
+        ctx.api_token = "pk-tok".to_string();
         let mut events = vec![wrapped_event("$pageview", "user-1")];
-        let limiter = overflow_limiter(100, 100, Some("phc_tok:user-1"));
+        let limiter = overflow_limiter(100, 100, Some("pk-tok:user-1"));
 
         apply_overflow_stamping(Some(&limiter), None, &ctx, &mut events);
 
@@ -3129,9 +3129,9 @@ mod tests {
     #[test]
     fn overflow_force_limited_by_token_only() {
         let mut ctx = test_utils::test_context();
-        ctx.api_token = "phc_tok".to_string();
+        ctx.api_token = "pk-tok".to_string();
         let mut events = vec![wrapped_event("$pageview", "user-1")];
-        let limiter = overflow_limiter(100, 100, Some("phc_tok"));
+        let limiter = overflow_limiter(100, 100, Some("pk-tok"));
 
         apply_overflow_stamping(Some(&limiter), None, &ctx, &mut events);
 
@@ -3143,7 +3143,7 @@ mod tests {
     #[test]
     fn overflow_rate_limited_stamps_spread_without_disabling_person_processing() {
         let mut ctx = test_utils::test_context();
-        ctx.api_token = "phc_tok".to_string();
+        ctx.api_token = "pk-tok".to_string();
         // burst=1 means only 1 event allowed, the second will be limited
         let limiter = overflow_limiter(1, 1, None);
         let mut events = vec![
@@ -3171,7 +3171,7 @@ mod tests {
     #[test]
     fn overflow_rate_limited_preserves_locality_when_configured() {
         let mut ctx = test_utils::test_context();
-        ctx.api_token = "phc_tok".to_string();
+        ctx.api_token = "pk-tok".to_string();
         let limiter = overflow_limiter_preserving(1, 1);
         let mut events = vec![
             wrapped_event("$pageview", "user-1"),
@@ -3191,7 +3191,7 @@ mod tests {
     #[test]
     fn overflow_skips_non_analytics_main() {
         let ctx = test_utils::test_context();
-        let limiter = overflow_limiter(100, 100, Some("phc_test_token:user-1"));
+        let limiter = overflow_limiter(100, 100, Some("pk-test_token:user-1"));
         let mut events = vec![wrapped_event("$pageview", "user-1")];
         events[0].destination = Destination::AnalyticsHistorical;
 
@@ -3207,7 +3207,7 @@ mod tests {
     #[test]
     fn overflow_skips_dropped_events() {
         let ctx = test_utils::test_context();
-        let limiter = overflow_limiter(100, 100, Some("phc_test_token:user-1"));
+        let limiter = overflow_limiter(100, 100, Some("pk-test_token:user-1"));
         let mut events = vec![wrapped_event("$pageview", "user-1")];
         events[0].result = EventResult::Drop;
 
@@ -3229,8 +3229,8 @@ mod tests {
         #[case] expected_force_disable: bool,
     ) {
         let mut ctx = test_utils::test_context();
-        ctx.api_token = "phc_tok".to_string();
-        let limiter = overflow_limiter(100, 100, Some("phc_tok:user-1"));
+        ctx.api_token = "pk-tok".to_string();
+        let limiter = overflow_limiter(100, 100, Some("pk-tok:user-1"));
         let ai_limiter = ai_limiter_present.then_some(&limiter);
         let mut events = vec![wrapped_event("$ai_generation", "user-1")];
         events[0].destination = Destination::AiEvents;
@@ -3247,7 +3247,7 @@ mod tests {
     #[test]
     fn overflow_ai_events_rate_limited_preserves_locality_when_configured() {
         let mut ctx = test_utils::test_context();
-        ctx.api_token = "phc_tok".to_string();
+        ctx.api_token = "pk-tok".to_string();
         let limiter = overflow_limiter_preserving(1, 1);
         let mut events = vec![
             wrapped_event("$ai_generation", "user-1"),
@@ -3272,7 +3272,7 @@ mod tests {
     #[test]
     fn overflow_ai_events_rate_limited_spreads_without_disabling_person_processing() {
         let mut ctx = test_utils::test_context();
-        ctx.api_token = "phc_tok".to_string();
+        ctx.api_token = "pk-tok".to_string();
         let limiter = overflow_limiter(1, 1, None);
         let mut events = vec![
             wrapped_event("$ai_generation", "user-1"),
@@ -3293,14 +3293,14 @@ mod tests {
     /// overflow, and vice versa.
     #[rstest::rstest]
     #[case::analytics_force_key_leaves_ai_untouched(
-        Some("phc_tok:user-1"),
+        Some("pk-tok:user-1"),
         None,
         Destination::Overflow,
         Destination::AiEvents
     )]
     #[case::ai_force_key_leaves_analytics_untouched(
         None,
-        Some("phc_tok:user-1"),
+        Some("pk-tok:user-1"),
         Destination::AnalyticsMain,
         Destination::AiEventsOverflow
     )]
@@ -3311,7 +3311,7 @@ mod tests {
         #[case] expected_ai_destination: Destination,
     ) {
         let mut ctx = test_utils::test_context();
-        ctx.api_token = "phc_tok".to_string();
+        ctx.api_token = "pk-tok".to_string();
         let analytics_limiter = overflow_limiter(100, 100, analytics_force_keys);
         let ai_limiter = overflow_limiter(100, 100, ai_force_keys);
         let mut events = vec![
@@ -3355,7 +3355,7 @@ mod tests {
 
     #[tokio::test]
     async fn gateway_provenance_leaves_non_ai_events_untouched() {
-        let token = "phc_test_token";
+        let token = "pk-test_token";
         let now = Utc::now();
         let state = TestStateBuilder::new()
             .with_ai_gateway_signing_secret(GW_SECRET)
@@ -3381,7 +3381,7 @@ mod tests {
 
     #[tokio::test]
     async fn gateway_provenance_verifies_and_stamps_a_valid_signature() {
-        let token = "phc_test_token";
+        let token = "pk-test_token";
         let distinct_id = "user-1";
         let now = Utc::now();
         let state = TestStateBuilder::new()
@@ -3422,7 +3422,7 @@ mod tests {
 
     #[tokio::test]
     async fn gateway_provenance_strips_forged_props_and_does_not_verify() {
-        let token = "phc_test_token";
+        let token = "pk-test_token";
         let distinct_id = "user-1";
         let now = Utc::now();
         let state = TestStateBuilder::new()
@@ -3453,7 +3453,7 @@ mod tests {
     /// stripped, even sharing one request-level signature.
     #[tokio::test]
     async fn gateway_provenance_verifies_only_the_signed_distinct_id_in_a_batch() {
-        let token = "phc_test_token";
+        let token = "pk-test_token";
         let signed_id = "user-signed";
         let now = Utc::now();
         let state = TestStateBuilder::new()
@@ -3495,7 +3495,7 @@ mod tests {
     /// is dropped, so the marker can't reach billing via Datastore's lenient reader.
     #[tokio::test]
     async fn gateway_provenance_drops_event_with_unparseable_forged_props() {
-        let token = "phc_test_token";
+        let token = "pk-test_token";
         let now = Utc::now();
         let state = TestStateBuilder::new()
             .with_ai_gateway_signing_secret(GW_SECRET)
@@ -3518,7 +3518,7 @@ mod tests {
     /// can't parse to stamp, since a forged marker hidden in them would survive.
     #[tokio::test]
     async fn gateway_provenance_drops_verified_event_with_unparseable_props() {
-        let token = "phc_test_token";
+        let token = "pk-test_token";
         let distinct_id = "user-1";
         let now = Utc::now();
         let state = TestStateBuilder::new()
@@ -3551,7 +3551,7 @@ mod tests {
     /// and the trusted marker survives serialization into the published payload.
     #[tokio::test]
     async fn process_batch_stamps_verified_gateway_event_into_published_payload() {
-        let token = "phc_test_token";
+        let token = "pk-test_token";
         let distinct_id = "user-1";
         let now = Utc::now();
         let ts = TestStateBuilder::new()
@@ -3592,7 +3592,7 @@ mod tests {
     /// before the event is serialized, so it never reaches the meter as trusted.
     #[tokio::test]
     async fn process_batch_strips_forged_gateway_marker_from_published_payload() {
-        let token = "phc_test_token";
+        let token = "pk-test_token";
         let now = Utc::now();
         let ts = TestStateBuilder::new()
             .with_ai_gateway_signing_secret(GW_SECRET)
@@ -3627,14 +3627,14 @@ mod tests {
     /// from the request token, so with a `SecondaryAllowlist` policy the same
     /// `$ai_*` event lands on the AI topic only when the batch token is listed.
     #[rstest::rstest]
-    #[case("phc_allowlisted", "ai_events")]
-    #[case("phc_other", "events_main")]
+    #[case("pk-allowlisted", "ai_events")]
+    #[case("pk-other", "events_main")]
     #[tokio::test]
     async fn process_batch_gates_ai_topic_on_batch_token(
         #[case] token: &str,
         #[case] expected_topic: &str,
     ) {
-        let allowlist: HashSet<String> = ["phc_allowlisted".to_string()].into_iter().collect();
+        let allowlist: HashSet<String> = ["pk-allowlisted".to_string()].into_iter().collect();
         let ts = TestStateBuilder::new()
             .with_ai_routing(crate::config::AiRouting::SecondaryAllowlist(allowlist))
             .build();
@@ -3970,7 +3970,7 @@ mod tests {
         // wired and the (token, distinct_id) is over its limit. If the limiter
         // ran, the event would be flagged person_processing_disabled; here it
         // must stay untouched. valid_event()'s distinct_id is "user-42".
-        let limiter = std::sync::Arc::new(mock_limiter(vec!["phc_test_token:user-42"]));
+        let limiter = std::sync::Arc::new(mock_limiter(vec!["pk-test_token:user-42"]));
         let ts = TestStateBuilder::new()
             .with_capture_mode(crate::config::CaptureMode::Import)
             .with_global_rate_limiter(limiter)
@@ -4066,7 +4066,7 @@ mod tests {
         // Control for the Import GRL-bypass test: the same over-limit key in the
         // default Events mode flags the event, proving the limiter is genuinely
         // hot and the Import bypass above is meaningful.
-        let limiter = std::sync::Arc::new(mock_limiter(vec!["phc_test_token:user-42"]));
+        let limiter = std::sync::Arc::new(mock_limiter(vec!["pk-test_token:user-42"]));
         let ts = TestStateBuilder::new()
             .with_global_rate_limiter(limiter)
             .build();
@@ -4120,7 +4120,7 @@ mod tests {
         assert_eq!(emitted.len(), 1, "same-tag drops must dedupe to one emit");
         assert_eq!(emitted[0].warning, WarningType::MissingEventName);
         assert_eq!(emitted[0].count, 3);
-        assert_eq!(emitted[0].token, "phc_test_token");
+        assert_eq!(emitted[0].token, "pk-test_token");
         // With multiple affected events, per-event identifiers are ambiguous
         // and must be omitted; request-level context is always present.
         assert!(!emitted[0].extra_details.contains_key("distinctId"));

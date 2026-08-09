@@ -11,7 +11,7 @@ class TestSigningSecret(BaseTest):
     @parameterized.expand(
         [
             ("first_mint", None),
-            ("rotation_updates_existing_row", "phs_previous_secret"),
+            ("rotation_updates_existing_row", "sk-previous_secret"),
         ]
     )
     def test_token_rotation_dual_writes_signing_secret(self, _name, existing_token):
@@ -41,12 +41,12 @@ class TestSigningSecret(BaseTest):
             name="Child environment",
         )
 
-        parent_secret = SigningSecret(team=self.team, secret="phs_parent_secret")
+        parent_secret = SigningSecret(team=self.team, secret="sk-parent_secret")
         parent_secret.save()
-        child_secret = SigningSecret(team=child_team, secret="phs_child_secret")
+        child_secret = SigningSecret(team=child_team, secret="sk-child_secret")
         child_secret.save()
 
         child_secret.refresh_from_db()
         self.assertEqual(child_secret.team_id, child_team.id)
         self.assertEqual(SigningSecret.objects.unscoped().filter(team_id__in=[self.team.id, child_team.id]).count(), 2)
-        self.assertEqual(SigningSecret.objects.for_team(child_team.id).get().secret, "phs_child_secret")
+        self.assertEqual(SigningSecret.objects.for_team(child_team.id).get().secret, "sk-child_secret")

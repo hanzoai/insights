@@ -226,14 +226,14 @@ def test_sandbox_gets_minted_short_lived_credential_and_closed_egress(
     recorder.register_pr(REPO, 110, _pr_object(110, "devex-dev", head_sha), _pr_files())
     recorder.policy_files[".stamphog/policy.yml"] = "version: 1\n"
 
-    worker_env = {"ANTHROPIC_API_KEY": "sk-ant-worker-secret", "AI_GATEWAY_API_KEY": "phs_worker_shared_key"}
+    worker_env = {"ANTHROPIC_API_KEY": "sk-ant-worker-secret", "AI_GATEWAY_API_KEY": "sk-worker_shared_key"}
     with patch.dict(os.environ, worker_env):
         stamphog_chain.post_webhook(_opened_event(110, "devex-dev", head_sha), delivery_id=str(uuid.uuid4()))
 
     config = stamphog_chain.sandbox_class.created_configs[0]
     env = config.environment_variables
     assert "ANTHROPIC_API_KEY" not in env
-    assert env["AI_GATEWAY_API_KEY"] != "phs_worker_shared_key"
+    assert env["AI_GATEWAY_API_KEY"] != "sk-worker_shared_key"
 
     minted = OAuthAccessToken.objects.get(token=env["AI_GATEWAY_API_KEY"])
     assert minted.user_id == user.id

@@ -4,7 +4,7 @@
 # Same transport as pii-probe-extensive-curl.sh:
 #   OTEL_LOGS_HTTP=http://localhost:4318/v1/logs ./sampling-drop-probe-curl.sh
 # Direct to capture (no collector auth injection):
-#   OTEL_LOGS_HTTP=http://127.0.0.1:8010/i/v1/logs OTEL_LOGS_TOKEN=phc_... ./sampling-drop-probe-curl.sh
+#   OTEL_LOGS_HTTP=http://127.0.0.1:8010/i/v1/logs OTEL_LOGS_TOKEN=pk-... ./sampling-drop-probe-curl.sh
 #
 # Ingestion worker: LOGS_SAMPLING_ENABLED_TEAMS defaults to * (all teams). Set empty to disable sampling
 # evaluation globally, or comma-separated team ids to restrict. Restart worker after overriding env.

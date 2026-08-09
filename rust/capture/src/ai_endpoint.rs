@@ -1130,7 +1130,7 @@ mod tests {
     #[test]
     fn test_insert_blob_urls_into_properties() {
         let uploaded = UploadedBlobs {
-            base_url: "s3://capture/llma/phc_test_token/abc-def".to_string(),
+            base_url: "s3://capture/llma/pk-test_token/abc-def".to_string(),
             boundary: "----insights-ai-abc-def".to_string(),
             parts: vec![
                 BlobPartRange {
@@ -1151,11 +1151,11 @@ mod tests {
 
         assert_eq!(
             properties.get("$ai_input").unwrap().as_str().unwrap(),
-            "s3://capture/llma/phc_test_token/abc-def?range=0-99"
+            "s3://capture/llma/pk-test_token/abc-def?range=0-99"
         );
         assert_eq!(
             properties.get("$ai_output").unwrap().as_str().unwrap(),
-            "s3://capture/llma/phc_test_token/abc-def?range=100-249"
+            "s3://capture/llma/pk-test_token/abc-def?range=100-249"
         );
     }
 }

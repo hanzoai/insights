@@ -123,7 +123,7 @@ function GatewayEndpoint(): JSX.Element {
     }
 
     const gatewayBase = preflight.ai_gateway_url.replace(/\/$/, '')
-    const key = '<your phs_… project secret key with the llm_gateway:read scope>'
+    const key = '<your sk-… project secret key with the llm_gateway:read scope>'
 
     // provider → language → snippet. The OpenAI SDK appends "chat/completions" to base + "/v1";
     // the Anthropic SDK appends "/v1/messages" to the gateway base.

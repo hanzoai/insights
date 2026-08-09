@@ -38,7 +38,7 @@ class TestTopHogAdminHelpers(BaseTest):
 
     @parameterized.expand(
         [
-            ("explicit_token", {"token": "phc_abc", "team_id": "1"}, "phc_abc"),
+            ("explicit_token", {"token": "pk-abc", "team_id": "1"}, "pk-abc"),
             ("unknown_placeholder_falls_back_to_team_id", {"token": "unknown", "team_id": "1"}, "resolved"),
             ("team_id_lookup", {"team_id": "1"}, "resolved"),
             ("unresolvable_team_id", {"team_id": "2"}, ""),
@@ -50,7 +50,7 @@ class TestTopHogAdminHelpers(BaseTest):
 
     def test_restrictions_page_url_carries_full_key_and_pipelines(self):
         url = _restrictions_page_url(
-            "phc_abc",
+            "pk-abc",
             {"team_id": "1", "distinct_id": "did", "partition": "3", "token": "unknown"},
             ["analytics", "heatmaps"],
         )
@@ -59,7 +59,7 @@ class TestTopHogAdminHelpers(BaseTest):
         self.assertEqual(
             parse_qs(parsed.query),
             {
-                "token": ["phc_abc"],
+                "token": ["pk-abc"],
                 "team_id": ["1"],
                 "distinct_id": ["did"],
                 "partition": ["3"],
@@ -69,7 +69,7 @@ class TestTopHogAdminHelpers(BaseTest):
 
     def test_create_restriction_url_prefills_add_form_from_key(self):
         url = _create_restriction_url(
-            "phc_abc",
+            "pk-abc",
             {"team_id": "1", "distinct_id": "did", "session_id": "sid", "partition": "3"},
             ["analytics", "session_recordings"],
         )
@@ -78,7 +78,7 @@ class TestTopHogAdminHelpers(BaseTest):
         self.assertEqual(
             parse_qs(parsed.query),
             {
-                "token": ["phc_abc"],
+                "token": ["pk-abc"],
                 "distinct_ids": ["did"],
                 "session_ids": ["sid"],
                 "pipelines": ["analytics,session_recordings"],
@@ -127,7 +127,7 @@ class TestTopHogAdminHelpers(BaseTest):
     )
     def test_restriction_matches(self, _name, config_kwargs, key, tophog_pipelines, expected):
         restriction = EventIngestionRestrictionConfig(
-            token="phc_abc",
+            token="pk-abc",
             restriction_type=RestrictionType.DROP_EVENT_FROM_INGESTION,
             **{"pipelines": ["analytics"], **config_kwargs},
         )
@@ -135,7 +135,7 @@ class TestTopHogAdminHelpers(BaseTest):
 
     def test_extend_restriction_appends_only_to_nonempty_lists(self):
         restriction = EventIngestionRestrictionConfig.objects.create(
-            token="phc_extend",
+            token="pk-extend",
             restriction_type=RestrictionType.DROP_EVENT_FROM_INGESTION,
             distinct_ids=["existing"],
         )
@@ -147,7 +147,7 @@ class TestTopHogAdminHelpers(BaseTest):
 
     def test_extend_restriction_noop_when_already_covered(self):
         restriction = EventIngestionRestrictionConfig.objects.create(
-            token="phc_noop",
+            token="pk-noop",
             restriction_type=RestrictionType.DROP_EVENT_FROM_INGESTION,
             distinct_ids=["d1"],
         )
@@ -157,21 +157,21 @@ class TestTopHogAdminHelpers(BaseTest):
 
     def test_pipelines_prefill_split_from_comma_separated_param(self):
         model_admin = EventIngestionRestrictionConfigAdmin(EventIngestionRestrictionConfig, admin.site)
-        request = RequestFactory().get("/", {"token": "phc_x", "pipelines": "analytics,session_recordings"})
+        request = RequestFactory().get("/", {"token": "pk-x", "pipelines": "analytics,session_recordings"})
         initial = model_admin.get_changeform_initial_data(request)
         self.assertEqual(initial["pipelines"], ["analytics", "session_recordings"])
-        self.assertEqual(initial["token"], "phc_x")
+        self.assertEqual(initial["token"], "pk-x")
 
     def test_restrictions_view_extend_post(self):
         self.user.is_staff = True
         self.user.save()
         self.client.force_login(self.user)
         restriction = EventIngestionRestrictionConfig.objects.create(
-            token="phc_view",
+            token="pk-view",
             restriction_type=RestrictionType.DROP_EVENT_FROM_INGESTION,
             distinct_ids=["existing"],
         )
-        url = reverse("tophog-restrictions") + "?token=phc_view&distinct_id=new-id"
+        url = reverse("tophog-restrictions") + "?token=pk-view&distinct_id=new-id"
         response = self.client.post(url, {"restriction_id": str(restriction.pk)})
         self.assertEqual(response.status_code, 302)
         restriction.refresh_from_db()

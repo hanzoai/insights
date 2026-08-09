@@ -313,7 +313,7 @@ class TestCheckActionability:
         assert "x-insights-property-$ai_billable" not in headers
 
     @pytest.mark.asyncio
-    @override_settings(AI_GATEWAY_URL="https://ai-gateway.example/v1", AI_GATEWAY_API_KEY="phs_test")
+    @override_settings(AI_GATEWAY_URL="https://ai-gateway.example/v1", AI_GATEWAY_API_KEY="sk-test")
     async def test_gateway_mode_labels_ride_on_properties_blob(self):
         mock_client = MagicMock()
         mock_client.messages.create = AsyncMock(return_value=_make_llm_response("ACTIONABLE"))

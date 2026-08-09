@@ -74,7 +74,7 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
         assert data["scopes"] == ["endpoint:read"]
         assert data["last_rolled_at"] is None
         assert data["last_used_at"] is None
-        assert data["value"].startswith("phs_")
+        assert data["value"].startswith("sk-")
 
     def test_create_feature_flag_read_scope(self):
         response = self.client.post(
@@ -283,7 +283,7 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
         assert rolled["mask_value"] != original_mask
         assert rolled["last_rolled_at"] is not None
         assert rolled["value"] is not None
-        assert rolled["value"].startswith("phs_")
+        assert rolled["value"].startswith("sk-")
 
         key = ProjectSecretAPIKey.objects.get(id=key_id)
         assert key.secure_value != original_secure_value
@@ -299,7 +299,7 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
             team=other_team,
             label="team2 key",
             secure_value="sha256$abc123",
-            mask_value="phs_...1234",
+            mask_value="sk-...1234",
             scopes=["endpoint:read"],
         )
 
@@ -316,7 +316,7 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
             team=other_team,
             label="secret",
             secure_value="sha256$other",
-            mask_value="phs_...5678",
+            mask_value="sk-...5678",
             scopes=["endpoint:read"],
         )
 
@@ -415,7 +415,7 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
         assert "last_rolled_at" in changes
 
         assert changes["mask_value"]["before"] != changes["mask_value"]["after"]
-        assert changes["mask_value"]["after"].startswith("phs_...")
+        assert changes["mask_value"]["after"].startswith("sk-...")
         assert changes["last_rolled_at"]["before"] is None
         assert changes["last_rolled_at"]["after"] is not None
 
@@ -479,7 +479,7 @@ class TestProjectSecretAPIKeysViaPersonalAPIKey(APIBaseTest):
         assert response.status_code == 200, response.content
         rolled = response.json()
         assert rolled["value"] is not None
-        assert rolled["value"].startswith("phs_")
+        assert rolled["value"].startswith("sk-")
 
         original.refresh_from_db()
         assert original.secure_value != original_secure_value
