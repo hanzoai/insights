@@ -7,8 +7,11 @@ from django.conf import settings
 
 import httpx
 import structlog
+
 from anthropic import AsyncAnthropic
 from openai import AsyncOpenAI, OpenAI
+
+from insights import iam
 
 logger = structlog.get_logger(__name__)
 
@@ -169,32 +172,45 @@ def get_async_anthropic_gateway_client(
     )
 
 
-def _gateway_misconfig(url: str, api_key: str) -> str | None:
-    """Return a reason string if the gateway env is half-applied or malformed, else None."""
-    if not (url and api_key):
-        return "AI_GATEWAY_URL and AI_GATEWAY_API_KEY must be set together"
+def _gateway_misconfig(url: str) -> str | None:
+    """Return a reason string if the gateway URL is malformed, else None."""
     # The SDK appends /chat/completions, so base_url must already carry the /v1 path.
     if not urlparse(url).path.rstrip("/").endswith("/v1"):
         return "AI_GATEWAY_URL must include the OpenAI base path, e.g. https://<host>/v1"
     return None
 
 
-def resolve_ai_gateway_config() -> tuple[str, str] | None:
-    """Return the validated (url, api_key) for the internal Go ai-gateway, or None.
+def resolve_ai_gateway_config(user=None) -> tuple[str, str] | None:
+    """The gateway URL and the bearer that proves WHO is asking, or None.
 
-    None when neither env var is set (the caller uses its normal path), and ALSO when the config
-    is half-applied or the URL is malformed: that logs a warning and returns None so the caller
-    falls back to the current flow rather than failing the call (the fallback comes out once
-    rollout completes).
+    There is no gateway API key, because a key in the environment is one tenant's
+    credential doing every tenant's work: the org that pays is read off the
+    bearer's IAM claim, so a static one would bill every customer's assistant to
+    whoever the key belongs to. The bearer is an IAM token and nothing else.
+
+    Which token depends on who is acting. A request made by a signed-in person
+    carries THEIR token, so the call is authorized and billed as them. Work with
+    no person behind it — a temporal workflow, an eval — carries this
+    deployment's own IAM identity, which is the honest answer to "who asked" when
+    nobody did.
+
+    None when the gateway is not configured, and also when the URL is malformed or
+    IAM will not issue a token: the caller then takes its normal path rather than
+    failing the request outright.
     """
-    url, api_key = settings.AI_GATEWAY_URL, settings.AI_GATEWAY_API_KEY
-    if not (url or api_key):
+    url = settings.AI_GATEWAY_URL
+    if not url:
         return None
-    misconfig = _gateway_misconfig(url, api_key)
+    misconfig = _gateway_misconfig(url)
     if misconfig:
         logger.warning("ai_gateway_misconfigured_falling_back", reason=misconfig)
         return None
-    return url, api_key
+    try:
+        bearer = iam.user_token(user) if user is not None else iam.service_token()
+    except iam.IamUnavailable as e:
+        logger.warning("ai_gateway_no_identity_falling_back", reason=str(e))
+        return None
+    return url, bearer
 
 
 def _ai_property_headers(**labels: str | None) -> dict[str, str] | None:
@@ -262,9 +278,9 @@ def build_openai_client(product: Product, ai_product: str | None = None) -> Open
     generation in gateway mode (the Python-gateway fallback derives the tag from ``product``).
     trust_env=False keeps the in-cluster call off the egress proxy.
     """
-    gateway = resolve_ai_gateway_config()
+    gateway = resolve_ai_gateway_config(user)
     if gateway:
-        url, api_key = gateway
+        url, bearer = gateway
         return OpenAI(
             api_key=api_key,
             base_url=url,
@@ -294,6 +310,7 @@ def build_async_anthropic_client(
     ai_stage: str | None = None,
     team_id: int | None = None,
     use_bedrock_fallback: bool = False,
+    user=None,
 ) -> AsyncAnthropic:
     """Return a raw Anthropic client routed through the internal Go ai-gateway when configured,
     else the Python LLM gateway via :func:`get_async_anthropic_gateway_client`.
@@ -328,7 +345,7 @@ def build_async_anthropic_client(
             **_ai_trace_headers(team_id),
         }
         return AsyncAnthropic(
-            api_key=api_key,
+            api_key=bearer,
             base_url=_anthropic_gateway_base_url(url),
             default_headers=default_headers or None,
             http_client=httpx.AsyncClient(trust_env=False),

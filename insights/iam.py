@@ -110,3 +110,63 @@ def service_token(force_refresh: bool = False) -> str:
 def authorization() -> dict[str, str]:
     """The Authorization header for a call to an internal Hanzo service."""
     return {"Authorization": f"Bearer {service_token()}"}
+
+
+def _stale(token: str) -> bool:
+    """Whether `token` is too close to its own `exp` to be worth sending.
+
+    The signature is not checked — the service on the other end does that, and
+    this only decides whether to ask. Anything unreadable counts as stale, so a
+    token of an unexpected shape gets refreshed rather than sent and refused.
+    """
+    import jwt  # noqa: PLC0415 — keeps the import off the service-token path
+
+    try:
+        expires_at = jwt.decode(token, options={"verify_signature": False})["exp"]
+    except Exception:
+        return True
+    return time.time() + REFRESH_MARGIN_SECONDS >= float(expires_at)
+
+
+def user_token(user, *, fresh: Optional[str] = None) -> str:
+    """The ACTING PERSON's IAM access token — not this deployment's.
+
+    Which one a call carries decides which org is billed and whose data it may
+    touch, so the two never substitute for each other: the service token names
+    insights, and would attribute a person's work, and their spend, to us.
+
+    A login already holds a token and passes it as `fresh`, touching neither the
+    database nor IAM again. Everywhere else reads what python-social-auth stored
+    at sign-in, which is usually expired — those live hours, and a person comes
+    back days later — so a stale one is refreshed with the refresh token stored
+    beside it, through social-auth's own machinery, which writes the new token
+    back where it found the old one.
+    """
+    if fresh:
+        return fresh
+
+    from social_django.utils import load_strategy  # noqa: PLC0415 — needs configured settings
+
+    social = user.social_auth.filter(provider="oidc").first()
+    if social is None:
+        raise IamUnavailable("this account has no Hanzo IAM login; sign in again")
+
+    token = (social.extra_data or {}).get("access_token")
+    if token and not _stale(token):
+        return token
+
+    try:
+        social.refresh_token(load_strategy())
+    except Exception as e:
+        raise IamUnavailable(
+            f"the Hanzo IAM login could not be refreshed ({type(e).__name__}); sign in again"
+        ) from e
+
+    # Re-read rather than trust the call: `refresh_token` is a no-op when there is
+    # no refresh token to spend, and a silent no-op would send the stale one.
+    token = (social.extra_data or {}).get("access_token")
+    if not token or _stale(token):
+        raise IamUnavailable("the Hanzo IAM login could not be refreshed; sign in again")
+
+    logger.info("iam.user_token_refreshed", user_id=str(user.uuid))
+    return token
