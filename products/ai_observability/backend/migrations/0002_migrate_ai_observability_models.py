@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db import migrations, models
 
 import insights.models.utils
-from insights.migration_helpers import CreateTableIfNotExists
+from insights.migration_helpers import AddColumnIfNotExists, CreateTableIfNotExists
 
 
 class Migration(migrations.Migration):
@@ -124,6 +124,10 @@ class Migration(migrations.Migration):
             database_operations=[
                 CreateTableIfNotExists(model_name="llmprompt"),
                 CreateTableIfNotExists(model_name="llmtracesummary"),
+                # The table came from `insights.0001_initial`, whose shape predates these
+                # fields: the move declares them but nothing ever adds the columns, so a
+                # fresh install is left without them. No-ops where the table was built above.
+                AddColumnIfNotExists(model_name="llmprompt", name="is_latest"),
             ],
         ),
     ]
