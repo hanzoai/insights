@@ -1014,7 +1014,7 @@ class TestCachedProductIntentsForTeam(BaseTest):
 
     def test_invalidates_both_teams_on_reassignment(self):
         # Codex P2: when an intent's team_id changes, the previous team's cache must
-        # also be evicted, otherwise its /api/users/@me/ payload returns the moved
+        # also be evicted, otherwise its /v1/users/@me/ payload returns the moved
         # intent for up to PRODUCT_INTENTS_CACHE_TTL_SECONDS.
         other_team = Team.objects.create(organization=self.organization, name="Other")
         intent = ProductIntent.objects.create(team=self.team, product_type=ProductKey.SURVEYS)

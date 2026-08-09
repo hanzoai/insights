@@ -58,7 +58,7 @@ class TestPushSubscriptionsAPI(BaseTest):
     def _post(self, data: dict, api_key: str | None = None):
         payload = {**data, "api_key": api_key or self.team.api_token}
         return self.client.post(
-            "/api/push_subscriptions/",
+            "/v1/push_subscriptions/",
             data=json.dumps(payload),
             content_type="application/json",
         )
@@ -66,7 +66,7 @@ class TestPushSubscriptionsAPI(BaseTest):
     def _delete(self, data: dict, api_key: str | None = None):
         payload = {**data, "api_key": api_key or self.team.api_token}
         return self.client.delete(
-            "/api/push_subscriptions/",
+            "/v1/push_subscriptions/",
             data=json.dumps(payload),
             content_type="application/json",
         )
@@ -228,7 +228,7 @@ class TestPushSubscriptionsAPI(BaseTest):
 
     def test_missing_api_key_returns_401(self):
         response = self.client.post(
-            "/api/push_subscriptions/",
+            "/v1/push_subscriptions/",
             data=json.dumps({"distinct_id": "user-1", "device_token": "t", "platform": "android", "app_id": "proj"}),
             content_type="application/json",
         )
@@ -301,13 +301,13 @@ class TestPushSubscriptionsAPI(BaseTest):
 
     def test_get_method_not_allowed(self):
         response = self.client.get(
-            f"/api/push_subscriptions/?token={self.team.api_token}",
+            f"/v1/push_subscriptions/?token={self.team.api_token}",
         )
 
         assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
     def test_options_returns_200(self):
-        response = self.client.options("/api/push_subscriptions/")
+        response = self.client.options("/v1/push_subscriptions/")
 
         assert response.status_code == status.HTTP_200_OK
 
@@ -325,7 +325,7 @@ class TestPushSubscriptionsAPI(BaseTest):
         compressed = gzip.compress(json.dumps(payload).encode())
 
         response = self.client.post(
-            "/api/push_subscriptions/",
+            "/v1/push_subscriptions/",
             data=compressed,
             content_type="application/json",
             HTTP_CONTENT_ENCODING="gzip",
@@ -342,7 +342,7 @@ class TestPushSubscriptionsAPI(BaseTest):
         oversized = json.dumps({"api_key": self.team.api_token, "padding": "x" * (16 * 1024 + 1)})
 
         response = self.client.post(
-            "/api/push_subscriptions/",
+            "/v1/push_subscriptions/",
             data=oversized,
             content_type="application/json",
         )

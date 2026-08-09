@@ -16,6 +16,7 @@ from rest_framework import status
 
 from insights.constants import AvailableFeature
 from insights.models import User
+from insights.models.ee_models import AccessControl, Role, RoleMembership
 from insights.models.instance_setting import set_instance_setting
 from insights.models.organization import Organization, OrganizationMembership
 from insights.models.organization_domain import OrganizationDomain
@@ -23,9 +24,6 @@ from insights.models.organization_invite import OrganizationInvite
 from insights.models.personal_api_key import PersonalAPIKey
 from insights.models.team.team import Team
 from insights.models.utils import generate_random_token_personal, hash_key_value
-
-from insights.models.ee_models import Role, RoleMembership
-from insights.models.ee_models import AccessControl
 
 NAME_SEEDS = ["John", "Jane", "Alice", "Bob", ""]
 
@@ -71,12 +69,12 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         org = Organization.objects.create(name="Alien Org")
         invite = OrganizationInvite.objects.create(target_email="siloed@hanzo.ai", organization=org)
 
-        response = self.client.get(f"/api/organizations/{org.id}/invites/")
+        response = self.client.get(f"/v1/organizations/{org.id}/invites/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response.json(), self.permission_denied_response())
 
         # Even though there's no retrieve for invites, permissions are validated first
-        response = self.client.get(f"/api/organizations/{org.id}/invites/{invite.id}")
+        response = self.client.get(f"/v1/organizations/{org.id}/invites/{invite.id}")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response.json(), self.permission_denied_response())
 
@@ -97,7 +95,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             level=OrganizationMembership.Level.MEMBER,
         )
 
-        response = self.client.get(f"/api/organizations/{self.organization.id}/invites/")
+        response = self.client.get(f"/v1/organizations/{self.organization.id}/invites/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["results"], [])
 
@@ -114,7 +112,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             level=OrganizationMembership.Level.MEMBER,
         )
 
-        response = self.client.get(f"/api/organizations/{self.organization.id}/invites/")
+        response = self.client.get(f"/v1/organizations/{self.organization.id}/invites/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ids = [row["id"] for row in response.json()["results"]]
         self.assertIn(str(invite.id), ids)
@@ -137,7 +135,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             level=OrganizationMembership.Level.ADMIN,
         )
 
-        response = self.client.get(f"/api/organizations/{self.organization.id}/invites/")
+        response = self.client.get(f"/v1/organizations/{self.organization.id}/invites/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ids = [row["id"] for row in response.json()["results"]]
         self.assertIn(str(member_invite.id), ids)
@@ -158,7 +156,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             level=OrganizationMembership.Level.ADMIN,
         )
 
-        response = self.client.get(f"/api/organizations/{self.organization.id}/invites/")
+        response = self.client.get(f"/v1/organizations/{self.organization.id}/invites/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ids = [row["id"] for row in response.json()["results"]]
         self.assertIn(str(member_invite.id), ids)
@@ -168,7 +166,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
     @patch("hanzo_insights.capture")
     def test_add_organization_invite_email_required(self, mock_capture):
-        response = self.client.post("/api/organizations/@current/invites/")
+        response = self.client.post("/v1/organizations/@current/invites/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_data = response.json()
         self.assertDictEqual(
@@ -190,7 +188,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         with self.settings(EMAIL_ENABLED=True, SITE_URL="http://test.hanzo.ai"):
             response = self.client.post(
-                "/api/organizations/@current/invites/",
+                "/v1/organizations/@current/invites/",
                 {"target_email": email},
             )
 
@@ -269,7 +267,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         with self.settings(EMAIL_ENABLED=True, SITE_URL="http://test.hanzo.ai"):
             response = self.client.post(
-                "/api/organizations/@current/invites/", {"target_email": email, "send_email": False}
+                "/v1/organizations/@current/invites/", {"target_email": email, "send_email": False}
             )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -283,7 +281,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         count = OrganizationInvite.objects.count()
 
         for _ in range(0, 3):
-            response = self.client.post("/api/organizations/@current/invites/", {"target_email": email})
+            response = self.client.post("/v1/organizations/@current/invites/", {"target_email": email})
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
             obj = OrganizationInvite.objects.get(id=response.json()["id"])
             self.assertEqual(obj.target_email, email)
@@ -312,7 +310,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             organization_member=self.organization_membership,
         )
         response = self.client.post(
-            "/api/organizations/@current/invites/",
+            "/v1/organizations/@current/invites/",
             {
                 "target_email": email,
                 "level": OrganizationMembership.Level.MEMBER,
@@ -332,7 +330,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         email = "y@hanzo.ai"
         count = OrganizationInvite.objects.count()
         response = self.client.post(
-            "/api/organizations/@current/invites/",
+            "/v1/organizations/@current/invites/",
             {
                 "target_email": email,
                 "level": OrganizationMembership.Level.MEMBER,
@@ -366,7 +364,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             resource_id=str(private_team.id),
         )
         response = self.client.post(
-            "/api/organizations/@current/invites/",
+            "/v1/organizations/@current/invites/",
             {
                 "target_email": email,
                 "level": OrganizationMembership.Level.MEMBER,
@@ -397,7 +395,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             resource_id=str(team_in_other_org.id),
         )
         response = self.client.post(
-            "/api/organizations/@current/invites/",
+            "/v1/organizations/@current/invites/",
             {
                 "target_email": email,
                 "level": OrganizationMembership.Level.MEMBER,
@@ -430,7 +428,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             resource_id=str(private_team.id),
         )
         response = self.client.post(
-            "/api/organizations/@current/invites/",
+            "/v1/organizations/@current/invites/",
             {
                 "target_email": email,
                 "level": OrganizationMembership.Level.MEMBER,
@@ -474,7 +472,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             organization_member=self.organization_membership,
         )
         response = self.client.post(
-            "/api/organizations/@current/invites/",
+            "/v1/organizations/@current/invites/",
             {
                 "target_email": email,
                 "level": OrganizationMembership.Level.MEMBER,
@@ -514,7 +512,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             resource_id=str(restricted_team.id),
         )
         response = self.client.post(
-            "/api/organizations/@current/invites/",
+            "/v1/organizations/@current/invites/",
             {
                 "target_email": email,
                 "level": OrganizationMembership.Level.MEMBER,
@@ -539,7 +537,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         count = OrganizationInvite.objects.count()
         email = "x@hanzo.ai"
-        response = self.client.post(f"/api/organizations/{another_org.id}/invites/", {"target_email": email})
+        response = self.client.post(f"/v1/organizations/{another_org.id}/invites/", {"target_email": email})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response.json(), self.permission_denied_response())
 
@@ -554,7 +552,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
     def test_invite_restricted_to_verified_domain_when_enforcement_on(self, _name, email, expected_status):
         _enable_domain_enforcement(self.organization, "hogflix.com", self.user.email)
 
-        response = self.client.post("/api/organizations/@current/invites/", {"target_email": email})
+        response = self.client.post("/v1/organizations/@current/invites/", {"target_email": email})
 
         self.assertEqual(response.status_code, expected_status, response.json())
         if expected_status == status.HTTP_400_BAD_REQUEST:
@@ -574,7 +572,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         with self.settings(EMAIL_ENABLED=True, SITE_URL="http://test.hanzo.ai"):
             response = self.client.post(
-                "/api/organizations/@current/invites/bulk/",
+                "/v1/organizations/@current/invites/bulk/",
                 payload,
                 format="json",
                 headers={"X-Insights-Session-Id": "123", "Referer": "http://test.hanzo.ai/my-url"},
@@ -640,7 +638,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             EMAIL_HOST="localhost",
             SITE_URL="http://test.hanzo.ai",
         ):
-            response = self.client.post("/api/organizations/@current/invites/bulk/", payload, format="json")
+            response = self.client.post("/v1/organizations/@current/invites/bulk/", payload, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
@@ -669,7 +667,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             EMAIL_HOST="localhost",
             SITE_URL="http://test.hanzo.ai",
         ):
-            response = self.client.post("/api/organizations/@current/invites/bulk/", payload, format="json")
+            response = self.client.post("/v1/organizations/@current/invites/bulk/", payload, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -691,7 +689,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             SITE_URL="http://test.hanzo.ai",
         ):
             response = self.client.post(
-                f"/api/organizations/{another_org.id}/invites/bulk/",
+                f"/v1/organizations/{another_org.id}/invites/bulk/",
                 payload,
                 format="json",
             )
@@ -711,7 +709,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
         self.organization_membership.save()
         invite = OrganizationInvite.objects.create(organization=self.organization)
-        response = self.client.delete(f"/api/organizations/@current/invites/{invite.id}")
+        response = self.client.delete(f"/v1/organizations/@current/invites/{invite.id}")
         # Members should not be able to delete invites
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertIn("Your organization access level is insufficient", response.json()["detail"])
@@ -722,7 +720,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
         invite = OrganizationInvite.objects.create(organization=self.organization)
-        response = self.client.delete(f"/api/organizations/@current/invites/{invite.id}")
+        response = self.client.delete(f"/v1/organizations/@current/invites/{invite.id}")
         # Admins should be able to delete invites
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(response.content, b"")  # Empty response
@@ -733,7 +731,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.OWNER
         self.organization_membership.save()
         invite = OrganizationInvite.objects.create(organization=self.organization)
-        response = self.client.delete(f"/api/organizations/@current/invites/{invite.id}")
+        response = self.client.delete(f"/v1/organizations/@current/invites/{invite.id}")
         # Owners should be able to delete invites
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(response.content, b"")  # Empty response
@@ -770,7 +768,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Create first invite with member access to team 1
         first_invite = self.client.post(
-            "/api/organizations/@current/invites/",
+            "/v1/organizations/@current/invites/",
             {
                 "target_email": email,
                 "level": OrganizationMembership.Level.MEMBER,
@@ -780,7 +778,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Create second invite with admin access to team 2
         second_invite = self.client.post(
-            "/api/organizations/@current/invites/",
+            "/v1/organizations/@current/invites/",
             {
                 "target_email": email,
                 "level": OrganizationMembership.Level.ADMIN,
@@ -790,7 +788,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Create third invite combining previous invites
         response = self.client.post(
-            "/api/organizations/@current/invites/",
+            "/v1/organizations/@current/invites/",
             {
                 "target_email": email,
                 "level": OrganizationMembership.Level.MEMBER,
@@ -821,7 +819,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
     def test_combine_pending_invites_with_no_existing_invites(self):
         email = "x@hanzo.ai"
         response = self.client.post(
-            "/api/organizations/@current/invites/",
+            "/v1/organizations/@current/invites/",
             {
                 "target_email": email,
                 "level": OrganizationMembership.Level.MEMBER,
@@ -848,7 +846,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             )
 
         response = self.client.post(
-            "/api/organizations/@current/invites/",
+            "/v1/organizations/@current/invites/",
             {
                 "target_email": email,
                 "level": OrganizationMembership.Level.MEMBER,
@@ -872,7 +870,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Create first invite
         first_invite = self.client.post(
-            "/api/organizations/@current/invites/",
+            "/v1/organizations/@current/invites/",
             {
                 "target_email": email,
                 "level": OrganizationMembership.Level.ADMIN,
@@ -881,7 +879,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Create second invite with combine_pending_invites=False
         response = self.client.post(
-            "/api/organizations/@current/invites/",
+            "/v1/organizations/@current/invites/",
             {
                 "target_email": email,
                 "level": OrganizationMembership.Level.MEMBER,
@@ -907,7 +905,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Try to invite an admin as an member
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/invites/",
+            f"/v1/organizations/{self.organization.id}/invites/",
             {
                 "target_email": "new_admin@hanzo.ai",
                 "level": OrganizationMembership.Level.ADMIN,
@@ -931,7 +929,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Try to invite an owner as an admin
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/invites/",
+            f"/v1/organizations/{self.organization.id}/invites/",
             {
                 "target_email": "new_owner@hanzo.ai",
                 "level": OrganizationMembership.Level.OWNER,
@@ -956,7 +954,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Try to invite a member as a member (same level)
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/invites/",
+            f"/v1/organizations/{self.organization.id}/invites/",
             {
                 "target_email": "new_member@hanzo.ai",
                 "level": OrganizationMembership.Level.MEMBER,
@@ -979,7 +977,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Try to invite an admin as an admin (same level)
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/invites/",
+            f"/v1/organizations/{self.organization.id}/invites/",
             {
                 "target_email": "new_admin@hanzo.ai",
                 "level": OrganizationMembership.Level.ADMIN,
@@ -1016,7 +1014,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             },
         ]
 
-        response = self.client.post(f"/api/organizations/{self.organization.id}/invites/bulk/", payload)
+        response = self.client.post(f"/v1/organizations/{self.organization.id}/invites/bulk/", payload)
 
         # Should be forbidden due to the admin invite
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -1052,7 +1050,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
             },
         ]
 
-        response = self.client.post(f"/api/organizations/{self.organization.id}/invites/bulk/", payload)
+        response = self.client.post(f"/v1/organizations/{self.organization.id}/invites/bulk/", payload)
 
         # Should be successful
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -1081,7 +1079,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Try to create a single invite
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/invites/",
+            f"/v1/organizations/{self.organization.id}/invites/",
             {
                 "target_email": "test@hanzo.ai",
                 "level": OrganizationMembership.Level.MEMBER,
@@ -1091,7 +1089,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Try to create bulk invites
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/invites/bulk/",
+            f"/v1/organizations/{self.organization.id}/invites/bulk/",
             [
                 {
                     "target_email": "test1@hanzo.ai",
@@ -1118,7 +1116,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         invite = OrganizationInvite.objects.create(organization=self.organization, created_by=admin_user)
 
         # Try to delete as member
-        response = self.client.delete(f"/api/organizations/@current/invites/{invite.id}")
+        response = self.client.delete(f"/v1/organizations/@current/invites/{invite.id}")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertTrue(OrganizationInvite.objects.filter(id=invite.id).exists())
 
@@ -1138,7 +1136,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Try to create a single invite
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/invites/",
+            f"/v1/organizations/{self.organization.id}/invites/",
             {
                 "target_email": "test@hanzo.ai",
                 "level": OrganizationMembership.Level.MEMBER,
@@ -1148,7 +1146,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Try to create bulk invites
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/invites/bulk/",
+            f"/v1/organizations/{self.organization.id}/invites/bulk/",
             [
                 {
                     "target_email": "test1@hanzo.ai",
@@ -1171,7 +1169,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Try to create a single invite
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/invites/",
+            f"/v1/organizations/{self.organization.id}/invites/",
             {
                 "target_email": "test@hanzo.ai",
                 "level": OrganizationMembership.Level.MEMBER,
@@ -1181,7 +1179,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Try to create bulk invites
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/invites/bulk/",
+            f"/v1/organizations/{self.organization.id}/invites/bulk/",
             [
                 {
                     "target_email": "test1@hanzo.ai",
@@ -1204,7 +1202,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Try to create a single invite
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/invites/",
+            f"/v1/organizations/{self.organization.id}/invites/",
             {
                 "target_email": "test@hanzo.ai",
                 "level": OrganizationMembership.Level.MEMBER,
@@ -1214,7 +1212,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Try to create bulk invites
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/invites/bulk/",
+            f"/v1/organizations/{self.organization.id}/invites/bulk/",
             [
                 {
                     "target_email": "test1@hanzo.ai",
@@ -1239,7 +1237,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Try to invite a user to the team
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/invites/",
+            f"/v1/organizations/{self.organization.id}/invites/",
             {
                 "target_email": "test@hanzo.ai",
                 "private_project_access": [{"id": team.id, "level": "member"}],
@@ -1271,7 +1269,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Try to invite a user to the team
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/invites/",
+            f"/v1/organizations/{self.organization.id}/invites/",
             {
                 "target_email": "test@hanzo.ai",
                 "private_project_access": [{"id": team.id, "level": "member"}],
@@ -1306,7 +1304,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Try to invite a user to the private team
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/invites/",
+            f"/v1/organizations/{self.organization.id}/invites/",
             {
                 "target_email": "test@hanzo.ai",
                 "private_project_access": [{"id": team.id, "level": "member"}],
@@ -1348,7 +1346,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         # Try to invite a user to the private team
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/invites/",
+            f"/v1/organizations/{self.organization.id}/invites/",
             {
                 "target_email": "test@hanzo.ai",
                 "private_project_access": [{"id": team.id, "level": "member"}],
@@ -1373,7 +1371,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         with self.settings(EMAIL_ENABLED=True, SITE_URL="http://test.hanzo.ai"):
             response = self.client.post(
-                "/api/organizations/@current/invites/",
+                "/v1/organizations/@current/invites/",
                 {"target_email": mixed_case_email},
             )
 
@@ -1392,7 +1390,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         # Create first invite with lowercase email
         with self.settings(EMAIL_ENABLED=True, SITE_URL="http://test.hanzo.ai"):
             response1 = self.client.post(
-                "/api/organizations/@current/invites/",
+                "/v1/organizations/@current/invites/",
                 {"target_email": base_email},
             )
 
@@ -1402,7 +1400,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         mixed_case_email = "User@Example.COM"
         with self.settings(EMAIL_ENABLED=True, SITE_URL="http://test.hanzo.ai"):
             response2 = self.client.post(
-                "/api/organizations/@current/invites/",
+                "/v1/organizations/@current/invites/",
                 {"target_email": mixed_case_email},
             )
 
@@ -1421,7 +1419,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
 
         invite_email = "existing.user@example.com"
         response = self.client.post(
-            "/api/organizations/@current/invites/",
+            "/v1/organizations/@current/invites/",
             {"target_email": invite_email},
         )
 
@@ -1475,7 +1473,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         api_key = self._create_api_key(scopes)
         self.client.logout()
 
-        url = f"/api/organizations/{self.organization.id}/invites/"
+        url = f"/v1/organizations/{self.organization.id}/invites/"
         if http_method == "post":
             response = self.client.post(
                 url,
@@ -1499,7 +1497,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.client.logout()
 
         response = self.client.delete(
-            f"/api/organizations/{self.organization.id}/invites/{invite.id}/",
+            f"/v1/organizations/{self.organization.id}/invites/{invite.id}/",
             HTTP_AUTHORIZATION=f"Bearer {api_key}",
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -1511,7 +1509,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.client.logout()
 
         response = self.client.post(
-            f"/api/organizations/{self.organization.id}/invites/bulk/",
+            f"/v1/organizations/{self.organization.id}/invites/bulk/",
             [{"target_email": "bulk@hanzo.ai"}],
             content_type="application/json",
             HTTP_AUTHORIZATION=f"Bearer {api_key}",
@@ -1550,7 +1548,7 @@ class TestOrganizationInvitesAPI(APIBaseTest):
         self.user.save()
 
         response = self.client.post(
-            f"/api/organizations/{org_b.id}/invites/",
+            f"/v1/organizations/{org_b.id}/invites/",
             {"target_email": "cross_org_test@hanzo.ai"},
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -1565,7 +1563,7 @@ class TestOnboardingDelegationInviteAPI(APIBaseTest):
         self.organization_membership.save()
 
     def _delegate_url(self) -> str:
-        return f"/api/organizations/{self.organization.id}/invites/delegate/"
+        return f"/v1/organizations/{self.organization.id}/invites/delegate/"
 
     def test_delegate_rejects_non_admin(self):
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
@@ -1671,7 +1669,7 @@ class TestOnboardingDelegationInviteAPI(APIBaseTest):
 
 class TestOnboardingSkipAPI(APIBaseTest):
     def _skip_url(self) -> str:
-        return "/api/users/@me/onboarding/skip/"
+        return "/v1/users/@me/onboarding/skip/"
 
     def test_skip_sets_timestamp_and_reason(self):
         response = self.client.post(self._skip_url(), {"reason": "later", "step_at_skip": "install"})
@@ -1727,7 +1725,7 @@ class TestOnboardingSkipAPI(APIBaseTest):
         # reason="delegated" and runs atomic state cleanup; the user PATCH path must NOT
         # be a back door that bypasses those guarantees.
         for attempted_value in ("delegated", "later", "other"):
-            response = self.client.patch("/api/users/@me/", {"onboarding_skipped_reason": attempted_value})
+            response = self.client.patch("/v1/users/@me/", {"onboarding_skipped_reason": attempted_value})
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
             self.user.refresh_from_db()
             self.assertIsNone(self.user.onboarding_skipped_reason)
@@ -1761,7 +1759,7 @@ class TestDelegationCancellationUnsuppressesRedirect(APIBaseTest):
         self.organization_membership.save()
 
     def test_cancelling_delegation_invite_unsuppresses_redirect(self):
-        delegate_url = f"/api/organizations/{self.organization.id}/invites/delegate/"
+        delegate_url = f"/v1/organizations/{self.organization.id}/invites/delegate/"
         response = self.client.post(delegate_url, {"target_email": "engineer@example.com"})
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         invite = OrganizationInvite.objects.get(target_email="engineer@example.com")
@@ -1771,7 +1769,7 @@ class TestDelegationCancellationUnsuppressesRedirect(APIBaseTest):
         self.assertIsNotNone(self.user.onboarding_skipped_at)
         self.assertEqual(self.user.onboarding_skipped_reason, "delegated")
 
-        response = self.client.delete(f"/api/organizations/{self.organization.id}/invites/{invite.id}/")
+        response = self.client.delete(f"/v1/organizations/{self.organization.id}/invites/{invite.id}/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         # Full redirect condition: both the FK *and* the skip timestamp/reason must be cleared
@@ -1790,10 +1788,10 @@ class TestOnboardingDelegationStateTransitionTable(APIBaseTest):
         self.organization_membership.save()
 
     def _delegate_url(self) -> str:
-        return f"/api/organizations/{self.organization.id}/invites/delegate/"
+        return f"/v1/organizations/{self.organization.id}/invites/delegate/"
 
     def _skip_url(self) -> str:
-        return "/api/users/@me/onboarding/skip/"
+        return "/v1/users/@me/onboarding/skip/"
 
     def _assert_user_state(
         self,
@@ -1858,7 +1856,7 @@ class TestOnboardingDelegationStateTransitionTable(APIBaseTest):
     def _run_delegate_then_cancel(self) -> None:
         self._run_delegate_only()
         invite = OrganizationInvite.objects.get(target_email=self._last_delegate_email)
-        response = self.client.delete(f"/api/organizations/{self.organization.id}/invites/{invite.id}/")
+        response = self.client.delete(f"/v1/organizations/{self.organization.id}/invites/{invite.id}/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
 
@@ -1902,13 +1900,13 @@ class TestOrganizationInviteRateLimits(APIBaseTest):
     def test_burst_limit_rejects_single_invites_over_cap(self, _rate_limit_enabled_mock, _time_sensitive_mock):
         for i in range(3):
             response = self.client.post(
-                "/api/organizations/@current/invites/",
+                "/v1/organizations/@current/invites/",
                 {"target_email": f"burst_{i}@hanzo.ai"},
             )
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         response = self.client.post(
-            "/api/organizations/@current/invites/",
+            "/v1/organizations/@current/invites/",
             {"target_email": "burst_final@hanzo.ai"},
         )
         self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
@@ -1918,14 +1916,14 @@ class TestOrganizationInviteRateLimits(APIBaseTest):
         # Two bulk requests of 6 each: the second is blocked because 6+6 > 10,
         # even though the second request is only the caller's second HTTP hit.
         response = self.client.post(
-            "/api/organizations/@current/invites/bulk/",
+            "/v1/organizations/@current/invites/bulk/",
             self._payload(6, seed="first"),
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         response = self.client.post(
-            "/api/organizations/@current/invites/bulk/",
+            "/v1/organizations/@current/invites/bulk/",
             self._payload(6, seed="second"),
             format="json",
         )
@@ -1936,7 +1934,7 @@ class TestOrganizationInviteRateLimits(APIBaseTest):
         self, _rate_limit_enabled_mock, _time_sensitive_mock
     ):
         response = self.client.post(
-            "/api/organizations/@current/invites/bulk/",
+            "/v1/organizations/@current/invites/bulk/",
             self._payload(6, seed="oversize"),
             format="json",
         )
@@ -1949,19 +1947,19 @@ class TestOrganizationInviteRateLimits(APIBaseTest):
         with freeze_time(base_time):
             for i in range(2):
                 response = self.client.post(
-                    "/api/organizations/@current/invites/",
+                    "/v1/organizations/@current/invites/",
                     {"target_email": f"reset_{i}@hanzo.ai"},
                 )
                 self.assertEqual(response.status_code, status.HTTP_201_CREATED)
             response = self.client.post(
-                "/api/organizations/@current/invites/",
+                "/v1/organizations/@current/invites/",
                 {"target_email": "reset_blocked@hanzo.ai"},
             )
             self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
 
         with freeze_time(base_time + timedelta(hours=1, seconds=1)):
             response = self.client.post(
-                "/api/organizations/@current/invites/",
+                "/v1/organizations/@current/invites/",
                 {"target_email": "reset_later@hanzo.ai"},
             )
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -1975,14 +1973,14 @@ class TestOrganizationInviteRateLimits(APIBaseTest):
         for i in range(3):
             with freeze_time(base_time + timedelta(hours=2 * i)):
                 response = self.client.post(
-                    "/api/organizations/@current/invites/",
+                    "/v1/organizations/@current/invites/",
                     {"target_email": f"sustained_{i}@hanzo.ai"},
                 )
                 self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         with freeze_time(base_time + timedelta(hours=8)):
             response = self.client.post(
-                "/api/organizations/@current/invites/",
+                "/v1/organizations/@current/invites/",
                 {"target_email": "sustained_blocked@hanzo.ai"},
             )
             self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
@@ -1996,21 +1994,21 @@ class TestOrganizationInviteRateLimits(APIBaseTest):
 
         for i in range(2):
             response = self.client.post(
-                "/api/organizations/@current/invites/",
+                "/v1/organizations/@current/invites/",
                 {"target_email": f"scoped_{i}@hanzo.ai"},
             )
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # Current org is capped.
         response = self.client.post(
-            "/api/organizations/@current/invites/",
+            "/v1/organizations/@current/invites/",
             {"target_email": "scoped_over@hanzo.ai"},
         )
         self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
 
         # The other org has its own bucket and can still invite.
         response = self.client.post(
-            f"/api/organizations/{other_org.id}/invites/",
+            f"/v1/organizations/{other_org.id}/invites/",
             {"target_email": "scoped_other@hanzo.ai"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

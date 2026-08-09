@@ -193,9 +193,9 @@ def _fetch_rows(*, organization_id: str | None) -> list[dict] | None:
         return None
 
     if organization_id is None:
-        url = f"{base_url.rstrip('/')}/api/v1/teams"
+        url = f"{base_url.rstrip('/')}/v1/v1/teams"
     else:
-        url = f"{base_url.rstrip('/')}/api/v1/orgs/{organization_id}/teams"
+        url = f"{base_url.rstrip('/')}/v1/v1/orgs/{organization_id}/teams"
 
     headers: dict[str, str] = {}
     token = getattr(settings, "DUCKGRES_INTERNAL_SECRET", None)

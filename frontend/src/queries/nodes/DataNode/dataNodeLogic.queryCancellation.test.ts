@@ -18,7 +18,7 @@ describe('dataNodeLogic - query cancellation', () => {
         featureFlagLogic.mount()
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/trend/': async ({ request }) => {
+                '/v1/environments/:team_id/insights/trend/': async ({ request }) => {
                     if (new URL(request.url).searchParams.get('date_from') === '-180d') {
                         // delay for a second before response without pausing
                         return new Promise<[number, { result: string[] }]>((resolve) =>
@@ -31,8 +31,8 @@ describe('dataNodeLogic - query cancellation', () => {
                 },
             },
             post: {
-                '/api/environments/997/insights/cancel/': [201],
-                '/api/environments/997/query/:kind/': async () => {
+                '/v1/environments/997/insights/cancel/': [201],
+                '/v1/environments/997/query/:kind/': async () => {
                     return new Promise<[number, { result: string[] }]>((resolve) =>
                         setTimeout(() => {
                             resolve([200, { result: ['slow result from api'] }])
@@ -41,7 +41,7 @@ describe('dataNodeLogic - query cancellation', () => {
                 },
             },
             delete: {
-                '/api/environments/:team_id/query/uuid-first': [200, {}],
+                '/v1/environments/:team_id/query/uuid-first': [200, {}],
             },
         })
     })

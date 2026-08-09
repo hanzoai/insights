@@ -17,7 +17,7 @@ class DatastoreTestFunnelTypes(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/funnel/",
+            f"/v1/projects/{self.team.id}/insights/funnel/",
             {
                 "events": [
                     {"id": "step one", "type": "events", "order": 0},
@@ -45,7 +45,7 @@ class DatastoreTestFunnelTypes(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/funnel/",
+            f"/v1/projects/{self.team.id}/insights/funnel/",
             {
                 "events": [
                     {"id": "step one", "type": "events", "order": 0},
@@ -81,7 +81,7 @@ class DatastoreTestFunnelTypes(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/funnel/",
+            f"/v1/projects/{self.team.id}/insights/funnel/",
             {
                 "events": [
                     {"id": "step one", "type": "events", "order": 0},
@@ -117,7 +117,7 @@ class DatastoreTestFunnelTypes(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/funnel/",
+            f"/v1/projects/{self.team.id}/insights/funnel/",
             {
                 "events": [
                     {"id": "step one", "type": "events", "order": 0},
@@ -154,7 +154,7 @@ class DatastoreTestFunnelTypes(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/funnel/",
+            f"/v1/projects/{self.team.id}/insights/funnel/",
             {
                 "events": [
                     {"id": "step one", "type": "events", "order": 0},
@@ -196,7 +196,7 @@ class DatastoreTestFunnelTypes(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/funnel/",
+            f"/v1/projects/{self.team.id}/insights/funnel/",
             {
                 "events": [
                     {"id": "step one", "type": "events", "order": 0},
@@ -241,7 +241,7 @@ class DatastoreTestFunnelTypes(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/funnel/",
+            f"/v1/projects/{self.team.id}/insights/funnel/",
             {
                 "insight": "funnels",
                 "funnel_viz_type": "time_to_convert",
@@ -300,7 +300,7 @@ class DatastoreTestFunnelTypes(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/funnel/",
+            f"/v1/projects/{self.team.id}/insights/funnel/",
             {
                 "insight": "funnels",
                 "funnel_viz_type": "time_to_convert",
@@ -360,7 +360,7 @@ class DatastoreTestFunnelTypes(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/funnel/",
+            f"/v1/projects/{self.team.id}/insights/funnel/",
             {
                 "insight": "funnels",
                 "funnel_viz_type": "time_to_convert",
@@ -397,7 +397,7 @@ class DatastoreTestFunnelTypes(DatastoreTestMixin, APIBaseTest):
 
     def test_funnel_invalid_action_handled(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/funnel/",
+            f"/v1/projects/{self.team.id}/insights/funnel/",
             {"actions": [{"id": 666, "type": "actions", "order": 0}, {"id": 666, "type": "actions", "order": 0}]},
         )
 
@@ -421,7 +421,7 @@ class DatastoreTestFunnelTypes(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/funnel/",
+            f"/v1/projects/{self.team.id}/insights/funnel/",
             {
                 "events": [
                     {"id": "step one", "type": "events", "order": 0},
@@ -468,7 +468,7 @@ class DatastoreTestFunnelTypes(DatastoreTestMixin, APIBaseTest):
             ("step three", 0, 1, False),
         ]:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights/funnel/",
+                f"/v1/projects/{self.team.id}/insights/funnel/",
                 {
                     "events": [
                         {"id": "step one", "type": "events", "order": 0},
@@ -552,7 +552,7 @@ class DatastoreTestFunnelTypes(DatastoreTestMixin, APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/funnel?refresh=true",
+            f"/v1/projects/{self.team.id}/insights/funnel?refresh=true",
             filter_with_breakdown,
         )
         self.assertEqual(200, response.status_code)

@@ -17,7 +17,7 @@ from insights.exceptions import exception_handler
 class TestExceptionHandlerWWWAuthenticate(SimpleTestCase):
     def _request(self, *, secure: bool = True, host: str = "us.hanzo.ai") -> HttpRequest:
         factory = RequestFactory()
-        return factory.get("/api/users/@me/", secure=secure, HTTP_HOST=host)
+        return factory.get("/v1/users/@me/", secure=secure, HTTP_HOST=host)
 
     @parameterized.expand(
         [

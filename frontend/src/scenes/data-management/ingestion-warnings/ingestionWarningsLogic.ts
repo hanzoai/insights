@@ -104,7 +104,7 @@ export const ingestionWarningsLogic = kea<ingestionWarningsLogicType>([
             {
                 loadData: async () => {
                     const q = values.searchQuery ? `?q=${values.searchQuery}` : ''
-                    const { results } = await api.get(`api/projects/${values.currentProjectId}/ingestion_warnings${q}`)
+                    const { results } = await api.get(`v1/projects/${values.currentProjectId}/ingestion_warnings${q}`)
                     return results
                 },
             },

@@ -54,7 +54,7 @@ class TestTraceSpansAttributeBreakdown(_TraceSpansTestBase):
     def _breakdown(self, **query_fields) -> list[dict]:
         query: dict = {"dateRange": {"date_from": DATE_FROM, "date_to": DATE_TO}, **query_fields}
         response = self.client.post(
-            f"/api/projects/{self.team.id}/tracing/spans/attribute-breakdown/",
+            f"/v1/projects/{self.team.id}/tracing/spans/attribute-breakdown/",
             {"query": query},
             format="json",
         )
@@ -135,7 +135,7 @@ class TestTraceSpansAttributeBreakdown(_TraceSpansTestBase):
 
     def test_span_column_breakdown_rejects_non_allowlisted_key(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/tracing/spans/attribute-breakdown/",
+            f"/v1/projects/{self.team.id}/tracing/spans/attribute-breakdown/",
             {
                 "query": {
                     "dateRange": {"date_from": DATE_FROM, "date_to": DATE_TO},

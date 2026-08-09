@@ -386,11 +386,11 @@ export const llmTaggersLogic = kea<llmTaggersLogicType>([
     listeners(({ actions, values }) => ({
         loadTaggers: async () => {
             // nosemgrep: prefer-codegen-api
-            const response = await api.get('api/environments/@current/taggers/')
+            const response = await api.get('v1/environments/@current/taggers/')
             if (response.results.length === 0 && !values.hasSeededDefaults) {
                 for (const template of defaultTaggerTemplates) {
                     // nosemgrep: prefer-codegen-api
-                    await api.create('api/environments/@current/taggers/', {
+                    await api.create('v1/environments/@current/taggers/', {
                         name: template.name,
                         description: template.description,
                         enabled: false,
@@ -399,7 +399,7 @@ export const llmTaggersLogic = kea<llmTaggersLogicType>([
                     })
                 }
                 // nosemgrep: prefer-codegen-api
-                const seeded = await api.get('api/environments/@current/taggers/')
+                const seeded = await api.get('v1/environments/@current/taggers/')
                 actions.loadTaggersSuccess(seeded.results)
             } else {
                 actions.loadTaggersSuccess(response.results)
@@ -415,7 +415,7 @@ export const llmTaggersLogic = kea<llmTaggersLogicType>([
                 return
             }
             // nosemgrep: prefer-codegen-api
-            await api.update(`api/environments/@current/taggers/${id}/`, { enabled: !tagger.enabled })
+            await api.update(`v1/environments/@current/taggers/${id}/`, { enabled: !tagger.enabled })
             await breakpoint(100)
             actions.loadTaggers()
         },

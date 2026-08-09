@@ -216,7 +216,7 @@ export const insightsQLQueryEditorLogic = kea<insightsQLQueryEditorLogicType>([
             }
             try {
                 const result = await api.get(
-                    combineUrl(`api/projects/${values.currentProjectId}/query/draft_sql/`, {
+                    combineUrl(`v1/projects/${values.currentProjectId}/query/draft_sql/`, {
                         prompt: values.prompt,
                         current_query: values.queryInput,
                     }).url
@@ -237,7 +237,7 @@ export const insightsQLQueryEditorLogic = kea<insightsQLQueryEditorLogicType>([
             }
             try {
                 const result = await api.get(
-                    combineUrl(`api/projects/@current/query/draft_sql/`, {
+                    combineUrl(`v1/projects/@current/query/draft_sql/`, {
                         prompt,
                         current_query: values.queryInput,
                     }).url

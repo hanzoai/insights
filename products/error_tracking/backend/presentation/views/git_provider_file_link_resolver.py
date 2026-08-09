@@ -225,7 +225,7 @@ def get_gitlab_file_url(
             return None
 
         encoded_search = urllib.parse.quote(search_query)
-        url = f"{gitlab_url}/api/v4/projects/{encoded_project_path}/search?scope={search_scope}&search={encoded_search}"
+        url = f"{gitlab_url}/v1/v4/projects/{encoded_project_path}/search?scope={search_scope}&search={encoded_search}"
 
         try:
             response = requests.get(url, headers=headers, timeout=10)

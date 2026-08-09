@@ -36,10 +36,10 @@ class TestGetTeamData(SimpleTestCase):
 
 
 class TestSdkHealthViewSet(APIBaseTest):
-    """Tests for the /api/projects/{team_id}/sdk_health/report/ MCP-accessible endpoint."""
+    """Tests for the /v1/projects/{team_id}/sdk_health/report/ MCP-accessible endpoint."""
 
     def _url(self) -> str:
-        return f"/api/projects/{self.team.pk}/sdk_health/report/"
+        return f"/v1/projects/{self.team.pk}/sdk_health/report/"
 
     def test_requires_authentication(self) -> None:
         self.client.logout()
@@ -173,10 +173,10 @@ class TestSdkHealthViewSet(APIBaseTest):
 
 
 class TestSdkHealthLegacyEndpoint(APIBaseTest):
-    """Tests for the legacy /api/sdk_health/ endpoint consumed by the onboarding scene."""
+    """Tests for the legacy /v1/sdk_health/ endpoint consumed by the onboarding scene."""
 
     def _url(self) -> str:
-        return "/api/sdk_health/"
+        return "/v1/sdk_health/"
 
     @patch("insights.api.sdk_health.get_team_data")
     def test_cold_cache_returns_empty_200(self, mock_team) -> None:

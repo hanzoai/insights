@@ -28,7 +28,7 @@ class TestPropertyAccessControlViewSet(APIBaseTest):
             property_type="String",
             type=PropertyDefinition.Type.EVENT,
         )
-        self.url = f"/api/environments/{self.team.pk}/property_access_controls/"
+        self.url = f"/v1/environments/{self.team.pk}/property_access_controls/"
         self.list_url = f"{self.url}?property_definition_id={self.prop_def.id}"
 
     def _post(self, data: dict):
@@ -184,7 +184,6 @@ class TestPropertyAccessControlViewSet(APIBaseTest):
 
     def test_cross_org_role_rejected(self):
         from insights.models import Organization
-
         from insights.models.ee_models import Role
 
         other_org = Organization.objects.create(name="Other org")
@@ -219,7 +218,6 @@ class TestPropertyAccessControlViewSet(APIBaseTest):
 
     def test_delete_cross_org_role_rejected(self):
         from insights.models import Organization
-
         from insights.models.ee_models import Role
 
         other_org = Organization.objects.create(name="Other org")

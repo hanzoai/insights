@@ -359,7 +359,7 @@ export const webAnalyticsHealthLogic = kea<webAnalyticsHealthLogicType>([
             __default: null as HealthIssuesResponse | null,
             loadHealthIssues: async (): Promise<HealthIssuesResponse> => {
                 return await api.get<HealthIssuesResponse>(
-                    `api/projects/${values.currentTeamIdStrict}/health_issues/?status=active&dismissed=false`
+                    `v1/projects/${values.currentTeamIdStrict}/health_issues/?status=active&dismissed=false`
                 )
             },
         },
@@ -542,7 +542,7 @@ export const webAnalyticsHealthLogic = kea<webAnalyticsHealthLogicType>([
                     scheduled_kinds: string[]
                     kinds_failed: string[]
                     team_id: number
-                }>(`api/projects/${values.currentTeamIdStrict}/health_issues/refresh/`)
+                }>(`v1/projects/${values.currentTeamIdStrict}/health_issues/refresh/`)
                 breakpoint()
 
                 actions.setNextRefreshAvailableAt(Date.now() + REFRESH_COOLDOWN_MS)

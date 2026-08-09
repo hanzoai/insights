@@ -47,7 +47,7 @@ class TestEmailConnectDomainCaseInsensitivity(BaseTest):
     )
     def test_connect_lowercases_domain(self, _mock_setting: MagicMock, _mock_mailgun: MagicMock):
         response = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "Support@Example.COM", "from_name": "Support"},
             content_type="application/json",
         )
@@ -66,7 +66,7 @@ class TestEmailConnectDomainCaseInsensitivity(BaseTest):
         self, _mock_setting: MagicMock, _mock_mailgun: MagicMock
     ):
         self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "support@example.com", "from_name": "Support"},
             content_type="application/json",
         )
@@ -81,7 +81,7 @@ class TestEmailConnectDomainCaseInsensitivity(BaseTest):
         self.user.save()
 
         response = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "help@Example.COM", "from_name": "Help"},
             content_type="application/json",
         )
@@ -100,19 +100,19 @@ class TestEmailChannelPermissions(BaseTest):
             (
                 "connect",
                 "post",
-                "/api/conversations/v1/email/connect",
+                "/v1/conversations/v1/email/connect",
                 {"from_email": "s@example.com", "from_name": "S"},
             ),
             (
                 "disconnect",
                 "post",
-                "/api/conversations/v1/email/disconnect",
+                "/v1/conversations/v1/email/disconnect",
                 {"config_id": "00000000-0000-0000-0000-000000000999"},
             ),
             (
                 "set-default",
                 "post",
-                "/api/conversations/v1/email/set-default",
+                "/v1/conversations/v1/email/set-default",
                 {"config_id": "00000000-0000-0000-0000-000000000999"},
             ),
         ]
@@ -131,7 +131,7 @@ class TestEmailChannelPermissions(BaseTest):
         self.organization_membership.save()
 
         response = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "s@example.com", "from_name": "S"},
             content_type="application/json",
         )
@@ -143,7 +143,7 @@ class TestEmailChannelPermissions(BaseTest):
 
         # Disconnect with a nonexistent config_id returns 404 (not crash)
         response = self.client.post(
-            "/api/conversations/v1/email/disconnect",
+            "/v1/conversations/v1/email/disconnect",
             {"config_id": "00000000-0000-0000-0000-000000000999"},
             content_type="application/json",
         )
@@ -164,14 +164,14 @@ class TestEmailMultiConfig(BaseTest):
     )
     def test_connect_multiple_emails(self, _mock_setting: MagicMock, mock_mailgun: MagicMock):
         r1 = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "support@example.com", "from_name": "Support"},
             content_type="application/json",
         )
         assert r1.status_code == 200
 
         r2 = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "billing@example.com", "from_name": "Billing"},
             content_type="application/json",
         )
@@ -187,14 +187,14 @@ class TestEmailMultiConfig(BaseTest):
     )
     def test_same_domain_skips_mailgun_add(self, _mock_setting: MagicMock, mock_mailgun: MagicMock):
         self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "support@example.com", "from_name": "Support"},
             content_type="application/json",
         )
         mock_mailgun.reset_mock()
 
         self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "billing@example.com", "from_name": "Billing"},
             content_type="application/json",
         )
@@ -208,12 +208,12 @@ class TestEmailMultiConfig(BaseTest):
     )
     def test_reject_duplicate_from_email(self, _mock_setting: MagicMock, _mock_mailgun: MagicMock):
         self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "support@example.com", "from_name": "Support"},
             content_type="application/json",
         )
         r2 = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "support@example.com", "from_name": "Support Again"},
             content_type="application/json",
         )
@@ -226,7 +226,7 @@ class TestEmailMultiConfig(BaseTest):
     )
     def test_same_org_different_team_domain_allowed(self, _mock_setting: MagicMock, mock_mailgun: MagicMock):
         self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "support@example.com", "from_name": "Support"},
             content_type="application/json",
         )
@@ -237,7 +237,7 @@ class TestEmailMultiConfig(BaseTest):
         self.user.save()
 
         r2 = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "billing@example.com", "from_name": "Billing"},
             content_type="application/json",
         )
@@ -252,7 +252,7 @@ class TestEmailMultiConfig(BaseTest):
     )
     def test_cross_org_domain_rejected(self, _mock_setting: MagicMock, _mock_mailgun: MagicMock):
         self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "support@example.com", "from_name": "Support"},
             content_type="application/json",
         )
@@ -266,7 +266,7 @@ class TestEmailMultiConfig(BaseTest):
         self.user.save()
 
         r2 = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "billing@example.com", "from_name": "Billing"},
             content_type="application/json",
         )
@@ -283,12 +283,12 @@ class TestEmailMultiConfig(BaseTest):
         self, _mock_setting: MagicMock, _mock_delete: MagicMock, _mock_add: MagicMock
     ):
         r1 = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "support@example.com", "from_name": "Support"},
             content_type="application/json",
         )
         self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "billing@example.com", "from_name": "Billing"},
             content_type="application/json",
         )
@@ -296,7 +296,7 @@ class TestEmailMultiConfig(BaseTest):
         config1_id = r1.json()["config"]["id"]
 
         response = self.client.post(
-            "/api/conversations/v1/email/disconnect",
+            "/v1/conversations/v1/email/disconnect",
             {"config_id": config1_id},
             content_type="application/json",
         )
@@ -317,14 +317,14 @@ class TestEmailMultiConfig(BaseTest):
         self, _mock_setting: MagicMock, _mock_delete: MagicMock, _mock_add: MagicMock
     ):
         r1 = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "support@example.com", "from_name": "Support"},
             content_type="application/json",
         )
         config_id = r1.json()["config"]["id"]
 
         self.client.post(
-            "/api/conversations/v1/email/disconnect",
+            "/v1/conversations/v1/email/disconnect",
             {"config_id": config_id},
             content_type="application/json",
         )
@@ -343,19 +343,19 @@ class TestEmailMultiConfig(BaseTest):
         self, _mock_setting: MagicMock, mock_delete: MagicMock, _mock_add: MagicMock
     ):
         r1 = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "support@example.com", "from_name": "Support"},
             content_type="application/json",
         )
         self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "billing@example.com", "from_name": "Billing"},
             content_type="application/json",
         )
 
         config1_id = r1.json()["config"]["id"]
         self.client.post(
-            "/api/conversations/v1/email/disconnect",
+            "/v1/conversations/v1/email/disconnect",
             {"config_id": config1_id},
             content_type="application/json",
         )
@@ -381,7 +381,7 @@ class TestEmailMultiConfig(BaseTest):
         _mock_get_domain: MagicMock,
     ):
         response = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "support@example.com", "from_name": "Support"},
             content_type="application/json",
         )
@@ -428,7 +428,7 @@ class TestEmailMultiConfig(BaseTest):
         mock_verify.return_value = {"state": reverified_state}
 
         response = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "support@example.com", "from_name": "Support"},
             content_type="application/json",
         )
@@ -462,7 +462,7 @@ class TestEmailMultiConfig(BaseTest):
         _mock_get_domain: MagicMock,
     ):
         response = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "support@example.com", "from_name": "Support"},
             content_type="application/json",
         )
@@ -478,17 +478,17 @@ class TestEmailMultiConfig(BaseTest):
     )
     def test_status_returns_all_configs(self, _mock_setting: MagicMock, _mock_mailgun: MagicMock):
         self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "support@example.com", "from_name": "Support"},
             content_type="application/json",
         )
         self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "billing@example.com", "from_name": "Billing"},
             content_type="application/json",
         )
 
-        response = self.client.get("/api/conversations/v1/email/status")
+        response = self.client.get("/v1/conversations/v1/email/status")
         assert response.status_code == 200
         data = response.json()
         assert len(data["configs"]) == 2
@@ -506,7 +506,7 @@ class TestEmailMultiConfig(BaseTest):
 
         for i in range(MAX_EMAIL_CONFIGS_PER_TEAM):
             r = self.client.post(
-                "/api/conversations/v1/email/connect",
+                "/v1/conversations/v1/email/connect",
                 {"from_email": f"addr{i}@example{i}.com", "from_name": f"Name {i}"},
                 content_type="application/json",
             )
@@ -515,7 +515,7 @@ class TestEmailMultiConfig(BaseTest):
         # A failed Mailgun release must not mask the limit error
         mock_delete.side_effect = RuntimeError("mailgun unavailable")
         r = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "overflow@overflow.com", "from_name": "Overflow"},
             content_type="application/json",
         )
@@ -551,14 +551,14 @@ class TestEmailMultiConfig(BaseTest):
 
         for i in range(MAX_EMAIL_CONFIGS_PER_TEAM):
             r = self.client.post(
-                "/api/conversations/v1/email/connect",
+                "/v1/conversations/v1/email/connect",
                 {"from_email": f"addr{i}@example{i}.com", "from_name": f"Name {i}"},
                 content_type="application/json",
             )
             assert r.status_code == 200, f"Failed to connect config {i}: {r.json()}"
 
         r = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "overflow@overflow.com", "from_name": "Overflow"},
             content_type="application/json",
         )
@@ -577,7 +577,7 @@ class TestEmailMultiConfig(BaseTest):
     )
     def test_idor_disconnect_other_teams_config(self, _mock_setting: MagicMock, _mock_mailgun: MagicMock):
         r1 = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "support@team1.com", "from_name": "Team1"},
             content_type="application/json",
         )
@@ -588,7 +588,7 @@ class TestEmailMultiConfig(BaseTest):
         self.user.save()
 
         response = self.client.post(
-            "/api/conversations/v1/email/disconnect",
+            "/v1/conversations/v1/email/disconnect",
             {"config_id": config_id},
             content_type="application/json",
         )
@@ -607,12 +607,12 @@ class TestEmailMultiConfig(BaseTest):
         self, _mock_setting: MagicMock, _mock_verify: MagicMock, _mock_add: MagicMock
     ):
         self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "support@example.com", "from_name": "Support"},
             content_type="application/json",
         )
         r2 = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "billing@example.com", "from_name": "Billing"},
             content_type="application/json",
         )
@@ -622,7 +622,7 @@ class TestEmailMultiConfig(BaseTest):
         self.user.current_team = second_team
         self.user.save()
         self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "sales@example.com", "from_name": "Sales"},
             content_type="application/json",
         )
@@ -633,7 +633,7 @@ class TestEmailMultiConfig(BaseTest):
 
         config2_id = r2.json()["config"]["id"]
         response = self.client.post(
-            "/api/conversations/v1/email/verify-domain",
+            "/v1/conversations/v1/email/verify-domain",
             {"config_id": config2_id},
             content_type="application/json",
         )
@@ -658,7 +658,7 @@ class TestEmailMultiConfig(BaseTest):
         self, _mock_setting: MagicMock, _mock_verify: MagicMock, _mock_add: MagicMock
     ):
         r1 = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "support@team1.com", "from_name": "Team1"},
             content_type="application/json",
         )
@@ -669,7 +669,7 @@ class TestEmailMultiConfig(BaseTest):
         self.user.save()
 
         response = self.client.post(
-            "/api/conversations/v1/email/verify-domain",
+            "/v1/conversations/v1/email/verify-domain",
             {"config_id": config_id},
             content_type="application/json",
         )
@@ -682,7 +682,7 @@ class TestEmailInboundRegionRouting(BaseTest):
         self.client = Client()
 
     def _post(self, data: dict[str, str]):
-        return self.client.post("/api/conversations/v1/email/inbound", data=data)
+        return self.client.post("/v1/conversations/v1/email/inbound", data=data)
 
     @patch("products.conversations.backend.api.email_events.proxy_to_secondary_region", return_value=True)
     @patch("products.conversations.backend.api.email_events.validate_webhook_signature", return_value=True)
@@ -726,7 +726,7 @@ class TestBuildProxyKwargs(BaseTest):
 
         factory = RequestFactory()
         request = factory.post(
-            "/api/conversations/v1/email/inbound",
+            "/v1/conversations/v1/email/inbound",
             data=b"key=val",
             content_type="application/x-www-form-urlencoded",
         )
@@ -746,7 +746,7 @@ class TestBuildProxyKwargs(BaseTest):
         factory = RequestFactory()
         png = SimpleUploadedFile("photo.png", _make_png_bytes(), content_type="image/png")
         request = factory.post(
-            "/api/conversations/v1/email/inbound",
+            "/v1/conversations/v1/email/inbound",
             data={"recipient": "team-abc@mg.hanzo.ai", "attachment-1": png},
         )
 
@@ -793,7 +793,7 @@ class TestEmailInboundMultiConfig(BaseTest):
         self._create_config("billing@example.com", "bbb222")
 
         response = self.client.post(
-            "/api/conversations/v1/email/inbound",
+            "/v1/conversations/v1/email/inbound",
             {
                 "recipient": "team-aaa111@mg.hanzo.ai",
                 "from": "customer@test.com",
@@ -814,7 +814,7 @@ class TestEmailInboundMultiConfig(BaseTest):
         config2 = self._create_config("billing@example.com", "bbb222")
 
         response = self.client.post(
-            "/api/conversations/v1/email/inbound",
+            "/v1/conversations/v1/email/inbound",
             {
                 "recipient": "team-bbb222@mg.hanzo.ai",
                 "from": "vendor@test.com",
@@ -880,7 +880,7 @@ class TestEmailInboundContent(BaseTest):
         self, _name: str, body_fields: dict[str, str], expected_content: str, _mock_sig: MagicMock
     ):
         response = self.client.post(
-            "/api/conversations/v1/email/inbound",
+            "/v1/conversations/v1/email/inbound",
             {
                 "recipient": "team-cc00dd11ee2233ff@mg.hanzo.ai",
                 "from": "customer@test.com",
@@ -902,11 +902,11 @@ class TestEmailInboundContent(BaseTest):
             "subject": "Help",
         }
         self.client.post(
-            "/api/conversations/v1/email/inbound",
+            "/v1/conversations/v1/email/inbound",
             {**base, "Message-Id": "<thread-init@test.com>", "stripped-text": "Initial question"},
         )
         response = self.client.post(
-            "/api/conversations/v1/email/inbound",
+            "/v1/conversations/v1/email/inbound",
             {
                 **base,
                 "Message-Id": "<thread-reply@test.com>",
@@ -1361,7 +1361,7 @@ class TestEmailInboundDmarcRewrite(BaseTest):
     def test_dmarc_sender_recovery(self, _name, extra_headers, expected_email, expected_name, _mock_sig):
         data = self._base_data(f"<dmarc-{_name}@test.com>")
         data.update(extra_headers)
-        self.client.post("/api/conversations/v1/email/inbound", data)
+        self.client.post("/v1/conversations/v1/email/inbound", data)
 
         ticket = Ticket.objects.get(team=self.team)
         assert ticket.email_from == expected_email
@@ -1373,7 +1373,7 @@ class TestEmailInboundDmarcRewrite(BaseTest):
         data = self._base_data("<dmarc-ctx@test.com>")
         data["from"] = "'Alex Smith' via Merch <merch@hanzo.ai>"
         data["X-Original-From"] = "Alex Smith <alex@strictdmarc.com>"
-        self.client.post("/api/conversations/v1/email/inbound", data)
+        self.client.post("/v1/conversations/v1/email/inbound", data)
 
         ticket = Ticket.objects.get(team=self.team)
         assert ticket.distinct_id == "alex@strictdmarc.com"
@@ -1400,7 +1400,7 @@ class TestEmailInboundTeamMemberDetection(BaseTest):
         )
 
     def _post(self, data: dict[str, str]):
-        return self.client.post("/api/conversations/v1/email/inbound", data)
+        return self.client.post("/v1/conversations/v1/email/inbound", data)
 
     @patch("products.conversations.backend.api.email_events.validate_webhook_signature", return_value=True)
     def test_team_member_reply_attribution_and_unread(self, _mock_sig: MagicMock):
@@ -1663,7 +1663,7 @@ class TestEmailInboundCcParticipants(BaseTest):
             data["To"] = to_header
         if cc_header:
             data["Cc"] = cc_header
-        response = self.client.post("/api/conversations/v1/email/inbound", data)
+        response = self.client.post("/v1/conversations/v1/email/inbound", data)
         assert response.status_code == 200
         ticket = Ticket.objects.get(team=self.team)
         assert ticket.cc_participants == expected
@@ -1672,7 +1672,7 @@ class TestEmailInboundCcParticipants(BaseTest):
     def test_reply_merges_cc_participants(self, _mock_sig: MagicMock):
         data1 = self._base_data("<cc2@test.com>")
         data1["Cc"] = "dev@company.com"
-        self.client.post("/api/conversations/v1/email/inbound", data1)
+        self.client.post("/v1/conversations/v1/email/inbound", data1)
 
         ticket = Ticket.objects.get(team=self.team)
         assert ticket.cc_participants == ["dev@company.com"]
@@ -1680,7 +1680,7 @@ class TestEmailInboundCcParticipants(BaseTest):
         data2 = self._base_data("<cc3@test.com>")
         data2["In-Reply-To"] = "<cc2@test.com>"
         data2["Cc"] = "dev@company.com, new@company.com"
-        self.client.post("/api/conversations/v1/email/inbound", data2)
+        self.client.post("/v1/conversations/v1/email/inbound", data2)
 
         ticket.refresh_from_db()
         assert ticket.cc_participants == ["dev@company.com", "new@company.com"]
@@ -1692,7 +1692,7 @@ class TestEmailInboundCcParticipants(BaseTest):
         data3["In-Reply-To"] = "<cc2@test.com>"
         data3["To"] = "sender@test.com, support@example.com"
         data3["Cc"] = "new@company.com"
-        self.client.post("/api/conversations/v1/email/inbound", data3)
+        self.client.post("/v1/conversations/v1/email/inbound", data3)
 
         ticket.refresh_from_db()
         assert ticket.cc_participants == ["dev@company.com", "new@company.com"]
@@ -1729,7 +1729,7 @@ class TestEmailInboundAttachments(BaseTest):
 
         data = self._base_post_data("<img@test.com>")
         with self.settings(OBJECT_STORAGE_ENABLED=True):
-            response = self.client.post("/api/conversations/v1/email/inbound", {**data, "attachment-1": attachment})
+            response = self.client.post("/v1/conversations/v1/email/inbound", {**data, "attachment-1": attachment})
 
         assert response.status_code == 200
         mock_storage.assert_called_once()
@@ -1752,7 +1752,7 @@ class TestEmailInboundAttachments(BaseTest):
 
         data = self._base_post_data("<pdf@test.com>")
         with self.settings(OBJECT_STORAGE_ENABLED=True):
-            response = self.client.post("/api/conversations/v1/email/inbound", {**data, "attachment-1": pdf})
+            response = self.client.post("/v1/conversations/v1/email/inbound", {**data, "attachment-1": pdf})
 
         assert response.status_code == 200
 
@@ -1777,7 +1777,7 @@ class TestEmailInboundAttachments(BaseTest):
         data = self._base_post_data("<multi@test.com>")
         with self.settings(OBJECT_STORAGE_ENABLED=True):
             response = self.client.post(
-                "/api/conversations/v1/email/inbound", {**data, "attachment-1": png, "attachment-2": pdf}
+                "/v1/conversations/v1/email/inbound", {**data, "attachment-1": png, "attachment-2": pdf}
             )
 
         assert response.status_code == 200
@@ -1798,7 +1798,7 @@ class TestEmailInboundAttachments(BaseTest):
 
         data = self._base_post_data("<huge@test.com>")
         with self.settings(OBJECT_STORAGE_ENABLED=True):
-            response = self.client.post("/api/conversations/v1/email/inbound", {**data, "attachment-1": oversized})
+            response = self.client.post("/v1/conversations/v1/email/inbound", {**data, "attachment-1": oversized})
 
         assert response.status_code == 200
         mock_storage.assert_not_called()
@@ -1816,7 +1816,7 @@ class TestEmailInboundAttachments(BaseTest):
 
         data = self._base_post_data("<nostorage@test.com>")
         with self.settings(OBJECT_STORAGE_ENABLED=False):
-            response = self.client.post("/api/conversations/v1/email/inbound", {**data, "attachment-1": png})
+            response = self.client.post("/v1/conversations/v1/email/inbound", {**data, "attachment-1": png})
 
         assert response.status_code == 200
         mock_storage.assert_not_called()
@@ -1833,7 +1833,7 @@ class TestEmailInboundAttachments(BaseTest):
 
         data = self._base_post_data("<evil@test.com>")
         with self.settings(OBJECT_STORAGE_ENABLED=True):
-            response = self.client.post("/api/conversations/v1/email/inbound", {**data, "attachment-1": fake_image})
+            response = self.client.post("/v1/conversations/v1/email/inbound", {**data, "attachment-1": fake_image})
 
         assert response.status_code == 200
         mock_storage.assert_not_called()
@@ -1848,7 +1848,7 @@ class TestEmailInboundAttachments(BaseTest):
     def test_inbound_no_attachments_unchanged(self, _mock_sig: MagicMock, mock_storage: MagicMock):
         data = self._base_post_data("<plain@test.com>")
         with self.settings(OBJECT_STORAGE_ENABLED=True):
-            response = self.client.post("/api/conversations/v1/email/inbound", data)
+            response = self.client.post("/v1/conversations/v1/email/inbound", data)
 
         assert response.status_code == 200
         mock_storage.assert_not_called()
@@ -1885,7 +1885,7 @@ class TestEmailSendTestView(BaseTest):
         mock_send_mime.return_value = "<mg-id@example.com>"
 
         response = self.client.post(
-            "/api/conversations/v1/email/send-test", self._post(), content_type="application/json"
+            "/v1/conversations/v1/email/send-test", self._post(), content_type="application/json"
         )
 
         assert response.status_code == 200
@@ -1920,7 +1920,7 @@ class TestEmailSendTestView(BaseTest):
         mock_send_mime.side_effect = getattr(mailgun_mod, exc_name)(exc_arg)
 
         response = self.client.post(
-            "/api/conversations/v1/email/send-test", self._post(), content_type="application/json"
+            "/v1/conversations/v1/email/send-test", self._post(), content_type="application/json"
         )
 
         assert response.status_code == expected_status
@@ -1935,7 +1935,7 @@ class TestEmailSendTestView(BaseTest):
 
         mock_send_mime.side_effect = MailgunDomainNotRegistered("gone")
 
-        self.client.post("/api/conversations/v1/email/send-test", self._post(), content_type="application/json")
+        self.client.post("/v1/conversations/v1/email/send-test", self._post(), content_type="application/json")
 
         self.config.refresh_from_db()
         assert self.config.domain_verified is False
@@ -1966,12 +1966,12 @@ class TestEmailDefaultChannel(BaseTest):
     )
     def test_first_connected_channel_becomes_default(self, _mock_setting: MagicMock, _mock_mailgun: MagicMock):
         r1 = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "support@example.com", "from_name": "Support"},
             content_type="application/json",
         )
         r2 = self.client.post(
-            "/api/conversations/v1/email/connect",
+            "/v1/conversations/v1/email/connect",
             {"from_email": "billing@example.com", "from_name": "Billing"},
             content_type="application/json",
         )
@@ -1984,7 +1984,7 @@ class TestEmailDefaultChannel(BaseTest):
         second = self._create_config("billing@example.com")
 
         response = self.client.post(
-            "/api/conversations/v1/email/set-default",
+            "/v1/conversations/v1/email/set-default",
             {"config_id": str(second.id)},
             content_type="application/json",
         )
@@ -2001,7 +2001,7 @@ class TestEmailDefaultChannel(BaseTest):
         other = self._create_config("billing@example.com")
 
         response = self.client.post(
-            "/api/conversations/v1/email/disconnect",
+            "/v1/conversations/v1/email/disconnect",
             {"config_id": str(default.id)},
             content_type="application/json",
         )

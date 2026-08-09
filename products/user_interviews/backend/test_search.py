@@ -48,7 +48,7 @@ class TestUserInterviewSearch(_FeatureFlagEnabledMixin):
         )
 
     def _url(self) -> str:
-        return f"/api/environments/{self.team.id}/user_interviews/search/"
+        return f"/v1/environments/{self.team.id}/user_interviews/search/"
 
     def _embedding_response(self) -> MagicMock:
         resp = MagicMock()

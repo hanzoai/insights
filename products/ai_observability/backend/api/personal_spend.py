@@ -7,7 +7,7 @@ analytics team. Scoped to a single `ai_product` via the required `product`
 query param; see `SUPPORTED_PRODUCTS` for the currently accepted values.
 
 Endpoint:
-- GET /api/llm_analytics/@me/spend/?product=<ai_product>&date_from=-30d&date_to=&limit=50&refresh=false&bucket_minutes=5
+- GET /v1/llm_analytics/@me/spend/?product=<ai_product>&date_from=-30d&date_to=&limit=50&refresh=false&bucket_minutes=5
 """
 
 from __future__ import annotations
@@ -913,11 +913,11 @@ class _PersonalSpendUserViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated, APIScopePermission]
     # Identity-scoped (`/@me/...`): the caller reads their own spend, not data
     # nested under a team or project. `scope_object = "user"` matches the shape
-    # of `/api/users/@me/` — APIScopePermission already exempts the `user`
+    # of `/v1/users/@me/` — APIScopePermission already exempts the `user`
     # bucket from team/org scoping, so we don't need
     # `dangerously_skip_scoped_team_enforcement` here. `user:read` is a clean
     # superset of "read your own spend": anyone trusted with `user:read`
-    # already learns the more sensitive identity facts on `/api/users/@me/`,
+    # already learns the more sensitive identity facts on `/v1/users/@me/`,
     # and the wildcard `*` plus OAuth identity tokens (MCP) inherit access
     # the same way they do for every other `user`-scoped endpoint.
     scope_object = "user"
@@ -939,7 +939,7 @@ class PersonalSpendViewSet(_PersonalSpendUserViewSet):
     authenticated user's email (read off the events row via person-on-events) —
     callers cannot pivot to other users' data. Authorization model is "any
     authenticated Insights user may read their own spend" via `user:read` (the
-    same scope that covers `/api/users/@me/`). Queries the shared `events`
+    same scope that covers `/v1/users/@me/`). Queries the shared `events`
     table directly -- same pattern as the LLM Analytics "Users" tab and every
     other person-property filter on AI events. We don't route through
     `query_ai_events` because the satellite `ai_events`
@@ -1030,7 +1030,7 @@ CROSS_REGION_SIGNATURE_HEADER = "X-Insights-Spend-Signature"
 CROSS_REGION_TIMESTAMP_HEADER = "X-Insights-Spend-Timestamp"
 # Fast connect failure; cold spend runs take a few seconds of Datastore time.
 CROSS_REGION_TIMEOUT_SECONDS = (3, 15)
-_CROSS_REGION_INTERNAL_PATH = "/api/llm_analytics/internal/spend/"
+_CROSS_REGION_INTERNAL_PATH = "/v1/llm_analytics/internal/spend/"
 
 
 def _cross_region_target_url() -> str:
@@ -1106,7 +1106,7 @@ class _CrossRegionUpstreamError(exceptions.APIException):
 
 
 class PersonalSpendEUProxyViewSet(_PersonalSpendUserViewSet):
-    """EU `/api/llm_analytics/@me/spend/`: authenticates locally, fetches from
+    """EU `/v1/llm_analytics/@me/spend/`: authenticates locally, fetches from
     US server-side. Falls back to the 302 redirect while the secret is unset."""
 
     @extend_schema(

@@ -450,7 +450,7 @@ class TestRefreshSource(BaseTest):
 class TestUrlApi(APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/api/projects/{self.team.id}/business_knowledge/sources/"
+        self.url = f"/v1/projects/{self.team.id}/business_knowledge/sources/"
 
     @patch("products.business_knowledge.backend.api.views.KnowledgeSourceViewSet._start_background_ingest")
     @patch("products.business_knowledge.backend.logic.is_url_allowed", return_value=(True, None))

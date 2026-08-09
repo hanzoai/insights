@@ -8,7 +8,7 @@ from insights.models import EventDefinition, EventSchema, Project, SchemaPropert
 class TestSchemaPropertyGroupAPI(APIBaseTest):
     def test_create_property_group_with_properties(self):
         response = self.client.post(
-            f"/api/projects/{self.project.id}/schema_property_groups/",
+            f"/v1/projects/{self.project.id}/schema_property_groups/",
             {
                 "name": "User Info",
                 "description": "Basic user information",
@@ -41,7 +41,7 @@ class TestSchemaPropertyGroupAPI(APIBaseTest):
 
     def test_create_property_group_with_is_optional_in_types(self):
         response = self.client.post(
-            f"/api/projects/{self.project.id}/schema_property_groups/",
+            f"/v1/projects/{self.project.id}/schema_property_groups/",
             {
                 "name": "Super Props Group",
                 "properties": [
@@ -84,7 +84,7 @@ class TestSchemaPropertyGroupAPI(APIBaseTest):
 
         # Update: keep prop1, modify prop2, add prop3, delete nothing
         response = self.client.patch(
-            f"/api/projects/{self.project.id}/schema_property_groups/{property_group.id}/",
+            f"/v1/projects/{self.project.id}/schema_property_groups/{property_group.id}/",
             {
                 "properties": [
                     {"id": str(prop1.id), "name": "prop1", "property_type": "String"},
@@ -120,7 +120,7 @@ class TestSchemaPropertyGroupAPI(APIBaseTest):
 
         # Update to only keep prop1
         response = self.client.patch(
-            f"/api/projects/{self.project.id}/schema_property_groups/{property_group.id}/",
+            f"/v1/projects/{self.project.id}/schema_property_groups/{property_group.id}/",
             {
                 "properties": [
                     {"id": str(prop1.id), "name": "prop1", "property_type": "String"},
@@ -137,7 +137,7 @@ class TestSchemaPropertyGroupAPI(APIBaseTest):
         SchemaPropertyGroup.objects.create(team=self.team, project=self.project, name="Duplicate Name")
 
         response = self.client.post(
-            f"/api/projects/{self.project.id}/schema_property_groups/",
+            f"/v1/projects/{self.project.id}/schema_property_groups/",
             {"name": "Duplicate Name", "description": "Should fail"},
         )
 
@@ -149,7 +149,7 @@ class TestSchemaPropertyGroupAPI(APIBaseTest):
         to support grandfathered property names that are already in use."""
         max_length_name = "a" * 200
         response = self.client.post(
-            f"/api/projects/{self.project.id}/schema_property_groups/",
+            f"/v1/projects/{self.project.id}/schema_property_groups/",
             {
                 "name": "Test Group",
                 "properties": [
@@ -174,7 +174,7 @@ class TestSchemaPropertyGroupAPI(APIBaseTest):
     def test_property_name_rejects_empty(self):
         """Empty property names should be rejected."""
         response = self.client.post(
-            f"/api/projects/{self.project.id}/schema_property_groups/",
+            f"/v1/projects/{self.project.id}/schema_property_groups/",
             {
                 "name": "Test Group",
                 "properties": [
@@ -191,7 +191,7 @@ class TestSchemaPropertyGroupAPI(APIBaseTest):
         """Property names over 200 characters should be rejected."""
         long_name = "a" * 201
         response = self.client.post(
-            f"/api/projects/{self.project.id}/schema_property_groups/",
+            f"/v1/projects/{self.project.id}/schema_property_groups/",
             {
                 "name": "Test Group",
                 "properties": [
@@ -207,7 +207,7 @@ class TestSchemaPropertyGroupAPI(APIBaseTest):
         property_group = SchemaPropertyGroup.objects.create(team=self.team, project=self.project, name="To Delete")
         SchemaPropertyGroupProperty.objects.create(property_group=property_group, name="prop1", property_type="String")
 
-        response = self.client.delete(f"/api/projects/{self.project.id}/schema_property_groups/{property_group.id}/")
+        response = self.client.delete(f"/v1/projects/{self.project.id}/schema_property_groups/{property_group.id}/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not SchemaPropertyGroup.objects.filter(id=property_group.id).exists()
@@ -222,7 +222,7 @@ class TestSchemaPropertyGroupAPI(APIBaseTest):
         event_def = EventDefinition.objects.create(team=self.team, project=self.project, name="test_event")
         EventSchema.objects.create(event_definition=event_def, property_group=property_group)
 
-        response = self.client.get(f"/api/projects/{self.project.id}/schema_property_groups/")
+        response = self.client.get(f"/v1/projects/{self.project.id}/schema_property_groups/")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -241,7 +241,7 @@ class TestEventSchemaAPI(APIBaseTest):
         event_def = EventDefinition.objects.create(team=self.team, project=self.project, name="test_event")
 
         response = self.client.post(
-            f"/api/projects/{self.project.id}/event_schemas/",
+            f"/v1/projects/{self.project.id}/event_schemas/",
             {
                 "event_definition": event_def.id,
                 "property_group_id": str(property_group.id),
@@ -261,7 +261,7 @@ class TestEventSchemaAPI(APIBaseTest):
 
         # Try to create duplicate
         response = self.client.post(
-            f"/api/projects/{self.project.id}/event_schemas/",
+            f"/v1/projects/{self.project.id}/event_schemas/",
             {
                 "event_definition": event_def.id,
                 "property_group_id": str(property_group.id),
@@ -278,7 +278,7 @@ class TestEventSchemaAPI(APIBaseTest):
         event_def = EventDefinition.objects.create(team=self.team, project=self.project, name="test_event")
         event_schema = EventSchema.objects.create(event_definition=event_def, property_group=property_group)
 
-        response = self.client.delete(f"/api/projects/{self.project.id}/event_schemas/{event_schema.id}/")
+        response = self.client.delete(f"/v1/projects/{self.project.id}/event_schemas/{event_schema.id}/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not EventSchema.objects.filter(id=event_schema.id).exists()
@@ -296,7 +296,7 @@ class TestEventSchemaAPI(APIBaseTest):
         event_def = EventDefinition.objects.create(team=self.team, project=self.project, name="test_event")
 
         response = self.client.post(
-            f"/api/projects/{self.project.id}/event_schemas/",
+            f"/v1/projects/{self.project.id}/event_schemas/",
             {"event_definition": event_def.id, "property_group_id": str(other_property_group.id)},
         )
 
@@ -316,7 +316,7 @@ class TestEventSchemaAPI(APIBaseTest):
         property_group = SchemaPropertyGroup.objects.create(team=self.team, project=self.project, name="Test Group")
 
         response = self.client.post(
-            f"/api/projects/{self.project.id}/event_schemas/",
+            f"/v1/projects/{self.project.id}/event_schemas/",
             {"event_definition": other_event_def.id, "property_group_id": str(property_group.id)},
         )
 

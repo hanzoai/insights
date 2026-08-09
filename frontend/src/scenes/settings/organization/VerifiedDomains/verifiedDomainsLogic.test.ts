@@ -17,7 +17,7 @@ describe('verifiedDomainsLogic', () => {
         useAvailableFeatures([AvailableFeature.SSO_ENFORCEMENT, AvailableFeature.SAML])
         useMocks({
             get: {
-                '/api/organizations/:organization/domains': {
+                '/v1/organizations/:organization/domains': {
                     count: 1,
                     next: null,
                     previous: null,
@@ -42,7 +42,7 @@ describe('verifiedDomainsLogic', () => {
                 },
             },
             post: {
-                '/api/organizations/:organization/domains/': {
+                '/v1/organizations/:organization/domains/': {
                     id: '14f3358a-a0ab-490a-9037-81a0abc',
                     domain: 'new.hanzo.ai',
                     jit_provisioning_enabled: false,
@@ -52,7 +52,7 @@ describe('verifiedDomainsLogic', () => {
                 },
             },
             delete: {
-                '/api/organizations/:organization/domains/:id/': {},
+                '/v1/organizations/:organization/domains/:id/': {},
             },
         })
         initKeaTests()

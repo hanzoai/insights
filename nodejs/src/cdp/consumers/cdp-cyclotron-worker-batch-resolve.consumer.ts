@@ -431,7 +431,7 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
     }
 
     private async putBatchJobStatus(teamId: number, batchJobId: string, status: 'completed' | 'failed'): Promise<void> {
-        const urlPath = `/api/projects/${teamId}/internal/hog_flows/batch_jobs/${batchJobId}/status` as const
+        const urlPath = `/v1/projects/${teamId}/internal/hog_flows/batch_jobs/${batchJobId}/status` as const
 
         const { fetchResponse, fetchError } = await this.internalFetchService.fetch({
             urlPath,

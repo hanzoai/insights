@@ -24,7 +24,7 @@ class TestSummarizationAPI(APIBaseTest):
     def test_unauthenticated_user_cannot_access_summarization(self):
         """Should require authentication to access summarization endpoints."""
         self.client.logout()
-        response = self.client.post(f"/api/environments/{self.team.id}/llm_analytics/summarization/")
+        response = self.client.post(f"/v1/environments/{self.team.id}/llm_analytics/summarization/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     @patch("products.ai_observability.backend.api.summarization.summarize")
@@ -65,7 +65,7 @@ class TestSummarizationAPI(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/summarization/",
+            f"/v1/environments/{self.team.id}/llm_analytics/summarization/",
             request_data,
             format="json",
         )
@@ -128,7 +128,7 @@ class TestSummarizationAPI(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/summarization/",
+            f"/v1/environments/{self.team.id}/llm_analytics/summarization/",
             request_data,
             format="json",
         )
@@ -148,7 +148,7 @@ class TestSummarizationAPI(APIBaseTest):
         request_data: dict[str, Any] = {"data": {"event": {}}}
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/summarization/",
+            f"/v1/environments/{self.team.id}/llm_analytics/summarization/",
             request_data,
             format="json",
         )
@@ -164,7 +164,7 @@ class TestSummarizationAPI(APIBaseTest):
         request_data = {"summarize_type": "event"}
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/summarization/",
+            f"/v1/environments/{self.team.id}/llm_analytics/summarization/",
             request_data,
             format="json",
         )
@@ -183,7 +183,7 @@ class TestSummarizationAPI(APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/summarization/",
+            f"/v1/environments/{self.team.id}/llm_analytics/summarization/",
             request_data,
             format="json",
         )
@@ -251,7 +251,7 @@ class TestSummarizationAPI(APIBaseTest):
 
         # Summarize event A
         response_a = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/summarization/",
+            f"/v1/environments/{self.team.id}/llm_analytics/summarization/",
             event_a_request,
             format="json",
         )
@@ -260,7 +260,7 @@ class TestSummarizationAPI(APIBaseTest):
 
         # Summarize event B - should get a different summary, not event A's cached result
         response_b = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/summarization/",
+            f"/v1/environments/{self.team.id}/llm_analytics/summarization/",
             event_b_request,
             format="json",
         )
@@ -273,7 +273,7 @@ class TestSummarizationAPI(APIBaseTest):
     def test_batch_check_unauthenticated(self):
         """Should require authentication to access batch_check endpoint."""
         self.client.logout()
-        response = self.client.post(f"/api/environments/{self.team.id}/llm_analytics/summarization/batch_check/")
+        response = self.client.post(f"/v1/environments/{self.team.id}/llm_analytics/summarization/batch_check/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_batch_check_empty_traces(self):
@@ -282,7 +282,7 @@ class TestSummarizationAPI(APIBaseTest):
         self.organization.save()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/summarization/batch_check/",
+            f"/v1/environments/{self.team.id}/llm_analytics/summarization/batch_check/",
             {"trace_ids": ["trace1", "trace2"], "mode": "minimal"},
             format="json",
         )
@@ -313,14 +313,14 @@ class TestSummarizationAPI(APIBaseTest):
             },
         }
         self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/summarization/",
+            f"/v1/environments/{self.team.id}/llm_analytics/summarization/",
             summarize_request,
             format="json",
         )
 
         # Now check batch - should return the cached summary
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/summarization/batch_check/",
+            f"/v1/environments/{self.team.id}/llm_analytics/summarization/batch_check/",
             {"trace_ids": ["cached_trace", "not_cached"], "mode": "minimal"},
             format="json",
         )
@@ -335,7 +335,7 @@ class TestSummarizationAPI(APIBaseTest):
         self.organization.save()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/summarization/batch_check/",
+            f"/v1/environments/{self.team.id}/llm_analytics/summarization/batch_check/",
             {"mode": "minimal"},
             format="json",
         )
@@ -348,7 +348,7 @@ class TestSummarizationAPI(APIBaseTest):
         self.organization.save()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/summarization/",
+            f"/v1/environments/{self.team.id}/llm_analytics/summarization/",
             {"summarize_type": "event", "mode": "minimal", "data": {"event": {"id": "test"}}},
             format="json",
         )

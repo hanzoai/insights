@@ -110,7 +110,7 @@ describe('high-traffic scene smoke', () => {
 
     beforeEach(() => {
         useMocks({
-            post: { '/api/environments/:team_id/query/': () => [200, { results: [] }] },
+            post: { '/v1/environments/:team_id/query/': () => [200, { results: [] }] },
         })
         initKeaTests()
         renderErrors.length = 0

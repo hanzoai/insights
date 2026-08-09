@@ -19,7 +19,7 @@ Use to answer:
 - "What does the `/checkout` flow actually call downstream?"
 - "Which child operation under `POST /orders` is the slowest?"
 - "Where is time spent inside `process_payment` — DB, external API, or something else?"
-- "Did the call tree under `/api/feed` change between last week and this week?" (with `compareFilter`)
+- "Did the call tree under `/v1/feed` change between last week and this week?" (with `compareFilter`)
 
 For a flat per-operation view (no parent linkage), use `apm-spans-aggregate` instead.
 
@@ -88,7 +88,7 @@ Property filters applied to both windows. See the "Property filters" section.
 ```json
 {
   "query": {
-    "spanName": "POST /api/orders",
+    "spanName": "POST /v1/orders",
     "serviceName": "web-server"
   }
 }
@@ -111,7 +111,7 @@ Property filters applied to both windows. See the "Property filters" section.
 ```json
 {
   "query": {
-    "spanName": "POST /api/orders",
+    "spanName": "POST /v1/orders",
     "serviceName": "web-server",
     "dateRange": { "date_from": "-1d" },
     "compareFilter": { "compare": true, "compare_to": "-7d" }
@@ -124,7 +124,7 @@ Property filters applied to both windows. See the "Property filters" section.
 ```json
 {
   "query": {
-    "spanName": "POST /api/orders",
+    "spanName": "POST /v1/orders",
     "serviceName": "web-server",
     "filterGroup": [{ "key": "status_code", "operator": "exact", "type": "span", "value": 2 }]
   }

@@ -40,7 +40,7 @@ export class FlowBatchPersonQueryService {
         groupTypeIndex?: number
     ): Promise<BlastRadiusResponse> {
         // The /internal endpoints aren't exposed publicly and require INTERNAL_API_SECRET for authentication
-        const urlPath = `/api/projects/${team.id}/internal/hog_flows/user_blast_radius` as const
+        const urlPath = `/v1/projects/${team.id}/internal/hog_flows/user_blast_radius` as const
 
         try {
             const { fetchResponse, fetchError } = await this.internalFetchService.fetch({
@@ -94,7 +94,7 @@ export class FlowBatchPersonQueryService {
         cursor?: string | null,
         dedupeKey?: 'email'
     ): Promise<BlastRadiusPersonsResponse> {
-        const urlPath = `/api/projects/${team.id}/internal/hog_flows/user_blast_radius_persons` as const
+        const urlPath = `/v1/projects/${team.id}/internal/hog_flows/user_blast_radius_persons` as const
 
         try {
             const { fetchResponse, fetchError } = await this.internalFetchService.fetch({
@@ -145,7 +145,7 @@ export class FlowBatchPersonQueryService {
         filters: unknown,
         cursor?: string | null
     ): Promise<AccountAudienceResponse> {
-        const urlPath = `/api/projects/${team.id}/internal/hog_flows/account_audience` as const
+        const urlPath = `/v1/projects/${team.id}/internal/hog_flows/account_audience` as const
 
         try {
             const { fetchResponse, fetchError } = await this.internalFetchService.fetch({

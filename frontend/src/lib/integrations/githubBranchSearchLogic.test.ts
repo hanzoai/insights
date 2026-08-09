@@ -14,7 +14,7 @@ describe('githubBranchSearchLogic', () => {
     it('surfaces a branch loading failure', async () => {
         useMocks({
             get: {
-                '/api/environments/:team_id/integrations/:id/github_branches/': () => [500, { detail: 'Unavailable' }],
+                '/v1/environments/:team_id/integrations/:id/github_branches/': () => [500, { detail: 'Unavailable' }],
             },
         })
         initKeaTests()

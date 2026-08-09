@@ -22,8 +22,8 @@ from insights.schema import ProductKey
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.shared import ProjectBackwardCompatBasicSerializer
 
-# These are imported from team.py for now. They are part of the legacy /api/environments/ surface and are
-# expected to move project-side (or to a neutral module) in a later PR once /api/environments/ is retired —
+# These are imported from team.py for now. They are part of the legacy /v1/environments/ surface and are
+# expected to move project-side (or to a neutral module) in a later PR once /v1/environments/ is retired —
 # project.py must NOT depend on team.py at that point. The parity *logic* (config writes, retention check,
 # and the team-config actions) is defined locally below rather than imported, so it survives that removal.
 from insights.api.team import (
@@ -125,10 +125,10 @@ logger = structlog.get_logger(__name__)
 MAX_ALLOWED_PROJECTS_PER_ORG = 2000
 
 
-# --- Backward-compatibility logic for the /api/projects/ surface ---
-# These mirror the behaviour of the legacy /api/environments/ (TeamViewSet/TeamSerializer) endpoints, operating
-# on a project's passthrough Team. They live here — not imported from team.py — so /api/projects/ keeps working
-# after /api/environments/ is retired. Until then both surfaces intentionally carry equivalent logic; the
+# --- Backward-compatibility logic for the /v1/projects/ surface ---
+# These mirror the behaviour of the legacy /v1/environments/ (TeamViewSet/TeamSerializer) endpoints, operating
+# on a project's passthrough Team. They live here — not imported from team.py — so /v1/projects/ keeps working
+# after /v1/environments/ is retired. Until then both surfaces intentionally carry equivalent logic; the
 # introspection test in test_team_project_parity.py guards against drift.
 def capture_team_config_diff(team: Team, key: str, before: dict, after: dict, *, context: dict) -> None:
     changes = dict_changes_between("Team", {key: before}, {key: after}, use_field_exclusions=True)
@@ -1635,8 +1635,8 @@ class ProjectViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets
     def logs_config(self, request: request.Request, id: str, **kwargs) -> response.Response:
         """Manage logs product configuration for this project's canonical environment.
         Members can read; writing requires project admin, matching the admin-only
-        settings UI. Mirrors the env-router action so /api/projects/:id/logs_config/
-        resolves alongside the legacy /api/environments/:id/logs_config/ alias."""
+        settings UI. Mirrors the env-router action so /v1/projects/:id/logs_config/
+        resolves alongside the legacy /v1/environments/:id/logs_config/ alias."""
         project = self.get_object()
         return handle_logs_config(request, project.passthrough_team)
 
@@ -1658,7 +1658,7 @@ class ProjectViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets
         return activity_page_response(activity_page, limit, page, request)
 
     # The following actions mirror TeamViewSet, operating on the project's passthrough Team. They delegate to
-    # the shared team_*_view helpers so /api/projects/ and /api/environments/ cannot drift apart.
+    # the shared team_*_view helpers so /v1/projects/ and /v1/environments/ cannot drift apart.
     @action(
         methods=["GET", "PUT"],
         detail=True,

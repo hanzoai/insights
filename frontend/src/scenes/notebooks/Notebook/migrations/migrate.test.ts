@@ -14,7 +14,7 @@ describe('migrate()', () => {
     beforeEach(() => {
         useMocks({
             post: {
-                '/api/environments/:team_id/query/upgrade': async ({ request }) => {
+                '/v1/environments/:team_id/query/upgrade': async ({ request }) => {
                     const data = (await request.json()) as any
                     const kind = data?.query?.source?.kind
                     // These fixtures have no result customizations and fully tagged series, so

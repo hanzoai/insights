@@ -93,7 +93,7 @@ describe('insightHistoryLogic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/activity_log/': () => [
+                    '/v1/projects/:team_id/activity_log/': () => [
                         200,
                         { results: [settingsOnlyChangeItem, queryChangeItem, nameChangeItem], count: 3, next: null },
                     ],
@@ -131,12 +131,12 @@ describe('insightHistoryLogic', () => {
             const fullPage = Array.from({ length: 100 }, () => queryChangeItem)
             useMocks({
                 get: {
-                    '/api/projects/:team_id/activity_log/': ({ request }) => {
+                    '/v1/projects/:team_id/activity_log/': ({ request }) => {
                         const page = Number(new URL(request.url).searchParams.get('page') || '1')
                         return [
                             200,
                             page === 1
-                                ? { results: fullPage, count: 101, next: '/api/activity_log/?page=2' }
+                                ? { results: fullPage, count: 101, next: '/v1/activity_log/?page=2' }
                                 : { results: [nameChangeItem], count: 101, next: null },
                         ]
                     },
@@ -156,7 +156,7 @@ describe('insightHistoryLogic', () => {
             const fullPage = Array.from({ length: 100 }, () => queryChangeItem)
             useMocks({
                 get: {
-                    '/api/projects/:team_id/activity_log/': ({ request }) => {
+                    '/v1/projects/:team_id/activity_log/': ({ request }) => {
                         const page = Number(new URL(request.url).searchParams.get('page') || '1')
                         if (page > 2) {
                             // DRF's paginator 404s past the last page — a length-based
@@ -168,7 +168,7 @@ describe('insightHistoryLogic', () => {
                             {
                                 results: fullPage,
                                 count: 200,
-                                next: page === 1 ? '/api/activity_log/?page=2' : null,
+                                next: page === 1 ? '/v1/activity_log/?page=2' : null,
                             },
                         ]
                     },
@@ -188,9 +188,9 @@ describe('insightHistoryLogic', () => {
             const fullPage = Array.from({ length: 100 }, () => queryChangeItem)
             useMocks({
                 get: {
-                    '/api/projects/:team_id/activity_log/': () => [
+                    '/v1/projects/:team_id/activity_log/': () => [
                         200,
-                        { results: fullPage, count: 5000, next: '/api/activity_log/?page=next' },
+                        { results: fullPage, count: 5000, next: '/v1/activity_log/?page=next' },
                     ],
                 },
             })

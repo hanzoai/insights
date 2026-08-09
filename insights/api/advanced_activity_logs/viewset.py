@@ -556,7 +556,7 @@ class AdvancedActivityLogsViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSe
                 team=self.team,
                 export_format=format_mapping[export_format],
                 export_context={
-                    "path": f"/api/projects/{self.team_id}/advanced_activity_logs/?{urlencode(query_params)}",
+                    "path": f"/v1/projects/{self.team_id}/advanced_activity_logs/?{urlencode(query_params)}",
                     "method": "GET",
                     "filters": serializable_filters,
                     "filename": filename,
@@ -609,7 +609,7 @@ class OrganizationAdvancedActivityLogsViewSet(AdvancedActivityLogsViewSet):
     """
     Organization-wide view of activity logs across every project in the organization.
 
-    Mounted at /api/organizations/<organization_id>/advanced_activity_logs/.
+    Mounted at /v1/organizations/<organization_id>/advanced_activity_logs/.
     Restricted to organization admins and owners.
     """
 

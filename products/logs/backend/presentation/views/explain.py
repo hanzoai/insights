@@ -4,7 +4,7 @@ Django REST API endpoint for log explanation using AI.
 This ViewSet provides AI-powered explanations of individual log entries.
 
 Endpoints:
-- POST /api/environments/:id/logs/explainLogWithAI/ - Explain a log entry using AI
+- POST /v1/environments/:id/logs/explainLogWithAI/ - Explain a log entry using AI
 """
 
 from pathlib import Path
@@ -293,7 +293,7 @@ class LogExplainViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
         """
         Explain a log entry using AI.
 
-        POST /api/environments/:id/logs/explainLogWithAI/
+        POST /v1/environments/:id/logs/explainLogWithAI/
         """
         tag_queries(product=Product.LOGS, feature=Feature.QUERY)
         self._validate_feature_access(request)

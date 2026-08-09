@@ -10,7 +10,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/organizations/:organization_id/proxy_records': [],
+                '/v1/organizations/:organization_id/proxy_records': [],
             },
         }),
     ],

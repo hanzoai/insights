@@ -48,7 +48,7 @@ describe('FlowBatchPersonQueryService', () => {
 
             expect(fetchMock).toHaveBeenCalledTimes(1)
             expect(fetchMock).toHaveBeenCalledWith({
-                urlPath: '/api/projects/123/internal/hog_flows/user_blast_radius',
+                urlPath: '/v1/projects/123/internal/hog_flows/user_blast_radius',
                 fetchParams: {
                     method: 'POST',
                     body: JSON.stringify({
@@ -70,7 +70,7 @@ describe('FlowBatchPersonQueryService', () => {
             await service.getBlastRadius(team, filters)
 
             expect(fetchMock).toHaveBeenCalledWith({
-                urlPath: '/api/projects/123/internal/hog_flows/user_blast_radius',
+                urlPath: '/v1/projects/123/internal/hog_flows/user_blast_radius',
                 fetchParams: {
                     method: 'POST',
                     body: JSON.stringify({
@@ -136,7 +136,7 @@ describe('FlowBatchPersonQueryService', () => {
 
             expect(fetchMock).toHaveBeenCalledTimes(2)
             expect(fetchMock).toHaveBeenNthCalledWith(1, {
-                urlPath: '/api/projects/123/internal/hog_flows/user_blast_radius_persons',
+                urlPath: '/v1/projects/123/internal/hog_flows/user_blast_radius_persons',
                 fetchParams: {
                     method: 'POST',
                     body: JSON.stringify({
@@ -148,7 +148,7 @@ describe('FlowBatchPersonQueryService', () => {
                 },
             })
             expect(fetchMock).toHaveBeenNthCalledWith(2, {
-                urlPath: '/api/projects/123/internal/hog_flows/user_blast_radius_persons',
+                urlPath: '/v1/projects/123/internal/hog_flows/user_blast_radius_persons',
                 fetchParams: {
                     method: 'POST',
                     body: JSON.stringify({
@@ -179,7 +179,7 @@ describe('FlowBatchPersonQueryService', () => {
             await service.getBlastRadiusPersons(team, filters, undefined, null, dedupeKey)
 
             expect(fetchMock).toHaveBeenCalledWith({
-                urlPath: '/api/projects/123/internal/hog_flows/user_blast_radius_persons',
+                urlPath: '/v1/projects/123/internal/hog_flows/user_blast_radius_persons',
                 fetchParams: {
                     method: 'POST',
                     body: JSON.stringify({
@@ -237,7 +237,7 @@ describe('FlowBatchPersonQueryService', () => {
             await expect(service.getAccountAudiencePage(team, accountFilters, 'abc')).resolves.toEqual(response)
 
             expect(fetchMock).toHaveBeenCalledWith({
-                urlPath: '/api/projects/123/internal/hog_flows/account_audience',
+                urlPath: '/v1/projects/123/internal/hog_flows/account_audience',
                 fetchParams: {
                     method: 'POST',
                     body: JSON.stringify({

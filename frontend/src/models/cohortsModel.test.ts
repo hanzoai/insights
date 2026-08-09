@@ -52,13 +52,13 @@ describe('cohortsModel', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/cohorts/': MOCK_COHORTS,
+                '/v1/projects/:team/cohorts/': MOCK_COHORTS,
             },
             delete: {
-                '/api/projects/:team/cohorts/:id/': { success: true },
+                '/v1/projects/:team/cohorts/:id/': { success: true },
             },
             patch: {
-                '/api/projects/:team/cohorts/:id/': async ({ request }) => {
+                '/v1/projects/:team/cohorts/:id/': async ({ request }) => {
                     const data = (await request.json()) as Record<string, any>
                     return { ...MOCK_COHORTS.results[0], ...data }
                 },
@@ -90,7 +90,7 @@ describe('cohortsModel', () => {
             // Mock API to return cohorts with no calculating ones
             useMocks({
                 get: {
-                    '/api/projects/:team/cohorts/': {
+                    '/v1/projects/:team/cohorts/': {
                         ...MOCK_COHORTS,
                         results: MOCK_COHORTS.results.map((c) => ({ ...c, is_calculating: false })),
                     },

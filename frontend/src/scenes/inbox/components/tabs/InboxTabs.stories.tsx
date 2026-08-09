@@ -44,7 +44,7 @@ const SAMPLE_RUNS: SignalRun[] = [
 function reportsListDecorator(reports: SignalReport[]): Decorator {
     return mswDecorator({
         get: {
-            '/api/projects/:id/signals/reports': () => [
+            '/v1/projects/:id/signals/reports': () => [
                 200,
                 { results: reports, count: reports.length, next: null, previous: null },
             ],

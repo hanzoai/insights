@@ -214,11 +214,11 @@ export const EditAlert: EditAlertVariant = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/alerts/:alert_id/': (request) => [
+                '/v1/environments/:team_id/alerts/:alert_id/': (request) => [
                     200,
                     alertsById[request.params.alert_id as string],
                 ],
-                '/api/projects/:team_id/insights_functions/': EMPTY_PAGINATED_RESPONSE,
+                '/v1/projects/:team_id/insights_functions/': EMPTY_PAGINATED_RESPONSE,
             },
         }),
     ],
@@ -304,7 +304,7 @@ export const CreateWizard: CreateWizardVariant = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/insights_functions/': EMPTY_PAGINATED_RESPONSE,
+                '/v1/projects/:team_id/insights_functions/': EMPTY_PAGINATED_RESPONSE,
             },
         }),
     ],

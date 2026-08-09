@@ -180,7 +180,7 @@ class TestMetricEventSamplesQueryRunner(DatastoreTestMixin, APIBaseTest):
     def test_samples_api_requires_authentication(self):
         self.client.logout()
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/samples",
+            f"/v1/projects/{self.team.id}/metrics/samples",
             data={"query": {"metricName": "m", "dateFrom": "2026-01-01T00:00:00Z"}},
             content_type="application/json",
         )
@@ -188,7 +188,7 @@ class TestMetricEventSamplesQueryRunner(DatastoreTestMixin, APIBaseTest):
 
     def test_samples_api_validates_required_fields(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/samples",
+            f"/v1/projects/{self.team.id}/metrics/samples",
             data={"query": {"dateFrom": "2026-01-01T00:00:00Z"}},
             content_type="application/json",
         )
@@ -205,7 +205,7 @@ class TestMetricEventSamplesQueryRunner(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/samples",
+            f"/v1/projects/{self.team.id}/metrics/samples",
             data={
                 "query": {
                     "metricName": "checkout.failed",

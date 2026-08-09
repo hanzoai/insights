@@ -36,7 +36,7 @@ If the user is **creating** the endpoint, use `creating-an-endpoint` first.
 ## The endpoint URL
 
 ```text
-/api/projects/{team_id}/endpoints/{name}/run
+/v1/projects/{team_id}/endpoints/{name}/run
 ```
 
 - `team_id` is the project ID (numeric). Available in Insights under project settings, or via
@@ -199,7 +199,7 @@ Agent steps:
    That gives you typed client functions.
 
    A minimum call looks like:
-     POST /api/projects/12345/endpoints/monthly_active_users/run
+     POST /v1/projects/12345/endpoints/monthly_active_users/run
      Authorization: Bearer <PH_API_KEY>
      Content-Type: application/json
 

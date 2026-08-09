@@ -12,6 +12,7 @@ from rest_framework import status
 
 from insights.constants import AvailableFeature
 from insights.models import User
+from insights.models.ee_models import AccessControl
 from insights.models.organization import Organization
 from insights.models.team.team import Team
 
@@ -20,8 +21,6 @@ from products.dashboards.backend.api.dashboard_templates import (
     organization_dashboard_template_limit_detail,
 )
 from products.dashboards.backend.models.dashboard_templates import DashboardTemplate
-
-from insights.models.ee_models import AccessControl
 
 
 def assert_template_equals(received, expected):
@@ -151,7 +150,7 @@ class TestDashboardTemplates(APIBaseTest):
         )
 
         overflow = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "over the limit template"},
         )
         assert overflow.status_code == status.HTTP_400_BAD_REQUEST, overflow.content
@@ -176,7 +175,7 @@ class TestDashboardTemplates(APIBaseTest):
         )
 
         victim = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "victim to delete"},
         )
         assert victim.status_code == status.HTTP_201_CREATED, victim.content
@@ -184,20 +183,20 @@ class TestDashboardTemplates(APIBaseTest):
 
         assert (
             self.client.patch(
-                f"/api/projects/{self.team.pk}/dashboard_templates/{victim_id}",
+                f"/v1/projects/{self.team.pk}/dashboard_templates/{victim_id}",
                 {"deleted": True},
             ).status_code
             == status.HTTP_200_OK
         )
 
         replacement = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "replacement while victim deleted"},
         )
         assert replacement.status_code == status.HTTP_201_CREATED, replacement.content
 
         blocked_restore = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{victim_id}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{victim_id}",
             {"deleted": False},
         )
         assert blocked_restore.status_code == status.HTTP_400_BAD_REQUEST, blocked_restore.content
@@ -205,7 +204,7 @@ class TestDashboardTemplates(APIBaseTest):
 
     def test_create_and_get_dashboard_template_with_tile(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             variable_template,
         )
         assert response.status_code == status.HTTP_201_CREATED, response
@@ -218,7 +217,7 @@ class TestDashboardTemplates(APIBaseTest):
             variable_template,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates")
         assert response.status_code == status.HTTP_200_OK, response
 
         assert_template_equals(
@@ -231,13 +230,13 @@ class TestDashboardTemplates(APIBaseTest):
     def test_create_dashboard_template_duplicate_name_returns_bad_request(self) -> None:
         # create first template
         self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             variable_template,
         )
 
         # create second template
         duplicate_response = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             variable_template,
         )
 
@@ -251,13 +250,13 @@ class TestDashboardTemplates(APIBaseTest):
         n0 = DashboardTemplate.objects_including_soft_deleted.count()
         # create first template (soft deleted)
         self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "deleted": True},
         )
 
         # create second template
         duplicate_response = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             variable_template,
         )
 
@@ -272,7 +271,7 @@ class TestDashboardTemplates(APIBaseTest):
     )
     def test_is_featured_can_be_set_on_creation(self, scope: str, template_name: str) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": template_name, "scope": scope, "is_featured": True},
         )
         assert response.status_code == status.HTTP_201_CREATED, response
@@ -281,7 +280,7 @@ class TestDashboardTemplates(APIBaseTest):
 
     def test_is_featured_defaults_to_false_when_omitted(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "Template without is_featured"},
         )
         assert response.status_code == status.HTTP_201_CREATED, response
@@ -289,7 +288,7 @@ class TestDashboardTemplates(APIBaseTest):
 
     def test_is_featured_persists_when_scope_changes_to_team(self) -> None:
         global_featured = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {
                 **variable_template,
                 "template_name": "Featured global then team scope",
@@ -301,7 +300,7 @@ class TestDashboardTemplates(APIBaseTest):
         assert global_featured.json()["is_featured"] is True
 
         patch = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{global_featured.json()['id']}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{global_featured.json()['id']}",
             {"scope": "team"},
         )
         assert patch.status_code == status.HTTP_200_OK, patch
@@ -310,20 +309,20 @@ class TestDashboardTemplates(APIBaseTest):
     def test_staff_can_make_dashboard_template_public(self) -> None:
         assert self.team.pk is not None
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             variable_template,
         )
         assert response.status_code == status.HTTP_201_CREATED, response
         assert response.json()["scope"] == "team"
 
         update_response = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{response.json()['id']}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{response.json()['id']}",
             {"scope": "global"},
         )
 
         assert update_response.status_code == status.HTTP_200_OK, update_response
 
-        get_updated_response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates")
+        get_updated_response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates")
         assert get_updated_response.status_code == status.HTTP_200_OK, get_updated_response
 
         assert get_updated_response.json()["results"][0]["scope"] == "global"
@@ -331,7 +330,7 @@ class TestDashboardTemplates(APIBaseTest):
     def test_staff_can_make_dashboard_template_private(self) -> None:
         assert self.team.pk is not None
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             variable_template,
         )
         assert response.status_code == status.HTTP_201_CREATED, response
@@ -339,23 +338,23 @@ class TestDashboardTemplates(APIBaseTest):
         id = response.json()["id"]
 
         update_response = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{id}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{id}",
             {"scope": "global"},
         )
         assert update_response.status_code == status.HTTP_200_OK, update_response
 
-        get_updated_response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates")
+        get_updated_response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates")
         assert get_updated_response.status_code == status.HTTP_200_OK, get_updated_response
 
         assert get_template_from_response(get_updated_response, id)["scope"] == "global"
 
         update_response = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{id}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{id}",
             {"scope": "team"},
         )
         assert update_response.status_code == status.HTTP_200_OK, update_response
 
-        get_updated_response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates")
+        get_updated_response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates")
         assert get_updated_response.status_code == status.HTTP_200_OK, get_updated_response
 
         assert get_template_from_response(get_updated_response, id)["scope"] == "team"
@@ -373,7 +372,7 @@ class TestDashboardTemplates(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{tpl.id}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{tpl.id}",
             {"scope": "team"},
         )
         assert response.status_code == status.HTTP_200_OK, response
@@ -387,7 +386,7 @@ class TestDashboardTemplates(APIBaseTest):
 
     def test_non_staff_cannot_make_dashboard_template_public(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             variable_template,
         )
         assert response.status_code == status.HTTP_201_CREATED, response
@@ -396,7 +395,7 @@ class TestDashboardTemplates(APIBaseTest):
         self.user.save()
 
         update_response = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{response.json()['id']}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{response.json()['id']}",
             {"scope": "global"},
         )
         assert update_response.status_code == status.HTTP_400_BAD_REQUEST, update_response
@@ -407,7 +406,7 @@ class TestDashboardTemplates(APIBaseTest):
         assert default_template.scope == "global"
 
         update_response = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{default_template.id}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{default_template.id}",
             {"template_name": "Test name"},
         )
         assert update_response.status_code == status.HTTP_200_OK, update_response
@@ -416,7 +415,7 @@ class TestDashboardTemplates(APIBaseTest):
         self.user.save()
 
         update_response = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{default_template.id}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{default_template.id}",
             {"template_name": "Test name"},
         )
         assert update_response.status_code == status.HTTP_403_FORBIDDEN, update_response
@@ -432,7 +431,7 @@ class TestDashboardTemplates(APIBaseTest):
             **variable_template,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/")
         assert response.status_code == status.HTTP_200_OK, response
 
         assert len(response.json()["results"]) == global_seed_count  # Other org template is team-scoped elsewhere
@@ -440,7 +439,7 @@ class TestDashboardTemplates(APIBaseTest):
         dashboard_template.scope = "global"
         dashboard_template.save()
 
-        get_updated_response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/")
+        get_updated_response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/")
         assert get_updated_response.status_code == status.HTTP_200_OK, get_updated_response
 
         assert len(get_updated_response.json()["results"]) == global_seed_count + 1
@@ -455,7 +454,7 @@ class TestDashboardTemplates(APIBaseTest):
         self.user.save()
 
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             variable_template,
         )
         assert response.status_code == status.HTTP_201_CREATED, response
@@ -466,13 +465,13 @@ class TestDashboardTemplates(APIBaseTest):
     def test_get_dashboard_template_by_id(self) -> None:
         n0 = DashboardTemplate.objects.count()
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             variable_template,
         )
         assert response.status_code == status.HTTP_201_CREATED, response
         assert DashboardTemplate.objects.count() == n0 + 1
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/{response.json()['id']}")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/{response.json()['id']}")
 
         assert response.status_code == status.HTTP_200_OK, response
 
@@ -484,7 +483,7 @@ class TestDashboardTemplates(APIBaseTest):
     def test_delete_dashboard_template_by_id(self) -> None:
         n0 = DashboardTemplate.objects.count()
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             variable_template,
         )
         assert response.status_code == status.HTTP_201_CREATED, response
@@ -492,12 +491,12 @@ class TestDashboardTemplates(APIBaseTest):
         dashboard_template = DashboardTemplate.objects.get(id=response.json()["id"])
 
         update_response = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{response.json()['id']}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{response.json()['id']}",
             {"deleted": True},
         )
         assert update_response.status_code == status.HTTP_200_OK, update_response
 
-        get_response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates")
+        get_response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates")
         assert get_response.status_code == status.HTTP_200_OK, get_response
 
         assert get_template_from_response(get_response, dashboard_template.id) is None
@@ -508,7 +507,7 @@ class TestDashboardTemplates(APIBaseTest):
 
     def test_soft_deleted_dashboard_template_can_be_restored_via_patch(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             variable_template,
         )
         assert response.status_code == status.HTTP_201_CREATED, response
@@ -516,27 +515,27 @@ class TestDashboardTemplates(APIBaseTest):
 
         assert (
             self.client.patch(
-                f"/api/projects/{self.team.pk}/dashboard_templates/{template_id}",
+                f"/v1/projects/{self.team.pk}/dashboard_templates/{template_id}",
                 {"deleted": True},
             ).status_code
             == status.HTTP_200_OK
         )
 
         restore = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{template_id}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{template_id}",
             {"deleted": False},
         )
         assert restore.status_code == status.HTTP_200_OK, restore.content
         assert restore.json()["deleted"] in (False, None)
 
-        list_response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates")
+        list_response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates")
         assert list_response.status_code == status.HTTP_200_OK
         assert get_template_from_response(list_response, template_id) is not None
 
     def test_non_staff_can_delete_own_team_dashboard_template(self) -> None:
         n0 = DashboardTemplate.objects.count()
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             variable_template,
         )
         assert response.status_code == status.HTTP_201_CREATED, response
@@ -547,12 +546,12 @@ class TestDashboardTemplates(APIBaseTest):
         self.user.save()
 
         patch_response = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{template_id}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{template_id}",
             {"deleted": True},
         )
         assert patch_response.status_code == status.HTTP_200_OK, patch_response
 
-        get_response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates")
+        get_response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates")
         assert get_response.status_code == status.HTTP_200_OK, get_response
 
         assert get_template_from_response(get_response, template_id) is None
@@ -566,7 +565,7 @@ class TestDashboardTemplates(APIBaseTest):
         self.user.save()
 
         patch_response = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{global_tpl.id}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{global_tpl.id}",
             {"deleted": True},
         )
         assert patch_response.status_code == status.HTTP_403_FORBIDDEN, patch_response
@@ -574,14 +573,14 @@ class TestDashboardTemplates(APIBaseTest):
     def test_update_dashboard_template_by_id(self) -> None:
         n0 = DashboardTemplate.objects.count()
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             variable_template,
         )
         assert response.status_code == status.HTTP_201_CREATED
         assert DashboardTemplate.objects.count() == n0 + 1
 
         update_response = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{response.json()['id']}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{response.json()['id']}",
             {"template_name": "new name"},
         )
         assert update_response.status_code == status.HTTP_200_OK, update_response
@@ -690,7 +689,7 @@ class TestDashboardTemplates(APIBaseTest):
         }
 
         response = self.client.get(
-            f"/api/projects/{self.team.pk}/dashboard_templates/json_schema",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/json_schema",
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -709,7 +708,7 @@ class TestDashboardTemplates(APIBaseTest):
         self.create_template({"scope": DashboardTemplate.Scope.GLOBAL, "template_name": "Zebra"})
         self.create_template({"scope": DashboardTemplate.Scope.GLOBAL, "template_name": "Alpha"})
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/?ordering={ordering}")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/?ordering={ordering}")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
         assert len(results) == 2
@@ -727,11 +726,11 @@ class TestDashboardTemplates(APIBaseTest):
         DashboardTemplate.objects.filter(id=older_id).update(created_at=datetime(2020, 6, 1, 12, 0, 0, tzinfo=UTC))
         DashboardTemplate.objects.filter(id=newer_id).update(created_at=datetime(2021, 6, 1, 12, 0, 0, tzinfo=UTC))
 
-        asc_resp = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/?ordering=created_at")
+        asc_resp = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/?ordering=created_at")
         assert asc_resp.status_code == status.HTTP_200_OK
         assert [r["template_name"] for r in asc_resp.json()["results"]] == ["Older", "Newer"]
 
-        desc_resp = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/?ordering=-created_at")
+        desc_resp = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/?ordering=-created_at")
         assert desc_resp.status_code == status.HTTP_200_OK
         assert [r["template_name"] for r in desc_resp.json()["results"]] == ["Newer", "Older"]
 
@@ -741,7 +740,7 @@ class TestDashboardTemplates(APIBaseTest):
         self.create_template({"scope": DashboardTemplate.Scope.GLOBAL, "template_name": "Zebra"})
         self.create_template({"scope": DashboardTemplate.Scope.GLOBAL, "template_name": "Alpha"})
 
-        default_order = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/")
+        default_order = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/")
         assert default_order.status_code == status.HTTP_200_OK
         default_results = default_order.json()["results"]
         assert len(default_results) == 2
@@ -764,7 +763,7 @@ class TestDashboardTemplates(APIBaseTest):
             }
         )
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/")
         assert response.status_code == status.HTTP_200_OK
         assert [r["template_name"] for r in response.json()["results"]] == ["Zebra featured", "Aardvark not featured"]
 
@@ -794,12 +793,12 @@ class TestDashboardTemplates(APIBaseTest):
             {"scope": DashboardTemplate.Scope.GLOBAL, "template_name": "goat template"}
         )
 
-        default_response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/")
+        default_response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/")
         assert default_response.status_code == status.HTTP_200_OK
         assert len(default_response.json()["results"]) == 5
 
         # will match pony and ponies
-        pony_response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/?search=pony")
+        pony_response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/?search=pony")
         assert pony_response.status_code == status.HTTP_200_OK
         assert len(pony_response.json()["results"]) == 4
         assert not_pony_template_id not in [r["id"] for r in pony_response.json()["results"]]
@@ -819,7 +818,7 @@ class TestDashboardTemplates(APIBaseTest):
             {"scope": DashboardTemplate.Scope.ONLY_TEAM, "template_name": "team scoped template"}
         )
 
-        default_response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/")
+        default_response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/")
         assert default_response.status_code == status.HTTP_200_OK
         default_rows = default_response.json()["results"]
         assert len(default_rows) == 3
@@ -829,15 +828,15 @@ class TestDashboardTemplates(APIBaseTest):
             (team_template_id, "team"),
         }
 
-        team_only_response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/?scope=team")
+        team_only_response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/?scope=team")
         assert team_only_response.status_code == status.HTTP_200_OK
         assert [(r["id"], r["scope"]) for r in team_only_response.json()["results"]] == [(team_template_id, "team")]
 
-        global_response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/?scope=global")
+        global_response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/?scope=global")
         assert global_response.status_code == status.HTTP_200_OK
         assert [(r["id"], r["scope"]) for r in global_response.json()["results"]] == [(global_template_id, "global")]
 
-        flag_response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/?scope=feature_flag")
+        flag_response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/?scope=feature_flag")
         assert flag_response.status_code == status.HTTP_200_OK
         assert [(r["id"], r["scope"]) for r in flag_response.json()["results"]] == [(flag_template_id, "feature_flag")]
 
@@ -850,18 +849,18 @@ class TestDashboardTemplates(APIBaseTest):
             {"template_name": "Not featured list filter B", "is_featured": False},
         )
 
-        all_response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/")
+        all_response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/")
         assert all_response.status_code == status.HTTP_200_OK
         all_results = all_response.json()["results"]
         assert len(all_results) == 2
         assert [r["template_name"] for r in all_results] == ["Featured list filter A", "Not featured list filter B"]
 
-        featured_response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/?is_featured=true")
+        featured_response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/?is_featured=true")
         assert featured_response.status_code == status.HTTP_200_OK
         featured_ids = {r["id"] for r in featured_response.json()["results"]}
         assert featured_ids == {featured_id}
 
-        not_featured_response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/?is_featured=false")
+        not_featured_response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/?is_featured=false")
         assert not_featured_response.status_code == status.HTTP_200_OK
         not_featured_ids = {r["id"] for r in not_featured_response.json()["results"]}
         assert not_featured_ids == {not_featured_id}
@@ -882,7 +881,7 @@ class TestDashboardTemplates(APIBaseTest):
                 "scope": DashboardTemplate.Scope.FEATURE_FLAG,
             },
         )
-        response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/?is_featured=true")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/?is_featured=true")
         assert response.status_code == status.HTTP_200_OK
         ids = {r["id"] for r in response.json()["results"]}
         assert ids == {team_featured, global_featured}
@@ -891,7 +890,7 @@ class TestDashboardTemplates(APIBaseTest):
     def create_template(self, overrides: dict[str, Any], team_id: Optional[int] = None) -> str:
         template = {**variable_template, **overrides}
         response = self.client.post(
-            f"/api/projects/{team_id or self.team.pk}/dashboard_templates",
+            f"/v1/projects/{team_id or self.team.pk}/dashboard_templates",
             template,
         )
         assert response.status_code == status.HTTP_201_CREATED
@@ -918,27 +917,27 @@ class TestDashboardTemplates(APIBaseTest):
         )
 
         # the user from another_team can access the new dashboard via the API on their own team
-        list_response = self.client.get(f"/api/projects/{another_team.pk}/dashboard_templates/")
+        list_response = self.client.get(f"/v1/projects/{another_team.pk}/dashboard_templates/")
         assert list_response.status_code == status.HTTP_200_OK
         assert id in [r["id"] for r in list_response.json()["results"]]
 
         # the user from the home team cannot see the dashboard by default
         self.client.force_login(self.user)
-        home_list_response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates")
+        home_list_response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates")
 
         assert home_list_response.status_code == status.HTTP_200_OK
         assert id not in [r["id"] for r in home_list_response.json()["results"]]
 
         # the user form the home team cannot escape their permissions by passing filters
         attempted_escape_response = self.client.get(
-            f"/api/projects/{self.team.pk}/dashboard_templates/?team_id={another_team.pk}"
+            f"/v1/projects/{self.team.pk}/dashboard_templates/?team_id={another_team.pk}"
         )
         assert attempted_escape_response.status_code == status.HTTP_200_OK
         assert id not in [r["id"] for r in attempted_escape_response.json()["results"]]
 
         # searching by text doesn't get around the team filtering
         another_attempted_escape_response = self.client.get(
-            f"/api/projects/{self.team.pk}/dashboard_templates/?search=other"
+            f"/v1/projects/{self.team.pk}/dashboard_templates/?search=other"
         )
         assert another_attempted_escape_response.status_code == status.HTTP_200_OK
         assert id not in [r["id"] for r in another_attempted_escape_response.json()["results"]]
@@ -956,11 +955,11 @@ class TestDashboardTemplates(APIBaseTest):
             tags=[],
         )
 
-        list_response = self.client.get(f"/api/projects/{sibling_team.pk}/dashboard_templates/")
+        list_response = self.client.get(f"/v1/projects/{sibling_team.pk}/dashboard_templates/")
         assert list_response.status_code == status.HTTP_200_OK, list_response
         assert str(org_template.id) in [r["id"] for r in list_response.json()["results"]]
 
-        retrieve_response = self.client.get(f"/api/projects/{sibling_team.pk}/dashboard_templates/{org_template.id}")
+        retrieve_response = self.client.get(f"/v1/projects/{sibling_team.pk}/dashboard_templates/{org_template.id}")
         assert retrieve_response.status_code == status.HTTP_200_OK, retrieve_response
         assert retrieve_response.json()["scope"] == "organization"
 
@@ -982,11 +981,11 @@ class TestDashboardTemplates(APIBaseTest):
         )
         self.client.force_login(other_user)
 
-        list_response = self.client.get(f"/api/projects/{other_team.pk}/dashboard_templates/")
+        list_response = self.client.get(f"/v1/projects/{other_team.pk}/dashboard_templates/")
         assert list_response.status_code == status.HTTP_200_OK, list_response
         assert str(org_template.id) not in [r["id"] for r in list_response.json()["results"]]
 
-        retrieve_response = self.client.get(f"/api/projects/{other_team.pk}/dashboard_templates/{org_template.id}")
+        retrieve_response = self.client.get(f"/v1/projects/{other_team.pk}/dashboard_templates/{org_template.id}")
         assert retrieve_response.status_code == status.HTTP_404_NOT_FOUND, retrieve_response
 
     def test_scope_organization_filter_returns_only_caller_org(self) -> None:
@@ -1010,7 +1009,7 @@ class TestDashboardTemplates(APIBaseTest):
             tags=[],
         )
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/?scope=organization")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/?scope=organization")
         assert response.status_code == status.HTTP_200_OK
         rows = [(r["id"], r["scope"]) for r in response.json()["results"]]
         assert rows == [(org_template_id, "organization")]
@@ -1045,12 +1044,12 @@ class TestDashboardTemplates(APIBaseTest):
             },
         ]
         create = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "Refs template", "tiles": tiles_with_refs},
         )
         assert create.status_code == status.HTTP_201_CREATED, create
 
-        retrieve = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/{create.json()['id']}")
+        retrieve = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/{create.json()['id']}")
         assert retrieve.status_code == status.HTTP_200_OK
         assert retrieve.json()["non_portable_references"] == {
             "actions": 1,
@@ -1060,25 +1059,25 @@ class TestDashboardTemplates(APIBaseTest):
 
     def test_non_portable_references_empty_for_event_only_template(self) -> None:
         create = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "Portable template"},
         )
         assert create.status_code == status.HTTP_201_CREATED, create
 
-        retrieve = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/{create.json()['id']}")
+        retrieve = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/{create.json()['id']}")
         assert retrieve.status_code == status.HTTP_200_OK
         assert retrieve.json()["non_portable_references"] == {"actions": 0, "cohorts": 0, "warehouse_tables": []}
 
     def test_non_portable_references_null_in_list_response(self) -> None:
         create = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "Listed template"},
         )
         assert create.status_code == status.HTTP_201_CREATED, create
         # Not computed on the create (non-retrieve) response, nor in list responses — only on single retrieve.
         assert create.json()["non_portable_references"] is None
 
-        list_response = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates?scope=team")
+        list_response = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates?scope=team")
         assert list_response.status_code == status.HTTP_200_OK
         listed = [t for t in list_response.json()["results"] if t["id"] == create.json()["id"]]
         assert len(listed) == 1
@@ -1112,23 +1111,23 @@ class TestCustomerDashboardTemplateAuthoring(APIBaseTest):
 
     def test_non_staff_viewer_forbidden(self) -> None:
         self._grant_template_viewer()
-        response = self.client.post(f"/api/projects/{self.team.pk}/dashboard_templates", variable_template)
+        response = self.client.post(f"/v1/projects/{self.team.pk}/dashboard_templates", variable_template)
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_non_staff_editor_post_patch_delete_team_template(self) -> None:
-        create = self.client.post(f"/api/projects/{self.team.pk}/dashboard_templates", variable_template)
+        create = self.client.post(f"/v1/projects/{self.team.pk}/dashboard_templates", variable_template)
         assert create.status_code == status.HTTP_201_CREATED, create
         tid = create.json()["id"]
 
         patch_resp = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{tid}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{tid}",
             {"template_name": "Renamed", "tags": ["a"]},
         )
         assert patch_resp.status_code == status.HTTP_200_OK, patch_resp
         assert patch_resp.json()["template_name"] == "Renamed"
 
         del_resp = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{tid}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{tid}",
             {"deleted": True},
         )
         assert del_resp.status_code == status.HTTP_200_OK, del_resp
@@ -1136,13 +1135,13 @@ class TestCustomerDashboardTemplateAuthoring(APIBaseTest):
     def test_non_staff_patch_with_tiles_returns_400(self) -> None:
         self.user.is_staff = True
         self.user.save()
-        create = self.client.post(f"/api/projects/{self.team.pk}/dashboard_templates", variable_template)
+        create = self.client.post(f"/v1/projects/{self.team.pk}/dashboard_templates", variable_template)
         tid = create.json()["id"]
         self.user.is_staff = False
         self.user.save()
 
         bad = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{tid}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{tid}",
             {"template_name": "x", "tiles": variable_template["tiles"]},
         )
         assert bad.status_code == status.HTTP_400_BAD_REQUEST
@@ -1156,7 +1155,7 @@ class TestCustomerDashboardTemplateAuthoring(APIBaseTest):
     )
     def test_non_staff_post_staff_only_fields_400(self, field: str, value: Any) -> None:
         body = {**variable_template, field: value}
-        response = self.client.post(f"/api/projects/{self.team.pk}/dashboard_templates", body)
+        response = self.client.post(f"/v1/projects/{self.team.pk}/dashboard_templates", body)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json().get("attr") == field
 
@@ -1176,11 +1175,11 @@ class TestCustomerDashboardTemplateAuthoring(APIBaseTest):
         )
 
         r1 = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{global_tpl.id}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{global_tpl.id}",
             {"template_name": "nope"},
         )
         r2 = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{ff_tpl.id}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{ff_tpl.id}",
             {"template_name": "nope"},
         )
         assert r1.status_code == status.HTTP_403_FORBIDDEN
@@ -1201,7 +1200,7 @@ class TestCustomerDashboardTemplateAuthoring(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{other_tpl.id}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{other_tpl.id}",
             {"template_name": "hax"},
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -1210,7 +1209,7 @@ class TestCustomerDashboardTemplateAuthoring(APIBaseTest):
         self.user.is_staff = True
         self.user.save()
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "Staff global featured", "scope": "global", "is_featured": True},
         )
         assert response.status_code == status.HTTP_201_CREATED, response
@@ -1220,7 +1219,7 @@ class TestCustomerDashboardTemplateAuthoring(APIBaseTest):
         self.user.is_staff = True
         self.user.save()
         self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "Analytics emit team scoped"},
         )
         mock_report.assert_called()
@@ -1230,14 +1229,14 @@ class TestCustomerDashboardTemplateAuthoring(APIBaseTest):
 
         mock_report.reset_mock()
         self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "Analytics emit global scoped", "scope": "global"},
         )
         mock_report.assert_not_called()
 
     def test_non_staff_editor_can_create_organization_scoped_template(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "Org scoped by editor", "scope": "organization"},
         )
         assert response.status_code == status.HTTP_201_CREATED, response
@@ -1246,7 +1245,7 @@ class TestCustomerDashboardTemplateAuthoring(APIBaseTest):
 
     def test_non_staff_editor_can_promote_and_demote_between_team_and_organization(self) -> None:
         create = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "Promote demote me"},
         )
         assert create.status_code == status.HTTP_201_CREATED, create
@@ -1254,14 +1253,14 @@ class TestCustomerDashboardTemplateAuthoring(APIBaseTest):
         tid = create.json()["id"]
 
         promote = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{tid}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{tid}",
             {"scope": "organization"},
         )
         assert promote.status_code == status.HTTP_200_OK, promote
         assert promote.json()["scope"] == "organization"
 
         demote = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{tid}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{tid}",
             {"scope": "team"},
         )
         assert demote.status_code == status.HTTP_200_OK, demote
@@ -1281,24 +1280,24 @@ class TestCustomerDashboardTemplateAuthoring(APIBaseTest):
         )
 
         # Readable org-wide from the current project...
-        retrieve = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/{org_template.id}")
+        retrieve = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/{org_template.id}")
         assert retrieve.status_code == status.HTTP_200_OK, retrieve
 
         # ...but rename / demote / delete are rejected because this project does not own it.
         rename = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{org_template.id}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{org_template.id}",
             {"template_name": "Hijacked"},
         )
         assert rename.status_code == status.HTTP_403_FORBIDDEN, rename
 
         demote = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{org_template.id}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{org_template.id}",
             {"scope": "team"},
         )
         assert demote.status_code == status.HTTP_403_FORBIDDEN, demote
 
         delete = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{org_template.id}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{org_template.id}",
             {"deleted": True},
         )
         assert delete.status_code == status.HTTP_403_FORBIDDEN, delete
@@ -1318,20 +1317,20 @@ class TestCustomerDashboardTemplateAuthoring(APIBaseTest):
         )
 
         # A sibling project that captured the UUID must not be able to read it once it's soft-deleted.
-        retrieve = self.client.get(f"/api/projects/{self.team.pk}/dashboard_templates/{org_template.id}")
+        retrieve = self.client.get(f"/v1/projects/{self.team.pk}/dashboard_templates/{org_template.id}")
         assert retrieve.status_code == status.HTTP_404_NOT_FOUND, retrieve
 
     @patch("products.dashboards.backend.api.dashboard_templates.report_user_action")
     def test_scope_change_emits_analytics(self, mock_report) -> None:
         create = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "Scope change analytics"},
         )
         tid = create.json()["id"]
         mock_report.reset_mock()
 
         promote = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{tid}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{tid}",
             {"scope": "organization"},
         )
         assert promote.status_code == status.HTTP_200_OK, promote
@@ -1344,7 +1343,7 @@ class TestCustomerDashboardTemplateAuthoring(APIBaseTest):
         # A no-op update (no scope change) must not emit the event.
         mock_report.reset_mock()
         rename = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{tid}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{tid}",
             {"template_name": "Scope change analytics renamed"},
         )
         assert rename.status_code == status.HTTP_200_OK, rename
@@ -1353,12 +1352,12 @@ class TestCustomerDashboardTemplateAuthoring(APIBaseTest):
     @parameterized.expand([("global",), ("feature_flag",)])
     def test_non_staff_cannot_promote_to_restricted_scope(self, bad_scope: str) -> None:
         create = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": f"No promote to {bad_scope}"},
         )
         tid = create.json()["id"]
         resp = self.client.patch(
-            f"/api/projects/{self.team.pk}/dashboard_templates/{tid}",
+            f"/v1/projects/{self.team.pk}/dashboard_templates/{tid}",
             {"scope": bad_scope},
         )
         assert resp.status_code == status.HTTP_400_BAD_REQUEST, resp
@@ -1378,7 +1377,7 @@ class TestCustomerDashboardTemplateAuthoring(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "Duplicated org name", "scope": "organization"},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response
@@ -1397,11 +1396,11 @@ class TestDashboardTemplateCopyBetweenProjects(APIBaseTest):
         self.team_c = Team.objects.create(organization=self.organization, name="Third project copy source")
 
     def _copy_url(self, team_pk: int) -> str:
-        return f"/api/projects/{team_pk}/dashboard_templates/copy_between_projects/"
+        return f"/v1/projects/{team_pk}/dashboard_templates/copy_between_projects/"
 
     def test_copy_happy_path_creates_row_on_target_team(self) -> None:
         src = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "Copy me inter-project", "scope": "team"},
         )
         assert src.status_code == status.HTTP_201_CREATED, src.content
@@ -1420,7 +1419,7 @@ class TestDashboardTemplateCopyBetweenProjects(APIBaseTest):
     @patch("products.dashboards.backend.api.dashboard_templates.report_user_action")
     def test_copy_emits_distinct_analytics_event(self, mock_report: Any) -> None:
         src = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "Analytics copy between", "scope": "team"},
         )
         src_id = src.json()["id"]
@@ -1442,7 +1441,7 @@ class TestDashboardTemplateCopyBetweenProjects(APIBaseTest):
 
     def test_copy_same_source_and_target_team_400(self) -> None:
         src = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "Same team copy", "scope": "team"},
         )
         src_id = src.json()["id"]
@@ -1498,7 +1497,7 @@ class TestDashboardTemplateCopyBetweenProjects(APIBaseTest):
     def test_copy_source_team_row_missing_404(self) -> None:
         """Stale `team_id` on the template (no matching Team row) must be 404, not 500."""
         src = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "Source team row missing", "scope": "team"},
         )
         assert src.status_code == status.HTTP_201_CREATED, src.content
@@ -1520,13 +1519,13 @@ class TestDashboardTemplateCopyBetweenProjects(APIBaseTest):
 
     def test_copy_soft_deleted_source_404(self) -> None:
         src = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "Deleted source", "scope": "team"},
         )
         src_id = src.json()["id"]
         assert (
             self.client.patch(
-                f"/api/projects/{self.team.pk}/dashboard_templates/{src_id}",
+                f"/v1/projects/{self.team.pk}/dashboard_templates/{src_id}",
                 {"deleted": True},
             ).status_code
             == status.HTTP_200_OK
@@ -1542,13 +1541,13 @@ class TestDashboardTemplateCopyBetweenProjects(APIBaseTest):
 
     def test_copy_disambiguates_template_name_on_target(self) -> None:
         first = self.client.post(
-            f"/api/projects/{self.team_b.pk}/dashboard_templates",
+            f"/v1/projects/{self.team_b.pk}/dashboard_templates",
             {**variable_template, "template_name": "Shared name", "scope": "team"},
         )
         assert first.status_code == status.HTTP_201_CREATED, first.content
 
         src = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "Shared name", "scope": "team"},
         )
         src_id = src.json()["id"]
@@ -1558,7 +1557,7 @@ class TestDashboardTemplateCopyBetweenProjects(APIBaseTest):
         assert resp.json()["template_name"] == "Shared name (copy)"
 
         src2 = self.client.post(
-            f"/api/projects/{self.team_c.pk}/dashboard_templates",
+            f"/v1/projects/{self.team_c.pk}/dashboard_templates",
             {**variable_template, "template_name": "Shared name", "scope": "team"},
         )
         assert src2.status_code == status.HTTP_201_CREATED, src2.content
@@ -1585,7 +1584,7 @@ class TestDashboardTemplateCopyBetweenProjects(APIBaseTest):
             ]
         )
         src = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "Copy cap source", "scope": "team"},
         )
         assert src.status_code == status.HTTP_201_CREATED, src.content
@@ -1609,7 +1608,7 @@ class TestCustomerDashboardTemplateCopyBetweenProjects(APIBaseTest):
         self.team_b = Team.objects.create(organization=self.organization, name="Customer copy target")
 
     def _copy_url(self, team_pk: int) -> str:
-        return f"/api/projects/{team_pk}/dashboard_templates/copy_between_projects/"
+        return f"/v1/projects/{team_pk}/dashboard_templates/copy_between_projects/"
 
     def test_non_staff_copy_requires_editor_on_target(self) -> None:
         AccessControl.objects.create(
@@ -1629,7 +1628,7 @@ class TestCustomerDashboardTemplateCopyBetweenProjects(APIBaseTest):
             access_level="editor",
         )
         src = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "Customer inter-project", "scope": "team"},
         )
         assert src.status_code == status.HTTP_201_CREATED, src.content
@@ -1690,7 +1689,7 @@ class TestCustomerDashboardTemplateCopyBetweenProjects(APIBaseTest):
             access_level="viewer",
         )
         src = self.client.post(
-            f"/api/projects/{self.team.pk}/dashboard_templates",
+            f"/v1/projects/{self.team.pk}/dashboard_templates",
             {**variable_template, "template_name": "Viewer on target", "scope": "team"},
         )
         src_id = src.json()["id"]

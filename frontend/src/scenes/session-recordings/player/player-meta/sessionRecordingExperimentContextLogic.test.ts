@@ -39,7 +39,7 @@ describe('sessionRecordingExperimentContextLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team_id/experiments/session_context/': mockResponse,
+                '/v1/projects/:team_id/experiments/session_context/': mockResponse,
             },
         })
         initKeaTests()
@@ -62,7 +62,7 @@ describe('sessionRecordingExperimentContextLogic', () => {
         setFlagEnabled(true)
         useMocks({
             get: {
-                '/api/projects/:team_id/experiments/session_context/': { session_id: 'session-2', results: [] },
+                '/v1/projects/:team_id/experiments/session_context/': { session_id: 'session-2', results: [] },
             },
         })
         logic = sessionRecordingExperimentContextLogic({ sessionRecordingId: 'session-2' })
@@ -93,7 +93,7 @@ describe('sessionRecordingExperimentContextLogic', () => {
         setFlagEnabled(true)
         useMocks({
             get: {
-                '/api/projects/:team_id/experiments/session_context/': {
+                '/v1/projects/:team_id/experiments/session_context/': {
                     session_id: 'session-4',
                     // Deliberately shuffled, and named so a signal-rank-first sort would order them
                     // differently: a control exposed first must still lead a later multi-variant.

@@ -14,7 +14,7 @@ async function createSavedTrendsInsight(
     insightName: string,
     workspace: PlaywrightWorkspaceSetupResult
 ): Promise<void> {
-    const response = await page.request.post(`/api/projects/${workspace.team_id}/insights/`, {
+    const response = await page.request.post(`/v1/projects/${workspace.team_id}/insights/`, {
         headers: {
             Authorization: `Bearer ${workspace.personal_api_key}`,
             'Content-Type': 'application/json',

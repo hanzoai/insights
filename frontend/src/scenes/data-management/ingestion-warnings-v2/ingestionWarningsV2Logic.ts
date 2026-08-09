@@ -202,7 +202,7 @@ export const ingestionWarningsV2Logic = kea<ingestionWarningsV2LogicType>([
                         ...(severity ? { severity } : {}),
                     })
                     const response = await api.get(
-                        `api/projects/${values.currentProjectId}/ingestion_warnings_v2/?${params}`
+                        `v1/projects/${values.currentProjectId}/ingestion_warnings_v2/?${params}`
                     )
                     breakpoint()
                     return response

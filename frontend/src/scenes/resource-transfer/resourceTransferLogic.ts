@@ -193,7 +193,7 @@ export const resourceTransferLogic = kea<resourceTransferLogicType>([
                     }
 
                     return await api.create<PreviewResponse>(
-                        `api/organizations/${currentOrganization.id}/resource_transfers/preview/`,
+                        `v1/organizations/${currentOrganization.id}/resource_transfers/preview/`,
                         {
                             source_team_id: currentTeamId,
                             destination_team_id: destinationTeamId,
@@ -214,7 +214,7 @@ export const resourceTransferLogic = kea<resourceTransferLogicType>([
                     }
 
                     return await api.create<TransferResponse>(
-                        `api/organizations/${currentOrganization.id}/resource_transfers/transfer/`,
+                        `v1/organizations/${currentOrganization.id}/resource_transfers/transfer/`,
                         {
                             source_team_id: currentTeamId,
                             destination_team_id: destinationTeamId,

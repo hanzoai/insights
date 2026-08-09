@@ -43,10 +43,10 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
 
     def _create_active_flow(self) -> str:
         insights_flow = {"name": "Test Flow", "actions": [_trigger_action(), _webhook_action()]}
-        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        create = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert create.status_code == 201, create.json()
         flow_id = create.json()["id"]
-        activate = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
+        activate = self.client.patch(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
         assert activate.status_code == 200, activate.json()
         return flow_id
 
@@ -54,7 +54,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
         # Graph content edits over MCP go through the surgical graph endpoint (a plain update
         # rejects actions/edges outright), so drafts are staged the way real agents stage them.
         return self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {
                 "operations": [
                     {
@@ -88,7 +88,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
     def test_web_content_edit_on_active_flow_still_applies_live(self):
         flow_id = self._create_active_flow()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"actions": [_trigger_action(), _webhook_action(url="https://changed.example.com")]},
         )
         assert response.status_code == 200, response.json()
@@ -100,7 +100,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
     def test_mcp_content_edit_on_inactive_flow_applies_live(self):
         # Disabled/draft-status workflows edit in place — the draft cycle protects in-flight runs only
         insights_flow = {"name": "Test Flow", "actions": [_trigger_action(), _webhook_action()]}
-        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        create = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         flow_id = create.json()["id"]
 
         response = self._patch_actions_via_mcp(flow_id)
@@ -113,7 +113,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
     def test_mcp_metadata_edit_on_active_flow_applies_live_without_draft(self):
         flow_id = self._create_active_flow()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"name": "Renamed live"},
             HTTP_X_INSIGHTS_CLIENT="mcp",
         )
@@ -125,7 +125,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
     def test_mcp_mixed_status_and_content_still_rejected(self):
         flow_id = self._create_active_flow()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"status": "draft", "name": "Renamed"},
             HTTP_X_INSIGHTS_CLIENT="mcp",
         )
@@ -138,7 +138,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
 
         stale = "2020-01-01T00:00:00Z"
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {
                 "operations": [
                     {
@@ -160,7 +160,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
         live_actions_before = InsightsFlow.objects.get(pk=flow_id).actions
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {
                 "operations": [
                     {
@@ -187,7 +187,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
         assert first.status_code == 200, first.json()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {
                 "operations": [
                     {
@@ -219,7 +219,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
                 mock_count.side_effect = Exception("count service down")
             else:
                 mock_count.return_value = MagicMock(status_code=200, json=lambda: counts)
-            response = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish", {})
+            response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/publish", {})
         assert response.status_code == 200, response.json()
         return response
 
@@ -232,7 +232,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
         flow = self._stage_draft(flow_id)
         live_actions_before = flow.actions
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish", {})
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/publish", {})
         assert response.status_code == 200, response.json()
         assert response.json()["in_flight_runs"] == 42
         assert response.json()["draft_updated_at"] is not None
@@ -255,7 +255,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
         flow_id = self._create_active_flow()
         self._stage_draft(flow_id)
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish", {})
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/publish", {})
         assert response.status_code == 200, response.json()
         assert response.json()["in_flight_runs"] is None
         # Graph-derived impact still renders; only the counts degrade
@@ -268,13 +268,13 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
         )
         flow_id = self._create_active_three_step_flow()
         stage = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {"operations": [{"op": "remove_action", "id": "action_1"}]},
             HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         assert stage.status_code == 200, stage.json()
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish", {})
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/publish", {})
         assert response.status_code == 200, response.json()
         impact = response.json()["impact"]
         assert impact["deleted_steps"] == [
@@ -294,7 +294,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
         confirm_token = self._publish_preview(flow_id).json()["confirm_token"]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/publish",
             {"confirm": True, "confirm_token": confirm_token},
         )
         assert response.status_code == 200, response.json()
@@ -321,7 +321,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
         assert reedit.status_code == 200, reedit.json()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/publish",
             {"confirm": True, "confirm_token": confirm_token},
         )
         assert response.status_code == 409, response.json()
@@ -340,7 +340,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
         payload: dict = {"confirm": True}
         if confirm_token is not None:
             payload["confirm_token"] = confirm_token
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish", payload)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/publish", payload)
         assert response.status_code == 400, response.json()
 
     def test_publish_with_expired_token_is_rejected(self):
@@ -350,7 +350,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
             confirm_token = self._publish_preview(flow_id).json()["confirm_token"]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/publish",
             {"confirm": True, "confirm_token": confirm_token},
         )
         assert response.status_code == 400, response.json()
@@ -368,7 +368,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
         flow.save(update_fields=["draft"])
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/publish",
             {"confirm": True, "confirm_token": confirm_token},
         )
         assert response.status_code == 400, response.json()
@@ -383,7 +383,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
         flow_id = self._create_active_flow()
         self._stage_draft(flow_id)
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/discard_draft", {})
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/discard_draft", {})
         assert response.status_code == 200, response.json()
 
         flow = InsightsFlow.objects.get(pk=flow_id)
@@ -402,7 +402,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
         self._stage_draft(flow_id)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/invocations",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/invocations",
             {"use_draft": True, "globals": {"event": {"event": "$pageview", "properties": {}}}},
         )
         assert response.status_code == 200, response.json()
@@ -418,7 +418,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
     def test_invocation_with_use_draft_and_no_draft_is_rejected(self):
         flow_id = self._create_active_flow()
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/invocations",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/invocations",
             {"use_draft": True, "globals": {"event": {"event": "$pageview", "properties": {}}}},
         )
         assert response.status_code == 400, response.json()
@@ -429,7 +429,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
         flow_id = self._create_active_flow()
         self._stage_draft(flow_id)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_flows/{flow_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}")
         assert response.status_code == 200, response.json()
         assert response.json()["draft"] is not None
         assert response.json()["draft_updated_at"] is not None
@@ -447,10 +447,10 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
                 {"from": "action_1", "to": "action_2", "type": "continue"},
             ],
         }
-        create = self.client.post(f"/api/projects/{self.team.id}/insights_flows", insights_flow)
+        create = self.client.post(f"/v1/projects/{self.team.id}/insights_flows", insights_flow)
         assert create.status_code == 201, create.json()
         flow_id = create.json()["id"]
-        activate = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
+        activate = self.client.patch(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
         assert activate.status_code == 200, activate.json()
         return flow_id
 
@@ -462,7 +462,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
     def test_publish_deleting_a_step_persists_its_redirect(self):
         flow_id = self._create_active_three_step_flow()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {"operations": [{"op": "remove_action", "id": "action_1"}]},
             HTTP_X_INSIGHTS_CLIENT="mcp",
         )
@@ -472,7 +472,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
         confirm_token = self._publish_preview(flow_id).json()["confirm_token"]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/publish",
             {"confirm": True, "confirm_token": confirm_token},
         )
         assert response.status_code == 200, response.json()
@@ -484,7 +484,9 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
 
     def test_web_edit_deleting_a_step_persists_its_redirect(self):
         flow_id = self._create_active_three_step_flow()
-        response = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", self._DELETE_ACTION_1_PAYLOAD)
+        response = self.client.patch(
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", self._DELETE_ACTION_1_PAYLOAD
+        )
         assert response.status_code == 200, response.json()
         flow = InsightsFlow.objects.get(pk=flow_id)
         assert flow.action_redirects == {"action_1": "action_2"}
@@ -493,10 +495,12 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
         # Disabling a flow doesn't purge its parked runs — a step deleted during a disable/re-enable
         # window must still get a redirect, or those runs strand on re-activation.
         flow_id = self._create_active_three_step_flow()
-        disable = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "draft"})
+        disable = self.client.patch(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "draft"})
         assert disable.status_code == 200, disable.json()
 
-        response = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", self._DELETE_ACTION_1_PAYLOAD)
+        response = self.client.patch(
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", self._DELETE_ACTION_1_PAYLOAD
+        )
         assert response.status_code == 200, response.json()
         flow = InsightsFlow.objects.get(pk=flow_id)
         assert flow.action_redirects == {"action_1": "action_2"}
@@ -504,7 +508,7 @@ class TestInsightsFlowDraftPublish(APIBaseTest):
     def test_graph_remove_action_persists_its_redirect(self):
         flow_id = self._create_active_three_step_flow()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {"operations": [{"op": "remove_action", "id": "action_1"}]},
         )
         assert response.status_code == 200, response.json()

@@ -106,7 +106,7 @@ To exercise dark/light variants of a scene, patch the authenticated user's `them
 // via the browser MCP evaluate tool, in the authenticated page context
 ;async () => {
   const csrf = document.cookie.match(/csrftoken=([^;]+)/)?.[1]
-  const r = await fetch('/api/users/@me/', {
+  const r = await fetch('/v1/users/@me/', {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
     body: JSON.stringify({ theme_mode: 'dark' }), // or 'light' / 'system'

@@ -220,7 +220,7 @@ class TestExperimentSessionBuckets(DatastoreTestMixin, APIBaseTest):
 
     def _post_bucket(self, experiment: Experiment, **body: Any) -> Any:
         return self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment.id}/session_buckets/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment.id}/session_buckets/",
             body,
             format="json",
         )

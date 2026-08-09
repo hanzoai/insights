@@ -45,27 +45,27 @@ describe('endpointsUsageTrendsTransforms', () => {
 
         it('divides values by the scale divisor in the breakdown case', () => {
             const results: TrendsDataPoint[] = [
-                { date: '2026-07-01', breakdown: '/api/events', value: 60 },
-                { date: '2026-07-02', breakdown: '/api/events', value: 120 },
+                { date: '2026-07-01', breakdown: '/v1/events', value: 60 },
+                { date: '2026-07-02', breakdown: '/v1/events', value: 120 },
             ]
             const { series } = transformDataForChart(results, 'cpu_seconds', false)
 
-            expect(series).toEqual([{ key: '/api/events', label: '/api/events', data: [1, 2] }])
+            expect(series).toEqual([{ key: '/v1/events', label: '/v1/events', data: [1, 2] }])
         })
 
         it('fills missing breakdown values at a date with 0 rather than dropping the series', () => {
             const results: TrendsDataPoint[] = [
-                { date: '2026-07-01', breakdown: '/api/events', value: 10 },
-                { date: '2026-07-01', breakdown: '/api/persons', value: 20 },
-                { date: '2026-07-02', breakdown: '/api/events', value: 30 },
-                // '/api/persons' has no row on 2026-07-02
+                { date: '2026-07-01', breakdown: '/v1/events', value: 10 },
+                { date: '2026-07-01', breakdown: '/v1/persons', value: 20 },
+                { date: '2026-07-02', breakdown: '/v1/events', value: 30 },
+                // '/v1/persons' has no row on 2026-07-02
             ]
             const { labels, series } = transformDataForChart(results, 'requests', false)
 
             expect(labels).toEqual(['2026-07-01', '2026-07-02'])
             expect(series).toEqual([
-                { key: '/api/events', label: '/api/events', data: [10, 30] },
-                { key: '/api/persons', label: '/api/persons', data: [20, 0] },
+                { key: '/v1/events', label: '/v1/events', data: [10, 30] },
+                { key: '/v1/persons', label: '/v1/persons', data: [20, 0] },
             ])
         })
 

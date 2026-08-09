@@ -9,7 +9,7 @@ HASH = "a" * 64
 
 class TestAIBlobEndpoint(APIBaseTest):
     def _url(self, team_id: int | None = None, hash: str = HASH) -> str:
-        return f"/api/projects/{team_id or self.team.pk}/ai_blob/v1/sha256/{hash}"
+        return f"/v1/projects/{team_id or self.team.pk}/ai_blob/v1/sha256/{hash}"
 
     @patch("products.ai_observability.backend.api.ai_blob.object_storage.read_object")
     def test_serves_inline_image_with_immutable_caching(self, mock_read) -> None:

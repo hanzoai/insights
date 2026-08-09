@@ -57,7 +57,7 @@ describe('earlyAccessFeatureLogic', () => {
         let createBody: any = null
         useMocks({
             post: {
-                '/api/projects/:team_id/early_access_feature': async ({ request }) => {
+                '/v1/projects/:team_id/early_access_feature': async ({ request }) => {
                     createBody = await request.json()
                     return [201, mockFeature({ id: 'created-id', name: createBody.name })]
                 },
@@ -85,10 +85,10 @@ describe('earlyAccessFeatureLogic', () => {
         let updateBody: any = null
         useMocks({
             get: {
-                '/api/projects/:team_id/early_access_feature/:id': mockFeature(),
+                '/v1/projects/:team_id/early_access_feature/:id': mockFeature(),
             },
             patch: {
-                '/api/projects/:team_id/early_access_feature/:id': async ({ request }) => {
+                '/v1/projects/:team_id/early_access_feature/:id': async ({ request }) => {
                     updateBody = await request.json()
                     return [200, mockFeature({ name: updateBody.name })]
                 },
@@ -117,10 +117,10 @@ describe('earlyAccessFeatureLogic', () => {
         let deleted = false
         useMocks({
             get: {
-                '/api/projects/:team_id/early_access_feature/:id': mockFeature(),
+                '/v1/projects/:team_id/early_access_feature/:id': mockFeature(),
             },
             delete: {
-                '/api/projects/:team_id/early_access_feature/:id': () => {
+                '/v1/projects/:team_id/early_access_feature/:id': () => {
                     deleted = true
                     return [204, {}]
                 },
@@ -149,7 +149,7 @@ describe('earlyAccessFeatureLogic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/early_access_feature/:id': mockFeature({ id: 'existing-id' }),
+                    '/v1/projects/:team_id/early_access_feature/:id': mockFeature({ id: 'existing-id' }),
                 },
             })
         })

@@ -219,7 +219,7 @@ class TestPlaygroundModelEnforcement(APIBaseTest):
     )
     def test_completion_rejects_non_playground_model(self, _name: str, model: str, provider: str) -> None:
         response = self.client.post(
-            "/api/llm_proxy/completion/",
+            "/v1/llm_proxy/completion/",
             data=self._completion_payload(model, provider),
             format="json",
         )
@@ -230,7 +230,7 @@ class TestPlaygroundModelEnforcement(APIBaseTest):
     def test_completion_allows_playground_model(self, mock_client_cls) -> None:
         mock_client_cls.return_value.stream.return_value = iter([])
         response = self.client.post(
-            "/api/llm_proxy/completion/",
+            "/v1/llm_proxy/completion/",
             data=self._completion_payload("gpt-4.1-mini", "openai"),
             format="json",
         )
@@ -252,7 +252,7 @@ class TestPlaygroundModelEnforcement(APIBaseTest):
         payload = self._completion_payload("gpt-5.4", "openai")
         payload["provider_key_id"] = str(byok_key.id)
         response = self.client.post(
-            "/api/llm_proxy/completion/",
+            "/v1/llm_proxy/completion/",
             data=payload,
             format="json",
         )
@@ -262,7 +262,7 @@ class TestPlaygroundModelEnforcement(APIBaseTest):
         mock_client_cls.return_value.stream.assert_called_once()
 
     def test_models_endpoint_returns_only_playground_models(self) -> None:
-        response = self.client.get("/api/llm_proxy/models/")
+        response = self.client.get("/v1/llm_proxy/models/")
         assert response.status_code == 200
         returned_ids = {m["id"] for m in response.json()}
         assert returned_ids == PLAYGROUND_MODEL_IDS

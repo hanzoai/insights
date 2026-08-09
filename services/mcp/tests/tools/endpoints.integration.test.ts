@@ -43,7 +43,7 @@ describe('Endpoints', { concurrent: false }, () => {
             try {
                 await context.api.request({
                     method: 'PATCH',
-                    path: `/api/projects/${TEST_PROJECT_ID}/endpoints/${name}/`,
+                    path: `/v1/projects/${TEST_PROJECT_ID}/endpoints/${name}/`,
                     body: { deleted: true },
                 })
             } catch (error) {

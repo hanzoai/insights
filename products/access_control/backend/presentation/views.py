@@ -51,7 +51,7 @@ class PropertyAccessControlViewSet(TeamAndOrgViewSetMixin, GenericViewSet):
     """
     Manages property-level access control rules for property definitions.
 
-    Mounted at `/api/environments/{team_id}/property_access_controls/`. The target
+    Mounted at `/v1/environments/{team_id}/property_access_controls/`. The target
     property definition is provided via the `property_definition_id` query parameter
     on GET requests and in the request body on POST requests.
     """

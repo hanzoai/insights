@@ -337,7 +337,7 @@ class MCPServerInstallationSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if request:
             return request.build_absolute_uri(
-                f"/api/environments/{obj.team_id}/mcp_server_installations/{obj.id}/proxy/"
+                f"/v1/environments/{obj.team_id}/mcp_server_installations/{obj.id}/proxy/"
             )
         return ""
 

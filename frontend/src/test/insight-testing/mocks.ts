@@ -266,31 +266,31 @@ export function setupInsightMocks({
     // eslint-disable-next-line react-hooks/rules-of-hooks -- useMocks is an MSW test helper, not a React hook
     useMocks({
         get: {
-            '/api/projects/:team/event_definitions': ({ request }) => {
+            '/v1/projects/:team/event_definitions': ({ request }) => {
                 const search = new URL(request.url).searchParams.get('search') ?? ''
                 const results = filterBySearch(eventDefs, search)
                 return [200, { results, count: results.length }]
             },
-            '/api/projects/:team/property_definitions': ({ request }) => {
+            '/v1/projects/:team/property_definitions': ({ request }) => {
                 const search = new URL(request.url).searchParams.get('search') ?? ''
                 const results = filterBySearch(propDefs, search)
                 return [200, { results, count: results.length }]
             },
-            '/api/projects/:team/actions': { results: actionDefinitions },
-            '/api/environments/:team/persons/properties': personProperties,
-            '/api/environments/:team/sessions/property_definitions': { results: sessionPropertyDefinitions },
-            '/api/environments/:team/events/values': ({ request }) => {
+            '/v1/projects/:team/actions': { results: actionDefinitions },
+            '/v1/environments/:team/persons/properties': personProperties,
+            '/v1/environments/:team/sessions/property_definitions': { results: sessionPropertyDefinitions },
+            '/v1/environments/:team/events/values': ({ request }) => {
                 const key = new URL(request.url).searchParams.get('key') ?? ''
                 const values = (propValues[key] ?? []).map((name) => ({ name }))
                 return [200, values]
             },
             // TODO: support loading saved insights — accept a savedInsights option in SetupMocksOptions
             // and return them here, enabling tests that load insights by short ID
-            '/api/environments/:team_id/insights/': { results: [] },
-            '/api/environments/:team_id/insights/trend': [],
+            '/v1/environments/:team_id/insights/': { results: [] },
+            '/v1/environments/:team_id/insights/trend': [],
             // Annotations layer fetches this on mount; resolve immediately so async
             // state changes don't race against tooltip/click assertions.
-            '/api/projects/:team_id/annotations/': {
+            '/v1/projects/:team_id/annotations/': {
                 results: annotations,
                 count: annotations.length,
                 next: null,
@@ -298,7 +298,7 @@ export function setupInsightMocks({
             },
         },
         post: {
-            '/api/environments/:team_id/query/:kind': async ({ request }) => {
+            '/v1/environments/:team_id/query/:kind': async ({ request }) => {
                 const queryBody = extractQueryBody(await request.json())
 
                 for (const mock of responses) {

@@ -62,7 +62,7 @@ describe('savedInsightsLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/': ({ request }) => {
+                '/v1/environments/:team_id/insights/': ({ request }) => {
                     const url = new URL(request.url)
                     return [
                         200,
@@ -72,11 +72,11 @@ describe('savedInsightsLogic', () => {
                         ),
                     ]
                 },
-                '/api/environments/:team_id/insights/42': createInsight(42),
-                '/api/environments/:team_id/insights/123': createInsight(123),
+                '/v1/environments/:team_id/insights/42': createInsight(42),
+                '/v1/environments/:team_id/insights/123': createInsight(123),
             },
             post: {
-                '/api/environments/:team_id/insights/': () => [200, createInsight(42)],
+                '/v1/environments/:team_id/insights/': () => [200, createInsight(42)],
             },
         })
         initKeaTests()
@@ -202,7 +202,7 @@ describe('savedInsightsLogic', () => {
     it('carries per-row search_match_type through to the results', async () => {
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/': () => {
+                '/v1/environments/:team_id/insights/': () => {
                     const base = createSavedInsights('hello', 0)
                     return [
                         200,
@@ -237,7 +237,7 @@ describe('savedInsightsLogic', () => {
         sourceInsight.derived_name = 'should be copied'
         await logic.asyncActions.duplicateInsight(sourceInsight)
         expect(api.create).toHaveBeenCalledWith(
-            `api/environments/${MOCK_TEAM_ID}/insights`,
+            `v1/environments/${MOCK_TEAM_ID}/insights`,
             expect.objectContaining({ name: '' }),
             expect.objectContaining({})
         )
@@ -249,7 +249,7 @@ describe('savedInsightsLogic', () => {
         sourceInsight.derived_name = ''
         await logic.asyncActions.duplicateInsight(sourceInsight)
         expect(api.create).toHaveBeenCalledWith(
-            `api/environments/${MOCK_TEAM_ID}/insights`,
+            `v1/environments/${MOCK_TEAM_ID}/insights`,
             expect.objectContaining({ name: 'should be copied (copy)' }),
             expect.objectContaining({})
         )
@@ -268,7 +268,7 @@ describe('savedInsightsLogic', () => {
 
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/': ({ request }) => {
+                '/v1/environments/:team_id/insights/': ({ request }) => {
                     const search = new URL(request.url).searchParams.get('search') ?? ''
                     return new Promise<[number, any]>((resolve) => {
                         pendingRequests.push({ resolve, search })

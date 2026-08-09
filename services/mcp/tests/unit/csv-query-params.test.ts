@@ -90,7 +90,7 @@ describe('ApiClient.request query serialization', () => {
         const mockFetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({}), { status: 200 }))
         vi.stubGlobal('fetch', mockFetch)
         const client = new ApiClient({ apiToken: 'token', baseUrl: 'https://example.com' })
-        await client.request({ method: 'GET', path: '/api/test/', query })
+        await client.request({ method: 'GET', path: '/v1/test/', query })
         return mockFetch.mock.calls[0]![0] as string
     }
 

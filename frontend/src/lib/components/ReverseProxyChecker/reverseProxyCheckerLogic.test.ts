@@ -14,7 +14,7 @@ const doesNotHaveReverseProxyValues = [[null], [null]]
 const useMockedValues = (results: (string | null)[][]): void => {
     useMocks({
         post: {
-            '/api/environments/:team_id/query/:kind': () => [
+            '/v1/environments/:team_id/query/:kind': () => [
                 200,
                 {
                     results,
@@ -86,7 +86,7 @@ describe('reverseProxyCheckerLogic', () => {
         // scene that mounts ProductSetupButton.
         useMocks({
             post: {
-                '/api/environments/:team_id/query/:kind': () => [500, { detail: 'A server error occurred' }],
+                '/v1/environments/:team_id/query/:kind': () => [500, { detail: 'A server error occurred' }],
             },
         })
 

@@ -305,7 +305,7 @@ export const managedMigrationLogic = kea<managedMigrationLogicType>([
                 loadMigrations: async () => {
                     const projectId = ApiConfig.getCurrentProjectId()
                     // nosemgrep: prefer-codegen-api
-                    const response = await api.get(`api/projects/${projectId}/managed_migrations`)
+                    const response = await api.get(`v1/projects/${projectId}/managed_migrations`)
                     return response.results
                 },
             },
@@ -475,7 +475,7 @@ export const managedMigrationLogic = kea<managedMigrationLogicType>([
                 }
                 try {
                     // nosemgrep: prefer-codegen-api
-                    const response = await api.create(`api/projects/${projectId}/managed_migrations`, payload)
+                    const response = await api.create(`v1/projects/${projectId}/managed_migrations`, payload)
                     return response
                 } catch (error: any) {
                     if (error.status === 400 && error.data?.error) {
@@ -512,7 +512,7 @@ export const managedMigrationLogic = kea<managedMigrationLogicType>([
             try {
                 const projectId = ApiConfig.getCurrentProjectId()
                 // nosemgrep: prefer-codegen-api
-                await api.create(`api/projects/${projectId}/managed_migrations/${id}/pause/`)
+                await api.create(`v1/projects/${projectId}/managed_migrations/${id}/pause/`)
                 toast.success('Migration paused successfully')
                 actions.loadMigrations()
             } catch (error: any) {
@@ -523,7 +523,7 @@ export const managedMigrationLogic = kea<managedMigrationLogicType>([
             try {
                 const projectId = ApiConfig.getCurrentProjectId()
                 // nosemgrep: prefer-codegen-api
-                await api.create(`api/projects/${projectId}/managed_migrations/${id}/resume/`)
+                await api.create(`v1/projects/${projectId}/managed_migrations/${id}/resume/`)
                 toast.success('Migration resumed successfully')
                 actions.loadMigrations()
             } catch (error: any) {

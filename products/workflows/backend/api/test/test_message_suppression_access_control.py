@@ -19,7 +19,7 @@ except ImportError:
 @pytest.mark.ee
 class TestMessageSuppressionAccessControl(APIBaseTest):
     """
-    Guards the resource-level RBAC gate on `/api/projects/:id/messaging_suppressions/`.
+    Guards the resource-level RBAC gate on `/v1/projects/:id/messaging_suppressions/`.
 
     The endpoints act on team-wide data (every suppressed recipient, their SMTP diagnostics,
     every add/remove) but carry no per-workflow object. `AccessControlPermission` alone falls
@@ -76,7 +76,7 @@ class TestMessageSuppressionAccessControl(APIBaseTest):
         )
 
     def _url(self, action: str) -> str:
-        return f"/api/projects/{self.team.id}/messaging_suppressions/{action}/"
+        return f"/v1/projects/{self.team.id}/messaging_suppressions/{action}/"
 
     @parameterized.expand(
         [

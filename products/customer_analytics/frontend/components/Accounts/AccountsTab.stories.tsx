@@ -9,14 +9,14 @@ import { urls } from 'scenes/urls'
 import { mswDecorator } from '~/mocks/browser'
 import type { MockResolverInfo } from '~/mocks/utils'
 
-const QUERY_ENDPOINT = '/api/environments/:team_id/query/:kind/'
-const ACCOUNT_RETRIEVE_ENDPOINT = 'api/projects/:team_id/accounts/:account_id/'
-const ACCOUNT_NOTEBOOKS_ENDPOINT = 'api/projects/:team_id/accounts/:account_id/notebooks/'
-const ACCOUNT_RELATIONSHIPS_ENDPOINT = 'api/projects/:team_id/accounts/:account_id/relationships/'
-const RELATIONSHIP_DEFINITIONS_ENDPOINT = 'api/projects/:team_id/account_relationship_definitions/'
-const ORGANIZATION_MEMBERS_ENDPOINT = 'api/projects/:team_id/organization_members/'
-const WAREHOUSE_VIEW_LINK_ENDPOINT = 'api/environments/:team_id/warehouse_view_link/'
-const INSIGHTS_ENDPOINT = 'api/environments/:team_id/insights/'
+const QUERY_ENDPOINT = '/v1/environments/:team_id/query/:kind/'
+const ACCOUNT_RETRIEVE_ENDPOINT = 'v1/projects/:team_id/accounts/:account_id/'
+const ACCOUNT_NOTEBOOKS_ENDPOINT = 'v1/projects/:team_id/accounts/:account_id/notebooks/'
+const ACCOUNT_RELATIONSHIPS_ENDPOINT = 'v1/projects/:team_id/accounts/:account_id/relationships/'
+const RELATIONSHIP_DEFINITIONS_ENDPOINT = 'v1/projects/:team_id/account_relationship_definitions/'
+const ORGANIZATION_MEMBERS_ENDPOINT = 'v1/projects/:team_id/organization_members/'
+const WAREHOUSE_VIEW_LINK_ENDPOINT = 'v1/environments/:team_id/warehouse_view_link/'
+const INSIGHTS_ENDPOINT = 'v1/environments/:team_id/insights/'
 
 type AccountNameCell = { name: string; external_id: string | null; id: string }
 // Active assignee user ids from the relationships lazy join. Ids 178 and 202 match

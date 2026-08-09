@@ -161,7 +161,7 @@ describe('outbound 429 handling', () => {
         it('propagates the error through ApiClient.request()', async () => {
             stubFetch(build429({ 'Retry-After': '3600' }))
 
-            await expect(buildClient().request({ method: 'GET', path: '/api/users/@me/' })).rejects.toBeInstanceOf(
+            await expect(buildClient().request({ method: 'GET', path: '/v1/users/@me/' })).rejects.toBeInstanceOf(
                 InsightsRateLimitError
             )
         })

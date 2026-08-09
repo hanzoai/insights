@@ -598,7 +598,7 @@ class TestLogsQueryRunner(DatastoreTestMixin, APIBaseTest):
             """)
 
     def _make_logs_api_request(self, query_params, expected_status=status.HTTP_200_OK):
-        response = self.client.post(f"/api/projects/{self.team.id}/logs/query", data={"query": query_params})
+        response = self.client.post(f"/v1/projects/{self.team.id}/logs/query", data={"query": query_params})
         self.assertEqual(response.status_code, expected_status)
         return response.json() if expected_status == status.HTTP_200_OK else response
 
@@ -919,7 +919,7 @@ class TestLogsQueryRunner(DatastoreTestMixin, APIBaseTest):
 
     def test_logs_attributes_endpoint(self):
         response = self.client.get(
-            f"/api/projects/{self.team.id}/logs/attributes",
+            f"/v1/projects/{self.team.id}/logs/attributes",
             {
                 "dateRange": '{"date_from": "2025-12-16T09:49:36.184820Z", "date_to": null}',
                 "attribute_type": "log",
@@ -936,7 +936,7 @@ class TestLogsQueryRunner(DatastoreTestMixin, APIBaseTest):
 
     def test_logs_values_endpoint(self):
         response = self.client.get(
-            f"/api/projects/{self.team.id}/logs/values",
+            f"/v1/projects/{self.team.id}/logs/values",
             {
                 "dateRange": '{"date_from": "2025-12-16T10:32:36.184820Z", "date_to": null}',
                 "key": "service.name",
@@ -951,7 +951,7 @@ class TestLogsQueryRunner(DatastoreTestMixin, APIBaseTest):
         self.assertEqual(data["results"][0]["name"], "cdp-legacy-events-consumer")
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/logs/values",
+            f"/v1/projects/{self.team.id}/logs/values",
             {
                 "dateRange": '{"date_from": "2025-12-16T10:32:36.184820Z", "date_to": null}',
                 "attribute_type": "log",
@@ -1368,19 +1368,19 @@ class TestLogsPersonIdFilter(DatastoreTestMixin, APIBaseTest):
             "personId": str(person.uuid),
         }
 
-        response = self.client.post(f"/api/projects/{self.team.id}/logs/query", data={"query": query_params})
+        response = self.client.post(f"/v1/projects/{self.team.id}/logs/query", data={"query": query_params})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual([r["attributes"]["insightsDistinctId"] for r in results], ["person-id-test-api"])
 
         sparkline_response = self.client.post(
-            f"/api/projects/{self.team.id}/logs/sparkline", data={"query": query_params}
+            f"/v1/projects/{self.team.id}/logs/sparkline", data={"query": query_params}
         )
         self.assertEqual(sparkline_response.status_code, status.HTTP_200_OK)
         self.assertEqual(sum(bucket["count"] for bucket in sparkline_response.json()), 1)
 
         facet_response = self.client.post(
-            f"/api/projects/{self.team.id}/logs/facet_values",
+            f"/v1/projects/{self.team.id}/logs/facet_values",
             data={"query": {**query_params, "facetField": "severity_text"}},
         )
         self.assertEqual(facet_response.status_code, status.HTTP_200_OK)

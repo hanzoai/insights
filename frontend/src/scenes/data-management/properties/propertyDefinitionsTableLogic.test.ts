@@ -18,7 +18,7 @@ describe('propertyDefinitionsTableLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/projects/:team/property_definitions/': ({ request }) => {
+                '/v1/projects/:team/property_definitions/': ({ request }) => {
                     const url = new URL(request.url)
                     if (url.searchParams.get('limit') === '50' && !url.searchParams.get('offset')) {
                         return [
@@ -27,7 +27,7 @@ describe('propertyDefinitionsTableLogic', () => {
                                 results: mockEventPropertyDefinitions.slice(0, 50),
                                 count: 50,
                                 previous: null,
-                                next: `api/projects/${MOCK_TEAM_ID}/property_definitions${
+                                next: `v1/projects/${MOCK_TEAM_ID}/property_definitions${
                                     combineUrl(url.pathname, {
                                         ...url.searchParams,
                                         limit: 50,
@@ -43,7 +43,7 @@ describe('propertyDefinitionsTableLogic', () => {
                             {
                                 results: mockEventPropertyDefinitions.slice(50, 56),
                                 count: 6,
-                                previous: `api/projects/${MOCK_TEAM_ID}/property_definitions${
+                                previous: `v1/projects/${MOCK_TEAM_ID}/property_definitions${
                                     combineUrl(url.pathname, {
                                         ...url.searchParams,
                                         limit: 50,
@@ -55,7 +55,7 @@ describe('propertyDefinitionsTableLogic', () => {
                         ]
                     }
                 },
-                'api/projects/:team/groups_types': MOCK_GROUP_TYPES,
+                'v1/projects/:team/groups_types': MOCK_GROUP_TYPES,
             },
         })
         initKeaTests()
@@ -72,7 +72,7 @@ describe('propertyDefinitionsTableLogic', () => {
     })
 
     describe('property definitions', () => {
-        const startingUrl = `api/projects/${MOCK_TEAM_ID}/property_definitions${
+        const startingUrl = `v1/projects/${MOCK_TEAM_ID}/property_definitions${
             combineUrl('', {
                 limit: EVENT_PROPERTY_DEFINITIONS_PER_PAGE,
             }).search
@@ -92,7 +92,7 @@ describe('propertyDefinitionsTableLogic', () => {
                         count: 50,
                         results: mockEventPropertyDefinitions.slice(0, 50),
                         previous: null,
-                        next: `api/projects/${MOCK_TEAM_ID}/property_definitions?limit=50&offset=50`,
+                        next: `v1/projects/${MOCK_TEAM_ID}/property_definitions?limit=50&offset=50`,
                     }),
                 })
 
@@ -119,14 +119,14 @@ describe('propertyDefinitionsTableLogic', () => {
                 .toMatchValues({
                     propertyDefinitions: partial({
                         count: 50,
-                        next: `api/projects/${MOCK_TEAM_ID}/property_definitions?limit=50&offset=50`,
+                        next: `v1/projects/${MOCK_TEAM_ID}/property_definitions?limit=50&offset=50`,
                     }),
                 })
             expect(api.get).toHaveBeenCalledTimes(1)
             // Forwards
             await expectLogic(logic, () => {
                 logic.actions.loadPropertyDefinitions(
-                    `api/projects/${MOCK_TEAM_ID}/property_definitions?limit=50&offset=50`
+                    `v1/projects/${MOCK_TEAM_ID}/property_definitions?limit=50&offset=50`
                 )
             })
                 .toDispatchActions(['loadPropertyDefinitions', 'loadPropertyDefinitionsSuccess'])
@@ -134,7 +134,7 @@ describe('propertyDefinitionsTableLogic', () => {
                 .toMatchValues({
                     propertyDefinitions: partial({
                         count: 6,
-                        previous: `api/projects/${MOCK_TEAM_ID}/property_definitions?limit=50`,
+                        previous: `v1/projects/${MOCK_TEAM_ID}/property_definitions?limit=50`,
                         next: null,
                     }),
                 })
@@ -147,7 +147,7 @@ describe('propertyDefinitionsTableLogic', () => {
                 .toMatchValues({
                     propertyDefinitions: partial({
                         count: 50,
-                        next: `api/projects/${MOCK_TEAM_ID}/property_definitions?limit=50&offset=50`,
+                        next: `v1/projects/${MOCK_TEAM_ID}/property_definitions?limit=50&offset=50`,
                     }),
                 })
             expect(api.get).toHaveBeenCalledTimes(2)

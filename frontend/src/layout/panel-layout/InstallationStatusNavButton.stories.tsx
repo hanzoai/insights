@@ -24,7 +24,7 @@ const meta: Meta<typeof InstallationStatusNavButton> = {
         msw: {
             mocks: {
                 get: {
-                    '/api/projects/:projectId/wizard/sessions/latest/': () => [204, ''],
+                    '/v1/projects/:projectId/wizard/sessions/latest/': () => [204, ''],
                 },
             },
         },

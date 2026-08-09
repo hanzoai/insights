@@ -38,27 +38,27 @@ describe('reviewHogSettingsLogic', () => {
         useMocks({
             get: {
                 // The user has no reviews of their own; the project has a dozen.
-                '/api/projects/:team_id/review_hog/reviews/': ({ request }) => {
+                '/v1/projects/:team_id/review_hog/reviews/': ({ request }) => {
                     const url = new URL(request.url)
                     const limit = Number(url.searchParams.get('limit') ?? REVIEWS_PAGE_SIZE)
                     const pool =
                         url.searchParams.get('scope') === ReviewHogReviewsListScope.Everyone ? everyoneReviews : []
                     return [200, { results: pool.slice(0, limit), has_more: pool.length > limit }]
                 },
-                '/api/projects/:team_id/review_hog/reviews/perspective_stats/': () => [
+                '/v1/projects/:team_id/review_hog/reviews/perspective_stats/': () => [
                     200,
                     { report_count: 0, perspectives: [] },
                 ],
-                '/api/projects/:team_id/review_hog/settings/': () => [
+                '/v1/projects/:team_id/review_hog/settings/': () => [
                     200,
                     { review_inbox_prs: false, review_labeled_prs: true, urgency_threshold: 'should_fix' },
                 ],
-                '/api/projects/:team_id/review_hog/perspectives/': () => [200, []],
-                '/api/projects/:team_id/review_hog/blind_spots/': () => [200, []],
-                '/api/projects/:team_id/review_hog/validators/': () => [200, []],
+                '/v1/projects/:team_id/review_hog/perspectives/': () => [200, []],
+                '/v1/projects/:team_id/review_hog/blind_spots/': () => [200, []],
+                '/v1/projects/:team_id/review_hog/validators/': () => [200, []],
             },
             post: {
-                '/api/projects/:team_id/review_hog/reviews/trigger/': () => [
+                '/v1/projects/:team_id/review_hog/reviews/trigger/': () => [
                     202,
                     { workflow_id: 'wf-1', status: 'started' },
                 ],
@@ -119,7 +119,7 @@ describe('reviewHogSettingsLogic', () => {
         let triggerCalls = 0
         useMocks({
             post: {
-                '/api/projects/:team_id/review_hog/reviews/trigger/': () => {
+                '/v1/projects/:team_id/review_hog/reviews/trigger/': () => {
                     triggerCalls++
                     return [202, { workflow_id: 'wf-1', status: 'started' }]
                 },
@@ -143,7 +143,7 @@ describe('reviewHogSettingsLogic', () => {
     it('an already-reviewed PR informs without arming the watch', async () => {
         useMocks({
             post: {
-                '/api/projects/:team_id/review_hog/reviews/trigger/': () => [
+                '/v1/projects/:team_id/review_hog/reviews/trigger/': () => [
                     200,
                     { workflow_id: '', status: 'already_reviewed' },
                 ],
@@ -167,7 +167,7 @@ describe('reviewHogSettingsLogic', () => {
     it('a rejected trigger resets the in-flight flag and keeps the input for correction', async () => {
         useMocks({
             post: {
-                '/api/projects/:team_id/review_hog/reviews/trigger/': () => [
+                '/v1/projects/:team_id/review_hog/reviews/trigger/': () => [
                     403,
                     { error: "ReviewHog reviews can't be started from this project yet" },
                 ],
@@ -199,7 +199,7 @@ describe('reviewHogSettingsLogic', () => {
         const statsScopes: (string | null)[] = []
         useMocks({
             get: {
-                '/api/projects/:team_id/review_hog/reviews/perspective_stats/': ({ request }) => {
+                '/v1/projects/:team_id/review_hog/reviews/perspective_stats/': ({ request }) => {
                     statsScopes.push(new URL(request.url).searchParams.get('scope'))
                     return [200, { report_count: 0, perspectives: [] }]
                 },
@@ -276,11 +276,11 @@ describe('reviewHogSettingsLogic', () => {
         // published — the exact lie the stored snapshot exists to fix.
         useMocks({
             get: {
-                '/api/projects/:team_id/review_hog/reviews/r-stamped/': () => [
+                '/v1/projects/:team_id/review_hog/reviews/r-stamped/': () => [
                     200,
                     reviewDetail('r-stamped', 'must_fix'),
                 ],
-                '/api/projects/:team_id/review_hog/reviews/r-old/': () => [200, reviewDetail('r-old', null)],
+                '/v1/projects/:team_id/review_hog/reviews/r-old/': () => [200, reviewDetail('r-old', null)],
             },
         })
         logic.mount()
@@ -304,7 +304,7 @@ describe('reviewHogSettingsLogic', () => {
         // sync silently dead-ends every held-back-findings link already posted to GitHub.
         useMocks({
             get: {
-                '/api/projects/:team_id/review_hog/reviews/r-9/': () => [200, reviewDetail('r-9', null)],
+                '/v1/projects/:team_id/review_hog/reviews/r-9/': () => [200, reviewDetail('r-9', null)],
             },
         })
         logic.mount()
@@ -341,7 +341,7 @@ describe('reviewHogSettingsLogic', () => {
         // without the failure path the drawer would sit open on skeletons forever.
         useMocks({
             get: {
-                '/api/projects/:team_id/review_hog/reviews/r-gone/': () => [404, { detail: 'Not found.' }],
+                '/v1/projects/:team_id/review_hog/reviews/r-gone/': () => [404, { detail: 'Not found.' }],
             },
         })
         logic.mount()

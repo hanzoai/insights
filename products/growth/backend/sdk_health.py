@@ -802,7 +802,7 @@ def compute_sdk_health(
 ) -> SdkHealthReport:
     """
     Top-level entry point. Takes the combined data structure returned by the existing
-    /api/sdk_health/ view:
+    /v1/sdk_health/ view:
 
         {
           "web": {

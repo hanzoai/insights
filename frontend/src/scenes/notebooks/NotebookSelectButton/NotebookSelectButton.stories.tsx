@@ -50,7 +50,7 @@ const allNotebooks = [
 const renderNotebookSelect = (props: any): JSX.Element => {
     useStorybookMocks({
         get: {
-            '/api/projects/:team_id/notebooks/': async ({ request }) => {
+            '/v1/projects/:team_id/notebooks/': async ({ request }) => {
                 const contains = new URL(request.url).searchParams.get('contains')
                 const sessionRecordingId = contains?.split(':')[1]
                 const unfiltered = contains == null && sessionRecordingId === undefined
@@ -126,7 +126,7 @@ export const WithNoNotebooks: Story = {
 const renderSessionNotebookSelect = (props: any): JSX.Element => {
     useStorybookMocks({
         get: {
-            '/api/projects/:team_id/notebooks/': () => {
+            '/v1/projects/:team_id/notebooks/': () => {
                 return [
                     200,
                     {

@@ -176,7 +176,7 @@ describe('dashboardLogic', () => {
         }
         useMocks({
             get: {
-                '/api/environments/:team_id/query/123/': () => [
+                '/v1/environments/:team_id/query/123/': () => [
                     200,
                     {
                         query_status: {
@@ -184,21 +184,21 @@ describe('dashboardLogic', () => {
                         },
                     },
                 ],
-                '/api/environments/:team_id/dashboards/5/': { ...dashboards[5] },
-                '/api/environments/:team_id/dashboards/6/': { ...dashboards[6] },
-                '/api/environments/:team_id/dashboards/7/': () => [500, '💣'],
-                '/api/environments/:team_id/dashboards/13/': () => [404, { detail: 'Not found.' }],
-                '/api/environments/:team_id/dashboards/14/': () => [401, { detail: 'Authentication expired.' }],
-                '/api/environments/:team_id/dashboards/15/': () => [
+                '/v1/environments/:team_id/dashboards/5/': { ...dashboards[5] },
+                '/v1/environments/:team_id/dashboards/6/': { ...dashboards[6] },
+                '/v1/environments/:team_id/dashboards/7/': () => [500, '💣'],
+                '/v1/environments/:team_id/dashboards/13/': () => [404, { detail: 'Not found.' }],
+                '/v1/environments/:team_id/dashboards/14/': () => [401, { detail: 'Authentication expired.' }],
+                '/v1/environments/:team_id/dashboards/15/': () => [
                     403,
                     { code: 'permission_denied', detail: 'Access denied.' },
                 ],
-                '/api/environments/:team_id/dashboards/16/': () => [504, { detail: 'Gateway timeout.' }],
-                '/api/environments/:team_id/dashboards/8/': { ...dashboards[8] },
-                '/api/environments/:team_id/dashboards/9/': { ...dashboards[9] },
-                '/api/environments/:team_id/dashboards/10/': { ...dashboards[10] },
-                '/api/environments/:team_id/dashboards/11/': { ...dashboards[11] },
-                '/api/environments/:team_id/dashboards/': {
+                '/v1/environments/:team_id/dashboards/16/': () => [504, { detail: 'Gateway timeout.' }],
+                '/v1/environments/:team_id/dashboards/8/': { ...dashboards[8] },
+                '/v1/environments/:team_id/dashboards/9/': { ...dashboards[9] },
+                '/v1/environments/:team_id/dashboards/10/': { ...dashboards[10] },
+                '/v1/environments/:team_id/dashboards/11/': { ...dashboards[11] },
+                '/v1/environments/:team_id/dashboards/': {
                     count: 6,
                     next: null,
                     previous: null,
@@ -210,7 +210,7 @@ describe('dashboardLogic', () => {
                         { ...dashboards[10] },
                     ],
                 },
-                '/api/environments/:team_id/data_color_themes/': [
+                '/v1/environments/:team_id/data_color_themes/': [
                     {
                         id: 1,
                         name: 'Default theme',
@@ -219,9 +219,9 @@ describe('dashboardLogic', () => {
                     },
                     { id: 123, name: 'Two-color theme', colors: ['#ff0000', '#00ff00'], is_global: false },
                 ],
-                '/api/environments/:team_id/insights/1001/': () => [200, { ...insights['1001'] }],
-                '/api/environments/:team_id/insights/800/': () => [200, { ...insights['800'] }],
-                '/api/environments/:team_id/insights/:id/': ({ request, params }) => {
+                '/v1/environments/:team_id/insights/1001/': () => [200, { ...insights['1001'] }],
+                '/v1/environments/:team_id/insights/800/': () => [200, { ...insights['800'] }],
+                '/v1/environments/:team_id/insights/:id/': ({ request, params }) => {
                     const dashboard = new URL(request.url).searchParams.get('from_dashboard')
                     if (!dashboard) {
                         throw new Error('the logic must always add this param')
@@ -234,16 +234,16 @@ describe('dashboardLogic', () => {
                 },
             },
             post: {
-                '/api/environments/:team_id/insights/cancel/': [201],
+                '/v1/environments/:team_id/insights/cancel/': [201],
             },
             patch: {
-                '/api/environments/:team_id/dashboards/:id/': async ({ request, params }) => {
+                '/v1/environments/:team_id/dashboards/:id/': async ({ request, params }) => {
                     const dashboardId =
                         typeof params.id === 'string' ? parseInt(params.id) : parseInt((params.id as string[])[0])
                     const payload = (await request.json()) as Record<string, any>
                     return [200, { ...dashboards[dashboardId], ...payload }]
                 },
-                '/api/environments/:team_id/dashboards/:id/move_tile/': async ({ request, params }) => {
+                '/v1/environments/:team_id/dashboards/:id/move_tile/': async ({ request, params }) => {
                     // backend updates the two dashboards and the insight
                     const jsonPayload = (await request.json()) as Record<string, any>
                     const { to_dashboard: toDashboard, tile: tileToUpdate } = jsonPayload
@@ -270,7 +270,7 @@ describe('dashboardLogic', () => {
 
                     return [200, { ...from }]
                 },
-                '/api/environments/:team_id/insights/:id/': async ({ request, params }) => {
+                '/v1/environments/:team_id/insights/:id/': async ({ request, params }) => {
                     try {
                         const updates = await request.json()
                         if (typeof updates !== 'object') {
@@ -385,7 +385,7 @@ describe('dashboardLogic', () => {
 
             expect(api.update).toHaveBeenCalledTimes(1)
             expect(api.update).toHaveBeenCalledWith(
-                `api/environments/${MOCK_TEAM_ID}/dashboards/5`,
+                `v1/environments/${MOCK_TEAM_ID}/dashboards/5`,
                 expect.objectContaining({
                     tiles: expect.any(Array),
                 })
@@ -407,7 +407,7 @@ describe('dashboardLogic', () => {
 
             expect(api.update).toHaveBeenCalledTimes(1)
             expect(api.update).toHaveBeenCalledWith(
-                `api/environments/${MOCK_TEAM_ID}/dashboards/5`,
+                `v1/environments/${MOCK_TEAM_ID}/dashboards/5`,
                 expect.objectContaining({
                     filters: expect.objectContaining({ date_from: '-7d' }),
                 })
@@ -447,7 +447,7 @@ describe('dashboardLogic', () => {
 
             expect(api.update).toHaveBeenCalledTimes(1)
             expect(api.update).toHaveBeenCalledWith(
-                `api/environments/${MOCK_TEAM_ID}/dashboards/5`,
+                `v1/environments/${MOCK_TEAM_ID}/dashboards/5`,
                 expect.objectContaining({
                     breakdown_colors: expect.arrayContaining([
                         expect.objectContaining({ breakdownValue: 'x', colorToken: 'preset-1' }),
@@ -590,7 +590,7 @@ describe('dashboardLogic', () => {
             }).toFinishAllListeners()
 
             expect(api.update).toHaveBeenCalledWith(
-                `api/environments/${MOCK_TEAM_ID}/dashboards/5`,
+                `v1/environments/${MOCK_TEAM_ID}/dashboards/5`,
                 expect.objectContaining({
                     // only the pin — no auto entry materialized from the partially loaded tiles
                     breakdown_colors: [expect.objectContaining({ breakdownValue: 'pinned', colorToken: 'preset-5' })],
@@ -613,7 +613,7 @@ describe('dashboardLogic', () => {
 
             expect(api.update).toHaveBeenCalledTimes(1)
             expect(api.update).toHaveBeenCalledWith(
-                `api/environments/${MOCK_TEAM_ID}/dashboards/5`,
+                `v1/environments/${MOCK_TEAM_ID}/dashboards/5`,
                 expect.objectContaining({
                     data_color_theme_id: 123,
                 })
@@ -1174,7 +1174,7 @@ describe('dashboardLogic', () => {
             await expectLogic(dashboardEightlogic).toFinishAllListeners()
 
             expect(api.update).toHaveBeenCalledWith(
-                `api/environments/${MOCK_TEAM_ID}/dashboards/${9}/move_tile`,
+                `v1/environments/${MOCK_TEAM_ID}/dashboards/${9}/move_tile`,
                 expect.objectContaining({ tile: sourceTile, to_dashboard: 8 })
             )
         })
@@ -2091,7 +2091,7 @@ describe('dashboardLogic', () => {
             // oxlint-disable-next-line react-hooks/rules-of-hooks
             useMocks({
                 get: {
-                    '/api/environments/:team_id/dashboards/12/': () => [200, dashboardWithVariableOverride],
+                    '/v1/environments/:team_id/dashboards/12/': () => [200, dashboardWithVariableOverride],
                 },
             })
 
@@ -2577,7 +2577,7 @@ describe('dashboardLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/environments/:team_id/dashboards/5/': () => [
+                    '/v1/environments/:team_id/dashboards/5/': () => [
                         200,
                         { ...dashboards[5], tiles: [...dashboards[5].tiles, WIDGET_TILE] },
                     ],
@@ -2846,7 +2846,7 @@ describe('dashboardLogic', () => {
                 logic.actions.copyToDashboard(WIDGET_TILE, 5, 8, 'Target dashboard')
             }).toFinishAllListeners()
 
-            expect(api.create).toHaveBeenCalledWith(`api/environments/${MOCK_TEAM_ID}/dashboards/8/copy_tile`, {
+            expect(api.create).toHaveBeenCalledWith(`v1/environments/${MOCK_TEAM_ID}/dashboards/8/copy_tile`, {
                 fromDashboardId: 5,
                 tileId: WIDGET_TILE.id,
             })

@@ -30,7 +30,7 @@ class TestStamphogRepoConfigAPI(StamphogTeamScopedTestMixin, APIBaseTest):
 
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/api/projects/{self.team.id}/stamphog/repo_configs/"
+        self.url = f"/v1/projects/{self.team.id}/stamphog/repo_configs/"
 
     def test_create_ignores_client_supplied_installation_id(self) -> None:
         # installation_id is read-only: a manual create must not let a caller claim an installation
@@ -99,7 +99,7 @@ class TestStamphogRepoConfigAPI(StamphogTeamScopedTestMixin, APIBaseTest):
             team_id=self.team.id, repository="Insights/insights", installation_id="7"
         )
 
-        response = self.client.get(f"/api/projects/{env.id}/stamphog/repo_configs/")
+        response = self.client.get(f"/v1/projects/{env.id}/stamphog/repo_configs/")
 
         assert response.status_code == status.HTTP_200_OK, response.content
         repos = [row["repository"] for row in response.json()["results"]]
@@ -124,7 +124,7 @@ class TestStamphogRepoConfigAPI(StamphogTeamScopedTestMixin, APIBaseTest):
         self.client.logout()
 
         response = self.client.get(
-            f"/api/projects/{env.id}/stamphog/repo_configs/", HTTP_AUTHORIZATION=f"Bearer {key_value}"
+            f"/v1/projects/{env.id}/stamphog/repo_configs/", HTTP_AUTHORIZATION=f"Bearer {key_value}"
         )
 
         assert response.status_code == status.HTTP_403_FORBIDDEN, response.content
@@ -174,7 +174,7 @@ class TestReviewRunAPI(StamphogTeamScopedTestMixin, APIBaseTest):
 
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/api/projects/{self.team.id}/stamphog/review_runs/"
+        self.url = f"/v1/projects/{self.team.id}/stamphog/review_runs/"
         self.repo_config = StamphogRepoConfig.objects.unscoped().create(
             team_id=self.team.id, repository="Insights/insights", installation_id="1"
         )
@@ -272,7 +272,7 @@ class TestSyncInstallationAPI(StamphogTeamScopedTestMixin, APIBaseTest):
 
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/api/projects/{self.team.id}/stamphog/repo_configs/sync_installation/"
+        self.url = f"/v1/projects/{self.team.id}/stamphog/repo_configs/sync_installation/"
         self.state = _install_state(self.team.id, self.user.id)
 
     @patch(f"{_VIEWS}.list_user_accessible_repositories", return_value=["Insights/insights", "Insights/other"])
@@ -485,7 +485,7 @@ class TestDigestChannelAPI(StamphogTeamScopedTestMixin, APIBaseTest):
             slack_channel_id="C1",
             enabled=True,
         )
-        url = f"/api/projects/{self.team.id}/stamphog/digest_channels/{channel.id}/"
+        url = f"/v1/projects/{self.team.id}/stamphog/digest_channels/{channel.id}/"
         response = self.client.delete(url)
         assert response.status_code == status.HTTP_204_NO_CONTENT, response.content
         channel.refresh_from_db()
@@ -500,12 +500,12 @@ class TestDigestChannelAPI(StamphogTeamScopedTestMixin, APIBaseTest):
             team_id=self.team.id, kind="slack", config={}, sensitive_config={"access_token": "x"}
         )
         created = self.client.post(
-            f"/api/projects/{self.team.id}/stamphog/digest_channels/",
+            f"/v1/projects/{self.team.id}/stamphog/digest_channels/",
             {"audience_key": "team-x", "slack_integration_id": integration.id, "slack_channel_id": "C1"},
             format="json",
         ).json()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/stamphog/digest_channels/{created['id']}/",
+            f"/v1/projects/{self.team.id}/stamphog/digest_channels/{created['id']}/",
             {"audience_key": "team-evil", "slack_channel_name": "renamed"},
             format="json",
         )
@@ -528,7 +528,7 @@ class TestDigestChannelAPI(StamphogTeamScopedTestMixin, APIBaseTest):
             enabled=True,
         )
         response = self.client.post(
-            f"/api/projects/{self.team.id}/stamphog/digest_channels/",
+            f"/v1/projects/{self.team.id}/stamphog/digest_channels/",
             {"audience_key": "team-x", "slack_integration_id": integration.id, "slack_channel_id": "C2"},
             format="json",
         )

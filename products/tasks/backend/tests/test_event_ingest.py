@@ -78,7 +78,7 @@ class TestTaskRunEventIngest(TestCase):
         task = task or self.task
         run = run or self.task_run
         project_id = project_id if project_id is not None else self.team.id
-        return f"/api/projects/{project_id}/tasks/{task.id}/runs/{run.id}/event_stream/"
+        return f"/v1/projects/{project_id}/tasks/{task.id}/runs/{run.id}/event_stream/"
 
     def _create_token(self, run: TaskRun | None = None) -> str:
         token_run = run or self.task_run

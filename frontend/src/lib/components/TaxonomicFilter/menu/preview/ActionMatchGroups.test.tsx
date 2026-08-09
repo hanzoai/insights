@@ -30,7 +30,7 @@ function renderItem(item: any): ReturnType<typeof render> {
 
 describe('ActionMatchGroups', () => {
     beforeEach(async () => {
-        useMocks({ get: { '/api/projects/:team_id/actions/': { results: [TEST_ACTION], count: 1 } } })
+        useMocks({ get: { '/v1/projects/:team_id/actions/': { results: [TEST_ACTION], count: 1 } } })
         initKeaTests()
         actionsModel.mount()
         await waitFor(() => {

@@ -16,7 +16,7 @@ class TestFeatureFlagsStaffTeamSearchAPI(APIBaseTest):
         self.user.is_staff = False
         self.user.save()
 
-        response = self.client.get("/api/feature_flags_staff_teams/?search=Test")
+        response = self.client.get("/v1/feature_flags_staff_teams/?search=Test")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_staff_can_find_team_in_organization_they_do_not_belong_to(self):
@@ -27,7 +27,7 @@ class TestFeatureFlagsStaffTeamSearchAPI(APIBaseTest):
         other_team = Team.objects.create(organization=other_org, name="Cross Org Team")
         self.assertFalse(self.user.organization_memberships.filter(organization=other_org).exists())
 
-        response = self.client.get("/api/feature_flags_staff_teams/?search=Cross Org Team")
+        response = self.client.get("/v1/feature_flags_staff_teams/?search=Cross Org Team")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         returned_ids = [team["id"] for team in response.json()["results"]]
@@ -46,7 +46,7 @@ class TestFeatureFlagsStaffTeamSearchAPI(APIBaseTest):
         org = Organization.objects.create(name="Findable Organization")
         self.searchable_team = Team.objects.create(organization=org, name="Searchable Team")
 
-        response = self.client.get("/api/feature_flags_staff_teams/", {"search": search_value_fn(self)})
+        response = self.client.get("/v1/feature_flags_staff_teams/", {"search": search_value_fn(self)})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         returned_ids = [team["id"] for team in response.json()["results"]]
@@ -56,7 +56,7 @@ class TestFeatureFlagsStaffTeamSearchAPI(APIBaseTest):
         org = Organization.objects.create(name="Shape Org")
         team = Team.objects.create(organization=org, name="Shape Team")
 
-        response = self.client.get("/api/feature_flags_staff_teams/", {"search": "Shape Team"})
+        response = self.client.get("/v1/feature_flags_staff_teams/", {"search": "Shape Team"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         result = next(r for r in response.json()["results"] if r["id"] == team.id)
@@ -70,7 +70,7 @@ class TestFeatureFlagsStaffTeamSearchAPI(APIBaseTest):
     def test_non_numeric_search_below_min_length_returns_400(self, _name, search):
         # A single-digit numeric id lookup is allowed (see exact_id case above); a single
         # letter or empty string is not, so an over-broad query never returns half the table.
-        response = self.client.get("/api/feature_flags_staff_teams/", {"search": search})
+        response = self.client.get("/v1/feature_flags_staff_teams/", {"search": search})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_single_digit_search_only_matches_by_id_not_by_name_or_org_substring(self):
@@ -86,14 +86,14 @@ class TestFeatureFlagsStaffTeamSearchAPI(APIBaseTest):
         team.save(update_fields=["name"])
         org.save(update_fields=["name"])
 
-        response = self.client.get("/api/feature_flags_staff_teams/", {"search": digit})
+        response = self.client.get("/v1/feature_flags_staff_teams/", {"search": digit})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         returned_ids = [result["id"] for result in response.json()["results"]]
         self.assertNotIn(team.id, returned_ids)
 
     def test_limit_is_capped(self):
-        response = self.client.get("/api/feature_flags_staff_teams/", {"search": "Test", "limit": "1000"})
+        response = self.client.get("/v1/feature_flags_staff_teams/", {"search": "Test", "limit": "1000"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_limit_bounds_number_of_results(self):
@@ -101,6 +101,6 @@ class TestFeatureFlagsStaffTeamSearchAPI(APIBaseTest):
         for i in range(3):
             Team.objects.create(organization=org, name=f"Bulk Team {i}")
 
-        response = self.client.get("/api/feature_flags_staff_teams/", {"search": "Bulk Team", "limit": "2"})
+        response = self.client.get("/v1/feature_flags_staff_teams/", {"search": "Bulk Team", "limit": "2"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 2)

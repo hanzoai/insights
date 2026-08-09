@@ -24,7 +24,7 @@ describe('errorTrackingInsightsLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/quick_filters/': { results: [] },
+                '/v1/environments/:team_id/quick_filters/': { results: [] },
             },
         })
         initKeaTests()

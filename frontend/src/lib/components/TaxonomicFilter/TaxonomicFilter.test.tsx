@@ -49,17 +49,17 @@ describe('TaxonomicFilter', () => {
         })
         useMocks({
             get: {
-                '/api/projects/:team/event_definitions': mockGetEventDefinitions,
-                '/api/projects/:team/property_definitions': mockGetPropertyDefinitions,
-                '/api/projects/:team/actions': { results: [mockActionDefinition] },
-                '/api/environments/:team/persons/properties': [
+                '/v1/projects/:team/event_definitions': mockGetEventDefinitions,
+                '/v1/projects/:team/property_definitions': mockGetPropertyDefinitions,
+                '/v1/projects/:team/actions': { results: [mockActionDefinition] },
+                '/v1/environments/:team/persons/properties': [
                     { id: 1, name: 'location', count: 1 },
                     { id: 2, name: 'role', count: 2 },
                     { id: 3, name: 'height', count: 3 },
                 ],
             },
             post: {
-                '/api/environments/:team/query': { results: [] },
+                '/v1/environments/:team/query': { results: [] },
             },
         })
         // Recents/pinned persist to localStorage; clear so an earlier test's selection
@@ -892,13 +892,13 @@ describe('TaxonomicFilter', () => {
         it('handles empty API response gracefully', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team/event_definitions': () => [200, { results: [], count: 0 }],
-                    '/api/projects/:team/property_definitions': () => [200, { results: [], count: 0 }],
-                    '/api/projects/:team/actions': { results: [] },
-                    '/api/environments/:team/persons/properties': [],
+                    '/v1/projects/:team/event_definitions': () => [200, { results: [], count: 0 }],
+                    '/v1/projects/:team/property_definitions': () => [200, { results: [], count: 0 }],
+                    '/v1/projects/:team/actions': { results: [] },
+                    '/v1/environments/:team/persons/properties': [],
                 },
                 post: {
-                    '/api/environments/:team/query': { results: [] },
+                    '/v1/environments/:team/query': { results: [] },
                 },
             })
 
@@ -963,7 +963,7 @@ describe('TaxonomicFilter', () => {
         // verify that promotion moves it to position 0.
         useMocks({
             get: {
-                '/api/projects/:team/property_definitions': ({ request }) => {
+                '/v1/projects/:team/property_definitions': ({ request }) => {
                     const search = new URL(request.url).searchParams.get('search') ?? ''
                     const allProps = [
                         { ...mockEventPropertyDefinition, id: 'url-other', name: '$initial_referring_url' },
@@ -1154,9 +1154,9 @@ describe('TaxonomicFilter', () => {
         function useMockPageviewUrls(urls: string[]): void {
             useMocks({
                 get: {
-                    '/api/projects/:team/event_definitions': mockGetEventDefinitions,
-                    '/api/projects/:team/property_definitions': mockGetPropertyDefinitions,
-                    '/api/environments/:team/events/values': urls.map((name) => ({ name })),
+                    '/v1/projects/:team/event_definitions': mockGetEventDefinitions,
+                    '/v1/projects/:team/property_definitions': mockGetPropertyDefinitions,
+                    '/v1/environments/:team/events/values': urls.map((name) => ({ name })),
                 },
             })
         }
@@ -1262,9 +1262,9 @@ describe('TaxonomicFilter', () => {
             let valuesFetched = false
             useMocks({
                 get: {
-                    '/api/projects/:team/event_definitions': mockGetEventDefinitions,
-                    '/api/projects/:team/property_definitions': mockGetPropertyDefinitions,
-                    '/api/environments/:team/events/values': () => {
+                    '/v1/projects/:team/event_definitions': mockGetEventDefinitions,
+                    '/v1/projects/:team/property_definitions': mockGetPropertyDefinitions,
+                    '/v1/environments/:team/events/values': () => {
                         valuesFetched = true
                         return [200, []]
                     },
@@ -1317,9 +1317,9 @@ describe('TaxonomicFilter', () => {
             })
             useMocks({
                 get: {
-                    '/api/projects/:team/event_definitions': mockGetEventDefinitions,
-                    '/api/projects/:team/property_definitions': mockGetPropertyDefinitions,
-                    '/api/environments/:team/events/values': [
+                    '/v1/projects/:team/event_definitions': mockGetEventDefinitions,
+                    '/v1/projects/:team/property_definitions': mockGetPropertyDefinitions,
+                    '/v1/environments/:team/events/values': [
                         { name: 'https://app.hanzo.ai/replay' },
                         { name: 'https://app.hanzo.ai/replay/home' },
                     ],
@@ -1550,8 +1550,8 @@ describe('TaxonomicFilter', () => {
             localStorage.clear()
             useMocks({
                 get: {
-                    '/api/projects/:team/event_definitions': mockGetEventDefinitions,
-                    '/api/projects/:team/property_definitions': ({ request }: MockResolverInfo) => {
+                    '/v1/projects/:team/event_definitions': mockGetEventDefinitions,
+                    '/v1/projects/:team/property_definitions': ({ request }: MockResolverInfo) => {
                         const search = new URL(request.url).searchParams.get('search') ?? ''
                         const fixture = promotedFixtures[search]
                         const names = fixture ? [...fixture.decoys, fixture.name] : []
@@ -1567,10 +1567,10 @@ describe('TaxonomicFilter', () => {
                             },
                         ]
                     },
-                    '/api/projects/:team/actions': { results: [] },
+                    '/v1/projects/:team/actions': { results: [] },
                 },
                 post: {
-                    '/api/environments/:team/query': { results: [] },
+                    '/v1/environments/:team/query': { results: [] },
                 },
             })
         })
@@ -1626,13 +1626,13 @@ describe('TaxonomicFilter', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/projects/:team/event_definitions': mockGetEventDefinitions,
-                    '/api/projects/:team/property_definitions': mockGetPropertyDefinitions,
-                    '/api/projects/:team/actions': { results: [] },
-                    '/api/environments/:team/logs/attributes': mockLogAttributes,
+                    '/v1/projects/:team/event_definitions': mockGetEventDefinitions,
+                    '/v1/projects/:team/property_definitions': mockGetPropertyDefinitions,
+                    '/v1/projects/:team/actions': { results: [] },
+                    '/v1/environments/:team/logs/attributes': mockLogAttributes,
                 },
                 post: {
-                    '/api/environments/:team/query': { results: [] },
+                    '/v1/environments/:team/query': { results: [] },
                 },
             })
         })
@@ -1734,13 +1734,13 @@ describe('TaxonomicFilter', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/projects/:team/event_definitions': mockGetEventDefinitions,
-                    '/api/projects/:team/property_definitions': mockGetPropertyDefinitions,
-                    '/api/projects/:team/cohorts/': { results: [], next: null, count: 0 },
-                    '/api/projects/:team/actions': { results: [] },
+                    '/v1/projects/:team/event_definitions': mockGetEventDefinitions,
+                    '/v1/projects/:team/property_definitions': mockGetPropertyDefinitions,
+                    '/v1/projects/:team/cohorts/': { results: [], next: null, count: 0 },
+                    '/v1/projects/:team/actions': { results: [] },
                 },
                 post: {
-                    '/api/environments/:team/query': { results: [] },
+                    '/v1/environments/:team/query': { results: [] },
                 },
             })
             localStorage.clear()
@@ -1825,20 +1825,20 @@ describe('TaxonomicFilter', () => {
             // to the DOM in CI. Production latency exceeds this comfortably.
             useMocks({
                 get: {
-                    '/api/projects/:team/event_definitions': async (info) => {
+                    '/v1/projects/:team/event_definitions': async (info) => {
                         await new Promise((resolve) => setTimeout(resolve, 100))
                         return mockGetEventDefinitions(info)
                     },
-                    '/api/projects/:team/property_definitions': mockGetPropertyDefinitions,
-                    '/api/projects/:team/actions': { results: [mockActionDefinition] },
-                    '/api/environments/:team/persons/properties': [
+                    '/v1/projects/:team/property_definitions': mockGetPropertyDefinitions,
+                    '/v1/projects/:team/actions': { results: [mockActionDefinition] },
+                    '/v1/environments/:team/persons/properties': [
                         { id: 1, name: 'location', count: 1 },
                         { id: 2, name: 'role', count: 2 },
                         { id: 3, name: 'height', count: 3 },
                     ],
                 },
                 post: {
-                    '/api/environments/:team/query': { results: [] },
+                    '/v1/environments/:team/query': { results: [] },
                 },
             })
             const recentLogic = recentTaxonomicFiltersLogic.build()

@@ -48,19 +48,19 @@ class TestInsightsFlowTimingRescheduleTrigger(APIBaseTest):
 
     def _create_flow(self, activate: bool = True) -> str:
         create = self.client.post(
-            f"/api/projects/{self.team.id}/insights_flows",
+            f"/v1/projects/{self.team.id}/insights_flows",
             {"name": "Test Flow", "actions": _actions(), "edges": _edges()},
         )
         assert create.status_code == 201, create.json()
         flow_id = create.json()["id"]
         if activate:
-            response = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
+            response = self.client.patch(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
             assert response.status_code == 200, response.json()
         return flow_id
 
     def _patch_actions(self, flow_id: str, delay_duration: str, webhook_url: str = "https://example.com", **extra):
         return self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}",
             {"actions": _actions(delay_duration=delay_duration, webhook_url=webhook_url)},
             **extra,
         )
@@ -69,7 +69,7 @@ class TestInsightsFlowTimingRescheduleTrigger(APIBaseTest):
         # Graph content edits over MCP go through the surgical graph endpoint (a plain update
         # rejects actions/edges outright).
         return self.client.patch(
-            f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
+            f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/graph",
             {
                 "operations": [
                     {"op": "update_action", "id": "delay_1", "patch": {"config": {"delay_duration": delay_duration}}}
@@ -140,12 +140,12 @@ class TestInsightsFlowTimingRescheduleTrigger(APIBaseTest):
             "products.workflows.backend.api.insights_flow.get_insights_flow_in_flight_count",
             side_effect=Exception("count service down"),
         ):
-            preview = self.client.post(f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish", {})
+            preview = self.client.post(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/publish", {})
         assert preview.status_code == 200, preview.json()
 
         with self.captureOnCommitCallbacks(execute=True):
             publish = self.client.post(
-                f"/api/projects/{self.team.id}/insights_flows/{flow_id}/publish",
+                f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/publish",
                 {"confirm": True, "confirm_token": preview.json()["confirm_token"]},
             )
 
@@ -157,14 +157,14 @@ class TestInsightsFlowTimingRescheduleTrigger(APIBaseTest):
         # Runs parked during a prior active period survive a disable, and timing edits made while
         # disabled never sweep - so the enable transition converges every timing step.
         flow_id = self._create_flow()
-        disable = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "draft"})
+        disable = self.client.patch(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "draft"})
         assert disable.status_code == 200, disable.json()
         edit = self._patch_actions(flow_id, delay_duration="1d")
         assert edit.status_code == 200, edit.json()
         mock_task.delay.assert_not_called()
 
         with self.captureOnCommitCallbacks(execute=True):
-            enable = self.client.patch(f"/api/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
+            enable = self.client.patch(f"/v1/projects/{self.team.id}/insights_flows/{flow_id}", {"status": "active"})
 
         assert enable.status_code == 200, enable.json()
         mock_task.delay.assert_called_once_with(team_id=self.team.id, insights_flow_id=flow_id, action_ids=["delay_1"])
@@ -175,7 +175,7 @@ class TestInsightsFlowTimingRescheduleTrigger(APIBaseTest):
 
         with self.captureOnCommitCallbacks(execute=True):
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/insights_flows/{flow_id}/graph",
+                f"/v1/projects/{self.team.id}/insights_flows/{flow_id}/graph",
                 {
                     "operations": [
                         {"op": "update_action", "id": "delay_1", "patch": {"config": {"delay_duration": "1d"}}}

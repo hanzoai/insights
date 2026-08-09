@@ -1246,7 +1246,7 @@ export function defineToolBehaviorTests(
         })
 
         // execute-sql is the heaviest upstream call surface in the MCP server:
-        // it crosses the API client, the Insights `/api/environments/<id>/mcp_tools/execute_sql/`
+        // it crosses the API client, the Insights `/v1/environments/<id>/mcp_tools/execute_sql/`
         // endpoint, and Datastore via InsightsQL. If this works end-to-end, the
         // whole query path is wired up.
         //

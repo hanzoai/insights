@@ -9,9 +9,8 @@ from rest_framework import status
 
 from insights.constants import AvailableFeature
 from insights.models import Team, User
-from insights.models.organization import OrganizationMembership
-
 from insights.models.ee_models import AccessControl
+from insights.models.organization import OrganizationMembership
 
 from ...api.skill_serializers import DEFAULT_BODY_PAGE_LENGTH
 from ...api.skill_services import (
@@ -27,7 +26,7 @@ from ...models.skills import LLMSkill, LLMSkillFile
 
 class TestLLMSkillAPI(APIBaseTest):
     def _url(self, path: str = "") -> str:
-        return f"/api/environments/{self.team.id}/llm_skills/{path}"
+        return f"/v1/environments/{self.team.id}/llm_skills/{path}"
 
     def create_skill(
         self,
@@ -1236,7 +1235,7 @@ class TestSkillAccessControlRBAC(APIBaseTest):
         self.client.force_login(self.member)
 
     def _url(self, path: str = "") -> str:
-        return f"/api/environments/{self.team.id}/llm_skills/{path}"
+        return f"/v1/environments/{self.team.id}/llm_skills/{path}"
 
     def _grant_llm_skill_access(self, access_level: str) -> None:
         membership = OrganizationMembership.objects.get(user=self.member, organization=self.organization)
@@ -1330,7 +1329,7 @@ class TestLLMSkillOwners(APIBaseTest):
     """
 
     def _url(self, path: str = "") -> str:
-        return f"/api/environments/{self.team.id}/llm_skills/{path}"
+        return f"/v1/environments/{self.team.id}/llm_skills/{path}"
 
     def _member(self, email: str) -> User:
         return User.objects.create_and_join(self.organization, email, None)

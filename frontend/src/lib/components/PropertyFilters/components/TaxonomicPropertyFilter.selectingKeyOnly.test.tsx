@@ -36,17 +36,17 @@ describe('TaxonomicPropertyFilter selectingKeyOnly', () => {
         initKeaTests()
         useMocks({
             get: {
-                '/api/projects/:team/event_definitions': mockGetEventDefinitions,
-                '/api/projects/:team/property_definitions': mockGetPropertyDefinitions,
-                '/api/projects/:team/cohorts/': {
+                '/v1/projects/:team/event_definitions': mockGetEventDefinitions,
+                '/v1/projects/:team/property_definitions': mockGetPropertyDefinitions,
+                '/v1/projects/:team/cohorts/': {
                     results: [cohortPowerUsers],
                     next: null,
                     count: 1,
                 },
-                '/api/projects/:team/actions': { results: [] },
+                '/v1/projects/:team/actions': { results: [] },
             },
             post: {
-                '/api/environments/:team/query': { results: [] },
+                '/v1/environments/:team/query': { results: [] },
             },
         })
     })

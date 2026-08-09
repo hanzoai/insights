@@ -33,11 +33,11 @@ describe('insightModalsLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/42': { id: 42, short_id: Insight42, result: ['result'] },
-                '/api/environments/:team_id/insights/': { results: [], count: 0 },
+                '/v1/environments/:team_id/insights/42': { id: 42, short_id: Insight42, result: ['result'] },
+                '/v1/environments/:team_id/insights/': { results: [], count: 0 },
             },
             patch: {
-                '/api/environments/:team_id/insights/:id': async ({ request, params }) => {
+                '/v1/environments/:team_id/insights/:id': async ({ request, params }) => {
                     const payload = (await request.json()) as Record<string, any>
                     return [200, { ...payload, id: params.id, short_id: Insight42 }]
                 },
@@ -65,7 +65,7 @@ describe('insightModalsLogic', () => {
     it('does not open the modal and clears the pending flag when the save fails', async () => {
         // Hold the save open so the pending flag stays set, then drive the failure signal directly — this exercises
         // insightModalsLogic's reaction without depending on insightLogic re-throwing on a real API error.
-        useMocks({ patch: { '/api/environments/:team_id/insights/:id': () => new Promise(() => {}) } })
+        useMocks({ patch: { '/v1/environments/:team_id/insights/:id': () => new Promise(() => {}) } })
 
         await expectLogic(logic, () => {
             logic.actions.saveAndAddToDashboard()

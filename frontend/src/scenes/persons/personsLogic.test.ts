@@ -44,7 +44,7 @@ describe('personsLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/persons/': mockPersonsApiHandler,
+                '/v1/environments/:team_id/persons/': mockPersonsApiHandler,
             },
         })
         initKeaTests()
@@ -113,7 +113,7 @@ describe('personsLogic', () => {
                 logic.actions.loadPerson('+')
                 // has encoded from + in the action to %2B in the API call
                 expect(api.get).toHaveBeenCalledWith(
-                    `api/environments/${MOCK_TEAM_ID}/persons?distinct_id=%2B`,
+                    `v1/environments/${MOCK_TEAM_ID}/persons?distinct_id=%2B`,
                     undefined
                 )
             })
@@ -227,8 +227,8 @@ describe('personsLogic', () => {
 
         it('updates existing property immutably', async () => {
             useMocks({
-                get: { '/api/environments/:team_id/persons/': mockPersonsApiHandler },
-                post: { '/api/environments/:team_id/persons/:id/update_property/': [200, {}] },
+                get: { '/v1/environments/:team_id/persons/': mockPersonsApiHandler },
+                post: { '/v1/environments/:team_id/persons/:id/update_property/': [200, {}] },
             })
 
             const originalProperties = logic.values.person!.properties
@@ -244,8 +244,8 @@ describe('personsLogic', () => {
 
         it('adds new property at the top', async () => {
             useMocks({
-                get: { '/api/environments/:team_id/persons/': mockPersonsApiHandler },
-                post: { '/api/environments/:team_id/persons/:id/update_property/': [200, {}] },
+                get: { '/v1/environments/:team_id/persons/': mockPersonsApiHandler },
+                post: { '/v1/environments/:team_id/persons/:id/update_property/': [200, {}] },
             })
 
             await expectLogic(logic, () => {
@@ -259,8 +259,8 @@ describe('personsLogic', () => {
 
         it('rolls back on API failure', async () => {
             useMocks({
-                get: { '/api/environments/:team_id/persons/': mockPersonsApiHandler },
-                post: { '/api/environments/:team_id/persons/:id/update_property/': () => [500, {}] },
+                get: { '/v1/environments/:team_id/persons/': mockPersonsApiHandler },
+                post: { '/v1/environments/:team_id/persons/:id/update_property/': () => [500, {}] },
             })
 
             await expectLogic(logic, () => {
@@ -272,8 +272,8 @@ describe('personsLogic', () => {
 
         it('coerces values via coercePropertyValue', async () => {
             useMocks({
-                get: { '/api/environments/:team_id/persons/': mockPersonsApiHandler },
-                post: { '/api/environments/:team_id/persons/:id/update_property/': [200, {}] },
+                get: { '/v1/environments/:team_id/persons/': mockPersonsApiHandler },
+                post: { '/v1/environments/:team_id/persons/:id/update_property/': [200, {}] },
             })
 
             await expectLogic(logic, () => {
@@ -300,8 +300,8 @@ describe('personsLogic', () => {
 
         it('removes the property from person', async () => {
             useMocks({
-                get: { '/api/environments/:team_id/persons/': mockPersonsApiHandler },
-                post: { '/api/environments/:team_id/persons/:id/delete_property/': [200, {}] },
+                get: { '/v1/environments/:team_id/persons/': mockPersonsApiHandler },
+                post: { '/v1/environments/:team_id/persons/:id/delete_property/': [200, {}] },
             })
 
             await expectLogic(logic, () => {
@@ -313,8 +313,8 @@ describe('personsLogic', () => {
 
         it('rolls back on API failure', async () => {
             useMocks({
-                get: { '/api/environments/:team_id/persons/': mockPersonsApiHandler },
-                post: { '/api/environments/:team_id/persons/:id/delete_property/': () => [500, {}] },
+                get: { '/v1/environments/:team_id/persons/': mockPersonsApiHandler },
+                post: { '/v1/environments/:team_id/persons/:id/delete_property/': () => [500, {}] },
             })
 
             await expectLogic(logic, () => {
@@ -532,7 +532,7 @@ describe('personsLogic', () => {
         beforeEach(async () => {
             useMocks({
                 get: {
-                    '/api/environments/:team_id/persons/': () => [200, { results: [person] }],
+                    '/v1/environments/:team_id/persons/': () => [200, { results: [person] }],
                 },
             })
             await expectLogic(logic, () => {

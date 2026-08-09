@@ -53,21 +53,21 @@ describe('feature flag release conditions cohort operator', () => {
         initKeaTests()
         useMocks({
             get: {
-                '/api/projects/:team/event_definitions': mockGetEventDefinitions,
-                '/api/projects/:team/property_definitions': mockGetPropertyDefinitions,
-                '/api/projects/:team/cohorts/': { results: [cohortPowerUsers], next: null, count: 1 },
+                '/v1/projects/:team/event_definitions': mockGetEventDefinitions,
+                '/v1/projects/:team/property_definitions': mockGetPropertyDefinitions,
+                '/v1/projects/:team/cohorts/': { results: [cohortPowerUsers], next: null, count: 1 },
                 // featureFlagLogic mounts alongside and loads the flag; the unhandled-request
                 // floor has no `filters`, which crashes payload conversion
-                '/api/projects/:team/feature_flags/1234/': {
+                '/v1/projects/:team/feature_flags/1234/': {
                     id: 1234,
                     key: 'test-flag',
                     filters: { groups: [], multivariate: null, payloads: {} },
                 },
-                '/api/projects/:team/actions': { results: [] },
+                '/v1/projects/:team/actions': { results: [] },
             },
             post: {
-                '/api/environments/:team/query': { results: [] },
-                '/api/projects/:team/feature_flags/user_blast_radius': () => [200, { affected: 0, total: 2 }],
+                '/v1/environments/:team/query': { results: [] },
+                '/v1/projects/:team/feature_flags/user_blast_radius': () => [200, { affected: 0, total: 2 }],
             },
         })
     })

@@ -36,7 +36,7 @@ describe('Alerts', { concurrent: false }, () => {
         // Create a trends insight as a prerequisite — alerts require an insight to monitor
         const insight = await context.api.request<{ id: number }>({
             method: 'POST',
-            path: `/api/projects/${TEST_PROJECT_ID}/insights/`,
+            path: `/v1/projects/${TEST_PROJECT_ID}/insights/`,
             body: {
                 name: generateUniqueKey('alert-test-insight'),
                 query: SAMPLE_TREND_QUERIES.basicPageviews,
@@ -47,7 +47,7 @@ describe('Alerts', { concurrent: false }, () => {
         // Fetch the current user ID — required for subscribed_users
         const user = await context.api.request<{ id: number; uuid: string }>({
             method: 'GET',
-            path: '/api/users/@me/',
+            path: '/v1/users/@me/',
         })
         currentUserId = user.id
         currentUserUuid = user.uuid

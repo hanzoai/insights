@@ -33,16 +33,16 @@ export const handlers: RequestHandler[] = [
             scoped_organizations: [],
         })
     ),
-    http.get('*/api/users/@me', () => HttpResponse.json(usersMe)),
-    http.get('*/api/users/@me/', () => HttpResponse.json(usersMe)),
-    http.get('*/api/personal_api_keys/@current', () => HttpResponse.json(personalApiKeyCurrent)),
-    http.get('*/api/personal_api_keys/@current/', () => HttpResponse.json(personalApiKeyCurrent)),
-    http.get('*/api/organizations/:orgId', () => HttpResponse.json(organization)),
-    http.get('*/api/organizations/:orgId/', () => HttpResponse.json(organization)),
-    http.get('*/api/projects/:projectId/groups_types', () => HttpResponse.json(groupTypes)),
-    http.get('*/api/projects/:projectId/groups_types/', () => HttpResponse.json(groupTypes)),
-    http.get('*/api/projects/:projectId', () => HttpResponse.json(project)),
-    http.get('*/api/projects/:projectId/', () => HttpResponse.json(project)),
+    http.get('*/v1/users/@me', () => HttpResponse.json(usersMe)),
+    http.get('*/v1/users/@me/', () => HttpResponse.json(usersMe)),
+    http.get('*/v1/personal_api_keys/@current', () => HttpResponse.json(personalApiKeyCurrent)),
+    http.get('*/v1/personal_api_keys/@current/', () => HttpResponse.json(personalApiKeyCurrent)),
+    http.get('*/v1/organizations/:orgId', () => HttpResponse.json(organization)),
+    http.get('*/v1/organizations/:orgId/', () => HttpResponse.json(organization)),
+    http.get('*/v1/projects/:projectId/groups_types', () => HttpResponse.json(groupTypes)),
+    http.get('*/v1/projects/:projectId/groups_types/', () => HttpResponse.json(groupTypes)),
+    http.get('*/v1/projects/:projectId', () => HttpResponse.json(project)),
+    http.get('*/v1/projects/:projectId/', () => HttpResponse.json(project)),
 ]
 
 const contextMillManifest = {

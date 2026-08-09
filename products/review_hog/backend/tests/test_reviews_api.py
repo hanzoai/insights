@@ -72,7 +72,7 @@ def _issues_review(count: int) -> IssuesReview:
 class TestRecentReviewsAPI(APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/api/projects/{self.team.id}/review_hog/reviews/"
+        self.url = f"/v1/projects/{self.team.id}/review_hog/reviews/"
 
     def _report(
         self,

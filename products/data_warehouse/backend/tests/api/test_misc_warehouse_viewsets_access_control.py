@@ -35,7 +35,7 @@ class TestDataWarehouseManagedViewSetAccessControl(WarehouseAccessControlTestMix
     resource = "warehouse_objects"
 
     def _detail_url(self) -> str:
-        return f"/api/environments/{self.team.pk}/managed_viewsets/{MANAGED_VIEWSET_KIND}/"
+        return f"/v1/environments/{self.team.pk}/managed_viewsets/{MANAGED_VIEWSET_KIND}/"
 
     @parameterized.expand(
         [
@@ -79,7 +79,7 @@ class TestDataWarehouseViewSetAccessControl(WarehouseAccessControlTestMixin):
     resource = "warehouse_objects"
 
     def _path(self, action_path: str) -> str:
-        return f"/api/environments/{self.team.pk}/data_warehouse/{action_path}"
+        return f"/v1/environments/{self.team.pk}/data_warehouse/{action_path}"
 
     def test_total_rows_stats_readable_by_viewer(self):
         self._create_access_control(self.viewer_user, access_level="viewer")
@@ -294,7 +294,7 @@ class TestModelPathViewSetAccessControl(WarehouseAccessControlTestMixin):
     resource = "warehouse_objects"
 
     def _list_url(self) -> str:
-        return f"/api/projects/{self.team.pk}/warehouse_model_paths/"
+        return f"/v1/projects/{self.team.pk}/warehouse_model_paths/"
 
     def test_viewer_can_list(self):
         self._create_access_control(self.viewer_user, access_level="viewer")
@@ -318,7 +318,7 @@ class TestDataModelingJobViewSetAccessControl(WarehouseAccessControlTestMixin):
     resource = "warehouse_objects"
 
     def _list_url(self) -> str:
-        return f"/api/environments/{self.team.pk}/data_modeling_jobs/"
+        return f"/v1/environments/{self.team.pk}/data_modeling_jobs/"
 
     def test_viewer_can_list(self):
         self._create_access_control(self.viewer_user, access_level="viewer")
@@ -363,7 +363,7 @@ class TestLineageAccessControl(WarehouseAccessControlTestMixin):
         )
 
     def _url(self) -> str:
-        return f"/api/environments/{self.team.pk}/data_modeling_nodes/lineage/?saved_query_id={self.saved_query.id}"
+        return f"/v1/environments/{self.team.pk}/data_modeling_nodes/lineage/?saved_query_id={self.saved_query.id}"
 
     def test_viewer_can_read(self):
         self._create_access_control(self.viewer_user, access_level="viewer")

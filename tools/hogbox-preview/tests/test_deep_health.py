@@ -97,9 +97,9 @@ class DeepHealthTest(unittest.TestCase):
         InsightsPreviewStack(backend).deep_health()
         script = next(c for c in backend.execs if "DEEP_HEALTH_OK" in c)
         self.assertIn("/login", script)
-        self.assertIn("/api/login/", script)
-        self.assertIn("/api/projects/@current/", script)
-        self.assertIn("/api/environments/@current/query/", script)
+        self.assertIn("/v1/login/", script)
+        self.assertIn("/v1/projects/@current/", script)
+        self.assertIn("/v1/environments/@current/query/", script)
         self.assertIn("InsightsQLQuery", script)
         self.assertIn("test@hanzo.ai", script)
 

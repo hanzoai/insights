@@ -217,7 +217,7 @@ describe('sqlEditorLogic', () => {
         materializeEndpointMock = jest.fn(() => [200, {}])
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/': ({ request }) => {
+                '/v1/environments/:team_id/insights/': ({ request }) => {
                     const shortId = new URL(request.url).searchParams.get('short_id')
                     if (shortId === MOCK_INSIGHT_SHORT_ID) {
                         return [200, { results: [MOCK_INSIGHT] }]
@@ -227,8 +227,8 @@ describe('sqlEditorLogic', () => {
                     }
                     return [200, { results: [] }]
                 },
-                '/api/environments/:team_id/warehouse_saved_queries/': { results: [MOCK_VIEW] },
-                '/api/environments/:team_id/warehouse_saved_queries/:id/': ({ params }) => {
+                '/v1/environments/:team_id/warehouse_saved_queries/': { results: [MOCK_VIEW] },
+                '/v1/environments/:team_id/warehouse_saved_queries/:id/': ({ params }) => {
                     if (params.id === MOCK_VIEW.id) {
                         return [
                             200,
@@ -237,18 +237,18 @@ describe('sqlEditorLogic', () => {
                     }
                     return [404]
                 },
-                '/api/environments/:team_id/data_modeling_dags/': { results: [] },
-                '/api/environments/:team_id/data_modeling_nodes/': { results: [] },
-                '/api/environments/:team_id/data_modeling_edges/': { results: [] },
-                '/api/environments/:team_id/data_modeling_jobs/recent/': [],
-                '/api/environments/:team_id/data_modeling_jobs/running/': [],
-                '/api/environments/:team_id/data_modeling_nodes/lineage/': { nodes: [], edges: [] },
-                '/api/projects/:team_id/external_data_sources/connections/': [],
-                '/api/user_home_settings/@me/': {},
+                '/v1/environments/:team_id/data_modeling_dags/': { results: [] },
+                '/v1/environments/:team_id/data_modeling_nodes/': { results: [] },
+                '/v1/environments/:team_id/data_modeling_edges/': { results: [] },
+                '/v1/environments/:team_id/data_modeling_jobs/recent/': [],
+                '/v1/environments/:team_id/data_modeling_jobs/running/': [],
+                '/v1/environments/:team_id/data_modeling_nodes/lineage/': { nodes: [], edges: [] },
+                '/v1/projects/:team_id/external_data_sources/connections/': [],
+                '/v1/user_home_settings/@me/': {},
             },
             post: {
-                '/api/environments/:team_id/query/': queryEndpointMock,
-                '/api/environments/:team_id/warehouse_saved_queries/': () => [
+                '/v1/environments/:team_id/query/': queryEndpointMock,
+                '/v1/environments/:team_id/warehouse_saved_queries/': () => [
                     200,
                     {
                         id: 'created-view-id',
@@ -264,18 +264,18 @@ describe('sqlEditorLogic', () => {
                 ],
                 // The generated client requests the projects path; the environments alias is a
                 // server-side rewrite that msw does not apply, so a mock on it never matches.
-                '/api/projects/:team_id/warehouse_saved_queries/:id/materialize/': materializeEndpointMock,
+                '/v1/projects/:team_id/warehouse_saved_queries/:id/materialize/': materializeEndpointMock,
             },
             patch: {
-                '/api/user_home_settings/@me/': [200],
-                '/api/environments/:team_id/warehouse_saved_queries/:id/': ({ params }) => [
+                '/v1/user_home_settings/@me/': [200],
+                '/v1/environments/:team_id/warehouse_saved_queries/:id/': ({ params }) => [
                     200,
                     { ...MOCK_VIEW, id: params.id, latest_history_id: 'updated-history-id' },
                 ],
             },
             delete: {
-                '/api/environments/:team_id/query/:id/': [204],
-                '/api/environments/:team_id/warehouse_saved_queries/:id/': [204],
+                '/v1/environments/:team_id/query/:id/': [204],
+                '/v1/environments/:team_id/warehouse_saved_queries/:id/': [204],
             },
         })
 
@@ -979,7 +979,7 @@ describe('sqlEditorLogic', () => {
             // open_query SQL: a crafted link must not overwrite a teammate's metric.
             useMocks({
                 get: {
-                    '/api/projects/:team_id/data_catalog/metrics/my_metric/': [
+                    '/v1/projects/:team_id/data_catalog/metrics/my_metric/': [
                         200,
                         {
                             name: 'my_metric',
@@ -1014,7 +1014,7 @@ describe('sqlEditorLogic', () => {
         it('opens an unbound tab when the metric cannot be loaded', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/data_catalog/metrics/missing_metric/': [404],
+                    '/v1/projects/:team_id/data_catalog/metrics/missing_metric/': [404],
                 },
             })
 
@@ -1036,7 +1036,7 @@ describe('sqlEditorLogic', () => {
             const retrieveMock = jest.fn(() => [200, { name: 'x', definition: { query: 'SELECT 1' } }])
             useMocks({
                 get: {
-                    '/api/projects/:team_id/data_catalog/metrics/:name/': retrieveMock,
+                    '/v1/projects/:team_id/data_catalog/metrics/:name/': retrieveMock,
                 },
             })
 
@@ -1881,7 +1881,7 @@ describe('sqlEditorLogic', () => {
         it('defaults to raw SQL mode for the managed warehouse connection', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/external_data_sources/connections/': [
+                    '/v1/projects/:team_id/external_data_sources/connections/': [
                         200,
                         [
                             {
@@ -1894,7 +1894,7 @@ describe('sqlEditorLogic', () => {
                             },
                         ],
                     ],
-                    '/api/environments/:team_id/external_data_sources/': [
+                    '/v1/environments/:team_id/external_data_sources/': [
                         200,
                         {
                             results: [
@@ -1950,7 +1950,7 @@ describe('sqlEditorLogic', () => {
         it('does not force raw SQL mode for a user-managed Postgres direct connection', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/external_data_sources/connections/': [
+                    '/v1/projects/:team_id/external_data_sources/connections/': [
                         200,
                         [
                             {
@@ -1963,7 +1963,7 @@ describe('sqlEditorLogic', () => {
                             },
                         ],
                     ],
-                    '/api/environments/:team_id/external_data_sources/': [
+                    '/v1/environments/:team_id/external_data_sources/': [
                         200,
                         {
                             results: [
@@ -1999,7 +1999,7 @@ describe('sqlEditorLogic', () => {
         it('forces raw SQL mode when the selected connection does not support InsightsQL', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/external_data_sources/connections/': [
+                    '/v1/projects/:team_id/external_data_sources/connections/': [
                         200,
                         [
                             {
@@ -2620,7 +2620,7 @@ describe('sqlEditorLogic', () => {
             // it, otherwise the sources sidebar sits on "Loading..." forever.
             // Non-forced so the only `{ force: true }` load in the action history is the editor's —
             // the schema query hangs, so `databaseLoading` stays true regardless.
-            useMocks({ post: { '/api/environments/:team_id/query/': () => new Promise(() => {}) } })
+            useMocks({ post: { '/v1/environments/:team_id/query/': () => new Promise(() => {}) } })
             databaseLogic.actions.loadDatabase()
             await expectLogic(databaseLogic).toMatchValues({ databaseLoading: true })
 

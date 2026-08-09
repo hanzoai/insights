@@ -43,8 +43,8 @@ describe('retentionGraphLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/projects/:team_id/cohorts/': { count: 0, results: [] },
-                '/api/environments/:team_id/data_color_themes/': [],
+                '/v1/projects/:team_id/cohorts/': { count: 0, results: [] },
+                '/v1/environments/:team_id/data_color_themes/': [],
             },
         })
         initKeaTests(false)

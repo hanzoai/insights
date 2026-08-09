@@ -107,11 +107,11 @@ const meta: Meta = {
         },
         mswDecorator({
             post: {
-                '/api/environments/:team_id/query/': () => [200, { results: [] }],
+                '/v1/environments/:team_id/query/': () => [200, { results: [] }],
             },
             get: {
-                '/api/projects/:team_id/elements/stats/': () => [200, { results: elementStatsResults, next: null }],
-                '/api/projects/:team_id/heatmaps/': () => [
+                '/v1/projects/:team_id/elements/stats/': () => [200, { results: elementStatsResults, next: null }],
+                '/v1/projects/:team_id/heatmaps/': () => [
                     200,
                     {
                         results: [

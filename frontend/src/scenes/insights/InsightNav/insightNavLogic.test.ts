@@ -46,12 +46,12 @@ describe('insightNavLogic', () => {
         beforeEach(async () => {
             useMocks({
                 get: {
-                    '/api/environments/:team_id/insights/trend/': async () => {
+                    '/v1/environments/:team_id/insights/trend/': async () => {
                         return [200, { result: ['result from api'] }]
                     },
                 },
                 post: {
-                    '/api/environments/:team_id/insights/funnel/': { result: ['result from api'] },
+                    '/v1/environments/:team_id/insights/funnel/': { result: ['result from api'] },
                 },
             })
             initKeaTests(true, { ...MOCK_DEFAULT_TEAM, test_account_filters_default_checked: true })

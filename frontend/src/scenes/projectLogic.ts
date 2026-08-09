@@ -202,7 +202,7 @@ export const projectLogic = kea<projectLogicType>([
                         return null
                     }
                     try {
-                        return await api.get('api/projects/@current')
+                        return await api.get('v1/projects/@current')
                     } catch {
                         return values.currentProject
                     }
@@ -213,7 +213,7 @@ export const projectLogic = kea<projectLogicType>([
                     }
 
                     const patchedProject = await api.update<ProjectType>(
-                        `api/projects/${values.currentProject.id}`,
+                        `v1/projects/${values.currentProject.id}`,
                         payload
                     )
                     breakpoint()
@@ -241,7 +241,7 @@ export const projectLogic = kea<projectLogicType>([
                     // Let failures (e.g. a 403 for non-admins) propagate: kea-loaders surfaces the API
                     // error toast and clears the loading state, and createProjectSuccess never fires — so we
                     // don't switch into a project that wasn't created or leave the modal stuck open.
-                    return await api.create('api/projects/', { name })
+                    return await api.create('v1/projects/', { name })
                 },
             },
         ],
@@ -250,11 +250,11 @@ export const projectLogic = kea<projectLogicType>([
             null as ProjectType | null,
             {
                 moveProject: async ({ project, organizationId }) => {
-                    const res = await api.create<ProjectType>(`api/projects/${project.id}/change_organization`, {
+                    const res = await api.create<ProjectType>(`v1/projects/${project.id}/change_organization`, {
                         organization_id: organizationId,
                     })
 
-                    await api.update('api/users/@me/', { set_current_organization: organizationId })
+                    await api.update('v1/users/@me/', { set_current_organization: organizationId })
 
                     return res
                 },
@@ -297,7 +297,7 @@ export const projectLogic = kea<projectLogicType>([
         },
         deleteProject: async ({ project }) => {
             try {
-                await api.delete(`api/projects/${project.id}`)
+                await api.delete(`v1/projects/${project.id}`)
                 actions.deleteProjectSuccess()
             } catch (e) {
                 const apiError = e as Record<string, any>

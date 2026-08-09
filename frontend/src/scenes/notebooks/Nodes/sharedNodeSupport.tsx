@@ -3,7 +3,7 @@ import { IconWarning } from '@hanzo/icons'
 /**
  * Fallback for node types that cannot render for the current viewer — e.g. inline / ad-hoc
  * queries in a publicly shared notebook, which would otherwise POST to
- * `/api/projects/.../query/`, an endpoint sharing tokens cannot reach.
+ * `/v1/projects/.../query/`, an endpoint sharing tokens cannot reach.
  */
 export function UnsupportedNodePlaceholder(): JSX.Element {
     return (

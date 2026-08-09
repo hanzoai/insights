@@ -197,7 +197,7 @@ class TestMetricsQueryAPI(DatastoreTestMixin, APIBaseTest):
     def test_query_requires_authentication(self):
         self.client.logout()
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/query",
+            f"/v1/projects/{self.team.id}/metrics/query",
             data={"query": {"metricName": "m1", "aggregation": "sum", "dateFrom": "2026-01-01T00:00:00Z"}},
             content_type="application/json",
         )
@@ -205,7 +205,7 @@ class TestMetricsQueryAPI(DatastoreTestMixin, APIBaseTest):
 
     def test_query_rejects_top_level_metric_type_with_clauses(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/query",
+            f"/v1/projects/{self.team.id}/metrics/query",
             data={
                 "query": {
                     "clauses": [{"name": "a", "metricName": "m1", "aggregation": "sum"}],
@@ -219,7 +219,7 @@ class TestMetricsQueryAPI(DatastoreTestMixin, APIBaseTest):
 
     def test_query_validates_required_fields(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/query",
+            f"/v1/projects/{self.team.id}/metrics/query",
             data={"query": {"aggregation": "sum", "dateFrom": "2026-01-01T00:00:00Z"}},
             content_type="application/json",
         )
@@ -227,7 +227,7 @@ class TestMetricsQueryAPI(DatastoreTestMixin, APIBaseTest):
 
     def test_query_validates_aggregation_choice(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/query",
+            f"/v1/projects/{self.team.id}/metrics/query",
             data={"query": {"metricName": "m1", "aggregation": "median", "dateFrom": "2026-01-01T00:00:00Z"}},
             content_type="application/json",
         )
@@ -245,7 +245,7 @@ class TestMetricsQueryAPI(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/query",
+            f"/v1/projects/{self.team.id}/metrics/query",
             data={
                 "query": {
                     "metricName": "m1",
@@ -366,10 +366,10 @@ class TestAttributeField(DatastoreTestMixin, APIBaseTest):
             team_id=self.team.id,
             metric_name="m_auto_attribute",
             points=[(anchor, 1.0)],
-            labels={"endpoint": "/api/projects/2/metrics/query"},
+            labels={"endpoint": "/v1/projects/2/metrics/query"},
         )
         value = self._select_attribute(attribute_field("endpoint"), "m_auto_attribute")
-        self.assertEqual(value, "/api/projects/2/metrics/query")
+        self.assertEqual(value, "/v1/projects/2/metrics/query")
 
     def test_auto_scope_returns_empty_when_neither_present(self):
         anchor = timezone.now().replace(microsecond=0)
@@ -526,7 +526,7 @@ class TestMetricFilters(DatastoreTestMixin, APIBaseTest):
 
     def test_filters_via_api(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/query",
+            f"/v1/projects/{self.team.id}/metrics/query",
             data={
                 "query": {
                     "metricName": "req",
@@ -651,7 +651,7 @@ class TestGroupBy(DatastoreTestMixin, APIBaseTest):
 
     def test_group_by_via_api(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/query",
+            f"/v1/projects/{self.team.id}/metrics/query",
             data={
                 "query": {
                     "metricName": "req",
@@ -821,7 +821,7 @@ class TestRateIncrease(DatastoreTestMixin, APIBaseTest):
         self.assertEqual([p.value for p in series[0].points], [0.5])
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/query",
+            f"/v1/projects/{self.team.id}/metrics/query",
             data={
                 "query": {
                     "metricName": "requests_total",
@@ -960,7 +960,7 @@ class TestHistogramQuantileRunner(DatastoreTestMixin, APIBaseTest):
             temporality="delta",
         )
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/query",
+            f"/v1/projects/{self.team.id}/metrics/query",
             data={
                 "query": {
                     "metricName": "latency",
@@ -980,7 +980,7 @@ class TestHistogramQuantileRunner(DatastoreTestMixin, APIBaseTest):
 
     def test_histogram_quantile_via_api_requires_quantile(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/query",
+            f"/v1/projects/{self.team.id}/metrics/query",
             data={
                 "query": {
                     "metricName": "latency",
@@ -1145,7 +1145,7 @@ class TestMultiClauseAndFormulas(DatastoreTestMixin, APIBaseTest):
 
     def test_clauses_and_formula_via_api(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/query",
+            f"/v1/projects/{self.team.id}/metrics/query",
             data={
                 "query": {
                     "clauses": [
@@ -1167,7 +1167,7 @@ class TestMultiClauseAndFormulas(DatastoreTestMixin, APIBaseTest):
 
     def test_api_rejects_both_shorthand_and_clauses(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/query",
+            f"/v1/projects/{self.team.id}/metrics/query",
             data={
                 "query": {
                     "metricName": "errors",
@@ -1256,7 +1256,7 @@ class TestMetricTypeIsolation(DatastoreTestMixin, APIBaseTest):
 
     def test_api_accepts_metric_type(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/query",
+            f"/v1/projects/{self.team.id}/metrics/query",
             data={
                 "query": {
                     "metricName": "m_collide",
@@ -1316,7 +1316,7 @@ class TestNonFiniteAggregates(DatastoreTestMixin, APIBaseTest):
     def test_overflow_serializes_as_json_null_via_api(self):
         self._seed_huge(2)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/query",
+            f"/v1/projects/{self.team.id}/metrics/query",
             data={
                 "query": {
                     "metricName": "m_huge",
@@ -1334,7 +1334,7 @@ class TestNonFiniteAggregates(DatastoreTestMixin, APIBaseTest):
     def test_formula_overflow_returns_null_gap(self):
         self._seed_huge(1)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/query",
+            f"/v1/projects/{self.team.id}/metrics/query",
             data={
                 "query": {
                     "clauses": [{"name": "a", "metricName": "m_huge", "aggregation": "avg"}],
@@ -1355,7 +1355,7 @@ class TestNonFiniteAggregates(DatastoreTestMixin, APIBaseTest):
         # in _evaluate_formula_point, not the formula-overflow branch above.
         self._seed_huge(2)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/query",
+            f"/v1/projects/{self.team.id}/metrics/query",
             data={
                 "query": {
                     "clauses": [{"name": "a", "metricName": "m_huge", "aggregation": "sum"}],

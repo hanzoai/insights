@@ -48,7 +48,7 @@ A new credential-based source needs **zero form code** — just route its
 `DataSourceSetup` switch case to `DynamicSourceSetup` with the capitalized
 `sourceType` and the `schemas` to sync.
 
-- Endpoint: `GET /api/environments/{projectId}/external_data_sources/wizard/?source_type=<Type>` → `Record<string, SourceConfig>`. Client method: `InsightsAPIClient.getExternalDataSourceConfigs`. Hook: `useSourceConfig(sourceType)`.
+- Endpoint: `GET /v1/environments/{projectId}/external_data_sources/wizard/?source_type=<Type>` → `Record<string, SourceConfig>`. Client method: `InsightsAPIClient.getExternalDataSourceConfigs`. Hook: `useSourceConfig(sourceType)`.
 - `SourceConfig.fields` is a union: `input` (text/email/password/url/number/…), `select`, `switch-group`, `oauth`, `oauth-account-select`, `ssh-tunnel`, `file-upload`. `DynamicSourceSetup` renders input/select/switch-group **and `oauth`/`oauth-account-select`** generically, and builds the `createExternalDataSource` payload from field `name`s. The backend is the single source of truth for field names/labels/required/secret, so forms never drift.
 - The field `name`s become the `payload` keys — so you no longer hand-maintain them. (Jira → `subdomain`, `email`, `api_token`; all `secret:false` except the token.)
 

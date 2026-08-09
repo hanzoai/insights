@@ -60,7 +60,7 @@ describe('scoutMcpServersLogic', () => {
         const zendesk = server('zendesk-id', 'Zendesk', 'ready')
         useMocks({
             get: {
-                '/api/projects/:team_id/mcp_gateway/service_accounts/': () => [
+                '/v1/projects/:team_id/mcp_gateway/service_accounts/': () => [
                     200,
                     {
                         count: 2,
@@ -87,7 +87,7 @@ describe('scoutMcpServersLogic', () => {
         const linear = server('linear-id', 'Linear', 'ready')
         useMocks({
             get: {
-                '/api/projects/:team_id/mcp_gateway/service_accounts/': () => [
+                '/v1/projects/:team_id/mcp_gateway/service_accounts/': () => [
                     200,
                     {
                         count: 1,

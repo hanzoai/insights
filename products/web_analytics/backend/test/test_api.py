@@ -39,7 +39,7 @@ def _create_pageview(
 
 
 class TestWebAnalyticsDigestAPI(DatastoreTestMixin, APIBaseTest):
-    ENDPOINT = "/api/environments/{team_id}/web_analytics/weekly_digest/"
+    ENDPOINT = "/v1/environments/{team_id}/web_analytics/weekly_digest/"
 
     def _url(self, team_id=None):
         return self.ENDPOINT.format(team_id=team_id or self.team.id)
@@ -278,7 +278,7 @@ class TestWebAnalyticsDigestAPI(DatastoreTestMixin, APIBaseTest):
 
 
 class TestWebAnalyticsRecapAPI(DatastoreTestMixin, APIBaseTest):
-    ENDPOINT = "/api/environments/{team_id}/web_analytics/recap/"
+    ENDPOINT = "/v1/environments/{team_id}/web_analytics/recap/"
 
     def _url(self, team_id=None):
         return self.ENDPOINT.format(team_id=team_id or self.team.id)

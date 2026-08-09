@@ -29,7 +29,7 @@ describe('projectNoticeLogic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/organizations/:organization_id/proxy_records': [200, { results: [] }],
+                    '/v1/organizations/:organization_id/proxy_records': [200, { results: [] }],
                 },
             })
             initKeaTests()
@@ -87,10 +87,10 @@ describe('projectNoticeLogic', () => {
             } as unknown as AppContext
             useMocks({
                 get: {
-                    '/api/organizations/:organization_id/proxy_records': [200, { results: [] }],
+                    '/v1/organizations/:organization_id/proxy_records': [200, { results: [] }],
                 },
                 post: {
-                    '/api/environments/:team_id/query/:kind': () => [200, { results: [] }],
+                    '/v1/environments/:team_id/query/:kind': () => [200, { results: [] }],
                 },
             })
             initKeaTests()
@@ -128,10 +128,10 @@ describe('projectNoticeLogic', () => {
                 get: {
                     // Function form so the [status, body] tuple is honored — a static array value
                     // would be served as a 200 JSON body instead of the error status.
-                    '/api/organizations/:organization_id/proxy_records': () => [status, {}],
+                    '/v1/organizations/:organization_id/proxy_records': () => [status, {}],
                 },
                 post: {
-                    '/api/environments/:team_id/query/:kind': () => [200, { results: [] }],
+                    '/v1/environments/:team_id/query/:kind': () => [200, { results: [] }],
                 },
             })
             initKeaTests()
@@ -165,11 +165,11 @@ describe('projectNoticeLogic', () => {
                 get: {
                     // currentOrganizationId resolves to the loaded org id, not "@current" —
                     // match any id so loadRecords resolves instead of erroring.
-                    '/api/organizations/:organization_id/proxy_records': [200, { results: [] }],
+                    '/v1/organizations/:organization_id/proxy_records': [200, { results: [] }],
                 },
                 post: {
                     // reverseProxyCheckerLogic's InsightsQL detection query.
-                    '/api/environments/:team_id/query/:kind': () => [200, { results: [] }],
+                    '/v1/environments/:team_id/query/:kind': () => [200, { results: [] }],
                 },
             })
             initKeaTests()
@@ -208,10 +208,10 @@ describe('projectNoticeLogic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/organizations/:organization_id/proxy_records': [200, { results: [] }],
+                    '/v1/organizations/:organization_id/proxy_records': [200, { results: [] }],
                 },
                 post: {
-                    '/api/environments/:team_id/query/:kind': () => [200, { results: [] }],
+                    '/v1/environments/:team_id/query/:kind': () => [200, { results: [] }],
                 },
             })
             initKeaTests()
@@ -267,10 +267,10 @@ describe('projectNoticeLogic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/organizations/:organization_id/proxy_records': [200, { results: [] }],
+                    '/v1/organizations/:organization_id/proxy_records': [200, { results: [] }],
                 },
                 post: {
-                    '/api/environments/:team_id/query/:kind': () => [200, { results: [] }],
+                    '/v1/environments/:team_id/query/:kind': () => [200, { results: [] }],
                 },
             })
             initKeaTests()

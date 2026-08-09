@@ -58,9 +58,9 @@ describe('saveAsActionDialog', () => {
         postResponseBody = { id: 42, name: 'Test', steps: [] }
         lastDialogConfig = undefined
         useMocks({
-            get: { '/api/projects/:team/actions/': { results: [] } },
+            get: { '/v1/projects/:team/actions/': { results: [] } },
             post: {
-                '/api/projects/:team/actions/': async ({ request }) => {
+                '/v1/projects/:team/actions/': async ({ request }) => {
                     capturedBody = await request.json()
                     if (postStatus >= 400) {
                         return [postStatus, postResponseBody]

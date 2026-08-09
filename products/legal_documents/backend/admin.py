@@ -35,7 +35,7 @@ class LegalDocumentAdminForm(forms.ModelForm):
     Admin upload form for documents signed outside the PandaDoc flow (sales /
     legal-ops dropping a counter-signed PDF). The PDF lives in object storage
     under the same key the public download endpoint already serves from, so the
-    customer can download it via /api/.../legal_documents/{id}/download just
+    customer can download it via /v1/.../legal_documents/{id}/download just
     like a PandaDoc-originated row.
     """
 
@@ -321,7 +321,7 @@ class LegalDocumentAdmin(admin.ModelAdmin):
         # synchronously on save). Hide the link until there's something to fetch.
         if document.status != LegalDocument.Status.SIGNED:
             return "—"
-        url = f"/api/organizations/{document.organization_id}/legal_documents/{document.id}/download"
+        url = f"/v1/organizations/{document.organization_id}/legal_documents/{document.id}/download"
         return format_html('<a href="{}" target="_blank" rel="noopener">Download PDF</a>', url)
 
 
@@ -357,7 +357,7 @@ class LegalDocumentInline(admin.TabularInline):
     def download_link(self, document: LegalDocument) -> str | SafeString:
         if document.status != LegalDocument.Status.SIGNED:
             return "—"
-        url = f"/api/organizations/{document.organization_id}/legal_documents/{document.id}/download"
+        url = f"/v1/organizations/{document.organization_id}/legal_documents/{document.id}/download"
         return format_html('<a href="{}" target="_blank" rel="noopener">Download PDF</a>', url)
 
 

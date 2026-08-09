@@ -344,7 +344,7 @@ class TestFetchUserMcpServerConfigs(TestCase):
         defaults = {
             "id": "abc-123",
             "name": "Linear",
-            "proxy_path": f"/api/environments/{self.TEAM_ID}/mcp_server_installations/abc-123/proxy/",
+            "proxy_path": f"/v1/environments/{self.TEAM_ID}/mcp_server_installations/abc-123/proxy/",
         }
         defaults.update(kwargs)
         return ActiveInstallationInfo(**defaults)
@@ -375,7 +375,7 @@ class TestFetchUserMcpServerConfigs(TestCase):
             McpServerConfig(
                 type="http",
                 name="Linear",
-                url=f"{self.API_BASE}/api/environments/{self.TEAM_ID}/mcp_server_installations/abc-123/proxy/",
+                url=f"{self.API_BASE}/v1/environments/{self.TEAM_ID}/mcp_server_installations/abc-123/proxy/",
                 headers=self._expected_user_headers(),
             )
         ]
@@ -449,7 +449,7 @@ class TestFetchUserMcpServerConfigs(TestCase):
             self._make_installation(
                 id="shared-id",
                 name="Shared",
-                proxy_path="/api/mcp_store/gateway/servers/server-id/proxy/",
+                proxy_path="/v1/mcp_store/gateway/servers/server-id/proxy/",
                 scope="shared",
                 proxy_token="agent-token",
             ),
@@ -474,7 +474,7 @@ class TestFetchUserMcpServerConfigs(TestCase):
             McpServerConfig(
                 type="http",
                 name="Shared",
-                url=f"{self.API_BASE}/api/mcp_store/gateway/servers/server-id/proxy/",
+                url=f"{self.API_BASE}/v1/mcp_store/gateway/servers/server-id/proxy/",
                 headers=[
                     {"name": "Authorization", "value": "Bearer agent-token"},
                     {"name": "x-insights-mcp-consumer", "value": "insights-code"},
@@ -524,10 +524,10 @@ class TestFetchUserMcpServerConfigs(TestCase):
         mock_api_url.return_value = self.API_BASE
         mock_facade.return_value = [
             self._make_installation(
-                id="abc-1", name="Linear", proxy_path="/api/environments/42/mcp_server_installations/abc-1/proxy/"
+                id="abc-1", name="Linear", proxy_path="/v1/environments/42/mcp_server_installations/abc-1/proxy/"
             ),
             self._make_installation(
-                id="abc-2", name="Notion", proxy_path="/api/environments/42/mcp_server_installations/abc-2/proxy/"
+                id="abc-2", name="Notion", proxy_path="/v1/environments/42/mcp_server_installations/abc-2/proxy/"
             ),
         ]
 

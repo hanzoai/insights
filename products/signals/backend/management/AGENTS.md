@@ -50,7 +50,7 @@ Use `ingest_report_json` to short-circuit the research flow and drop a fully-res
 ```bash
 # 1. Make sure at least one team user has opted into autonomy. Either set a default
 #    threshold for the team via SignalTeamConfig, or have a user POST to
-#    /api/users/<id>/signal_autonomy/ with their personal autostart_priority.
+#    /v1/users/<id>/signal_autonomy/ with their personal autostart_priority.
 
 # 2. Ingest a research-output fixture — creates a SignalReport, persists artefacts,
 #    triggers `maybe_autostart_implementation_task`, then marks the report READY.

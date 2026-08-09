@@ -2,14 +2,13 @@ from insights.test.base import APIBaseTest
 
 from insights.constants import AvailableFeature
 from insights.models import OrganizationMembership
+from insights.models.ee_models import AccessControl
 
 from products.warehouse_sources.backend.facade.models import (
     DataWarehouseCredential,
     DataWarehouseTable,
     WarehouseColumnAnnotation,
 )
-
-from insights.models.ee_models import AccessControl
 
 
 class TestWarehouseColumnAnnotation(APIBaseTest):
@@ -25,7 +24,7 @@ class TestWarehouseColumnAnnotation(APIBaseTest):
         )
 
     def _url(self, suffix: str = "") -> str:
-        return f"/api/projects/{self.team.pk}/warehouse_column_annotations/{suffix}"
+        return f"/v1/projects/{self.team.pk}/warehouse_column_annotations/{suffix}"
 
     def test_list_filters_by_table_id(self):
         other_table = DataWarehouseTable.objects.create(

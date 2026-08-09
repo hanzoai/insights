@@ -37,7 +37,7 @@ function mockDashboardSharingConfiguration({
     }
 
     return {
-        '/api/environments/:team_id/dashboards/:dashboard_id/sharing/': {
+        '/v1/environments/:team_id/dashboards/:dashboard_id/sharing/': {
             ...sharingConfiguration,
             // Some kea-loader success payloads are wrapped.
             sharingConfiguration,
@@ -60,12 +60,12 @@ function mockInsightSharingConfiguration({
     }
 
     return {
-        '/api/environments/:team_id/insights/:insight_id/sharing/': {
+        '/v1/environments/:team_id/insights/:insight_id/sharing/': {
             ...sharingConfiguration,
             // Some kea-loader success payloads are wrapped.
             sharingConfiguration,
         },
-        '/api/environments/:team_id/insights/': {
+        '/v1/environments/:team_id/insights/': {
             results: [
                 {
                     id: insightId,

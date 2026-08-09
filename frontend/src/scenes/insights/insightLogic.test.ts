@@ -141,11 +141,11 @@ describe('insightLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/projects/:team/tags': [],
-                '/api/environments/:team_id/quick_filters/': {
+                '/v1/projects/:team/tags': [],
+                '/v1/environments/:team_id/quick_filters/': {
                     results: [],
                 },
-                '/api/environments/:team_id/insights/trend/': async ({ request }) => {
+                '/v1/environments/:team_id/insights/trend/': async ({ request }) => {
                     const url = new URL(request.url)
                     const clientQueryId = url.searchParams.get('client_query_id')
                     if (clientQueryId !== null) {
@@ -165,14 +165,14 @@ describe('insightLogic', () => {
                     }
                     return [200, { result: ['result from api'] }]
                 },
-                '/api/environments/:team_id/insights/path/': { result: ['result from api'] },
-                '/api/environments/:team_id/insights/path': { result: ['result from api'] },
-                '/api/environments/:team_id/insights/funnel/': { result: ['result from api'] },
-                '/api/environments/:team_id/insights/retention/': { result: ['result from api'] },
-                '/api/environments/:team_id/insights/42': partialInsight42,
-                '/api/environments/:team_id/insights/43/': partialInsight43,
-                '/api/environments/:team_id/insights/44/': partialInsight44,
-                '/api/environments/:team_id/insights/': ({ request }) => {
+                '/v1/environments/:team_id/insights/path/': { result: ['result from api'] },
+                '/v1/environments/:team_id/insights/path': { result: ['result from api'] },
+                '/v1/environments/:team_id/insights/funnel/': { result: ['result from api'] },
+                '/v1/environments/:team_id/insights/retention/': { result: ['result from api'] },
+                '/v1/environments/:team_id/insights/42': partialInsight42,
+                '/v1/environments/:team_id/insights/43/': partialInsight43,
+                '/v1/environments/:team_id/insights/44/': partialInsight44,
+                '/v1/environments/:team_id/insights/': ({ request }) => {
                     const url = new URL(request.url)
                     if (url.searchParams.get('saved')) {
                         return [
@@ -212,7 +212,7 @@ describe('insightLogic', () => {
                         },
                     ]
                 },
-                '/api/environments/:team_id/dashboards/33/': {
+                '/v1/environments/:team_id/dashboards/33/': {
                     id: 33,
                     filters: {},
                     tiles: [
@@ -229,7 +229,7 @@ describe('insightLogic', () => {
                         },
                     ],
                 },
-                '/api/environments/:team_id/dashboards/34/': {
+                '/v1/environments/:team_id/dashboards/34/': {
                     id: 33,
                     filters: {},
                     tiles: [
@@ -248,16 +248,16 @@ describe('insightLogic', () => {
                 },
             },
             post: {
-                '/api/environments/:team_id/insights/funnel/': { result: ['result from api'] },
-                '/api/environments/:team_id/insights/viewed': [201],
-                '/api/environments/:team_id/insights/': async ({ request }) => [
+                '/v1/environments/:team_id/insights/funnel/': { result: ['result from api'] },
+                '/v1/environments/:team_id/insights/viewed': [201],
+                '/v1/environments/:team_id/insights/': async ({ request }) => [
                     200,
                     { ...((await request.json()) as any), id: 12, short_id: Insight12 },
                 ],
-                '/api/environments/997/insights/cancel/': [201],
+                '/v1/environments/997/insights/cancel/': [201],
             },
             patch: {
-                '/api/environments/:team_id/insights/:id': async ({ request, params }) => {
+                '/v1/environments/:team_id/insights/:id': async ({ request, params }) => {
                     const payload = (await request.json()) as Record<string, any>
                     const response = patchResponseFor(
                         payload,
@@ -266,7 +266,7 @@ describe('insightLogic', () => {
                     )
                     return [200, response]
                 },
-                '/api/projects/:team/insights/:id': async ({ request, params }) => {
+                '/v1/projects/:team/insights/:id': async ({ request, params }) => {
                     const payload = (await request.json()) as Record<string, any>
                     return [200, { ...payload, id: params.id }]
                 },
@@ -909,7 +909,7 @@ describe('insightLogic', () => {
             const mockCreateCalls = (api.create as jest.Mock).mock.calls
             expect(mockCreateCalls).toEqual([
                 [
-                    `api/environments/${MOCK_TEAM_ID}/insights`,
+                    `v1/environments/${MOCK_TEAM_ID}/insights`,
                     expect.objectContaining({
                         derived_name: '* from events',
                         query: {
@@ -1078,7 +1078,7 @@ describe('insightLogic', () => {
             seenRefreshParams.length = 0
             useMocks({
                 get: {
-                    '/api/environments/:team_id/insights/': ({ request }) => {
+                    '/v1/environments/:team_id/insights/': ({ request }) => {
                         const url = new URL(request.url)
                         seenRefreshParams.push(url.searchParams.get('refresh'))
                         return [
@@ -1215,7 +1215,7 @@ describe('insightLogic', () => {
         it('syncs favorited to savedInsight on metadata save', async () => {
             useMocks({
                 patch: {
-                    '/api/environments/:team_id/insights/:id': async ({ request }) => {
+                    '/v1/environments/:team_id/insights/:id': async ({ request }) => {
                         const payload = (await request.json()) as Record<string, any>
                         return [
                             200,

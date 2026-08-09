@@ -480,7 +480,7 @@ export const visualReviewRunSceneLogic = kea<visualReviewRunSceneLogicType>([
                 if (!run || !projectId) {
                     return null
                 }
-                return `/api/projects/${projectId}/visual_review/repos/${run.repo_id}/thumbnails`
+                return `/v1/projects/${projectId}/visual_review/repos/${run.repo_id}/thumbnails`
             },
         ],
         isRunInProgress: [

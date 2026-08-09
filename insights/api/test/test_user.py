@@ -79,7 +79,7 @@ class TestUserAPI(APIBaseTest):
     # RETRIEVING USER
 
     def test_retrieve_current_user(self):
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
@@ -141,7 +141,7 @@ class TestUserAPI(APIBaseTest):
         def me_membership_queries(user: User) -> tuple[int, dict]:
             self.client.force_login(user)
             with CaptureQueriesContext(connection) as ctx:
-                response = self.client.get("/api/users/@me/")
+                response = self.client.get("/v1/users/@me/")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             count = sum(
                 1
@@ -199,7 +199,7 @@ class TestUserAPI(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         pending_invites = response.json()["pending_invites"]
@@ -219,7 +219,7 @@ class TestUserAPI(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["pending_invites"]), 1)
 
@@ -235,7 +235,7 @@ class TestUserAPI(APIBaseTest):
                 created_by=self.user,
             )
 
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["pending_invites"]), 0)
 
@@ -243,7 +243,7 @@ class TestUserAPI(APIBaseTest):
         self.user.mascot_config = None
         self.user.save()
 
-        response = self.client.get(f"/api/users/@me/mascot_config/")
+        response = self.client.get(f"/v1/users/@me/mascot_config/")
         assert response.status_code == status.HTTP_200_OK
         # the front end assumes it will _always_ get JSON
         assert response.json() == {}
@@ -252,7 +252,7 @@ class TestUserAPI(APIBaseTest):
         self.user.mascot_config = {"a bag": "of data"}
         self.user.save()
 
-        response = self.client.get(f"/api/users/@me/mascot_config/")
+        response = self.client.get(f"/v1/users/@me/mascot_config/")
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {"a bag": "of data"}
 
@@ -265,7 +265,7 @@ class TestUserAPI(APIBaseTest):
             },
         }
 
-        response = self.client.patch("/api/users/@me/", {"ui_configuration": configuration})
+        response = self.client.patch("/v1/users/@me/", {"ui_configuration": configuration})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["ui_configuration"], configuration)
@@ -276,7 +276,7 @@ class TestUserAPI(APIBaseTest):
         configuration_before = self.user.ui_configuration
 
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {"ui_configuration": {"version": 1, "sidebar": {"items": {"bogus": {"visible": False}}}}},
         )
 
@@ -287,7 +287,7 @@ class TestUserAPI(APIBaseTest):
 
     def test_users_me_includes_active_realtime_notification_types(self):
         self.client.force_login(self.user)
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         assert response.status_code == 200
         body = response.json()
         assert "active_realtime_notification_types" in body
@@ -332,7 +332,7 @@ class TestUserAPI(APIBaseTest):
                 transports=["internal"],
                 verified=True,
             )
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         assert response.status_code == 200
         assert response.json()["requires_credential_review"] is expected
 
@@ -350,7 +350,7 @@ class TestUserAPI(APIBaseTest):
             transports=["internal"],
             verified=False,
         )
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         assert response.status_code == 200
         assert response.json()["requires_credential_review"] is True
 
@@ -363,26 +363,26 @@ class TestUserAPI(APIBaseTest):
             scopes=["*"],
         )
 
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         assert response.json()["requires_credential_review"] is True
 
-        response = self.client.post("/api/users/@me/credentials_review_complete/")
+        response = self.client.post("/v1/users/@me/credentials_review_complete/")
         assert response.status_code == 204
 
         refreshed = User.objects.get(pk=self.user.pk)
         assert refreshed.credentials_reviewed_at is not None
 
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         assert response.json()["requires_credential_review"] is False
 
         first_ts = refreshed.credentials_reviewed_at
-        response = self.client.post("/api/users/@me/credentials_review_complete/")
+        response = self.client.post("/v1/users/@me/credentials_review_complete/")
         assert response.status_code == 204
         assert User.objects.get(pk=self.user.pk).credentials_reviewed_at == first_ts
 
     def test_credentials_review_complete_requires_auth(self):
         self.client.logout()
-        response = self.client.post("/api/users/@me/credentials_review_complete/")
+        response = self.client.post("/v1/users/@me/credentials_review_complete/")
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_credentials_review_complete_rejects_personal_api_key_auth(self):
@@ -400,7 +400,7 @@ class TestUserAPI(APIBaseTest):
 
         self.client.logout()
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {api_key_value}")
-        response = self.client.post("/api/users/@me/credentials_review_complete/")
+        response = self.client.post("/v1/users/@me/credentials_review_complete/")
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
         assert User.objects.get(pk=self.user.pk).credentials_reviewed_at is None
@@ -409,13 +409,13 @@ class TestUserAPI(APIBaseTest):
         """
         At this moment only the current user can be retrieved from this endpoint.
         """
-        response = self.client.get("/api/users/")
+        response = self.client.get("/v1/users/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
         self.assertEqual(response.json()["results"][0]["uuid"], str(self.user.uuid))
 
         user = self._create_user("newtest@hanzo.ai")
-        response = self.client.get(f"/api/users/{user.uuid}")
+        response = self.client.get(f"/v1/users/{user.uuid}")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.json(),
@@ -429,7 +429,7 @@ class TestUserAPI(APIBaseTest):
 
     def test_unauthenticated_user_cannot_fetch_endpoint(self):
         self.client.logout()
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json(), self.unauthenticated_response())
 
@@ -442,7 +442,7 @@ class TestUserAPI(APIBaseTest):
         user.current_team = team
         user.save(update_fields=["current_team"])
 
-        response = self.client.get(f"/api/users/?email={user.email}")
+        response = self.client.get(f"/v1/users/?email={user.email}")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 0, "Should not return users from another orgs")
@@ -463,7 +463,7 @@ class TestUserAPI(APIBaseTest):
         user.current_team = team
         user.save(update_fields=["current_team"])
 
-        response = self.client.get(f"/api/users/?email={user.email}")
+        response = self.client.get(f"/v1/users/?email={user.email}")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1, "Admin users should be able to list users from other orgs")
@@ -475,12 +475,12 @@ class TestUserAPI(APIBaseTest):
 
     def test_creating_users_on_this_endpoint_is_not_supported(self):
         """
-        At this moment we don't support creating users on this endpoint. Refer to /api/signup or
-        /api/organization/@current/members to add users.
+        At this moment we don't support creating users on this endpoint. Refer to /v1/signup or
+        /v1/organization/@current/members to add users.
         """
         count = User.objects.count()
 
-        response = self.client.post("/api/users/", {"first_name": "James", "email": "test+james@hanzo.ai"})
+        response = self.client.post("/v1/users/", {"first_name": "James", "email": "test+james@hanzo.ai"})
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
         self.assertEqual(response.json(), self.method_not_allowed_response("POST"))
 
@@ -495,7 +495,7 @@ class TestUserAPI(APIBaseTest):
         user = self._create_user("old@hanzo.ai", password="12345678")
         self.client.force_login(user)
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {
                 "first_name": "Cooper",
                 "anonymize_data": True,
@@ -562,7 +562,7 @@ class TestUserAPI(APIBaseTest):
         dashboard_one = Dashboard.objects.create(team=a_third_team, name="Dashboard 1")
 
         response = self.client.post(
-            "/api/users/@me/scene_personalisation",
+            "/v1/users/@me/scene_personalisation",
             # even if someone tries to send a different user or team they are ignored
             {
                 "user": 12345,
@@ -576,7 +576,7 @@ class TestUserAPI(APIBaseTest):
     @patch("hanzo_insights.capture")
     def test_set_scene_personalisation_for_user_dashboard_must_exist(self, _mock_capture):
         response = self.client.post(
-            "/api/users/@me/scene_personalisation",
+            "/v1/users/@me/scene_personalisation",
             # even if someone tries to send a different user or team they are ignored
             {"user": 12345, "team": 12345, "dashboard": 12345, "scene": "Person"},
         )
@@ -585,7 +585,7 @@ class TestUserAPI(APIBaseTest):
     @patch("hanzo_insights.capture")
     def test_set_scene_personalisation_for_user_must_send_dashboard(self, _mock_capture):
         response = self.client.post(
-            "/api/users/@me/scene_personalisation",
+            "/v1/users/@me/scene_personalisation",
             # even if someone tries to send a different user or team they are ignored
             {"user": 12345, "team": 12345, "scene": "Person"},
         )
@@ -596,7 +596,7 @@ class TestUserAPI(APIBaseTest):
         dashboard_one = Dashboard.objects.create(team=self.team, name="Dashboard 1")
 
         response = self.client.post(
-            "/api/users/@me/scene_personalisation",
+            "/v1/users/@me/scene_personalisation",
             # even if someone tries to send a different user or team they are ignored
             {
                 "user": 12345,
@@ -662,7 +662,7 @@ class TestUserAPI(APIBaseTest):
         self, scene: str, dashboard: Dashboard, user: User, expected_choices: list[dict]
     ) -> None:
         response = self.client.post(
-            "/api/users/@me/scene_personalisation",
+            "/v1/users/@me/scene_personalisation",
             # even if someone tries to send a different user or team they are ignored
             {
                 "user": 12345,
@@ -677,7 +677,7 @@ class TestUserAPI(APIBaseTest):
         assert response_data["scene_personalisation"] == expected_choices
 
     def test_cannot_upgrade_yourself_to_staff_user(self):
-        response = self.client.patch("/api/users/@me/", {"is_staff": True})
+        response = self.client.patch("/v1/users/@me/", {"is_staff": True})
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
@@ -690,7 +690,7 @@ class TestUserAPI(APIBaseTest):
 
     @patch("hanzo_insights.capture")
     def test_can_update_current_organization(self, mock_capture):
-        response = self.client.patch("/api/users/@me/", {"set_current_organization": str(self.new_org.id)})
+        response = self.client.patch("/v1/users/@me/", {"set_current_organization": str(self.new_org.id)})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(response_data["organization"]["id"], str(self.new_org.id))
@@ -718,7 +718,7 @@ class TestUserAPI(APIBaseTest):
     @patch("hanzo_insights.capture")
     def test_can_update_current_project(self, mock_capture):
         team = Team.objects.create(name="Local Team", organization=self.new_org)
-        response = self.client.patch("/api/users/@me/", {"set_current_team": team.id})
+        response = self.client.patch("/v1/users/@me/", {"set_current_team": team.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(response_data["team"]["id"], team.id)
@@ -749,7 +749,7 @@ class TestUserAPI(APIBaseTest):
         self.user.join(organization=org)
 
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {
                 "set_current_team": team.id,
                 "set_current_organization": self.organization.id,
@@ -771,13 +771,13 @@ class TestUserAPI(APIBaseTest):
         self.assertEqual(self.user.current_organization, org)
 
     def test_cannot_switch_current_organization_into_one_that_blocks_the_member(self):
-        # /api/users/@me/ is on the enforcement whitelist, so the switch must refuse on its own —
+        # /v1/users/@me/ is on the enforcement whitelist, so the switch must refuse on its own —
         # otherwise a blocked member could point their session back at the org that moved them off.
         blocking_org = Organization.objects.create(name="Enforcing org", enforce_verified_domains=True)
         OrganizationMembership.objects.create(organization=blocking_org, user=self.user)
         OrganizationDomain.objects.create(domain="hogflix.com", organization=blocking_org, verified_at=timezone.now())
 
-        response = self.client.patch("/api/users/@me/", {"set_current_organization": str(blocking_org.id)})
+        response = self.client.patch("/v1/users/@me/", {"set_current_organization": str(blocking_org.id)})
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()["code"], "verified_domain_required")
@@ -787,7 +787,7 @@ class TestUserAPI(APIBaseTest):
     def test_cannot_set_an_organization_without_permissions(self):
         org = Organization.objects.create(name="Isolated Org")
 
-        response = self.client.patch("/api/users/@me/", {"set_current_organization": org.id})
+        response = self.client.patch("/v1/users/@me/", {"set_current_organization": org.id})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -805,7 +805,7 @@ class TestUserAPI(APIBaseTest):
         org = Organization.objects.create(name="Isolated Org")
         team = Team.objects.create(name="Isolated Team", organization=org)
 
-        response = self.client.patch("/api/users/@me/", {"set_current_team": team.id})
+        response = self.client.patch("/v1/users/@me/", {"set_current_team": team.id})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -820,7 +820,7 @@ class TestUserAPI(APIBaseTest):
         self._assert_current_org_and_team_unchanged()
 
     def test_cannot_set_a_non_existent_org_or_team(self):
-        response = self.client.patch("/api/users/@me/", {"set_current_team": 3983838})
+        response = self.client.patch("/v1/users/@me/", {"set_current_team": 3983838})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -833,7 +833,7 @@ class TestUserAPI(APIBaseTest):
         )
 
         _uuid = str(uuid.uuid4())
-        response = self.client.patch("/api/users/@me/", {"set_current_organization": _uuid})
+        response = self.client.patch("/v1/users/@me/", {"set_current_organization": _uuid})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -860,7 +860,7 @@ class TestUserAPI(APIBaseTest):
         self.user.current_team = None
         self.user.save()
 
-        response = self.client.get("/api/users/@me/").json()
+        response = self.client.get("/v1/users/@me/").json()
         self.assertEqual(response["team"]["id"], team2.pk)
 
     def test_team_property_does_not_save_when_no_teams_found(self):
@@ -965,7 +965,7 @@ class TestUserAPI(APIBaseTest):
     def test_unauthenticated_user_cannot_update_anything(self):
         self.client.logout()
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {
                 "id": str(self.user.uuid),
                 "first_name": "Hijacked",
@@ -979,26 +979,26 @@ class TestUserAPI(APIBaseTest):
 
     def test_no_ratelimit_for_get_requests_for_users(self):
         for _ in range(6):
-            response = self.client.get("/api/users/@me/")
+            response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         for _ in range(4):
             # below rate limit, so shouldn't be throttled
-            response = self.client.patch("/api/users/@me/", {"role_at_organization": "not-a-real-role"})
+            response = self.client.patch("/v1/users/@me/", {"role_at_organization": "not-a-real-role"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         for _ in range(2):
-            response = self.client.get("/api/users/@me/")
+            response = self.client.get("/v1/users/@me/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         for _ in range(2):
             # finally above rate limit, so should be throttled
-            response = self.client.patch("/api/users/@me/", {"role_at_organization": "not-a-real-role"})
+            response = self.client.patch("/v1/users/@me/", {"role_at_organization": "not-a-real-role"})
         self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
 
     def test_no_ratelimit_for_ordinary_updates(self):
         for _ in range(10):
-            response = self.client.patch("/api/users/@me/", {"organization_name": "new name"})
+            response = self.client.patch("/v1/users/@me/", {"organization_name": "new name"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_cannot_delete_user_with_organization_memberships(self):
@@ -1010,7 +1010,7 @@ class TestUserAPI(APIBaseTest):
 
         assert OrganizationMembership.objects.filter(user=user, organization=self.new_org).exists()
 
-        response = self.client.delete(f"/api/users/@me/")
+        response = self.client.delete(f"/v1/users/@me/")
         assert response.status_code == status.HTTP_409_CONFLICT
 
     @patch("hanzo_insights.capture")
@@ -1027,7 +1027,7 @@ class TestUserAPI(APIBaseTest):
 
         assert not OrganizationMembership.objects.filter(user=user).exists()
 
-        response = self.client.delete(f"/api/users/@me/")
+        response = self.client.delete(f"/v1/users/@me/")
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not User.objects.filter(uuid=user.uuid).exists()
 
@@ -1048,7 +1048,7 @@ class TestUserAPI(APIBaseTest):
 
         self.client.force_login(user)
 
-        response = self.client.delete(f"/api/users/{user_with_no_org_memberships.uuid}/")
+        response = self.client.delete(f"/v1/users/{user_with_no_org_memberships.uuid}/")
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert User.objects.filter(uuid=user_with_no_org_memberships.uuid).exists()
 
@@ -1061,7 +1061,7 @@ class TestUserAPI(APIBaseTest):
 
         self.client.force_login(user)
 
-        response = self.client.delete(f"/api/users/{user_with_org_memberships.uuid}/")
+        response = self.client.delete(f"/v1/users/{user_with_org_memberships.uuid}/")
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert User.objects.filter(uuid=user_with_org_memberships.uuid).exists()
 
@@ -1081,7 +1081,7 @@ class TestUserAPI(APIBaseTest):
         self.client.logout()
 
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {api_key_value}")
-        response = self.client.delete(f"/api/users/@me/")
+        response = self.client.delete(f"/v1/users/@me/")
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_redirect_user_to_site_with_toolbar(self):
@@ -1089,7 +1089,7 @@ class TestUserAPI(APIBaseTest):
         self.team.save()
 
         response = self.client.get(
-            "/api/user/redirect_to_site/?userIntent=add-action&appUrl=http%3A%2F%2F127.0.0.1%3A8010"
+            "/v1/user/redirect_to_site/?userIntent=add-action&appUrl=http%3A%2F%2F127.0.0.1%3A8010"
         )
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         locationHeader = response.headers.get("location", "not found")
@@ -1105,7 +1105,7 @@ class TestUserAPI(APIBaseTest):
         self.team.save()
 
         response = self.client.get(
-            "/api/user/redirect_to_site/?userIntent=add-action&appUrl=http%3A%2F%2F127.0.0.1%3A8010&generateOnly=1"
+            "/v1/user/redirect_to_site/?userIntent=add-action&appUrl=http%3A%2F%2F127.0.0.1%3A8010&generateOnly=1"
         )
         assert response.status_code == status.HTTP_200_OK
         assert (
@@ -1118,7 +1118,7 @@ class TestUserAPI(APIBaseTest):
         self.team.save()
 
         response = self.client.get(
-            "/api/user/redirect_to_site/?userIntent=add-action&appUrl=http%3A%2F%2F127.0.0.1%3A8010&generateOnly=0"
+            "/v1/user/redirect_to_site/?userIntent=add-action&appUrl=http%3A%2F%2F127.0.0.1%3A8010&generateOnly=0"
         )
         assert response.status_code == status.HTTP_302_FOUND
 
@@ -1127,7 +1127,7 @@ class TestUserAPI(APIBaseTest):
         self.team.save()
 
         response = self.client.get(
-            "/api/user/redirect_to_site/?userIntent=edit-experiment&experimentId=12&appUrl=http%3A%2F%2F127.0.0.1%3A8010"
+            "/v1/user/redirect_to_site/?userIntent=edit-experiment&experimentId=12&appUrl=http%3A%2F%2F127.0.0.1%3A8010"
         )
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         locationHeader = response.headers.get("location", "not found")
@@ -1147,13 +1147,13 @@ class TestUserAPI(APIBaseTest):
         self.team.save()
 
         def assert_allowed_url(url):
-            response = self.client.get(f"/api/user/redirect_to_site/?appUrl={quote(url)}")
+            response = self.client.get(f"/v1/user/redirect_to_site/?appUrl={quote(url)}")
             location = cast(str | None, response.headers.get("location")) or ""
             self.assertEqual(response.status_code, status.HTTP_302_FOUND)
             self.assertTrue(f"{url}#__insights=" in location)
 
         def assert_forbidden_url(url):
-            response = self.client.get(f"/api/user/redirect_to_site/?appUrl={quote(url)}")
+            response = self.client.get(f"/v1/user/redirect_to_site/?appUrl={quote(url)}")
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
             self.assertEqual(response.headers.get("location"), None)
 
@@ -1199,7 +1199,7 @@ class TestUserAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            "/api/user/prepare_toolbar_preloaded_flags/", {"distinct_id": "user123"}, content_type="application/json"
+            "/v1/user/prepare_toolbar_preloaded_flags/", {"distinct_id": "user123"}, content_type="application/json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1229,7 +1229,7 @@ class TestUserAPI(APIBaseTest):
 
         with self.settings(INTERNAL_REQUEST_TOKEN="test-internal-token"):
             response = self.client.post(
-                "/api/user/prepare_toolbar_preloaded_flags/",
+                "/v1/user/prepare_toolbar_preloaded_flags/",
                 {"distinct_id": "user123"},
                 content_type="application/json",
             )
@@ -1247,7 +1247,7 @@ class TestUserAPI(APIBaseTest):
         cache_key = "toolbar_flags_test-key-456"
         cache.set(cache_key, cache_data, timeout=300)
 
-        response = self.client.get("/api/user/get_toolbar_preloaded_flags/?key=test-key-456")
+        response = self.client.get("/v1/user/get_toolbar_preloaded_flags/?key=test-key-456")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -1255,7 +1255,7 @@ class TestUserAPI(APIBaseTest):
 
     def test_get_toolbar_preloaded_flags_returns_404_for_missing_key(self):
         """Test that get_toolbar_preloaded_flags returns 404 for expired/missing cache key"""
-        response = self.client.get("/api/user/get_toolbar_preloaded_flags/?key=nonexistent-key")
+        response = self.client.get("/v1/user/get_toolbar_preloaded_flags/?key=nonexistent-key")
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertIn("error", response.json())
@@ -1272,7 +1272,7 @@ class TestUserAPI(APIBaseTest):
         cache.set(cache_key, cache_data, timeout=300)
 
         # Try to access with current user (who belongs to self.team, not other_team)
-        response = self.client.get("/api/user/get_toolbar_preloaded_flags/?key=test-key-789")
+        response = self.client.get("/v1/user/get_toolbar_preloaded_flags/?key=test-key-789")
 
         # Should be forbidden
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -1283,7 +1283,7 @@ class TestUserAPI(APIBaseTest):
         self.team.save()
 
         response = self.client.get(
-            "/api/user/redirect_to_site/?userIntent=add-action&appUrl=http%3A%2F%2F127.0.0.1%3A8010&toolbarFlagsKey=test-key-789"
+            "/v1/user/redirect_to_site/?userIntent=add-action&appUrl=http%3A%2F%2F127.0.0.1%3A8010&toolbarFlagsKey=test-key-789"
         )
 
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
@@ -1309,17 +1309,17 @@ class TestUserAPI(APIBaseTest):
             "is_email_verified": True,
         }
 
-        initial_user = self.client.get("/api/users/@me/").json()
+        initial_user = self.client.get("/v1/users/@me/").json()
 
         for field, value in fields.items():
-            response = self.client.patch("/api/users/@me/", {field: value})
+            response = self.client.patch("/v1/users/@me/", {field: value})
             assert response.json()[field] == initial_user[field], (
                 f"Updating field '{field}' to '{value}' worked when it shouldn't! Was {initial_user[field]} and is now {response.json()[field]}"
             )
 
     def test_can_update_notification_settings(self):
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {
                 "notification_settings": {
                     "plugin_disabled": False,
@@ -1377,13 +1377,13 @@ class TestUserAPI(APIBaseTest):
     def test_notification_settings_project_settings_are_merged_not_replaced(self):
         # First update
         response = self.client.patch(
-            "/api/users/@me/", {"notification_settings": {"project_weekly_digest_disabled": {123: True}}}
+            "/v1/users/@me/", {"notification_settings": {"project_weekly_digest_disabled": {123: True}}}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Second update with different project
         response = self.client.patch(
-            "/api/users/@me/", {"notification_settings": {"project_weekly_digest_disabled": {456: True}}}
+            "/v1/users/@me/", {"notification_settings": {"project_weekly_digest_disabled": {456: True}}}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -1395,7 +1395,7 @@ class TestUserAPI(APIBaseTest):
     def test_notification_settings_organization_member_join_settings_are_merged_not_replaced(self):
         # First update
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {
                 "notification_settings": {
                     "organization_member_join_email_disabled": {"00000000-0000-0000-0000-000000000001": True}
@@ -1406,7 +1406,7 @@ class TestUserAPI(APIBaseTest):
 
         # Second update with different organization
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {
                 "notification_settings": {
                     "organization_member_join_email_disabled": {"00000000-0000-0000-0000-000000000002": True}
@@ -1431,7 +1431,7 @@ class TestUserAPI(APIBaseTest):
     def test_realtime_notifications_disabled_accepts_valid_payload(self):
         self.client.force_login(self.user)
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {
                 "notification_settings": {
                     "realtime_notifications_disabled": {"comment_mention": {str(self.team.id): True}}
@@ -1457,7 +1457,7 @@ class TestUserAPI(APIBaseTest):
     def test_realtime_notifications_disabled_rejects_invalid_payload(self, _name, payload, expected_message_substr):
         self.client.force_login(self.user)
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {"notification_settings": {"realtime_notifications_disabled": payload}},
             format="json",
         )
@@ -1469,7 +1469,7 @@ class TestUserAPI(APIBaseTest):
         self.user.save()
         self.client.force_login(self.user)
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {"notification_settings": {"realtime_notifications_disabled": {"comment_mention": {"1": False}}}},
             format="json",
         )
@@ -1490,7 +1490,7 @@ class TestUserAPI(APIBaseTest):
         self.user.save()
         self.client.force_login(self.user)
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {"notification_settings": {"realtime_notifications_disabled": {"comment_mention": {"9": True}}}},
             format="json",
         )
@@ -1532,7 +1532,7 @@ class TestUserAPI(APIBaseTest):
         self.client.force_login(self.user)
 
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {"notification_settings": {patched_key: patched_value}},
             format="json",
         )
@@ -1557,7 +1557,7 @@ class TestUserAPI(APIBaseTest):
             "",
         ]:
             response = self.client.patch(
-                "/api/users/@me/",
+                "/v1/users/@me/",
                 {"notification_settings": {"pipeline_notifications_disabled": {bad_key: True}}},
             )
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, f"key {bad_key!r} was accepted")
@@ -1570,7 +1570,7 @@ class TestUserAPI(APIBaseTest):
             "plugin_config:42",
         ]:
             response = self.client.patch(
-                "/api/users/@me/",
+                "/v1/users/@me/",
                 {"notification_settings": {"pipeline_notifications_disabled": {good_key: True}}},
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK, f"key {good_key!r} was rejected")
@@ -1580,14 +1580,14 @@ class TestUserAPI(APIBaseTest):
 
         too_many = {f"insights_function:fake-{i}": True for i in range(MAX_PIPELINE_NOTIFICATIONS + 1)}
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {"notification_settings": {"pipeline_notifications_disabled": too_many}},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("more than", response.json()["detail"])
 
     def test_invalid_notification_settings_returns_error(self):
-        response = self.client.patch("/api/users/@me/", {"notification_settings": {"invalid_key": True}})
+        response = self.client.patch("/v1/users/@me/", {"notification_settings": {"invalid_key": True}})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -1601,7 +1601,7 @@ class TestUserAPI(APIBaseTest):
 
     def test_notification_settings_wrong_type_returns_error(self):
         response = self.client.patch(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             {
                 "notification_settings": {
                     "project_weekly_digest_disabled": {"123": "not a boolean"}  # This should be True or False
@@ -1620,7 +1620,7 @@ class TestUserAPI(APIBaseTest):
         )
 
     def test_can_disable_all_notifications(self):
-        response = self.client.patch("/api/users/@me/", {"notification_settings": {"all_weekly_digest_disabled": True}})
+        response = self.client.patch("/v1/users/@me/", {"notification_settings": {"all_weekly_digest_disabled": True}})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(
@@ -1722,12 +1722,12 @@ class TestToolbarAccessControl(APIBaseTest):
     def test_redirect_to_site_denied_without_toolbar_access(self):
         self._deny_toolbar_access()
 
-        response = self.client.get("/api/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
+        response = self.client.get("/v1/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_redirect_to_site_allowed_with_default_access(self):
-        response = self.client.get("/api/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
+        response = self.client.get("/v1/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
 
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
@@ -1738,7 +1738,7 @@ class TestToolbarAccessControl(APIBaseTest):
         new_user = User.objects.create_user(email="no-team@hanzo.ai", password="testpass123", first_name="")
         self.client.force_login(new_user)
 
-        response = self.client.get("/api/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
+        response = self.client.get("/v1/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -1757,7 +1757,7 @@ class TestToolbarAccessControl(APIBaseTest):
         cache.set("toolbar_flags_test-key", {"feature_flags": {"a-flag": True}, "team_id": self.team.id}, timeout=300)
         self._deny_toolbar_access()
 
-        response = self.client.get("/api/user/get_toolbar_preloaded_flags/?key=test-key")
+        response = self.client.get("/v1/user/get_toolbar_preloaded_flags/?key=test-key")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -1767,7 +1767,7 @@ class TestToolbarAccessControl(APIBaseTest):
         self._deny_toolbar_access()
 
         response = self.client.post(
-            "/api/user/prepare_toolbar_preloaded_flags/", {"distinct_id": "user123"}, content_type="application/json"
+            "/v1/user/prepare_toolbar_preloaded_flags/", {"distinct_id": "user123"}, content_type="application/json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -1845,7 +1845,7 @@ class TestToolbarAccessControl(APIBaseTest):
 
         with patch("insights.api.user.refresh_tokens") as mock_refresh_tokens:
             response = self.client.post(
-                "/api/user/toolbar_oauth_refresh/",
+                "/v1/user/toolbar_oauth_refresh/",
                 {"refresh_token": refresh_token.token, "client_id": oauth_app.client_id},
                 content_type="application/json",
             )
@@ -1879,7 +1879,7 @@ class TestToolbarAccessControl(APIBaseTest):
 
         with patch("insights.api.user.refresh_tokens") as mock_refresh_tokens:
             response = self.client.post(
-                "/api/user/toolbar_oauth_refresh/",
+                "/v1/user/toolbar_oauth_refresh/",
                 {"refresh_token": refresh_token.token, "client_id": oauth_app.client_id},
                 content_type="application/json",
             )
@@ -1909,7 +1909,7 @@ class TestToolbarAccessControl(APIBaseTest):
 
         with patch("insights.api.user.refresh_tokens") as mock_refresh_tokens:
             response = self.client.post(
-                "/api/user/toolbar_oauth_refresh/",
+                "/v1/user/toolbar_oauth_refresh/",
                 {"refresh_token": refresh_token.token, "client_id": oauth_app.client_id},
                 content_type="application/json",
             )
@@ -1943,14 +1943,14 @@ class TestSessionAuthEndpoints(APIBaseTest):
         self.client.logout()
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.api_key_value}")
 
-        response = self.client.get("/api/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
+        response = self.client.get("/v1/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json()["detail"], "Authentication credentials were not provided.")
 
     def test_redirect_to_site_works_with_session_auth(self):
         """Session authentication should still work for redirect_to_site."""
-        response = self.client.get("/api/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
+        response = self.client.get("/v1/user/redirect_to_site/?appUrl=http%3A%2F%2F127.0.0.1%3A8010")
 
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
@@ -1960,7 +1960,7 @@ class TestSessionAuthEndpoints(APIBaseTest):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.api_key_value}")
 
         response = self.client.post(
-            "/api/user/prepare_toolbar_preloaded_flags/",
+            "/v1/user/prepare_toolbar_preloaded_flags/",
             {"distinct_id": "test-user"},
             format="json",
         )
@@ -1973,7 +1973,7 @@ class TestSessionAuthEndpoints(APIBaseTest):
         self.client.logout()
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.api_key_value}")
 
-        response = self.client.get("/api/user/get_toolbar_preloaded_flags/?key=test-key")
+        response = self.client.get("/v1/user/get_toolbar_preloaded_flags/?key=test-key")
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json()["detail"], "Authentication credentials were not provided.")
@@ -1994,7 +1994,7 @@ class TestStaffUserAPI(APIBaseTest):
         cls.user.save()
 
     def test_can_list_staff_users(self):
-        response = self.client.get("/api/users/?is_staff=true")
+        response = self.client.get("/v1/users/?is_staff=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(response_data["count"], 1)
@@ -2005,7 +2005,7 @@ class TestStaffUserAPI(APIBaseTest):
         self.user.is_staff = False
         self.user.save()
 
-        response = self.client.get("/api/users")
+        response = self.client.get("/v1/users")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
         self.assertEqual(response.json()["results"][0]["uuid"], str(self.user.uuid))
@@ -2015,7 +2015,7 @@ class TestStaffUserAPI(APIBaseTest):
         self.assertEqual(user.is_staff, False)
 
         # User becomes staff
-        response = self.client.patch(f"/api/users/{user.uuid}/", {"is_staff": True})
+        response = self.client.patch(f"/v1/users/{user.uuid}/", {"is_staff": True})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(response_data["is_staff"], True)
@@ -2023,7 +2023,7 @@ class TestStaffUserAPI(APIBaseTest):
         self.assertEqual(user.is_staff, True)
 
         # User is no longer staff
-        response = self.client.patch(f"/api/users/{user.uuid}/", {"is_staff": False})
+        response = self.client.patch(f"/v1/users/{user.uuid}/", {"is_staff": False})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(response_data["is_staff"], False)
@@ -2036,7 +2036,7 @@ class TestStaffUserAPI(APIBaseTest):
         self.user.is_staff = False
         self.user.save()
 
-        response = self.client.patch(f"/api/users/{user.uuid}/", {"is_staff": True})
+        response = self.client.patch(f"/v1/users/{user.uuid}/", {"is_staff": True})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.json(),
@@ -2079,7 +2079,7 @@ class TestUserOAuthAccess(APIBaseTest):
             scoped_teams=[self.team.id],
         )
 
-        response = self.client.get("/api/users/@me/", headers={"authorization": f"Bearer {access_token.token}"})
+        response = self.client.get("/v1/users/@me/", headers={"authorization": f"Bearer {access_token.token}"})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
@@ -2107,26 +2107,26 @@ class TestUserDeletionAfterOrgDeletion(NonAtomicBaseTest):
         self.client.force_login(user)
 
         # User belongs to exactly one organization
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["organizations"]) == 1
 
         # Cannot delete account while still a member of an organization
-        response = self.client.delete("/api/users/@me/")
+        response = self.client.delete("/v1/users/@me/")
         assert response.status_code == status.HTTP_409_CONFLICT
 
         # Delete the organization (runs the deletion workflow to completion)
         with execute_deletion_workflows_inline():
-            response = self.client.delete(f"/api/organizations/{org.id}")
+            response = self.client.delete(f"/v1/organizations/{org.id}")
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
         # The membership cascade removed the user's memberships, so they now see zero organizations
         assert not OrganizationMembership.objects.filter(user=user).exists()
-        response = self.client.get("/api/users/@me/")
+        response = self.client.get("/v1/users/@me/")
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["organizations"]) == 0
 
         # Now the user can delete their account
-        response = self.client.delete("/api/users/@me/")
+        response = self.client.delete("/v1/users/@me/")
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not User.objects.filter(pk=user.pk).exists()

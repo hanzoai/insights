@@ -11,8 +11,7 @@ from insights.rbac.user_access_control import UserAccessControl
 from insights.session_recordings.models.session_recording import SessionRecording
 
 try:
-    from insights.models.ee_models import AccessControl
-    from insights.models.ee_models import Role, RoleMembership
+    from insights.models.ee_models import AccessControl, Role, RoleMembership
 except ImportError:
     pass
 
@@ -62,7 +61,7 @@ class TestSessionRecordingAccessControl(APIBaseTest):
         self._create_access_control(self.viewer_user, access_level="viewer")
 
         self.client.force_login(self.viewer_user)
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/{self.recording.session_id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/{self.recording.session_id}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["id"], self.recording.session_id)
@@ -72,7 +71,7 @@ class TestSessionRecordingAccessControl(APIBaseTest):
         self._create_access_control(self.viewer_user, access_level="viewer")
 
         self.client.force_login(self.viewer_user)
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -82,7 +81,7 @@ class TestSessionRecordingAccessControl(APIBaseTest):
         self._create_access_control(self.viewer_user, access_level="viewer")
 
         self.client.force_login(self.viewer_user)
-        response = self.client.delete(f"/api/projects/{self.team.id}/session_recordings/{self.recording.session_id}/")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/session_recordings/{self.recording.session_id}/")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertIn("You do not have editor access", response.json()["detail"])
@@ -97,7 +96,7 @@ class TestSessionRecordingAccessControl(APIBaseTest):
         self._create_access_control(self.editor_user, access_level="editor")
 
         self.client.force_login(self.editor_user)
-        response = self.client.delete(f"/api/projects/{self.team.id}/session_recordings/{self.recording.session_id}/")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/session_recordings/{self.recording.session_id}/")
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -120,7 +119,7 @@ class TestSessionRecordingAccessControl(APIBaseTest):
 
         self.client.force_login(self.editor_user)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/bulk_delete/",
+            f"/v1/projects/{self.team.id}/session_recordings/bulk_delete/",
             {"session_recording_ids": [self.recording.session_id, recording2.session_id]},
             format="json",
         )
@@ -133,7 +132,7 @@ class TestSessionRecordingAccessControl(APIBaseTest):
         self._create_access_control(self.no_access_user, access_level="none")
 
         self.client.force_login(self.no_access_user)
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/{self.recording.session_id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/{self.recording.session_id}/")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -158,11 +157,11 @@ class TestSessionRecordingAccessControl(APIBaseTest):
         self.client.force_login(self.viewer_user)
 
         # Should be able to access the first recording
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/{self.recording.session_id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/{self.recording.session_id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Should not be able to access the second recording
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recordings/{recording2.session_id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recordings/{recording2.session_id}/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     @patch(
@@ -180,7 +179,7 @@ class TestSessionRecordingAccessControl(APIBaseTest):
         self.client.force_login(self.editor_user)
 
         # Should be able to delete without explicit permissions
-        response = self.client.delete(f"/api/projects/{self.team.id}/session_recordings/{self.recording.session_id}/")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/session_recordings/{self.recording.session_id}/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     @patch(
@@ -198,7 +197,7 @@ class TestSessionRecordingAccessControl(APIBaseTest):
         AccessControl.objects.create(team=self.team, resource="session_recording", access_level="editor", role=role)
 
         self.client.force_login(self.editor_user)
-        response = self.client.delete(f"/api/projects/{self.team.id}/session_recordings/{self.recording.session_id}/")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/session_recordings/{self.recording.session_id}/")
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -219,11 +218,11 @@ class TestSessionRecordingAccessControl(APIBaseTest):
         self.client.force_login(self.no_access_user)
 
         retrieve_response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recordings/{self.recording.session_id}/"
+            f"/v1/projects/{self.team.id}/session_recordings/{self.recording.session_id}/"
         )
         self.assertEqual(retrieve_response.status_code, status.HTTP_403_FORBIDDEN)
 
         summarize_response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recordings/{self.recording.session_id}/summarize/"
+            f"/v1/projects/{self.team.id}/session_recordings/{self.recording.session_id}/summarize/"
         )
         self.assertEqual(summarize_response.status_code, status.HTTP_403_FORBIDDEN)

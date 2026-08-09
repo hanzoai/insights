@@ -11,10 +11,10 @@ from products.ai_observability.backend.models.trace_reviews import TraceReview
 
 class TestReviewQueuesApi(APIBaseTest):
     def _queues_endpoint(self) -> str:
-        return f"/api/environments/{self.team.id}/llm_analytics/review_queues/"
+        return f"/v1/environments/{self.team.id}/llm_analytics/review_queues/"
 
     def _queue_items_endpoint(self) -> str:
-        return f"/api/environments/{self.team.id}/llm_analytics/review_queue_items/"
+        return f"/v1/environments/{self.team.id}/llm_analytics/review_queue_items/"
 
     def _create_queue(self, *, name: str = "Support queue") -> ReviewQueue:
         return ReviewQueue.objects.create(team=self.team, name=name, created_by=self.user)

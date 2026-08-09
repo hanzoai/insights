@@ -114,7 +114,7 @@ class TestTraceSpansCount(DatastoreTestMixin, APIBaseTest):
                 "filterGroup": [{"key": "name", "type": "span", "operator": "exact", "value": ROOT_NAME}],
             }
         }
-        res = self.client.post(f"/api/projects/{self.team.id}/tracing/spans/count/", body, format="json")
+        res = self.client.post(f"/v1/projects/{self.team.id}/tracing/spans/count/", body, format="json")
         self.assertEqual(res.status_code, 200, res.content)
         # One root span named process_query_model per trace.
         self.assertEqual(res.json()["count"], NUM_TRACES)
@@ -126,7 +126,7 @@ class TestTraceSpansCount(DatastoreTestMixin, APIBaseTest):
                 "filterGroup": [{"key": "is_root_span", "type": "span", "operator": "exact", "value": False}],
             }
         }
-        res = self.client.post(f"/api/projects/{self.team.id}/tracing/spans/count/", body, format="json")
+        res = self.client.post(f"/v1/projects/{self.team.id}/tracing/spans/count/", body, format="json")
         self.assertEqual(res.status_code, 200, res.content)
         # 2 child spans per trace = 6 matching spans, but no trace's ROOT matches (the filter excludes
         # roots), so the Traces view shows 0 traces — traceCount must agree with that, not count traces
@@ -158,6 +158,6 @@ class TestTraceSpansCount(DatastoreTestMixin, APIBaseTest):
                 "filterGroup": [{"key": key, "type": "span", "operator": "exact", "value": value}],
             }
         }
-        res = self.client.post(f"/api/projects/{self.team.id}/tracing/spans/count/", body, format="json")
+        res = self.client.post(f"/v1/projects/{self.team.id}/tracing/spans/count/", body, format="json")
         self.assertEqual(res.status_code, 200, res.content)
         self.assertEqual(res.json()["count"], expected_count)

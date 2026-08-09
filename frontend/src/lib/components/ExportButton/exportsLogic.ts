@@ -350,7 +350,7 @@ export const exportsLogic = kea<exportsLogicType>([
             const toastId = 'toast-' + Math.random()
             try {
                 toast.info('Saving cohort...', { toastId, autoClose: false })
-                const cohort: CohortType = await api.create('api/cohort', {
+                const cohort: CohortType = await api.create('v1/cohort', {
                     is_static: true,
                     name: name || 'Query cohort',
                     query: query,

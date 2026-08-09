@@ -28,7 +28,7 @@ export function MultiplePointsForOnePersonProperty(): JSX.Element {
     const examplePerson: PersonActorType = { ...EXAMPLE_PERSON, id: '012e89b5-4239-4319-8ae4-d3cae2f5deb1' }
     useStorybookMocks({
         get: {
-            [`/api/environments/${MOCK_TEAM_ID}/persons/${examplePerson.id}/properties_timeline/`]: {
+            [`/v1/environments/${MOCK_TEAM_ID}/persons/${examplePerson.id}/properties_timeline/`]: {
                 points: [
                     {
                         timestamp: '2021-01-01T00:00:00.000Z',
@@ -89,7 +89,7 @@ export function OnePointForOnePersonProperty(): JSX.Element {
     const examplePerson: PersonActorType = { ...EXAMPLE_PERSON, id: '012e89b5-4239-4319-8ae4-d3cae2f5deb2' }
     useStorybookMocks({
         get: {
-            [`/api/environments/${MOCK_TEAM_ID}/persons/${examplePerson.id}/properties_timeline/`]: {
+            [`/v1/environments/${MOCK_TEAM_ID}/persons/${examplePerson.id}/properties_timeline/`]: {
                 points: [
                     {
                         timestamp: '2021-05-01T00:00:00.000Z',
@@ -126,7 +126,7 @@ export function NoPointsForNoPersonProperties(): JSX.Element {
     const examplePerson: PersonActorType = { ...EXAMPLE_PERSON, id: '012e89b5-4239-4319-8ae4-d3cae2f5deb3' }
     useStorybookMocks({
         get: {
-            [`/api/environments/${MOCK_TEAM_ID}/persons/${examplePerson.id}/properties_timeline/`]: {
+            [`/v1/environments/${MOCK_TEAM_ID}/persons/${examplePerson.id}/properties_timeline/`]: {
                 points: [
                     {
                         timestamp: '2021-01-01T00:00:00.000Z',

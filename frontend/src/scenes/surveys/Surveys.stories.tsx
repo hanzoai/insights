@@ -327,25 +327,25 @@ const meta: Meta = {
         },
         mswDecorator({
             get: {
-                '/api/projects/:team_id/surveys/': toPaginatedResponse([
+                '/v1/projects/:team_id/surveys/': toPaginatedResponse([
                     MOCK_BASIC_SURVEY,
                     MOCK_SURVEY_WITH_RELEASE_CONS,
                     MOCK_SURVEY_WITH_MULTIPLE_OPTIONS,
                 ]),
-                '/api/projects/:team_id/surveys/0187c279-bcae-0000-34f5-4f121921f005/': MOCK_BASIC_SURVEY,
-                '/api/projects/:team_id/surveys/0187c279-bcae-0000-34f5-4f121921f006/': MOCK_SURVEY_WITH_RELEASE_CONS,
-                '/api/projects/:team_id/surveys/998FE805-F9EF-4F25-A5D1-B9549C4E2143/':
+                '/v1/projects/:team_id/surveys/0187c279-bcae-0000-34f5-4f121921f005/': MOCK_BASIC_SURVEY,
+                '/v1/projects/:team_id/surveys/0187c279-bcae-0000-34f5-4f121921f006/': MOCK_SURVEY_WITH_RELEASE_CONS,
+                '/v1/projects/:team_id/surveys/998FE805-F9EF-4F25-A5D1-B9549C4E2143/':
                     MOCK_SURVEY_WITH_MULTIPLE_OPTIONS,
-                '/api/projects/:team_id/surveys/responses_count/': MOCK_RESPONSES_COUNT,
-                [`/api/projects/:team_id/feature_flags/${
+                '/v1/projects/:team_id/surveys/responses_count/': MOCK_RESPONSES_COUNT,
+                [`/v1/projects/:team_id/feature_flags/${
                     (MOCK_SURVEY_WITH_RELEASE_CONS.linked_flag as FeatureFlagBasicType).id
                 }`]: toPaginatedResponse([MOCK_SURVEY_WITH_RELEASE_CONS.linked_flag]),
-                [`/api/projects/:team_id/feature_flags/${
+                [`/v1/projects/:team_id/feature_flags/${
                     (MOCK_SURVEY_WITH_RELEASE_CONS.targeting_flag as FeatureFlagBasicType).id
                 }`]: toPaginatedResponse([MOCK_SURVEY_WITH_RELEASE_CONS.targeting_flag]),
             },
             post: {
-                '/api/environments/:team_id/query/:kind/': async ({ request }) => {
+                '/v1/environments/:team_id/query/:kind/': async ({ request }) => {
                     const body = (await request.json()) as any
                     if (body.kind == 'EventsQuery') {
                         return [200, MOCK_SURVEY_RESULTS]
@@ -353,7 +353,7 @@ const meta: Meta = {
                     return [200, MOCK_SURVEY_SHOWN]
                 },
                 // flag targeting has loaders, make sure they don't keep loading
-                '/api/projects/:team_id/feature_flags/user_blast_radius/': () => [200, { affected: 120, total: 2000 }],
+                '/v1/projects/:team_id/feature_flags/user_blast_radius/': () => [200, { affected: 120, total: 2000 }],
             },
         }),
     ],
@@ -475,7 +475,7 @@ export const NewSurveyWithHTMLQuestionDescription: Story = {
         useStorybookMocks({
             get: {
                 // TODO: setting available featues should be a decorator to make this easy
-                '/api/users/@me': () => [
+                '/v1/users/@me': () => [
                     200,
                     {
                         email: 'test@hanzo.ai',
@@ -559,16 +559,16 @@ export const SurveyResults: Story = {
     decorators: [
         mswDecorator({
             get: {
-                [`/api/projects/:team_id/surveys/${MOCK_SURVEY_WITH_RESULTS.id}/`]: MOCK_SURVEY_WITH_RESULTS,
-                [`/api/projects/:team_id/surveys/${MOCK_SURVEY_WITH_RESULTS.id}/archived-response-uuids/`]: [],
-                '/api/projects/:team_id/surveys/responses_count/': {
+                [`/v1/projects/:team_id/surveys/${MOCK_SURVEY_WITH_RESULTS.id}/`]: MOCK_SURVEY_WITH_RESULTS,
+                [`/v1/projects/:team_id/surveys/${MOCK_SURVEY_WITH_RESULTS.id}/archived-response-uuids/`]: [],
+                '/v1/projects/:team_id/surveys/responses_count/': {
                     ...MOCK_RESPONSES_COUNT,
                     [MOCK_SURVEY_WITH_RESULTS.id]: 75,
                 },
-                '/api/environments/:team_id/insights_functions/': { count: 0, results: [], next: null },
+                '/v1/environments/:team_id/insights_functions/': { count: 0, results: [], next: null },
             },
             post: {
-                '/api/environments/:team_id/query/:kind/': async ({ request }) => {
+                '/v1/environments/:team_id/query/:kind/': async ({ request }) => {
                     const body = (await request.json()) as any
                     const sql: string = body?.query?.query ?? ''
                     if (sql.includes('question_id, label, cnt')) {
