@@ -1,4 +1,4 @@
-import { playerConfig } from 'insights-js/rrweb'
+import { playerConfig } from '@hanzo/insights-rrweb'
 
 export type BuiltLogging = {
     logger: playerConfig['logger']

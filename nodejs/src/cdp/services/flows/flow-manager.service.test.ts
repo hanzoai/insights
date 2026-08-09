@@ -237,7 +237,7 @@ describe('FlowManager', () => {
             expect(loaded).not.toHaveProperty('encrypted_inputs')
         })
 
-        it('re-merges a webhook trigger secret into hogFlow.trigger, not just the trigger action', async () => {
+        it('re-merges a webhook trigger secret into flow.trigger, not just the trigger action', async () => {
             const flow = await insertFlow(
                 hub.postgres,
                 new FixtureFlowBuilder()
@@ -271,7 +271,7 @@ describe('FlowManager', () => {
             manager['onFlowsReloaded'](teamId1, [flow.id])
 
             const loaded = await manager.getFlow(flow.id)
-            // The source-webhook consumer builds its function from hogFlow.trigger, so the secret must
+            // The source-webhook consumer builds its function from flow.trigger, so the secret must
             // land there too or a webhook trigger would run without its configured auth header.
             expect((loaded!.trigger as { inputs: Record<string, unknown> }).inputs).toEqual({
                 auth_header: { value: 'Bearer secret' },
