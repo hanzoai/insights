@@ -21,7 +21,15 @@
 # Not the pytest or jest suites: those need Postgres, ClickHouse and Kafka
 # (see ci-backend.yml standing them up as services). That is an integration
 # lane. A gate that is red for a missing database says nothing about the commit.
+# The second gate is cheap and catches a failure lint cannot see. An upstream
+# rebase removes a file we invented without raising a conflict — upstream never
+# had it, so "take upstream's version" is a clean delete — and a deleted module
+# takes its own tests with it, so nothing goes red. e443a4dab removed three that
+# way on 08-01 and it was found on 08-08, two rebases later. Runs first because
+# it needs no install.
 test:
+  - name: fork inventory
+    run: python3 scripts/fork-inventory.py
   - name: lint
     run: |
       set -e
