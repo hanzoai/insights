@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 
 import { CyclotronJobConflictError } from '../services/cyclotron-v2'
-import { InsightsFlowManagerService } from '../services/insightsflows/hogflow-manager.service'
+import { FlowManagerService } from '../services/flows/flow-manager.service'
 import { CyclotronJobQueuePostgresV2 } from '../services/job-queue/job-queue-postgres-v2'
 import { JobQueue } from '../services/job-queue/job-queue.interface'
 import { InsightsFunctionManagerService } from '../services/managers/script-function-manager.service'
@@ -47,7 +47,7 @@ describe('RerunPaginatorService queue routing', () => {
         paginator = new RerunPaginatorService(
             {} as any,
             {} as unknown as InsightsFunctionManagerService,
-            {} as unknown as InsightsFlowManagerService,
+            {} as unknown as FlowManagerService,
             invocationResultsRowsService,
             { insights_function: hogQueue, hog_flow: hogflowQueue },
             monitoringService,
@@ -147,7 +147,7 @@ describe('RerunPaginatorService queue routing', () => {
         const webhookPaginator = new RerunPaginatorService(
             {} as any,
             insightsFunctionManager,
-            {} as unknown as InsightsFlowManagerService,
+            {} as unknown as FlowManagerService,
             {} as unknown as HogInvocationResultsService,
             { insights_function: hogQueue, hog_flow: hogflowQueue },
             {} as unknown as InsightsFunctionMonitoringService,

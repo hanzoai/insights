@@ -144,8 +144,8 @@ export interface PluginServerCapabilities {
     cdpLegacyOnEvent?: boolean
     cdpCyclotronWorkerBatchResolve?: boolean
     cdpCyclotronWorker?: boolean
-    cdpCyclotronWorkerInsightsFlow?: boolean
-    cdpCyclotronWorkerInsightsFlowLegacyPg?: boolean
+    cdpCyclotronWorkerFlow?: boolean
+    cdpCyclotronWorkerFlowLegacyPg?: boolean
     cdpCyclotronWorkerEmail?: boolean
     cdpCyclotronWorkerEmailLegacyPg?: boolean
     cdpPrecalculatedFilters?: boolean

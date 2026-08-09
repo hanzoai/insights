@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 import { Counter } from 'prom-client'
 import express from 'ultimate-express'
 
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { Flow } from '~/cdp/schema/flow'
 import { CyclotronJobInvocationInsightsFunction, LogEntry, LogEntryLevel, MinimalAppMetric } from '~/cdp/types'
 import { ModifiedRequest } from '~/common/api/router'
 import { isDevEnv, isTestEnv } from '~/common/utils/env-utils'
@@ -10,7 +10,7 @@ import { parseJSON } from '~/common/utils/json-parse'
 import { logger } from '~/common/utils/logger'
 
 import { CapturedEventsService } from '../captured-events/captured-events.service'
-import { InsightsFlowManagerService } from '../insightsflows/hogflow-manager.service'
+import { FlowManagerService } from '../flows/flow-manager.service'
 import { InsightsFunctionManagerService } from '../managers/script-function-manager.service'
 import { TeamWorkflowsConfigService } from '../managers/team-workflows-config.service'
 import { InsightsFunctionMonitoringService } from '../monitoring/script-function-monitoring.service'
@@ -138,7 +138,7 @@ export class EmailTrackingService {
 
     constructor(
         private insightsFunctionManager: InsightsFunctionManagerService,
-        private hogFlowManager: InsightsFlowManagerService,
+        private flowManager: FlowManagerService,
         private insightsFunctionMonitoringService: InsightsFunctionMonitoringService,
         private capturedEventsService: CapturedEventsService,
         private teamWorkflowsConfigService: TeamWorkflowsConfigService,
@@ -183,13 +183,13 @@ export class EmailTrackingService {
         }
 
         // The function ID could be one or the other so we load both
-        const [insightsFunction, hogFlow] = await Promise.all([
+        const [insightsFunction, flow] = await Promise.all([
             this.insightsFunctionManager.getInsightsFunction(functionId).catch(() => null),
-            this.hogFlowManager.getInsightsFlow(functionId).catch(() => null),
+            this.flowManager.getFlow(functionId).catch(() => null),
         ])
 
-        const teamId = insightsFunction?.team_id ?? hogFlow?.team_id
-        const appSourceId = insightsFunction?.id ?? hogFlow?.id
+        const teamId = insightsFunction?.team_id ?? flow?.team_id
+        const appSourceId = insightsFunction?.id ?? flow?.id
 
         if (!teamId || !appSourceId) {
             logger.error('[EmailTrackingService] trackMetric: Script function or flow not found', {
@@ -211,13 +211,13 @@ export class EmailTrackingService {
                 metric_name: metricName,
                 metric_kind: 'email',
                 count: 1,
-                // The version comes off the tracking code minted at send time, never from `hogFlow`
+                // The version comes off the tracking code minted at send time, never from `flow`
                 // above — that's the currently published version, which for an engagement event
                 // arriving after a republish would blame the new version for the old one's sends.
                 app_source_version:
-                    hogFlow && workflowVersion !== undefined ? { id: hogFlow.id, version: workflowVersion } : undefined,
+                    flow && workflowVersion !== undefined ? { id: flow.id, version: workflowVersion } : undefined,
             },
-            hogFlow ? 'hog_flow' : 'insights_function'
+            flow ? 'hog_flow' : 'insights_function'
         )
 
         const eventName = METRIC_NAME_TO_EVENT_NAME[metricName]
@@ -264,9 +264,9 @@ export class EmailTrackingService {
             new Set(entries.map((e) => e.functionId).filter((id): id is string => Boolean(id)))
         )
 
-        let hogFlows: Record<string, InsightsFlow | null> = {}
+        let flows: Record<string, Flow | null> = {}
         try {
-            hogFlows = await this.hogFlowManager.getInsightsFlows(uniqueFunctionIds)
+            flows = await this.flowManager.getFlows(uniqueFunctionIds)
         } catch (error) {
             logger.error('[EmailTrackingService] trackLogs: Failed to load script flows', { error })
             emailTrackingErrorsCounter.inc({ error_type: 'hog_flow_lookup_failed', source: 'ses' })
@@ -285,17 +285,17 @@ export class EmailTrackingService {
                 continue
             }
 
-            const hogFlow = hogFlows[entry.functionId]
-            if (!hogFlow) {
+            const flow = flows[entry.functionId]
+            if (!flow) {
                 emailTrackingLogSkipsCounter.inc({ reason: 'non_flow', source: 'ses' })
                 continue
             }
 
             logEntries.push({
-                team_id: hogFlow.team_id,
+                team_id: flow.team_id,
                 log_source: 'hog_flow',
                 // Batch-triggered runs log under the batch run id (parentRunId); mirror the metrics path.
-                log_source_id: entry.parentRunId ?? hogFlow.id,
+                log_source_id: entry.parentRunId ?? flow.id,
                 instance_id: entry.invocationId,
                 timestamp: now,
                 level: entry.level,
