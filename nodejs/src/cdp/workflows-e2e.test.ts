@@ -318,7 +318,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
      * the batch resolver's buildFlowInvocation would produce. Skips the blast-radius API
      * call so tests don't need to stand up the Django side.
      */
-    async function triggerBatchWorkflow(hogFlow: Flow, personUuid: string): Promise<void> {
+    async function triggerBatchWorkflow(flow: Flow, personUuid: string): Promise<void> {
         const invocationGlobals = convertBatchFlowRequestToInsightsFunctionInvocationGlobals({
             team,
             personId: personUuid,
@@ -1927,7 +1927,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
         // templates defaulting to {event.distinct_id} would silently mint new person profiles.
         const personUuid = 'aaaaaaaa-1111-1111-1111-111111111111'
         const personDistinctId = 'batch-person-distinct-id'
-        let hogFlow: Flow
+        let flow: Flow
 
         beforeEach(async () => {
             const person = {

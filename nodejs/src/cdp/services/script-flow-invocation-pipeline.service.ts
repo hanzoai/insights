@@ -78,7 +78,7 @@ export class FlowInvocationPipeline {
             // knows its own source (events consumer → event triggers; DWH consumer → matching
             // warehouse-table triggers). Flows that fail the predicate are skipped without
             // touching the executor.
-            eligibilityFn?: (hogFlow: Flow, globals: InsightsFunctionInvocationGlobals) => boolean
+            eligibilityFn?: (flow: Flow, globals: InsightsFunctionInvocationGlobals) => boolean
         }
     ): Promise<CyclotronJobInvocation[]> {
         const teamsToLoad = [...new Set(invocationGlobals.map((x) => x.project.id))]
