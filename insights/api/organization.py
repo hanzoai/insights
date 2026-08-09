@@ -13,7 +13,7 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from insights import settings
+from insights import ingest, settings
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.scoped_related_fields import OrgScopedPrimaryKeyRelatedField
 from insights.api.shared import ProjectBasicSerializer, TeamBasicSerializer
@@ -240,7 +240,21 @@ class OrganizationSerializer(
     def create(self, validated_data: dict, *args: Any, **kwargs: Any) -> Organization:
         serializers.raise_errors_on_nested_writes("create", self, validated_data)
         user = self.context["request"].user
-        organization, _, _ = Organization.objects.bootstrap(user, **validated_data)
+
+        # An organization is born with a project, and that project ingests, so it
+        # needs cloud's key like any other. Named after the organization rather
+        # than after the project's own default: cloud scopes a project by the IAM
+        # `owner` claim, which is the same tenant for every organization this
+        # person makes, so "Default project" would resolve to one project shared
+        # by all of them.
+        try:
+            api_token = ingest.key(name=f"{validated_data['name']} Default", user=user)
+        except ingest.IngestKeyUnavailable as e:
+            raise serializers.ValidationError(str(e)) from e
+
+        organization, _, _ = Organization.objects.bootstrap(
+            user, team_fields={"api_token": api_token}, **validated_data
+        )
         return organization
 
     @tracer.start_as_current_span("organization_serializer.membership_level")
