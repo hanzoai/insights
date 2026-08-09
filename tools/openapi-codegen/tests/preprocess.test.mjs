@@ -200,7 +200,7 @@ describe('preprocessSchema', () => {
             openapi: '3.1.0',
             info: { title: 'Test', version: '1.0.0' },
             paths: {
-                '/api/projects/{id}/': {
+                '/v1/projects/{id}/': {
                     get: {
                         operationId: 'projects_retrieve',
                         parameters: [
@@ -222,7 +222,7 @@ describe('preprocessSchema', () => {
             components: { schemas: {} },
         }
         preprocessSchema(spec)
-        const idSchema = spec.paths['/api/projects/{id}/'].get.parameters[0].schema
+        const idSchema = spec.paths['/v1/projects/{id}/'].get.parameters[0].schema
         expect(idSchema.maximum).toBe(INT32_MAX)
         expect(idSchema.minimum).toBe(INT32_MIN)
     })
