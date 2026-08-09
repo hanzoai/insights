@@ -309,7 +309,7 @@ class PendingDeletesDictionary(Dictionary):
                 created_at DateTime,
             )
             PRIMARY KEY team_id, deletion_type, key
-            SOURCE(DATASTORE(DB %(database)s USER %(user)s PASSWORD %(password)s QUERY %(query)s))
+            SOURCE(CLICKHOUSE(DB %(database)s USER %(user)s PASSWORD %(password)s QUERY %(query)s))
             LAYOUT(COMPLEX_KEY_HASHED(SHARDS {shards}))
             LIFETIME(0)
             SETTINGS(max_execution_time={max_execution_time}, max_memory_usage={max_memory_usage})
@@ -350,7 +350,7 @@ class AdhocEventDeletesDictionary(Dictionary):
                 created_at DateTime64(6, 'UTC')
             )
             PRIMARY KEY team_id, uuid
-            SOURCE(DATASTORE(DB %(database)s USER %(user)s PASSWORD %(password)s QUERY %(query)s))
+            SOURCE(CLICKHOUSE(DB %(database)s USER %(user)s PASSWORD %(password)s QUERY %(query)s))
             LAYOUT(COMPLEX_KEY_HASHED(SHARDS {shards}))
             LIFETIME(0)
             SETTINGS(max_execution_time={max_execution_time}, max_memory_usage={max_memory_usage})

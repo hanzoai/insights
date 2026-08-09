@@ -129,7 +129,7 @@ CREATE DICTIONARY IF NOT EXISTS {dictionary_name} {on_cluster_clause} (
     team_id UInt64
 )
 PRIMARY KEY team_id
-SOURCE(DATASTORE(QUERY '{query}' USER '{datastore_user}' PASSWORD '{datastore_password}'))
+SOURCE(CLICKHOUSE(QUERY '{query}' USER '{datastore_user}' PASSWORD '{datastore_password}'))
 LIFETIME(MIN 3000 MAX 3600)
 LAYOUT(HASHED())""".format(
         dictionary_name=f"`{WEB_PRE_AGGREGATED_TEAM_SELECTION_DICTIONARY_NAME}`",

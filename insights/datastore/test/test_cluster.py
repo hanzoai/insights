@@ -762,8 +762,8 @@ def test_alter_mutation_force_parameter(cluster: DatastoreCluster) -> None:
     "sql,expected",
     [
         (
-            "SOURCE(DATASTORE(TABLE 'web_bot_definition' USER 'default' PASSWORD 'sup3r-s3cret'))",
-            "SOURCE(DATASTORE(TABLE 'web_bot_definition' USER 'default' PASSWORD '[REDACTED]'))",
+            "SOURCE(CLICKHOUSE(TABLE 'web_bot_definition' USER 'default' PASSWORD 'sup3r-s3cret'))",
+            "SOURCE(CLICKHOUSE(TABLE 'web_bot_definition' USER 'default' PASSWORD '[REDACTED]'))",
         ),
         # case-insensitive keyword
         ("source(datastore(password 'pw'))", "source(datastore(password '[REDACTED]'))"),
@@ -782,13 +782,13 @@ def test_redact_sql_secrets(sql, expected):
 
 
 def test_query_repr_redacts_inline_password():
-    rendered = repr(Query("SOURCE(DATASTORE(TABLE 't' PASSWORD 'sup3r-s3cret'))"))
+    rendered = repr(Query("SOURCE(CLICKHOUSE(TABLE 't' PASSWORD 'sup3r-s3cret'))"))
     assert "sup3r-s3cret" not in rendered
     assert "[REDACTED]" in rendered
 
 
 def test_query_repr_redacts_password_parameter():
-    rendered = repr(Query("SOURCE(DATASTORE(DB %(db)s PASSWORD %(password)s))", {"db": "insights", "password": "pw"}))
+    rendered = repr(Query("SOURCE(CLICKHOUSE(DB %(db)s PASSWORD %(password)s))", {"db": "insights", "password": "pw"}))
     assert "pw" not in rendered
     assert "'db': 'insights'" in rendered
     assert "'password': '[REDACTED]'" in rendered

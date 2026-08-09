@@ -751,7 +751,7 @@ CREATE OR REPLACE DICTIONARY {database}.person_distinct_id_overrides_dict ON CLU
 )
 PRIMARY KEY team_id, distinct_id
 -- For our own sanity, we explicitly write out the group by query.
-SOURCE(DATASTORE(
+SOURCE(CLICKHOUSE(
     query 'SELECT team_id, distinct_id, argMax(person_id, version) AS person_id FROM {database}.person_distinct_id_overrides GROUP BY team_id, distinct_id' USER '{datastore_user}' PASSWORD '{datastore_password}'
 ))
 LAYOUT(complex_key_hashed())
