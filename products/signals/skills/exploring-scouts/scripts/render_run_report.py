@@ -46,7 +46,7 @@ from typing import Any
 WIDTH = 66
 
 # the obligatory mascot
-HEDGEHOG = r"""
+MASCOT = r"""
          /////////,
        ///////////// .            Insights · Signals
      ///////////////  `.            scout run report
@@ -292,7 +292,7 @@ def render(run: dict, timeline: list[dict] | None, scratchpad: Any, posture: dic
            mode: str, base_url: str, art: bool, show_output: bool, input_width: int, output_width: int) -> str:
     L: list[str] = []
     if art:
-        L.append(HEDGEHOG.strip("\n"))
+        L.append(MASCOT.strip("\n"))
         L.append("")
     render_header(L, run, posture, base_url)
 

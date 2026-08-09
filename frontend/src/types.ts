@@ -4626,7 +4626,7 @@ export interface PreflightStatus {
     is_test?: boolean
     licensed_users_available?: number | null
     openai_available?: boolean
-    anthropic_available?: boolean
+    assistant_available?: boolean
     site_url?: string
     instance_preferences?: InstancePreferencesInterface
     buffer_conversion_seconds?: number
