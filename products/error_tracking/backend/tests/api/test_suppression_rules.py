@@ -400,7 +400,7 @@ VALID_FILTERS = {
 
 class TestSuppressionRuleAPI(APIBaseTest):
     def _url(self, rule_id: str | None = None) -> str:
-        base = f"/api/environments/{self.team.id}/error_tracking/suppression_rules/"
+        base = f"/v1/environments/{self.team.id}/error_tracking/suppression_rules/"
         if rule_id:
             return f"{base}{rule_id}/"
         return base

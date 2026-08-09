@@ -16,7 +16,7 @@ describe('dataModelingLogic', () => {
         localStorage.clear()
         useMocks({
             get: {
-                '/api/environments/:team_id/data_modeling_dags/': {
+                '/v1/environments/:team_id/data_modeling_dags/': {
                     results: [
                         {
                             id: 'dag-123',
@@ -29,10 +29,10 @@ describe('dataModelingLogic', () => {
                         },
                     ],
                 },
-                '/api/environments/:team_id/data_modeling_nodes/': { results: [] },
-                '/api/environments/:team_id/data_modeling_edges/': { results: [] },
-                '/api/environments/:team_id/data_modeling_jobs/recent/': [],
-                '/api/environments/:team_id/data_modeling_jobs/running/': [],
+                '/v1/environments/:team_id/data_modeling_nodes/': { results: [] },
+                '/v1/environments/:team_id/data_modeling_edges/': { results: [] },
+                '/v1/environments/:team_id/data_modeling_jobs/recent/': [],
+                '/v1/environments/:team_id/data_modeling_jobs/running/': [],
             },
         })
         initKeaTests()

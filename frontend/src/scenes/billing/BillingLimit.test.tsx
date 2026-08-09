@@ -32,9 +32,9 @@ describe('BillingLimit', () => {
     const seedBilling = async (customLimits: BillingType['custom_limits_usd']): Promise<void> => {
         billingState = { ...billingJson, custom_limits_usd: customLimits }
         useMocks({
-            get: { '/api/billing': () => [200, billingState] },
+            get: { '/v1/billing': () => [200, billingState] },
             patch: {
-                '/api/billing': async ({ request }) => {
+                '/v1/billing': async ({ request }) => {
                     patchedBody = await request.json()
                     // Persist the change like the backend does so the reload after save renders the new limit.
                     billingState = {

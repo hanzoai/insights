@@ -23,7 +23,7 @@ describe('billingProductLogic', () => {
     const mounted: ReturnType<typeof billingProductLogic.build>[] = []
 
     const seedBilling = async (customLimits: BillingType['custom_limits_usd']): Promise<void> => {
-        useMocks({ get: { '/api/billing': () => [200, { ...billingJson, custom_limits_usd: customLimits }] } })
+        useMocks({ get: { '/v1/billing': () => [200, { ...billingJson, custom_limits_usd: customLimits }] } })
         billingLogic.mount()
         await expectLogic(billingLogic, () => billingLogic.actions.loadBilling()).toFinishAllListeners()
     }
@@ -79,15 +79,15 @@ describe('billingProductLogic', () => {
         })
 
         // Guards the unsubscribe submit path the deleted Playwright spec covered: confirming
-        // deactivation must POST the product to /api/billing/deactivate, submit the collected
+        // deactivation must POST the product to /v1/billing/deactivate, submit the collected
         // survey on success (deactivateProductSuccess -> reportSurveySent), and clear surveyID so
         // the modal closes. Fake timers step over the loader's real 2s reload breakpoint.
         it('deactivates the product, submits the survey, and clears the modal on confirm', async () => {
             let deactivateBody: any = null
             useMocks({
-                get: { '/api/billing': () => [200, billingJson] },
+                get: { '/v1/billing': () => [200, billingJson] },
                 post: {
-                    '/api/billing/deactivate': async ({ request }) => {
+                    '/v1/billing/deactivate': async ({ request }) => {
                         deactivateBody = await request.json()
                         return [200, billingJson]
                     },
@@ -141,7 +141,7 @@ describe('billingProductLogic — confirm purchase modal', () => {
     let toastErrorSpy: jest.SpyInstance
 
     const seedBilling = async (billing: Partial<BillingType>): Promise<void> => {
-        useMocks({ get: { '/api/billing': () => [200, billing] } })
+        useMocks({ get: { '/v1/billing': () => [200, billing] } })
         billingLogic.mount()
         await expectLogic(billingLogic, () => billingLogic.actions.loadBilling()).toFinishAllListeners()
     }
@@ -174,7 +174,7 @@ describe('billingProductLogic — confirm purchase modal', () => {
         // Respond with an error so activation stops before any real-charge side effects, while still
         // proving the request fired with the right add-on + plan.
         const activate = jest.fn(() => [200, { success: false, error: 'stop before charge' }] as [number, unknown])
-        useMocks({ post: { '/api/billing/activate': activate } })
+        useMocks({ post: { '/v1/billing/activate': activate } })
         logic = billingProductLogic({ product: scaleAddon })
         logic.mount()
 
@@ -192,7 +192,7 @@ describe('billingProductLogic — confirm purchase modal', () => {
 
     it('auto-closes the modal once activation finishes', async () => {
         useMocks({
-            post: { '/api/billing/activate': () => [200, { success: false, error: 'x' }] as [number, unknown] },
+            post: { '/v1/billing/activate': () => [200, { success: false, error: 'x' }] as [number, unknown] },
         })
         logic = billingProductLogic({ product: scaleAddon })
         logic.mount()
@@ -255,7 +255,7 @@ describe('billingProductLogic — confirm purchase modal', () => {
 
     it('does nothing when the product has no upgrade plan', async () => {
         const activate = jest.fn(() => [200, { success: true }] as [number, unknown])
-        useMocks({ post: { '/api/billing/activate': activate } })
+        useMocks({ post: { '/v1/billing/activate': activate } })
         const productWithoutPlans = { ...scaleAddon, type: BillingPlan.Boost, plans: [] } as BillingProductV2AddonType
         logic = billingProductLogic({ product: productWithoutPlans })
         logic.mount()

@@ -69,7 +69,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         expected_response_json: dict | None = None,
     ):
         post_response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recording_playlists",
+            f"/v1/projects/{self.team.id}/session_recording_playlists",
             data=data,
         )
 
@@ -84,7 +84,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         return post_response
 
     def _get_non_synthetic_playlists(self, query_params: str = "", expected_synthetic_count: int = 7) -> list[dict]:
-        url = f"/api/projects/{self.team.id}/session_recording_playlists{query_params}"
+        url = f"/v1/projects/{self.team.id}/session_recording_playlists{query_params}"
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
 
@@ -97,7 +97,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         return non_synthetic_results
 
     def test_list_playlists_when_there_are_no_playlists(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recording_playlists")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recording_playlists")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
 
@@ -120,7 +120,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
             json.dumps({"session_ids": ["a", "b"], "has_more": False, "previous_ids": ["b"]}),
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recording_playlists")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recording_playlists")
 
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
@@ -232,7 +232,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         self._create_playlist({"name": "test", "type": "collection"})
 
         with CaptureQueriesContext(connection) as ctx:
-            response = self.client.get(f"/api/projects/{self.team.id}/session_recording_playlists")
+            response = self.client.get(f"/v1/projects/{self.team.id}/session_recording_playlists")
 
         assert response.status_code == status.HTTP_200_OK
 
@@ -345,7 +345,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         create_response = self._create_playlist({"type": "collection"})
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{create_response.json()['short_id']}"
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{create_response.json()['short_id']}"
         )
 
         assert response.json()["short_id"] == create_response.json()["short_id"]
@@ -357,7 +357,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         assert SessionRecordingPlaylistViewed.objects.count() == 0
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{short_id}/playlist_viewed"
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{short_id}/playlist_viewed"
         )
 
         assert response.status_code == status.HTTP_200_OK, response.json()
@@ -377,11 +377,11 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         assert SessionRecordingPlaylistViewed.objects.count() == 0
 
         response_one = self.client.post(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{short_id}/playlist_viewed"
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{short_id}/playlist_viewed"
         )
         assert response_one.status_code == status.HTTP_200_OK
         response_two = self.client.post(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{short_id}/playlist_viewed"
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{short_id}/playlist_viewed"
         )
         assert response_two.status_code == status.HTTP_200_OK
         assert SessionRecordingPlaylistViewed.objects.count() == 2
@@ -394,7 +394,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
 
         with freeze_time("2022-01-02"):
             response_one = self.client.post(
-                f"/api/projects/{self.team.id}/session_recording_playlists/{short_id}/playlist_viewed"
+                f"/v1/projects/{self.team.id}/session_recording_playlists/{short_id}/playlist_viewed"
             )
             assert response_one.status_code == status.HTTP_200_OK
             assert SessionRecordingPlaylistViewed.objects.count() == 1
@@ -402,7 +402,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
             # Run the API call in a separate atomic block so it doesn't break the main test transaction
             with transaction.atomic():
                 response_two = self.client.post(
-                    f"/api/projects/{self.team.id}/session_recording_playlists/{short_id}/playlist_viewed"
+                    f"/v1/projects/{self.team.id}/session_recording_playlists/{short_id}/playlist_viewed"
                 )
                 assert response_two.status_code == status.HTTP_200_OK
 
@@ -415,7 +415,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         another_team = Team.objects.create(organization=self.organization)
 
         response = self.client.post(
-            f"/api/projects/{another_team.id}/session_recording_playlists/{short_id}/playlist_viewed"
+            f"/v1/projects/{another_team.id}/session_recording_playlists/{short_id}/playlist_viewed"
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -433,7 +433,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
 
         with freeze_time("2022-01-02"):
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/session_recording_playlists/{short_id}",
+                f"/v1/projects/{self.team.id}/session_recording_playlists/{short_id}",
                 {
                     "name": "changed name",
                     "description": "changed description",
@@ -456,7 +456,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         short_id = create_response.json()["short_id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{short_id}",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{short_id}",
             {
                 "type": "filters",
                 "filters": {"events": [{"id": "test"}]},
@@ -477,7 +477,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         short_id = create_response.json()["short_id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{short_id}",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{short_id}",
             {
                 "type": "filters",
                 "filters": updated_filters,
@@ -496,7 +496,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         short_id = create_response.json()["short_id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{short_id}",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{short_id}",
             {"filters": {}, "deleted": True},
         )
         assert response.status_code == status.HTTP_200_OK, response.json()
@@ -507,7 +507,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         short_id = create_response.json()["short_id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{short_id}",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{short_id}",
             {"filters": {"events": [{"id": "test"}]}},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
@@ -525,7 +525,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         assert new_type_attempt != initial_type and new_type_attempt in SessionRecordingPlaylist.PlaylistType.values
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{short_id}",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{short_id}",
             {
                 "short_id": "something else",  # Attempt to change a known read-only field
                 "type": new_type_attempt,  # Attempt to change the now read-only 'type' field
@@ -609,7 +609,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         SessionRecordingPlaylistItem.objects.filter(playlist=playlist4, recording=recording4).update(deleted=True)
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recording_playlists?type=filters",
+            f"/v1/projects/{self.team.id}/session_recording_playlists?type=filters",
         )
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
@@ -640,7 +640,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         recording_session_id = "test_session_id"
         # Attempt to add (pin) a recording to this filters-type playlist
         add_item_response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings/{recording_session_id}",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings/{recording_session_id}",
         )
 
         # Assert that the attempt fails with a 400 Bad Request
@@ -680,18 +680,18 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
 
         # Create playlist items
         self.client.post(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings/{session_one}"
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings/{session_one}"
         )
         self.client.post(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings/{session_two}"
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings/{session_two}"
         )
         self.client.post(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings/session-missing"
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings/session-missing"
         )
 
         # Test get recordings
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings"
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings"
         )
         assert response.status_code == status.HTTP_200_OK
         result = response.json()
@@ -725,17 +725,17 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
             )
 
         self.client.post(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist1.short_id}/recordings/{session_one}",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist1.short_id}/recordings/{session_one}",
         )
         self.client.post(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist1.short_id}/recordings/{session_two}",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist1.short_id}/recordings/{session_two}",
         )
         self.client.post(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist2.short_id}/recordings/{session_one}",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist2.short_id}/recordings/{session_one}",
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist1.short_id}/recordings",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist1.short_id}/recordings",
         )
         assert response.status_code == status.HTTP_200_OK
         result = response.json()
@@ -745,7 +745,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
 
         # Test get recordings
         result = self.client.get(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist2.short_id}/recordings",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist2.short_id}/recordings",
         ).json()
 
         assert len(result["results"]) == 1
@@ -772,11 +772,11 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
                 retention_period_days=1826,
             )
             self.client.post(
-                f"/api/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings/{session_id}"
+                f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings/{session_id}"
             )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings"
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings"
         )
         assert response.status_code == status.HTTP_200_OK
         assert {x["id"] for x in response.json()["results"]} == {recent_session}
@@ -811,7 +811,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         SessionRecordingPlaylistItem.objects.create(playlist=playlist, recording=recording)
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings",
             data={"date_from": date_from},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -834,7 +834,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
 
         # Add recording 1 to playlist 1
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist1.short_id}/recordings/{recording1_session_id}",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist1.short_id}/recordings/{recording1_session_id}",
         )
         assert response.status_code == status.HTTP_200_OK
         result = response.json()
@@ -846,7 +846,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
 
         # Add recording 2 to playlist 1
         result = self.client.post(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist1.short_id}/recordings/{recording2_session_id}",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist1.short_id}/recordings/{recording2_session_id}",
         ).json()
         assert result["success"]
         playlist_item = SessionRecordingPlaylistItem.objects.filter(
@@ -856,7 +856,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
 
         # Add recording 2 to playlist 2
         result = self.client.post(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist2.short_id}/recordings/{recording2_session_id}",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist2.short_id}/recordings/{recording2_session_id}",
         ).json()
         assert result["success"]
         playlist_item = SessionRecordingPlaylistItem.objects.filter(
@@ -872,7 +872,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
 
         # Delete playlist items
         result = self.client.delete(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist1.short_id}/recordings/{recording1_session_id}",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist1.short_id}/recordings/{recording1_session_id}",
         ).json()
         assert result["success"]
         assert (
@@ -882,7 +882,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
             == 0
         )
         result = self.client.delete(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist1.short_id}/recordings/{recording2_session_id}",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist1.short_id}/recordings/{recording2_session_id}",
         ).json()
         assert result["success"]
         assert (
@@ -892,7 +892,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
             == 0
         )
         result = self.client.delete(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist2.short_id}/recordings/{recording2_session_id}",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist2.short_id}/recordings/{recording2_session_id}",
         ).json()
         assert result["success"]
         assert (
@@ -941,7 +941,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         SessionRecordingPlaylistItem.objects.create(playlist=p_collection_explicit_no_filters, recording=recording)
 
         # Test filtering by type=filters
-        response_filters = self.client.get(f"/api/projects/{self.team.id}/session_recording_playlists?type=filters")
+        response_filters = self.client.get(f"/v1/projects/{self.team.id}/session_recording_playlists?type=filters")
         assert response_filters.status_code == status.HTTP_200_OK
         results_filters = response_filters.json()["results"]
         assert len(results_filters) == 1
@@ -985,7 +985,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
             type=SessionRecordingPlaylist.PlaylistType.COLLECTION,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recording_playlists{query_params}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recording_playlists{query_params}")
         assert response.status_code == status.HTTP_200_OK
 
         results = response.json()["results"]
@@ -1039,7 +1039,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
 
         # Test bulk add
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist1.short_id}/recordings/bulk_add",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist1.short_id}/recordings/bulk_add",
             {"session_recording_ids": recording_ids},
             format="json",
         )
@@ -1057,7 +1057,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
 
         # Test bulk delete
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist1.short_id}/recordings/bulk_delete",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist1.short_id}/recordings/bulk_delete",
             {"session_recording_ids": recording_ids},
             format="json",
         )
@@ -1098,7 +1098,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings/bulk_add",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings/bulk_add",
             {"session_recording_ids": session_recording_ids},
             format="json",
         )
@@ -1116,7 +1116,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings/bulk_add",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings/bulk_add",
             {"session_recording_ids": ["session_1", "session_2"]},
             format="json",
         )
@@ -1134,13 +1134,13 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         # Add one recording first
         existing_id = "existing_session"
         self.client.post(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings/{existing_id}"
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings/{existing_id}"
         )
 
         # Try to bulk add including the existing one and new ones
         recording_ids = [existing_id, "new_session_1", "new_session_2"]
         response = self.client.post(
-            f"/api/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings/bulk_add",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/{playlist.short_id}/recordings/bulk_add",
             {"session_recording_ids": recording_ids},
             format="json",
         )
@@ -1175,7 +1175,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         total_count: int | None = None
         while True:
             response = self.client.get(
-                f"/api/projects/{self.team.id}/session_recording_playlists?order={order}&limit={limit}&offset={offset}"
+                f"/v1/projects/{self.team.id}/session_recording_playlists?order={order}&limit={limit}&offset={offset}"
             )
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -1210,7 +1210,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
             )
 
         page_one = self.client.get(
-            f"/api/projects/{self.team.id}/session_recording_playlists?limit={page_size}&offset=0"
+            f"/v1/projects/{self.team.id}/session_recording_playlists?limit={page_size}&offset=0"
         )
         assert page_one.status_code == status.HTTP_200_OK
         page_one_data = page_one.json()
@@ -1223,7 +1223,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         assert page_one_data["previous"] is None
 
         page_two = self.client.get(
-            f"/api/projects/{self.team.id}/session_recording_playlists?limit={page_size}&offset={page_size}"
+            f"/v1/projects/{self.team.id}/session_recording_playlists?limit={page_size}&offset={page_size}"
         )
         assert page_two.status_code == status.HTTP_200_OK
         page_two_data = page_two.json()
@@ -1251,7 +1251,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recording_playlists?order=name&limit=3&offset=0"
+            f"/v1/projects/{self.team.id}/session_recording_playlists?order=name&limit=3&offset=0"
         )
         assert response.status_code == status.HTTP_200_OK
         names = [r["name"] for r in response.json()["results"]]
@@ -1272,7 +1272,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         offset = 0
         while True:
             response = self.client.get(
-                f"/api/projects/{self.team.id}/session_recording_playlists?order=name&limit={page_size}&offset={offset}"
+                f"/v1/projects/{self.team.id}/session_recording_playlists?order=name&limit={page_size}&offset={offset}"
             )
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -1300,7 +1300,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         offset = 0
         while True:
             response = self.client.get(
-                f"/api/projects/{self.team.id}/session_recording_playlists?order=name&limit={page_size}&offset={offset}"
+                f"/v1/projects/{self.team.id}/session_recording_playlists?order=name&limit={page_size}&offset={offset}"
             )
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -1321,7 +1321,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         total = 0
         while True:
             response = self.client.get(
-                f"/api/projects/{self.team.id}/session_recording_playlists?limit={page_size}&offset={offset}"
+                f"/v1/projects/{self.team.id}/session_recording_playlists?limit={page_size}&offset={offset}"
             )
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -1349,7 +1349,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
         total = 0
         while True:
             response = self.client.get(
-                f"/api/projects/{self.team.id}/session_recording_playlists?collection_type=custom&limit={page_size}&offset={offset}"
+                f"/v1/projects/{self.team.id}/session_recording_playlists?collection_type=custom&limit={page_size}&offset={offset}"
             )
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -1394,9 +1394,7 @@ class TestSessionRecordingPlaylistPersonalAPIKey(APIBaseTest):
             type=SessionRecordingPlaylist.PlaylistType.COLLECTION,
         )
         personal_api_key = self._create_personal_api_key(["session_recording_playlist:read"])
-        url = (
-            f"/api/projects/{self.team.pk}/session_recording_playlists{path_suffix.format(short_id=playlist.short_id)}"
-        )
+        url = f"/v1/projects/{self.team.pk}/session_recording_playlists{path_suffix.format(short_id=playlist.short_id)}"
 
         response = self.client.get(url, headers={"authorization": f"Bearer {personal_api_key}"})
 
@@ -1422,7 +1420,7 @@ class TestSessionRecordingPlaylistPersonalAPIKey(APIBaseTest):
         personal_api_key = self._create_personal_api_key(scopes, scoped_teams)
 
         response = self.client.get(
-            f"/api/projects/{self.team.pk}/session_recording_playlists",
+            f"/v1/projects/{self.team.pk}/session_recording_playlists",
             headers={"authorization": f"Bearer {personal_api_key}"},
         )
 
@@ -1445,7 +1443,7 @@ class TestSessionRecordingPlaylistTeamIsolation(APIBaseTest):
             type="collection",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/session_recording_playlists")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/session_recording_playlists")
 
         assert response.status_code == status.HTTP_200_OK
         results = [r for r in response.json()["results"] if not r.get("is_synthetic")]
@@ -1470,9 +1468,7 @@ class TestSessionRecordingPlaylistTeamIsolation(APIBaseTest):
             created_by=self.user,
             type="collection",
         )
-        url = (
-            f"/api/projects/{self.team.pk}/session_recording_playlists{path_suffix.format(short_id=playlist.short_id)}"
-        )
+        url = f"/v1/projects/{self.team.pk}/session_recording_playlists{path_suffix.format(short_id=playlist.short_id)}"
 
         response = getattr(self.client, method)(url, data) if data else getattr(self.client, method)(url)
 
@@ -1482,7 +1478,7 @@ class TestSessionRecordingPlaylistTeamIsolation(APIBaseTest):
         other_org = Organization.objects.create(name="Other Org")
         other_team = Team.objects.create(organization=other_org, name="other org team")
 
-        response = self.client.get(f"/api/projects/{other_team.pk}/session_recording_playlists")
+        response = self.client.get(f"/v1/projects/{other_team.pk}/session_recording_playlists")
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
@@ -1660,7 +1656,7 @@ class TestPrecomputeRecordingsCounts(APIBaseTest):
     def test_list_clamps_limit_query_param_to_max(self) -> None:
         # Sanity-check the pagination cap — requesting limit=99999 must cap at the configured max.
         response = self.client.get(
-            f"/api/projects/{self.team.id}/session_recording_playlists?limit={PLAYLIST_LIST_MAX_LIMIT + 100}"
+            f"/v1/projects/{self.team.id}/session_recording_playlists?limit={PLAYLIST_LIST_MAX_LIMIT + 100}"
         )
         assert response.status_code == status.HTTP_200_OK
         # Even with no playlists created, the response must be well-formed and bounded.
@@ -1672,7 +1668,7 @@ class TestPrecomputeRecordingsCounts(APIBaseTest):
     def test_list_with_zero_limit_does_not_loop_pagination(self) -> None:
         # limit=0 would make the next link point back at the same offset (infinite paging);
         # it must fall back to the default page size and terminate.
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recording_playlists?limit=0")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recording_playlists?limit=0")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         # Default page size (100) comfortably holds the synthetics, so there's no next page

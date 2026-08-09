@@ -36,10 +36,10 @@ class ChannelsAPITestCase(TestCase):
         self.client.force_authenticate(self.user)
 
     def _channels_url(self) -> str:
-        return f"/api/projects/{self.team.id}/task_channels/"
+        return f"/v1/projects/{self.team.id}/task_channels/"
 
     def _tasks_url(self) -> str:
-        return f"/api/projects/{self.team.id}/tasks/"
+        return f"/v1/projects/{self.team.id}/tasks/"
 
     def test_list_provisions_personal_channel(self):
         response = self.client.get(self._channels_url())
@@ -262,7 +262,7 @@ class ChannelTaskAPITestCase(TestCase):
 
 class ThreadMessagesAPITestCase(ChannelTaskAPITestCase):
     def _thread_url(self) -> str:
-        return f"/api/projects/{self.team.id}/tasks/{self.task.id}/thread_messages/"
+        return f"/v1/projects/{self.team.id}/tasks/{self.task.id}/thread_messages/"
 
     def test_post_and_list_thread_messages(self):
         posted = self.peer_client.post(self._thread_url(), {"content": "What about mobile?"})
@@ -319,17 +319,17 @@ class ThreadMessagesAPITestCase(ChannelTaskAPITestCase):
             description="d",
             origin_product=Task.OriginProduct.USER_CREATED,
         )
-        url = f"/api/projects/{self.team.id}/tasks/{private_task.id}/thread_messages/"
+        url = f"/v1/projects/{self.team.id}/tasks/{private_task.id}/thread_messages/"
         response = self.peer_client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class TaskMentionsAPITestCase(ChannelTaskAPITestCase):
     def _mentions_url(self) -> str:
-        return f"/api/projects/{self.team.id}/task_mentions/"
+        return f"/v1/projects/{self.team.id}/task_mentions/"
 
     def _thread_url(self, task) -> str:
-        return f"/api/projects/{self.team.id}/tasks/{task.id}/thread_messages/"
+        return f"/v1/projects/{self.team.id}/tasks/{task.id}/thread_messages/"
 
     def _post_message(self, client, content: str, task=None) -> dict:
         response = client.post(self._thread_url(task or self.task), {"content": content})
@@ -449,22 +449,22 @@ class TaskMentionsAPITestCase(ChannelTaskAPITestCase):
             origin_product=Task.OriginProduct.USER_CREATED,
         )
         response = self.author_client.post(
-            f"/api/projects/{other_team.id}/tasks/{other_task.id}/thread_messages/",
+            f"/v1/projects/{other_team.id}/tasks/{other_task.id}/thread_messages/",
             {"content": "over here @[Bob](peer@example.com)"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
 
         self.assertEqual(self.peer_client.get(self._mentions_url()).json(), [])
-        other_team_mentions = self.peer_client.get(f"/api/projects/{other_team.id}/task_mentions/").json()
+        other_team_mentions = self.peer_client.get(f"/v1/projects/{other_team.id}/task_mentions/").json()
         self.assertEqual(len(other_team_mentions), 1)
 
 
 class TaskActivityAPITestCase(ChannelTaskAPITestCase):
     def _activity_url(self) -> str:
-        return f"/api/projects/{self.team.id}/task_activity/"
+        return f"/v1/projects/{self.team.id}/task_activity/"
 
     def _thread_url(self, task=None) -> str:
-        return f"/api/projects/{self.team.id}/tasks/{(task or self.task).id}/thread_messages/"
+        return f"/v1/projects/{self.team.id}/tasks/{(task or self.task).id}/thread_messages/"
 
     def _post_message(self, client, content: str, task=None) -> dict:
         response = client.post(self._thread_url(task), {"content": content})
@@ -759,10 +759,10 @@ class ChannelFeedMessageAPITestCase(TestCase):
         self.other_client.force_authenticate(self.other_user)
 
     def _channels_url(self) -> str:
-        return f"/api/projects/{self.team.id}/task_channels/"
+        return f"/v1/projects/{self.team.id}/task_channels/"
 
     def _feed_url(self, channel_id) -> str:
-        return f"/api/projects/{self.team.id}/task_channels/{channel_id}/feed/"
+        return f"/v1/projects/{self.team.id}/task_channels/{channel_id}/feed/"
 
     def _public_channel(self) -> str:
         return self.client.post(self._channels_url(), {"name": "mobile"}).json()["id"]
@@ -903,5 +903,5 @@ class ChannelFeedMessageAPITestCase(TestCase):
         channel_id = self._public_channel()
         other_team = Team.objects.create(organization=self.organization, name="Other Team")
         # Same org, wrong team in the URL — the channel must not resolve.
-        response = self.client.get(f"/api/projects/{other_team.id}/task_channels/{channel_id}/feed/")
+        response = self.client.get(f"/v1/projects/{other_team.id}/task_channels/{channel_id}/feed/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

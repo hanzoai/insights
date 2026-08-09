@@ -61,7 +61,7 @@ def authenticate_as_sandbox_token(test: APIBaseTest) -> None:
 
 class TestSignalReportDeleteAPI(APIBaseTest):
     def _url(self, report_id: str | None = None) -> str:
-        base = f"/api/projects/{self.team.id}/signals/reports/"
+        base = f"/v1/projects/{self.team.id}/signals/reports/"
         if report_id:
             return f"{base}{report_id}/"
         return base
@@ -126,7 +126,7 @@ class TestSignalReportListAPI(APIBaseTest):
     """GET list/retrieve: `priority` from actionability artefacts; `ordering` (comma-separated, e.g. `status,-total_weight`)."""
 
     def _list_url(self, **query) -> str:
-        base = f"/api/projects/{self.team.id}/signals/reports/"
+        base = f"/v1/projects/{self.team.id}/signals/reports/"
         if not query:
             return base
         return f"{base}?{urlencode(query)}"
@@ -243,7 +243,7 @@ class TestSignalReportListAPI(APIBaseTest):
         report = self._create_report()
         self._priority_artefact(report, priority="P0")
 
-        url = f"/api/projects/{self.team.id}/signals/reports/{report.id}/"
+        url = f"/v1/projects/{self.team.id}/signals/reports/{report.id}/"
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["priority"] == "P0"
@@ -611,7 +611,7 @@ class TestSignalReportListAPI(APIBaseTest):
         report = self._create_report()
         self._create_implementation_task_with_run(report, pr_url="https://github.com/org/repo/pull/42")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/signals/reports/{report.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/{report.id}/")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["implementation_pr_url"] == "https://github.com/org/repo/pull/42"
         assert response.json()["implementation_pr_url"] == response.json()["implementation_pr_url"].strip('"')
@@ -661,7 +661,7 @@ class TestSignalReportListAPI(APIBaseTest):
         expected = bool(output and output.get("pr_merged"))
 
         list_row = next(r for r in self.client.get(self._list_url()).json()["results"] if r["id"] == str(report.id))
-        detail = self.client.get(f"/api/projects/{self.team.id}/signals/reports/{report.id}/").json()
+        detail = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/{report.id}/").json()
 
         assert list_row["implementation_pr_merged"] is expected
         assert detail["implementation_pr_merged"] is expected
@@ -932,7 +932,7 @@ class TestSignalReportListAPI(APIBaseTest):
     def test_source_products_empty_on_retrieve_without_signals(self):
         report = self._create_report()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/signals/reports/{report.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/{report.id}/")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["source_products"] == []
 
@@ -947,7 +947,7 @@ class TestSignalReportListAPI(APIBaseTest):
                 )
             },
         ):
-            response = self.client.get(f"/api/projects/{self.team.id}/signals/reports/{report.id}/")
+            response = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/{report.id}/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["source_products"] == ["zendesk", "github"]
@@ -964,7 +964,7 @@ class TestSignalReportListAPI(APIBaseTest):
             ),
             patch("products.signals.backend.views.fetch_signals_for_report_sync", return_value=[]),
         ):
-            response = self.client.get(f"/api/projects/{self.team.id}/signals/reports/{report.id}/signals/")
+            response = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/{report.id}/signals/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["report"]["source_products"] == ["zendesk"]
@@ -976,7 +976,7 @@ class TestSignalReportListAPI(APIBaseTest):
             "products.signals.backend.views.fetch_source_products_for_reports",
             side_effect=Exception("datastore timeout"),
         ):
-            response = self.client.get(f"/api/projects/{self.team.id}/signals/reports/{report.id}/")
+            response = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/{report.id}/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["source_products"] == []
@@ -1012,7 +1012,7 @@ class TestSignalReportListAPI(APIBaseTest):
     def test_retrieve_serves_suppressed_report(self):
         report = self._create_report(status=SignalReport.Status.SUPPRESSED)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/signals/reports/{report.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/{report.id}/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["id"] == str(report.id)
@@ -1028,7 +1028,7 @@ class TestSignalReportListAPI(APIBaseTest):
             ),
             patch("products.signals.backend.views.fetch_signals_for_report_sync", return_value=[]),
         ):
-            response = self.client.get(f"/api/projects/{self.team.id}/signals/reports/{report.id}/signals/")
+            response = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/{report.id}/signals/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["report"]["id"] == str(report.id)
@@ -1095,7 +1095,7 @@ class TestSignalReportListAPI(APIBaseTest):
         # and 404s before any workflow is started (mirrors the delete contract).
         report = self._create_report(status=SignalReport.Status.SUPPRESSED)
 
-        response = self.client.post(f"/api/projects/{self.team.id}/signals/reports/{report.id}/reingest/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/signals/reports/{report.id}/reingest/")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -1104,7 +1104,7 @@ class TestSignalReportListAPI(APIBaseTest):
         report = self._create_report(status=SignalReport.Status.SUPPRESSED)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/signals/reports/{report.id}/reingest/?include_all_statuses=true"
+            f"/v1/projects/{self.team.id}/signals/reports/{report.id}/reingest/?include_all_statuses=true"
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -1303,7 +1303,7 @@ class TestAssociatedTaskRunsForReports(APIBaseTest):
 
 class TestSignalReportSuppressionAPI(APIBaseTest):
     def _state_url(self, report_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/{report_id}/state/"
+        return f"/v1/projects/{self.team.id}/signals/reports/{report_id}/state/"
 
     def _create_report(self, report_status=SignalReport.Status.READY) -> SignalReport:
         return SignalReport.objects.create(
@@ -1693,7 +1693,7 @@ class TestAvailableReviewersAPI(APIBaseTest):
         cache.clear()
 
     def _url(self, **query) -> str:
-        base = f"/api/projects/{self.team.id}/signals/reports/available_reviewers/"
+        base = f"/v1/projects/{self.team.id}/signals/reports/available_reviewers/"
         if not query:
             return base
         return f"{base}?{urlencode(query)}"
@@ -1779,7 +1779,7 @@ class TestAvailableReviewersAPI(APIBaseTest):
 
 class TestSignalReportBulkStateAPI(APIBaseTest):
     def _bulk_url(self) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/bulk-state/"
+        return f"/v1/projects/{self.team.id}/signals/reports/bulk-state/"
 
     def _create_report(self, team=None, report_status=SignalReport.Status.READY) -> SignalReport:
         return SignalReport.objects.create(
@@ -1925,7 +1925,7 @@ class TestSignalReportTaskAssociationViaArtefacts(APIBaseTest):
     """task_run artefacts ARE the task↔report association: associate-me defaults + the reports task_id filter."""
 
     def _artefacts_url(self, report_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/{report_id}/artefacts/"
+        return f"/v1/projects/{self.team.id}/signals/reports/{report_id}/artefacts/"
 
     def _create_report(self, team=None) -> SignalReport:
         return SignalReport.objects.create(
@@ -2050,14 +2050,14 @@ class TestSignalReportTaskAssociationViaArtefacts(APIBaseTest):
             task_id=str(task.id),
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/signals/reports/?task_id={task.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/?task_id={task.id}")
         assert response.status_code == status.HTTP_200_OK
         ids = {r["id"] for r in response.json()["results"]}
         assert ids == {str(report.id)}
         assert str(other_report.id) not in ids
 
     def test_reports_list_rejects_malformed_task_id(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/signals/reports/?task_id=not-a-uuid")
+        response = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/?task_id=not-a-uuid")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
@@ -2066,7 +2066,7 @@ class TestSignalReportLegacyTaskArtefactList(APIBaseTest):
     research / implementation associations show up before the backfill has converted the gate rows."""
 
     def _artefacts_url(self, report_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/{report_id}/artefacts/"
+        return f"/v1/projects/{self.team.id}/signals/reports/{report_id}/artefacts/"
 
     def _create_report(self, team=None) -> SignalReport:
         return SignalReport.objects.create(
@@ -2185,7 +2185,7 @@ class TestSignalReportLegacyTaskArtefactList(APIBaseTest):
 
 class TestSignalReportContentUpdateAPI(APIBaseTest):
     def _url(self, report_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/{report_id}/"
+        return f"/v1/projects/{self.team.id}/signals/reports/{report_id}/"
 
     def _create_report(self, team=None, report_status=SignalReport.Status.READY) -> SignalReport:
         return SignalReport.objects.create(
@@ -2266,7 +2266,7 @@ class TestSignalReportContentUpdateAPI(APIBaseTest):
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def _artefacts_url(self, report_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/{report_id}/artefacts/"
+        return f"/v1/projects/{self.team.id}/signals/reports/{report_id}/artefacts/"
 
     def _create_task(self, team=None) -> "Task":
         Task = apps.get_model("tasks", "Task")
@@ -2364,13 +2364,13 @@ class TestSignalReportPrEndpoints(APIBaseTest):
         )
 
     def _checks_url(self, report_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/{report_id}/pr_checks/"
+        return f"/v1/projects/{self.team.id}/signals/reports/{report_id}/pr_checks/"
 
     def _comments_url(self, report_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/{report_id}/pr_comments/"
+        return f"/v1/projects/{self.team.id}/signals/reports/{report_id}/pr_comments/"
 
     def _review_comment_url(self, report_id: str, comment_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/{report_id}/pr_review_comments/{comment_id}/"
+        return f"/v1/projects/{self.team.id}/signals/reports/{report_id}/pr_review_comments/{comment_id}/"
 
     @parameterized.expand(
         [
@@ -2429,7 +2429,7 @@ class TestSignalReportPrEndpoints(APIBaseTest):
             return_value={str(report.id): "https://github.com/Insights/insights/pull/7"},
         ):
             response = getattr(self.client, method)(
-                f"/api/projects/{self.team.id}/signals/reports/{report.id}/pr_review_comments/{suffix}",
+                f"/v1/projects/{self.team.id}/signals/reports/{report.id}/pr_review_comments/{suffix}",
                 data=payload,
                 format="json",
             )
@@ -2455,7 +2455,7 @@ class TestSignalReportPrEndpoints(APIBaseTest):
             return_value={str(report.id): "https://github.com/Insights/insights/pull/7"},
         ):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/signals/reports/{report.id}/pr_review_comments/",
+                f"/v1/projects/{self.team.id}/signals/reports/{report.id}/pr_review_comments/",
                 data={"body": "hi", "in_reply_to": "1"},
                 format="json",
             )

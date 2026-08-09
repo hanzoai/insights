@@ -55,7 +55,11 @@ from insights.models.instance_setting import get_instance_settings
 from insights.models.oauth import OAuthAccessToken, OAuthApplication, OAuthRefreshToken
 from insights.models.team.team import Team
 from insights.models.user import User
-from insights.models.utils import IntegrityError, generate_random_oauth_access_token, generate_random_oauth_refresh_token
+from insights.models.utils import (
+    IntegrityError,
+    generate_random_oauth_access_token,
+    generate_random_oauth_refresh_token,
+)
 from insights.plugins.plugin_server_api import reload_integrations_on_workers
 from insights.rbac.decorators import field_access_control
 from insights.schema_enums import SlackIntegrationScope, SlackIntegrationScopeInReview
@@ -3853,7 +3857,7 @@ class GitLabIntegration:
 
     @staticmethod
     def get(hostname: str, endpoint: str, project_access_token: str) -> dict:
-        url = f"{hostname}/api/v4/{endpoint}"
+        url = f"{hostname}/v1/v4/{endpoint}"
         allowed, error = is_url_allowed(url)
         if not allowed:
             raise GitLabIntegrationError(f"Invalid GitLab hostname: {error}")
@@ -3870,7 +3874,7 @@ class GitLabIntegration:
 
     @staticmethod
     def post(hostname: str, endpoint: str, project_access_token: str, json: dict) -> dict:
-        url = f"{hostname}/api/v4/{endpoint}"
+        url = f"{hostname}/v1/v4/{endpoint}"
         allowed, error = is_url_allowed(url)
         if not allowed:
             raise GitLabIntegrationError(f"Invalid GitLab hostname: {error}")

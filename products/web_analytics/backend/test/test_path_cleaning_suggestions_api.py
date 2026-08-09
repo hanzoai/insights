@@ -35,7 +35,7 @@ class TestPathCleaningSuggestionsAPI(APIBaseTest):
         self.organization_membership.save()
 
     def _url(self, suffix: str = "") -> str:
-        return f"/api/projects/{self.team.id}/web_analytics_path_cleaning_suggestions/{suffix}"
+        return f"/v1/projects/{self.team.id}/web_analytics_path_cleaning_suggestions/{suffix}"
 
     def _make_suggestion(self, team: Team) -> HealthIssue:
         issue, _ = HealthIssue.upsert_issue(

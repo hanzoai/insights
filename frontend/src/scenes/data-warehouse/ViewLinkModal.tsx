@@ -1,7 +1,6 @@
 import { useActions, useValues } from 'kea'
 import { Field, Form } from 'kea-forms'
 
-import { IconCheckCircle } from '@hanzo/icons'
 import {
     Banner,
     Button,
@@ -14,6 +13,7 @@ import {
     Tag,
     Spinner,
 } from '@hanzo/elements'
+import { IconCheckCircle } from '@hanzo/icons'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { InsightsQLDropdown } from 'lib/components/InsightsQLDropdown/InsightsQLDropdown'
@@ -287,10 +287,10 @@ function JoinKeyControl({
                     ) : (
                         <InsightsQLDropdown
                             size="small"
-                            hogQLValue={value ?? ''}
+                            insightsQLValue={value ?? ''}
                             onInsightsQLValueChange={onChange}
                             tableName={tableName ?? ''}
-                            hogQLEditorPlaceholder={sqlPlaceholder}
+                            insightsQLEditorPlaceholder={sqlPlaceholder}
                         />
                     )
                 }

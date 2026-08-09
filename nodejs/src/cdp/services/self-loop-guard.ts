@@ -23,7 +23,7 @@ export const SELF_LOOP_DEPTH_PROPERTY = '$insights_function_self_loop_depth'
 export const SELF_LOOP_MAX_DEPTH = 10
 
 // Only these paths re-enter the event pipeline. Observability (`/i/v1/logs`) and the
-// REST API (`/api/...`, `/decide`) do NOT re-trigger event processing, so a fetch to
+// REST API (`/v1/...`, `/decide`) do NOT re-trigger event processing, so a fetch to
 // them - even with the project's own token - cannot form an event-forwarding loop.
 const INGEST_PATHS = new Set(['/capture', '/batch', '/e', '/track', '/i/v0/e'])
 

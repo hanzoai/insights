@@ -74,7 +74,7 @@ class TestEvaluationRunViewSet(APIBaseTest):
         ]
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluation_runs/",
+            f"/v1/environments/{self.team.id}/evaluation_runs/",
             {
                 "evaluation_id": str(self.evaluation.id),
                 "target_event_id": target_event_id,
@@ -141,7 +141,7 @@ class TestEvaluationRunViewSet(APIBaseTest):
         mock_query.side_effect = capture_tags
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluation_runs/",
+            f"/v1/environments/{self.team.id}/evaluation_runs/",
             {
                 "evaluation_id": str(self.evaluation.id),
                 "target_event_id": target_event_id,
@@ -159,7 +159,7 @@ class TestEvaluationRunViewSet(APIBaseTest):
     def test_create_evaluation_run_invalid_evaluation(self):
         """Test creating evaluation run with non-existent evaluation"""
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluation_runs/",
+            f"/v1/environments/{self.team.id}/evaluation_runs/",
             {
                 "evaluation_id": str(uuid.uuid4()),
                 "target_event_id": str(uuid.uuid4()),
@@ -189,7 +189,7 @@ class TestEvaluationRunViewSet(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluation_runs/",
+            f"/v1/environments/{self.team.id}/evaluation_runs/",
             {
                 "evaluation_id": str(aggregate_evaluation.id),
                 "target_event_id": str(uuid.uuid4()),
@@ -204,7 +204,7 @@ class TestEvaluationRunViewSet(APIBaseTest):
     def test_create_evaluation_run_missing_params(self):
         """Test creating evaluation run with missing parameters"""
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluation_runs/",
+            f"/v1/environments/{self.team.id}/evaluation_runs/",
             {
                 "evaluation_id": str(self.evaluation.id),
             },
@@ -226,7 +226,7 @@ class TestEvaluationRunViewSet(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluation_runs/",
+            f"/v1/environments/{self.team.id}/evaluation_runs/",
             {
                 "evaluation_id": str(other_evaluation.id),
                 "target_event_id": str(uuid.uuid4()),

@@ -23,7 +23,7 @@ describe('organizations-get', () => {
     })
 
     it('returns accessible organizations filtered to the safe id/name/slug/membership fields', async () => {
-        // The `/api/organizations/` rows carry the full serializer, so the raw
+        // The `/v1/organizations/` rows carry the full serializer, so the raw
         // data includes billing/security fields the tool must not expose.
         const orgs = [
             {

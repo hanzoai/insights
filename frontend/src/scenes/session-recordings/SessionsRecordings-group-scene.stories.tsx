@@ -127,11 +127,11 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                'api/environments/:team_id/session_recordings/matching_events': () => [200, { results: [] }],
-                '/api/projects/:team_id/groups/related': () => [200, []],
-                '/api/projects/:team_id/groups/:group_type_index': () => [200, groupData],
-                '/api/projects/:team_id/groups/find': () => [200, groupData],
-                '/api/projects/:team_id/groups_types': () => [
+                'v1/environments/:team_id/session_recordings/matching_events': () => [200, { results: [] }],
+                '/v1/projects/:team_id/groups/related': () => [200, []],
+                '/v1/projects/:team_id/groups/:group_type_index': () => [200, groupData],
+                '/v1/projects/:team_id/groups/find': () => [200, groupData],
+                '/v1/projects/:team_id/groups_types': () => [
                     200,
                     [
                         {
@@ -142,10 +142,10 @@ const meta: Meta = {
                         },
                     ],
                 ],
-                '/api/environments/:team_id/groups/related': () => [200, []],
-                '/api/environments/:team_id/groups/:group_type_index': () => [200, groupData],
-                '/api/environments/:team_id/groups/find': () => [200, groupData],
-                '/api/environments/:team_id/groups_types': () => [
+                '/v1/environments/:team_id/groups/related': () => [200, []],
+                '/v1/environments/:team_id/groups/:group_type_index': () => [200, groupData],
+                '/v1/environments/:team_id/groups/find': () => [200, groupData],
+                '/v1/environments/:team_id/groups_types': () => [
                     200,
                     [
                         {
@@ -156,10 +156,10 @@ const meta: Meta = {
                         },
                     ],
                 ],
-                '/api/environments/:team_id/session_recordings/': () => [200, { results: threeRecordings }],
+                '/v1/environments/:team_id/session_recordings/': () => [200, { results: threeRecordings }],
             },
             post: {
-                '/api/environments/:team_id/query/:kind/': () => [200, { results: [] }],
+                '/v1/environments/:team_id/query/:kind/': () => [200, { results: [] }],
             },
         }),
     ],
@@ -172,7 +172,7 @@ export const GroupRecordingTabEmpty: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/session_recordings': () => [200, { results: [] }],
+                '/v1/environments/:team_id/session_recordings': () => [200, { results: [] }],
             },
         })
 
@@ -194,12 +194,12 @@ export const GroupRecordingTabMultipleAndFound: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/session_recordings/': () => [200, { results: threeRecordings }],
-                '/api/environments/:team_id/session_recordings/:id': () => [
+                '/v1/environments/:team_id/session_recordings/': () => [200, { results: threeRecordings }],
+                '/v1/environments/:team_id/session_recordings/:id': () => [
                     200,
                     { ...recordingMetaJson, id: 'group-rec-002' },
                 ],
-                '/api/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
                     if (new URL(request.url).searchParams.get('source') === 'blob_v2') {
                         return new HttpResponse(snapshotsAsJSONLines())
                     }
@@ -219,7 +219,7 @@ export const GroupRecordingTabMultipleAndFound: Story = {
                 },
             },
             post: {
-                '/api/environments/:team_id/query/:kind/': () => [200, { results: [] }],
+                '/v1/environments/:team_id/query/:kind/': () => [200, { results: [] }],
             },
         })
 
@@ -247,12 +247,12 @@ export const GroupRecordingTabWide: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/session_recordings/': () => [200, { results: threeRecordings }],
-                '/api/environments/:team_id/session_recordings/:id': () => [
+                '/v1/environments/:team_id/session_recordings/': () => [200, { results: threeRecordings }],
+                '/v1/environments/:team_id/session_recordings/:id': () => [
                     200,
                     { ...recordingMetaJson, id: 'group-rec-001' },
                 ],
-                '/api/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
                     if (new URL(request.url).searchParams.get('source') === 'blob_v2') {
                         return new HttpResponse(snapshotsAsJSONLines())
                     }
@@ -272,7 +272,7 @@ export const GroupRecordingTabWide: Story = {
                 },
             },
             post: {
-                '/api/environments/:team_id/query/:kind/': () => [200, { results: [] }],
+                '/v1/environments/:team_id/query/:kind/': () => [200, { results: [] }],
             },
         })
 
@@ -301,12 +301,12 @@ export const GroupRecordingTabNarrow: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/session_recordings/': () => [200, { results: threeRecordings }],
-                '/api/environments/:team_id/session_recordings/:id': () => [
+                '/v1/environments/:team_id/session_recordings/': () => [200, { results: threeRecordings }],
+                '/v1/environments/:team_id/session_recordings/:id': () => [
                     200,
                     { ...recordingMetaJson, id: 'group-rec-001' },
                 ],
-                '/api/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
                     if (new URL(request.url).searchParams.get('source') === 'blob_v2') {
                         return new HttpResponse(snapshotsAsJSONLines())
                     }
@@ -326,7 +326,7 @@ export const GroupRecordingTabNarrow: Story = {
                 },
             },
             post: {
-                '/api/environments/:team_id/query/:kind/': () => [200, { results: [] }],
+                '/v1/environments/:team_id/query/:kind/': () => [200, { results: [] }],
             },
         })
 
@@ -355,11 +355,11 @@ export const GroupEventsTabWithModal: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/session_recordings/:id': () => [
+                '/v1/environments/:team_id/session_recordings/:id': () => [
                     200,
                     { ...recordingMetaJson, id: 'group-rec-001' },
                 ],
-                '/api/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
                     if (new URL(request.url).searchParams.get('source') === 'blob_v2') {
                         return new HttpResponse(snapshotsAsJSONLines())
                     }
@@ -379,7 +379,7 @@ export const GroupEventsTabWithModal: Story = {
                 },
             },
             post: {
-                '/api/environments/:team_id/query/:kind/': () => [200, { results: [] }],
+                '/v1/environments/:team_id/query/:kind/': () => [200, { results: [] }],
             },
         })
 
@@ -410,11 +410,11 @@ export const GroupEventsTabWithModalNotFound: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/session_recordings/:id': () => [404, { detail: 'Not found.' }],
-                '/api/environments/:team_id/session_recordings/:id/snapshots': () => [404, { detail: 'Not found.' }],
+                '/v1/environments/:team_id/session_recordings/:id': () => [404, { detail: 'Not found.' }],
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': () => [404, { detail: 'Not found.' }],
             },
             post: {
-                '/api/environments/:team_id/query/:kind/': () => [200, { results: [] }],
+                '/v1/environments/:team_id/query/:kind/': () => [200, { results: [] }],
             },
         })
 

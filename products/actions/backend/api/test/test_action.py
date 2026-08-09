@@ -25,7 +25,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     @patch("products.actions.backend.api.action.report_user_action")
     def test_create_action(self, patch_capture, *args):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             data={
                 "name": "user signed up",
                 "steps": [
@@ -101,7 +101,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_create_action_generates_bytecode(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             data={
                 "name": "user signed up",
                 "steps": [
@@ -128,7 +128,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         # Make sure the endpoint works with and without the trailing slash
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             {"name": "user signed up"},
             headers={"origin": "http://testserver"},
         )
@@ -149,7 +149,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         count = Action.objects.count()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             {"name": ""},
             headers={"origin": "http://testserver"},
         )
@@ -169,7 +169,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         count = Action.objects.count()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             {"name": "   "},
             headers={"origin": "http://testserver"},
         )
@@ -197,7 +197,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         action.save()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/actions/{action.pk}/",
+            f"/v1/projects/{self.team.id}/actions/{action.pk}/",
             data={
                 "name": "user signed up 2",
                 "steps": [
@@ -285,13 +285,13 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         with self.assertNumQueries(FuzzyInt(9, 11)):
             # Django session,  user,  team,  org membership, instance setting,  org,
             # count, action
-            self.client.get(f"/api/projects/{self.team.id}/actions/")
+            self.client.get(f"/v1/projects/{self.team.id}/actions/")
 
     def test_update_action_remove_all_steps(self, *args):
         action = Action.objects.create(name="user signed up", team=self.team, steps_json=[{"text": "sign me up!"}])
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/actions/{action.pk}/",
+            f"/v1/projects/{self.team.id}/actions/{action.pk}/",
             data={"name": "user signed up 2", "steps": []},
             headers={"origin": "http://testserver"},
         )
@@ -301,7 +301,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     # This case happens when someone is running behind a proxy, but hasn't set `IS_BEHIND_PROXY`
     def test_http_to_https(self, *args):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             data={"name": "user signed up again"},
             headers={"origin": "https://testserver/"},
         )
@@ -310,7 +310,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     @patch("hanzo_insights.capture")
     def test_create_action_event_with_space(self, patch_capture, *args):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             data={"name": "test event", "steps": [{"event": "test_event "}]},
             headers={"origin": "http://testserver"},
         )
@@ -321,11 +321,11 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     @freeze_time("2021-12-12")
     def test_listing_actions_is_not_nplus1(self) -> None:
         # Pre-query to cache things like instance settings
-        self.client.get(f"/api/projects/{self.team.id}/actions/")
+        self.client.get(f"/v1/projects/{self.team.id}/actions/")
 
         # No actions yet, so no tags prefetch query
         with self.assertNumQueries(9), snapshot_postgres_queries_context(self):
-            self.client.get(f"/api/projects/{self.team.id}/actions/")
+            self.client.get(f"/v1/projects/{self.team.id}/actions/")
 
         Action.objects.create(
             team=self.team,
@@ -335,7 +335,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         # With actions, there's an extra tags prefetch query
         with self.assertNumQueries(10), snapshot_postgres_queries_context(self):
-            self.client.get(f"/api/projects/{self.team.id}/actions/")
+            self.client.get(f"/v1/projects/{self.team.id}/actions/")
 
         Action.objects.create(
             team=self.team,
@@ -344,7 +344,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         with self.assertNumQueries(10), snapshot_postgres_queries_context(self):
-            self.client.get(f"/api/projects/{self.team.id}/actions/")
+            self.client.get(f"/v1/projects/{self.team.id}/actions/")
 
     @parameterized.expand(
         [
@@ -366,7 +366,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         for index, name in enumerate(["alpha", "beta", "gamma", "delta"]):
             Action.objects.create(team=self.team, name=name, last_calculated_at=base - timedelta(minutes=index))
 
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/{params}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/{params}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual([action["name"] for action in response.json()["results"]], expected_names)
 
@@ -374,7 +374,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         for name in ["alpha", "beta", "gamma", "delta"]:
             Action.objects.create(team=self.team, name=name)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/?limit=2")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/?limit=2")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 4)
         self.assertEqual(len(response.json()["results"]), 2)
@@ -384,11 +384,11 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         Action.objects.create(team=self.team, name="mine", created_by=self.user)
         Action.objects.create(team=self.team, name="theirs", created_by=other)
 
-        mine = self.client.get(f"/api/projects/{self.team.id}/actions/?created_by={self.user.id}")
+        mine = self.client.get(f"/v1/projects/{self.team.id}/actions/?created_by={self.user.id}")
         self.assertEqual({a["name"] for a in mine.json()["results"]}, {"mine"})
         self.assertEqual(mine.json()["count"], 1)
 
-        both = self.client.get(f"/api/projects/{self.team.id}/actions/?created_by={self.user.id},{other.id}")
+        both = self.client.get(f"/v1/projects/{self.team.id}/actions/?created_by={self.user.id},{other.id}")
         self.assertEqual({a["name"] for a in both.json()["results"]}, {"mine", "theirs"})
 
     def test_listing_actions_filters_by_tags(self) -> None:
@@ -401,7 +401,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             tag = Tag.objects.create(name=name, team_id=self.team.id)
             tagged.tagged_items.create(tag_id=tag.id)
 
-        response = self.client.get(f'/api/projects/{self.team.id}/actions/?tags=["billing","beta"]')
+        response = self.client.get(f'/v1/projects/{self.team.id}/actions/?tags=["billing","beta"]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual([a["name"] for a in response.json()["results"]], ["tagged action"])
         self.assertEqual(response.json()["count"], 1)
@@ -420,7 +420,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         for index, name in enumerate(["gamma", "alpha", "beta"]):
             Action.objects.create(team=self.team, name=name, last_calculated_at=base - timedelta(minutes=index))
 
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/?ordering={ordering}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/?ordering={ordering}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual([a["name"] for a in response.json()["results"]], expected_names)
 
@@ -429,7 +429,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         tag = Tag.objects.create(name="random", team_id=self.team.id)
         action.tagged_items.create(tag_id=tag.id)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/{action.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/{action.id}")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["tags"], ["random"])
@@ -437,7 +437,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_create_action_with_tags(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             {"name": "Default", "tags": ["random", "hello"]},
         )
 
@@ -451,7 +451,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         action.tagged_items.create(tag_id=tag.id)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/actions/{action.id}",
+            f"/v1/projects/{self.team.id}/actions/{action.id}",
             {
                 "name": "action new name",
                 "tags": ["random", "hello"],
@@ -468,7 +468,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         action.tagged_items.create(tag_id=tag.id)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/actions/{action.id}",
+            f"/v1/projects/{self.team.id}/actions/{action.id}",
             {"name": "action new name", "description": "Internal system metrics."},
         )
 
@@ -484,7 +484,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertEqual(Action.objects.all().count(), 1)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/actions/{action.id}",
+            f"/v1/projects/{self.team.id}/actions/{action.id}",
             {
                 "name": "action new name",
                 "description": "Internal system metrics.",
@@ -498,7 +498,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_hard_deletion_is_forbidden(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             data={
                 "name": "user signed up",
                 "steps": [
@@ -515,7 +515,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        deletion_response = self.client.delete(f"/api/projects/{self.team.id}/actions/{response.json()['id']}")
+        deletion_response = self.client.delete(f"/v1/projects/{self.team.id}/actions/{response.json()['id']}")
         self.assertEqual(deletion_response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_create_action_in_specific_folder(self):
@@ -525,7 +525,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         """
         # 1. Create an Action, passing `_create_in_folder`
         response = self.client.post(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             data={
                 "name": "user signed up in folder",
                 "_create_in_folder": "Special Folder/Actions",
@@ -559,7 +559,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 },
             },
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/{action.id}/references/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/{action.id}/references/")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert len(data) == 1
@@ -575,7 +575,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             name="Legacy insight",
             filters={"actions": [{"id": action.id, "type": "actions"}]},
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/{action.id}/references/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/{action.id}/references/")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert len(data) == 1
@@ -603,7 +603,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 }
             ],
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/{action.id}/references/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/{action.id}/references/")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert len(data) == 1
@@ -634,7 +634,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 }
             },
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/{action.id}/references/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/{action.id}/references/")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert len(data) == 1
@@ -649,7 +649,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             name="My destination",
             filters={"actions": [{"id": str(action.id), "type": "actions"}]},
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/{action.id}/references/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/{action.id}/references/")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert len(data) == 1
@@ -659,7 +659,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_references_returns_empty_list_when_no_references(self):
         action = Action.objects.create(team=self.team, name="orphan action", steps_json=[{"event": "$pageview"}])
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/{action.id}/references/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/{action.id}/references/")
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == []
 
@@ -677,7 +677,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 },
             },
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/{action.id}/references/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/{action.id}/references/")
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == []
 
@@ -703,7 +703,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 }
             ],
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/{action.id}/references/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/{action.id}/references/")
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == []
 
@@ -731,7 +731,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 }
             },
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/{action.id}/references/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/{action.id}/references/")
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == []
 
@@ -743,7 +743,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             deleted=True,
             filters={"actions": [{"id": str(action.id), "type": "actions"}]},
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/{action.id}/references/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/{action.id}/references/")
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == []
 
@@ -754,7 +754,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             name="String ID destination",
             filters={"actions": [{"id": str(action.id), "type": "actions"}]},
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/{action.id}/references/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/{action.id}/references/")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert len(data) == 1
@@ -777,7 +777,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 },
             },
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/{action.id}/references/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/{action.id}/references/")
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == []
 
@@ -794,7 +794,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 },
             },
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/?include_reference_count=1")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/?include_reference_count=1")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
         action_result = next(r for r in results if r["id"] == action.id)
@@ -802,7 +802,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_list_without_include_reference_count_omits_count(self):
         Action.objects.create(team=self.team, name="some action", steps_json=[{"event": "$pageview"}])
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
         assert len(results) > 0
@@ -827,7 +827,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 },
             },
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/?include_reference_count=1")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/?include_reference_count=1")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
         counts = {r["id"]: r["reference_count"] for r in results}
@@ -897,7 +897,7 @@ class TestActionApi(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             filters={"actions": [{"id": str(action.id), "type": "actions"}]},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/actions/?include_reference_count=1")
+        response = self.client.get(f"/v1/projects/{self.team.id}/actions/?include_reference_count=1")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
         action_result = next(r for r in results if r["id"] == action.id)

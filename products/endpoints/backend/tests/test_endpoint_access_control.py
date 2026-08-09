@@ -79,10 +79,10 @@ class TestEndpointAccessControl(DatastoreTestMixin, APIBaseTest):
         )
 
     def _list_url(self) -> str:
-        return f"/api/environments/{self.team.pk}/endpoints/"
+        return f"/v1/environments/{self.team.pk}/endpoints/"
 
     def _detail_url(self, name=None) -> str:
-        return f"/api/environments/{self.team.pk}/endpoints/{name or self.endpoint.name}/"
+        return f"/v1/environments/{self.team.pk}/endpoints/{name or self.endpoint.name}/"
 
     @parameterized.expand(
         [

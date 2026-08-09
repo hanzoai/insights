@@ -152,6 +152,6 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.WARNING(
                     "No org users have a SignalUserAutonomyConfig — autostart will not trigger. "
-                    "Opt in via POST /api/users/<id>/signal_autonomy/ first."
+                    "Opt in via POST /v1/users/<id>/signal_autonomy/ first."
                 )
             )

@@ -11,7 +11,7 @@ then
 fi
 
 # Catch deterministic CI failures before this push burns a CI matrix.
-# Advisories never block; HOGLI_PREFLIGHT_DISABLED=1 makes it a no-op; no insightscli → skip.
+# Advisories never block; INSIGHTSCLI_PREFLIGHT_DISABLED=1 makes it a no-op; no insightscli → skip.
 if command -v insightscli >/dev/null 2>&1
 then
     insightscli ci:preflight --strict || {

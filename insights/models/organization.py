@@ -91,7 +91,7 @@ def _feature(key: AvailableFeature, *, limit: int | None = None, unit: str | Non
 # the single answer to "can this deployment do X", for the backend and the frontend alike.
 #
 # Upstream fills that field from the Billing Service, per the org's plan. There is no Billing
-# Service here (`/api/billing` answers 404) and nothing sells a plan, so the answer cannot come from
+# Service here (`/v1/billing` answers 404) and nothing sells a plan, so the answer cannot come from
 # a subscription. It comes from the build: a key is listed if the code that implements it is present
 # and works, and is absent if the implementation left with the separately-licensed `ee/` tree.
 #

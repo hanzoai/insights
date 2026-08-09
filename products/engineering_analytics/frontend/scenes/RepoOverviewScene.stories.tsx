@@ -225,17 +225,17 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                'api/projects/:team_id/engineering_analytics/sources/': SOURCES,
-                'api/projects/:team_id/engineering_analytics/repo_overview/': OVERVIEW,
-                'api/projects/:team_id/engineering_analytics/repo_run_activity/': ACTIVITY,
-                'api/projects/:team_id/engineering_analytics/ci_cards/': {
+                'v1/projects/:team_id/engineering_analytics/sources/': SOURCES,
+                'v1/projects/:team_id/engineering_analytics/repo_overview/': OVERVIEW,
+                'v1/projects/:team_id/engineering_analytics/repo_run_activity/': ACTIVITY,
+                'v1/projects/:team_id/engineering_analytics/ci_cards/': {
                     open_prs: 18,
                     repos: 1,
                     stuck: 3,
                     failing_ci: 4,
                 },
-                'api/projects/:team_id/engineering_analytics/pull_requests/': PULL_REQUESTS,
-                'api/projects/:team_id/engineering_analytics/workflow_health/': WORKFLOW_HEALTH,
+                'v1/projects/:team_id/engineering_analytics/pull_requests/': PULL_REQUESTS,
+                'v1/projects/:team_id/engineering_analytics/workflow_health/': WORKFLOW_HEALTH,
             },
         }),
     ],

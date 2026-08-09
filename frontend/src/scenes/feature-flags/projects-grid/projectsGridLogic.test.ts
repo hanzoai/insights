@@ -38,7 +38,7 @@ describe('projectsGridLogic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/organizations/:org/feature_flags/keys/': ({ request }) => {
+                    '/v1/organizations/:org/feature_flags/keys/': ({ request }) => {
                         const offset = Number(new URL(request.url).searchParams.get('offset') ?? 0)
                         const count = 40
                         const remaining = Math.max(0, count - offset)
@@ -53,7 +53,7 @@ describe('projectsGridLogic', () => {
                             },
                         ]
                     },
-                    '/api/organizations/:org/feature_flags/:key/': [],
+                    '/v1/organizations/:org/feature_flags/:key/': [],
                 },
             })
             initKeaTests()
@@ -97,13 +97,13 @@ describe('projectsGridLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/organizations/:org/feature_flags/keys/': {
+                    '/v1/organizations/:org/feature_flags/keys/': {
                         count: 3,
                         next: null,
                         previous: null,
                         results: [buildFlag(1), buildFlag(2), buildFlag(3)],
                     },
-                    '/api/organizations/:org/feature_flags/:key/': async ({ params }) => {
+                    '/v1/organizations/:org/feature_flags/:key/': async ({ params }) => {
                         const key = params.key as string
                         callOrder.push(key)
                         inFlight += 1
@@ -162,13 +162,13 @@ describe('projectsGridLogic', () => {
             localStorage.clear()
             useMocks({
                 get: {
-                    '/api/organizations/:org/feature_flags/keys/': {
+                    '/v1/organizations/:org/feature_flags/keys/': {
                         count: 0,
                         next: null,
                         previous: null,
                         results: [],
                     },
-                    '/api/organizations/:org/feature_flags/:key/': [],
+                    '/v1/organizations/:org/feature_flags/:key/': [],
                 },
             })
             initKeaTests()
@@ -235,16 +235,16 @@ describe('projectsGridLogic', () => {
             patchedUrls = []
             useMocks({
                 get: {
-                    '/api/organizations/:org/feature_flags/keys/': {
+                    '/v1/organizations/:org/feature_flags/keys/': {
                         count: 1,
                         next: null,
                         previous: null,
                         results: [buildFlag(1)],
                     },
-                    '/api/organizations/:org/feature_flags/:key/': [],
+                    '/v1/organizations/:org/feature_flags/:key/': [],
                 },
                 patch: {
-                    '/api/projects/:team_id/feature_flags/:id/': async ({ request, params }) => {
+                    '/v1/projects/:team_id/feature_flags/:id/': async ({ request, params }) => {
                         patchedUrls.push(new URL(request.url).pathname)
                         if (params.team_id === '99') {
                             return [403, { detail: "You don't have edit access" }]
@@ -281,7 +281,7 @@ describe('projectsGridLogic', () => {
                 expect(logic.values.togglingFlagIds).toEqual({ '2:42': true })
 
                 await expectLogic(logic).toDispatchActions(['flagActiveUpdated']).toFinishAllListeners()
-                expect(patchedUrls).toEqual(['/api/projects/2/feature_flags/42/'])
+                expect(patchedUrls).toEqual(['/v1/projects/2/feature_flags/42/'])
                 expect(logic.values.siblingsByFlagKey['flag_1']).toMatchObject([
                     { team_id: 1, active: true },
                     { team_id: 2, active },
@@ -322,11 +322,11 @@ describe('projectsGridLogic', () => {
             keysCalls = 0
             useMocks({
                 get: {
-                    '/api/organizations/:org/feature_flags/keys/': () => {
+                    '/v1/organizations/:org/feature_flags/keys/': () => {
                         keysCalls += 1
                         return [200, { count: 0, next: null, previous: null, results: [] }]
                     },
-                    '/api/organizations/:org/feature_flags/:key/': [],
+                    '/v1/organizations/:org/feature_flags/:key/': [],
                 },
             })
             initKeaTests()

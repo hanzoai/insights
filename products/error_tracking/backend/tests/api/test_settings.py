@@ -11,7 +11,7 @@ from products.error_tracking.backend.models import ErrorTrackingSettings
 
 class TestErrorTrackingSettingsAPI(APIBaseTest):
     def _base_url(self) -> str:
-        return f"/api/projects/{self.team.id}/error_tracking/settings"
+        return f"/v1/projects/{self.team.id}/error_tracking/settings"
 
     def _personal_api_key(self, scopes: list[str]) -> str:
         value = generate_random_token_personal()

@@ -99,7 +99,7 @@ function isSignalPropertyKey(key: unknown): boolean {
     return typeof key === 'string' && SIGNAL_PROPERTY_KEYS.has(key)
 }
 
-function hogQLStringHasSignal(sql: string): boolean {
+function insightsQLStringHasSignal(sql: string): boolean {
     for (const key of SIGNAL_PROPERTY_KEYS) {
         if (sql.includes(key)) {
             return true
@@ -209,7 +209,10 @@ function insightQueryHasSignal(query: QuerySchema): boolean {
         if (pathsFilter?.includeEventTypes?.some((eventType) => eventType === '$pageview')) {
             return true
         }
-        if (pathsFilter?.pathsInsightsQLExpression && hogQLStringHasSignal(pathsFilter.pathsInsightsQLExpression)) {
+        if (
+            pathsFilter?.pathsInsightsQLExpression &&
+            insightsQLStringHasSignal(pathsFilter.pathsInsightsQLExpression)
+        ) {
             return true
         }
     }
@@ -232,10 +235,10 @@ function queryHasSignal(query: QuerySchema): boolean {
     }
     if (isDataVisualizationNode(query)) {
         const sql = query.source?.query
-        return typeof sql === 'string' && hogQLStringHasSignal(sql)
+        return typeof sql === 'string' && insightsQLStringHasSignal(sql)
     }
     if (isInsightsQLQuery(query)) {
-        return typeof query.query === 'string' && hogQLStringHasSignal(query.query)
+        return typeof query.query === 'string' && insightsQLStringHasSignal(query.query)
     }
     if (
         isTrendsQuery(query) ||

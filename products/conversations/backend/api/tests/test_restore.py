@@ -378,7 +378,7 @@ class TestRestoreAPI(BaseTest):
 
     def test_restore_request_authentication_required(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/restore/request",
+            "/v1/conversations/v1/widget/restore/request",
             {
                 "email": self.customer_email,
                 "request_url": "https://example.com/support",
@@ -397,7 +397,7 @@ class TestRestoreAPI(BaseTest):
         )
 
         response = self.client.post(
-            "/api/conversations/v1/widget/restore/request",
+            "/v1/conversations/v1/widget/restore/request",
             {
                 "email": self.customer_email,
                 "request_url": "https://example.com/support",
@@ -416,7 +416,7 @@ class TestRestoreAPI(BaseTest):
     def test_restore_request_no_tickets_still_returns_ok(self, mock_send_email):
         self._enable_allowlist()
         response = self.client.post(
-            "/api/conversations/v1/widget/restore/request",
+            "/v1/conversations/v1/widget/restore/request",
             {
                 "email": "nonexistent@example.com",
                 "request_url": "https://example.com/support",
@@ -431,7 +431,7 @@ class TestRestoreAPI(BaseTest):
     def test_restore_request_invalid_email(self):
         self._enable_allowlist()
         response = self.client.post(
-            "/api/conversations/v1/widget/restore/request",
+            "/v1/conversations/v1/widget/restore/request",
             {
                 "email": "not_an_email",
                 "request_url": "https://example.com/support",
@@ -443,7 +443,7 @@ class TestRestoreAPI(BaseTest):
 
     def test_restore_request_missing_request_url(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/restore/request",
+            "/v1/conversations/v1/widget/restore/request",
             {"email": self.customer_email},
             **self._get_headers(),
         )
@@ -493,7 +493,7 @@ class TestRestoreAPI(BaseTest):
         )
 
         response = self.client.post(
-            "/api/conversations/v1/widget/restore/request",
+            "/v1/conversations/v1/widget/restore/request",
             {"email": self.customer_email, "request_url": request_url},
             **self._get_headers(origin=origin),
         )
@@ -512,7 +512,7 @@ class TestRestoreAPI(BaseTest):
         self.team.save()
 
         response = self.client.post(
-            "/api/conversations/v1/widget/restore/request",
+            "/v1/conversations/v1/widget/restore/request",
             {
                 "email": self.customer_email,
                 "request_url": "https://evil.com/phishing",
@@ -541,7 +541,7 @@ class TestRestoreAPI(BaseTest):
         )
 
         response = self.client.post(
-            "/api/conversations/v1/widget/restore/request",
+            "/v1/conversations/v1/widget/restore/request",
             {
                 "email": self.customer_email,
                 "request_url": "https://allowed.com/support",
@@ -585,7 +585,7 @@ class TestRestoreAPI(BaseTest):
         )
 
         response = self.client.post(
-            "/api/conversations/v1/widget/restore/request",
+            "/v1/conversations/v1/widget/restore/request",
             {"email": self.customer_email, "request_url": request_url},
             **self._get_headers(origin="https://allowed.com"),
         )
@@ -610,7 +610,7 @@ class TestRestoreAPI(BaseTest):
         )
 
         response = self.client.post(
-            "/api/conversations/v1/widget/restore",
+            "/v1/conversations/v1/widget/restore",
             {"restore_token": raw_token, "widget_session_id": new_session_id},
             **self._get_headers(),
         )
@@ -625,7 +625,7 @@ class TestRestoreAPI(BaseTest):
         # Token must be 40-50 chars to pass validation, then fails lookup
         fake_token = "a" * 43
         response = self.client.post(
-            "/api/conversations/v1/widget/restore",
+            "/v1/conversations/v1/widget/restore",
             {"restore_token": fake_token, "widget_session_id": self.widget_session_id},
             **self._get_headers(),
         )
@@ -644,7 +644,7 @@ class TestRestoreAPI(BaseTest):
         token_record.save()
 
         response = self.client.post(
-            "/api/conversations/v1/widget/restore",
+            "/v1/conversations/v1/widget/restore",
             {"restore_token": raw_token, "widget_session_id": self.widget_session_id},
             **self._get_headers(),
         )
@@ -663,7 +663,7 @@ class TestRestoreAPI(BaseTest):
         token_record.save()
 
         response = self.client.post(
-            "/api/conversations/v1/widget/restore",
+            "/v1/conversations/v1/widget/restore",
             {"restore_token": raw_token, "widget_session_id": self.widget_session_id},
             **self._get_headers(),
         )
@@ -675,7 +675,7 @@ class TestRestoreAPI(BaseTest):
 
     def test_restore_redeem_authentication_required(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/restore",
+            "/v1/conversations/v1/widget/restore",
             {"restore_token": "a" * 43, "widget_session_id": self.widget_session_id},
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -683,7 +683,7 @@ class TestRestoreAPI(BaseTest):
     def test_restore_redeem_empty_widget_session_id_rejected(self):
         """Empty widget_session_id should be rejected at validation."""
         response = self.client.post(
-            "/api/conversations/v1/widget/restore",
+            "/v1/conversations/v1/widget/restore",
             {"restore_token": "a" * 43, "widget_session_id": ""},
             **self._get_headers(),
         )
@@ -692,7 +692,7 @@ class TestRestoreAPI(BaseTest):
 
     def test_restore_redeem_non_uuid_widget_session_id_rejected(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/restore",
+            "/v1/conversations/v1/widget/restore",
             {"restore_token": "a" * 43, "widget_session_id": "not-a-uuid-string"},
             **self._get_headers(),
         )
@@ -702,7 +702,7 @@ class TestRestoreAPI(BaseTest):
     def test_restore_redeem_token_too_short_rejected(self):
         """Token shorter than 40 chars should be rejected at validation."""
         response = self.client.post(
-            "/api/conversations/v1/widget/restore",
+            "/v1/conversations/v1/widget/restore",
             {"restore_token": "short", "widget_session_id": self.widget_session_id},
             **self._get_headers(),
         )
@@ -712,7 +712,7 @@ class TestRestoreAPI(BaseTest):
     def test_restore_redeem_token_too_long_rejected(self):
         """Token longer than 50 chars should be rejected at validation."""
         response = self.client.post(
-            "/api/conversations/v1/widget/restore",
+            "/v1/conversations/v1/widget/restore",
             {"restore_token": "a" * 51, "widget_session_id": self.widget_session_id},
             **self._get_headers(),
         )

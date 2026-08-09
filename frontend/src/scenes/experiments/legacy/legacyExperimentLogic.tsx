@@ -561,7 +561,7 @@ export const legacyExperimentLogic = kea<legacyExperimentLogicType>([
         archiveExperiment: async ({ disableFeatureFlag }) => {
             try {
                 const response: Experiment = await api.create(
-                    `/api/projects/${values.currentProjectId}/experiments/${values.experimentId}/archive`,
+                    `/v1/projects/${values.currentProjectId}/experiments/${values.experimentId}/archive`,
                     { disable_feature_flag: disableFeatureFlag }
                 )
                 actions.setExperiment(response)
@@ -573,7 +573,7 @@ export const legacyExperimentLogic = kea<legacyExperimentLogicType>([
         endExperiment: async () => {
             try {
                 const response: Experiment = await api.create(
-                    `/api/projects/${values.currentProjectId}/experiments/${values.experimentId}/end`,
+                    `/v1/projects/${values.currentProjectId}/experiments/${values.experimentId}/end`,
                     {
                         conclusion: values.experiment.conclusion,
                         conclusion_comment: values.experiment.conclusion_comment,
@@ -593,7 +593,7 @@ export const legacyExperimentLogic = kea<legacyExperimentLogicType>([
         finishExperiment: async ({ selectedVariantKey }) => {
             try {
                 const response: Experiment = await api.create(
-                    `/api/projects/${values.currentProjectId}/experiments/${values.experimentId}/ship_variant`,
+                    `/v1/projects/${values.currentProjectId}/experiments/${values.experimentId}/ship_variant`,
                     {
                         variant_key: selectedVariantKey,
                         conclusion: values.experiment.conclusion,

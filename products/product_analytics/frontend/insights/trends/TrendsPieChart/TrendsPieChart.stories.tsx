@@ -28,7 +28,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/annotations/': {
+                '/v1/projects/:team_id/annotations/': {
                     count: 0,
                     next: null,
                     previous: null,

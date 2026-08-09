@@ -20,7 +20,7 @@ describe('sourceSchemasModalLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team_id/data_warehouse/managed-warehouse-source-schemas/': ({ request }) => {
+                '/v1/projects/:team_id/data_warehouse/managed-warehouse-source-schemas/': ({ request }) => {
                     const sourceId = new URL(request.url).searchParams.get('source_id')
                     return [200, { schemas: [{ schema_id: 'schema-1', source_id: sourceId }] }]
                 },
@@ -76,7 +76,7 @@ describe('sourceSchemasModalLogic', () => {
         const pending: Record<string, { resolve: (body: unknown) => void }> = {}
         useMocks({
             get: {
-                '/api/projects/:team_id/data_warehouse/managed-warehouse-source-schemas/': ({ request }) => {
+                '/v1/projects/:team_id/data_warehouse/managed-warehouse-source-schemas/': ({ request }) => {
                     const sourceId = new URL(request.url).searchParams.get('source_id') as string
                     return new Promise((resolve) => {
                         pending[sourceId] = { resolve: (body) => resolve([200, body]) }
@@ -104,7 +104,7 @@ describe('sourceSchemasModalLogic', () => {
     it('clears schemas and flags an error when the active source fails to load', async () => {
         useMocks({
             get: {
-                '/api/projects/:team_id/data_warehouse/managed-warehouse-source-schemas/': () => [
+                '/v1/projects/:team_id/data_warehouse/managed-warehouse-source-schemas/': () => [
                     500,
                     { detail: 'boom' },
                 ],
@@ -123,7 +123,7 @@ describe('sourceSchemasModalLogic', () => {
         const pending: Record<string, { resolve: (response: [number, unknown]) => void }> = {}
         useMocks({
             get: {
-                '/api/projects/:team_id/data_warehouse/managed-warehouse-source-schemas/': ({ request }) => {
+                '/v1/projects/:team_id/data_warehouse/managed-warehouse-source-schemas/': ({ request }) => {
                     const sourceId = new URL(request.url).searchParams.get('source_id') as string
                     return new Promise((resolve) => {
                         pending[sourceId] = { resolve }

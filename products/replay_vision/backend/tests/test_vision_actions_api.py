@@ -70,7 +70,7 @@ class _VisionActionAPITestCase(APIBaseTest):
 
     @property
     def actions_url(self) -> str:
-        return f"/api/projects/{self.team.id}/vision/actions/"
+        return f"/v1/projects/{self.team.id}/vision/actions/"
 
     def _create_scanner(self, team: Team | None = None, name: str = "my-scanner") -> ReplayScanner:
         return ReplayScanner.objects.create(
@@ -562,7 +562,7 @@ class TestVisionActionRunViewSet(_VisionActionAPITestCase):
         self.action = VisionAction.all_teams.create(team=self.team, scanner=self.scanner, name="daily-summary")
 
     def runs_url(self, action_id: str | None = None) -> str:
-        return f"/api/projects/{self.team.id}/vision/actions/{action_id or self.action.id}/runs/"
+        return f"/v1/projects/{self.team.id}/vision/actions/{action_id or self.action.id}/runs/"
 
     def _create_run(self, action: VisionAction | None = None, **overrides: Any) -> VisionActionRun:
         defaults: dict[str, Any] = {
@@ -737,7 +737,7 @@ class TestVisionActionRunCrossTeamIDOR(_VisionActionAPITestCase):
 
     def test_cannot_list_other_team_action_runs(self) -> None:
         # The action belongs to another team, so the nested route must 404 rather than leak its runs.
-        resp = self.client.get(f"/api/projects/{self.team.id}/vision/actions/{self.other_action.id}/runs/")
+        resp = self.client.get(f"/v1/projects/{self.team.id}/vision/actions/{self.other_action.id}/runs/")
         self.assertEqual(resp.status_code, 404)
 
 

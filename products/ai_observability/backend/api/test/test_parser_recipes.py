@@ -14,7 +14,7 @@ VALID_SOURCE = "id: my_recipe\nrules: []\n"
 
 class TestParserRecipesApi(APIBaseTest):
     def _endpoint(self) -> str:
-        return f"/api/projects/{self.team.id}/llm_analytics/parser_recipes/"
+        return f"/v1/projects/{self.team.id}/llm_analytics/parser_recipes/"
 
     def test_non_admin_member_can_write(self):
         # Managing recipes is intentionally not admin-only — a plain member can create.

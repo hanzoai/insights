@@ -2,8 +2,8 @@ import { DateTime } from 'luxon'
 
 import { Flow } from '~/cdp/schema/flow'
 import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
-import { logger } from '~/common/utils/logger'
 import { captureException } from '~/common/utils/insights'
+import { logger } from '~/common/utils/logger'
 
 import { RedisV2 } from '../../common/redis/redis-v2'
 import { KeyedRateLimitRequest, KeyedRateLimiterService } from '../../common/services/keyed-rate-limiter.service'

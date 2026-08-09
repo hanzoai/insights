@@ -95,9 +95,9 @@ Two non-obvious facts that drive real tickets:
 
 3. **Platform parity check.** Confirm the `lib` and consult the parity table. Eliminate features the platform doesn't support before investigating them.
 
-4. **Pull the survey definition.** `GET /api/projects/<id>/surveys/<sid>/`. Inspect `conditions` (events, url, seenSurveyWaitPeriodInDays), `appearance.surveyPopupDelaySeconds`, `schedule`, `linked_flag`, `targeting_flag`, `internal_targeting_flag.filters`, `responses_limit`, `iteration_*`.
+4. **Pull the survey definition.** `GET /v1/projects/<id>/surveys/<sid>/`. Inspect `conditions` (events, url, seenSurveyWaitPeriodInDays), `appearance.surveyPopupDelaySeconds`, `schedule`, `linked_flag`, `targeting_flag`, `internal_targeting_flag.filters`, `responses_limit`, `iteration_*`.
 
-5. **Pull the targeting-flag activity log** for any "stopped showing" ticket. Cohort swaps and rollout changes are invisible in the current config but show up here: `GET /api/projects/<id>/activity_log/?scope=FeatureFlag&item_id=<flag_id>&limit=20`. Also `?scope=Survey&item_id=<sid>` to see whether the survey itself was edited.
+5. **Pull the targeting-flag activity log** for any "stopped showing" ticket. Cohort swaps and rollout changes are invisible in the current config but show up here: `GET /v1/projects/<id>/activity_log/?scope=FeatureFlag&item_id=<flag_id>&limit=20`. Also `?scope=Survey&item_id=<sid>` to see whether the survey itself was edited.
 
 6. **Confirm with events.** Use `$feature_flag_called` to see what the gating flag actually returned for affected users, and whether `$groups` is set (see group-aggregation cause below). Use `survey shown` to see real reach vs the stats UI.
 

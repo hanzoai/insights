@@ -73,7 +73,7 @@ export const experimentsConfigLogic = kea<experimentsConfigLogicType>([
             null as ExperimentsConfig | null,
             {
                 loadExperimentsConfig: async (): Promise<ExperimentsConfig> => {
-                    return await api.get(`api/environments/${values.currentTeamId}/experiments_config/`)
+                    return await api.get(`v1/environments/${values.currentTeamId}/experiments_config/`)
                 },
             },
         ],
@@ -92,7 +92,7 @@ export const experimentsConfigLogic = kea<experimentsConfigLogicType>([
     listeners(({ actions, values }) => ({
         updateExperimentsConfig: async ({ payload }) => {
             try {
-                await api.update(`api/environments/${values.currentTeamId}/experiments_config/`, payload)
+                await api.update(`v1/environments/${values.currentTeamId}/experiments_config/`, payload)
             } finally {
                 actions.loadExperimentsConfig()
             }

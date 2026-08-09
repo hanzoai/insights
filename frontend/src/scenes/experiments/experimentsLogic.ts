@@ -633,7 +633,7 @@ export const experimentsLogic = kea<experimentsLogicType>([
             {
                 loadExperiments: async (_: void, breakpoint) => {
                     const response = await api.get(
-                        `api/projects/${values.currentProjectId}/experiments?${toParams(values.paramsFromFilters)}`
+                        `v1/projects/${values.currentProjectId}/experiments?${toParams(values.paramsFromFilters)}`
                     )
                     // Discard stale responses that resolve after a newer search has fired
                     breakpoint()
@@ -643,7 +643,7 @@ export const experimentsLogic = kea<experimentsLogicType>([
                     }
                 },
                 archiveExperiment: async ({ id, disableFeatureFlag }: { id: number; disableFeatureFlag: boolean }) => {
-                    await api.create(`api/projects/${values.currentProjectId}/experiments/${id}/archive`, {
+                    await api.create(`v1/projects/${values.currentProjectId}/experiments/${id}/archive`, {
                         disable_feature_flag: disableFeatureFlag,
                     })
                     toast.info('Experiment archived')
@@ -654,7 +654,7 @@ export const experimentsLogic = kea<experimentsLogicType>([
                     }
                 },
                 unarchiveExperiment: async (id: number) => {
-                    await api.create(`api/projects/${values.currentProjectId}/experiments/${id}/unarchive`)
+                    await api.create(`v1/projects/${values.currentProjectId}/experiments/${id}/unarchive`)
                     toast.info('Experiment unarchived')
                     return {
                         ...values.experiments,
@@ -671,7 +671,7 @@ export const experimentsLogic = kea<experimentsLogicType>([
                         data.name = payload.name
                     }
                     const duplicatedExperiment = await api.create(
-                        `api/projects/${values.currentProjectId}/experiments/${payload.id}/duplicate`,
+                        `v1/projects/${values.currentProjectId}/experiments/${payload.id}/duplicate`,
                         data
                     )
                     toast.success('Experiment duplicated successfully')
@@ -700,7 +700,7 @@ export const experimentsLogic = kea<experimentsLogicType>([
                         data.name = payload.name
                     }
                     const newExperiment = await api.create(
-                        `api/projects/${values.currentProjectId}/experiments/${payload.id}/copy_to_project`,
+                        `v1/projects/${values.currentProjectId}/experiments/${payload.id}/copy_to_project`,
                         data
                     )
                     toast.success('Experiment copied to project', {
@@ -738,7 +738,7 @@ export const experimentsLogic = kea<experimentsLogicType>([
             {
                 loadFeatureFlagModalFeatureFlags: async (_: void, breakpoint) => {
                     const response = await api.get(
-                        `api/projects/${values.currentProjectId}/feature_flags/?${toParams({
+                        `v1/projects/${values.currentProjectId}/feature_flags/?${toParams({
                             ...values.featureFlagModalParamsFromFilters,
                             eligible_for_experiment: true,
                         })}`
@@ -759,7 +759,7 @@ export const experimentsLogic = kea<experimentsLogicType>([
             } as ExperimentVelocityStats,
             {
                 loadExperimentsStats: async () => {
-                    const response = await api.get(`api/projects/${values.currentProjectId}/experiments/stats/`)
+                    const response = await api.get(`v1/projects/${values.currentProjectId}/experiments/stats/`)
                     return response
                 },
             },

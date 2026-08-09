@@ -36,11 +36,11 @@ type Story = StoryObj<typeof IntegrationFullPage>
 
 // integrationsLogic loads from the environments endpoint, not projects
 export const NotConnected: Story = {
-    decorators: [mswDecorator({ get: { '/api/environments/:id/integrations': { results: [] } } })],
+    decorators: [mswDecorator({ get: { '/v1/environments/:id/integrations': { results: [] } } })],
 }
 
 export const Connected: Story = {
-    decorators: [mswDecorator({ get: { '/api/environments/:id/integrations': { results: [mockIntegration] } } })],
+    decorators: [mswDecorator({ get: { '/v1/environments/:id/integrations': { results: [mockIntegration] } } })],
 }
 
 const memberTeam = { ...MOCK_DEFAULT_TEAM, effective_membership_level: OrganizationMembershipLevel.Member }
@@ -59,8 +59,8 @@ export const NoPermission: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:id/integrations': { results: [] },
-                '/api/organizations/@current/': memberOrganization,
+                '/v1/environments/:id/integrations': { results: [] },
+                '/v1/organizations/@current/': memberOrganization,
             },
         }),
     ],

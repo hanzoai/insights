@@ -24,8 +24,8 @@ All three kinds are team `LLMSkill` rows the review agents pull over MCP at run 
 canonicals; this skill is the guide for authoring **custom** ones. The skill itself is team-level;
 whether it _runs_ is a per-user setting in **Inbox → Code review**.
 
-| Kind                | Name contract                   | Cardinality per user                | Canonical example                          |
-| ------------------- | ------------------------------- | ----------------------------------- | ------------------------------------------ |
+| Kind                | Name contract                      | Cardinality per user                | Canonical example                             |
+| ------------------- | ---------------------------------- | ----------------------------------- | --------------------------------------------- |
 | Review perspective  | `review-script-perspective-<slug>` | Multi-enable, at least one stays on | `review-script-perspective-logic-correctness` |
 | Blind-spot check    | `review-script-blind-spots-<slug>` | Exactly one active; selecting swaps | `review-script-blind-spots-general`           |
 | Validation criteria | `review-script-validation-<slug>`  | Exactly one active; selecting swaps | `review-script-validation-criteria`           |

@@ -234,7 +234,7 @@ describe('Dashboards', { concurrent: false }, () => {
             const projectId = await context.stateManager.getProjectId()
             const insight = await context.api.request<any>({
                 method: 'POST',
-                path: `/api/projects/${projectId}/insights/`,
+                path: `/v1/projects/${projectId}/insights/`,
                 body: {
                     name: generateUniqueKey('Stripped Result Insight'),
                     query: SAMPLE_INSIGHTSQL_QUERIES.pageviews,
@@ -319,7 +319,7 @@ describe('Dashboards', { concurrent: false }, () => {
             const projectId = await context.stateManager.getProjectId()
             const insight = await context.api.request<any>({
                 method: 'POST',
-                path: `/api/projects/${projectId}/insights/`,
+                path: `/v1/projects/${projectId}/insights/`,
                 body: {
                     name: generateUniqueKey('Run Insights Insight'),
                     query: SAMPLE_INSIGHTSQL_QUERIES.pageviews,
@@ -373,7 +373,7 @@ describe('Dashboards', { concurrent: false }, () => {
             const projectId = await context.stateManager.getProjectId()
             const insight1 = await context.api.request<any>({
                 method: 'POST',
-                path: `/api/projects/${projectId}/insights/`,
+                path: `/v1/projects/${projectId}/insights/`,
                 body: {
                     name: generateUniqueKey('Insight 1'),
                     description: 'First insight',
@@ -385,7 +385,7 @@ describe('Dashboards', { concurrent: false }, () => {
 
             const insight2 = await context.api.request<any>({
                 method: 'POST',
-                path: `/api/projects/${projectId}/insights/`,
+                path: `/v1/projects/${projectId}/insights/`,
                 body: {
                     name: generateUniqueKey('Insight 2'),
                     description: 'Second insight',
@@ -398,7 +398,7 @@ describe('Dashboards', { concurrent: false }, () => {
             // Add insight1 to the primary dashboard
             await context.api.request({
                 method: 'PATCH',
-                path: `/api/projects/${projectId}/insights/${insight1.id}/`,
+                path: `/v1/projects/${projectId}/insights/${insight1.id}/`,
                 body: { dashboards: [dashboard.id] },
             })
 
@@ -406,12 +406,12 @@ describe('Dashboards', { concurrent: false }, () => {
             // dashboard — this verifies full-replacement semantics (must include all IDs)
             await context.api.request({
                 method: 'PATCH',
-                path: `/api/projects/${projectId}/insights/${insight2.id}/`,
+                path: `/v1/projects/${projectId}/insights/${insight2.id}/`,
                 body: { dashboards: [dashboard2.id] },
             })
             const updatedInsight2 = await context.api.request<any>({
                 method: 'PATCH',
-                path: `/api/projects/${projectId}/insights/${insight2.id}/`,
+                path: `/v1/projects/${projectId}/insights/${insight2.id}/`,
                 body: { dashboards: [dashboard2.id, dashboard.id] },
             })
             expect(updatedInsight2.dashboards).toContain(dashboard.id)

@@ -63,7 +63,7 @@ class TestPlaygroundAccessControl(APIBaseTest):
     def _post_completion(self):
         # Patched so the assertion is about the gate, not the payment-method check or the provider call
         with patch.object(LLMProxyViewSet, "_handle_completion_request", return_value=Response(status=200)):
-            return self.client.post("/api/llm_proxy/completion/", COMPLETION_PAYLOAD)
+            return self.client.post("/v1/llm_proxy/completion/", COMPLETION_PAYLOAD)
 
     @parameterized.expand(
         [
@@ -75,7 +75,7 @@ class TestPlaygroundAccessControl(APIBaseTest):
     def test_access_level_gates_each_action(self, access_level, models_status, completion_status):
         self._login_with_playground_level(access_level)
 
-        assert self.client.get("/api/llm_proxy/models/").status_code == models_status
+        assert self.client.get("/v1/llm_proxy/models/").status_code == models_status
         assert self._post_completion().status_code == completion_status
 
     def test_denied_without_a_current_team(self):

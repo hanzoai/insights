@@ -35,7 +35,7 @@ class TestDashboardRunInsights(APIBaseTest):
 
     def _run(self, dashboard_id: int, **query_params) -> dict:
         response = self.client.get(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/run_insights/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/run_insights/",
             data=query_params,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
@@ -143,7 +143,7 @@ class TestDashboardRunInsights(APIBaseTest):
         dashboard = Dashboard.objects.create(team=other_team, name="other dash")
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard.pk}/run_insights/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard.pk}/run_insights/",
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 

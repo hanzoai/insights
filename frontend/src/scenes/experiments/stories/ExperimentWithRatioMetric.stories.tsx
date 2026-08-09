@@ -22,16 +22,16 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                [`/api/projects/:team_id/experiments/${EXPERIMENT_WITH_RATIO_METRIC.id}/`]:
+                [`/v1/projects/:team_id/experiments/${EXPERIMENT_WITH_RATIO_METRIC.id}/`]:
                     EXPERIMENT_WITH_RATIO_METRIC,
-                [`/api/projects/:team_id/experiment_holdouts`]: [],
-                [`/api/projects/:team_id/experiment_saved_metrics/`]: [],
-                [`/api/projects/:team_id/feature_flags/${EXPERIMENT_WITH_RATIO_METRIC.feature_flag.id}/`]: {},
-                [`/api/projects/:team_id/feature_flags/${EXPERIMENT_WITH_RATIO_METRIC.feature_flag.id}/status/`]: {},
-                [`/api/environments/:team_id/default_release_conditions/`]: [],
+                [`/v1/projects/:team_id/experiment_holdouts`]: [],
+                [`/v1/projects/:team_id/experiment_saved_metrics/`]: [],
+                [`/v1/projects/:team_id/feature_flags/${EXPERIMENT_WITH_RATIO_METRIC.feature_flag.id}/`]: {},
+                [`/v1/projects/:team_id/feature_flags/${EXPERIMENT_WITH_RATIO_METRIC.feature_flag.id}/status/`]: {},
+                [`/v1/environments/:team_id/default_release_conditions/`]: [],
             },
             post: {
-                '/api/environments/:team_id/query/:kind': async ({ request }) => {
+                '/v1/environments/:team_id/query/:kind': async ({ request }) => {
                     const body = (await request.json()) as Record<string, any>
 
                     if (body.query.kind === NodeKind.ExperimentExposureQuery) {

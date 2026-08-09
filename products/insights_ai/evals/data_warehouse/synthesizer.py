@@ -36,7 +36,7 @@ from typing import Any, Literal
 from products.insights_ai.eval_harness.seeders.common import DEFAULT_NAME_SEED, NameProviders, make_name_providers
 
 __all__ = [
-    "HogqlType",
+    "InsightsqlType",
     "SynthColumn",
     "SynthTable",
     "SynthView",
@@ -67,7 +67,7 @@ __all__ = [
 ]
 
 
-HogqlType = Literal[
+InsightsqlType = Literal[
     "StringDatabaseField",
     "IntegerDatabaseField",
     "FloatDatabaseField",
@@ -96,7 +96,7 @@ _DATASTORE_FOR_INSIGHTSQL: dict[str, str] = {
 
 # Decimal is deliberately excluded from the noise pool so the column-type needle
 # (the one Decimal column in the catalog) stays unique. ``_validate`` enforces it.
-_NOISE_INSIGHTSQL_TYPES: tuple[HogqlType, ...] = (
+_NOISE_INSIGHTSQL_TYPES: tuple[InsightsqlType, ...] = (
     "StringDatabaseField",
     "IntegerDatabaseField",
     "FloatDatabaseField",
@@ -139,7 +139,7 @@ CHAIN_NEEDLE_FIELD = "owner"
 @dataclass(frozen=True)
 class SynthColumn:
     name: str
-    insightsql: HogqlType
+    insightsql: InsightsqlType
     nullable: bool = True
     description: str | None = None  # -> WarehouseColumnAnnotation(column_name=name)
 
@@ -223,7 +223,7 @@ class _Domain:
     description_template: str
 
 
-def _col(name: str, insightsql: HogqlType, *, nullable: bool = True) -> SynthColumn:
+def _col(name: str, insightsql: InsightsqlType, *, nullable: bool = True) -> SynthColumn:
     return SynthColumn(name=name, insightsql=insightsql, nullable=nullable)
 
 
@@ -470,7 +470,9 @@ class WarehouseSchemaSynthesizer:
             if self._rnd.random() < 0.3:
                 template = self._rnd.choice(_COLUMN_DESCRIPTION_TEMPLATES)
                 description = template.format(col=col.name)
-            out.append(SynthColumn(name=col.name, insightsql=col.insightsql, nullable=col.nullable, description=description))
+            out.append(
+                SynthColumn(name=col.name, insightsql=col.insightsql, nullable=col.nullable, description=description)
+            )
         return tuple(out)
 
     def _generate_noise_views(self) -> tuple[SynthView, ...]:

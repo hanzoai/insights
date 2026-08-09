@@ -280,7 +280,7 @@ class TestApplyEnvConfig:
             "insightscli.cli.get_manifest",
             lambda: self._make_manifest(env_files=[first, second]),
         )
-        for k in ("SHARED", "ONLY_FIRST", "ONLY_SECOND", "HOGLI_SECRETS_WRAPPED"):
+        for k in ("SHARED", "ONLY_FIRST", "ONLY_SECOND", "INSIGHTSCLI_SECRETS_WRAPPED"):
             monkeypatch.delenv(k, raising=False)
 
         _apply_env_config("anything")
@@ -301,7 +301,7 @@ class TestApplyEnvConfig:
             lambda: self._make_manifest(env_files=[env_file]),
         )
         monkeypatch.setenv("OVERRIDE_ME", "from_shell")
-        monkeypatch.delenv("HOGLI_SECRETS_WRAPPED", raising=False)
+        monkeypatch.delenv("INSIGHTSCLI_SECRETS_WRAPPED", raising=False)
 
         _apply_env_config("anything")
 
@@ -329,7 +329,7 @@ class TestApplyEnvConfig:
             ),
         )
         monkeypatch.delenv("PLAIN_KEY", raising=False)
-        monkeypatch.delenv("HOGLI_SECRETS_WRAPPED", raising=False)
+        monkeypatch.delenv("INSIGHTSCLI_SECRETS_WRAPPED", raising=False)
 
         with patch("os.execvp") as mock_exec:
             _apply_env_config("start")
@@ -363,7 +363,7 @@ class TestApplyEnvConfig:
                 needs_secrets_commands={"start"},
             ),
         )
-        for k in ("SHARED_KEY", "DEV_ONLY", "HOGLI_SECRETS_WRAPPED"):
+        for k in ("SHARED_KEY", "DEV_ONLY", "INSIGHTSCLI_SECRETS_WRAPPED"):
             monkeypatch.delenv(k, raising=False)
 
         with patch("os.execvp") as mock_exec:
@@ -394,7 +394,7 @@ class TestApplyEnvConfig:
                 needs_secrets_commands={"start"},
             ),
         )
-        for k in ("DEV_ONLY", "HOGLI_SECRETS_WRAPPED"):
+        for k in ("DEV_ONLY", "INSIGHTSCLI_SECRETS_WRAPPED"):
             monkeypatch.delenv(k, raising=False)
 
         with patch("os.execvp") as mock_exec:
@@ -431,7 +431,7 @@ class TestApplyEnvConfig:
                 needs_secrets_commands={"start"},
             ),
         )
-        for k in ("PRELOADED", "HOGLI_SECRETS_WRAPPED"):
+        for k in ("PRELOADED", "INSIGHTSCLI_SECRETS_WRAPPED"):
             monkeypatch.delenv(k, raising=False)
         # Re-exec only fires when insightscli owns the process (real CLI entrypoint).
         monkeypatch.setattr("insightscli.cli._is_process_entrypoint", True)
@@ -454,7 +454,7 @@ class TestApplyEnvConfig:
         # pre-loaded files were applied before the exec (so wrap-child inherits)
         assert os.environ["PRELOADED"] == "yes"
         # sentinel set to prevent infinite re-exec loop
-        assert os.environ["HOGLI_SECRETS_WRAPPED"] == "1"
+        assert os.environ["INSIGHTSCLI_SECRETS_WRAPPED"] == "1"
 
     def test_embedded_invocation_never_reexecs(self, tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
         """When insightscli is invoked in-process (not the process entrypoint), the
@@ -483,7 +483,7 @@ class TestApplyEnvConfig:
         )
         # Embedded, not a real entrypoint: this is what CliRunner / library use sees.
         monkeypatch.setattr("insightscli.cli._is_process_entrypoint", False)
-        for k in ("API_KEY", "LITERAL", "HOGLI_SECRETS_WRAPPED"):
+        for k in ("API_KEY", "LITERAL", "INSIGHTSCLI_SECRETS_WRAPPED"):
             monkeypatch.delenv(k, raising=False)
 
         with (
@@ -522,7 +522,7 @@ class TestApplyEnvConfig:
                 needs_secrets_commands={"start"},
             ),
         )
-        for k in ("OPENAI_API_KEY", "LITERAL", "HOGLI_SECRETS_WRAPPED"):
+        for k in ("OPENAI_API_KEY", "LITERAL", "INSIGHTSCLI_SECRETS_WRAPPED"):
             monkeypatch.delenv(k, raising=False)
         # The missing-binary warning is only meaningful for a real entrypoint
         # that would otherwise re-exec; simulate one.
@@ -542,7 +542,7 @@ class TestApplyEnvConfig:
         assert "op" in err  # wrap binary name surfaced
 
     def test_sentinel_skips_reexec_so_child_doesnt_loop(self, tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
-        """After wrap re-execs insightscli, the child sees HOGLI_SECRETS_WRAPPED and skips wrap.
+        """After wrap re-execs insightscli, the child sees INSIGHTSCLI_SECRETS_WRAPPED and skips wrap.
 
         Without this, the wrap binary would re-exec insightscli forever.
 
@@ -570,7 +570,7 @@ class TestApplyEnvConfig:
         )
         # Simulate being the child of a wrap re-exec: sentinel set, wrap already
         # populated the env via op run (so OPENAI_API_KEY would be in env).
-        monkeypatch.setenv("HOGLI_SECRETS_WRAPPED", "1")
+        monkeypatch.setenv("INSIGHTSCLI_SECRETS_WRAPPED", "1")
         monkeypatch.setenv("API_KEY", "resolved_by_op")
 
         with patch("os.execvp") as mock_exec:
@@ -582,7 +582,7 @@ class TestApplyEnvConfig:
         # Sentinel must STAY in env so subprocesses spawned by this wrap-child
         # inherit it and skip re-wrapping. Popping would re-trigger auth
         # prompts for every step in a composite chain.
-        assert os.environ["HOGLI_SECRETS_WRAPPED"] == "1"
+        assert os.environ["INSIGHTSCLI_SECRETS_WRAPPED"] == "1"
 
     @pytest.mark.parametrize(
         "invoked_subcommand,opted_in,expect_wrap",
@@ -614,7 +614,7 @@ class TestApplyEnvConfig:
             "insightscli.cli.get_manifest",
             lambda: self._make_manifest(secrets_config=secrets, needs_secrets_commands=opted_in),
         )
-        monkeypatch.delenv("HOGLI_SECRETS_WRAPPED", raising=False)
+        monkeypatch.delenv("INSIGHTSCLI_SECRETS_WRAPPED", raising=False)
         # This test exercises the needs_secrets gate, not the entrypoint gate —
         # run as a real entrypoint so the wrap can fire when the gate opens.
         monkeypatch.setattr("insightscli.cli._is_process_entrypoint", True)

@@ -12,5 +12,5 @@ The `RecordingApi` exposes REST endpoints that:
 
 ## Endpoints
 
-- `GET /api/projects/:team_id/recordings/:session_id/block` - Fetch and decrypt a recording block
-- `DELETE /api/projects/:team_id/recordings/:session_id` - Delete a recording via crypto-shredding
+- `GET /v1/projects/:team_id/recordings/:session_id/block` - Fetch and decrypt a recording block
+- `DELETE /v1/projects/:team_id/recordings/:session_id` - Delete a recording via crypto-shredding

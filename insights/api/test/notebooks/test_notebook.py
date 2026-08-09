@@ -32,7 +32,7 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
         }
 
     def assert_notebook_activity(self, expected: list[dict]) -> None:
-        activity_response = self.client.get(f"/api/projects/{self.team.id}/notebooks/activity")
+        activity_response = self.client.get(f"/v1/projects/{self.team.id}/notebooks/activity")
         assert activity_response.status_code == status.HTTP_200_OK
 
         activity: list[dict] = activity_response.json()["results"]
@@ -45,7 +45,7 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
         assert activity == expected
 
     def test_empty_notebook_list(self) -> None:
-        response = self.client.get(f"/api/projects/{self.team.id}/notebooks")
+        response = self.client.get(f"/v1/projects/{self.team.id}/notebooks")
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
             "count": 0,
@@ -55,16 +55,16 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
         }
 
     def test_cannot_list_deleted_notebook(self) -> None:
-        notebook_one = self.client.post(f"/api/projects/{self.team.id}/notebooks", data={}).json()
-        notebook_two = self.client.post(f"/api/projects/{self.team.id}/notebooks", data={}).json()
-        notebook_three = self.client.post(f"/api/projects/{self.team.id}/notebooks", data={}).json()
+        notebook_one = self.client.post(f"/v1/projects/{self.team.id}/notebooks", data={}).json()
+        notebook_two = self.client.post(f"/v1/projects/{self.team.id}/notebooks", data={}).json()
+        notebook_three = self.client.post(f"/v1/projects/{self.team.id}/notebooks", data={}).json()
 
         self.client.patch(
-            f"/api/projects/{self.team.id}/notebooks/{notebook_two['short_id']}",
+            f"/v1/projects/{self.team.id}/notebooks/{notebook_two['short_id']}",
             data={"deleted": True},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/notebooks")
+        response = self.client.get(f"/v1/projects/{self.team.id}/notebooks")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == 2
@@ -98,7 +98,7 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
     )
     def test_create_a_notebook(self, _, content: dict | None, text_content: str | None) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/notebooks",
+            f"/v1/projects/{self.team.id}/notebooks",
             data={"content": content, "text_content": text_content},
         )
         assert response.status_code == status.HTTP_201_CREATED
@@ -144,23 +144,23 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
         ]
     )
     def test_gets_notebook_markdown_by_shortid(self, _, content: dict, expected_markdown: str | None) -> None:
-        create_response = self.client.post(f"/api/projects/{self.team.id}/notebooks", data={"content": content})
+        create_response = self.client.post(f"/v1/projects/{self.team.id}/notebooks", data={"content": content})
         short_id = create_response.json()["short_id"]
 
-        response = self.client.get(f"/api/projects/{self.team.id}/notebooks/{short_id}/markdown")
+        response = self.client.get(f"/v1/projects/{self.team.id}/notebooks/{short_id}/markdown")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {"markdown": expected_markdown}
 
     def test_gets_individual_notebook_by_shortid(self) -> None:
-        create_response = self.client.post(f"/api/projects/{self.team.id}/notebooks", data={})
-        response = self.client.get(f"/api/projects/{self.team.id}/notebooks/{create_response.json()['short_id']}")
+        create_response = self.client.post(f"/v1/projects/{self.team.id}/notebooks", data={})
+        response = self.client.get(f"/v1/projects/{self.team.id}/notebooks/{create_response.json()['short_id']}")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["short_id"] == create_response.json()["short_id"]
 
     @snapshot_postgres_queries
     def test_updates_notebook(self) -> None:
-        response = self.client.post(f"/api/projects/{self.team.id}/notebooks/", data={})
+        response = self.client.post(f"/v1/projects/{self.team.id}/notebooks/", data={})
         assert response.status_code == status.HTTP_201_CREATED
         response_json = response.json()
         assert "short_id" in response_json
@@ -168,7 +168,7 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
 
         with freeze_time("2022-01-02"):
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/notebooks/{short_id}",
+                f"/v1/projects/{self.team.id}/notebooks/{short_id}",
                 {
                     "content": {"some": "updated content"},
                     "version": response_json["version"],
@@ -226,10 +226,10 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
         )
 
     def test_cannot_change_short_id(self) -> None:
-        notebook = self.client.post(f"/api/projects/{self.team.id}/notebooks/", data={}).json()
+        notebook = self.client.post(f"/v1/projects/{self.team.id}/notebooks/", data={}).json()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/notebooks/{notebook['short_id']}",
+            f"/v1/projects/{self.team.id}/notebooks/{notebook['short_id']}",
             {"short_id": "something else", "version": notebook["version"]},
         )
         # out of the box this is accepted _and_ ignored 🤷‍♀️
@@ -261,7 +261,7 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
             ],
         }
         response = self.client.post(
-            f"/api/projects/{self.team.id}/notebooks",
+            f"/v1/projects/{self.team.id}/notebooks",
             data={"content": bad_content},
         )
         assert response.status_code == status.HTTP_201_CREATED
@@ -289,7 +289,7 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
             ],
         }
         response = self.client.post(
-            f"/api/projects/{self.team.id}/notebooks",
+            f"/v1/projects/{self.team.id}/notebooks",
             data={"content": bad_content},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -298,7 +298,7 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
         assert "DefinitelyNotAQuery" in body["detail"]
 
     def test_update_notebook_normalizes_invalid_query_node(self) -> None:
-        create = self.client.post(f"/api/projects/{self.team.id}/notebooks", data={})
+        create = self.client.post(f"/v1/projects/{self.team.id}/notebooks", data={})
         short_id = create.json()["short_id"]
         version = create.json()["version"]
 
@@ -318,7 +318,7 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
             ],
         }
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/notebooks/{short_id}",
+            f"/v1/projects/{self.team.id}/notebooks/{short_id}",
             {"content": bad_content, "version": version},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -339,7 +339,7 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
             ],
         }
         response = self.client.post(
-            f"/api/projects/{self.team.id}/notebooks",
+            f"/v1/projects/{self.team.id}/notebooks",
             data={"content": content},
         )
         assert response.status_code == status.HTTP_201_CREATED
@@ -355,15 +355,15 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
         another_user = User.objects.create_and_join(self.organization, "other@example.com", password="")
 
         self.client.force_login(another_user)
-        response = self.client.post(f"/api/projects/{another_team.id}/notebooks", data={})
+        response = self.client.post(f"/v1/projects/{another_team.id}/notebooks", data={})
         assert response.status_code == status.HTTP_201_CREATED
 
         self.client.force_login(self.user)
-        response = self.client.post(f"/api/projects/{self.team.id}/notebooks", data={})
+        response = self.client.post(f"/v1/projects/{self.team.id}/notebooks", data={})
         assert response.status_code == status.HTTP_201_CREATED
         this_team_notebook_short_id = response.json()["short_id"]
 
-        response = self.client.get(f"/api/projects/{self.team.id}/notebooks")
+        response = self.client.get(f"/v1/projects/{self.team.id}/notebooks")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == 1
         assert response.json()["results"][0]["short_id"] == this_team_notebook_short_id
@@ -372,7 +372,7 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
         Notebook.objects.create(team=self.team, visibility=Notebook.Visibility.INTERNAL)
         default_visibility_notebook = Notebook.objects.create(team=self.team, visibility=Notebook.Visibility.DEFAULT)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/notebooks")
+        response = self.client.get(f"/v1/projects/{self.team.id}/notebooks")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == 1
@@ -383,7 +383,7 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
         another_team = Team.objects.create(organization=another_org)
 
         self.client.force_login(self.user)
-        response = self.client.post(f"/api/projects/{another_team.id}/notebooks", data={})
+        response = self.client.post(f"/v1/projects/{another_team.id}/notebooks", data={})
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_patching_does_not_leak_between_teams(self) -> None:
@@ -392,12 +392,12 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
         another_user = User.objects.create_and_join(another_org, "other@example.com", password="")
 
         self.client.force_login(another_user)
-        response = self.client.post(f"/api/projects/{another_team.id}/notebooks", data={})
+        response = self.client.post(f"/v1/projects/{another_team.id}/notebooks", data={})
         assert response.status_code == status.HTTP_201_CREATED
 
         self.client.force_login(self.user)
         response = self.client.patch(
-            f"/api/projects/{another_team.id}/notebooks/{response.json()['short_id']}",
+            f"/v1/projects/{another_team.id}/notebooks/{response.json()['short_id']}",
             data={"content": {"something": "here"}},
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -433,7 +433,7 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks/recording_comments",
+            f"/v1/projects/{self.team.id}/notebooks/recording_comments",
             data={"recording_id": recording_id},
         )
         assert response.status_code == 200
@@ -441,13 +441,13 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
 
     def test_responds_not_modified_if_versions_match(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/notebooks",
+            f"/v1/projects/{self.team.id}/notebooks",
             data={"content": {}, "text_content": ""},
         )
         assert response.status_code == status.HTTP_201_CREATED
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/notebooks/{response.json()['short_id']}",
+            f"/v1/projects/{self.team.id}/notebooks/{response.json()['short_id']}",
             headers={"if-none-match": response.json()["version"]},
         )
 
@@ -455,7 +455,7 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
 
     def test_create_notebook_in_specific_folder(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/notebooks",
+            f"/v1/projects/{self.team.id}/notebooks",
             {
                 "title": "My Notebook in folder",
                 "_create_in_folder": "Notebooks/Special Team Folder",
@@ -473,7 +473,7 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
 
     def test_create_notebook_with_custom_short_id(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/notebooks",
+            f"/v1/projects/{self.team.id}/notebooks",
             {"title": "From Artifact", "short_id": "abcd"},
             format="json",
         )
@@ -485,7 +485,7 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
 
     def test_create_notebook_without_short_id_auto_generates(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/notebooks",
+            f"/v1/projects/{self.team.id}/notebooks",
             {"title": "Auto ID"},
             format="json",
         )
@@ -500,7 +500,7 @@ class TestNotebooks(APIBaseTest, QueryMatchingTest):
     )
     def test_create_notebook_rejects_invalid_short_id(self, _name, bad_id):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/notebooks",
+            f"/v1/projects/{self.team.id}/notebooks",
             {"title": "Bad ID", "short_id": bad_id},
             format="json",
         )

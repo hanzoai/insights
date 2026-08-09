@@ -17,7 +17,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/session_recordings/': () => {
+                '/v1/environments/:team_id/session_recordings/': () => {
                     return [
                         200,
                         {
@@ -83,13 +83,13 @@ const meta: Meta = {
                                 },
                             ],
                             message:
-                                'Generic GET to /api/environments/:team_id/session_recordings/ mock for PersonSceneStory',
+                                'Generic GET to /v1/environments/:team_id/session_recordings/ mock for PersonSceneStory',
                         },
                     ]
                 },
             },
             post: {
-                '/api/environments/:team_id/query/:kind/': async ({ request }) => {
+                '/v1/environments/:team_id/query/:kind/': async ({ request }) => {
                     const query = ((await request.json()) as any)?.query
                     // Check if it's a DataTableNode query, which is used for Events/Exceptions tabs
                     if (
@@ -122,10 +122,10 @@ const meta: Meta = {
                             },
                         ]
                     }
-                    // Fallback for other POST /api/query calls that might not be DataTableNode
+                    // Fallback for other POST /v1/query calls that might not be DataTableNode
                     // For example, if other components on this page make different query calls.
                     // You might need to make this more specific if there are multiple non-DataTableNode POSTs.
-                    return [200, { results: [], message: 'Generic POST to /api/query mock for PersonSceneStory' }]
+                    return [200, { results: [], message: 'Generic POST to /v1/query mock for PersonSceneStory' }]
                 },
             },
         }),

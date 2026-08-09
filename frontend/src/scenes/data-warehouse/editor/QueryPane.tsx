@@ -52,7 +52,7 @@ export function QueryPane(props: QueryPaneProps): JSX.Element {
                             renderProp={({ height, width }) =>
                                 height && width ? (
                                     <CodeEditor
-                                        language="hogQL"
+                                        language="insightsQL"
                                         value={props.queryInput}
                                         sourceQuery={props.sourceQuery}
                                         height={height}

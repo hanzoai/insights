@@ -8,8 +8,8 @@ import {
     CyclotronJobInvocationInsightsFunction,
     InsightsFunctionMasking,
 } from '../../types'
-import { execHog } from '../../utils/script-exec'
 import { mirrorCompare } from '../../utils/mirror-call'
+import { execHog } from '../../utils/script-exec'
 
 export const BASE_REDIS_KEY = process.env.NODE_ENV == 'test' ? '@insights-test/script-masker' : '@hanzo/script-masker'
 const REDIS_KEY_TOKENS = `${BASE_REDIS_KEY}/mask`
@@ -47,7 +47,9 @@ function allowedExecutionsForResult(result: MaskPipelineResult, index: number, m
     return oldValue === 0 ? 1 : 0
 }
 
-function isInsightsFunctionInvocation(invocation: CyclotronJobInvocation): invocation is CyclotronJobInvocationInsightsFunction {
+function isInsightsFunctionInvocation(
+    invocation: CyclotronJobInvocation
+): invocation is CyclotronJobInvocationInsightsFunction {
     return (invocation as CyclotronJobInvocationInsightsFunction).insightsFunction !== undefined
 }
 

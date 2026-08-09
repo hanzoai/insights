@@ -2,8 +2,8 @@
 import { Monaco } from '@monaco-editor/react'
 import { languages } from 'monaco-editor'
 
-import { hogQLAutocompleteProvider } from 'lib/monaco/hogQLAutocompleteProvider'
-import { hogQLMetadataProvider } from 'lib/monaco/hogQLMetadataProvider'
+import { insightsQLAutocompleteProvider } from 'lib/monaco/insightsQLAutocompleteProvider'
+import { insightsQLMetadataProvider } from 'lib/monaco/insightsQLMetadataProvider'
 
 import { HogLanguage } from '~/queries/schema/schema-general'
 
@@ -860,10 +860,10 @@ export const language: () => languages.IMonarchLanguage = () => ({
     },
 })
 
-export function initInsightsQLLanguage(monaco: Monaco, lang: HogLanguage = HogLanguage.hogQL): void {
+export function initInsightsQLLanguage(monaco: Monaco, lang: HogLanguage = HogLanguage.insightsQL): void {
     if (!monaco.languages.getLanguages().some(({ id }: { id: string }) => id === lang)) {
         monaco.languages.register(
-            lang === 'hogQL'
+            lang === 'insightsQL'
                 ? {
                       id: lang,
                       extensions: ['.sql', '.insightsql'],
@@ -876,7 +876,7 @@ export function initInsightsQLLanguage(monaco: Monaco, lang: HogLanguage = HogLa
         )
         monaco.languages.setLanguageConfiguration(lang, conf())
         monaco.languages.setMonarchTokensProvider(lang, language())
-        monaco.languages.registerCompletionItemProvider(lang, hogQLAutocompleteProvider(lang))
-        monaco.languages.registerCodeActionProvider(lang, hogQLMetadataProvider())
+        monaco.languages.registerCompletionItemProvider(lang, insightsQLAutocompleteProvider(lang))
+        monaco.languages.registerCodeActionProvider(lang, insightsQLMetadataProvider())
     }
 }

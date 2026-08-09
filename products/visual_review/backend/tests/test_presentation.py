@@ -24,7 +24,7 @@ class TestRepoViewSet(VisualReviewTeamScopedTestMixin, APIBaseTest):
 
     def test_create_repo(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/visual_review/repos/",
+            f"/v1/projects/{self.team.id}/visual_review/repos/",
             {"repo_external_id": 12345, "repo_full_name": "org/my-repo"},
             format="json",
         )
@@ -36,11 +36,11 @@ class TestRepoViewSet(VisualReviewTeamScopedTestMixin, APIBaseTest):
         self.assertIn("id", data)
 
     def test_list_repos(self):
-        existing_count = self.client.get(f"/api/projects/{self.team.id}/visual_review/repos/").json()["count"]
+        existing_count = self.client.get(f"/v1/projects/{self.team.id}/visual_review/repos/").json()["count"]
         api.create_repo(team_id=self.team.id, repo_external_id=111, repo_full_name="org/first")
         api.create_repo(team_id=self.team.id, repo_external_id=222, repo_full_name="org/second")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/visual_review/repos/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/visual_review/repos/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -49,7 +49,7 @@ class TestRepoViewSet(VisualReviewTeamScopedTestMixin, APIBaseTest):
     def test_retrieve_project(self):
         repo = api.create_repo(team_id=self.team.id, repo_external_id=333, repo_full_name="org/test")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/visual_review/repos/{repo.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/visual_review/repos/{repo.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["repo_full_name"], "org/test")
@@ -57,7 +57,7 @@ class TestRepoViewSet(VisualReviewTeamScopedTestMixin, APIBaseTest):
     def test_retrieve_project_not_found(self):
         import uuid
 
-        response = self.client.get(f"/api/projects/{self.team.id}/visual_review/repos/{uuid.uuid4()}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/visual_review/repos/{uuid.uuid4()}/")
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -77,7 +77,7 @@ class TestRunViewSet(VisualReviewTeamScopedTestMixin, APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/visual_review/runs/",
+            f"/v1/projects/{self.team.id}/visual_review/runs/",
             {
                 "repo_id": str(self.vr_project.id),
                 "run_type": "storybook",
@@ -113,7 +113,7 @@ class TestRunViewSet(VisualReviewTeamScopedTestMixin, APIBaseTest):
             team_id=self.team.id,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/visual_review/runs/{create_result.run_id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/visual_review/runs/{create_result.run_id}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -135,7 +135,7 @@ class TestRunViewSet(VisualReviewTeamScopedTestMixin, APIBaseTest):
             team_id=self.team.id,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/visual_review/runs/{create_result.run_id}/snapshots/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/visual_review/runs/{create_result.run_id}/snapshots/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -174,7 +174,7 @@ class TestRunViewSet(VisualReviewTeamScopedTestMixin, APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/visual_review/runs/{create_result.run_id}/snapshots/{query}"
+            f"/v1/projects/{self.team.id}/visual_review/runs/{create_result.run_id}/snapshots/{query}"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -196,7 +196,7 @@ class TestRunViewSet(VisualReviewTeamScopedTestMixin, APIBaseTest):
             team_id=self.team.id,
         )
 
-        response = self.client.post(f"/api/projects/{self.team.id}/visual_review/runs/{create_result.run_id}/complete/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/visual_review/runs/{create_result.run_id}/complete/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["status"], "completed")
@@ -224,7 +224,7 @@ class TestRunViewSet(VisualReviewTeamScopedTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/visual_review/runs/{create_result.run_id}/approve/",
+            f"/v1/projects/{self.team.id}/visual_review/runs/{create_result.run_id}/approve/",
             {
                 "snapshots": [{"identifier": "Button", "new_hash": "new_hash"}],
             },
@@ -264,7 +264,7 @@ class TestRunViewSet(VisualReviewTeamScopedTestMixin, APIBaseTest):
 
         # No PR on this run, so nothing is pushed, but approve_all + finalize marks it approved.
         response = self.client.post(
-            f"/api/projects/{self.team.id}/visual_review/runs/{create_result.run_id}/finalize/",
+            f"/v1/projects/{self.team.id}/visual_review/runs/{create_result.run_id}/finalize/",
             {"approve_all": True},
             format="json",
         )
@@ -314,7 +314,7 @@ class TestRunViewSet(VisualReviewTeamScopedTestMixin, APIBaseTest):
             patch("products.visual_review.backend.tasks.tasks.post_approval_comment.delay") as delay,
         ):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/visual_review/runs/{create_result.run_id}/finalize/",
+                f"/v1/projects/{self.team.id}/visual_review/runs/{create_result.run_id}/finalize/",
                 body,
                 format="json",
             )
@@ -364,7 +364,7 @@ class TestRunViewSet(VisualReviewTeamScopedTestMixin, APIBaseTest):
             self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {key}")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/visual_review/runs/{run_id}/tolerate/",
+            f"/v1/projects/{self.team.id}/visual_review/runs/{run_id}/tolerate/",
             {"snapshot_id": snapshot_id},
             format="json",
         )
@@ -424,7 +424,7 @@ class TestRunViewSet(VisualReviewTeamScopedTestMixin, APIBaseTest):
 
     def _history_url(self, identifier: str, run_type: str = RunType.STORYBOOK) -> str:
         return (
-            f"/api/projects/{self.team.id}/visual_review/repos/{self.vr_project.id}"
+            f"/v1/projects/{self.team.id}/visual_review/repos/{self.vr_project.id}"
             f"/snapshots/{run_type}/{quote(identifier, safe='')}/"
         )
 
@@ -534,13 +534,13 @@ class TestRepoRunsSearch(VisualReviewTeamScopedTestMixin, APIBaseTest):
         )
 
     def _runs_url(self, **params: str) -> str:
-        base = f"/api/projects/{self.team.id}/visual_review/repos/{self.vr_project.id}/runs/"
+        base = f"/v1/projects/{self.team.id}/visual_review/repos/{self.vr_project.id}/runs/"
         if not params:
             return base
         return f"{base}?{urlencode(params)}"
 
     def _team_runs_url(self, **params: str) -> str:
-        base = f"/api/projects/{self.team.id}/visual_review/runs/"
+        base = f"/v1/projects/{self.team.id}/visual_review/runs/"
         if not params:
             return base
         return f"{base}?{urlencode(params)}"
@@ -641,7 +641,7 @@ class TestMalformedUuidReturns400(VisualReviewTeamScopedTestMixin, APIBaseTest):
     )
     def test_malformed_uuid_returns_400_not_500(self, _name: str, path: str) -> None:
         suffix = path.format(bad=self.BAD_UUID)
-        response = self.client.get(f"/api/projects/{self.team.id}/visual_review/{suffix}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/visual_review/{suffix}")
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
 
@@ -660,7 +660,7 @@ class TestRunFinalizePersonalAPIKeyScopes(VisualReviewTeamScopedTestMixin, APIBa
     def test_finalize_allowed_with_visual_review_write_scope(self):
         key = self.create_personal_api_key_with_scopes(["visual_review:write"])
         # Target a non-existent UUID; a 404 proves the scope gate was passed.
-        url = f"/api/projects/{self.team.id}/visual_review/runs/{uuid4()}/finalize/"
+        url = f"/v1/projects/{self.team.id}/visual_review/runs/{uuid4()}/finalize/"
         response = self.client.post(url, {}, format="json", **self._auth(key))
         assert response.status_code != 403, response.json()
 
@@ -673,6 +673,6 @@ class TestRunFinalizePersonalAPIKeyScopes(VisualReviewTeamScopedTestMixin, APIBa
     )
     def test_finalize_rejected_without_visual_review_write_scope(self, _name: str, scopes: list[str]):
         key = self.create_personal_api_key_with_scopes(scopes)
-        url = f"/api/projects/{self.team.id}/visual_review/runs/{uuid4()}/finalize/"
+        url = f"/v1/projects/{self.team.id}/visual_review/runs/{uuid4()}/finalize/"
         response = self.client.post(url, {}, format="json", **self._auth(key))
         assert response.status_code == 403, response.json()

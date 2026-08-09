@@ -27,9 +27,9 @@ class TestCohortsStaffToolsAPI(APIBaseTest):
 
     @parameterized.expand(
         [
-            ("lookup", "get", "/api/cohorts_staff/?cohort_ids=1"),
-            ("stuck", "get", "/api/cohorts_staff/stuck/"),
-            ("recalculate", "post", "/api/cohorts_staff/recalculate/"),
+            ("lookup", "get", "/v1/cohorts_staff/?cohort_ids=1"),
+            ("stuck", "get", "/v1/cohorts_staff/stuck/"),
+            ("recalculate", "post", "/v1/cohorts_staff/recalculate/"),
         ]
     )
     def test_non_staff_user_gets_403(self, _name, method, url):
@@ -51,7 +51,7 @@ class TestCohortsStaffToolsAPI(APIBaseTest):
             count=123,
         )
 
-        response = self.client.get(f"/api/cohorts_staff/?cohort_ids={cohort.id},999999999")
+        response = self.client.get(f"/v1/cohorts_staff/?cohort_ids={cohort.id},999999999")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -70,13 +70,13 @@ class TestCohortsStaffToolsAPI(APIBaseTest):
 
     def test_lookup_rejects_more_than_max_cohorts(self):
         cohort_ids = ",".join(str(i) for i in range(1, 52))
-        response = self.client.get(f"/api/cohorts_staff/?cohort_ids={cohort_ids}")
+        response = self.client.get(f"/v1/cohorts_staff/?cohort_ids={cohort_ids}")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_lookup_includes_deleted_cohorts(self):
         cohort = Cohort.objects.create(team=self.team, name="Deleted Cohort", deleted=True)
 
-        response = self.client.get(f"/api/cohorts_staff/?cohort_ids={cohort.id}")
+        response = self.client.get(f"/v1/cohorts_staff/?cohort_ids={cohort.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         (result,) = response.json()["results"]
@@ -97,7 +97,7 @@ class TestCohortsStaffToolsAPI(APIBaseTest):
             last_calculation=two_hours_ago,
         )
 
-        response = self.client.get("/api/cohorts_staff/stuck/")
+        response = self.client.get("/v1/cohorts_staff/stuck/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -108,7 +108,7 @@ class TestCohortsStaffToolsAPI(APIBaseTest):
     def test_recalculate_bumps_version_and_enqueues_with_initiating_user(self, mock_delay):
         cohort = self._create_cross_org_cohort(is_calculating=True, pending_version=7)
 
-        response = self.client.post("/api/cohorts_staff/recalculate/", {"cohort_ids": [cohort.id, 999999999]})
+        response = self.client.post("/v1/cohorts_staff/recalculate/", {"cohort_ids": [cohort.id, 999999999]})
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
         data = response.json()
@@ -133,7 +133,7 @@ class TestCohortsStaffToolsAPI(APIBaseTest):
     ):
         cohort = Cohort.objects.create(team=self.team, name="Skipped", **cohort_kwargs)
 
-        response = self.client.post("/api/cohorts_staff/recalculate/", {"cohort_ids": [cohort.id]})
+        response = self.client.post("/v1/cohorts_staff/recalculate/", {"cohort_ids": [cohort.id]})
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
         data = response.json()
@@ -144,7 +144,7 @@ class TestCohortsStaffToolsAPI(APIBaseTest):
         mock_delay.assert_not_called()
 
     def test_recalculate_rejects_more_than_max_cohorts(self):
-        response = self.client.post("/api/cohorts_staff/recalculate/", {"cohort_ids": list(range(1, 12))})
+        response = self.client.post("/v1/cohorts_staff/recalculate/", {"cohort_ids": list(range(1, 12))})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @patch("products.cohorts.backend.api.staff_tools.increment_version_and_enqueue_calculate_cohort")
@@ -155,7 +155,7 @@ class TestCohortsStaffToolsAPI(APIBaseTest):
         mock_increment.return_value = False
         cohort = Cohort.objects.create(team=self.team, name="Cohort", pending_version=1)
 
-        response = self.client.post("/api/cohorts_staff/recalculate/", {"cohort_ids": [cohort.id]})
+        response = self.client.post("/v1/cohorts_staff/recalculate/", {"cohort_ids": [cohort.id]})
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
         data = response.json()
@@ -177,7 +177,7 @@ class TestCohortsStaffToolsAPI(APIBaseTest):
 
         mock_increment.side_effect = side_effect
 
-        response = self.client.post("/api/cohorts_staff/recalculate/", {"cohort_ids": [cohort_ok.id, cohort_bad.id]})
+        response = self.client.post("/v1/cohorts_staff/recalculate/", {"cohort_ids": [cohort_ok.id, cohort_bad.id]})
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
         data = response.json()

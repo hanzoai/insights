@@ -13,7 +13,7 @@ A `ProjectSecretAPIKey` is a project-scoped, user-less service credential (`insi
 - Scopes are **project-wide within their resource type** and deliberately ignore object-level access controls (per-resource RBAC).
 - Do not confuse with `TeamSecretTokenAuthentication` — that validates the legacy per-team `Team.secret_api_token` (also `phs_`-prefixed) and is only for feature-flag local evaluation and similar pre-PSAK surfaces. It is pegged for migrating to PSAK at some point.
 
-Keys are managed at `POST /api/environments/:id/project_secret_api_keys` (label + scopes; plaintext value returned once; `roll` action to rotate; max 50 per project; wildcard `*` scope not allowed).
+Keys are managed at `POST /v1/environments/:id/project_secret_api_keys` (label + scopes; plaintext value returned once; `roll` action to rotate; max 50 per project; wildcard `*` scope not allowed).
 
 ## Wiring a viewset action — the checklist
 
@@ -40,7 +40,7 @@ class MyViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
 
 `psak_allowed_actions` is **default-deny**: `APIScopePermission` rejects any PSAK request whose action isn't listed ("This action does not support project secret API key access"). List only the programmatic actions — never CRUD that should stay human-driven.
 
-`APIScopePermission` also enforces team binding automatically: a PSAK only works against `view.team == key.team`, so PSAK auth only makes sense on project-scoped (`/api/environments/:id/...`) routes.
+`APIScopePermission` also enforces team binding automatically: a PSAK only works against `view.team == key.team`, so PSAK auth only makes sense on project-scoped (`/v1/environments/:id/...`) routes.
 
 ### 3. Use PSAK-aware throttles
 

@@ -1,7 +1,7 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, connect, events, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { decodeParams, router, urlToAction } from 'kea-router'
-import insights from 'insights-js'
 
 import api, { CountedPaginatedResponse } from 'lib/api'
 import { TriggerExportProps } from 'lib/components/ExportButton/exporter'
@@ -41,7 +41,7 @@ import type { TeamPublicType, TeamType } from '../../types'
 import {
     asDisplay,
     coercePropertyValue,
-    getHogqlQueryStringForPersonId,
+    getInsightsqlQueryStringForPersonId,
     parsePersonFromInsightsQLRow,
     pickBestPersonDistinctId,
 } from './person-utils'
@@ -392,7 +392,7 @@ export const personsLogic = kea<personsLogicType>([
                             newFilters.include_total = true // The total count is slow, but needed for infinite loading
                             if (props.cohort) {
                                 result = {
-                                    ...(await api.get(`api/cohort/${props.cohort}/persons/?${toParams(newFilters)}`)),
+                                    ...(await api.get(`v1/cohort/${props.cohort}/persons/?${toParams(newFilters)}`)),
                                     offset: 0,
                                 }
                             } else {
@@ -426,7 +426,7 @@ export const personsLogic = kea<personsLogicType>([
                             response = await api.query<InsightsQLQuery>(
                                 {
                                     kind: NodeKind.InsightsQLQuery,
-                                    query: getHogqlQueryStringForPersonId(),
+                                    query: getInsightsqlQueryStringForPersonId(),
                                     values: { id: uuid },
                                     tags: CUSTOMER_ANALYTICS_DEFAULT_QUERY_TAGS,
                                 },
@@ -461,7 +461,7 @@ export const personsLogic = kea<personsLogicType>([
                         if (!values.person?.id) {
                             return null
                         }
-                        const response = await api.get(`api/person/cohorts/?person_id=${values.person?.id}`)
+                        const response = await api.get(`v1/person/cohorts/?person_id=${values.person?.id}`)
                         return response.results
                     },
                 },

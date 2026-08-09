@@ -149,7 +149,7 @@ pub fn login_with_use_cases(host_override: Option<String>, use_cases: Vec<&str>)
 
 fn request_device_code(host: &str) -> Result<DeviceCodeResponse, Error> {
     let client = reqwest::blocking::Client::new();
-    let url = format!("{host}/api/cli-auth/device-code/");
+    let url = format!("{host}/v1/cli-auth/device-code/");
 
     let response = client
         .post(&url)
@@ -207,7 +207,7 @@ fn poll_for_authorization(
     expires_in_seconds: u64,
 ) -> Result<PollResponse, Error> {
     let client = reqwest::blocking::Client::new();
-    let url = format!("{host}/api/cli-auth/poll/");
+    let url = format!("{host}/v1/cli-auth/poll/");
     let max_attempts = (expires_in_seconds / interval_seconds) + 1;
     let poll_interval = Duration::from_secs(interval_seconds);
 

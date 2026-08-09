@@ -31,7 +31,7 @@ class FakeStrategy:
 
 
 class TestSocialSignupAPI(APIBaseTest):
-    """`/api/social_signup`: name the organization once the IdP has authenticated but before the pipeline resumes."""
+    """`/v1/social_signup`: name the organization once the IdP has authenticated but before the pipeline resumes."""
 
     CONFIG_EMAIL = None
 
@@ -42,7 +42,7 @@ class TestSocialSignupAPI(APIBaseTest):
         session.save()
 
         response = self.client.post(
-            "/api/social_signup",
+            "/v1/social_signup",
             {"organization_name": "Hogflix", "first_name": "Max"},
         )
 
@@ -59,7 +59,7 @@ class TestSocialSignupAPI(APIBaseTest):
         session.save()
 
         response = self.client.post(
-            "/api/social_signup",
+            "/v1/social_signup",
             {"organization_name": "Hogflix", "first_name": "Max", "email": "attacker@hanzo.ai"},
         )
 
@@ -71,7 +71,7 @@ class TestSocialSignupAPI(APIBaseTest):
         Organization.objects.all().delete()
 
         response = self.client.post(
-            "/api/social_signup",
+            "/v1/social_signup",
             {"organization_name": "Tech R Us", "first_name": "Max"},
         )
 
@@ -90,7 +90,7 @@ class TestSocialSignupAPI(APIBaseTest):
     def test_refuses_without_an_organization_name(self):
         Organization.objects.all().delete()
 
-        response = self.client.post("/api/social_signup", {})
+        response = self.client.post("/v1/social_signup", {})
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(

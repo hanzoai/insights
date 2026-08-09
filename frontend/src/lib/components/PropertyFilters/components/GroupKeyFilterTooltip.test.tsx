@@ -35,7 +35,7 @@ describe('GroupKeyFilterTooltip', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team/groups/find': ({ request }) => {
+                '/v1/environments/:team/groups/find': ({ request }) => {
                     const groupKey = new URL(request.url).searchParams.get('group_key')
                     const group = MOCK_GROUPS.find((g) => g.group_key === groupKey)
                     return group ? [200, group] : [404, { detail: 'Not found' }]
@@ -86,7 +86,7 @@ describe('GroupKeyFilterTooltip', () => {
         let findCalls = 0
         useMocks({
             get: {
-                '/api/environments/:team/groups/find': ({ request }) => {
+                '/v1/environments/:team/groups/find': ({ request }) => {
                     findCalls++
                     const groupKey = new URL(request.url).searchParams.get('group_key')
                     const group = MOCK_GROUPS.find((g) => g.group_key === groupKey)

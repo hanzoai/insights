@@ -38,7 +38,7 @@ describe('proxyLogic — shouldShowCloudflareOptIn', () => {
         localStorage.clear()
         useMocks({
             get: {
-                [`/api/organizations/${MOCK_ORGANIZATION_ID}/proxy_records`]: proxyRecordsResponse([]),
+                [`/v1/organizations/${MOCK_ORGANIZATION_ID}/proxy_records`]: proxyRecordsResponse([]),
             },
         })
         initKeaTests()
@@ -71,7 +71,7 @@ describe('proxyLogic — shouldShowCloudflareOptIn', () => {
     it('returns false when the organization already has proxy records', async () => {
         useMocks({
             get: {
-                [`/api/organizations/${MOCK_ORGANIZATION_ID}/proxy_records`]: proxyRecordsResponse([mockProxyRecord()]),
+                [`/v1/organizations/${MOCK_ORGANIZATION_ID}/proxy_records`]: proxyRecordsResponse([mockProxyRecord()]),
             },
         })
         await mountLogic()
@@ -120,7 +120,7 @@ describe('proxyLogic — shouldShowCloudflareOptIn', () => {
     it('auto-persists acknowledgment when loadRecordsSuccess returns existing records', async () => {
         useMocks({
             get: {
-                [`/api/organizations/${MOCK_ORGANIZATION_ID}/proxy_records`]: proxyRecordsResponse([mockProxyRecord()]),
+                [`/v1/organizations/${MOCK_ORGANIZATION_ID}/proxy_records`]: proxyRecordsResponse([mockProxyRecord()]),
             },
         })
         await mountLogic()

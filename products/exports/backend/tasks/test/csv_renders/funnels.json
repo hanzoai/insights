@@ -17,7 +17,7 @@
                 "type": "events",
                 "average_conversion_time": null,
                 "median_conversion_time": null,
-                "converted_people_url": "/api/person/funnel/?foo=bar",
+                "converted_people_url": "/v1/person/funnel/?foo=bar",
                 "dropped_people_url": null
             },
             {
@@ -30,8 +30,8 @@
                 "type": "actions",
                 "average_conversion_time": 473.5640151515152,
                 "median_conversion_time": 30,
-                "converted_people_url": "/api/person/funnel/?foo=bar",
-                "dropped_people_url": "/api/person/funnel/?foo=bar"
+                "converted_people_url": "/v1/person/funnel/?foo=bar",
+                "dropped_people_url": "/v1/person/funnel/?foo=bar"
             }
         ]
     }

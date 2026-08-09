@@ -15,12 +15,12 @@ describe('eventDefinitionSchemaLogic', () => {
 
         useMocks({
             get: {
-                '/api/projects/:teamId/event_definitions/:id': {
+                '/v1/projects/:teamId/event_definitions/:id': {
                     id: 'event-def-1',
                     name: 'test_event',
                     enforcement_mode: 'allow',
                 },
-                '/api/projects/:teamId/event_schemas': {
+                '/v1/projects/:teamId/event_schemas': {
                     results: [
                         {
                             id: 'schema-1',
@@ -34,7 +34,7 @@ describe('eventDefinitionSchemaLogic', () => {
                         },
                     ],
                 },
-                '/api/projects/:teamId/schema_property_groups/': {
+                '/v1/projects/:teamId/schema_property_groups/': {
                     results: [
                         {
                             id: 'group-1',
@@ -45,7 +45,7 @@ describe('eventDefinitionSchemaLogic', () => {
                 },
             },
             patch: {
-                '/api/projects/:teamId/schema_property_groups/:id/': () => [
+                '/v1/projects/:teamId/schema_property_groups/:id/': () => [
                     200,
                     {
                         id: 'group-1',
@@ -55,7 +55,7 @@ describe('eventDefinitionSchemaLogic', () => {
                 ],
             },
             post: {
-                '/api/projects/:teamId/schema_property_groups/': () => [
+                '/v1/projects/:teamId/schema_property_groups/': () => [
                     200,
                     {
                         id: 'group-2',

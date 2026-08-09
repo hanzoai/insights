@@ -30,7 +30,7 @@ class TestLiveReportIdsForSourceIds(APIBaseTest):
 
 class TestReportsSourceIdFilter(APIBaseTest):
     def _url(self, query: str) -> str:
-        return f"/api/projects/{self.team.pk}/signals/reports/?{query}"
+        return f"/v1/projects/{self.team.pk}/signals/reports/?{query}"
 
     def setUp(self) -> None:
         super().setUp()

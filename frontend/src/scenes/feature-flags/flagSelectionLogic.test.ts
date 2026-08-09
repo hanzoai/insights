@@ -21,11 +21,11 @@ describe('flagSelectionLogic bulk copy', () => {
         copyRequests = []
         useMocks({
             get: {
-                '/api/projects/:team/feature_flags/': { count: 0, results: [] },
+                '/v1/projects/:team/feature_flags/': { count: 0, results: [] },
             },
             post: {
-                '/api/projects/:team/feature_flags/bulk_keys/': [200, { keys: bulkKeys }],
-                '/api/organizations/:org/feature_flags/copy_flags/': async ({ request }) => {
+                '/v1/projects/:team/feature_flags/bulk_keys/': [200, { keys: bulkKeys }],
+                '/v1/organizations/:org/feature_flags/copy_flags/': async ({ request }) => {
                     const body = (await request.json()) as Record<string, any>
                     copyRequests.push(body)
                     return copyHandler(body)

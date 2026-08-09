@@ -1,8 +1,8 @@
 import { PostgresRouter, PostgresUse } from '~/common/utils/db/postgres'
+import { captureException } from '~/common/utils/insights'
 import { parseJSON } from '~/common/utils/json-parse'
 import { LazyLoader } from '~/common/utils/lazy-loader'
 import { logger } from '~/common/utils/logger'
-import { captureException } from '~/common/utils/insights'
 import { PubSub } from '~/common/utils/pubsub'
 
 import { Team } from '../../../types'
@@ -149,7 +149,10 @@ export class InsightsFunctionManagerService {
         return result
     }
 
-    public async getInsightsFunctionsForTeam(teamId: Team['id'], types: InsightsFunctionTypeType[]): Promise<InsightsFunctionType[]> {
+    public async getInsightsFunctionsForTeam(
+        teamId: Team['id'],
+        types: InsightsFunctionTypeType[]
+    ): Promise<InsightsFunctionType[]> {
         return (await this.getInsightsFunctionsForTeams([teamId], types))[teamId] ?? []
     }
 

@@ -59,7 +59,7 @@ export const experimentTabLogic = kea<experimentTabLogicType>([
             {
                 loadRelatedExperiments: async () => {
                     const response = await api.get(
-                        `api/projects/${values.currentProjectId}/experiments/?feature_flag_id=${props.featureFlagId}`
+                        `v1/projects/${values.currentProjectId}/experiments/?feature_flag_id=${props.featureFlagId}`
                     )
                     return response.results || []
                 },

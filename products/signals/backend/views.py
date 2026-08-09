@@ -354,7 +354,11 @@ class SignalSourceConfigViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
         # SESSION_ANALYSIS_CLUSTER used to upsert a summarization schedule here. That
         # sweep ran the enterprise summarization pipeline, which is not in this fork, so
         # the branch had nothing left to schedule. Data-import sources are unaffected.
-        if instance.enabled and not was_enabled and instance.source_type != SignalSourceConfig.SourceType.SESSION_ANALYSIS_CLUSTER:
+        if (
+            instance.enabled
+            and not was_enabled
+            and instance.source_type != SignalSourceConfig.SourceType.SESSION_ANALYSIS_CLUSTER
+        ):
             self._trigger_data_import_sync(instance)
 
     # Maps source_product to ExternalDataSourceType value for data import sources
@@ -3462,9 +3466,9 @@ class SignalReportArtefactViewSet(
 class SignalUserAutonomyConfigView(APIView):
     """Per-user signal autonomy config (singleton keyed by user).
 
-    GET    /api/users/<id>/signal_autonomy/ → current config (or 404)
-    POST   /api/users/<id>/signal_autonomy/ → create or update
-    DELETE /api/users/<id>/signal_autonomy/ → remove (opt out)
+    GET    /v1/users/<id>/signal_autonomy/ → current config (or 404)
+    POST   /v1/users/<id>/signal_autonomy/ → create or update
+    DELETE /v1/users/<id>/signal_autonomy/ → remove (opt out)
     """
 
     serializer_class = SignalUserAutonomyConfigSerializer

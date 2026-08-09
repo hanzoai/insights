@@ -54,10 +54,10 @@ class TestSignalReportRefundAPI(APIBaseTest):
         self.organization.save()
 
     def _refund_url(self, report_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/{report_id}/refund/"
+        return f"/v1/projects/{self.team.id}/signals/reports/{report_id}/refund/"
 
     def _state_url(self, report_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/{report_id}/state/"
+        return f"/v1/projects/{self.team.id}/signals/reports/{report_id}/state/"
 
     def _report_with_pr(
         self, *, pr_created_at: datetime, report_status: str = SignalReport.Status.READY
@@ -170,7 +170,7 @@ class TestSignalReportRefundAPI(APIBaseTest):
                 billing_exempt_reason=SignalReport.BillingExemptReason.INSIGHTS_HEALTH_CHECK
             )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/signals/reports/{report.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/{report.id}/")
 
         assert response.status_code == 200
         assert response.json()["refund_ineligibility_reason"] == expected
@@ -421,7 +421,7 @@ class TestSignalReportRefundAPI(APIBaseTest):
         archived.save()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/signals/reports/bulk-state/",
+            f"/v1/projects/{self.team.id}/signals/reports/bulk-state/",
             {"ids": [str(refunded.id), str(archived.id)], "state": "potential"},
             format="json",
         )
@@ -437,7 +437,7 @@ class TestSignalReportRefundAPI(APIBaseTest):
     def test_report_response_includes_refund_and_exemption_fields(self, _flag):
         report = self._report_with_pr(pr_created_at=datetime(2026, 6, 10, tzinfo=UTC))
         self._refund(report)
-        response = self.client.get(f"/api/projects/{self.team.id}/signals/reports/{report.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/{report.id}/")
         assert response.status_code == status.HTTP_200_OK
         body = response.json()
         assert body["refund"]["billing_path"] == "credited"
@@ -466,7 +466,7 @@ class TestSignalReportRefundAPI(APIBaseTest):
         _make_pr_run(other_team, foreign, created_at=datetime(2026, 6, 14, tzinfo=UTC))
         _make_refund(foreign, pr_run_created_at=datetime(2026, 6, 14, tzinfo=UTC))
 
-        response = self.client.get(f"/api/projects/{self.team.id}/signals/reports/refund-summary/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/refund-summary/")
         assert response.status_code == status.HTTP_200_OK
         # period_billable_credits: only report_a has a billable PR run in this org (credited
         # refunds stay counted — usage is truthful); the foreign org's billable PR must not leak in.
@@ -482,7 +482,7 @@ class TestSignalReportRefundAPI(APIBaseTest):
         # A PR created today hasn't shipped to billing yet but must count in the live number,
         # and a same-day (excluded-path) refund must visibly un-count it.
         report = self._report_with_pr(pr_created_at=datetime(2026, 6, 15, 8, 0, tzinfo=UTC))
-        url = f"/api/projects/{self.team.id}/signals/reports/refund-summary/"
+        url = f"/v1/projects/{self.team.id}/signals/reports/refund-summary/"
 
         assert self.client.get(url).json()["period_billable_credits"] == 1500
         assert self._refund(report).json()["billing_path"] == "excluded"
@@ -494,7 +494,7 @@ class TestSignalReportRefundAPI(APIBaseTest):
         # same gate the pipeline enforces, not the widget's own usage math.
         from products.signals.backend.quota import SelfDrivingQuotaGate
 
-        url = f"/api/projects/{self.team.id}/signals/reports/refund-summary/"
+        url = f"/v1/projects/{self.team.id}/signals/reports/refund-summary/"
         with patch(
             "products.signals.backend.views.self_driving_quota_gate",
             return_value=SelfDrivingQuotaGate(limited=True, enforced=True),
@@ -508,13 +508,13 @@ class TestSignalReportRefundFlagGate(APIBaseTest):
         # The two flags roll out independently; an enforcement-only org still needs quota_limited
         # from this endpoint, or the widget's paused banner can never render.
         flag_mock.side_effect = lambda key, *args, **kwargs: key == SELF_DRIVING_QUOTA_ENFORCEMENT_FLAG
-        summary = self.client.get(f"/api/projects/{self.team.id}/signals/reports/refund-summary/")
+        summary = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/refund-summary/")
         assert summary.status_code == status.HTTP_200_OK
         assert summary.json()["quota_limited"] is False
         # The refund action itself stays refunds-gated.
         report = _make_report(self.team)
         refund = self.client.post(
-            f"/api/projects/{self.team.id}/signals/reports/{report.id}/refund/", {"reason": "other"}, format="json"
+            f"/v1/projects/{self.team.id}/signals/reports/{report.id}/refund/", {"reason": "other"}, format="json"
         )
         assert refund.status_code == status.HTTP_404_NOT_FOUND
 
@@ -523,10 +523,10 @@ class TestSignalReportRefundFlagGate(APIBaseTest):
     def test_endpoints_unavailable_with_flag_off(self, action_path, _flag):
         report = _make_report(self.team)
         if action_path == "refund":
-            url = f"/api/projects/{self.team.id}/signals/reports/{report.id}/refund/"
+            url = f"/v1/projects/{self.team.id}/signals/reports/{report.id}/refund/"
             response = self.client.post(url, {"reason": "other"}, format="json")
         else:
-            url = f"/api/projects/{self.team.id}/signals/reports/refund-summary/"
+            url = f"/v1/projects/{self.team.id}/signals/reports/refund-summary/"
             response = self.client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert not SignalReportRefund.objects.filter(report=report).exists()

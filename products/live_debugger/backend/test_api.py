@@ -15,7 +15,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
             "condition": "user_id == '12345'",
         }
         response = self.client.post(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/",
             data=data,
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -33,7 +33,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
             "enabled": True,
         }
         response = self.client.post(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/",
             data=data,
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -52,14 +52,14 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
             "enabled": True,
         }
         response1 = self.client.post(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/",
             data=data,
         )
         self.assertEqual(response1.status_code, status.HTTP_201_CREATED)
 
         with transaction.atomic():
             response2 = self.client.post(
-                f"/api/projects/{self.team.id}/live_debugger_breakpoints/",
+                f"/v1/projects/{self.team.id}/live_debugger_breakpoints/",
                 data=data,
             )
             self.assertNotEqual(response2.status_code, status.HTTP_201_CREATED)
@@ -90,13 +90,13 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         }
 
         response1 = self.client.post(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/",
             data=data1,
         )
         self.assertEqual(response1.status_code, status.HTTP_201_CREATED)
 
         response2 = self.client.post(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/",
             data=data2,
         )
         self.assertEqual(response2.status_code, status.HTTP_201_CREATED)
@@ -120,7 +120,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
             enabled=False,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/live_debugger_breakpoints/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/live_debugger_breakpoints/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 2)
 
@@ -149,7 +149,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/?repository=Insights/insights"
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/?repository=Insights/insights"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
@@ -180,7 +180,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
             enabled=True,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/live_debugger_breakpoints/?filename=file1.py")
+        response = self.client.get(f"/v1/projects/{self.team.id}/live_debugger_breakpoints/?filename=file1.py")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(len(results), 2)
@@ -211,7 +211,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/?repository=Insights/insights&filename=file1.py"
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/?repository=Insights/insights&filename=file1.py"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
@@ -230,7 +230,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
             condition="x > 10",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/live_debugger_breakpoints/{breakpoint.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/live_debugger_breakpoints/{breakpoint.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["filename"], breakpoint.filename)
         self.assertEqual(response.json()["line_number"], breakpoint.line_number)
@@ -250,7 +250,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
             "condition": "y < 5",
         }
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/{breakpoint.id}/",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/{breakpoint.id}/",
             data=update_data,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -270,7 +270,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
             enabled=True,
         )
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/live_debugger_breakpoints/{breakpoint.id}/")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/live_debugger_breakpoints/{breakpoint.id}/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         self.assertFalse(LiveDebuggerBreakpoint.objects.filter(id=breakpoint.id).exists())
@@ -291,7 +291,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
             enabled=False,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/live_debugger_breakpoints/active/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/live_debugger_breakpoints/active/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -319,7 +319,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/active/",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/active/",
             {"filename": "file1.py"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -349,7 +349,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/active/",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/active/",
             {"repository": "Insights/insights"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -379,7 +379,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/active/",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/active/",
             {"enabled": "false"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -403,7 +403,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         )
 
         # Try to access it
-        response = self.client.get(f"/api/projects/{self.team.id}/live_debugger_breakpoints/{other_breakpoint.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/live_debugger_breakpoints/{other_breakpoint.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_list_only_shows_own_team_breakpoints(self):
@@ -426,7 +426,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
             enabled=True,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/live_debugger_breakpoints/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/live_debugger_breakpoints/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Should only see own team's breakpoint
@@ -435,7 +435,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
 
     def test_breakpoint_hits_with_defaults(self):
         """Test breakpoint_hits endpoint with no parameters (should use defaults)"""
-        response = self.client.get(f"/api/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("results", response.json())
         self.assertIn("count", response.json())
@@ -444,7 +444,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
     def test_breakpoint_hits_with_valid_parameters(self):
         """Test breakpoint_hits endpoint with valid limit and offset"""
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/",
             {"limit": 50, "offset": 10},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -459,7 +459,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
             enabled=True,
         )
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/?breakpoint_ids={str(breakpoint.id)}",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/?breakpoint_ids={str(breakpoint.id)}",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -489,14 +489,14 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
 
         # Request hits for first two breakpoints only using repeated query params
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/?breakpoint_ids={str(breakpoint1.id)}&breakpoint_ids={str(breakpoint2.id)}",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/?breakpoint_ids={str(breakpoint1.id)}&breakpoint_ids={str(breakpoint2.id)}",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_breakpoint_hits_invalid_breakpoint_id(self):
         """Test breakpoint_hits with non-UUID in breakpoint_ids"""
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/?breakpoint_ids=not-a-uuid",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/?breakpoint_ids=not-a-uuid",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         # ListField validation returns breakpoint_ids__0 for the first item
@@ -505,7 +505,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
     def test_breakpoint_hits_limit_too_high(self):
         """Test breakpoint_hits with limit > 1000"""
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/",
             {"limit": 1001},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -514,7 +514,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
     def test_breakpoint_hits_limit_too_low(self):
         """Test breakpoint_hits with limit < 1"""
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/",
             {"limit": 0},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -523,7 +523,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
     def test_breakpoint_hits_negative_limit(self):
         """Test breakpoint_hits with negative limit"""
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/",
             {"limit": -5},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -532,7 +532,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
     def test_breakpoint_hits_negative_offset(self):
         """Test breakpoint_hits with negative offset"""
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/",
             {"offset": -1},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -541,7 +541,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
     def test_breakpoint_hits_invalid_limit_type(self):
         """Test breakpoint_hits with non-integer limit"""
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/",
             {"limit": "not-a-number"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -550,7 +550,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
     def test_breakpoint_hits_invalid_offset_type(self):
         """Test breakpoint_hits with non-integer offset"""
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/",
             {"offset": "not-a-number"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -559,7 +559,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
     def test_breakpoint_hits_limit_at_max_boundary(self):
         """Test breakpoint_hits with limit exactly at max (1000)"""
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/",
             {"limit": 1000},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -567,7 +567,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
     def test_breakpoint_hits_limit_at_min_boundary(self):
         """Test breakpoint_hits with limit exactly at min (1)"""
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/",
             {"limit": 1},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -582,7 +582,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
             enabled=True,
         )
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/active/",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/active/",
             {"enabled": True},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -608,7 +608,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
             enabled=False,
         )
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/active/",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/active/",
             {"enabled": False},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -636,7 +636,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
 
         # Try to request hits for the other team's breakpoint from our team's context
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/?breakpoint_ids={str(other_breakpoint.id)}",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/?breakpoint_ids={str(other_breakpoint.id)}",
         )
 
         # Should return 200 with empty results (filtered out)
@@ -651,7 +651,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         fake_uuid = str(uuid.uuid4())
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/?breakpoint_ids={fake_uuid}",
+            f"/v1/projects/{self.team.id}/live_debugger_breakpoints/breakpoint_hits/?breakpoint_ids={fake_uuid}",
         )
 
         # Should return 200 with empty results (filtered out)
@@ -680,7 +680,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         )
 
         # Request active breakpoints from our team's context
-        response = self.client.get(f"/api/projects/{self.team.id}/live_debugger_breakpoints/active/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/live_debugger_breakpoints/active/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -715,7 +715,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         )
 
         # Request from our team's context
-        response = self.client.get(f"/api/projects/{self.team.id}/live_debugger_breakpoints/active/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/live_debugger_breakpoints/active/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -742,7 +742,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         )
 
         # Try to access via their team's URL path (different org)
-        response = self.client.get(f"/api/projects/{other_team.id}/live_debugger_breakpoints/breakpoint_hits/")
+        response = self.client.get(f"/v1/projects/{other_team.id}/live_debugger_breakpoints/breakpoint_hits/")
 
         # Should be denied - cannot access different organization
         self.assertIn(response.status_code, [status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND])
@@ -763,7 +763,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         )
 
         # Try to access other org's breakpoints list via their URL
-        response = self.client.get(f"/api/projects/{other_team.id}/live_debugger_breakpoints/")
+        response = self.client.get(f"/v1/projects/{other_team.id}/live_debugger_breakpoints/")
 
         # Should be denied - cannot access different organization
         self.assertIn(response.status_code, [status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND])
@@ -784,7 +784,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         )
 
         # Try to access via their URL path (different org)
-        response = self.client.get(f"/api/projects/{other_team.id}/live_debugger_breakpoints/active/")
+        response = self.client.get(f"/v1/projects/{other_team.id}/live_debugger_breakpoints/active/")
 
         # Should be denied - cannot access different organization
         self.assertIn(response.status_code, [status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND])
@@ -801,12 +801,12 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
             enabled=True,
         )
 
-        response = self.client.get(f"/api/projects/{other_team.id}/live_debugger_breakpoints/")
+        response = self.client.get(f"/v1/projects/{other_team.id}/live_debugger_breakpoints/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 1)
         self.assertEqual(response.json()["results"][0]["filename"], "shared_file.py")
 
-        response = self.client.get(f"/api/projects/{other_team.id}/live_debugger_breakpoints/{other_breakpoint.id}/")
+        response = self.client.get(f"/v1/projects/{other_team.id}/live_debugger_breakpoints/{other_breakpoint.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["filename"], "shared_file.py")
 
@@ -814,7 +814,6 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         """With advanced permissions, users cannot access private teams without explicit access"""
         from insights.constants import AvailableFeature
         from insights.models import OrganizationMembership
-
         from insights.models.ee_models import AccessControl
 
         self.organization.available_product_features = [
@@ -843,14 +842,14 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
         self.organization_membership.save()
 
-        response = self.client.get(f"/api/projects/{other_team.id}/live_debugger_breakpoints/")
+        response = self.client.get(f"/v1/projects/{other_team.id}/live_debugger_breakpoints/")
         self.assertIn(response.status_code, [status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND])
 
-        response = self.client.get(f"/api/projects/{other_team.id}/live_debugger_breakpoints/{private_breakpoint.id}/")
+        response = self.client.get(f"/v1/projects/{other_team.id}/live_debugger_breakpoints/{private_breakpoint.id}/")
         self.assertIn(response.status_code, [status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND])
 
         response = self.client.get(
-            f"/api/projects/{other_team.id}/live_debugger_breakpoints/breakpoint_hits/?breakpoint_ids={str(private_breakpoint.id)}",
+            f"/v1/projects/{other_team.id}/live_debugger_breakpoints/breakpoint_hits/?breakpoint_ids={str(private_breakpoint.id)}",
         )
         self.assertIn(response.status_code, [status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND])
 
@@ -858,7 +857,6 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         """With advanced permissions, users can access private teams when granted explicit access"""
         from insights.constants import AvailableFeature
         from insights.models import OrganizationMembership
-
         from insights.models.ee_models import AccessControl
 
         self.organization.available_product_features = [
@@ -896,11 +894,11 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
         self.organization_membership.save()
 
-        response = self.client.get(f"/api/projects/{other_team.id}/live_debugger_breakpoints/")
+        response = self.client.get(f"/v1/projects/{other_team.id}/live_debugger_breakpoints/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 1)
 
-        response = self.client.get(f"/api/projects/{other_team.id}/live_debugger_breakpoints/{private_breakpoint.id}/")
+        response = self.client.get(f"/v1/projects/{other_team.id}/live_debugger_breakpoints/{private_breakpoint.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["filename"], "accessible_private_file.py")
 
@@ -908,7 +906,6 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         """Org admins can access private teams even without explicit access"""
         from insights.constants import AvailableFeature
         from insights.models import OrganizationMembership
-
         from insights.models.ee_models import AccessControl
 
         self.organization.available_product_features = [
@@ -937,12 +934,12 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
 
-        response = self.client.get(f"/api/projects/{other_team.id}/live_debugger_breakpoints/")
+        response = self.client.get(f"/v1/projects/{other_team.id}/live_debugger_breakpoints/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 1)
 
         response = self.client.get(
-            f"/api/projects/{other_team.id}/live_debugger_breakpoints/{admin_accessible_breakpoint.id}/"
+            f"/v1/projects/{other_team.id}/live_debugger_breakpoints/{admin_accessible_breakpoint.id}/"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["filename"], "admin_accessible_file.py")

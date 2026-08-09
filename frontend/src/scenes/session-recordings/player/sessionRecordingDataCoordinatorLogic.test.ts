@@ -96,7 +96,7 @@ describe('sessionRecordingDataCoordinatorLogic', () => {
             logic.unmount()
             overrideSessionRecordingMocks({
                 getMocks: {
-                    '/api/environments/:team_id/session_recordings/:id': () => [500, { status: 0 }],
+                    '/v1/environments/:team_id/session_recordings/:id': () => [500, { status: 0 }],
                 },
             })
             const metaLogic = sessionRecordingMetaLogic({
@@ -134,7 +134,7 @@ describe('sessionRecordingDataCoordinatorLogic', () => {
             logic.unmount()
             overrideSessionRecordingMocks({
                 getMocks: {
-                    '/api/environments/:team_id/session_recordings/:id': () => [404, { detail: 'Not found.' }],
+                    '/v1/environments/:team_id/session_recordings/:id': () => [404, { detail: 'Not found.' }],
                 },
             })
             const metaLogic = sessionRecordingMetaLogic({
@@ -156,7 +156,7 @@ describe('sessionRecordingDataCoordinatorLogic', () => {
             logic.unmount()
             overrideSessionRecordingMocks({
                 getMocks: {
-                    '/api/environments/:team_id/session_recordings/:id/snapshots': () => [500, { status: 0 }],
+                    '/v1/environments/:team_id/session_recordings/:id/snapshots': () => [500, { status: 0 }],
                 },
             })
             logic.mount()
@@ -248,7 +248,7 @@ describe('sessionRecordingDataCoordinatorLogic', () => {
             // response used to leave fullyLoaded false with nothing left to re-trigger the report
             overrideSessionRecordingMocks({
                 postMocks: {
-                    '/api/environments/:team_id/query/:kind': async ({ request }) => {
+                    '/v1/environments/:team_id/query/:kind': async ({ request }) => {
                         const body = (await request.json()) as Record<string, any>
                         const query = body.query?.query || ''
                         if (query.includes('uuid in')) {
@@ -295,7 +295,7 @@ describe('sessionRecordingDataCoordinatorLogic', () => {
             snapshotLogic?.unmount()
             setupSessionRecordingTest({
                 getMocks: {
-                    '/api/environments/:team_id/session_recordings/:id/snapshots': async ({ request }) => {
+                    '/v1/environments/:team_id/session_recordings/:id/snapshots': async ({ request }) => {
                         const sourceParam = new URL(request.url).searchParams.get('source')
                         if (sourceParam === 'blob_v2' || sourceParam === 'blob') {
                             return new HttpResponse(jsonLines)
@@ -303,7 +303,7 @@ describe('sessionRecordingDataCoordinatorLogic', () => {
                         return [200, { sources: [BLOB_SOURCE_V2] }]
                     },
                     ...(metaOverride
-                        ? { '/api/environments/:team_id/session_recordings/:id': () => [200, metaOverride] }
+                        ? { '/v1/environments/:team_id/session_recordings/:id': () => [200, metaOverride] }
                         : {}),
                 },
             })

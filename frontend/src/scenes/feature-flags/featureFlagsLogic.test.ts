@@ -314,7 +314,7 @@ describe('updateFeatureFlag 409 handling', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:projectId/feature_flags/': () => [
+                '/v1/projects/:projectId/feature_flags/': () => [
                     200,
                     {
                         results: [{ id: 1, key: 'test-flag', active: false }],
@@ -380,7 +380,7 @@ describe('updateFeatureFlagArchived', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:projectId/feature_flags/': () => [
+                '/v1/projects/:projectId/feature_flags/': () => [
                     200,
                     {
                         results: [{ id: 1, key: 'test-flag', active: true }],
@@ -468,7 +468,7 @@ describe('displayedFlags stability while a load is in flight', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:projectId/feature_flags/': () => [
+                '/v1/projects/:projectId/feature_flags/': () => [
                     200,
                     {
                         results: [
@@ -537,7 +537,7 @@ describe('displayedFlags stability while a load is in flight', () => {
         let requestCount = 0
         useMocks({
             get: {
-                '/api/projects/:projectId/feature_flags/': async () => {
+                '/v1/projects/:projectId/feature_flags/': async () => {
                     requestCount += 1
                     if (requestCount === 1) {
                         await staleResponseReleased

@@ -1268,7 +1268,7 @@ export const ExperimentMetricMathTypeApi = {
     Avg: 'avg',
     Dau: 'dau',
     UniqueGroup: 'unique_group',
-    Hogql: 'insightsql',
+    Insightsql: 'insightsql',
 } as const
 
 export type MathGroupTypeIndexApi = (typeof MathGroupTypeIndexApi)[keyof typeof MathGroupTypeIndexApi]

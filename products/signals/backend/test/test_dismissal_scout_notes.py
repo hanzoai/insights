@@ -34,10 +34,10 @@ UNFORWARDED_NOTE = "feedback that never made it to a note"
 
 class TestDismissalScoutNotes(APIBaseTest):
     def _state_url(self, report_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/{report_id}/state/"
+        return f"/v1/projects/{self.team.id}/signals/reports/{report_id}/state/"
 
     def _bulk_state_url(self) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/bulk-state/"
+        return f"/v1/projects/{self.team.id}/signals/reports/bulk-state/"
 
     def _create_report(self, title: str = "Checkout errors spiked") -> SignalReport:
         return SignalReport.objects.create(
@@ -270,7 +270,7 @@ class TestDismissalScoutNotes(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{environment.id}/signals/reports/{report.id}/state/",
+            f"/v1/projects/{environment.id}/signals/reports/{report.id}/state/",
             data=json.dumps({"state": "suppressed", "dismissal_note": "noise from the staging env"}),
             content_type="application/json",
         )
@@ -301,7 +301,7 @@ class TestDismissalScoutNotes(APIBaseTest):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {raw_key}")
 
         response = self.client.post(
-            f"/api/projects/{environment.id}/signals/reports/{report.id}/state/",
+            f"/v1/projects/{environment.id}/signals/reports/{report.id}/state/",
             data=json.dumps({"state": "suppressed", "dismissal_note": "steering the parent's fleet"}),
             content_type="application/json",
         )

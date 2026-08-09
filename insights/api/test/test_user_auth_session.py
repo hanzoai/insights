@@ -26,7 +26,7 @@ from insights.session.risk import RiskFlags
 
 class TestSessionEngineActivity(APIBaseTest):
     def test_authenticated_request_attributes_session_to_user(self):
-        self.client.get("/api/users/@me/")
+        self.client.get("/v1/users/@me/")
 
         row = Session.objects.get(session_key=self.client.session.session_key)
         self.assertEqual(row.user_id, self.user.pk)
@@ -34,12 +34,12 @@ class TestSessionEngineActivity(APIBaseTest):
     def test_anonymous_request_attributes_nothing(self):
         self.client.logout()
 
-        self.client.get("/api/users/@me/")
+        self.client.get("/v1/users/@me/")
 
         self.assertFalse(Session.objects.filter(user_id=self.user.pk).exists())
 
     def test_logout_removes_the_session_row(self):
-        self.client.get("/api/users/@me/")
+        self.client.get("/v1/users/@me/")
         key = self.client.session.session_key
         self.assertTrue(Session.objects.filter(session_key=key).exists())
 
@@ -62,12 +62,12 @@ class TestUserAuthSessionAPI(APIBaseTest):
         return Session.objects.get(session_key=store.session_key)
 
     def _revoke_url(self, session: Session) -> str:
-        return f"/api/users/@me/login_sessions/{session_public_id(session.session_key)}/"
+        return f"/v1/users/@me/login_sessions/{session_public_id(session.session_key)}/"
 
     def test_list_returns_sessions_with_current_flag(self):
         self._other_session()
 
-        response = self.client.get("/api/users/@me/login_sessions/")
+        response = self.client.get("/v1/users/@me/login_sessions/")
 
         self.assertEqual(response.status_code, 200, response.content)
         data = response.json()
@@ -81,7 +81,7 @@ class TestUserAuthSessionAPI(APIBaseTest):
         store[settings.SESSION_COOKIE_CREATED_AT_KEY] = 1_700_000_000  # 2023-11-14T22:13:20+00:00
         store.save()
 
-        data = self.client.get("/api/users/@me/login_sessions/").json()
+        data = self.client.get("/v1/users/@me/login_sessions/").json()
         entry = next(s for s in data if s["id"] == str(session_public_id(session.session_key)))
 
         self.assertEqual(entry["created_at"], "2023-11-14T22:13:20+00:00")
@@ -90,7 +90,7 @@ class TestUserAuthSessionAPI(APIBaseTest):
         # _other_session() never runs through SessionAgeMiddleware, so it carries no created-at stamp.
         session = self._other_session()
 
-        data = self.client.get("/api/users/@me/login_sessions/").json()
+        data = self.client.get("/v1/users/@me/login_sessions/").json()
         entry = next(s for s in data if s["id"] == str(session_public_id(session.session_key)))
 
         self.assertIsNone(entry["created_at"])
@@ -98,7 +98,7 @@ class TestUserAuthSessionAPI(APIBaseTest):
     def test_list_excludes_sensitive_fields(self):
         self._other_session()
 
-        data = self.client.get("/api/users/@me/login_sessions/").json()
+        data = self.client.get("/v1/users/@me/login_sessions/").json()
 
         for entry in data:
             self.assertNotIn("session_key", entry)
@@ -109,7 +109,7 @@ class TestUserAuthSessionAPI(APIBaseTest):
         stale = self._other_session()
         Session.objects.filter(session_key=stale.session_key).update(expire_date=timezone.now() - timedelta(days=1))
 
-        data = self.client.get("/api/users/@me/login_sessions/").json()
+        data = self.client.get("/v1/users/@me/login_sessions/").json()
 
         self.assertNotIn(str(session_public_id(stale.session_key)), [s["id"] for s in data])
 
@@ -117,7 +117,7 @@ class TestUserAuthSessionAPI(APIBaseTest):
         other_user = User.objects.create(email="someone-else@example.com", distinct_id="other")
         self._other_session(other_user)
 
-        data = self.client.get("/api/users/@me/login_sessions/").json()
+        data = self.client.get("/v1/users/@me/login_sessions/").json()
 
         self.assertEqual(len(data), 1)
         self.assertTrue(data[0]["is_current"])
@@ -143,18 +143,18 @@ class TestUserAuthSessionAPI(APIBaseTest):
         first = self._other_session()
         second = self._other_session()
 
-        response = self.client.post("/api/users/@me/login_sessions/revoke_others/")
+        response = self.client.post("/v1/users/@me/login_sessions/revoke_others/")
 
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(response.json()["revoked_count"], 2)
         self.assertFalse(Session.objects.filter(session_key__in=[first.session_key, second.session_key]).exists())
-        self.assertEqual(self.client.get("/api/users/@me/").status_code, 200)  # current still works
+        self.assertEqual(self.client.get("/v1/users/@me/").status_code, 200)  # current still works
 
     def test_personal_api_key_cannot_list_login_sessions(self):
         key = self.create_personal_api_key_with_scopes(["user:read"])
         self.client.logout()
 
-        response = self.client.get("/api/users/@me/login_sessions/", HTTP_AUTHORIZATION=f"Bearer {key}")
+        response = self.client.get("/v1/users/@me/login_sessions/", HTTP_AUTHORIZATION=f"Bearer {key}")
 
         self.assertIn(response.status_code, (401, 403))
 
@@ -180,7 +180,7 @@ class TestUserAuthSessionAPI(APIBaseTest):
         other = self._other_session()
         self._make_session_stale()
 
-        response = self.client.post("/api/users/@me/login_sessions/revoke_others/")
+        response = self.client.post("/v1/users/@me/login_sessions/revoke_others/")
 
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()["code"], "sensitive_action_required_reauth")
@@ -190,7 +190,7 @@ class TestUserAuthSessionAPI(APIBaseTest):
         self._other_session()
         self._make_session_stale()
 
-        response = self.client.get("/api/users/@me/login_sessions/")
+        response = self.client.get("/v1/users/@me/login_sessions/")
 
         self.assertEqual(response.status_code, 200, response.content)
 
@@ -212,7 +212,7 @@ class TestUserAuthSessionAPI(APIBaseTest):
         session["step_up_required"] = True
         session.save()
 
-        self.assertEqual(self.client.get("/api/users/@me/login_sessions/").status_code, 200)
+        self.assertEqual(self.client.get("/v1/users/@me/login_sessions/").status_code, 200)
 
     def test_step_up_blocks_allowlisted_field_write(self):
         # The low-risk field allow-list (theme_mode etc.) must not bypass a step-up: the anomaly gate
@@ -221,7 +221,7 @@ class TestUserAuthSessionAPI(APIBaseTest):
         session["step_up_required"] = True
         session.save()
 
-        response = self.client.patch("/api/users/@me/", {"theme_mode": "dark"})
+        response = self.client.patch("/v1/users/@me/", {"theme_mode": "dark"})
 
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()["code"], "sensitive_action_required_reauth")
@@ -231,20 +231,20 @@ class TestUserAuthSessionAPI(APIBaseTest):
         # the step-up reordering didn't break the normal allow_if_only_fields path.
         self._make_session_stale()
 
-        response = self.client.patch("/api/users/@me/", {"theme_mode": "dark"})
+        response = self.client.patch("/v1/users/@me/", {"theme_mode": "dark"})
 
         self.assertEqual(response.status_code, 200, response.content)
 
     def test_step_up_nulls_reported_sensitive_session_expiry(self):
         # The API-reported expiry must reflect that sensitive actions are blocked now, not advertise a
         # fresh window the permission layer will reject (the two used to disagree).
-        self.assertIsNotNone(self.client.get("/api/users/@me/").json()["sensitive_session_expires_at"])
+        self.assertIsNotNone(self.client.get("/v1/users/@me/").json()["sensitive_session_expires_at"])
 
         session = self.client.session
         session["step_up_required"] = True
         session.save()
 
-        self.assertIsNone(self.client.get("/api/users/@me/").json()["sensitive_session_expires_at"])
+        self.assertIsNone(self.client.get("/v1/users/@me/").json()["sensitive_session_expires_at"])
 
     @override_settings(SESSION_RISK_ENABLED=True)
     @patch("insights.session.risk.risk_flags", return_value=RiskFlags(detection=True, step_up=False, session_end=True))
@@ -268,7 +268,7 @@ class TestUserAuthSessionAPI(APIBaseTest):
         )
 
         response = self.client.get(
-            "/api/users/@me/",
+            "/v1/users/@me/",
             headers={
                 "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/119.0"
             },
@@ -293,11 +293,11 @@ class TestUserAuthSessionAPI(APIBaseTest):
         victim_user = User.objects.create(email="victim-staff@example.com", distinct_id="victim-staff")
         victim = self._other_session(victim_user)
 
-        listed = self.client.get(f"/api/users/{victim_user.uuid}/login_sessions/").json()
+        listed = self.client.get(f"/v1/users/{victim_user.uuid}/login_sessions/").json()
         self.assertNotIn(str(session_public_id(victim.session_key)), [s["id"] for s in listed])
 
         response = self.client.delete(
-            f"/api/users/{victim_user.uuid}/login_sessions/{session_public_id(victim.session_key)}/"
+            f"/v1/users/{victim_user.uuid}/login_sessions/{session_public_id(victim.session_key)}/"
         )
         self.assertEqual(response.status_code, 404)
         self.assertTrue(Session.objects.filter(session_key=victim.session_key).exists())
@@ -311,7 +311,7 @@ class TestPostLoginReauthBaseline(APIBaseTest):
         self.engine = import_module(settings.SESSION_ENGINE)
 
     def _login(self):
-        return self.client.post("/api/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
+        return self.client.post("/v1/login", {"email": self.CONFIG_EMAIL, "password": self.CONFIG_PASSWORD})
 
     def test_login_sets_last_reauth_at(self):
         before = time.time()
@@ -379,20 +379,20 @@ class TestUserAuthSessionImpersonation(APIBaseTest):
     def test_get_list_allowed_while_impersonating(self):
         self._impersonate()
 
-        response = self.client.get("/api/users/@me/login_sessions/")
+        response = self.client.get("/v1/users/@me/login_sessions/")
 
         self.assertEqual(response.status_code, 200, response.content)
 
     def test_revoke_blocked_while_impersonating(self):
         self._impersonate()
 
-        response = self.client.delete("/api/users/@me/login_sessions/00000000-0000-0000-0000-000000000000/")
+        response = self.client.delete("/v1/users/@me/login_sessions/00000000-0000-0000-0000-000000000000/")
 
         self.assertEqual(response.status_code, 403, response.content)
 
     def test_revoke_others_blocked_while_impersonating(self):
         self._impersonate()
 
-        response = self.client.post("/api/users/@me/login_sessions/revoke_others/")
+        response = self.client.post("/v1/users/@me/login_sessions/revoke_others/")
 
         self.assertEqual(response.status_code, 403, response.content)

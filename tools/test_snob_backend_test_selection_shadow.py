@@ -37,7 +37,7 @@ class TestSnobBackendTestSelectionShadow(unittest.TestCase):
                         "",
                         "def test_feature_flags_endpoint():",
                         "    client = APIClient()",
-                        "    client.get('/api/projects/1/feature_flags/')",
+                        "    client.get('/v1/projects/1/feature_flags/')",
                     ]
                 )
             )
@@ -62,7 +62,7 @@ class TestSnobBackendTestSelectionShadow(unittest.TestCase):
                 "\n".join(
                     [
                         "def test_feature_flags_endpoint(api_client):",
-                        "    api_client.get('/api/projects/1/feature_flags/')",
+                        "    api_client.get('/v1/projects/1/feature_flags/')",
                     ]
                 )
             )

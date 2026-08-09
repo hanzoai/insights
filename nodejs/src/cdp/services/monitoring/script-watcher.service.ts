@@ -2,9 +2,9 @@ import { Counter } from 'prom-client'
 
 import { RedisClientPipeline, RedisV2, getRedisPipelineResults } from '~/common/redis/redis-v2'
 import { KeyedRateLimiterService } from '~/common/services/keyed-rate-limiter.service'
+import { captureTeamEvent } from '~/common/utils/insights'
 import { LazyLoader } from '~/common/utils/lazy-loader'
 import { logger } from '~/common/utils/logger'
-import { captureTeamEvent } from '~/common/utils/insights'
 import { TeamManager } from '~/common/utils/team-manager'
 
 import {
@@ -33,7 +33,8 @@ export interface HogWatcherConfig {
     observeResultsBufferMaxResults: number
 }
 
-export const BASE_REDIS_KEY = process.env.NODE_ENV == 'test' ? '@insights-test/script-watcher-2' : '@hanzo/script-watcher-2'
+export const BASE_REDIS_KEY =
+    process.env.NODE_ENV == 'test' ? '@insights-test/script-watcher-2' : '@hanzo/script-watcher-2'
 const REDIS_KEY_TOKENS = `${BASE_REDIS_KEY}/tokens`
 const REDIS_KEY_STATE = `${BASE_REDIS_KEY}/state`
 const REDIS_KEY_STATE_LOCK = `${BASE_REDIS_KEY}/state-lock`

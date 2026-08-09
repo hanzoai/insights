@@ -33,7 +33,7 @@ describe('aiObservabilitySessionEvaluationsLogic', () => {
     beforeEach(() => {
         useMocks({
             post: {
-                '/api/environments/:team_id/query/:kind': () => [200, { results: [SESSION_VERDICT_ROW] }],
+                '/v1/environments/:team_id/query/:kind': () => [200, { results: [SESSION_VERDICT_ROW] }],
             },
         })
         initKeaTests()
@@ -80,7 +80,7 @@ describe('aiObservabilitySessionEvaluationsLogic', () => {
     it('clears verdicts when the query fails', async () => {
         useMocks({
             post: {
-                '/api/environments/:team_id/query/:kind': () => [500, { error: 'nope' }],
+                '/v1/environments/:team_id/query/:kind': () => [500, { error: 'nope' }],
             },
         })
 

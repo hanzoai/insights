@@ -35,7 +35,7 @@ describe('InsightsPermissionError', () => {
         const error = new InsightsPermissionError({
             detail: "API key missing required scope 'user:read'",
             missingScope: 'user:read',
-            url: 'https://us.hanzo.ai/api/users/@me/',
+            url: 'https://us.hanzo.ai/v1/users/@me/',
             method: 'GET',
         })
 
@@ -47,7 +47,7 @@ describe('InsightsPermissionError', () => {
     it('builds message without missing scope', () => {
         const error = new InsightsPermissionError({
             detail: 'you do not have access to this team',
-            url: 'https://us.hanzo.ai/api/projects/47074/',
+            url: 'https://us.hanzo.ai/v1/projects/47074/',
             method: 'GET',
         })
 
@@ -61,7 +61,7 @@ describe('formatPermissionErrorMessage', () => {
         const error = new InsightsPermissionError({
             detail: "API key missing required scope 'user:read'",
             missingScope: 'user:read',
-            url: 'https://us.hanzo.ai/api/users/@me/',
+            url: 'https://us.hanzo.ai/v1/users/@me/',
             method: 'GET',
         })
 
@@ -69,13 +69,13 @@ describe('formatPermissionErrorMessage', () => {
 
         expect(text).toContain("'user:read'")
         expect(text).toContain('MCP Server')
-        expect(text).toContain('GET https://us.hanzo.ai/api/users/@me/')
+        expect(text).toContain('GET https://us.hanzo.ai/v1/users/@me/')
     })
 
     it('falls back to generic remediation when no scope is parsed', () => {
         const error = new InsightsPermissionError({
             detail: 'team access denied',
-            url: 'https://us.hanzo.ai/api/projects/47074/',
+            url: 'https://us.hanzo.ai/v1/projects/47074/',
             method: 'GET',
         })
 
@@ -91,7 +91,7 @@ describe('buildInsufficientScopeChallenge', () => {
         const error = new InsightsPermissionError({
             detail: "API key missing required scope 'user:read'",
             missingScope: 'user:read',
-            url: 'https://us.hanzo.ai/api/users/@me/',
+            url: 'https://us.hanzo.ai/v1/users/@me/',
             method: 'GET',
         })
 
@@ -103,7 +103,7 @@ describe('buildInsufficientScopeChallenge', () => {
     it('omits scope when unknown', () => {
         const error = new InsightsPermissionError({
             detail: 'team access denied',
-            url: 'https://us.hanzo.ai/api/projects/1/',
+            url: 'https://us.hanzo.ai/v1/projects/1/',
             method: 'GET',
         })
 
@@ -116,7 +116,7 @@ describe('buildInsufficientScopeChallenge', () => {
         const error = new InsightsPermissionError({
             detail: 'hi "there"\nthis is bad',
             missingScope: 'user:read',
-            url: 'https://us.hanzo.ai/api/users/@me/',
+            url: 'https://us.hanzo.ai/v1/users/@me/',
             method: 'GET',
         })
 
@@ -133,7 +133,7 @@ describe('findInsightsPermissionError', () => {
         const original = new InsightsPermissionError({
             detail: 'x',
             missingScope: 'user:read',
-            url: 'https://us.hanzo.ai/api/users/@me/',
+            url: 'https://us.hanzo.ai/v1/users/@me/',
             method: 'GET',
         })
 
@@ -144,7 +144,7 @@ describe('findInsightsPermissionError', () => {
         const original = new InsightsPermissionError({
             detail: 'x',
             missingScope: 'user:read',
-            url: 'https://us.hanzo.ai/api/users/@me/',
+            url: 'https://us.hanzo.ai/v1/users/@me/',
             method: 'GET',
         })
         const wrapped = wrapError(`Failed to get user: ${original.message}`, original)
@@ -200,7 +200,7 @@ describe('handleToolError with permission errors', () => {
         const error = new InsightsPermissionError({
             detail: "API key missing required scope 'user:read'",
             missingScope: 'user:read',
-            url: 'https://us.hanzo.ai/api/users/@me/',
+            url: 'https://us.hanzo.ai/v1/users/@me/',
             method: 'GET',
         })
 
@@ -219,7 +219,7 @@ describe('handleToolError with permission errors', () => {
         const error = new InsightsPermissionError({
             detail: "API key missing required scope 'user:read'",
             missingScope: 'user:read',
-            url: 'https://us.hanzo.ai/api/users/@me/',
+            url: 'https://us.hanzo.ai/v1/users/@me/',
             method: 'GET',
         })
 
@@ -237,7 +237,7 @@ describe('handleToolError with permission errors', () => {
         const original = new InsightsPermissionError({
             detail: "API key missing required scope 'insight:read'",
             missingScope: 'insight:read',
-            url: 'https://us.hanzo.ai/api/projects/1/insights/',
+            url: 'https://us.hanzo.ai/v1/projects/1/insights/',
             method: 'GET',
         })
         const wrapped = wrapError(`Failed to list insights: ${original.message}`, original)
@@ -279,7 +279,7 @@ describe('ApiClient fetchJson on 403 permission_denied', () => {
         const permissionError = result.error as InsightsPermissionError
         expect(permissionError.missingScope).toBe('user:read')
         expect(permissionError.method).toBe('GET')
-        expect(permissionError.url).toBe('https://us.hanzo.ai/api/users/@me/')
+        expect(permissionError.url).toBe('https://us.hanzo.ai/v1/users/@me/')
 
         vi.unstubAllGlobals()
     })
@@ -359,7 +359,7 @@ describe('ApiClient fetchJson on 403 permission_denied', () => {
             baseUrl: 'https://us.hanzo.ai',
         })
 
-        await expect(client.request({ method: 'GET', path: '/api/users/@me/' })).rejects.toBeInstanceOf(
+        await expect(client.request({ method: 'GET', path: '/v1/users/@me/' })).rejects.toBeInstanceOf(
             InsightsPermissionError
         )
 
@@ -392,7 +392,7 @@ describe('handleToolError with API errors', () => {
                 status,
                 statusText,
                 body: '{"detail":"Not found."}',
-                url: 'https://us.hanzo.ai/api/environments/2/symbol_sets/00000000-0000-0000-0000-000000000000/',
+                url: 'https://us.hanzo.ai/v1/environments/2/symbol_sets/00000000-0000-0000-0000-000000000000/',
                 method: 'GET',
             })
 
@@ -417,7 +417,7 @@ describe('handleToolError with API errors', () => {
                 status,
                 statusText,
                 body: '{"detail":"oops"}',
-                url: 'https://us.hanzo.ai/api/environments/2/symbol_sets/abc/',
+                url: 'https://us.hanzo.ai/v1/environments/2/symbol_sets/abc/',
                 method: 'GET',
             })
 
@@ -434,7 +434,7 @@ describe('handleToolError with API errors', () => {
             attr: 'id',
             code: 'invalid',
             extra: undefined,
-            url: 'https://us.hanzo.ai/api/environments/2/symbol_sets/not-a-uuid/',
+            url: 'https://us.hanzo.ai/v1/environments/2/symbol_sets/not-a-uuid/',
             method: 'GET',
         })
 
@@ -452,7 +452,7 @@ describe('handleToolError with API errors', () => {
             status: 404,
             statusText: 'Not Found',
             body: '{"detail":"Not found."}',
-            url: 'https://us.hanzo.ai/api/environments/2/symbol_sets/00000000-0000-0000-0000-000000000000/',
+            url: 'https://us.hanzo.ai/v1/environments/2/symbol_sets/00000000-0000-0000-0000-000000000000/',
             method: 'GET',
         })
         const wrapped = wrapError('Failed to retrieve symbol set', original)

@@ -60,7 +60,7 @@ const meta: Meta<MenuOverlayProps> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/external_data_sources/wizard': () => {
+                '/v1/environments/:team_id/external_data_sources/wizard': () => {
                     return [200, MARKETING_SOURCE_ICONS]
                 },
             },

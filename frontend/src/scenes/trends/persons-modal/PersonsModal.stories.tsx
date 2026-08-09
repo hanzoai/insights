@@ -22,7 +22,7 @@ export const WithResults: Story = {
         useStorybookMocks({
             get: {
                 [EXAMPLE_PERSONS_RESPONSE.initial]: EXAMPLE_PERSONS_RESPONSE,
-                [`/api/projects/:team_id/persons/${EXAMPLE_PERSONS_RESPONSE.results[0].people[0].uuid}/properties_timeline/`]:
+                [`/v1/projects/:team_id/persons/${EXAMPLE_PERSONS_RESPONSE.results[0].people[0].uuid}/properties_timeline/`]:
                     {
                         points: [
                             {
@@ -98,7 +98,7 @@ export const Empty: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/projects/:team_id/persons/trends/*': {
+                '/v1/projects/:team_id/persons/trends/*': {
                     results: [
                         {
                             people: [],
@@ -111,7 +111,7 @@ export const Empty: Story = {
 
         return (
             <div className="flex max-h-200">
-                <PersonsModalComponent title="Hello!" url="/api/projects/1/persons/trends/" inline />
+                <PersonsModalComponent title="Hello!" url="/v1/projects/1/persons/trends/" inline />
             </div>
         )
     },
@@ -121,7 +121,7 @@ export const TimeoutError: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/projects/:team_id/persons/trends/*': async () => {
+                '/v1/projects/:team_id/persons/trends/*': async () => {
                     await delay(200)
                     return HttpResponse.json(
                         {
@@ -136,7 +136,7 @@ export const TimeoutError: Story = {
 
         return (
             <div className="flex max-h-200">
-                <PersonsModalComponent title="Hello!" url="/api/projects/1/persons/trends/" inline />
+                <PersonsModalComponent title="Hello!" url="/v1/projects/1/persons/trends/" inline />
             </div>
         )
     },
@@ -146,7 +146,7 @@ export const ServerError: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/projects/:team_id/persons/trends/*': async () => {
+                '/v1/projects/:team_id/persons/trends/*': async () => {
                     await delay(200)
                     return HttpResponse.json(
                         {
@@ -161,7 +161,7 @@ export const ServerError: Story = {
 
         return (
             <div className="flex max-h-200">
-                <PersonsModalComponent title="Hello!" url="/api/projects/1/persons/trends/" inline />
+                <PersonsModalComponent title="Hello!" url="/v1/projects/1/persons/trends/" inline />
             </div>
         )
     },

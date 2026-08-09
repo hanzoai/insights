@@ -228,7 +228,7 @@ class TestFlakyTestsAPI(DatastoreTestMixin, APIBaseTest):
         )
 
     def _get(self, **params: str) -> dict:
-        response = self.client.get(f"/api/projects/{self.team.id}/engineering_analytics/flaky_tests/", params)
+        response = self.client.get(f"/v1/projects/{self.team.id}/engineering_analytics/flaky_tests/", params)
         assert response.status_code == status.HTTP_200_OK, response.content
         return response.json()
 
@@ -382,7 +382,7 @@ class TestFlakyTestsAPI(DatastoreTestMixin, APIBaseTest):
         ]
     )
     def test_invalid_params_return_400(self, _name: str, params: dict) -> None:
-        response = self.client.get(f"/api/projects/{self.team.id}/engineering_analytics/flaky_tests/", params)
+        response = self.client.get(f"/v1/projects/{self.team.id}/engineering_analytics/flaky_tests/", params)
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.content
 
 

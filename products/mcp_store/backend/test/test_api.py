@@ -185,7 +185,7 @@ class TestMCPServerAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         active_b = self._create_active_template()
         self._create_active_template(is_active=False)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/mcp_servers/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/mcp_servers/")
         assert response.status_code == status.HTTP_200_OK
         names = {s["name"] for s in response.json()["results"]}
         assert {active_a.name, active_b.name}.issubset(names)
@@ -195,7 +195,7 @@ class TestMCPServerAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_list_servers_entries_match_serializer_schema(self):
         self._create_active_template()
-        response = self.client.get(f"/api/environments/{self.team.id}/mcp_servers/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/mcp_servers/")
         expected_keys = {
             "id",
             "name",
@@ -214,7 +214,7 @@ class TestMCPServerAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_create_not_allowed(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_servers/",
+            f"/v1/environments/{self.team.id}/mcp_servers/",
             data={"name": "My Server", "url": "https://mcp.example.com"},
         )
         assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
@@ -232,7 +232,7 @@ class TestMCPServerAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def test_icon_rejects_non_hostname_domains(self, _name, bad_domain):
         # The domain param becomes a path segment of img.logo.dev/{domain} — anything but a bare
         # hostname must be rejected or the endpoint can be steered off the logo host.
-        response = self.client.get(f"/api/environments/{self.team.id}/mcp_servers/icon/", data={"domain": bad_domain})
+        response = self.client.get(f"/v1/environments/{self.team.id}/mcp_servers/icon/", data={"domain": bad_domain})
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @parameterized.expand(
@@ -249,7 +249,7 @@ class TestMCPServerAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         # stripped so case variants can't mint separate cache entries.
         with patch("products.mcp_store.backend.presentation.views.CDPIconsService") as service:
             service.return_value.get_icon_http_response.return_value = HttpResponse(b"png", content_type="image/png")
-            response = self.client.get(f"/api/environments/{self.team.id}/mcp_servers/icon/", data=params)
+            response = self.client.get(f"/v1/environments/{self.team.id}/mcp_servers/icon/", data=params)
         assert response.status_code == status.HTTP_200_OK
         service.return_value.get_icon_http_response.assert_called_once_with(
             "linear.app", theme=expected_theme, fallback="404", team_id=self.team.id
@@ -277,7 +277,7 @@ class TestMCPServerAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         with patch("products.mcp_store.backend.presentation.views.CDPIconsService") as service:
             service.return_value.get_icon_http_response.return_value = HttpResponse(b"png", content_type="image/png")
             response = client.get(
-                f"/api/environments/{self.team.id}/mcp_servers/icon/",
+                f"/v1/environments/{self.team.id}/mcp_servers/icon/",
                 data={"domain": "linear.app"},
                 headers={"authorization": f"Bearer {access_token.token}"},
             )
@@ -286,13 +286,13 @@ class TestMCPServerAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_unauthenticated_access(self):
         client = APIClient()
-        response = client.get(f"/api/environments/{self.team.id}/mcp_servers/")
+        response = client.get(f"/v1/environments/{self.team.id}/mcp_servers/")
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 class TestMCPGatewayServerAPI(APIBaseTest):
     def _api_url(self, suffix: str = "") -> str:
-        base = f"/api/projects/{self.team.id}/mcp_gateway/servers/"
+        base = f"/v1/projects/{self.team.id}/mcp_gateway/servers/"
         return f"{base}{suffix}" if suffix else base
 
     def _make_admin(self) -> None:
@@ -622,7 +622,7 @@ class TestMCPGatewayServerAPI(APIBaseTest):
         assert member_tool["locked"] is False
 
         legacy_response = self.client.get(
-            f"/api/environments/{self.team.id}/mcp_server_installations/{installation.id}/tools/"
+            f"/v1/environments/{self.team.id}/mcp_server_installations/{installation.id}/tools/"
         )
         assert legacy_response.status_code == status.HTTP_200_OK
         legacy_tool = legacy_response.json()["results"][0]
@@ -684,7 +684,7 @@ class TestMCPGatewayServerAPI(APIBaseTest):
         assert above_ceiling_response.status_code == status.HTTP_400_BAD_REQUEST
 
         legacy_above_ceiling_response = self.client.patch(
-            f"/api/environments/{self.team.id}/mcp_server_installations/{installation.id}/tools/create_issue/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/{installation.id}/tools/create_issue/",
             data={"approval_state": "approved"},
             format="json",
         )
@@ -786,7 +786,7 @@ class TestMCPGatewayServerAPI(APIBaseTest):
             approval_state="approved",
             last_seen_at=timezone.now(),
         )
-        url = f"/api/environments/{child.id}/mcp_server_installations/{installation.id}/tools/{tool.tool_name}/"
+        url = f"/v1/environments/{child.id}/mcp_server_installations/{installation.id}/tools/{tool.tool_name}/"
 
         first_response = self.client.patch(url, data={"approval_state": "do_not_use"}, format="json")
         second_response = self.client.patch(url, data={"approval_state": "needs_approval"}, format="json")
@@ -847,7 +847,7 @@ class TestMCPGatewayServerAPI(APIBaseTest):
         assert team_response.status_code == status.HTTP_200_OK
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/mcp_gateway/service_accounts/{account.id}/access/",
+            f"/v1/projects/{self.team.id}/mcp_gateway/service_accounts/{account.id}/access/",
             data={
                 "gateway_server_id": str(server.id),
                 "enabled": True,
@@ -870,7 +870,7 @@ class TestMCPGatewayServerAPI(APIBaseTest):
 
 class TestMCPGatewayConfigAPI(APIBaseTest):
     def _api_url(self, suffix: str = "") -> str:
-        base = f"/api/projects/{self.team.id}/mcp_gateway/config/"
+        base = f"/v1/projects/{self.team.id}/mcp_gateway/config/"
         return f"{base}{suffix}" if suffix else base
 
     def _make_admin(self) -> None:
@@ -977,7 +977,7 @@ class TestMCPGatewayConfigAPI(APIBaseTest):
 
 class TestMCPGatewayMemberAPI(APIBaseTest):
     def _api_url(self, suffix: str = "") -> str:
-        base = f"/api/projects/{self.team.id}/mcp_gateway/members/"
+        base = f"/v1/projects/{self.team.id}/mcp_gateway/members/"
         return f"{base}{suffix}" if suffix else base
 
     def _make_admin(self) -> None:
@@ -1103,13 +1103,13 @@ class TestMCPGatewayWriteScopeAPI(APIBaseTest):
         account = sync_built_in_agents(self.team)[0]
         data: dict[str, object]
         if action_name == "policies":
-            url = f"/api/projects/{self.team.id}/mcp_gateway/servers/{server.id}/policies/"
+            url = f"/v1/projects/{self.team.id}/mcp_gateway/servers/{server.id}/policies/"
             data = {
                 "scope_type": "team",
                 "policies": [{"tool_name": "search", "policy_state": "approved"}],
             }
         else:
-            url = f"/api/projects/{self.team.id}/mcp_gateway/service_accounts/{account.id}/access/"
+            url = f"/v1/projects/{self.team.id}/mcp_gateway/service_accounts/{account.id}/access/"
             data = {"gateway_server_id": str(server.id), "enabled": True}
 
         response = self._read_only_oauth_client().post(url, data=data, format="json")
@@ -1121,7 +1121,7 @@ class TestMCPGatewayWriteScopeAPI(APIBaseTest):
 
 class TestMCPServiceAccountAPI(APIBaseTest):
     def _api_url(self, suffix: str = "") -> str:
-        base = f"/api/projects/{self.team.id}/mcp_gateway/service_accounts/"
+        base = f"/v1/projects/{self.team.id}/mcp_gateway/service_accounts/"
         return f"{base}{suffix}" if suffix else base
 
     def _make_admin(self) -> None:
@@ -1214,7 +1214,7 @@ class TestMCPServiceAccountAPI(APIBaseTest):
         install_url = "https://mcp.personal-agent-grant.example.com/mcp"
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={
                 "name": "Personal grant",
                 "url": install_url,
@@ -1244,7 +1244,7 @@ class TestMCPServiceAccountAPI(APIBaseTest):
         install_url = "https://mcp.restricted-agent-grant.example.com/mcp"
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={
                 "name": "Restricted grant",
                 "url": install_url,
@@ -1271,7 +1271,7 @@ class TestMCPServiceAccountAPI(APIBaseTest):
         install_url = "https://mcp.legacy-agent-grant.example.com/mcp"
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={
                 "name": "Legacy grant",
                 "url": install_url,
@@ -1341,7 +1341,7 @@ class TestMCPServiceAccountAPI(APIBaseTest):
         )
 
         policy_response = self.client.post(
-            f"/api/projects/{self.team.id}/mcp_gateway/servers/{server.id}/policies/",
+            f"/v1/projects/{self.team.id}/mcp_gateway/servers/{server.id}/policies/",
             data={
                 "scope_type": "agent",
                 "scope_service_account_id": str(account.id),
@@ -1476,7 +1476,7 @@ class TestMCPServiceAccountAPI(APIBaseTest):
         TeamMCPGatewayConfig.objects.for_team(self.team.id).create(team=self.team, allow_member_agent_access=False)
 
         policy_response = self.client.post(
-            f"/api/projects/{self.team.id}/mcp_gateway/servers/{server.id}/policies/",
+            f"/v1/projects/{self.team.id}/mcp_gateway/servers/{server.id}/policies/",
             data={
                 "scope_type": "agent",
                 "scope_service_account_id": str(account.id),
@@ -1505,7 +1505,7 @@ class TestMCPServiceAccountAPI(APIBaseTest):
 
     def test_only_admin_can_update_member_agent_access_setting(self) -> None:
         self._make_member()
-        config_url = f"/api/projects/{self.team.id}/mcp_gateway/config/"
+        config_url = f"/v1/projects/{self.team.id}/mcp_gateway/config/"
         response = self.client.get(config_url)
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["allow_member_agent_access"] is True
@@ -1627,7 +1627,7 @@ class TestMCPServiceAccountAPI(APIBaseTest):
         token = create_gateway_agent_token(account)
         tampered_token = f"{token[:-1]}{'a' if token[-1] != 'a' else 'b'}"
 
-        response = self._agent_client(account, tampered_token).get("/api/mcp_store/gateway/servers/")
+        response = self._agent_client(account, tampered_token).get("/v1/mcp_store/gateway/servers/")
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -1639,7 +1639,7 @@ class TestMCPServiceAccountAPI(APIBaseTest):
             "products.mcp_store.backend.agents.signing.loads",
             side_effect=SignatureExpired("Gateway token expired"),
         ):
-            response = client.get("/api/mcp_store/gateway/servers/")
+            response = client.get("/v1/mcp_store/gateway/servers/")
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -1649,7 +1649,7 @@ class TestMCPServiceAccountAPI(APIBaseTest):
         recent_active_at = timezone.now()
         MCPServiceAccount.objects.for_team(self.team.id).filter(pk=account.pk).update(last_active_at=recent_active_at)
 
-        recent_response = client.get("/api/mcp_store/gateway/servers/")
+        recent_response = client.get("/v1/mcp_store/gateway/servers/")
         account.refresh_from_db()
 
         assert recent_response.status_code == status.HTTP_200_OK
@@ -1658,7 +1658,7 @@ class TestMCPServiceAccountAPI(APIBaseTest):
         stale_active_at = timezone.now() - timedelta(minutes=61)
         MCPServiceAccount.objects.for_team(self.team.id).filter(pk=account.pk).update(last_active_at=stale_active_at)
         before_stale_request = timezone.now()
-        stale_response = client.get("/api/mcp_store/gateway/servers/")
+        stale_response = client.get("/v1/mcp_store/gateway/servers/")
         after_stale_request = timezone.now()
         account.refresh_from_db()
 
@@ -1673,7 +1673,7 @@ class TestMCPServiceAccountAPI(APIBaseTest):
 
         account.status = "paused"
         account.save(update_fields=["status", "updated_at"])
-        assert client.get("/api/mcp_store/gateway/servers/").status_code == status.HTTP_401_UNAUTHORIZED
+        assert client.get("/v1/mcp_store/gateway/servers/").status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_agent_endpoint_does_not_gate_on_product_state(self) -> None:
         account = self._active_scout_account()
@@ -1681,15 +1681,15 @@ class TestMCPServiceAccountAPI(APIBaseTest):
 
         self.organization.is_ai_data_processing_approved = False
         self.organization.save(update_fields=["is_ai_data_processing_approved"])
-        assert client.get("/api/mcp_store/gateway/servers/").status_code == status.HTTP_200_OK
+        assert client.get("/v1/mcp_store/gateway/servers/").status_code == status.HTTP_200_OK
 
     @parameterized.expand(
         [
-            ("catalog", "GET", "/api/mcp_store/gateway/servers/", status.HTTP_200_OK),
+            ("catalog", "GET", "/v1/mcp_store/gateway/servers/", status.HTTP_200_OK),
             (
                 "proxy",
                 "POST",
-                "/api/mcp_store/gateway/servers/00000000-0000-0000-0000-000000000001/proxy/",
+                "/v1/mcp_store/gateway/servers/00000000-0000-0000-0000-000000000001/proxy/",
                 status.HTTP_404_NOT_FOUND,
             ),
         ]
@@ -1751,7 +1751,7 @@ class TestMCPServiceAccountAPI(APIBaseTest):
             access.delete()
 
         response = self._agent_client(account).post(
-            f"/api/mcp_store/gateway/servers/{server.id}/proxy/",
+            f"/v1/mcp_store/gateway/servers/{server.id}/proxy/",
             data={"jsonrpc": "2.0", "method": "tools/list", "id": 1},
             format="json",
         )
@@ -1787,7 +1787,7 @@ class TestMCPServiceAccountAPI(APIBaseTest):
         )
 
         response = self._agent_client(account).post(
-            f"/api/mcp_store/gateway/servers/{server.id}/proxy/",
+            f"/v1/mcp_store/gateway/servers/{server.id}/proxy/",
             data={"jsonrpc": "2.0", "method": "tools/list", "id": 1},
             format="json",
         )
@@ -1836,7 +1836,7 @@ class TestMCPServiceAccountAPI(APIBaseTest):
         )
 
         response = self._agent_client(account).post(
-            f"/api/mcp_store/gateway/servers/{server.id}/proxy/",
+            f"/v1/mcp_store/gateway/servers/{server.id}/proxy/",
             data={
                 "jsonrpc": "2.0",
                 "method": "tools/call",
@@ -1919,14 +1919,14 @@ class TestMCPServiceAccountAPI(APIBaseTest):
         account = MCPServiceAccount.objects.for_team(self.team.id).get(id=scout["id"])
         agent_client = APIClient()
         agent_client.credentials(HTTP_AUTHORIZATION=f"Bearer {create_gateway_agent_token(account)}")
-        dormant_response = agent_client.get("/api/mcp_store/gateway/servers/")
+        dormant_response = agent_client.get("/v1/mcp_store/gateway/servers/")
 
         assert dormant_response.status_code == status.HTTP_200_OK
         assert dormant_response.json()["results"] == []
 
         granted_server.is_team_enabled = True
         granted_server.save(update_fields=["is_team_enabled"])
-        response = agent_client.get("/api/mcp_store/gateway/servers/")
+        response = agent_client.get("/v1/mcp_store/gateway/servers/")
 
         assert response.status_code == status.HTTP_200_OK
         assert [server["id"] for server in response.json()["results"]] == [str(granted_server.id)]
@@ -1937,7 +1937,7 @@ class TestMCPServiceAccountAPI(APIBaseTest):
             data={"gateway_server_id": str(granted_server.id), "enabled": False},
             format="json",
         )
-        revoked_catalog_response = agent_client.get("/api/mcp_store/gateway/servers/")
+        revoked_catalog_response = agent_client.get("/v1/mcp_store/gateway/servers/")
 
         assert revoke_response.status_code == status.HTTP_200_OK
         assert str(granted_server.id) not in revoke_response.json()["server_ids"]
@@ -1988,13 +1988,13 @@ class TestMCPServiceAccountAPI(APIBaseTest):
             return server
 
         servers = [grant_server(0)]
-        assert client.get("/api/mcp_store/gateway/servers/").status_code == status.HTTP_200_OK
+        assert client.get("/v1/mcp_store/gateway/servers/").status_code == status.HTTP_200_OK
         with CaptureQueriesContext(connection) as one_server_queries:
-            one_server_response = client.get("/api/mcp_store/gateway/servers/")
+            one_server_response = client.get("/v1/mcp_store/gateway/servers/")
 
         servers.extend(grant_server(index) for index in range(1, 5))
         with CaptureQueriesContext(connection) as five_server_queries:
-            five_server_response = client.get("/api/mcp_store/gateway/servers/")
+            five_server_response = client.get("/v1/mcp_store/gateway/servers/")
 
         assert one_server_response.status_code == status.HTTP_200_OK
         assert five_server_response.status_code == status.HTTP_200_OK
@@ -2032,20 +2032,20 @@ class TestMCPServiceAccountAPI(APIBaseTest):
         )
         client = self._oauth_client(built_in_agent=True)
 
-        assert client.get(f"/api/environments/{self.team.id}/mcp_server_installations/").status_code == 403
+        assert client.get(f"/v1/environments/{self.team.id}/mcp_server_installations/").status_code == 403
         assert (
-            client.get(f"/api/environments/{self.team.id}/mcp_server_installations/{installation.id}/").status_code
+            client.get(f"/v1/environments/{self.team.id}/mcp_server_installations/{installation.id}/").status_code
             == 403
         )
         assert (
             client.post(
-                f"/api/environments/{self.team.id}/mcp_server_installations/{installation.id}/proxy/"
+                f"/v1/environments/{self.team.id}/mcp_server_installations/{installation.id}/proxy/"
             ).status_code
             == 403
         )
         assert (
             client.patch(
-                f"/api/projects/{self.team.id}/mcp_gateway/servers/{server.id}/",
+                f"/v1/projects/{self.team.id}/mcp_gateway/servers/{server.id}/",
                 data={"is_team_enabled": False},
                 format="json",
             ).status_code
@@ -2061,7 +2061,7 @@ class TestMCPServiceAccountAPI(APIBaseTest):
         )
         assert (
             client.post(
-                f"/api/environments/{self.team.id}/mcp_server_installations/{installation.id}/share/"
+                f"/v1/environments/{self.team.id}/mcp_server_installations/{installation.id}/share/"
             ).status_code
             == 403
         )
@@ -2082,7 +2082,7 @@ class TestMCPServiceAccountAPI(APIBaseTest):
         )
         client = self._oauth_client(built_in_agent=False)
 
-        response = client.get(f"/api/environments/{self.team.id}/mcp_server_installations/")
+        response = client.get(f"/v1/environments/{self.team.id}/mcp_server_installations/")
 
         assert response.status_code == status.HTTP_200_OK
         assert [row["id"] for row in response.json()["results"]] == [str(installation.id)]
@@ -2091,7 +2091,7 @@ class TestMCPServiceAccountAPI(APIBaseTest):
 class TestMCPServerInstallationAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def test_create_not_allowed(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/",
             data={"url": "https://mcp.example.com", "display_name": "Test"},
             format="json",
         )
@@ -2106,7 +2106,7 @@ class TestMCPServerInstallationAPI(DatastoreTestMixin, APIBaseTest, QueryMatchin
             auth_type="api_key",
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/mcp_server_installations/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/mcp_server_installations/")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
         assert len(results) == 1
@@ -2136,7 +2136,7 @@ class TestMCPServerInstallationAPI(DatastoreTestMixin, APIBaseTest, QueryMatchin
             url=template.url,
             auth_type="api_key",
         )
-        response = self.client.get(f"/api/environments/{self.team.id}/mcp_server_installations/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/mcp_server_installations/")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["results"][0]["icon_domain"] == "notion.example"
         assert response.json()["results"][0]["icon_key"] == "insights_mcp"
@@ -2150,7 +2150,7 @@ class TestMCPServerInstallationAPI(DatastoreTestMixin, APIBaseTest, QueryMatchin
             auth_type="api_key",
         )
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/mcp_server_installations/{installation.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/mcp_server_installations/{installation.id}/")
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not MCPServerInstallation.objects.filter(id=installation.id).exists()
 
@@ -2165,7 +2165,7 @@ class TestMCPServerInstallationAPI(DatastoreTestMixin, APIBaseTest, QueryMatchin
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/mcp_server_installations/{installation.id}/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/{installation.id}/",
             data={"display_name": "Updated", "description": "New description"},
             format="json",
         )
@@ -2186,7 +2186,7 @@ class TestMCPServerInstallationAPI(DatastoreTestMixin, APIBaseTest, QueryMatchin
         )
 
         response = self.client.put(
-            f"/api/environments/{self.team.id}/mcp_server_installations/{installation.id}/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/{installation.id}/",
             data={"display_name": "Updated", "url": "https://evil.example.com", "auth_type": "oauth"},
             format="json",
         )
@@ -2206,7 +2206,7 @@ class TestMCPServerInstallationAPI(DatastoreTestMixin, APIBaseTest, QueryMatchin
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/mcp_server_installations/{installation.id}/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/{installation.id}/",
             data={"is_enabled": True},
             format="json",
         )
@@ -2233,7 +2233,7 @@ class TestMCPServerInstallationAPI(DatastoreTestMixin, APIBaseTest, QueryMatchin
             is_enabled=False,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/mcp_server_installations/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/mcp_server_installations/")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
         assert len(results) == 2
@@ -2261,7 +2261,7 @@ class TestMCPServerInstallationAPI(DatastoreTestMixin, APIBaseTest, QueryMatchin
             auth_type="api_key",
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/mcp_server_installations/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/mcp_server_installations/")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
         assert len(results) == 1
@@ -2272,7 +2272,7 @@ class TestInstallCustomAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     @ALLOW_URL
     def test_install_custom_api_key_server(self, _mock):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={
                 "name": "My API Server",
                 "url": "https://mcp.custom.com",
@@ -2290,7 +2290,7 @@ class TestInstallCustomAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     @ALLOW_URL
     def test_install_custom_api_key_server_without_key(self, _mock):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={"name": "Open Server", "url": "https://mcp.open.com", "auth_type": "api_key"},
             format="json",
         )
@@ -2299,7 +2299,7 @@ class TestInstallCustomAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_install_custom_none_auth_type_rejected(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={"name": "Server", "url": "https://mcp.example.com", "auth_type": "none"},
             format="json",
         )
@@ -2308,12 +2308,12 @@ class TestInstallCustomAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     @ALLOW_URL
     def test_install_custom_duplicate_url_rejected(self, _mock):
         self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={"name": "Server", "url": "https://mcp.dup.com", "auth_type": "api_key"},
             format="json",
         )
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={"name": "Server Again", "url": "https://mcp.dup.com", "auth_type": "api_key"},
             format="json",
         )
@@ -2322,7 +2322,7 @@ class TestInstallCustomAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     @patch("products.mcp_store.backend.presentation.views.is_url_allowed", return_value=(False, "Private IP"))
     def test_install_custom_ssrf_blocked(self, _mock):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={"name": "Evil", "url": "http://192.168.1.1/mcp", "auth_type": "api_key"},
             format="json",
         )
@@ -2331,7 +2331,7 @@ class TestInstallCustomAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     @patch("products.mcp_store.backend.presentation.views.is_url_allowed", return_value=(False, "Local/metadata host"))
     def test_install_custom_oauth_ssrf_blocked(self, _mock):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={
                 "name": "Evil OAuth",
                 "url": "http://169.254.169.254/mcp",
@@ -2344,7 +2344,7 @@ class TestInstallCustomAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     @ALLOW_URL
     def test_installation_name_field(self, _mock):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={"name": "Custom Name", "url": "https://mcp.named.com", "auth_type": "api_key"},
             format="json",
         )
@@ -2355,7 +2355,7 @@ class TestInstallCustomAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     @ALLOW_URL
     def test_install_custom_accepts_insights_code_install_source(self, _mock):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={
                 "name": "Code Server",
                 "url": "https://mcp.code.com",
@@ -2368,7 +2368,7 @@ class TestInstallCustomAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_install_custom_rejects_invalid_insights_code_callback_url(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={
                 "name": "Evil",
                 "url": "https://mcp.example.com",
@@ -2383,7 +2383,7 @@ class TestInstallCustomAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     @ALLOW_URL
     def test_install_custom_accepts_insights_code_callback_url(self, _mock):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={
                 "name": "Code Server",
                 "url": "https://mcp.code2.com",
@@ -2418,7 +2418,7 @@ class TestInstallCustomAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             TeamMCPGatewayConfig.objects.for_team(self.team.id).create(team=self.team, default_servers_enabled=False)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={"name": "Disabled", "url": url, "auth_type": auth_type, "api_key": "sk-x"},
             format="json",
         )
@@ -2458,7 +2458,7 @@ class TestInstallCustomAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         url = "https://mcp.admin-override.example.com/mcp"
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={"name": "Override", "url": url, "auth_type": auth_type, "api_key": "sk-x"},
             format="json",
         )
@@ -2481,7 +2481,7 @@ class TestInstallCustomAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={"name": "Row off", "url": url, "auth_type": "api_key", "api_key": "sk-x"},
             format="json",
         )
@@ -2573,7 +2573,7 @@ class TestOAuthCallback(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self._create_oauth_state(installation, state_token, web_return_path=return_path)
 
         response = self.client.get(
-            "/api/mcp_store/oauth_redirect/",
+            "/v1/mcp_store/oauth_redirect/",
             {"state": state_token, "error": "access_denied"},
         )
 
@@ -2595,7 +2595,7 @@ class TestOAuthCallback(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self._create_oauth_state(installation, state_token, pkce_verifier="test-pkce-verifier")
 
         response = self.client.get(
-            "/api/mcp_store/oauth_redirect/",
+            "/v1/mcp_store/oauth_redirect/",
             {"state": state_token, "code": "auth-code"},
         )
 
@@ -2623,7 +2623,7 @@ class TestOAuthCallback(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.get(
-            "/api/mcp_store/oauth_redirect/",
+            "/v1/mcp_store/oauth_redirect/",
             {"state": state_token, "code": "auth-code"},
         )
 
@@ -2644,7 +2644,7 @@ class TestOAuthCallback(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.get(
-            "/api/mcp_store/oauth_redirect/",
+            "/v1/mcp_store/oauth_redirect/",
             {"state": state_token, "error": "access_denied"},
         )
 
@@ -2666,7 +2666,7 @@ class TestOAuthCallback(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         victim_client = APIClient()  # not logged in
         response = victim_client.get(
-            "/api/mcp_store/oauth_redirect/",
+            "/v1/mcp_store/oauth_redirect/",
             {"state": state_token, "code": "victim-auth-code"},
         )
 
@@ -2690,7 +2690,7 @@ class TestOAuthCallback(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         browser_client = APIClient()
         response = browser_client.get(
-            "/api/mcp_store/oauth_redirect/",
+            "/v1/mcp_store/oauth_redirect/",
             {"state": state_token, "code": "code"},
         )
 
@@ -2721,7 +2721,7 @@ class TestOAuthCallback(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         browser_client = APIClient()
         response = browser_client.get(
-            "/api/mcp_store/oauth_redirect/",
+            "/v1/mcp_store/oauth_redirect/",
             {"state": state_token, "code": "code"},
         )
 
@@ -2748,7 +2748,7 @@ class TestOAuthCallback(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         victim_client = APIClient()
         victim_client.force_login(victim_user)
         response = victim_client.get(
-            "/api/mcp_store/oauth_redirect/",
+            "/v1/mcp_store/oauth_redirect/",
             {"state": state_token, "error": "access_denied"},
         )
 
@@ -2779,7 +2779,7 @@ class TestOAuthCallback(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.get(
-            "/api/mcp_store/oauth_redirect/",
+            "/v1/mcp_store/oauth_redirect/",
             {"state": state_token, "code": "code"},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -2796,7 +2796,7 @@ class TestOAuthCallback(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self._create_oauth_state(installation, state_token, pkce_verifier="v")
 
         response = self.client.get(
-            "/api/mcp_store/oauth_redirect/",
+            "/v1/mcp_store/oauth_redirect/",
             {"state": state_token, "code": "code"},
         )
         assert response.status_code == 302
@@ -2823,7 +2823,7 @@ class TestOAuthCallback(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         browser_client = APIClient()
         browser_client.force_login(self.user)
         response = browser_client.get(
-            "/api/mcp_store/oauth_redirect/",
+            "/v1/mcp_store/oauth_redirect/",
             {"state": state_token, "code": "code"},
         )
         assert response.status_code == 302
@@ -2840,10 +2840,10 @@ class TestOAuthCallback(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         state_token = "one-shot"
         self._create_oauth_state(installation, state_token, pkce_verifier="v")
 
-        first = self.client.get("/api/mcp_store/oauth_redirect/", {"state": state_token, "code": "c1"})
+        first = self.client.get("/v1/mcp_store/oauth_redirect/", {"state": state_token, "code": "c1"})
         assert first.status_code == 302
 
-        second = self.client.get("/api/mcp_store/oauth_redirect/", {"state": state_token, "code": "c2"})
+        second = self.client.get("/v1/mcp_store/oauth_redirect/", {"state": state_token, "code": "c2"})
         assert second.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_session_cookie_samesite_is_compatible_with_oauth_redirect(self):
@@ -2873,7 +2873,7 @@ class TestOAuthCallback(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/mcp_server_installations/authorize/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/authorize/",
             {"template_id": str(template.id)},
         )
         assert response.status_code == 302
@@ -2901,7 +2901,7 @@ class TestOAuthCallback(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         }
 
         resp = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={"name": "srv", "url": "https://mcp.example.com/mcp", "auth_type": "oauth"},
             format="json",
         )
@@ -2939,7 +2939,7 @@ class TestOAuthCallback(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         resp = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={"name": "srv", "url": url, "auth_type": "oauth"},
             format="json",
         )
@@ -2974,7 +2974,7 @@ class TestOAuthIssuerSpoofingProtection(DatastoreTestMixin, APIBaseTest, QueryMa
         mock_discover.side_effect = ValueError("Issuer mismatch in authorization server metadata")
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={"name": "Evil", "url": "https://evil.com/mcp", "auth_type": "oauth"},
             format="json",
         )
@@ -3003,7 +3003,7 @@ class TestOAuthIssuerSpoofingProtection(DatastoreTestMixin, APIBaseTest, QueryMa
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={"name": "Legit", "url": "https://mcp.legit.com/mcp", "auth_type": "oauth"},
             format="json",
         )
@@ -3041,7 +3041,7 @@ class TestOAuthIssuerSpoofingProtection(DatastoreTestMixin, APIBaseTest, QueryMa
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={"name": "Legit", "url": "https://mcp.legit.com/mcp", "auth_type": "oauth"},
             format="json",
         )
@@ -3067,7 +3067,7 @@ class TestOAuthIssuerSpoofingProtection(DatastoreTestMixin, APIBaseTest, QueryMa
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={
                 "name": "Legit",
                 "url": "https://mcp.legit.com/mcp",
@@ -3106,7 +3106,7 @@ class TestOAuthIssuerSpoofingProtection(DatastoreTestMixin, APIBaseTest, QueryMa
         }
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={
                 "name": "Legit",
                 "url": "https://mcp.legit.com/mcp",
@@ -3142,7 +3142,7 @@ class TestOAuthIssuerSpoofingProtection(DatastoreTestMixin, APIBaseTest, QueryMa
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={
                 "name": "Legit",
                 "url": "https://mcp.legit.com/mcp",
@@ -3205,7 +3205,7 @@ class TestOAuthIssuerSpoofingProtection(DatastoreTestMixin, APIBaseTest, QueryMa
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
             data={"name": "Legit", "url": "https://mcp.legit.com/mcp", "auth_type": "oauth"},
             format="json",
         )
@@ -3241,7 +3241,7 @@ class TestOAuthIssuerSpoofingProtection(DatastoreTestMixin, APIBaseTest, QueryMa
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/mcp_server_installations/authorize/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/authorize/",
             {"installation_id": str(installation.id)},
         )
 
@@ -3265,7 +3265,7 @@ class TestOAuthIssuerSpoofingProtection(DatastoreTestMixin, APIBaseTest, QueryMa
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/mcp_server_installations/authorize/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/authorize/",
             {"template_id": str(template.id)},
         )
 
@@ -3297,18 +3297,18 @@ class TestOAuthIssuerSpoofingProtection(DatastoreTestMixin, APIBaseTest, QueryMa
         )
 
         authorize_response = self.client.get(
-            f"/api/environments/{self.team.id}/mcp_server_installations/authorize/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/authorize/",
             {"template_id": str(template.id)},
         )
         state_token = parse_qs(urlparse(authorize_response["Location"]).query)["state"][0]
 
         first_callback = self.client.get(
-            "/api/mcp_store/oauth_redirect/", {"state": state_token, "error": "access_denied"}
+            "/v1/mcp_store/oauth_redirect/", {"state": state_token, "error": "access_denied"}
         )
         assert first_callback.status_code == 302
 
         second_callback = self.client.get(
-            "/api/mcp_store/oauth_redirect/", {"state": state_token, "error": "access_denied"}
+            "/v1/mcp_store/oauth_redirect/", {"state": state_token, "error": "access_denied"}
         )
         assert second_callback.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -3345,7 +3345,7 @@ class TestMCPAuthorizeInsightsCodeResponse(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/mcp_server_installations/authorize/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/authorize/",
             {
                 "installation_id": str(installation.id),
                 "install_source": "insights-code",
@@ -3373,7 +3373,7 @@ class TestMCPAuthorizeInsightsCodeResponse(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/mcp_server_installations/authorize/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/authorize/",
             {
                 "installation_id": str(installation.id),
                 "install_source": "insights-code",
@@ -3411,7 +3411,7 @@ class TestInstallTemplateAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest)
         template = self._template()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_template/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_template/",
             data={"template_id": str(template.id)},
             format="json",
         )
@@ -3429,7 +3429,7 @@ class TestInstallTemplateAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest)
         template = self._template(auth_type="api_key", oauth_credentials={}, oauth_metadata={})
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_template/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_template/",
             data={"template_id": str(template.id), "api_key": "sk-template"},
             format="json",
         )
@@ -3445,7 +3445,7 @@ class TestInstallTemplateAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest)
         template = self._template(auth_type="api_key", oauth_credentials={}, oauth_metadata={})
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_template/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_template/",
             data={"template_id": str(template.id)},
             format="json",
         )
@@ -3455,7 +3455,7 @@ class TestInstallTemplateAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest)
         template = self._template(is_active=False)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_template/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_template/",
             data={"template_id": str(template.id)},
             format="json",
         )
@@ -3467,7 +3467,7 @@ class TestInstallTemplateAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest)
         template = self._template(oauth_metadata={})
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_template/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_template/",
             data={"template_id": str(template.id)},
             format="json",
         )
@@ -3495,7 +3495,7 @@ class TestInstallTemplateAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest)
         template = self._template(oauth_credentials={}, oauth_metadata={})
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_template/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_template/",
             data={"template_id": str(template.id)},
             format="json",
         )
@@ -3526,7 +3526,7 @@ class TestInstallTemplateAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest)
         template = self._template(oauth_credentials={}, oauth_metadata={})
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_template/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_template/",
             data={"template_id": str(template.id)},
             format="json",
         )
@@ -3549,7 +3549,7 @@ class TestInstallTemplateAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest)
         template = self._template(oauth_credentials={}, oauth_metadata={})
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_template/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_template/",
             data={"template_id": str(template.id)},
             format="json",
         )
@@ -3572,7 +3572,7 @@ class TestInstallTemplateAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest)
             TeamMCPGatewayConfig.objects.for_team(self.team.id).create(team=self.team, default_servers_enabled=False)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_template/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_template/",
             data={"template_id": str(template.id)},
             format="json",
         )
@@ -3594,7 +3594,7 @@ class TestInstallTemplateAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest)
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/install_template/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/install_template/",
             data={"template_id": str(template.id)},
             format="json",
         )
@@ -3638,7 +3638,7 @@ class TestInstallTemplateAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest)
             params = {"installation_id": str(installation.id)}
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/mcp_server_installations/authorize/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/authorize/",
             params,
         )
 
@@ -3679,9 +3679,7 @@ class TestInstallationToolsAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTes
         self._tool(installation, "alpha")
         self._tool(installation, "gone", removed=True)
 
-        response = self.client.get(
-            f"/api/environments/{self.team.id}/mcp_server_installations/{installation.id}/tools/"
-        )
+        response = self.client.get(f"/v1/environments/{self.team.id}/mcp_server_installations/{installation.id}/tools/")
         assert response.status_code == status.HTTP_200_OK
         names = [t["tool_name"] for t in response.json()["results"]]
         assert names == ["alpha"]
@@ -3692,7 +3690,7 @@ class TestInstallationToolsAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTes
         self._tool(installation, "gone", removed=True)
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/mcp_server_installations/{installation.id}/tools/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/{installation.id}/tools/",
             {"include_removed": "1"},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -3704,7 +3702,7 @@ class TestInstallationToolsAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTes
         tool = self._tool(installation, "alpha", approval_state="needs_approval")
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/mcp_server_installations/{installation.id}/tools/{tool.tool_name}/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/{installation.id}/tools/{tool.tool_name}/",
             data={"approval_state": "approved"},
             format="json",
         )
@@ -3718,7 +3716,7 @@ class TestInstallationToolsAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTes
         self._tool(installation, "alpha")
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/mcp_server_installations/{installation.id}/tools/alpha/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/{installation.id}/tools/alpha/",
             data={"approval_state": "bogus"},
             format="json",
         )
@@ -3728,7 +3726,7 @@ class TestInstallationToolsAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTes
         installation = self._installation()
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/mcp_server_installations/{installation.id}/tools/ghost/",
+            f"/v1/environments/{self.team.id}/mcp_server_installations/{installation.id}/tools/ghost/",
             data={"approval_state": "approved"},
             format="json",
         )
@@ -3747,7 +3745,7 @@ class TestInstallationToolsAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTes
         mock_sync.side_effect = _stub
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/{installation.id}/tools/refresh/"
+            f"/v1/environments/{self.team.id}/mcp_server_installations/{installation.id}/tools/refresh/"
         )
         assert response.status_code == status.HTTP_200_OK
         mock_sync.assert_called_once()
@@ -3758,7 +3756,7 @@ class TestInstallationToolsAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTes
         installation = self._installation(is_enabled=False)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/mcp_server_installations/{installation.id}/tools/refresh/"
+            f"/v1/environments/{self.team.id}/mcp_server_installations/{installation.id}/tools/refresh/"
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -3769,7 +3767,7 @@ class TestInstallDispatchesToolSync(DatastoreTestMixin, APIBaseTest, QueryMatchi
     def test_install_custom_api_key_dispatches_background_sync(self, mock_task, _allow):
         with self.captureOnCommitCallbacks(execute=True):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/mcp_server_installations/install_custom/",
+                f"/v1/environments/{self.team.id}/mcp_server_installations/install_custom/",
                 data={
                     "name": "My API Server",
                     "url": "https://mcp.custom-sync.com",
@@ -3824,7 +3822,7 @@ class TestInstallDispatchesToolSync(DatastoreTestMixin, APIBaseTest, QueryMatchi
 
         with self.captureOnCommitCallbacks(execute=True):
             response = self.client.get(
-                "/api/mcp_store/oauth_redirect/",
+                "/v1/mcp_store/oauth_redirect/",
                 {"state": state_token, "code": "auth-code"},
             )
 
@@ -3834,7 +3832,7 @@ class TestInstallDispatchesToolSync(DatastoreTestMixin, APIBaseTest, QueryMatchi
 
 class TestMCPInstallationScopeAccess(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def _api_url(self, suffix: str = "") -> str:
-        base = f"/api/environments/{self.team.id}/mcp_server_installations/"
+        base = f"/v1/environments/{self.team.id}/mcp_server_installations/"
         return f"{base}{suffix}" if suffix else base
 
     def _create_installation(self, user=None, scope="personal", **kwargs) -> MCPServerInstallation:
@@ -4320,7 +4318,7 @@ class TestMCPScopeAdminGateWithAccessControlFeature(DatastoreTestMixin, APIBaseT
         self.organization.save()
 
     def _api_url(self, suffix: str = "") -> str:
-        base = f"/api/environments/{self.team.id}/mcp_server_installations/"
+        base = f"/v1/environments/{self.team.id}/mcp_server_installations/"
         return f"{base}{suffix}" if suffix else base
 
     def _create_installation(self, user=None, scope="personal") -> MCPServerInstallation:

@@ -87,7 +87,7 @@ export interface TaxonomicPopoverMenuProps<ValueType extends TaxonomicFilterValu
     optionsFromProp?: Partial<Record<TaxonomicFilterGroupType, SimpleOption[]>>
     hideBehavioralCohorts?: boolean
     endpointFilters?: Record<string, any>
-    hogQLGlobals?: Record<string, any>
+    insightsQLGlobals?: Record<string, any>
     showNumericalPropsOnly?: boolean
     dataWarehousePopoverFields?: DataWarehousePopoverField[]
     maxContextOptions?: MaxContextTaxonomicFilterOption[]
@@ -225,7 +225,7 @@ function ArmedTaxonomicPopoverMenu<ValueType extends TaxonomicFilterValue = Taxo
     optionsFromProp,
     hideBehavioralCohorts,
     endpointFilters,
-    hogQLGlobals,
+    insightsQLGlobals,
     showNumericalPropsOnly,
     dataWarehousePopoverFields,
     maxContextOptions,
@@ -307,7 +307,7 @@ function ArmedTaxonomicPopoverMenu<ValueType extends TaxonomicFilterValue = Taxo
             optionsFromProp={optionsFromProp}
             hideBehavioralCohorts={hideBehavioralCohorts}
             endpointFilters={endpointFilters}
-            hogQLGlobals={hogQLGlobals}
+            insightsQLGlobals={insightsQLGlobals}
             showNumericalPropsOnly={showNumericalPropsOnly}
             maxContextOptions={maxContextOptions}
             allowNonCapturedEvents={allowNonCapturedEvents}

@@ -30,8 +30,8 @@ class TestDatasetsApi(APIBaseTest):
         )
         feature_flag_patch.start()
         self.addCleanup(feature_flag_patch.stop)
-        self.datasets_url = f"/api/environments/{self.team.id}/datasets/"
-        self.items_url = f"/api/environments/{self.team.id}/dataset_items/"
+        self.datasets_url = f"/v1/environments/{self.team.id}/datasets/"
+        self.items_url = f"/v1/environments/{self.team.id}/dataset_items/"
 
     def _create_dataset(self, name: str = "Support answers") -> dict:
         response = self.client.post(
@@ -505,12 +505,12 @@ class TestDatasetsApi(APIBaseTest):
         parent_dataset = self._create_dataset("Per-environment dataset")
 
         child_response = self.client.post(
-            f"/api/environments/{child_team.id}/datasets/",
+            f"/v1/environments/{child_team.id}/datasets/",
             {"name": "Per-environment dataset"},
             format="json",
         )
         sibling_response = self.client.post(
-            f"/api/environments/{sibling_team.id}/datasets/",
+            f"/v1/environments/{sibling_team.id}/datasets/",
             {"name": "Per-environment dataset"},
             format="json",
         )
@@ -526,7 +526,7 @@ class TestDatasetsApi(APIBaseTest):
             sibling_team.id,
         )
         child_item_response = self.client.post(
-            f"/api/environments/{child_team.id}/dataset_items/",
+            f"/v1/environments/{child_team.id}/dataset_items/",
             {"dataset": child_response.data["id"], "input": "child input"},
             format="json",
         )
@@ -545,8 +545,8 @@ class TestDatasetsApi(APIBaseTest):
         )
 
         parent_list = self.client.get(self.datasets_url)
-        child_list = self.client.get(f"/api/environments/{child_team.id}/datasets/")
-        sibling_list = self.client.get(f"/api/environments/{sibling_team.id}/datasets/")
+        child_list = self.client.get(f"/v1/environments/{child_team.id}/datasets/")
+        sibling_list = self.client.get(f"/v1/environments/{sibling_team.id}/datasets/")
 
         self.assertEqual([dataset["id"] for dataset in parent_list.data["results"]], [parent_dataset["id"]])
         self.assertEqual([dataset["id"] for dataset in child_list.data["results"]], [child_response.data["id"]])
@@ -563,7 +563,7 @@ class TestDatasetsApi(APIBaseTest):
         )
         parent_dataset = self._create_dataset("Parent dataset")
         child_response = self.client.post(
-            f"/api/environments/{child_team.id}/datasets/",
+            f"/v1/environments/{child_team.id}/datasets/",
             {"name": "Child dataset"},
             format="json",
         )
@@ -581,9 +581,9 @@ class TestDatasetsApi(APIBaseTest):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {key_value}")
 
         child_dataset_response = self.client.get(
-            f"/api/environments/{child_team.id}/datasets/{child_response.data['id']}/"
+            f"/v1/environments/{child_team.id}/datasets/{child_response.data['id']}/"
         )
-        parent_dataset_response = self.client.get(f"/api/environments/{child_team.id}/datasets/{parent_dataset['id']}/")
+        parent_dataset_response = self.client.get(f"/v1/environments/{child_team.id}/datasets/{parent_dataset['id']}/")
 
         self.assertEqual(child_dataset_response.status_code, status.HTTP_200_OK)
         self.assertEqual(parent_dataset_response.status_code, status.HTTP_404_NOT_FOUND)

@@ -15,9 +15,9 @@ describe('projectHomepageLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/dashboards/1/': dashboardJson,
-                '/api/environments/:team_id/insights/': { results: ['result from api'] },
-                '/api/environments/:team_id/persons/': { results: ['result from api'] },
+                '/v1/environments/:team_id/dashboards/1/': dashboardJson,
+                '/v1/environments/:team_id/insights/': { results: ['result from api'] },
+                '/v1/environments/:team_id/persons/': { results: ['result from api'] },
             },
         })
         initKeaTests()

@@ -1,11 +1,15 @@
 import { QuotaLimiting } from '../../common/services/quota-limiting.service'
-import { CyclotronJobInvocationInsightsFunction, InsightsFunctionInvocationGlobals, InsightsFunctionType } from '../types'
+import {
+    CyclotronJobInvocationInsightsFunction,
+    InsightsFunctionInvocationGlobals,
+    InsightsFunctionType,
+} from '../types'
 import { buildInsightsFunctionInvocations } from '../utils/invocation-utils'
-import { InsightsFunctionInvocationPipeline } from './script-function-invocation-pipeline.service'
 import { InsightsFunctionManagerService } from './managers/script-function-manager.service'
 import { InsightsFunctionMonitoringService } from './monitoring/script-function-monitoring.service'
 import { HogMaskerService } from './monitoring/script-masker.service'
 import { HogWatcherService, HogWatcherState } from './monitoring/script-watcher.service'
+import { InsightsFunctionInvocationPipeline } from './script-function-invocation-pipeline.service'
 
 jest.mock('../utils/invocation-utils', () => ({
     ...jest.requireActual('../utils/invocation-utils'),
@@ -38,7 +42,10 @@ function makeInsightsFunction(overrides: Partial<InsightsFunctionType> = {}): In
     } as InsightsFunctionType
 }
 
-function makeInvocation(insightsFunction: InsightsFunctionType, eventUuid = 'evt-1'): CyclotronJobInvocationInsightsFunction {
+function makeInvocation(
+    insightsFunction: InsightsFunctionType,
+    eventUuid = 'evt-1'
+): CyclotronJobInvocationInsightsFunction {
     return {
         id: `inv-${insightsFunction.id}`,
         teamId: insightsFunction.team_id,
@@ -218,7 +225,11 @@ describe('InsightsFunctionInvocationPipeline', () => {
         const fn2 = makeInsightsFunction({ id: 'fn-2' })
         const inv1 = makeInvocation(fn1, 'evt-same')
         const inv2 = makeInvocation(fn2, 'evt-same')
-        jest.mocked(buildInsightsFunctionInvocations).mockResolvedValue({ invocations: [inv1, inv2], metrics: [], logs: [] })
+        jest.mocked(buildInsightsFunctionInvocations).mockResolvedValue({
+            invocations: [inv1, inv2],
+            metrics: [],
+            logs: [],
+        })
         hogWatcher.getEffectiveStates.mockResolvedValue({
             [fn1.id]: { state: HogWatcherState.healthy },
             [fn2.id]: { state: HogWatcherState.healthy },

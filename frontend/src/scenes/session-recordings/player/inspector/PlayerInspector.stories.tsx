@@ -21,7 +21,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/comments': {
+                '/v1/projects/:team_id/comments': {
                     count: 1,
                     results: [
                         {
@@ -51,8 +51,8 @@ const meta: Meta = {
                         },
                     ],
                 },
-                '/api/environments/:team_id/session_recordings/:id': largeRecordingMetaJson,
-                '/api/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
+                '/v1/environments/:team_id/session_recordings/:id': largeRecordingMetaJson,
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
                     if (new URL(request.url).searchParams.get('source') === 'blob_v2') {
                         return new HttpResponse(largeRecordingJSONL)
                     }
@@ -72,7 +72,7 @@ const meta: Meta = {
                 },
             },
             post: {
-                '/api/environments/:team_id/query/:kind': async ({ request }) => {
+                '/v1/environments/:team_id/query/:kind': async ({ request }) => {
                     const body = (await request.json()) as Record<string, any>
 
                     if (body.query.kind === 'InsightsQLQuery') {
@@ -87,7 +87,7 @@ const meta: Meta = {
                 },
             },
             patch: {
-                '/api/environments/:team_id/session_recordings/:id': () => {
+                '/v1/environments/:team_id/session_recordings/:id': () => {
                     return [200, {}]
                 },
             },

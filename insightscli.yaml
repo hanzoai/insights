@@ -919,10 +919,11 @@ tools:
             - temporal
     tool:script:
         bin_script: script
-        description: Run InsightsQL interpreter (TypeScript/Python) or compiled bytecode
-    tool:hoge:
-        bin_script: hoge
-        description: Compile InsightsQL source to bytecode or JavaScript
+        description: Run a .script program or compiled .scriptc bytecode on the script
+            VM (nodejs by default, --python for the Python VM)
+    tool:scriptc:
+        bin_script: scriptc
+        description: Compile a .script program to .scriptc bytecode or JavaScript
     tool:ruff:
         bin_script: ruff.sh
         description: Python linter and formatter with virtualenv auto-activation
@@ -938,8 +939,8 @@ tools:
         cmd: python manage.py create_ch_migration
         description: Generate new Datastore migration scaffold
     tool:print-script-stl:
-        cmd: python manage.py print_hog_stl_table
-        description: Print HogSQL standard library definitions for reference
+        cmd: python manage.py print_script_stl_table
+        description: Print the script standard library definitions for reference
         hidden: true
     datastore:logs:init:
         bin_script: datastore-logs-init
@@ -1213,10 +1214,6 @@ environment:
     debrand:selftest:
         bin_script: debrand-selftest
         description: 'Self-test bin/debrand, one check per rename defect that has happened before'
-        hidden: true
-    hog:
-        bin_script: hog
-        description: 'Run a .hoge program on the script VM (nodejs by default, --python for the Python VM)'
         hidden: true
     tables:
         bin_script: tables

@@ -12,7 +12,7 @@ const meta: Meta<PlayerShareLogicProps> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/session_recordings/:recording_id/sharing': () => [
+                '/v1/environments/:team_id/session_recordings/:recording_id/sharing': () => [
                     200,
                     {
                         created_at: '2025-01-30T19:46:47.564036Z',

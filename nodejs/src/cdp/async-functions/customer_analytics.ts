@@ -39,7 +39,7 @@ registerAsyncFunction('insightsGetAccount', {
 
         result.invocation.queueParameters = CyclotronInvocationQueueParametersFetchSchema.parse({
             type: 'fetch',
-            url: `${context.siteUrl}/api/customer_analytics/external/account?external_id=${encodeURIComponent(externalId)}`,
+            url: `${context.siteUrl}/v1/customer_analytics/external/account?external_id=${encodeURIComponent(externalId)}`,
             method: 'GET',
             headers: { Authorization: `Bearer ${team.secret_api_token}` },
         })
@@ -109,7 +109,7 @@ registerAsyncFunction('insightsUpdateAccount', {
 
         result.invocation.queueParameters = CyclotronInvocationQueueParametersFetchSchema.parse({
             type: 'fetch',
-            url: `${context.siteUrl}/api/customer_analytics/external/account`,
+            url: `${context.siteUrl}/v1/customer_analytics/external/account`,
             method: 'PATCH',
             body: JSON.stringify({ external_id: externalId, ...updates }),
             headers,
@@ -159,7 +159,7 @@ registerAsyncFunction('insightsSetAccountProperties', {
 
         result.invocation.queueParameters = CyclotronInvocationQueueParametersFetchSchema.parse({
             type: 'fetch',
-            url: `${context.siteUrl}/api/customer_analytics/external/account/custom_property_values`,
+            url: `${context.siteUrl}/v1/customer_analytics/external/account/custom_property_values`,
             method: 'PATCH',
             body: JSON.stringify({ external_id: externalId, properties }),
             headers,
@@ -208,7 +208,7 @@ registerAsyncFunction('insightsCreateAccount', {
 
         result.invocation.queueParameters = CyclotronInvocationQueueParametersFetchSchema.parse({
             type: 'fetch',
-            url: `${context.siteUrl}/api/customer_analytics/external/account`,
+            url: `${context.siteUrl}/v1/customer_analytics/external/account`,
             method: 'POST',
             body: JSON.stringify({ external_id: externalId }),
             headers,

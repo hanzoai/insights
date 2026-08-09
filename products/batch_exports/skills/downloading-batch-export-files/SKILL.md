@@ -87,7 +87,7 @@ After cancelling an export, the `id` may not be used anymore and the export must
 Use a direct authenticated HTTP request to the existing endpoint:
 
 ```text
-GET /api/projects/{project_id}/file_download_batch_exports/{run_id}/download/{part}/
+GET /v1/projects/{project_id}/file_download_batch_exports/{run_id}/download/{part}/
 ```
 
 `part` can be either:
@@ -98,7 +98,7 @@ GET /api/projects/{project_id}/file_download_batch_exports/{run_id}/download/{pa
 If there is only one file, this also works without `part`:
 
 ```text
-GET /api/projects/{project_id}/file_download_batch_exports/{run_id}/download/
+GET /v1/projects/{project_id}/file_download_batch_exports/{run_id}/download/
 ```
 
 Let the HTTP client follow the redirect, or inspect the `Location` header if you need the temporary signed URL.

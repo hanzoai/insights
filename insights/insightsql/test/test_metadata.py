@@ -753,7 +753,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
 
     def test_valid_view_nested_view(self):
         saved_query_response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {

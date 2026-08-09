@@ -37,7 +37,7 @@ class TestTicketSnoozeAPI(APIBaseTest):
             distinct_id="snooze-user",
             status=Status.NEW,
         )
-        self.url = f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/"
+        self.url = f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/"
 
     def test_set_snoozed_until(self, _):
         snooze_time = (timezone.now() + timedelta(hours=2)).isoformat()
@@ -134,7 +134,7 @@ class TestTicketSnoozeAPI(APIBaseTest):
         self.ticket.snoozed_until = snooze_time
         self.ticket.save(update_fields=["snoozed_until"])
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNotNone(response.json()["results"][0]["snoozed_until"])
 
@@ -150,7 +150,7 @@ class TestTicketSnoozeAPI(APIBaseTest):
             distinct_id="unsnoozed-user",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?snoozed={param_value}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?snoozed={param_value}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
 
@@ -178,7 +178,7 @@ class TestExternalTicketSnoozeAPI(BaseTest):
             channel_source="widget",
             status=Status.NEW,
         )
-        self.url = f"/api/conversations/external/ticket/{self.ticket.id}"
+        self.url = f"/v1/conversations/external/ticket/{self.ticket.id}"
 
     def _auth(self):
         return {"HTTP_AUTHORIZATION": f"Bearer {self.team.secret_api_token}"}

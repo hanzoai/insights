@@ -23,14 +23,14 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/experiments/': toPaginatedResponse([
+                '/v1/projects/:team_id/experiments/': toPaginatedResponse([
                     EXPERIMENT_DRAFT,
                     EXPERIMENT_WITH_LEGACY_TRENDS_QUERY,
                     EXPERIMENT_WITH_LEGACY_FUNNELS_QUERY,
                     EXPERIMENT_WITH_MULTIPLE_METRICS,
                 ]),
-                '/api/projects/:team_id/experiment_holdouts': [],
-                '/api/projects/:team_id/experiment_saved_metrics/': [],
+                '/v1/projects/:team_id/experiment_holdouts': [],
+                '/v1/projects/:team_id/experiment_saved_metrics/': [],
             },
         }),
     ],

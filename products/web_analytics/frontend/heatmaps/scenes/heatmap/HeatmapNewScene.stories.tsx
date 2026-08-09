@@ -119,7 +119,7 @@ const meta: Meta<typeof HeatmapNewStory> = {
         msw: {
             mocks: {
                 post: {
-                    '/api/environments/:team_id/query/:kind': queryMock(24),
+                    '/v1/environments/:team_id/query/:kind': queryMock(24),
                 },
             },
         },
@@ -149,7 +149,7 @@ export const NoMatchingData: Story = {
         msw: {
             mocks: {
                 post: {
-                    '/api/environments/:team_id/query/:kind': queryMock(0),
+                    '/v1/environments/:team_id/query/:kind': queryMock(0),
                 },
             },
         },
@@ -182,7 +182,7 @@ export const AuthenticatedWithRecordings: Story = {
         msw: {
             mocks: {
                 get: {
-                    '/api/environments/:team_id/session_recordings': [
+                    '/v1/environments/:team_id/session_recordings': [
                         200,
                         {
                             results: [

@@ -10,7 +10,7 @@ from insights.push_notifications import send_push_to_user
 class TestUserPushTokenEndpoints(APIBaseTest):
     def test_register_creates_row(self):
         response = self.client.post(
-            "/api/users/@me/push_tokens/",
+            "/v1/users/@me/push_tokens/",
             {"token": "ExponentPushToken[abc]", "platform": "ios"},
             format="json",
         )
@@ -23,7 +23,7 @@ class TestUserPushTokenEndpoints(APIBaseTest):
         UserPushToken.objects.create(user=self.user, token="ExponentPushToken[abc]", platform="ios")
 
         response = self.client.post(
-            "/api/users/@me/push_tokens/",
+            "/v1/users/@me/push_tokens/",
             {"token": "ExponentPushToken[abc]", "platform": "android"},
             format="json",
         )
@@ -36,7 +36,7 @@ class TestUserPushTokenEndpoints(APIBaseTest):
 
     def test_register_rejects_invalid_platform(self):
         response = self.client.post(
-            "/api/users/@me/push_tokens/",
+            "/v1/users/@me/push_tokens/",
             {"token": "ExponentPushToken[abc]", "platform": "blackberry"},
             format="json",
         )
@@ -44,7 +44,7 @@ class TestUserPushTokenEndpoints(APIBaseTest):
 
     def test_register_requires_token(self):
         response = self.client.post(
-            "/api/users/@me/push_tokens/",
+            "/v1/users/@me/push_tokens/",
             {"platform": "ios"},
             format="json",
         )
@@ -54,7 +54,7 @@ class TestUserPushTokenEndpoints(APIBaseTest):
         UserPushToken.objects.create(user=self.user, token="ExponentPushToken[abc]", platform="ios")
 
         response = self.client.post(
-            "/api/users/@me/push_tokens/unregister/",
+            "/v1/users/@me/push_tokens/unregister/",
             {"token": "ExponentPushToken[abc]"},
             format="json",
         )
@@ -63,7 +63,7 @@ class TestUserPushTokenEndpoints(APIBaseTest):
 
     def test_unregister_unknown_token_is_a_noop(self):
         response = self.client.post(
-            "/api/users/@me/push_tokens/unregister/",
+            "/v1/users/@me/push_tokens/unregister/",
             {"token": "ExponentPushToken[never-registered]"},
             format="json",
         )
@@ -75,7 +75,7 @@ class TestUserPushTokenEndpoints(APIBaseTest):
         UserPushToken.objects.create(user=self.user, token="ExponentPushToken[shared]", platform="ios")
 
         response = self.client.post(
-            "/api/users/@me/push_tokens/unregister/",
+            "/v1/users/@me/push_tokens/unregister/",
             {"token": "ExponentPushToken[shared]"},
             format="json",
         )
@@ -88,7 +88,7 @@ class TestUserPushTokenEndpoints(APIBaseTest):
         UserPushToken.objects.create(user=other_user, token="ExponentPushToken[abc]", platform="ios")
 
         response = self.client.post(
-            "/api/users/@me/push_tokens/",
+            "/v1/users/@me/push_tokens/",
             {"token": "ExponentPushToken[abc]", "platform": "ios"},
             format="json",
         )
@@ -99,7 +99,7 @@ class TestUserPushTokenEndpoints(APIBaseTest):
     def test_unauthenticated_requests_are_rejected(self):
         self.client.logout()
         response = self.client.post(
-            "/api/users/@me/push_tokens/",
+            "/v1/users/@me/push_tokens/",
             {"token": "ExponentPushToken[abc]", "platform": "ios"},
             format="json",
         )
@@ -117,7 +117,7 @@ class TestUserPushTokenEndpoints(APIBaseTest):
         victim = self._create_user("victim@example.com")
 
         response = self.client.post(
-            f"/api/users/{victim.uuid}/push_tokens/",
+            f"/v1/users/{victim.uuid}/push_tokens/",
             {"token": "ExponentPushToken[attacker]", "platform": "ios"},
             format="json",
         )
@@ -139,7 +139,7 @@ class TestUserPushTokenEndpoints(APIBaseTest):
             )
 
         response = self.client.post(
-            "/api/users/@me/push_tokens/",
+            "/v1/users/@me/push_tokens/",
             {"token": "ExponentPushToken[new]", "platform": "ios"},
             format="json",
         )

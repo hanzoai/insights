@@ -105,21 +105,21 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                'api/projects/:team_id/engineering_analytics/flaky_tests/': FLAKY_TESTS,
-                'api/projects/:team_id/engineering_analytics/quarantine/': QUARANTINE,
-                'api/projects/:team_id/engineering_analytics/sources/': SOURCES,
-                'api/projects/:team_id/engineering_analytics/ci_cards/': {
+                'v1/projects/:team_id/engineering_analytics/flaky_tests/': FLAKY_TESTS,
+                'v1/projects/:team_id/engineering_analytics/quarantine/': QUARANTINE,
+                'v1/projects/:team_id/engineering_analytics/sources/': SOURCES,
+                'v1/projects/:team_id/engineering_analytics/ci_cards/': {
                     open_prs: 18,
                     repos: 1,
                     stuck: 3,
                     failing_ci: 4,
                 },
-                'api/projects/:team_id/engineering_analytics/pull_requests/': {
+                'v1/projects/:team_id/engineering_analytics/pull_requests/': {
                     items: [],
                     truncated: false,
                     limit: 1000,
                 },
-                'api/projects/:team_id/engineering_analytics/workflow_health/': [],
+                'v1/projects/:team_id/engineering_analytics/workflow_health/': [],
             },
         }),
     ],

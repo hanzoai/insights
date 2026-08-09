@@ -405,15 +405,15 @@ RESOURCE_INHERITANCE_MAP = {
 The `AccessControlViewSetMixin` automatically adds these endpoints:
 
 ```text
-GET    /api/projects/{project_id}/{resource}/{id}/access_controls/
-POST   /api/projects/{project_id}/{resource}/{id}/access_controls/
-DELETE /api/projects/{project_id}/{resource}/{id}/access_controls/
+GET    /v1/projects/{project_id}/{resource}/{id}/access_controls/
+POST   /v1/projects/{project_id}/{resource}/{id}/access_controls/
+DELETE /v1/projects/{project_id}/{resource}/{id}/access_controls/
 
-GET    /api/projects/{project_id}/{resource}/resource_access_controls/
-POST   /api/projects/{project_id}/{resource}/resource_access_controls/
-DELETE /api/projects/{project_id}/{resource}/resource_access_controls/
+GET    /v1/projects/{project_id}/{resource}/resource_access_controls/
+POST   /v1/projects/{project_id}/{resource}/resource_access_controls/
+DELETE /v1/projects/{project_id}/{resource}/resource_access_controls/
 
-GET    /api/projects/{project_id}/{resource}/{id}/users_with_access/
+GET    /v1/projects/{project_id}/{resource}/{id}/users_with_access/
 ```
 
 ## Common Patterns

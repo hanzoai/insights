@@ -39,8 +39,8 @@ describe('SupportTicketsTable selection', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team_id/conversations/tickets/': () => [200, { results: [TICKET], count: 1 }],
-                '/api/organizations/:organization_id/members/': () => [200, { results: [] }],
+                '/v1/projects/:team_id/conversations/tickets/': () => [200, { results: [TICKET], count: 1 }],
+                '/v1/organizations/:organization_id/members/': () => [200, { results: [] }],
             },
         })
         initKeaTests()
@@ -180,9 +180,9 @@ describe('SupportTicketsTableFilters count', () => {
         mockCount = 0
         useMocks({
             get: {
-                '/api/projects/:team_id/conversations/tickets/': () => [200, { results: [TICKET], count: mockCount }],
-                '/api/organizations/:organization_id/members/': () => [200, { results: [] }],
-                '/api/projects/:team_id/tags': () => [200, []],
+                '/v1/projects/:team_id/conversations/tickets/': () => [200, { results: [TICKET], count: mockCount }],
+                '/v1/organizations/:organization_id/members/': () => [200, { results: [] }],
+                '/v1/projects/:team_id/tags': () => [200, []],
             },
         })
         initKeaTests()

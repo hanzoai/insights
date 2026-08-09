@@ -257,7 +257,7 @@ class InsightsPreviewStack:
         # hard-requires the personinsights service for group-type lookups since #65968
         # — require_personinsights_client() raises "personinsights client not configured"
         # without it), this file didn't, and every preview 500'd on
-        # /api/projects/@current/ (and environment/@current, team create, some
+        # /v1/projects/@current/ (and environment/@current, team create, some
         # InsightsQL paths) from 2026-07-06 to 2026-07-10 until this was fixed.
         #
         # A web recreate still happens in up_web — but only to bind-mount the PR's
@@ -462,7 +462,7 @@ class InsightsPreviewStack:
 
     def deep_health(self) -> None:
         # /_health is UNAUTHENTICATED — it passed the whole time previews were
-        # 500ing on /api/projects/@current/ (the personinsights drift), so "healthy"
+        # 500ing on /v1/projects/@current/ (the personinsights drift), so "healthy"
         # meant "process is up", not "app is usable". This gate logs into the
         # seeded demo user and hits the endpoints that actually broke, so a
         # regression like that fails the bring-up instead of shipping a dead box.
@@ -483,9 +483,9 @@ class InsightsPreviewStack:
         # independent of external networking — same posture as wait_http_ok. One
         # bash script does the whole login+probe flow with a shared cookie jar:
         #   1. GET  /login          -> seed the CSRF cookie
-        #   2. POST /api/login/     -> authenticate the demo user
-        #   3. GET  /api/projects/@current/               expect 200
-        #   4. POST /api/environments/@current/query/     expect 200 (InsightsQL)
+        #   2. POST /v1/login/     -> authenticate the demo user
+        #   3. GET  /v1/projects/@current/               expect 200
+        #   4. POST /v1/environments/@current/query/     expect 200 (InsightsQL)
         # It prints "STEP <name> <http_code>" per step and the body of the first
         # non-2xx, so the Python side can raise with the exact failure.
         base = f"http://localhost:{self.backend.web_port}"
@@ -506,9 +506,9 @@ probe() {{ # name method path [json]
   case "$code" in 2*) ;; *) echo "BODY_START"; head -c 300 /tmp/dh_body; echo; echo "BODY_END"; return 1;; esac
 }}
 probe login GET /login || exit 1
-probe api_login POST /api/login/ '{{"email":"{_DEMO_EMAIL}","password":"{_DEMO_PASSWORD}"}}' || exit 1
-probe projects GET /api/projects/@current/ || exit 1
-probe insightsql POST /api/environments/@current/query/ '{{"query":{{"kind":"InsightsQLQuery","query":"select 1"}}}}' || exit 1
+probe api_login POST /v1/login/ '{{"email":"{_DEMO_EMAIL}","password":"{_DEMO_PASSWORD}"}}' || exit 1
+probe projects GET /v1/projects/@current/ || exit 1
+probe insightsql POST /v1/environments/@current/query/ '{{"query":{{"kind":"InsightsQLQuery","query":"select 1"}}}}' || exit 1
 echo "DEEP_HEALTH_OK"
 """
         r = self.backend.exec(script, timeout=180)

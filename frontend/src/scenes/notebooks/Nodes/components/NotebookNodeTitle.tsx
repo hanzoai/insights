@@ -1,5 +1,5 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { KeyboardEvent, useEffect, useRef, useState } from 'react'
 
 import { Input, Tag, Tooltip } from '@hanzo/elements'
@@ -14,7 +14,7 @@ import { notebookNodeLogic } from '../notebookNodeLogic'
 const getNodeIndex = ({
     isPythonNode,
     isDuckSqlNode,
-    isHogqlSqlNode,
+    isInsightsqlSqlNode,
     isSqlNode,
     nodeId,
     pythonNodeIndices,
@@ -24,7 +24,7 @@ const getNodeIndex = ({
 }: {
     isPythonNode: boolean
     isDuckSqlNode: boolean
-    isHogqlSqlNode: boolean
+    isInsightsqlSqlNode: boolean
     isSqlNode: boolean
     nodeId: string
     pythonNodeIndices: Map<string, number>
@@ -38,7 +38,7 @@ const getNodeIndex = ({
     if (isDuckSqlNode) {
         return duckSqlNodeIndices.get(nodeId)
     }
-    if (isHogqlSqlNode) {
+    if (isInsightsqlSqlNode) {
         return insightsqlSqlNodeIndices.get(nodeId)
     }
     if (isSqlNode) {
@@ -74,7 +74,7 @@ export function NotebookNodeTitle(): JSX.Element {
 
     const isPythonNode = nodeType === NotebookNodeType.Python
     const isDuckSqlNode = nodeType === NotebookNodeType.DuckSQL
-    const isHogqlSqlNode = nodeType === NotebookNodeType.InsightsQLSQL
+    const isInsightsqlSqlNode = nodeType === NotebookNodeType.InsightsQLSQL
     const isSqlNode =
         nodeType === NotebookNodeType.Query &&
         (isInsightsQLQuery(nodeAttributes.query) ||
@@ -83,7 +83,7 @@ export function NotebookNodeTitle(): JSX.Element {
     const nodeIndex = getNodeIndex({
         isPythonNode,
         isDuckSqlNode,
-        isHogqlSqlNode,
+        isInsightsqlSqlNode,
         isSqlNode,
         nodeId: nodeAttributes.nodeId,
         pythonNodeIndices,

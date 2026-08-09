@@ -3,8 +3,8 @@ import { Counter } from 'prom-client'
 
 import { InternalFetchService } from '~/common/services/internal-fetch'
 import { instrumentFn } from '~/common/tracing/tracing-utils'
-import { logger, serializeError } from '~/common/utils/logger'
 import { captureException } from '~/common/utils/insights'
+import { logger, serializeError } from '~/common/utils/logger'
 import { UUIDT } from '~/common/utils/utils'
 
 import { HealthCheckResult, HealthCheckResultError, HealthCheckResultOk, PluginsServerConfig, Team } from '../../types'
@@ -431,7 +431,7 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
     }
 
     private async putBatchJobStatus(teamId: number, batchJobId: string, status: 'completed' | 'failed'): Promise<void> {
-        const urlPath = `/api/projects/${teamId}/internal/hog_flows/batch_jobs/${batchJobId}/status` as const
+        const urlPath = `/v1/projects/${teamId}/internal/hog_flows/batch_jobs/${batchJobId}/status` as const
 
         const { fetchResponse, fetchError } = await this.internalFetchService.fetch({
             urlPath,

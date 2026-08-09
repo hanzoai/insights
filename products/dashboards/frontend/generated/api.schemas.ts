@@ -939,7 +939,7 @@ export const BreakdownTypeApi = {
     EventMetadata: 'event_metadata',
     Group: 'group',
     Session: 'session',
-    Hogql: 'insightsql',
+    Insightsql: 'insightsql',
     DataWarehouse: 'data_warehouse',
     DataWarehousePersonProperty: 'data_warehouse_person_property',
     RevenueAnalytics: 'revenue_analytics',
@@ -953,7 +953,7 @@ export const MultipleBreakdownTypeApi = {
     EventMetadata: 'event_metadata',
     Group: 'group',
     Session: 'session',
-    Hogql: 'insightsql',
+    Insightsql: 'insightsql',
     Cohort: 'cohort',
     RevenueAnalytics: 'revenue_analytics',
     DataWarehouse: 'data_warehouse',
@@ -1678,7 +1678,7 @@ export const ExperimentMetricMathTypeApi = {
     Avg: 'avg',
     Dau: 'dau',
     UniqueGroup: 'unique_group',
-    Hogql: 'insightsql',
+    Insightsql: 'insightsql',
 } as const
 
 export type CalendarHeatmapMathTypeApi = (typeof CalendarHeatmapMathTypeApi)[keyof typeof CalendarHeatmapMathTypeApi]
@@ -3232,7 +3232,7 @@ export const PathTypeApi = {
     Pageview: '$pageview',
     Screen: '$screen',
     CustomEvent: 'custom_event',
-    Hogql: 'insightsql',
+    Insightsql: 'insightsql',
 } as const
 
 export interface PathCleaningFilterApi {
@@ -4914,7 +4914,7 @@ export const TaxonomicFilterGroupTypeApi = {
     Dashboards: 'dashboards',
     NameGroups: 'name_groups',
     SessionProperties: 'session_properties',
-    HogqlExpression: 'insightsql_expression',
+    InsightsqlExpression: 'insightsql_expression',
     Notebooks: 'notebooks',
     LogEntries: 'log_entries',
     ErrorTrackingIssues: 'error_tracking_issues',

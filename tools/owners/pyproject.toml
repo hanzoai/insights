@@ -41,9 +41,9 @@ dev = [
 owners = "insights_owners.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/PostHog/posthog"
-Documentation = "https://github.com/PostHog/posthog/tree/master/tools/owners"
-Repository = "https://github.com/PostHog/posthog"
+Homepage = "https://github.com/hanzoai/insights"
+Documentation = "https://github.com/hanzoai/insights/tree/master/tools/owners"
+Repository = "https://github.com/hanzoai/insights"
 
 [tool.hatch.build.targets.wheel]
 packages = ["insights_owners"]

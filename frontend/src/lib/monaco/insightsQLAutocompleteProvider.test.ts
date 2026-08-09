@@ -1,4 +1,4 @@
-import { hogQLAutocompleteProvider } from 'lib/monaco/hogQLAutocompleteProvider'
+import { insightsQLAutocompleteProvider } from 'lib/monaco/insightsQLAutocompleteProvider'
 
 import { performQuery } from '~/queries/query'
 import { HogLanguage } from '~/queries/schema/schema-general'
@@ -7,14 +7,14 @@ jest.mock('~/queries/query', () => ({
     performQuery: jest.fn(),
 }))
 
-describe('hogQLAutocompleteProvider', () => {
+describe('insightsQLAutocompleteProvider', () => {
     beforeEach(() => {
         jest.mocked(performQuery).mockReset()
     })
 
     it('returns an empty completion list when the autocomplete query fails', async () => {
         jest.mocked(performQuery).mockRejectedValueOnce(new Error("trailing tokens after expression: 'is'"))
-        const provider = hogQLAutocompleteProvider(HogLanguage.hogQL)
+        const provider = insightsQLAutocompleteProvider(HogLanguage.insightsQL)
         const model = {
             codeEditorLogic: {
                 isMounted: () => true,

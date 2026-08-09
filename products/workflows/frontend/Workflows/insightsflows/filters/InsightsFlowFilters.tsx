@@ -111,7 +111,7 @@ export function InsightsFlowEventFilters({
             }}
             buttonCopy={buttonCopy ?? 'Add filter'}
             allowNonCapturedEvents
-            hogQLGlobals={sampleGlobals}
+            insightsQLGlobals={sampleGlobals}
             operatorAllowlist={WORKFLOW_OPERATOR_ALLOWLIST}
         />
     )
@@ -166,7 +166,7 @@ export function InsightsFlowPropertyFilters({
                 select: defaultDataTableColumns(NodeKind.EventsQuery),
                 after: '-30d',
             }}
-            hogQLGlobals={sampleGlobals}
+            insightsQLGlobals={sampleGlobals}
             operatorAllowlist={WORKFLOW_OPERATOR_ALLOWLIST}
         />
     )

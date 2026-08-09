@@ -13,7 +13,7 @@ async function fetchWorkflow(
 ): Promise<{ status: string | undefined; trigger: WorkflowTrigger }> {
     const workflow = await context.api.request<{ status?: string; trigger?: unknown }>({
         method: 'GET',
-        path: `/api/projects/${encodeURIComponent(String(projectId))}/hog_flows/${encodeURIComponent(String(workflowId))}/`,
+        path: `/v1/projects/${encodeURIComponent(String(projectId))}/hog_flows/${encodeURIComponent(String(workflowId))}/`,
     })
     return { status: workflow.status, trigger: (workflow.trigger ?? {}) as WorkflowTrigger }
 }
@@ -25,7 +25,7 @@ function triggerFilters(trigger: WorkflowTrigger): unknown {
 async function sizeAudience(context: Context, projectId: string, filters: unknown): Promise<BlastRadius> {
     return await context.api.request<BlastRadius>({
         method: 'POST',
-        path: `/api/projects/${encodeURIComponent(String(projectId))}/hog_flows/user_blast_radius/`,
+        path: `/v1/projects/${encodeURIComponent(String(projectId))}/hog_flows/user_blast_radius/`,
         body: { filters },
     })
 }
@@ -115,7 +115,7 @@ export const workflowsRunBatch = (): ToolBase<typeof RunBatchSchema, unknown> =>
 
         return await context.api.request({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/hog_flows/${encodeURIComponent(String(params.workflow_id))}/batch_jobs/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/hog_flows/${encodeURIComponent(String(params.workflow_id))}/batch_jobs/`,
             body: {
                 filters,
                 confirm_token: params.confirm_token,
@@ -183,7 +183,7 @@ export const workflowsScheduleCreate = (): ToolBase<typeof ScheduleCreateSchema,
 
         return await context.api.request({
             method: 'POST',
-            path: `/api/projects/${encodeURIComponent(String(projectId))}/hog_flows/${encodeURIComponent(String(params.workflow_id))}/schedules/`,
+            path: `/v1/projects/${encodeURIComponent(String(projectId))}/hog_flows/${encodeURIComponent(String(params.workflow_id))}/schedules/`,
             body: {
                 rrule: params.rrule,
                 starts_at: params.starts_at,

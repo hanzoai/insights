@@ -90,7 +90,7 @@ class TestOrganizationFeatureFlagGet(APIBaseTest, QueryMatchingTest):
 
     @snapshot_postgres_queries
     def test_get_feature_flag_success(self):
-        url = f"/api/organizations/{self.organization.id}/feature_flags/{self.feature_flag_key}"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/{self.feature_flag_key}"
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -110,7 +110,7 @@ class TestOrganizationFeatureFlagGet(APIBaseTest, QueryMatchingTest):
         self.assertCountEqual(response.json(), expected_data)
 
     def test_get_feature_flag_not_found(self):
-        url = f"/api/organizations/{self.organization.id}/feature_flags/nonexistent-flag"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/nonexistent-flag"
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -119,7 +119,7 @@ class TestOrganizationFeatureFlagGet(APIBaseTest, QueryMatchingTest):
     def test_get_feature_flag_unauthorized(self):
         self.client.logout()
 
-        url = f"/api/organizations/{self.organization.id}/feature_flags/{self.feature_flag_key}"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/{self.feature_flag_key}"
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -133,7 +133,7 @@ class TestOrganizationFeatureFlagGet(APIBaseTest, QueryMatchingTest):
             filters={"groups": [], "payloads": {"true": "ciphertext-blob"}},
         )
 
-        url = f"/api/organizations/{self.organization.id}/feature_flags/encrypted-key"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/encrypted-key"
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -165,7 +165,7 @@ class TestOrganizationFeatureFlagGet(APIBaseTest, QueryMatchingTest):
             access_level="none",
         )
 
-        url = f"/api/organizations/{self.organization.id}/feature_flags/{self.feature_flag_key}"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/{self.feature_flag_key}"
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -200,7 +200,7 @@ class TestOrganizationFeatureFlagGet(APIBaseTest, QueryMatchingTest):
             access_level="none",
         )
 
-        url = f"/api/organizations/{self.organization.id}/feature_flags/{self.feature_flag_key}"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/{self.feature_flag_key}"
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -225,7 +225,7 @@ class TestOrganizationFeatureFlagKeys(APIBaseTest):
         super().setUp()
 
     def _keys_url(self, **params: Any) -> str:
-        url = f"/api/organizations/{self.organization.id}/feature_flags/keys/"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/keys/"
         query = "&".join(f"{k}={v}" for k, v in params.items())
         return f"{url}?{query}" if query else url
 
@@ -447,7 +447,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
 
     @snapshot_postgres_queries
     def test_copy_feature_flag_create_new(self):
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         target_project = self.team_2
 
         data = {
@@ -574,7 +574,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
         existing_flag.usage_dashboard = usage_dashboard
         existing_flag.save()
 
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
 
         data = {
             "feature_flag_key": self.feature_flag_to_copy.key,
@@ -692,7 +692,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
         self.assertEqual(copied_flag.filters["groups"][0]["properties"][0]["value"], copied_cohort.id)
 
     def test_copy_feature_flag_with_old_legacy_flags(self):
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         target_project = self.team_2
 
         flag_to_copy = FeatureFlag.objects.create(
@@ -761,7 +761,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
             team=target_project_2, created_by=self.user, feature_flag_id=existing_deleted_flag2.id
         )
 
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
 
         data = {
             "feature_flag_key": self.feature_flag_to_copy.key,
@@ -867,7 +867,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
                 filters={"groups": [{"rollout_percentage": 10}]},
             )
 
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         data: dict[str, Any] = {
             "feature_flag_key": self.feature_flag_to_copy.key,
             "from_project": self.feature_flag_to_copy.team_id,
@@ -890,7 +890,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
         self.assertTrue(self.feature_flag_to_copy.active)
 
     def test_copy_feature_flag_missing_fields(self):
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         data: dict[str, Any] = {}
         response = self.client.post(url, data)
 
@@ -901,7 +901,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
         self.assertIn("This field is required.", body["detail"])
 
     def test_copy_feature_flag_nonexistent_key(self):
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         data = {
             "feature_flag_key": "nonexistent-key",
             "from_project": self.team_1.id,
@@ -919,7 +919,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
         other_team = Team.objects.create(organization=other_org)
         FeatureFlag.objects.create(team=other_team, created_by=self.user, key="other-org-flag")
 
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         data = {
             "feature_flag_key": "other-org-flag",
             "from_project": other_team.id,
@@ -931,7 +931,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
         self.assertEqual(response.json()["error"], "Feature flag to copy does not exist.")
 
     def test_copy_feature_flag_to_nonexistent_target(self):
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         nonexistent_project_id = 999
         data = {
             "feature_flag_key": self.feature_flag_key,
@@ -947,7 +947,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
 
     def test_copy_feature_flag_unauthorized(self):
         self.client.logout()
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         data = {
             "feature_flag_key": self.feature_flag_key,
             "from_project": self.team_1.id,
@@ -973,7 +973,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
             access_level="none",
         )
 
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         data = {
             "feature_flag_key": self.feature_flag_key,
             "from_project": self.team_1.id,
@@ -1203,7 +1203,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
                 )
             return real_save(serializer_self, **kwargs)
 
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         data = {
             "feature_flag_key": self.feature_flag_key,
             "from_project": self.team_1.id,
@@ -1281,7 +1281,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
             },
         )
 
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         target_project = self.team_2
 
         data = {
@@ -1354,7 +1354,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
             },
         )
 
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         target_project = self.team_2
 
         data = {
@@ -1440,7 +1440,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
             },
         )
 
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
 
         data = {
             "feature_flag_key": flag_to_copy.key,
@@ -1459,7 +1459,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
             self.assertTrue(destination_cohort.groups[0]["properties"][0]["value"] == destination_cohort_prop_value)
 
     def _copy_flags_url(self) -> str:
-        return f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        return f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
 
     def _dependency_requirements_url(self) -> str:
         return f"{self._copy_flags_url()}/dependency_requirements"
@@ -2365,7 +2365,6 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
 
     def test_copy_feature_flag_with_dependencies_does_not_reuse_restricted_target_dependency(self):
         from insights.constants import AvailableFeature
-
         from insights.models.ee_models import AccessControl
 
         self.organization.available_product_features = [
@@ -2772,7 +2771,6 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
 
     def test_copy_feature_flag_with_dependency_denied_returns_forbidden(self):
         from insights.constants import AvailableFeature
-
         from insights.models.ee_models import AccessControl
 
         self.organization.available_product_features = [
@@ -2840,7 +2838,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
         self.assertFalse(FeatureFlag.objects.filter(team=self.team_2, key=flag_to_copy.key).exists())
 
     def test_copy_feature_flag_too_many_target_projects(self):
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         # One more than the cap. team_2 is a real, writable target, included to prove it gets
         # nothing even though it would otherwise succeed on its own.
         target_project_ids = [*range(10_000, 10_000 + MAX_COPY_FLAGS_TARGET_PROJECTS), self.team_2.id]
@@ -2862,7 +2860,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
         # CopyFlagsBurstRateThrottle subclasses PersonalApiKeyOrUserRateThrottle, which applies
         # regardless of auth method, so it must catch the test client's session-authenticated
         # calls too. The patched rate makes the second request trip it deterministically.
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         data = {
             "feature_flag_key": self.feature_flag_key,
             "from_project": self.team_1.id,
@@ -2877,7 +2875,6 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
 
     def test_copy_feature_flag_overwrite_denied_by_object_level_access_control_fails(self):
         from insights.constants import AvailableFeature
-
         from insights.models.ee_models import AccessControl
 
         self.organization.available_product_features = [
@@ -2908,7 +2905,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
             access_level="viewer",
         )
 
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         data = {
             "feature_flag_key": self.feature_flag_key,
             "from_project": self.team_1.id,
@@ -2953,7 +2950,7 @@ class TestOrganizationFeatureFlagCopyPersonalAPIKey(APIBaseTest):
             filters={"groups": [{"rollout_percentage": 50}]},
         )
 
-        self.url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        self.url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         self.body = {
             "feature_flag_key": self.feature_flag_to_copy.key,
             "from_project": self.team_1.id,
@@ -3050,7 +3047,7 @@ class TestOrganizationFeatureFlagCopySchedules(APIBaseTest):
             "target_project_ids": [self.team_2.id],
         }
         data.update(overrides)
-        return self.client.post(f"/api/organizations/{self.organization.id}/feature_flags/copy_flags", data)
+        return self.client.post(f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags", data)
 
     def test_copy_flag_without_schedules(self):
         """Copying a flag without copy_schedule=True should not copy schedules."""
@@ -3064,7 +3061,7 @@ class TestOrganizationFeatureFlagCopySchedules(APIBaseTest):
             created_by=self.user,
         )
 
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         data = {
             "feature_flag_key": self.feature_flag_key,
             "from_project": self.team_1.id,
@@ -3186,7 +3183,7 @@ class TestOrganizationFeatureFlagCopySchedules(APIBaseTest):
             created_by=self.user,
         )
 
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         data = {
             "feature_flag_key": self.feature_flag_key,
             "from_project": self.team_1.id,
@@ -3233,7 +3230,7 @@ class TestOrganizationFeatureFlagCopySchedules(APIBaseTest):
             created_by=self.user,
         )
 
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         data = {
             "feature_flag_key": self.feature_flag_key,
             "from_project": self.team_1.id,
@@ -3278,7 +3275,7 @@ class TestOrganizationFeatureFlagCopySchedules(APIBaseTest):
             executed_at=timezone.now(),
         )
 
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         data = {
             "feature_flag_key": self.feature_flag_key,
             "from_project": self.team_1.id,
@@ -3315,7 +3312,7 @@ class TestOrganizationFeatureFlagCopySchedules(APIBaseTest):
             created_by=self.user,
         )
 
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         data = {
             "feature_flag_key": self.feature_flag_key,
             "from_project": self.team_1.id,
@@ -3612,7 +3609,6 @@ class TestOrganizationFeatureFlagCopySchedules(APIBaseTest):
 
     def test_copy_flag_schedule_dependency_denied_does_not_disclose_key(self):
         from insights.constants import AvailableFeature
-
         from insights.models.ee_models import AccessControl
 
         self.organization.available_product_features = [
@@ -3737,7 +3733,7 @@ class TestOrganizationFeatureFlagCopySchedules(APIBaseTest):
             created_by=self.user,
         )
 
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         data = {
             "feature_flag_key": self.feature_flag_key,
             "from_project": self.team_1.id,
@@ -3769,7 +3765,7 @@ class TestOrganizationFeatureFlagEvaluations(DatastoreTestMixin, APIBaseTest):
         FeatureFlag.objects.create(team=self.other_team, key="shared_flag", created_by=self.user, active=False)
 
     def _url(self, key: str) -> str:
-        return f"/api/organizations/{self.organization.id}/feature_flags/{key}/"
+        return f"/v1/organizations/{self.organization.id}/feature_flags/{key}/"
 
     def test_response_includes_evaluations_field(self):
         response = self.client.get(self._url("shared_flag"))
@@ -3847,7 +3843,7 @@ class TestOrganizationFeatureFlagCopyApprovalGate(APIBaseTest):
         )
 
     def _copy(self, target_ids: list[int], disable: bool = False) -> Any:
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         return self.client.post(
             url,
             {
@@ -3900,7 +3896,7 @@ class TestOrganizationFeatureFlagCopyApprovalGate(APIBaseTest):
         assert FeatureFlag.objects.filter(team=self.team_2, key=self.source_flag.key, active=False).exists()
 
     def _copy_with_schedule(self, target_ids: list[int], disable: bool = False) -> Any:
-        url = f"/api/organizations/{self.organization.id}/feature_flags/copy_flags"
+        url = f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags"
         return self.client.post(
             url,
             {

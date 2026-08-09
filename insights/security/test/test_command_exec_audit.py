@@ -42,7 +42,7 @@ class _ExecProbeView(APIView):
 
 
 # Test-only URLconf so a real request/response cycle can run a command from a view.
-urlpatterns = [path("api/_exec_audit_probe/", _ExecProbeView.as_view())]
+urlpatterns = [path("v1/_exec_audit_probe/", _ExecProbeView.as_view())]
 
 
 class TestCommandExecAuditScrubbing(TestCase):
@@ -360,7 +360,7 @@ class TestCommandExecAuditPatching(TestCase):
 
 @override_settings(ROOT_URLCONF="insights.security.test.test_command_exec_audit")
 class TestCommandExecAuditRequestCycle(APIBaseTest):
-    PROBE = "/api/_exec_audit_probe/"
+    PROBE = "/v1/_exec_audit_probe/"
 
     def setUp(self) -> None:
         super().setUp()

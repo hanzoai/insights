@@ -489,7 +489,7 @@ export const advancedActivityLogsLogic = kea<advancedActivityLogsLogicType>([
                 loadExports: async () => {
                     const params = new URLSearchParams()
                     params.append('context_path', '/advanced_activity_logs/')
-                    const response = await api.get(`api/environments/${values.currentTeamIdStrict}/exports/?${params}`)
+                    const response = await api.get(`v1/environments/${values.currentTeamIdStrict}/exports/?${params}`)
                     return response.results || []
                 },
             },
@@ -503,8 +503,8 @@ export const advancedActivityLogsLogic = kea<advancedActivityLogsLogicType>([
             (s) => [s.isOrganizationView, s.currentProjectId, s.currentOrganizationId],
             (isOrganizationView: boolean, currentProjectId: number | string, currentOrganizationId: string): string =>
                 isOrganizationView
-                    ? `api/organizations/${currentOrganizationId}/advanced_activity_logs`
-                    : `api/projects/${currentProjectId}/advanced_activity_logs`,
+                    ? `v1/organizations/${currentOrganizationId}/advanced_activity_logs`
+                    : `v1/projects/${currentProjectId}/advanced_activity_logs`,
         ],
 
         canViewOrganization: [
@@ -779,7 +779,7 @@ export const advancedActivityLogsLogic = kea<advancedActivityLogsLogicType>([
                     item_ids: values.filters.item_ids,
                 }
 
-                await api.create(`api/projects/${values.currentProjectId}/advanced_activity_logs/export/`, {
+                await api.create(`v1/projects/${values.currentProjectId}/advanced_activity_logs/export/`, {
                     format,
                     filters: filtersToExport,
                 })

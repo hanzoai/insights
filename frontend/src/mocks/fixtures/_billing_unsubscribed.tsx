@@ -2514,7 +2514,7 @@ export const billingUnsubscribedJson: BillingType = {
     "discount_percent": undefined,
     "discount_amount_usd": undefined,
     "amount_off_expires_at": undefined,
-    "stripe_portal_url": "http://localhost:8000/api/billing/portal",
+    "stripe_portal_url": "http://localhost:8000/v1/billing/portal",
     "billing_plan": BillingPlan.Free,
     subscription_level: "free",
 }
