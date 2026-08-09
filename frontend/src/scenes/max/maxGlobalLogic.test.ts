@@ -101,12 +101,12 @@ describe('maxGlobalLogic', () => {
             { realm: 'Insights Cloud', preflight: { cloud: true }, expected: true },
             {
                 realm: 'self-hosted with an Anthropic key',
-                preflight: { cloud: false, is_debug: false, anthropic_available: true },
+                preflight: { cloud: false, is_debug: false, assistant_available: true },
                 expected: true,
             },
             {
                 realm: 'self-hosted without a key',
-                preflight: { cloud: false, is_debug: false, anthropic_available: false },
+                preflight: { cloud: false, is_debug: false, assistant_available: false },
                 expected: false,
             },
         ])('is $expected on $realm', async ({ preflight, expected }) => {
