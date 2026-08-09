@@ -19,6 +19,7 @@ from rest_framework.permissions import BasePermission, IsAuthenticated
 
 from insights.schema import ProductKey
 
+from insights import ingest
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.shared import ProjectBackwardCompatBasicSerializer
 
@@ -1103,6 +1104,19 @@ class ProjectBackwardCompatSerializer(
         for field_name in validated_data.copy():  # Copy to avoid iterating over a changing dict
             if field_name in self.Meta.team_passthrough_fields:
                 team_fields[field_name] = validated_data.pop(field_name)
+
+        # Cloud mints the ingest key, against the acting user's own IAM identity so
+        # the project lands in their org. The name is settled here rather than left
+        # to `create_with_team` so the project cloud names and the project this
+        # creates are the same one.
+        name = validated_data.setdefault(
+            "name", Project.objects.get_unique_default_name(self.context["view"].organization_id)
+        )
+        try:
+            team_fields["api_token"] = ingest.key(name=name, user=request.user)
+        except ingest.IngestKeyUnavailable as e:
+            raise serializers.ValidationError(str(e)) from e
+
         project, team = Project.objects.create_with_team(
             organization_id=self.context["view"].organization_id,
             initiating_user=self.context["request"].user,
@@ -1564,19 +1578,6 @@ class ProjectViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets
             team=teams[0],
             request=self.request,
         )
-
-    @action(
-        methods=["PATCH"],
-        detail=True,
-        # Only ADMIN or higher users are allowed to access this project
-        permission_classes=[TeamMemberStrictManagementPermission],
-    )
-    def reset_token(self, request: request.Request, id: str, **kwargs) -> response.Response:
-        project = self.get_object()
-        project.passthrough_team.reset_token_and_save(
-            user=request.user, is_impersonated_session=is_impersonated(request)
-        )
-        return response.Response(ProjectBackwardCompatSerializer(project, context=self.get_serializer_context()).data)
 
     @action(
         methods=["PATCH"],
