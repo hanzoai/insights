@@ -268,13 +268,6 @@
             "iconType": "web_analytics",
             "type": null,
             "intents": ["web_analytics"]
-        },
-        {
-            "path": "Workflows",
-            "category": "Tools",
-            "iconType": "workflows",
-            "type": "workflows",
-            "intents": ["workflows"]
         }
     ],
     "games": [],

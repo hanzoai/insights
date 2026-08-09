@@ -228,7 +228,7 @@ class PolicyError(ValueError):
 # ── Global policy loading + validation ───────────────────────────
 
 _TOP_LEVEL_KEYS = {"version", "deny", "allow", "size_gate", "tiers", "dismiss", "overrides", "familiarity", "ownership"}
-# Keys the hosted server owns and parses itself (products/stamphog/backend/logic/digest_config.py),
+# Keys the hosted server owns and parses itself (products/stamp/backend/logic/digest_config.py),
 # not the engine. Allowed at the top level so a repo declaring one doesn't hard-fail every review, but
 # never required and never read here — the engine ignores their contents.
 _SERVER_ONLY_TOP_LEVEL_KEYS = {"digest"}

@@ -414,9 +414,7 @@ class StampRepoConfigViewSet(_StampTeamScopedViewSet, viewsets.ModelViewSet):
             try:
                 discovered = list_user_installations(user_token)
             except StampGitHubError:
-                logger.warning(
-                    "stamp sync_installation: discovering user installations failed", team_id=self.team_id
-                )
+                logger.warning("stamp sync_installation: discovering user installations failed", team_id=self.team_id)
                 raise ValidationError({"code": "Failed to discover GitHub App installations. Try again."})
             if not discovered:
                 # The App isn't installed anywhere the user can see. Not an error: the frontend routes them

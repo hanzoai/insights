@@ -2465,17 +2465,6 @@ export const getTreeItemsProducts = (): FileSystemImport[] => [
         sceneKey: 'WebScripts',
         sceneKeys: ['WebScripts'],
     },
-    {
-        path: 'Workflows',
-        intents: [ProductKey.WORKFLOWS],
-        href: urls.workflows(),
-        type: 'workflows',
-        category: ProductItemCategory.TOOLS,
-        iconType: 'workflows',
-        iconColor: ['var(--color-product-workflows-light)'] as FileSystemIconColor,
-        sceneKey: 'Workflows',
-        sceneKeys: ['Workflows', 'Workflow', 'WorkflowsLibraryTemplate'],
-    },
 ]
 
 /** This const is auto-generated, as is the whole file */

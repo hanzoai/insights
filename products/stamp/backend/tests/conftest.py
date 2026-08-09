@@ -196,9 +196,7 @@ def stamp_chain() -> Iterator[StampChain]:
         # mark_review_failed emits a failure event through the real analytics client — a network
         # boundary, faked like the rest. Tests asserting on the event re-patch this locally.
         stack.enter_context(patch("products.stamp.backend.temporal.activities.ph_scoped_capture"))
-        stack.enter_context(
-            patch("products.stamp.backend.logic.github_client.github_request", recorder.github_request)
-        )
+        stack.enter_context(patch("products.stamp.backend.logic.github_client.github_request", recorder.github_request))
         stack.enter_context(
             patch(
                 "products.stamp.backend.logic.github_client.remember_observed_core_limit",
@@ -221,9 +219,7 @@ def stamp_chain() -> Iterator[StampChain]:
             patch("products.stamp.backend.tasks.tasks.execute_stamp_review_workflow", _inline_review_workflow)
         )
         stack.enter_context(
-            patch(
-                "products.stamp.backend.tasks.tasks.transaction.on_commit", side_effect=lambda fn, using=None: fn()
-            )
+            patch("products.stamp.backend.tasks.tasks.transaction.on_commit", side_effect=lambda fn, using=None: fn())
         )
         stack.enter_context(patch("products.stamp.backend.logic.slack_digest.SlackIntegration", fake_slack))
         stack.enter_context(patch("products.stamp.backend.logic.channel_resolution.SlackIntegration", fake_slack))
@@ -233,6 +229,4 @@ def stamp_chain() -> Iterator[StampChain]:
                 side_effect=RuntimeError("no gateway in tests"),
             )
         )
-        yield StampChain(
-            recorder=recorder, client=Client(), sandbox_writes=sandbox_writes, sandbox_class=fake_sandbox
-        )
+        yield StampChain(recorder=recorder, client=Client(), sandbox_writes=sandbox_writes, sandbox_class=fake_sandbox)

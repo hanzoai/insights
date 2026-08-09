@@ -389,11 +389,7 @@ export const getStampRepoConfigsDestroyUrl = (projectId: string, id: string) => 
 /**
  * Per-repo stamp settings — enable/disable review, GitHub App installation, policy overrides.
  */
-export const stampRepoConfigsDestroy = async (
-    projectId: string,
-    id: string,
-    options?: RequestInit
-): Promise<void> => {
+export const stampRepoConfigsDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
     return apiMutator<void>(getStampRepoConfigsDestroyUrl(projectId, id), {
         ...options,
         method: 'DELETE',

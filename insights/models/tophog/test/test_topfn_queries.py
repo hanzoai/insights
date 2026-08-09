@@ -5,8 +5,8 @@ from insights.test.base import BaseTest, DatastoreTestMixin
 from parameterized import parameterized
 
 from insights.datastore.client import sync_execute
-from insights.models.topfn.queries import query_topfn_filter_options, query_topfn_metrics
-from insights.models.topfn.sql import DATA_TABLE_NAME, TRUNCATE_TOPFN_TABLE_SQL
+from insights.models.tophog.queries import query_topfn_filter_options, query_topfn_metrics
+from insights.models.tophog.sql import DATA_TABLE_NAME, TRUNCATE_TOPFN_TABLE_SQL
 
 TS = datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)
 DATE_FROM = datetime(2024, 1, 15, 0, 0, 0, tzinfo=UTC)

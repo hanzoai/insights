@@ -117,9 +117,7 @@ class PullRequest(ProductTeamModel):
     # Inherit the base Meta so default_manager_name="all_teams" survives (see StampRepoConfig.Meta).
     class Meta(ProductTeamModel.Meta):
         constraints = [
-            models.UniqueConstraint(
-                fields=["team_id", "repo_config", "pr_number"], name="unique_stamp_pull_request"
-            ),
+            models.UniqueConstraint(fields=["team_id", "repo_config", "pr_number"], name="unique_stamp_pull_request"),
         ]
         indexes = [
             # Serves both digest hot paths, restricted to the small, draining set of digest-eligible
@@ -206,9 +204,7 @@ class DigestChannel(ProductTeamModel):
     # Inherit the base Meta so default_manager_name="all_teams" survives (see StampRepoConfig.Meta).
     class Meta(ProductTeamModel.Meta):
         constraints = [
-            models.UniqueConstraint(
-                fields=["team_id", "audience_key"], name="unique_stamp_digest_audience_per_team"
-            ),
+            models.UniqueConstraint(fields=["team_id", "audience_key"], name="unique_stamp_digest_audience_per_team"),
         ]
 
     def __str__(self) -> str:

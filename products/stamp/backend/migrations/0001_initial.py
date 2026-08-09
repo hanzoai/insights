@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 import insights.models.utils
 
-import products.stamphog.backend.facade.enums
+import products.stamp.backend.facade.enums
 
 
 class Migration(migrations.Migration):
@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
                             ("stamphog_config", "stamphog_config"),
                             ("owners_contact", "owners_contact"),
                         ],
-                        default=products.stamphog.backend.facade.enums.ChannelResolutionSource["MANUAL"],
+                        default=products.stamp.backend.facade.enums.ChannelResolutionSource["MANUAL"],
                         max_length=32,
                     ),
                 ),
@@ -84,7 +84,7 @@ class Migration(migrations.Migration):
                             ("completed", "completed"),
                             ("failed", "failed"),
                         ],
-                        default=products.stamphog.backend.facade.enums.DigestRunStatus["PENDING"],
+                        default=products.stamp.backend.facade.enums.DigestRunStatus["PENDING"],
                         max_length=32,
                     ),
                 ),
@@ -133,7 +133,7 @@ class Migration(migrations.Migration):
                     "review_mode",
                     models.CharField(
                         choices=[("all", "all"), ("label", "label")],
-                        default=products.stamphog.backend.facade.enums.ReviewMode["ALL"],
+                        default=products.stamp.backend.facade.enums.ReviewMode["ALL"],
                         max_length=16,
                     ),
                 ),
@@ -243,7 +243,7 @@ class Migration(migrations.Migration):
                             ("failed", "failed"),
                             ("superseded", "superseded"),
                         ],
-                        default=products.stamphog.backend.facade.enums.ReviewRunStatus["QUEUED"],
+                        default=products.stamp.backend.facade.enums.ReviewRunStatus["QUEUED"],
                         max_length=32,
                     ),
                 ),
@@ -258,7 +258,7 @@ class Migration(migrations.Migration):
                             ("wait", "wait"),
                             ("error", "error"),
                         ],
-                        default=products.stamphog.backend.facade.enums.ReviewVerdict["NONE"],
+                        default=products.stamp.backend.facade.enums.ReviewVerdict["NONE"],
                         max_length=32,
                     ),
                 ),
