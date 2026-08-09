@@ -15,16 +15,14 @@ VERIFIED_DOMAIN_REQUIRED_ERROR = (
     "Your organization only allows members with a verified email domain. Contact your organization's admin for access."
 )
 
-_ORGANIZATION_DETAIL_PATH = re.compile(r"^/(?:api|v1)/organizations/[^/]+/?$")
+_ORGANIZATION_DETAIL_PATH = re.compile(r"^/v1/organizations/[^/]+/?$")
 
 # Paths a blocked member must still reach: to see why they are blocked, to leave,
 # and to come back through Hanzo IAM. Everything else is denied.
 _EXEMPT_PATHS = frozenset(
     {
         "/logout/",
-        "/api/logout/",
         "/v1/logout/",
-        "/api/users/@me/",
         "/v1/users/@me/",
         "/_health/",
     }
@@ -35,7 +33,6 @@ _EXEMPT_PREFIXES = (
     "/uploaded_media/",
     "/login/oidc",
     "/complete/oidc",
-    "/api/social_signup",
     "/v1/social_signup",
 )
 
