@@ -29,7 +29,7 @@ export type AppMetricsOutput = typeof APP_METRICS_OUTPUT
 export const LOG_ENTRIES_OUTPUT = 'log_entries' as const
 export type LogEntriesOutput = typeof LOG_ENTRIES_OUTPUT
 
-export const TOPFN_OUTPUT = 'tophog' as const
+export const TOPFN_OUTPUT = 'topfn' as const
 export type TopFnOutput = typeof TOPFN_OUTPUT
 
 export const INSIGHTS_INVOCATION_RESULTS_OUTPUT = 'hog_invocation_results' as const
