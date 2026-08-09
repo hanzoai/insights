@@ -39,7 +39,8 @@ describe('BatchExportInsightsFunctionService', () => {
         return item
     }
 
-    const invocationUrl = () => `/api/projects/${team.id}/insights_functions/${insightsFunction.id}/batch_export_invocations`
+    const invocationUrl = () =>
+        `/api/projects/${team.id}/insights_functions/${insightsFunction.id}/batch_export_invocations`
 
     const postInvocation = (body: any) => supertest(app).post(invocationUrl()).send(body)
 

@@ -49,8 +49,8 @@ export function TaxonomicFilter({
     dataWarehousePopoverFields = defaultDataWarehousePopoverFields,
     maxContextOptions,
     allowNonCapturedEvents = false,
-    hogQLGlobals,
-    hogQLExpressionShowBreakdownLabelHint,
+    insightsQLGlobals,
+    insightsQLExpressionShowBreakdownLabelHint,
     definitionPopoverRenderer,
     minSearchQueryLength,
     suggestedFiltersLabel,
@@ -97,8 +97,8 @@ export function TaxonomicFilter({
         autoSelectItem: true,
         allowNonCapturedEvents,
         maxContextOptions,
-        hogQLGlobals,
-        hogQLExpressionShowBreakdownLabelHint,
+        insightsQLGlobals,
+        insightsQLExpressionShowBreakdownLabelHint,
         minSearchQueryLength,
         suggestedFiltersLabel: resolvedSuggestedFiltersLabel,
         enableKeywordShortcuts,
@@ -183,10 +183,7 @@ export const TaxonomicFilterSearchInput = forwardRef<
         categoryDropdownVariant?: CategoryDropdownVariant
         eventName?: string
         focusInput?: () => void
-    } & Pick<
-        InputPropsText,
-        'onClick' | 'size' | 'prefix' | 'fullWidth' | 'onChange' | 'autoFocus' | 'placeholder'
-    >
+    } & Pick<InputPropsText, 'onClick' | 'size' | 'prefix' | 'fullWidth' | 'onChange' | 'autoFocus' | 'placeholder'>
 >(function UniversalSearchInput(
     {
         searchInputRef,

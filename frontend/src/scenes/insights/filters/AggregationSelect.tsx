@@ -29,7 +29,7 @@ export function getInsightsQLValue(groupIndex?: number | null, aggregationQuery?
     return UNIQUE_USERS
 }
 
-export function hogQLToFilterValue(value?: string): { groupIndex?: number; aggregationQuery?: string } {
+export function insightsQLToFilterValue(value?: string): { groupIndex?: number; aggregationQuery?: string } {
     if (value?.match(/^\$group_[0-9]+$/)) {
         return { groupIndex: parseInt(value.replace('$group_', '')) }
     } else if (value === 'person_id') {
@@ -83,7 +83,7 @@ export function AggregationSelect({
               )
 
     const onChange = (value: string): void => {
-        const { aggregationQuery, groupIndex } = hogQLToFilterValue(value)
+        const { aggregationQuery, groupIndex } = insightsQLToFilterValue(value)
         if (isFunnelsQuery(querySource)) {
             if (value === CUSTOM_DATA_WAREHOUSE_ITEMS) {
                 updateQuerySource({

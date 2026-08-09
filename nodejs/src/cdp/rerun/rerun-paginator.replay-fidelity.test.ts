@@ -1,7 +1,7 @@
 import { DatastoreClient } from '@datastore/client'
 import { DateTime } from 'luxon'
 
-import { InsightsFlowManagerService } from '../services/insightsflows/hogflow-manager.service'
+import { InsightsFlowManagerService } from '../services/insightsflows/insightsflow-manager.service'
 import { CyclotronJobQueuePostgresV2 } from '../services/job-queue/job-queue-postgres-v2'
 import { JobQueue } from '../services/job-queue/job-queue.interface'
 import { InsightsFunctionManagerService } from '../services/managers/script-function-manager.service'

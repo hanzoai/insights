@@ -5,7 +5,7 @@ import {
     BlastRadiusPersonsResponse,
     BlastRadiusResponse,
     InsightsFlowBatchPersonQueryService,
-} from './hogflow-batch-person-query.service'
+} from './insightsflow-batch-person-query.service'
 
 type MockedInternalFetchResult = {
     fetchResponse: { status: number; text: () => Promise<string> } | null

@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 
-import { InsightsFlow, InsightsFlowAction, InsightsFlowEdge } from '~/cdp/schema/hogflow'
-import { findActionByType } from '~/cdp/services/insightsflows/hogflow-utils'
+import { InsightsFlow, InsightsFlowAction, InsightsFlowEdge } from '~/cdp/schema/insightsflow'
+import { findActionByType } from '~/cdp/services/insightsflows/insightsflow-utils'
 import { logger } from '~/common/utils/logger'
 
 import { INSIGHTS_FILTERS_EXAMPLES } from '../examples'
@@ -36,7 +36,10 @@ import { INSIGHTS_FILTERS_EXAMPLES } from '../examples'
     }
  */
 export type SimpleInsightsFlowRepresentation = {
-    actions: Record<string, Pick<InsightsFlowAction, 'type' | 'config'> & Partial<Omit<InsightsFlowAction, 'type' | 'config'>>>
+    actions: Record<
+        string,
+        Pick<InsightsFlowAction, 'type' | 'config'> & Partial<Omit<InsightsFlowAction, 'type' | 'config'>>
+    >
     edges: InsightsFlowEdge[]
 }
 

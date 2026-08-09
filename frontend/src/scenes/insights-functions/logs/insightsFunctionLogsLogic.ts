@@ -163,7 +163,7 @@ export type insightsFunctionLogsLogicType = MakeLogicType<
 >
 
 export const insightsFunctionLogsLogic = kea<insightsFunctionLogsLogicType>([
-    path((key) => ['scenes', 'pipeline', 'hogfunctions', 'logs', 'insightsFunctionLogsLogic', key]),
+    path((key) => ['scenes', 'pipeline', 'insightsfunctions', 'logs', 'insightsFunctionLogsLogic', key]),
     props({} as LogsViewerLogicProps), // TODO: Remove `stage` from props, it isn't needed here for anything
     key(({ sourceType, sourceId }) => `${sourceType}:${sourceId}`),
     connect((props: LogsViewerLogicProps) => ({

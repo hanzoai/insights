@@ -82,7 +82,10 @@ export interface nonInsightsFunctionsLogicActions {
     }
 }
 
-export type nonInsightsFunctionsLogicType = MakeLogicType<nonInsightsFunctionsLogicValues, nonInsightsFunctionsLogicActions>
+export type nonInsightsFunctionsLogicType = MakeLogicType<
+    nonInsightsFunctionsLogicValues,
+    nonInsightsFunctionsLogicActions
+>
 
 export const nonInsightsFunctionsLogic = kea<nonInsightsFunctionsLogicType>([
     path((key) => ['scenes', 'data-pipelines', 'utils', 'nonInsightsFunctionsLogic', key]),
@@ -119,7 +122,7 @@ export const nonInsightsFunctionsLogic = kea<nonInsightsFunctionsLogicType>([
 
                     const pluginsById = Object.fromEntries(plugins.map((plugin) => [plugin.id, plugin]))
 
-                    const hogfunctions: InsightsFunctionType[] = []
+                    const insightsfunctions: InsightsFunctionType[] = []
 
                     for (const pluginConfig of pluginConfigs) {
                         const plugin = pluginsById[pluginConfig.plugin]
@@ -133,7 +136,7 @@ export const nonInsightsFunctionsLogic = kea<nonInsightsFunctionsLogicType>([
                             // Do nothing
                         }
 
-                        hogfunctions.push({
+                        insightsfunctions.push({
                             id: `plugin-${pluginConfig.id}`,
                             name: pluginConfig.name || plugin?.name || 'Unknown app',
                             description: pluginConfig.description || plugin?.description || '',
@@ -148,7 +151,7 @@ export const nonInsightsFunctionsLogic = kea<nonInsightsFunctionsLogicType>([
                         })
                     }
 
-                    return hogfunctions
+                    return insightsfunctions
                 },
             },
         ],
@@ -169,7 +172,7 @@ export const nonInsightsFunctionsLogic = kea<nonInsightsFunctionsLogicType>([
 
                     const pluginsById = Object.fromEntries(plugins.map((plugin) => [plugin.id, plugin]))
 
-                    const hogfunctions: InsightsFunctionType[] = []
+                    const insightsfunctions: InsightsFunctionType[] = []
 
                     for (const pluginConfig of pluginConfigs) {
                         const plugin = pluginsById[pluginConfig.plugin]
@@ -183,7 +186,7 @@ export const nonInsightsFunctionsLogic = kea<nonInsightsFunctionsLogicType>([
                             // Do nothing
                         }
 
-                        hogfunctions.push({
+                        insightsfunctions.push({
                             id: `plugin-${pluginConfig.id}`,
                             name: pluginConfig.name || plugin?.name || 'Unknown app',
                             description: pluginConfig.description || plugin?.description || '',
@@ -198,7 +201,7 @@ export const nonInsightsFunctionsLogic = kea<nonInsightsFunctionsLogicType>([
                         })
                     }
 
-                    return hogfunctions
+                    return insightsfunctions
                 },
             },
         ],

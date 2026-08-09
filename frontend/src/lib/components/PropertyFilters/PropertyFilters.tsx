@@ -58,7 +58,7 @@ export interface PropertyFiltersProps {
     hideBehavioralCohorts?: boolean
     addFilterDocLink?: string
     operatorAllowlist?: OperatorValueSelectProps['operatorAllowlist']
-    hogQLGlobals?: Record<string, any>
+    insightsQLGlobals?: Record<string, any>
     /**
      * `'input'` renders the replay-style input-box add-filter trigger; `'button'`
      * (the default) renders a button. Only has an effect on the rebuild menu
@@ -102,7 +102,7 @@ export function PropertyFilters({
     hideBehavioralCohorts,
     addFilterDocLink,
     operatorAllowlist,
-    hogQLGlobals,
+    insightsQLGlobals,
     triggerVariant = 'button',
 }: PropertyFiltersProps): JSX.Element {
     const logicProps = { propertyFilters, onChange, pageKey, sendAllKeyUpdates }
@@ -173,7 +173,7 @@ export function PropertyFilters({
                                             addFilterDocLink={addFilterDocLink}
                                             editable={editable}
                                             operatorAllowlist={operatorAllowlist}
-                                            hogQLGlobals={hogQLGlobals}
+                                            insightsQLGlobals={insightsQLGlobals}
                                             triggerVariant={triggerVariant}
                                         />
                                     )}

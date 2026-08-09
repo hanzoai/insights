@@ -25,7 +25,7 @@ import type {
     DeleteWarehouseOrgResponseApi,
     DeprovisionWarehouseResponseApi,
     FileUploadResponseApi,
-    FixHogqlListParams,
+    FixInsightsqlListParams,
     InsightVariableApi,
     InsightVariablesListParams,
     ManagedWarehouseDataStatusResponseApi,
@@ -527,7 +527,7 @@ export const dataWarehouseWarehouseStatusRetrieve = async (
     })
 }
 
-export const getFixHogqlListUrl = (projectId: string, params?: FixHogqlListParams) => {
+export const getFixInsightsqlListUrl = (projectId: string, params?: FixInsightsqlListParams) => {
     const normalizedParams = new URLSearchParams()
 
     Object.entries(params || {}).forEach(([key, value]) => {
@@ -543,67 +543,71 @@ export const getFixHogqlListUrl = (projectId: string, params?: FixHogqlListParam
         : `/api/projects/${projectId}/fix_insightsql/`
 }
 
-export const fixHogqlList = async (
+export const fixInsightsqlList = async (
     projectId: string,
-    params?: FixHogqlListParams,
+    params?: FixInsightsqlListParams,
     options?: RequestInit
 ): Promise<void> => {
-    return apiMutator<void>(getFixHogqlListUrl(projectId, params), {
+    return apiMutator<void>(getFixInsightsqlListUrl(projectId, params), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getFixHogqlCreateUrl = (projectId: string) => {
+export const getFixInsightsqlCreateUrl = (projectId: string) => {
     return `/api/projects/${projectId}/fix_insightsql/`
 }
 
-export const fixHogqlCreate = async (projectId: string, options?: RequestInit): Promise<void> => {
-    return apiMutator<void>(getFixHogqlCreateUrl(projectId), {
+export const fixInsightsqlCreate = async (projectId: string, options?: RequestInit): Promise<void> => {
+    return apiMutator<void>(getFixInsightsqlCreateUrl(projectId), {
         ...options,
         method: 'POST',
     })
 }
 
-export const getFixHogqlRetrieveUrl = (projectId: string, id: string) => {
+export const getFixInsightsqlRetrieveUrl = (projectId: string, id: string) => {
     return `/api/projects/${projectId}/fix_insightsql/${id}/`
 }
 
-export const fixHogqlRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
-    return apiMutator<void>(getFixHogqlRetrieveUrl(projectId, id), {
+export const fixInsightsqlRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
+    return apiMutator<void>(getFixInsightsqlRetrieveUrl(projectId, id), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getFixHogqlUpdateUrl = (projectId: string, id: string) => {
+export const getFixInsightsqlUpdateUrl = (projectId: string, id: string) => {
     return `/api/projects/${projectId}/fix_insightsql/${id}/`
 }
 
-export const fixHogqlUpdate = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
-    return apiMutator<void>(getFixHogqlUpdateUrl(projectId, id), {
+export const fixInsightsqlUpdate = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
+    return apiMutator<void>(getFixInsightsqlUpdateUrl(projectId, id), {
         ...options,
         method: 'PUT',
     })
 }
 
-export const getFixHogqlPartialUpdateUrl = (projectId: string, id: string) => {
+export const getFixInsightsqlPartialUpdateUrl = (projectId: string, id: string) => {
     return `/api/projects/${projectId}/fix_insightsql/${id}/`
 }
 
-export const fixHogqlPartialUpdate = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
-    return apiMutator<void>(getFixHogqlPartialUpdateUrl(projectId, id), {
+export const fixInsightsqlPartialUpdate = async (
+    projectId: string,
+    id: string,
+    options?: RequestInit
+): Promise<void> => {
+    return apiMutator<void>(getFixInsightsqlPartialUpdateUrl(projectId, id), {
         ...options,
         method: 'PATCH',
     })
 }
 
-export const getFixHogqlDestroyUrl = (projectId: string, id: string) => {
+export const getFixInsightsqlDestroyUrl = (projectId: string, id: string) => {
     return `/api/projects/${projectId}/fix_insightsql/${id}/`
 }
 
-export const fixHogqlDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
-    return apiMutator<void>(getFixHogqlDestroyUrl(projectId, id), {
+export const fixInsightsqlDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
+    return apiMutator<void>(getFixInsightsqlDestroyUrl(projectId, id), {
         ...options,
         method: 'DELETE',
     })

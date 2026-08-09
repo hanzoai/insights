@@ -2,7 +2,7 @@ import { Message } from 'node-rdkafka'
 import { Pool } from 'pg'
 import { Counter, Histogram } from 'prom-client'
 
-import { InsightsFlow, InsightsFlowAction } from '~/cdp/schema/hogflow'
+import { InsightsFlow, InsightsFlowAction } from '~/cdp/schema/insightsflow'
 import {
     KAFKA_CDP_INTERNAL_EVENTS,
     KAFKA_EVENTS_JSON,
@@ -12,9 +12,9 @@ import {
 import { KafkaConsumerInterface, RdKafkaConsumerConfig, createKafkaConsumer } from '~/common/kafka/consumer'
 import { InternalCaptureEvent } from '~/common/services/internal-capture'
 import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
+import { captureException } from '~/common/utils/insights'
 import { parseJSON } from '~/common/utils/json-parse'
 import { logger } from '~/common/utils/logger'
-import { captureException } from '~/common/utils/insights'
 import { UUIDT } from '~/common/utils/utils'
 
 import {
@@ -30,8 +30,13 @@ import {
     hasEventOrActionTarget,
     matchesWaitUntilCondition,
     runFilterBytecode,
-} from '../services/insightsflows/hogflow-utils'
-import { CyclotronPerson, InsightsFlowInvocationContext, InsightsFunctionInvocationGlobals, MinimalAppMetric } from '../types'
+} from '../services/insightsflows/insightsflow-utils'
+import {
+    CyclotronPerson,
+    InsightsFlowInvocationContext,
+    InsightsFunctionInvocationGlobals,
+    MinimalAppMetric,
+} from '../types'
 import {
     convertInternalEventToInsightsFunctionInvocationGlobals,
     convertToInsightsFunctionInvocationGlobals,
@@ -685,7 +690,9 @@ export class CdpHogflowSubscriptionMatcherConsumer<
                         counterHogflowMatcherEventSkipped.labels({ reason: 'no_team' }).inc()
                         return
                     }
-                    events.push(convertInternalEventToInsightsFunctionInvocationGlobals(parsed, team, this.config.SITE_URL))
+                    events.push(
+                        convertInternalEventToInsightsFunctionInvocationGlobals(parsed, team, this.config.SITE_URL)
+                    )
                 } catch (e) {
                     logger.error('Error parsing internal event message', e)
                     counterParseError.labels({ error: e.message }).inc()

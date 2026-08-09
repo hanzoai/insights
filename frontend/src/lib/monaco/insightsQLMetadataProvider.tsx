@@ -3,7 +3,7 @@ import { languages } from 'monaco-editor'
 
 import type { codeEditorLogicType } from './codeEditorLogic'
 
-export const hogQLMetadataProvider: () => languages.CodeActionProvider = () => ({
+export const insightsQLMetadataProvider: () => languages.CodeActionProvider = () => ({
     provideCodeActions: (model, _range, context) => {
         const logic: BuiltLogic<codeEditorLogicType> | undefined = (model as any).codeEditorLogic
         if (logic?.isMounted()) {
@@ -25,13 +25,13 @@ export const hogQLMetadataProvider: () => languages.CodeActionProvider = () => (
                 })
                 for (const rawMarker of markersFromMetadata) {
                     if (
-                        rawMarker.hogQLFix &&
+                        rawMarker.insightsQLFix &&
                         // if ranges overlap
                         rawMarker.start <= end &&
                         rawMarker.end >= start
                     ) {
                         quickFixes.push({
-                            title: `Replace with: ${rawMarker.hogQLFix}`,
+                            title: `Replace with: ${rawMarker.insightsQLFix}`,
                             diagnostics: [rawMarker],
                             kind: 'quickfix',
                             edit: {
@@ -40,7 +40,7 @@ export const hogQLMetadataProvider: () => languages.CodeActionProvider = () => (
                                         resource: model.uri,
                                         textEdit: {
                                             range: rawMarker,
-                                            text: rawMarker.hogQLFix,
+                                            text: rawMarker.insightsQLFix,
                                         },
                                         versionId: undefined,
                                     },
@@ -50,7 +50,7 @@ export const hogQLMetadataProvider: () => languages.CodeActionProvider = () => (
                         })
                     }
                     if (
-                        rawMarker.hogQLAIFixPrompt &&
+                        rawMarker.insightsQLAIFixPrompt &&
                         // if ranges overlap
                         rawMarker.start <= end &&
                         rawMarker.end >= start
@@ -62,7 +62,7 @@ export const hogQLMetadataProvider: () => languages.CodeActionProvider = () => (
                             command: {
                                 id: 'insights.insightsql.fixWithAI',
                                 title: 'Fix with AI',
-                                arguments: [rawMarker.hogQLAIFixPrompt],
+                                arguments: [rawMarker.insightsQLAIFixPrompt],
                             },
                             isPreferred: true,
                         })

@@ -32,7 +32,7 @@ const TRACE_ID_MAX_LENGTH = 128
 const BATCH_WINDOW_BUFFER_MINUTES = 10
 
 // "2026-04-11T19:20:55.828Z" → "2026-04-11 19:20:55" (Datastore toDateTime format, UTC).
-function formatHogqlDateTime(d: Date): string {
+function formatInsightsqlDateTime(d: Date): string {
     return d.toISOString().replace('T', ' ').slice(0, 19)
 }
 
@@ -219,8 +219,8 @@ export const traceMessagesLazyLoaderLogic = kea<traceMessagesLazyLoaderLogicType
                             // can prune partitions regardless of the UI date filter.
                             const bufferMs = BATCH_WINDOW_BUFFER_MINUTES * 60 * 1000
                             const createdAtList = safe.map((s) => s.createdAtMs)
-                            const fromStr = formatHogqlDateTime(new Date(Math.min(...createdAtList) - bufferMs))
-                            const toStr = formatHogqlDateTime(new Date(Math.max(...createdAtList) + bufferMs))
+                            const fromStr = formatInsightsqlDateTime(new Date(Math.min(...createdAtList) - bufferMs))
+                            const toStr = formatInsightsqlDateTime(new Date(Math.max(...createdAtList) + bufferMs))
 
                             // Inlining IDs + timestamps rather than using a values dict: we
                             // can't combine `{values}` with `{filters}`-style placeholders

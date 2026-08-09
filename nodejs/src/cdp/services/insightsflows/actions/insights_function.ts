@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 
-import { InsightsFlowAction } from '~/cdp/schema/hogflow'
+import { InsightsFlowAction } from '~/cdp/schema/insightsflow'
 import { instrumentFn } from '~/common/tracing/tracing-utils'
 
 import {
@@ -9,13 +9,13 @@ import {
     CyclotronJobInvocationResult,
     MinimalLogEntry,
 } from '../../../types'
-import { HogExecutorExecuteAsyncOptions } from '../../script-executor-async.service'
 import { EmailValidationService } from '../../messaging/email-validation.service'
 import { RecipientPreferencesService } from '../../messaging/recipient-preferences.service'
+import { HogExecutorExecuteAsyncOptions } from '../../script-executor-async.service'
 import { trackInsightsFlowBillableInvocation } from '../billing-utils'
-import { InsightsFlowFunctionsService } from '../hogflow-functions.service'
-import { actionIdForLogging, findContinueAction } from '../hogflow-utils'
-import { observeMissingVariableReferences } from '../hogflow-variable-usage'
+import { InsightsFlowFunctionsService } from '../insightsflow-functions.service'
+import { actionIdForLogging, findContinueAction } from '../insightsflow-utils'
+import { observeMissingVariableReferences } from '../insightsflow-variable-usage'
 import { ActionHandler, ActionHandlerOptions, ActionHandlerResult } from './action.interface'
 
 type FunctionActionType = 'function' | 'function_email' | 'function_sms'
@@ -200,8 +200,9 @@ export class InsightsFunctionHandler implements ActionHandler {
             }
         }
 
-        return instrumentFn({ key: 'hogFlow.action.insightsFunction.executeWithAsyncFunctions', sendException: false }, () =>
-            this.hogFlowFunctionsService.executeWithAsyncFunctions(insightsFunctionInvocation, hogExecutorOptions)
+        return instrumentFn(
+            { key: 'hogFlow.action.insightsFunction.executeWithAsyncFunctions', sendException: false },
+            () => this.hogFlowFunctionsService.executeWithAsyncFunctions(insightsFunctionInvocation, hogExecutorOptions)
         )
     }
 }

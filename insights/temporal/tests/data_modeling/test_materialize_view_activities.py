@@ -1170,7 +1170,7 @@ class _EmptyArrowClient:
         yield _Response(body)
 
 
-class TestHogqlTableEmptyResults:
+class TestInsightsqlTableEmptyResults:
     async def test_zero_row_query_uses_the_initial_stream_schema(self, ateam):
         client = _EmptyArrowClient(pa.schema([pa.field("id", pa.int64())]))
 
@@ -1203,7 +1203,7 @@ class _SlowDescribeClient(_EmptyArrowClient):
             yield response
 
 
-class TestHogqlTableResolutionDeadline:
+class TestInsightsqlTableResolutionDeadline:
     async def test_slow_describe_does_not_exhaust_the_resolution_deadline(self, ateam):
         # regression: a DateTime column sends insightsql_table back through prepare_ast_for_printing to
         # wrap the select in toTimeZone. That second pass used to share the first pass's deadline

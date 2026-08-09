@@ -1,4 +1,4 @@
-RUST_HOGVM_STL = [
+RUST_SCRIPTVM_STL = [
     "toString",
     "typeof",
     "isNull",

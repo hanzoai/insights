@@ -26721,7 +26721,7 @@
             "type": "object"
         },
         "HogLanguage": {
-            "enum": ["script", "hogJson", "hogQL", "hogQLExpr", "hogTemplate", "liquid"],
+            "enum": ["script", "hogJson", "insightsQL", "insightsQLExpr", "hogTemplate", "liquid"],
             "type": "string"
         },
         "InsightsQLAlertConfig": {

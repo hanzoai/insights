@@ -29,9 +29,9 @@ from insights.api.utils import action, log_activity_from_viewset
 from insights.cdp.services.icons import CDPIconsService
 from insights.cdp.site_functions import get_transpiled_function
 from insights.cdp.validation import (
-    InsightsFunctionFiltersSerializer,
     InputsSchemaItemSerializer,
     InputsSerializer,
+    InsightsFunctionFiltersSerializer,
     MappingsSerializer,
     compile_hog,
     generate_template_bytecode,
@@ -116,7 +116,7 @@ CREATE_ENABLED_MESSAGE = (
 # would change. Signing the live timestamp too is what stops a publish from silently discarding a
 # concurrent web edit: the draft is a full snapshot, so it overwrites whatever landed since.
 PUBLISH_CONFIRM_TOKEN_MAX_AGE = timedelta(minutes=15)
-_PUBLISH_CONFIRM_SALT = "hogfunction-publish"
+_PUBLISH_CONFIRM_SALT = "insightsfunction-publish"
 
 
 def _publish_confirm_value(insights_function: InsightsFunction) -> str:
@@ -437,7 +437,9 @@ class InsightsFunctionSerializer(InsightsFunctionMinimalSerializer):
             return
         if attrs.get("enabled", self.instance.enabled) is not True:
             return
-        template = InsightsFunctionTemplate.get_template(self.instance.template_id) if self.instance.template_id else None
+        template = (
+            InsightsFunctionTemplate.get_template(self.instance.template_id) if self.instance.template_id else None
+        )
         if template is not None and template.status == "hidden":
             raise serializers.ValidationError(
                 {
@@ -1127,7 +1129,8 @@ class InsightsFunctionViewSet(
         # everywhere else in this file.
         if (
             serializer.validated_data.get("enabled")
-            and (serializer.validated_data.get("type") or InsightsFunctionType.DESTINATION) == InsightsFunctionType.DESTINATION
+            and (serializer.validated_data.get("type") or InsightsFunctionType.DESTINATION)
+            == InsightsFunctionType.DESTINATION
             and self._is_agent_request(self.request)
             and use_destinations_revisions(self.team)
         ):
@@ -1322,7 +1325,9 @@ class InsightsFunctionViewSet(
             detail_type=humanize_insights_function_type(serializer.instance.type),
         )
 
-    @extend_schema(request=InsightsFunctionPublishRequestSerializer, responses={200: InsightsFunctionPublishResponseSerializer})
+    @extend_schema(
+        request=InsightsFunctionPublishRequestSerializer, responses={200: InsightsFunctionPublishResponseSerializer}
+    )
     @action(detail=True, methods=["POST"])
     def publish(self, request: Request, *args, **kwargs):
         # Promote the staged draft to the live config. Two-step by design: a call without confirm only
@@ -1475,7 +1480,9 @@ class InsightsFunctionViewSet(
             raise exceptions.ValidationError(REVISIONS_DISABLED_MESSAGE)
         instance = self.get_object()
         queryset = (
-            InsightsFunctionRevision.objects.filter(insights_function=instance).order_by("-version").select_related("created_by")
+            InsightsFunctionRevision.objects.filter(insights_function=instance)
+            .order_by("-version")
+            .select_related("created_by")
         )
         page = self.paginate_queryset(queryset)
         return self.get_paginated_response(InsightsFunctionRevisionBasicSerializer(page, many=True).data)
@@ -1519,7 +1526,9 @@ class InsightsFunctionViewSet(
             # nosemgrep: idor-lookup-without-team (re-fetch of already-authorized instance, locked for update)
             locked = InsightsFunction.objects.select_for_update().get(pk=instance.pk)
             try:
-                revision = InsightsFunctionRevision.objects.get(insights_function_id=locked.pk, version=int(version or 0))
+                revision = InsightsFunctionRevision.objects.get(
+                    insights_function_id=locked.pk, version=int(version or 0)
+                )
             except InsightsFunctionRevision.DoesNotExist:
                 raise exceptions.NotFound("No such revision for this function.")
             if locked.draft and not param_serializer.validated_data["overwrite"]:

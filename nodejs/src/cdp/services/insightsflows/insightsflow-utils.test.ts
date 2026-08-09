@@ -1,4 +1,4 @@
-import { isEvaluableCondition } from './hogflow-utils'
+import { isEvaluableCondition } from './insightsflow-utils'
 
 describe('isEvaluableCondition', () => {
     it('treats a filter that targets nothing as absent (compiles to always-true)', () => {

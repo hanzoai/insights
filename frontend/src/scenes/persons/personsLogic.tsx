@@ -1,7 +1,7 @@
+import insights from 'insights-js'
 import { MakeLogicType, actions, connect, events, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { decodeParams, router, urlToAction } from 'kea-router'
-import insights from 'insights-js'
 
 import api, { CountedPaginatedResponse } from 'lib/api'
 import { TriggerExportProps } from 'lib/components/ExportButton/exporter'
@@ -41,7 +41,7 @@ import type { TeamPublicType, TeamType } from '../../types'
 import {
     asDisplay,
     coercePropertyValue,
-    getHogqlQueryStringForPersonId,
+    getInsightsqlQueryStringForPersonId,
     parsePersonFromInsightsQLRow,
     pickBestPersonDistinctId,
 } from './person-utils'
@@ -426,7 +426,7 @@ export const personsLogic = kea<personsLogicType>([
                             response = await api.query<InsightsQLQuery>(
                                 {
                                     kind: NodeKind.InsightsQLQuery,
-                                    query: getHogqlQueryStringForPersonId(),
+                                    query: getInsightsqlQueryStringForPersonId(),
                                     values: { id: uuid },
                                     tags: CUSTOMER_ANALYTICS_DEFAULT_QUERY_TAGS,
                                 },

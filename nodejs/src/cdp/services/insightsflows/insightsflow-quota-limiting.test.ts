@@ -1,4 +1,4 @@
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { InsightsFlow } from '~/cdp/schema/insightsflow'
 
 import { QuotaLimiting } from '../../../common/services/quota-limiting.service'
 import { CyclotronJobInvocationInsightsFlow } from '../../types'
@@ -7,7 +7,7 @@ import {
     checkInsightsFlowQuotaLimits,
     counterInsightsFlowQuotaLimited,
     shouldBlockInsightsFlowDueToQuota,
-} from './hogflow-quota-limiting'
+} from './insightsflow-quota-limiting'
 
 describe('InsightsFlow Quota Limiting', () => {
     let mockQuotaLimiting: jest.Mocked<QuotaLimiting>

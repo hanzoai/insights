@@ -11,7 +11,7 @@ from insights.temporal.messaging.insightsql_compile import compile_insightsql_fo
 
 
 @pytest.mark.django_db(transaction=True)
-class TestCompileHogqlForStreaming:
+class TestCompileInsightsqlForStreaming:
     @pytest.mark.asyncio
     async def test_bypasses_property_restrictions(self):
         """restricted_properties=set() must skip get_restricted_properties_for_team."""

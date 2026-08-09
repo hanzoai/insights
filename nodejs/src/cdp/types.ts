@@ -1,9 +1,8 @@
+import { VMState } from '@hanzo/scriptvm'
 import { DateTime } from 'luxon'
 
-import { VMState } from '@hanzo/scriptvm'
-
 import { CyclotronInputType, CyclotronInvocationQueueParametersType } from '~/cdp/schema/cyclotron'
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { InsightsFlow } from '~/cdp/schema/insightsflow'
 
 import {
     DatastoreTimestamp,

@@ -1,9 +1,9 @@
-import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/hogflow.builder'
+import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/insightsflow.builder'
 import { createExampleInsightsFlowInvocation } from '~/cdp/_tests/fixtures-insightsflows'
-import { InsightsFlowAction } from '~/cdp/schema/hogflow'
+import { InsightsFlowAction } from '~/cdp/schema/insightsflow'
 import { CyclotronJobInvocationInsightsFlow } from '~/cdp/types'
 
-import { findActionById, findActionByType } from '../hogflow-utils'
+import { findActionById, findActionByType } from '../insightsflow-utils'
 import { getRandomCohort } from './random_cohort_branch'
 
 describe('getRandomCohort', () => {

@@ -512,7 +512,7 @@ def test_dismiss_time_trust_is_opt_in_per_ecosystem() -> None:
 
 # ── Ownership sources ────────────────────────────────────────────
 
-_HOGLI_RESOLVER = (OwnershipSource(format="insightscli-resolver", path="."),)
+_INSIGHTSCLI_RESOLVER = (OwnershipSource(format="insightscli-resolver", path="."),)
 
 
 @pytest.mark.parametrize(
@@ -536,7 +536,7 @@ def test_resolver_owner_normalization(
     product_dir.mkdir(parents=True)
     (product_dir / "product.yaml").write_text(owners_yaml)
 
-    resolvers = build_ownership(tmp_path, _HOGLI_RESOLVER)
+    resolvers = build_ownership(tmp_path, _INSIGHTSCLI_RESOLVER)
     ownership = detect_ownership(["products/foo/backend/models.py"], resolvers)
 
     assert ownership["teams"] == expected_teams
@@ -550,7 +550,7 @@ def test_ownership_cross_team_and_unowned(tmp_path: Path) -> None:
     product_dir.mkdir(parents=True)
     (product_dir / "product.yaml").write_text("owners:\n  - team-a\n  - team-b\n")
 
-    resolvers = build_ownership(tmp_path, _HOGLI_RESOLVER)
+    resolvers = build_ownership(tmp_path, _INSIGHTSCLI_RESOLVER)
 
     owned = detect_ownership(["products/foo/sub/x.py"], resolvers)
     assert owned["teams"] == ["@Insights/team-a", "@Insights/team-b"]

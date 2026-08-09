@@ -1,11 +1,11 @@
 import { QuotaLimiting } from '../../common/services/quota-limiting.service'
 import { InsightsFunctionInvocationGlobals } from '../types'
-import { InsightsFlowInvocationPipeline } from './script-flow-invocation-pipeline.service'
-import { InsightsFlowExecutorService } from './insightsflows/hogflow-executor.service'
-import { InsightsFlowManagerService } from './insightsflows/hogflow-manager.service'
+import { InsightsFlowExecutorService } from './insightsflows/insightsflow-executor.service'
+import { InsightsFlowManagerService } from './insightsflows/insightsflow-manager.service'
 import { InsightsFunctionMonitoringService } from './monitoring/script-function-monitoring.service'
 import { HogMaskerService } from './monitoring/script-masker.service'
 import { HogWatcherService, HogWatcherState } from './monitoring/script-watcher.service'
+import { InsightsFlowInvocationPipeline } from './script-flow-invocation-pipeline.service'
 
 jest.mock('../../common/services/keyed-rate-limiter.service', () => ({
     KeyedRateLimiterService: jest.fn().mockImplementation(() => ({

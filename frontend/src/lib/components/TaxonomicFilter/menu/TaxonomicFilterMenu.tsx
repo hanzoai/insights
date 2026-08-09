@@ -1,3 +1,4 @@
+import insights from 'insights-js'
 /**
  * Dropdown-menu-fronted taxonomic filter.
  *
@@ -22,7 +23,6 @@
  * old headless components use).
  */
 import { useValues } from 'kea'
-import insights from 'insights-js'
 import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { IconChevronRight, IconFilter } from '@hanzo/icons'
@@ -53,8 +53,8 @@ import { isQuickFilterItem, META_GROUP_TYPES, TaxonomicDefinitionTypes, Taxonomi
 import { filterPinnedForContext, filterRecentsForContext } from '../utils/suggestedContextFilters'
 import { MenuFilterCombobox } from './Combobox'
 import { MenuFilterDwhConfig } from './DwhFlow'
-import { MenuFilterInsightsQLEditor } from './InsightsQLEditor'
 import { MenuInputTrigger } from './InputTrigger'
+import { MenuFilterInsightsQLEditor } from './InsightsQLEditor'
 import { taxonomicTriggerWrapperClassName } from './triggerLayout'
 import {
     CommitFn,
@@ -329,7 +329,7 @@ export function TaxonomicFilterMenu({
             setState({ kind: 'dwh-config', table, group, origin }),
         []
     )
-    const openHogql = useCallback(() => setState({ kind: 'insightsql-edit' }), [])
+    const openInsightsql = useCallback(() => setState({ kind: 'insightsql-edit' }), [])
 
     // Capture which dropdown-menu option the user picked, then run its
     // transition. Lets us see the relative pull of New / Recent / Pinned /
@@ -378,7 +378,7 @@ export function TaxonomicFilterMenu({
     )
 
     const hasDwh = groups.some((g) => g.type === TaxonomicFilterGroupType.DataWarehouse)
-    const hasHogql = groups.some((g) => g.type === TaxonomicFilterGroupType.InsightsQLExpression)
+    const hasInsightsql = groups.some((g) => g.type === TaxonomicFilterGroupType.InsightsQLExpression)
 
     // -- Commit -- routes through orchestrator's `selectItem` AND the
     // consumer's `onCommit` callback. Closes everything.
@@ -810,7 +810,7 @@ export function TaxonomicFilterMenu({
                         <IconChevronRight className="ml-auto size-3.5 text-tertiary" />
                     </DropdownMenuItem>
                 )}
-                {(hasDwh || hasHogql) && <DropdownMenuSeparator />}
+                {(hasDwh || hasInsightsql) && <DropdownMenuSeparator />}
                 {hasDwh && (
                     <DropdownMenuItem
                         onClick={() => selectMenuOption('dwh', openDwhPick)}
@@ -820,9 +820,9 @@ export function TaxonomicFilterMenu({
                         <IconChevronRight className="ml-auto size-3.5 text-tertiary" />
                     </DropdownMenuItem>
                 )}
-                {hasHogql && (
+                {hasInsightsql && (
                     <DropdownMenuItem
-                        onClick={() => selectMenuOption('insightsql', openHogql)}
+                        onClick={() => selectMenuOption('insightsql', openInsightsql)}
                         data-attr="taxonomic-filter-menu-insightsql"
                     >
                         InsightsQL expression

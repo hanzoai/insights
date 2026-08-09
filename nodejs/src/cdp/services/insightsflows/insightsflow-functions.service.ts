@@ -1,4 +1,4 @@
-import { InsightsFlow, InsightsFlowAction } from '~/cdp/schema/hogflow'
+import { InsightsFlow, InsightsFlowAction } from '~/cdp/schema/insightsflow'
 import {
     CyclotronJobInvocationInsightsFlow,
     CyclotronJobInvocationInsightsFunction,
@@ -7,8 +7,8 @@ import {
     InsightsFunctionType,
 } from '~/cdp/types'
 
-import { HogExecutorAsyncService, HogExecutorExecuteAsyncOptions } from '../script-executor-async.service'
 import { InsightsFunctionTemplateManagerService } from '../managers/script-function-template-manager.service'
+import { HogExecutorAsyncService, HogExecutorExecuteAsyncOptions } from '../script-executor-async.service'
 
 type FunctionActionType = 'function' | 'function_email' | 'function_sms'
 type Action = Extract<InsightsFlowAction, { type: FunctionActionType }>
@@ -22,7 +22,9 @@ export class InsightsFlowFunctionsService {
     ) {}
 
     async buildInsightsFunction(hogFlow: InsightsFlow, configuration: Action['config']): Promise<InsightsFunctionType> {
-        const template = await this.insightsFunctionTemplateManager.getInsightsFunctionTemplate(configuration.template_id)
+        const template = await this.insightsFunctionTemplateManager.getInsightsFunctionTemplate(
+            configuration.template_id
+        )
 
         if (!template) {
             throw new Error(`Template '${configuration.template_id}' not found`)

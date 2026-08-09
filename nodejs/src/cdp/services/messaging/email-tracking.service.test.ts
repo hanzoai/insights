@@ -6,7 +6,7 @@ import { Server } from 'http'
 import supertest from 'supertest'
 import express from 'ultimate-express'
 
-import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/hogflow.builder'
+import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/insightsflow.builder'
 import { insertInsightsFunction } from '~/cdp/_tests/fixtures'
 import { insertInsightsFlow } from '~/cdp/_tests/fixtures-insightsflows'
 import { CdpApi } from '~/cdp/cdp-api'
@@ -529,7 +529,10 @@ describe('EmailTrackingService', () => {
         }
 
         it('inserts a suppression row and marks it suppressed after a Transient bounce webhook', async () => {
-            const hogFlow = await insertInsightsFlow(hub.postgres, new FixtureInsightsFlowBuilder().withTeamId(team.id).build())
+            const hogFlow = await insertInsightsFlow(
+                hub.postgres,
+                new FixtureInsightsFlowBuilder().withTeamId(team.id).build()
+            )
             const email = 'transient-bouncer@example.com'
 
             const res = await postTransientBounce(hogFlow.id, email)
@@ -563,7 +566,10 @@ describe('EmailTrackingService', () => {
         })
 
         it('inserts a suppressed row for a Permanent bounce webhook', async () => {
-            const hogFlow = await insertInsightsFlow(hub.postgres, new FixtureInsightsFlowBuilder().withTeamId(team.id).build())
+            const hogFlow = await insertInsightsFlow(
+                hub.postgres,
+                new FixtureInsightsFlowBuilder().withTeamId(team.id).build()
+            )
             const email = 'hard-bouncer@example.com'
 
             const res = await postPermanentBounce(hogFlow.id, email)

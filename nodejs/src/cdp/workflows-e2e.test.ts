@@ -21,7 +21,7 @@ import { register } from 'prom-client'
 import supertest from 'supertest'
 import express from 'ultimate-express'
 
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { InsightsFlow } from '~/cdp/schema/insightsflow'
 import { setupExpressApp } from '~/common/api/router'
 import {
     KAFKA_APP_METRICS_2,
@@ -44,17 +44,17 @@ import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { Hub, Team } from '../../src/types'
 import { createRedisV2PoolFromConfig } from '../common/redis/redis-v2'
-import { FixtureInsightsFlowBuilder } from './_tests/builders/hogflow.builder'
+import { FixtureInsightsFlowBuilder } from './_tests/builders/insightsflow.builder'
 import { INSIGHTS_FILTERS_EXAMPLES } from './_tests/examples'
 import { createHogExecutionGlobals, insertInsightsFunctionTemplate, insertIntegration } from './_tests/fixtures'
 import { insertInsightsFlow } from './_tests/fixtures-insightsflows'
 import { CdpApi } from './cdp-api'
 import { CdpCyclotronWorkerBatchResolve } from './consumers/cdp-cyclotron-worker-batch-resolve.consumer'
 import { CdpCyclotronWorkerEmail } from './consumers/cdp-cyclotron-worker-email.consumer'
-import { CdpCyclotronWorkerInsightsFlow } from './consumers/cdp-cyclotron-worker-hogflow.consumer'
+import { CdpCyclotronWorkerInsightsFlow } from './consumers/cdp-cyclotron-worker-insightsflow.consumer'
 import { CdpDatawarehouseEventsConsumer } from './consumers/cdp-data-warehouse-events.consumer'
 import { CdpEventsConsumer } from './consumers/cdp-events.consumer'
-import { CdpHogflowSubscriptionMatcherConsumer } from './consumers/cdp-hogflow-subscription-matcher.consumer'
+import { CdpHogflowSubscriptionMatcherConsumer } from './consumers/cdp-insightsflow-subscription-matcher.consumer'
 import { createCdpOutputsRegistry } from './outputs/registry'
 import {
     CyclotronV2Janitor,
@@ -67,7 +67,7 @@ import {
     MAX_RESOLVER_ATTEMPTS,
     serializeResolverState,
 } from './services/insightsflows/batch-resolver.types'
-import { InsightsFlowBatchPersonQueryService } from './services/insightsflows/hogflow-batch-person-query.service'
+import { InsightsFlowBatchPersonQueryService } from './services/insightsflows/insightsflow-batch-person-query.service'
 import { CyclotronJobQueueKafka } from './services/job-queue/job-queue-kafka'
 import { CyclotronJobQueuePostgres } from './services/job-queue/job-queue-postgres'
 import { CyclotronJobQueuePostgresV2 } from './services/job-queue/job-queue-postgres-v2'
@@ -296,7 +296,11 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
     /** Same as createWorkflow but returns the full InsightsFlow object (useful for hand-built invocations) */
     async function createWorkflowFlow(
         workflow: Parameters<FixtureInsightsFlowBuilder['withWorkflow']>[0],
-        opts?: { name?: string; conversion?: InsightsFlow['conversion']; exitCondition?: InsightsFlow['exit_condition'] }
+        opts?: {
+            name?: string
+            conversion?: InsightsFlow['conversion']
+            exitCondition?: InsightsFlow['exit_condition']
+        }
     ): Promise<InsightsFlow> {
         const builder = new FixtureInsightsFlowBuilder().withTeamId(team.id).withStatus('active').withWorkflow(workflow)
         if (opts?.name) {

@@ -1,11 +1,11 @@
 import { DateTime } from 'luxon'
 import { Counter } from 'prom-client'
 
-import { InsightsFlowAction } from '~/cdp/schema/hogflow'
+import { InsightsFlowAction } from '~/cdp/schema/insightsflow'
 import { CyclotronJobInvocationInsightsFlow } from '~/cdp/types'
 import { filterFunctionInstrumented } from '~/cdp/utils/script-function-filtering'
 
-import { findContinueAction, findNextAction, isEvaluableCondition } from '../hogflow-utils'
+import { findContinueAction, findNextAction, isEvaluableCondition } from '../insightsflow-utils'
 import { ActionHandler, ActionHandlerOptions, ActionHandlerResult } from './action.interface'
 import { calculatedScheduledAt } from './delay'
 

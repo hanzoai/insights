@@ -2,7 +2,7 @@ import { get } from 'lodash'
 import { DateTime } from 'luxon'
 import { Counter } from 'prom-client'
 
-import { InsightsFlow, InsightsFlowAction } from '~/cdp/schema/hogflow'
+import { InsightsFlow, InsightsFlowAction } from '~/cdp/schema/insightsflow'
 import { logger } from '~/common/utils/logger'
 import { UUIDT } from '~/common/utils/utils'
 
@@ -19,11 +19,14 @@ import {
     MinimalLogEntry,
     WarehouseWebhookPayload,
 } from '../../types'
-import { convertToInsightsFunctionFilterGlobal, filterFunctionInstrumented } from '../../utils/script-function-filtering'
 import { createInvocationResult } from '../../utils/invocation-utils'
-import { HogExecutorExecuteAsyncOptions } from '../script-executor-async.service'
+import {
+    convertToInsightsFunctionFilterGlobal,
+    filterFunctionInstrumented,
+} from '../../utils/script-function-filtering'
 import { EmailValidationService } from '../messaging/email-validation.service'
 import { RecipientPreferencesService } from '../messaging/recipient-preferences.service'
+import { HogExecutorExecuteAsyncOptions } from '../script-executor-async.service'
 import { ActionHandler } from './actions/action.interface'
 import { ConditionalBranchHandler } from './actions/conditional_branch'
 import { DelayHandler } from './actions/delay'
@@ -32,8 +35,8 @@ import { InsightsFunctionHandler } from './actions/insights_function'
 import { RandomCohortBranchHandler } from './actions/random_cohort_branch'
 import { TriggerHandler } from './actions/trigger.handler'
 import { WaitUntilTimeWindowHandler } from './actions/wait_until_time_window'
-import { InsightsFlowDuplicateObserverService } from './hogflow-duplicate-observer.service'
-import { InsightsFlowFunctionsService } from './hogflow-functions.service'
+import { InsightsFlowDuplicateObserverService } from './insightsflow-duplicate-observer.service'
+import { InsightsFlowFunctionsService } from './insightsflow-functions.service'
 import {
     WorkflowChangedError,
     actionIdForLogging,
@@ -41,7 +44,7 @@ import {
     findContinueAction,
     shouldSkipAction,
     trackE2eLag,
-} from './hogflow-utils'
+} from './insightsflow-utils'
 
 export const MAX_ACTION_STEPS_HARD_LIMIT = 1000
 
