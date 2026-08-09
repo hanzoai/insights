@@ -4,7 +4,7 @@ import { defineConfig, devices } from '@playwright/test'
  * The suite that runs against a DEPLOYED insights, not a dev instance.
  *
  * Separate from playwright.config.ts on purpose. That config's fixtures build a
- * workspace through /api/setup_test/, which only exists in TEST mode -- pointing
+ * workspace through /v1/setup_test/, which only exists in TEST mode -- pointing
  * it at production makes every test fail on a 404 that has nothing to do with the
  * thing under test. This suite touches no setup endpoint and creates no data; it
  * signs in as an existing account and reads.

@@ -72,11 +72,13 @@ class TestInsightsFlowInvocationResults(DatastoreTestMixin, APIBaseTest):
         self.insights_flow = InsightsFlow.objects.create(team=self.team, name="Test Flow")
 
     def _list(self, params=None):
-        return self.client.get(f"/api/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/", params)
+        return self.client.get(
+            f"/v1/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/", params
+        )
 
     def _detail(self, invocation_id: str):
         return self.client.get(
-            f"/api/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/{invocation_id}/"
+            f"/v1/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/{invocation_id}/"
         )
 
     def _seed(self, invocation_id: str, **kwargs):
@@ -237,12 +239,13 @@ class TestInsightsFlowInvocationResults(DatastoreTestMixin, APIBaseTest):
         )
         headers = {"authorization": f"Bearer {key}"}
         list_res = self.client.get(
-            f"/api/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/", headers=headers
+            f"/v1/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/", headers=headers
         )
         assert list_res.status_code == 403, list_res.json()
         assert "person:read" in list_res.json().get("detail", "")
         detail_res = self.client.get(
-            f"/api/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/inv-1/", headers=headers
+            f"/v1/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/inv-1/",
+            headers=headers,
         )
         assert detail_res.status_code == 403, detail_res.json()
         assert "person:read" in detail_res.json().get("detail", "")
@@ -258,12 +261,13 @@ class TestInsightsFlowInvocationResults(DatastoreTestMixin, APIBaseTest):
         )
         headers = {"authorization": f"Bearer {key}"}
         list_res = self.client.get(
-            f"/api/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/", headers=headers
+            f"/v1/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/", headers=headers
         )
         assert list_res.status_code == 200, list_res.json()
         assert {r["invocation_id"] for r in list_res.json()} == {"inv-1"}
         detail_res = self.client.get(
-            f"/api/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/inv-1/", headers=headers
+            f"/v1/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/inv-1/",
+            headers=headers,
         )
         assert detail_res.status_code == 200, detail_res.json()
         assert detail_res.json()["invocation_id"] == "inv-1"

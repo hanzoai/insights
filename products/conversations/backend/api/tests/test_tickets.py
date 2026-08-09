@@ -2,12 +2,7 @@ import json
 from datetime import timedelta
 from decimal import Decimal
 
-from insights.test.base import (
-    APIBaseTest,
-    BaseTest,
-    DatastoreTestMixin,
-    _create_person,
-)
+from insights.test.base import APIBaseTest, BaseTest, DatastoreTestMixin, _create_person
 from unittest.mock import patch
 
 from django.db import transaction
@@ -16,9 +11,8 @@ from django.utils import timezone
 from parameterized import parameterized
 from rest_framework import status
 
-
-
 from insights.models import ActivityLog, Comment, Organization, Tag, Team, User
+from insights.models.ee_models import AccessControl, Role
 from insights.models.personal_api_key import PersonalAPIKey
 from insights.models.utils import generate_random_token_personal, hash_key_value
 from insights.test.persons import create_person
@@ -28,9 +22,6 @@ from products.conversations.backend.api.tickets import TicketReplyRequestSeriali
 from products.conversations.backend.models import Ticket, TicketAssignment, TicketView
 from products.conversations.backend.models.constants import Channel, ChannelDetail, Priority, Status
 from products.conversations.backend.person_lookup import _get_persons_by_email
-
-from insights.models.ee_models import AccessControl
-from insights.models.ee_models import Role
 
 
 # Patch on_commit to execute immediately in tests
@@ -51,7 +42,7 @@ class TestTicketAPI(APIBaseTest):
         )
 
     def test_list_tickets(self, mock_on_commit):
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
         self.assertEqual(response.json()["results"][0]["id"], str(self.ticket.id))
@@ -74,7 +65,7 @@ class TestTicketAPI(APIBaseTest):
             self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {raw_key}")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/conversations/tickets/",
+            f"/v1/projects/{self.team.id}/conversations/tickets/",
             data={"status": "new"},
             format="json",
         )
@@ -94,7 +85,7 @@ class TestTicketAPI(APIBaseTest):
         return ticket
 
     def _list_ids(self, **params):
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/", data=params)
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/", data=params)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         return {r["id"] for r in response.json()["results"]}
 
@@ -133,7 +124,7 @@ class TestTicketAPI(APIBaseTest):
             widget_session_id="other-session",
             distinct_id="other-user",
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 2)
         ticket_ids = {t["id"] for t in response.json()["results"]}
@@ -141,33 +132,33 @@ class TestTicketAPI(APIBaseTest):
         self.assertIn(str(other_ticket.id), ticket_ids)
 
     def test_retrieve_ticket(self, mock_on_commit):
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["id"], str(self.ticket.id))
         self.assertEqual(response.json()["status"], Status.NEW)
 
     def test_retrieve_ticket_by_ticket_number(self, mock_on_commit):
         """Test retrieving a ticket by ticket_number instead of UUID."""
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.ticket_number}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.ticket_number}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["id"], str(self.ticket.id))
         self.assertEqual(response.json()["ticket_number"], self.ticket.ticket_number)
 
     def test_retrieve_ticket_by_uuid_still_works(self, mock_on_commit):
         """Test that UUID lookup still works for backward compatibility."""
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["id"], str(self.ticket.id))
 
     def test_retrieve_ticket_invalid_identifier_returns_404(self, mock_on_commit):
         """Test that invalid identifier returns 404."""
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/invalid/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/invalid/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_ticket_by_ticket_number(self, mock_on_commit):
         """Test updating a ticket using ticket_number."""
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.ticket_number}/",
+            f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.ticket_number}/",
             {"status": "resolved"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -177,7 +168,7 @@ class TestTicketAPI(APIBaseTest):
         self.ticket.unread_team_count = 5
         self.ticket.save()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["unread_team_count"], 0)
 
@@ -189,7 +180,7 @@ class TestTicketAPI(APIBaseTest):
         self.ticket.anonymous_traits = {"name": "John Doe", "email": "john@example.com"}
         self.ticket.save()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("anonymous_traits", response.json())
         self.assertEqual(response.json()["anonymous_traits"]["name"], "John Doe")
@@ -200,7 +191,7 @@ class TestTicketAPI(APIBaseTest):
         self.ticket.anonymous_traits = {"name": "Jane Doe", "company": "ACME"}
         self.ticket.save()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
         self.assertIn("anonymous_traits", response.json()["results"][0])
@@ -210,7 +201,7 @@ class TestTicketAPI(APIBaseTest):
     def test_update_sla_due_at(self, mock_on_commit):
         sla_time = timezone.now() + timedelta(hours=5)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
+            f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
             {"sla_due_at": sla_time.isoformat()},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -222,7 +213,7 @@ class TestTicketAPI(APIBaseTest):
     def test_update_sla_due_at_logs_activity(self, mock_on_commit):
         sla_time = timezone.now() + timedelta(hours=5)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
+            f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
             {"sla_due_at": sla_time.isoformat()},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -250,7 +241,7 @@ class TestTicketAPI(APIBaseTest):
     )
     def test_update_ticket_field(self, mock_on_commit, field_name, update_value, expected_response_value):
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
+            f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
             {field_name: update_value},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -299,7 +290,7 @@ class TestTicketAPI(APIBaseTest):
             **other_ticket_attrs,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?{filter_param}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?{filter_param}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
 
@@ -312,7 +303,7 @@ class TestTicketAPI(APIBaseTest):
     @parameterized.expand([("status", "invalid"), ("priority", "invalid")])
     def test_invalid_filter_ignored(self, mock_on_commit, filter_name, invalid_value):
         """Test that invalid filter values are ignored and all tickets are returned."""
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?{filter_name}={invalid_value}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?{filter_name}={invalid_value}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
 
@@ -336,7 +327,7 @@ class TestTicketAPI(APIBaseTest):
             status=Status.RESOLVED,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?status=new,open")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?status=new,open")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 2)
         ticket_ids = {t["id"] for t in response.json()["results"]}
@@ -364,7 +355,7 @@ class TestTicketAPI(APIBaseTest):
             priority=Priority.MEDIUM,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?priority=low,high")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?priority=low,high")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 2)
         ticket_ids = {t["id"] for t in response.json()["results"]}
@@ -396,7 +387,7 @@ class TestTicketAPI(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/conversations/tickets/?status=new,open&priority=high,low"
+            f"/v1/projects/{self.team.id}/conversations/tickets/?status=new,open&priority=high,low"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 2)
@@ -418,7 +409,7 @@ class TestTicketAPI(APIBaseTest):
             status=Status.OPEN,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?status=new,invalid,open")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?status=new,invalid,open")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 2)
         ticket_ids = {t["id"] for t in response.json()["results"]}
@@ -434,7 +425,7 @@ class TestTicketAPI(APIBaseTest):
             distinct_id="other-user",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?status=")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?status=")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 2)
 
@@ -451,7 +442,7 @@ class TestTicketAPI(APIBaseTest):
             status=Status.OPEN,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?status=new")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?status=new")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
         self.assertEqual(response.json()["results"][0]["id"], str(self.ticket.id))
@@ -465,7 +456,7 @@ class TestTicketAPI(APIBaseTest):
             distinct_id="other-user",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?date_from=all")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?date_from=all")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 2)
 
@@ -482,7 +473,7 @@ class TestTicketAPI(APIBaseTest):
             sla_due_at=timezone.now() + timedelta(hours=5),
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?sla=breached")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?sla=breached")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
         self.assertEqual(response.json()["results"][0]["id"], str(self.ticket.id))
@@ -500,7 +491,7 @@ class TestTicketAPI(APIBaseTest):
             sla_due_at=timezone.now() + timedelta(hours=5),
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?sla=at-risk")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?sla=at-risk")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
         self.assertEqual(response.json()["results"][0]["id"], str(self.ticket.id))
@@ -518,7 +509,7 @@ class TestTicketAPI(APIBaseTest):
             sla_due_at=timezone.now() - timedelta(hours=1),
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?sla=on-track")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?sla=on-track")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
         self.assertEqual(response.json()["results"][0]["id"], str(self.ticket.id))
@@ -536,7 +527,7 @@ class TestTicketAPI(APIBaseTest):
             sla_due_at=timezone.now() + timedelta(hours=1),
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?order_by=sla_due_at")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?order_by=sla_due_at")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(results[0]["id"], str(urgent_ticket.id))
@@ -567,7 +558,7 @@ class TestTicketAPI(APIBaseTest):
         seen: list[str] = []
         for offset in range(0, len(tickets), 2):
             response = self.client.get(
-                f"/api/projects/{self.team.id}/conversations/tickets/?order_by={order_by}&limit=2&offset={offset}"
+                f"/v1/projects/{self.team.id}/conversations/tickets/?order_by={order_by}&limit=2&offset={offset}"
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             seen.extend(r["id"] for r in response.json()["results"])
@@ -596,7 +587,7 @@ class TestTicketAPI(APIBaseTest):
             priority=None,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?priority=low,high")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?priority=low,high")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 2)
         ticket_ids = {t["id"] for t in response.json()["results"]}
@@ -605,7 +596,7 @@ class TestTicketAPI(APIBaseTest):
 
     def test_search_by_ticket_number(self, mock_on_commit):
         response = self.client.get(
-            f"/api/projects/{self.team.id}/conversations/tickets/?search={self.ticket.ticket_number}"
+            f"/v1/projects/{self.team.id}/conversations/tickets/?search={self.ticket.ticket_number}"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
@@ -613,7 +604,7 @@ class TestTicketAPI(APIBaseTest):
 
     def test_search_by_ticket_number_with_hash_prefix(self, mock_on_commit):
         response = self.client.get(
-            f"/api/projects/{self.team.id}/conversations/tickets/?search=%23{self.ticket.ticket_number}"
+            f"/v1/projects/{self.team.id}/conversations/tickets/?search=%23{self.ticket.ticket_number}"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
@@ -622,7 +613,7 @@ class TestTicketAPI(APIBaseTest):
     def test_search_with_non_ascii_digit_does_not_error(self, mock_on_commit):
         # "²" passes str.isdigit() but int() rejects it; it must fall through to text search
         # rather than 500.
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?search=%C2%B2")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?search=%C2%B2")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 0)
 
@@ -638,7 +629,7 @@ class TestTicketAPI(APIBaseTest):
             setattr(self.ticket, field, value)
         self.ticket.save()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?search={query}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?search={query}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
         self.assertEqual(response.json()["results"][0]["id"], str(self.ticket.id))
@@ -651,7 +642,7 @@ class TestTicketAPI(APIBaseTest):
             content="I need help with the API integration",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?search=API+integration")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?search=API+integration")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
         self.assertEqual(response.json()["results"][0]["id"], str(self.ticket.id))
@@ -670,7 +661,7 @@ class TestTicketAPI(APIBaseTest):
             content="Thanks, all sorted now",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?search=passwords")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?search=passwords")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
 
@@ -684,14 +675,12 @@ class TestTicketAPI(APIBaseTest):
         comment.deleted = True
         comment.save()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?search=secret+deleted")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?search=secret+deleted")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 0)
 
     def test_search_no_match_returns_empty(self, mock_on_commit):
-        response = self.client.get(
-            f"/api/projects/{self.team.id}/conversations/tickets/?search=nonexistent_query_xyzzy"
-        )
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?search=nonexistent_query_xyzzy")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 0)
 
@@ -720,14 +709,14 @@ class TestTicketAPI(APIBaseTest):
             content="zebra migration question",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?search=zebra")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?search=zebra")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
         self.assertEqual(response.json()["results"][0]["id"], str(same_team_ticket.id))
 
     def test_search_ignores_too_long_query(self, mock_on_commit):
         long_query = "a" * 201
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?search={long_query}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?search={long_query}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
 
@@ -764,7 +753,7 @@ class TestTicketAPI(APIBaseTest):
                 comment.deleted = True
                 comment.save()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         for field_name, expected_value in expected_fields.items():
@@ -817,7 +806,7 @@ class TestTicketAPI(APIBaseTest):
         # write (deferred to on_commit, which this test class patches to run synchronously)
         # Note: person reads go through personinsights (no DB queries)
         with self.assertNumQueries(12):
-            response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/")
+            response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             # Should have original ticket + 10 new tickets = 11 total
             self.assertEqual(response.json()["count"], 11)
@@ -846,7 +835,7 @@ class TestBulkUpdateStatus(APIBaseTest):
         ]
 
     def _bulk_url(self) -> str:
-        return f"/api/projects/{self.team.id}/conversations/tickets/bulk_update_status/"
+        return f"/v1/projects/{self.team.id}/conversations/tickets/bulk_update_status/"
 
     def test_bulk_update_status(self, mock_on_commit):
         ids = [str(t.id) for t in self.tickets]
@@ -993,7 +982,7 @@ class TestTicketAssignment(APIBaseTest):
         self.assertEqual(TicketAssignment.objects.count(), 0)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
+            f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
             {"assignee": {"id": self.user.id, "type": "user"}},
         )
 
@@ -1011,7 +1000,7 @@ class TestTicketAssignment(APIBaseTest):
         self.assertEqual(TicketAssignment.objects.count(), 0)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
+            f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
             {"assignee": {"id": str(self.role.id), "type": "role"}},
         )
 
@@ -1030,7 +1019,7 @@ class TestTicketAssignment(APIBaseTest):
         self.assertEqual(TicketAssignment.objects.count(), 1)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
+            f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
             {"assignee": {"id": str(self.role.id), "type": "role"}},
         )
 
@@ -1048,7 +1037,7 @@ class TestTicketAssignment(APIBaseTest):
         self.assertEqual(TicketAssignment.objects.count(), 1)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
+            f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
             {"assignee": None},
         )
 
@@ -1060,7 +1049,7 @@ class TestTicketAssignment(APIBaseTest):
         """Test that assignee serialization returns correct {id, type} format."""
         TicketAssignment.objects.create(ticket=self.ticket, user=self.user)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("assignee", response.json())
@@ -1069,7 +1058,7 @@ class TestTicketAssignment(APIBaseTest):
 
     def test_unassigned_ticket_returns_null_assignee(self):
         """Test that unassigned ticket returns null for assignee."""
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNone(response.json()["assignee"])
@@ -1085,7 +1074,7 @@ class TestTicketAssignment(APIBaseTest):
             distinct_id="other-user",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?assignee=user:{self.user.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?assignee=user:{self.user.id}")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
@@ -1102,7 +1091,7 @@ class TestTicketAssignment(APIBaseTest):
             distinct_id="other-user",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?assignee=role:{self.role.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?assignee=role:{self.role.id}")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
@@ -1118,7 +1107,7 @@ class TestTicketAssignment(APIBaseTest):
         )
         TicketAssignment.objects.create(ticket=assigned_ticket, user=self.user)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?assignee=unassigned")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?assignee=unassigned")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
@@ -1155,7 +1144,7 @@ class TestTicketAssignment(APIBaseTest):
         assignee_param = assignee_template.format(
             user_id=self.user.id, other_user_id=other_user.id, role_id=self.role.id
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?assignee={assignee_param}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?assignee={assignee_param}")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         returned_ids = {result["id"] for result in response.json()["results"]}
@@ -1174,7 +1163,7 @@ class TestTicketAssignment(APIBaseTest):
         )
         TicketAssignment.objects.create(ticket=other_ticket, user=other_user)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?assignee=me")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?assignee=me")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
@@ -1190,7 +1179,7 @@ class TestTicketAssignment(APIBaseTest):
             distinct_id="unassigned-user",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?assignee=me,unassigned")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?assignee=me,unassigned")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         returned_ids = {result["id"] for result in response.json()["results"]}
@@ -1199,7 +1188,7 @@ class TestTicketAssignment(APIBaseTest):
     def test_assignment_logs_activity(self):
         """Test that assignment changes are logged in activity log."""
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
+            f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
             {"assignee": {"id": self.user.id, "type": "user"}},
         )
 
@@ -1229,7 +1218,7 @@ class TestTicketAssignment(APIBaseTest):
     )
     def test_invalid_assignee_payload(self, name, payload, expected_error):
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
+            f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
             {"assignee": payload},
         )
 
@@ -1240,7 +1229,7 @@ class TestTicketAssignment(APIBaseTest):
         other_user = User.objects.create(email="other@example.com")
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
+            f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
             {"assignee": {"id": other_user.id, "type": "user"}},
         )
 
@@ -1253,7 +1242,7 @@ class TestTicketAssignment(APIBaseTest):
         other_role = Role.objects.create(name="Other Role", organization=other_org)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
+            f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
             {"assignee": {"id": str(other_role.id), "type": "role"}},
         )
 
@@ -1270,7 +1259,7 @@ class TestUnreadCountEndpoint(APIBaseTest):
         self.team.save()
 
     def test_unread_count_returns_zero_when_no_tickets(self, mock_on_commit):
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/unread_count/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/unread_count/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 0)
 
@@ -1290,7 +1279,7 @@ class TestUnreadCountEndpoint(APIBaseTest):
             unread_team_count=2,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/unread_count/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/unread_count/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 5)
 
@@ -1312,7 +1301,7 @@ class TestUnreadCountEndpoint(APIBaseTest):
             status=Status.RESOLVED,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/unread_count/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/unread_count/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 3)
 
@@ -1328,7 +1317,7 @@ class TestUnreadCountEndpoint(APIBaseTest):
             unread_team_count=5,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/unread_count/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/unread_count/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 0)
 
@@ -1342,7 +1331,7 @@ class TestUnreadCountEndpoint(APIBaseTest):
             unread_team_count=3,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/{ticket.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/{ticket.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         mock_invalidate.assert_called_once_with(self.team.id)
 
@@ -1356,7 +1345,7 @@ class TestUnreadCountEndpoint(APIBaseTest):
             unread_team_count=0,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/{ticket.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/{ticket.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         mock_invalidate.assert_not_called()
 
@@ -1371,7 +1360,7 @@ class TestUnreadCountEndpoint(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/conversations/tickets/{ticket.id}/",
+            f"/v1/projects/{self.team.id}/conversations/tickets/{ticket.id}/",
             {"status": Status.RESOLVED},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1388,7 +1377,7 @@ class TestUnreadCountEndpoint(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/conversations/tickets/{ticket.id}/",
+            f"/v1/projects/{self.team.id}/conversations/tickets/{ticket.id}/",
             {"status": Status.OPEN},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1405,7 +1394,7 @@ class TestUnreadCountEndpoint(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/conversations/tickets/{ticket.id}/",
+            f"/v1/projects/{self.team.id}/conversations/tickets/{ticket.id}/",
             {"priority": Priority.HIGH},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1429,7 +1418,7 @@ class TestPrivateMessageAppAPI(APIBaseTest):
     def test_app_api_can_create_private_message(self, mock_on_commit):
         """Verify authenticated users can create private messages via App API."""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/comments/",
+            f"/v1/projects/{self.team.id}/comments/",
             {
                 "content": "Private internal note",
                 "scope": "conversations_ticket",
@@ -1461,7 +1450,7 @@ class TestPrivateMessageAppAPI(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/comments/?scope=conversations_ticket&item_id={self.ticket.id}"
+            f"/v1/projects/{self.team.id}/comments/?scope=conversations_ticket&item_id={self.ticket.id}"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 1)
@@ -1516,7 +1505,7 @@ class TestTicketPersonData(APIBaseTest):
             properties={"email": "test@example.com", "name": "Test User"},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
 
         assert response.status_code == status.HTTP_200_OK
         person_data = response.json()["person"]
@@ -1526,7 +1515,7 @@ class TestTicketPersonData(APIBaseTest):
         assert set(person_data["distinct_ids"]) == {"user-123", "user@example.com", "another-id"}
 
     def test_retrieve_ticket_person_null_when_no_person(self, mock_on_commit):
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["person"] is None
@@ -1538,7 +1527,7 @@ class TestTicketPersonData(APIBaseTest):
             properties={"email": "test@example.com"},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == 1
@@ -1548,7 +1537,7 @@ class TestTicketPersonData(APIBaseTest):
         assert set(person_data["distinct_ids"]) == {"user-123", "user@example.com"}
 
     def test_list_tickets_person_null_when_no_person(self, mock_on_commit):
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == 1
@@ -1562,7 +1551,7 @@ class TestTicketPersonData(APIBaseTest):
             properties={"email": "other@example.com"},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["person"] is None
@@ -1595,7 +1584,7 @@ class TestTicketEmailFallbackPersonLookup(DatastoreTestMixin, APIBaseTest):
         )
         self._create_email_ticket(email_from="alice@example.com", distinct_id="alice@example.com")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/")
 
         assert response.status_code == status.HTTP_200_OK
         person_data = response.json()["results"][0]["person"]
@@ -1611,7 +1600,7 @@ class TestTicketEmailFallbackPersonLookup(DatastoreTestMixin, APIBaseTest):
         )
         self._create_email_ticket(email_from="alice@example.com", distinct_id="alice@example.com")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/")
 
         assert response.status_code == status.HTTP_200_OK
         person_data = response.json()["results"][0]["person"]
@@ -1621,7 +1610,7 @@ class TestTicketEmailFallbackPersonLookup(DatastoreTestMixin, APIBaseTest):
     def test_email_fallback_no_match_returns_null_person(self, mock_on_commit):
         self._create_email_ticket(email_from="nobody@example.com", distinct_id="nobody@example.com")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["results"][0]["person"] is None
@@ -1643,7 +1632,7 @@ class TestTicketEmailFallbackPersonLookup(DatastoreTestMixin, APIBaseTest):
         self._create_email_ticket(email_from="b@example.com", distinct_id="b@example.com")
         self._create_email_ticket(email_from="c@example.com", distinct_id="c@example.com")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/")
 
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
@@ -1668,7 +1657,7 @@ class TestTicketEmailFallbackPersonLookup(DatastoreTestMixin, APIBaseTest):
         )
         self._create_email_ticket(email_from="scoped@example.com", distinct_id="scoped@example.com")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["results"][0]["person"] is None
@@ -1687,7 +1676,7 @@ class TestTicketEmailFallbackPersonLookup(DatastoreTestMixin, APIBaseTest):
             status=Status.NEW,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["results"][0]["person"] is None
@@ -1716,6 +1705,7 @@ class TestTicketEmailFallbackPersonLookup(DatastoreTestMixin, APIBaseTest):
         assert person is not None
         assert str(person.uuid) == str(identified.uuid)
 
+
 @patch.object(transaction, "on_commit", side_effect=immediate_on_commit)
 class TestTicketEmailFilter(APIBaseTest):
     """Tests the `emails` query param used by the previous-tickets panel to match related tickets."""
@@ -1736,7 +1726,7 @@ class TestTicketEmailFilter(APIBaseTest):
         match = self._create_ticket(distinct_id="did-1", email_from="Alice@Example.com")
         self._create_ticket(distinct_id="did-2", email_from="bob@example.com")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?emails=alice@example.com")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?emails=alice@example.com")
 
         assert response.status_code == status.HTTP_200_OK
         assert self._numbers(response) == {match.ticket_number}
@@ -1747,7 +1737,7 @@ class TestTicketEmailFilter(APIBaseTest):
         self._create_ticket(distinct_id="did-3", email_from="bob@example.com")
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/conversations/tickets/?distinct_ids=did-1&emails=alice@example.com"
+            f"/v1/projects/{self.team.id}/conversations/tickets/?distinct_ids=did-1&emails=alice@example.com"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -1756,7 +1746,7 @@ class TestTicketEmailFilter(APIBaseTest):
     def test_filter_by_email_no_match_returns_empty(self, mock_on_commit):
         self._create_ticket(distinct_id="did-1", email_from="alice@example.com")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/?emails=nobody@example.com")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/?emails=nobody@example.com")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] == 0
@@ -1782,7 +1772,7 @@ class TestComposeTicketAPI(APIBaseTest):
 
     def _compose(self, data):
         return self.client.post(
-            f"/api/projects/{self.team.id}/conversations/tickets/compose/",
+            f"/v1/projects/{self.team.id}/conversations/tickets/compose/",
             data,
             format="json",
         )
@@ -1927,7 +1917,7 @@ class TestTicketPersonalAPIKeyScopes(APIBaseTest):
     def test_read_actions(self, _name, action, method, use_detail, scopes, expected_status):
         self._auth_with_pak(scopes)
 
-        base = f"/api/projects/{self.team.id}/conversations/tickets/"
+        base = f"/v1/projects/{self.team.id}/conversations/tickets/"
         if use_detail:
             url = f"{base}{self.ticket.id}/"
         elif action in ("list",):
@@ -1947,7 +1937,7 @@ class TestTicketPersonalAPIKeyScopes(APIBaseTest):
     )
     def test_write_actions(self, _name, action, scopes, expected_status):
         self._auth_with_pak(scopes)
-        url = f"/api/projects/{self.team.id}/conversations/tickets/{action}/"
+        url = f"/v1/projects/{self.team.id}/conversations/tickets/{action}/"
         response = self.client.post(url, {}, format="json")
         assert response.status_code == expected_status, f"{_name}: {response.status_code} != {expected_status}"
 
@@ -1964,7 +1954,7 @@ class TestTicketPersonalAPIKeyScopes(APIBaseTest):
     def test_messages_and_reply_scopes(self, _name, action, method, scopes, expected_status):
         self._auth_with_pak(scopes)
 
-        url = f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/{action}/"
+        url = f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/{action}/"
         if method == "post":
             response = self.client.post(url, {"message": "test reply"}, format="json")
         else:
@@ -1991,7 +1981,7 @@ class TestTicketPersonalAPIKeyScopes(APIBaseTest):
             item_context={"author_type": "support", "is_private": True},
         )
         self._auth_with_pak(scopes)
-        url = f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/notes/{note.id}/"
+        url = f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/notes/{note.id}/"
         if method == "patch":
             response = self.client.patch(url, {"message": "Updated note"}, format="json")
         else:
@@ -2011,7 +2001,7 @@ class TestTicketMessagesAPI(APIBaseTest):
             status=Status.OPEN,
             anonymous_traits={"name": "Alice", "email": "alice@example.com"},
         )
-        self.url = f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/messages/"
+        self.url = f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/messages/"
 
     def test_messages_returns_thread_in_order(self, mock_on_commit):
         base = timezone.now()
@@ -2119,7 +2109,7 @@ class TestTicketMessagesAPI(APIBaseTest):
             item_context={"author_type": "customer"},
         )
 
-        url = f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.ticket_number}/messages/"
+        url = f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.ticket_number}/messages/"
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["results"]) == 1
@@ -2218,7 +2208,7 @@ class TestTicketMessagesAPI(APIBaseTest):
             status=Status.NEW,
         )
 
-        url = f"/api/projects/{self.team.id}/conversations/tickets/{other_ticket.id}/messages/"
+        url = f"/v1/projects/{self.team.id}/conversations/tickets/{other_ticket.id}/messages/"
         response = self.client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -2268,7 +2258,7 @@ class TestTicketReplyAPI(APIBaseTest):
             distinct_id="user-1",
             status=Status.OPEN,
         )
-        self.url = f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/reply/"
+        self.url = f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/reply/"
 
     @parameterized.expand(
         [
@@ -2332,7 +2322,7 @@ class TestTicketReplyAPI(APIBaseTest):
             status=Status.NEW,
         )
 
-        url = f"/api/projects/{self.team.id}/conversations/tickets/{other_ticket.id}/reply/"
+        url = f"/v1/projects/{self.team.id}/conversations/tickets/{other_ticket.id}/reply/"
         response = self.client.post(url, {"message": "hi"}, format="json")
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -2397,7 +2387,7 @@ class TestAiFeedbackAPI(APIBaseTest):
                 "ai_trace_id": "trace-abc",
             },
         )
-        self.url = f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/ai_feedback/"
+        self.url = f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/ai_feedback/"
 
     @patch("products.conversations.backend.api.tickets.hanzo_insights.capture")
     def test_ai_feedback_captures_metric_on_rating(self, mock_capture, mock_on_commit):
@@ -2490,14 +2480,14 @@ class TestTicketAccessControl(APIBaseTest):
     @parameterized.expand([("none", status.HTTP_403_FORBIDDEN), ("viewer", status.HTTP_200_OK)])
     def test_list_access_by_resource_level(self, access_level: str, expected_status: int) -> None:
         self._set_resource_level(access_level)
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/")
         self.assertEqual(response.status_code, expected_status)
 
     @parameterized.expand([("viewer", status.HTTP_403_FORBIDDEN), ("editor", status.HTTP_200_OK)])
     def test_update_access_by_resource_level(self, access_level: str, expected_status: int) -> None:
         self._set_resource_level(access_level)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
+            f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/",
             {"status": "resolved"},
         )
         self.assertEqual(response.status_code, expected_status, response.json())
@@ -2507,7 +2497,7 @@ class TestTicketAccessControl(APIBaseTest):
         # `reply` is a write @action; a viewer must not be able to post a reply.
         self._set_resource_level(access_level)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/reply/",
+            f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/reply/",
             {"message": "A reply"},
             format="json",
         )
@@ -2515,7 +2505,7 @@ class TestTicketAccessControl(APIBaseTest):
 
     def test_user_access_level_reflects_resource_level(self) -> None:
         self._set_resource_level("viewer")
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["user_access_level"], "viewer")
 
@@ -2523,7 +2513,7 @@ class TestTicketAccessControl(APIBaseTest):
         # An object-level grant for this ticket wins over the lower resource-level floor.
         self._set_resource_level("viewer")
         self._grant_object_level(self.ticket, "editor")
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["user_access_level"], "editor")
 
@@ -2538,7 +2528,7 @@ class TestTicketAccessControl(APIBaseTest):
         )
         self._set_resource_level("viewer")
         self._grant_object_level(blocked, "none")
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         returned_ids = {r["id"] for r in response.json()["results"]}
         self.assertIn(str(self.ticket.id), returned_ids)
@@ -2549,7 +2539,7 @@ class TestTicketAccessControl(APIBaseTest):
         # deny must still block the detail route (not just list filtering).
         self._set_resource_level("viewer")
         self._grant_object_level(self.ticket, "none")
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_reply_blocked_at_object_level(self) -> None:
@@ -2558,7 +2548,7 @@ class TestTicketAccessControl(APIBaseTest):
         self._set_resource_level("editor")
         self._grant_object_level(self.ticket, "none")
         response = self.client.post(
-            f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/reply/",
+            f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/reply/",
             {"message": "A reply"},
             format="json",
         )
@@ -2571,7 +2561,7 @@ class TestTicketAccessControl(APIBaseTest):
         self.ticket.save(update_fields=["unread_team_count"])
         self._set_resource_level("viewer")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.ticket.refresh_from_db()
@@ -2582,7 +2572,7 @@ class TestTicketAccessControl(APIBaseTest):
         self.ticket.save(update_fields=["unread_team_count"])
         self._set_resource_level("editor")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.ticket.refresh_from_db()
@@ -2604,7 +2594,7 @@ class TestTicketAccessControl(APIBaseTest):
         self._set_resource_level("viewer")
         self._grant_object_level(blocked, "none")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/unread_count/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/unread_count/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 2)
@@ -2613,7 +2603,7 @@ class TestTicketAccessControl(APIBaseTest):
         # The per-ticket access_controls route (side-panel object permissions) is wired by the mixin.
         self._set_resource_level("viewer")
         response = self.client.get(
-            f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/access_controls"
+            f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/access_controls"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -2622,7 +2612,7 @@ class TestTicketAccessControl(APIBaseTest):
         # Saved views use the `conversation` scope, which inherits the `ticket` resource's access level.
         self._set_resource_level(access_level)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/conversations/views/",
+            f"/v1/projects/{self.team.id}/conversations/views/",
             {"name": "My view", "filters": {"status": ["open"]}},
             format="json",
         )
@@ -2645,7 +2635,7 @@ class TestTicketViewParamFilter(APIBaseTest):
         return TicketView.objects.create(team=self.team, name="Saved view", filters=filters, created_by=self.user)
 
     def _list_ids(self, **params) -> set[str]:
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/", data=params)
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/", data=params)
         assert response.status_code == status.HTTP_200_OK, response.json()
         return {r["id"] for r in response.json()["results"]}
 
@@ -2667,7 +2657,7 @@ class TestTicketViewParamFilter(APIBaseTest):
         assert self._list_ids(view=view.short_id, status="resolved") == {str(resolved.id)}
 
     def test_unknown_view_short_id_returns_400(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/", data={"view": "nonexistent"})
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/", data={"view": "nonexistent"})
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_other_teams_view_returns_400(self):
@@ -2677,7 +2667,7 @@ class TestTicketViewParamFilter(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/conversations/tickets/", data={"view": other_view.short_id}
+            f"/v1/projects/{self.team.id}/conversations/tickets/", data={"view": other_view.short_id}
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -2755,7 +2745,7 @@ class TestTicketViewParamFilter(APIBaseTest):
             }
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/", data={"view": view.short_id})
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/", data={"view": view.short_id})
         assert response.status_code == status.HTTP_200_OK
         assert [r["id"] for r in response.json()["results"]] == [str(first.id), str(second.id)]
 
@@ -2785,7 +2775,7 @@ class TestTicketNoteAPI(APIBaseTest):
             },
             item_context={"author_type": "support", "is_private": True},
         )
-        self.url = f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/notes/{self.note.id}/"
+        self.url = f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/notes/{self.note.id}/"
 
     def test_patch_updates_content_and_bumps_version(self, mock_on_commit):
         response = self.client.patch(
@@ -2820,7 +2810,7 @@ class TestTicketNoteAPI(APIBaseTest):
         self.note.refresh_from_db()
         assert self.note.deleted is True
 
-        messages = self.client.get(f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/messages/")
+        messages = self.client.get(f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/messages/")
         assert messages.status_code == status.HTTP_200_OK
         assert all(m["id"] != str(self.note.id) for m in messages.json()["results"])
 
@@ -2845,7 +2835,7 @@ class TestTicketNoteAPI(APIBaseTest):
                 content="Someone else's note",
                 item_context={"author_type": "support", "is_private": True},
             )
-            url = f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/notes/{note.id}/"
+            url = f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/notes/{note.id}/"
         elif setup_kind == "ai":
             note = Comment.objects.create(
                 team=self.team,
@@ -2855,7 +2845,7 @@ class TestTicketNoteAPI(APIBaseTest):
                 content="AI note",
                 item_context={"author_type": "AI", "is_private": True},
             )
-            url = f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/notes/{note.id}/"
+            url = f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/notes/{note.id}/"
         elif setup_kind == "self":
             note = Comment.objects.create(
                 team=self.team,
@@ -2865,7 +2855,7 @@ class TestTicketNoteAPI(APIBaseTest):
                 content="Public reply",
                 item_context={"author_type": "support", "is_private": is_private},
             )
-            url = f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/notes/{note.id}/"
+            url = f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/notes/{note.id}/"
         elif setup_kind == "other_ticket":
             other_ticket = Ticket.objects.create_with_number(
                 team=self.team,
@@ -2874,13 +2864,13 @@ class TestTicketNoteAPI(APIBaseTest):
                 distinct_id="user-2",
                 status=Status.OPEN,
             )
-            url = f"/api/projects/{self.team.id}/conversations/tickets/{other_ticket.id}/notes/{self.note.id}/"
+            url = f"/v1/projects/{self.team.id}/conversations/tickets/{other_ticket.id}/notes/{self.note.id}/"
         elif setup_kind == "deleted":
             self.note.deleted = True
             self.note.save(update_fields=["deleted"])
             url = self.url
         else:
-            url = f"/api/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/notes/not-a-uuid/"
+            url = f"/v1/projects/{self.team.id}/conversations/tickets/{self.ticket.id}/notes/not-a-uuid/"
 
         response = self.client.patch(url, {"message": "Hacked"}, format="json")
         assert response.status_code == expected_status

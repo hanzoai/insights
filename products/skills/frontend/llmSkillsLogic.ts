@@ -35,7 +35,7 @@ export function buildMarketplaceCommand(token: string | null): string {
     const origin = window.location.origin
     const scheme = origin.startsWith('https') ? 'https' : 'http'
     const host = origin.replace(/^https?:\/\//, '')
-    return `/plugin marketplace add ${scheme}://x-access-token:${token ?? 'YOUR_PHS_TOKEN'}@${host}/api/projects/${teamId}/llm_skills/marketplace.git`
+    return `/plugin marketplace add ${scheme}://x-access-token:${token ?? 'YOUR_PHS_TOKEN'}@${host}/v1/projects/${teamId}/llm_skills/marketplace.git`
 }
 
 function errorDetail(error: unknown): string | undefined {

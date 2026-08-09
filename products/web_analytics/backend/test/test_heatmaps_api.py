@@ -75,7 +75,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
             params = {}
 
         query_params = "&".join([f"{key}={value}" for key, value in params.items()])
-        response = self.client.get(f"/api/heatmap/?{query_params}")
+        response = self.client.get(f"/v1/heatmap/?{query_params}")
         assert response.status_code == expected_status_code, response.data
 
         return response
@@ -146,7 +146,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
     @freezegun.freeze_time("2025-03-31")
     @snapshot_datastore_queries
     def test_can_get_empty_response(self) -> None:
-        response = self.client.get("/api/heatmap/?date_from=2024-05-03")
+        response = self.client.get("/v1/heatmap/?date_from=2024-05-03")
         assert response.status_code == 200
         self.assertEqual(
             response.data,
@@ -179,7 +179,7 @@ class TestSessionRecordings(APIBaseTest, DatastoreTestMixin, QueryMatchingTest):
         # A fixed-position click below the fold is always on screen — excluded from the fold summary.
         self._create_heatmap_event("s4", "click", viewport_height=640, y=960, pointer_target_fixed=True)
 
-        response = self.client.get("/api/heatmap/?date_from=2023-03-08&type=click")
+        response = self.client.get("/v1/heatmap/?date_from=2023-03-08&type=click")
         assert response.status_code == 200
         assert response.data["fold"] == {
             "total_count": 3,

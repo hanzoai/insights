@@ -36,7 +36,7 @@ from products.ai_observability.backend.api.personal_spend import (
     sign_cross_region_spend_request,
 )
 
-ENDPOINT = "/api/llm_analytics/@me/spend/"
+ENDPOINT = "/v1/llm_analytics/@me/spend/"
 # `product` is required server-side; spell that out once for every happy-path test.
 PRODUCT_QS = "product=insights_code"
 ENDPOINT_OK = f"{ENDPOINT}?{PRODUCT_QS}"
@@ -55,7 +55,7 @@ class TestPersonalSpendEuRedirect(APIBaseTest):
         from products.ai_observability.backend.api.personal_spend import personal_spend_eu_redirect
 
         factory = RequestFactory()
-        request = factory.get("/api/llm_analytics/@me/spend/", data={"date_from": "-7d", "product": "insights_code"})
+        request = factory.get("/v1/llm_analytics/@me/spend/", data={"date_from": "-7d", "product": "insights_code"})
         response = personal_spend_eu_redirect(request)
 
         assert response.status_code == status.HTTP_302_FOUND
@@ -70,7 +70,7 @@ class TestPersonalSpendEuRedirect(APIBaseTest):
 
         factory = RequestFactory()
         request = factory.get(
-            "/api/llm_analytics/@me/spend/",
+            "/v1/llm_analytics/@me/spend/",
             data={"date_from": "-7d", "evil": "https://attacker.example/", "fragment": "#"},
         )
         response = personal_spend_eu_redirect(request)
@@ -633,8 +633,8 @@ class TestPersonalSpendQueries(DatastoreTestMixin, APIBaseTest):
 class TestPersonalSpendNonSessionAuth(APIBaseTest):
     """
     Pins down what scopes the MCP and OAuth-token paths need to reach
-    `/api/llm_analytics/@me/spend/`. The endpoint is `scope_object = "user"` —
-    same bucket as `/api/users/@me/` — so the wildcard `*` (the "Full access"
+    `/v1/llm_analytics/@me/spend/`. The endpoint is `scope_object = "user"` —
+    same bucket as `/v1/users/@me/` — so the wildcard `*` (the "Full access"
     consent option) and an explicit `user:read` both grant access. An OAuth
     token carrying only OIDC identity scopes (`openid profile email`) without
     any resource scope is correctly rejected: identity alone does not imply
@@ -705,7 +705,7 @@ class TestPersonalSpendNonSessionAuth(APIBaseTest):
         assert response.status_code == expected, response.content
 
 
-INTERNAL_ENDPOINT = "/api/llm_analytics/internal/spend/"
+INTERNAL_ENDPOINT = "/v1/llm_analytics/internal/spend/"
 CROSS_REGION_SECRET = "test-cross-region-secret"
 
 
@@ -833,7 +833,7 @@ class TestPersonalSpendEUProxy(APIBaseTest):
 
     def _get(self, query: dict | None = None, *, user=None):
         factory = APIRequestFactory()
-        request = factory.get("/api/llm_analytics/@me/spend/", data=query or {"product": "insights_code"})
+        request = factory.get("/v1/llm_analytics/@me/spend/", data=query or {"product": "insights_code"})
         if user is not None:
             force_authenticate(request, user=user)
         return PersonalSpendEUProxyViewSet.as_view({"get": "list"})(request)
@@ -879,7 +879,7 @@ class TestPersonalSpendEUProxy(APIBaseTest):
         assert response.data == upstream_payload
 
         (target_url,) = post.call_args.args
-        assert target_url.endswith("/api/llm_analytics/internal/spend/")
+        assert target_url.endswith("/v1/llm_analytics/internal/spend/")
         sent_body = post.call_args.kwargs["data"]
         sent = json.loads(sent_body)
         assert sent["email"] == self.user.email

@@ -32,7 +32,7 @@ class TestEndpointQueryTagging(DatastoreTestMixin, APIBaseTest):
             created_by=self.user,
             is_active=True,
         )
-        self.run_url = f"/api/environments/{self.team.id}/endpoints/{self.endpoint.name}/run/"
+        self.run_url = f"/v1/environments/{self.team.id}/endpoints/{self.endpoint.name}/run/"
 
         self.api_key_value = generate_random_token_personal()
         PersonalAPIKey.objects.create(

@@ -38,7 +38,7 @@ class ImpersonationTestViewSet(GenericViewSet):
 _test_router = DefaultRouterPlusPlus()
 _test_router.register(r"impersonation-test", ImpersonationTestViewSet, "impersonation-test")
 
-urlpatterns = [path("api/", include(_test_router.urls))]
+urlpatterns = [path("v1/", include(_test_router.urls))]
 
 
 @override_settings(ROOT_URLCONF="insights.test.test_decorators")
@@ -47,7 +47,7 @@ class TestDisallowIfImpersonatedDecorator(APIBaseTest):
     def test_allows_non_impersonated_session(self, mock_is_impersonated):
         mock_is_impersonated.return_value = False
 
-        response = self.client.get("/api/impersonation-test/blocked_action/")
+        response = self.client.get("/v1/impersonation-test/blocked_action/")
 
         assert response.status_code == 200
         assert response.json()["status"] == "success"
@@ -56,7 +56,7 @@ class TestDisallowIfImpersonatedDecorator(APIBaseTest):
     def test_blocks_impersonated_session(self, mock_is_impersonated):
         mock_is_impersonated.return_value = True
 
-        response = self.client.get("/api/impersonation-test/blocked_action/")
+        response = self.client.get("/v1/impersonation-test/blocked_action/")
 
         assert response.status_code == 403
         assert response.json()["detail"] == "Impersonated sessions cannot perform this action."
@@ -65,7 +65,7 @@ class TestDisallowIfImpersonatedDecorator(APIBaseTest):
     def test_custom_error_message(self, mock_is_impersonated):
         mock_is_impersonated.return_value = True
 
-        response = self.client.get("/api/impersonation-test/blocked_with_custom_message/")
+        response = self.client.get("/v1/impersonation-test/blocked_with_custom_message/")
 
         assert response.status_code == 403
         assert response.json()["detail"] == "Custom error message."
@@ -74,7 +74,7 @@ class TestDisallowIfImpersonatedDecorator(APIBaseTest):
     def test_allowed_methods_get_is_allowed(self, mock_is_impersonated):
         mock_is_impersonated.return_value = True
 
-        response = self.client.get("/api/impersonation-test/partially_blocked/")
+        response = self.client.get("/v1/impersonation-test/partially_blocked/")
 
         assert response.status_code == 200
         assert response.json()["status"] == "success"
@@ -84,7 +84,7 @@ class TestDisallowIfImpersonatedDecorator(APIBaseTest):
     def test_allowed_methods_post_is_blocked(self, mock_is_impersonated):
         mock_is_impersonated.return_value = True
 
-        response = self.client.post("/api/impersonation-test/partially_blocked/")
+        response = self.client.post("/v1/impersonation-test/partially_blocked/")
 
         assert response.status_code == 403
         assert response.json()["detail"] == "Impersonated sessions cannot perform this action."
@@ -93,8 +93,8 @@ class TestDisallowIfImpersonatedDecorator(APIBaseTest):
     def test_non_impersonated_can_use_all_methods(self, mock_is_impersonated):
         mock_is_impersonated.return_value = False
 
-        get_response = self.client.get("/api/impersonation-test/partially_blocked/")
-        post_response = self.client.post("/api/impersonation-test/partially_blocked/")
+        get_response = self.client.get("/v1/impersonation-test/partially_blocked/")
+        post_response = self.client.post("/v1/impersonation-test/partially_blocked/")
 
         assert get_response.status_code == 200
         assert post_response.status_code == 200

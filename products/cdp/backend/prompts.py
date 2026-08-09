@@ -767,8 +767,8 @@ columnLambdaExpr:
     ;
 insightsqlxChildElement: insightsqlxTagElement | (LBRACE columnExpr RBRACE);
 insightsqlxTagElement
-    : LT identifier insightsqlxTagAttribute* SLASH GT                                          # HogqlxTagElementClosed
-    | LT identifier insightsqlxTagAttribute* GT insightsqlxChildElement* LT SLASH identifier GT     # HogqlxTagElementNested
+    : LT identifier insightsqlxTagAttribute* SLASH GT                                          # InsightsqlxTagElementClosed
+    | LT identifier insightsqlxTagAttribute* GT insightsqlxChildElement* LT SLASH identifier GT     # InsightsqlxTagElementNested
     ;
 insightsqlxTagAttribute
     :   identifier '=' string

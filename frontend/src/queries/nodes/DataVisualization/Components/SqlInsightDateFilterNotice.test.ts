@@ -2,7 +2,7 @@ import { DateRange, InsightsQLQuery, NodeKind } from '~/queries/schema/schema-ge
 
 import { isAffectedByDateFilterResolutionChange } from './SqlInsightDateFilterNotice'
 
-function hogQLQuery(query: string, filters?: InsightsQLQuery['filters']): InsightsQLQuery {
+function insightsQLQuery(query: string, filters?: InsightsQLQuery['filters']): InsightsQLQuery {
     return { kind: NodeKind.InsightsQLQuery, query, filters }
 }
 
@@ -36,15 +36,15 @@ describe('isAffectedByDateFilterResolutionChange', () => {
         ['explicit date with no end', { date_from: '2026-07-01', date_to: null, explicitDate: true }, true],
         ['explicit date with relative preset', { date_from: '-1mStart', date_to: '-1mEnd', explicitDate: true }, true],
     ])('%s -> %s', (_name, dateRange, expected) => {
-        expect(isAffectedByDateFilterResolutionChange(hogQLQuery(FILTERED_SQL, { dateRange }))).toBe(expected)
+        expect(isAffectedByDateFilterResolutionChange(insightsQLQuery(FILTERED_SQL, { dateRange }))).toBe(expected)
     })
 
     it('is unaffected without a filters placeholder or date range', () => {
         expect(
             isAffectedByDateFilterResolutionChange(
-                hogQLQuery('SELECT count() FROM demo', { dateRange: { date_from: 'mStart' } })
+                insightsQLQuery('SELECT count() FROM demo', { dateRange: { date_from: 'mStart' } })
             )
         ).toBe(false)
-        expect(isAffectedByDateFilterResolutionChange(hogQLQuery(FILTERED_SQL))).toBe(false)
+        expect(isAffectedByDateFilterResolutionChange(insightsQLQuery(FILTERED_SQL))).toBe(false)
     })
 })

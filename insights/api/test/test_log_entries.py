@@ -48,7 +48,9 @@ class TestLogEntries(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
     def get_log_entries(self, params=None):
-        return self.client.get(f"/api/projects/{self.team.id}/insights_functions/{self.insights_function.id}/logs/", params)
+        return self.client.get(
+            f"/v1/projects/{self.team.id}/insights_functions/{self.insights_function.id}/logs/", params
+        )
 
     def create_log_for_function(self, level: str, instance_id="instance-id-1", message=None, timestamp=None):
         create_log_entry(

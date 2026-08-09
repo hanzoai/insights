@@ -163,7 +163,7 @@ class TestCompileMatchRegex(TestCase):
             ("request <uuid> failed", "request 93fce79d-6926-4b08-8fa5-00ffd8e65f4e failed"),
             ("peer <ip> disconnected", "peer 10.32.243.94 disconnected"),
             ("token <hex> rejected", "token 0xdeadbeef rejected"),
-            ("path /api/v1/users?id=<num> hit", "path /api/v1/users?id=42 hit"),
+            ("path /v1/v1/users?id=<num> hit", "path /v1/v1/users?id=42 hit"),
         ]
     )
     def test_compiled_regex_matches_raw_bodies(self, template: str, raw_body: str) -> None:

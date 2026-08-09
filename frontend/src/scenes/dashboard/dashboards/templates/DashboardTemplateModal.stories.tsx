@@ -26,14 +26,14 @@ type ViewerModeStoryArgs = {
 
 const templateMocks = {
     get: {
-        '/api/projects/:team_id/dashboard_templates/': __dashboard_templates as any,
-        '/api/projects/:team_id/dashboard_templates/json_schema/': __dashboard_template_schema as any,
+        '/v1/projects/:team_id/dashboard_templates/': __dashboard_templates as any,
+        '/v1/projects/:team_id/dashboard_templates/json_schema/': __dashboard_template_schema as any,
     },
 }
 
 const nonStaffUserMocks = {
     get: {
-        '/api/users/@me/': (): [number, typeof MOCK_DEFAULT_USER] => [200, { ...MOCK_DEFAULT_USER, is_staff: false }],
+        '/v1/users/@me/': (): [number, typeof MOCK_DEFAULT_USER] => [200, { ...MOCK_DEFAULT_USER, is_staff: false }],
     },
 }
 

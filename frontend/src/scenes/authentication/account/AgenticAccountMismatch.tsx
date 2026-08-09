@@ -21,7 +21,7 @@ export function AgenticAccountMismatch(): JSX.Element {
     const partnerName = typeof searchParams.partner_name === 'string' ? searchParams.partner_name : 'the requesting app'
     const state = typeof searchParams.state === 'string' ? searchParams.state : ''
 
-    const nextUrl = state ? `/api/agentic/authorize?state=${encodeURIComponent(state)}` : null
+    const nextUrl = state ? `/v1/agentic/authorize?state=${encodeURIComponent(state)}` : null
 
     const submitLogout = (): void => {
         const form = document.createElement('form')

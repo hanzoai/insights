@@ -29,8 +29,8 @@ fi
 # Migration aid: after the common/insightscli/ -> tools/insightscli/ + tools/insightscli-commands/
 # restructure, users with stale venvs see `ModuleNotFoundError: insightscli`. Catch it
 # early and point at `uv sync`. Safe to delete once everyone has re-activated.
-HOGLI_IMPORT_ERR="$("$PYTHON_CMD" -c "import insightscli" 2>&1)" || true
-if [[ -n "$HOGLI_IMPORT_ERR" && "$HOGLI_IMPORT_ERR" == *"No module named 'insightscli'"* ]]; then
+INSIGHTSCLI_IMPORT_ERR="$("$PYTHON_CMD" -c "import insightscli" 2>&1)" || true
+if [[ -n "$INSIGHTSCLI_IMPORT_ERR" && "$INSIGHTSCLI_IMPORT_ERR" == *"No module named 'insightscli'"* ]]; then
     cat >&2 <<'EOF'
 error: the `insightscli` package is not importable from your active venv.
 

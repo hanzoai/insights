@@ -215,7 +215,7 @@ describe('ToolExecutor metrics', () => {
                         attr: 'actions__2__inputs__email',
                         code: 'invalid_input',
                         extra: undefined,
-                        url: 'https://us.hanzo.ai/api/environments/2/hog_flows/',
+                        url: 'https://us.hanzo.ai/v1/environments/2/hog_flows/',
                         method: 'POST',
                     })
                 }) as any
@@ -250,7 +250,7 @@ describe('ToolExecutor metrics', () => {
                     attr: 'query',
                     code: 'invalid_input',
                     extra: undefined,
-                    url: 'https://us.hanzo.ai/api/environments/2/query/',
+                    url: 'https://us.hanzo.ai/v1/environments/2/query/',
                     method: 'POST',
                 }),
                 'Validation error: invalid_input (field: query)',
@@ -281,7 +281,7 @@ describe('ToolExecutor metrics', () => {
                         status: 502,
                         statusText: 'Bad Gateway',
                         body: '{"secret": "upstream response body must not leak"}',
-                        url: 'https://us.hanzo.ai/api/environments/2/insights/?token=sk_live_secret',
+                        url: 'https://us.hanzo.ai/v1/environments/2/insights/?token=sk_live_secret',
                         method: 'GET',
                     })
                 }) as any
@@ -290,7 +290,7 @@ describe('ToolExecutor metrics', () => {
             await executor.handleToolCall({ name: 'fail-tool', arguments: {} }, makeState([{ name: 'fail-tool' }]))
 
             expect(trackToolCallExtras('fail-tool')).toMatchObject({
-                $mcp_error_message: 'HTTP 502 Bad Gateway on GET /api/environments/2/insights/',
+                $mcp_error_message: 'HTTP 502 Bad Gateway on GET /v1/environments/2/insights/',
             })
         })
 
@@ -315,7 +315,7 @@ describe('ToolExecutor metrics', () => {
                 makeFakeTool('execute-sql', async () => {
                     throw new InsightsRateLimitError({
                         body: '{}',
-                        url: 'https://us.hanzo.ai/api/environments/2/mcp_tools/execute_sql/',
+                        url: 'https://us.hanzo.ai/v1/environments/2/mcp_tools/execute_sql/',
                         method: 'POST',
                         retryAfterSeconds: 5,
                     })
@@ -328,7 +328,7 @@ describe('ToolExecutor metrics', () => {
                 $mcp_error_type: 'rate_limited',
                 $mcp_error_status: 429,
                 // Subclasses of InsightsApiError get the same rebuilt-safe message shape.
-                $mcp_error_message: 'HTTP 429 Too Many Requests on POST /api/environments/2/mcp_tools/execute_sql/',
+                $mcp_error_message: 'HTTP 429 Too Many Requests on POST /v1/environments/2/mcp_tools/execute_sql/',
             })
         })
 
@@ -337,7 +337,7 @@ describe('ToolExecutor metrics', () => {
                 makeFakeTool('execute-sql', async () => {
                     throw new InsightsRateLimitError({
                         body: '{}',
-                        url: 'https://us.hanzo.ai/api/environments/2/mcp_tools/execute_sql/',
+                        url: 'https://us.hanzo.ai/v1/environments/2/mcp_tools/execute_sql/',
                         method: 'POST',
                         retryAfterSeconds: 5,
                     })
@@ -356,7 +356,7 @@ describe('ToolExecutor metrics', () => {
                         'Failed to run query',
                         new InsightsRateLimitError({
                             body: '{}',
-                            url: 'https://us.hanzo.ai/api/environments/2/mcp_tools/execute_sql/',
+                            url: 'https://us.hanzo.ai/v1/environments/2/mcp_tools/execute_sql/',
                             method: 'POST',
                             retryAfterSeconds: null,
                         })

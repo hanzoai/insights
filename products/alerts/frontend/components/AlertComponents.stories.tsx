@@ -301,8 +301,8 @@ const STORY_EXISTING_FN_FUNCTIONS = [
 function MultipleSlackWorkspacesStory(): JSX.Element {
     useStorybookMocks({
         get: {
-            '/api/environments/:team_id/integrations': { results: STORY_SLACK_WORKSPACES, count: 2 },
-            '/api/environments/:team_id/integrations/:id/channels': ({ params, request }) => {
+            '/v1/environments/:team_id/integrations': { results: STORY_SLACK_WORKSPACES, count: 2 },
+            '/v1/environments/:team_id/integrations/:id/channels': ({ params, request }) => {
                 const channelId = new URL(request.url).searchParams.get('channel_id')
                 const allChannels = (STORY_SLACK_CHANNELS[String(params.id)] ?? []).map((channel) => ({
                     ...channel,
@@ -313,7 +313,7 @@ function MultipleSlackWorkspacesStory(): JSX.Element {
                 const channels = channelId ? allChannels.filter((channel) => channel.id === channelId) : allChannels
                 return [200, { channels, lastRefreshedAt: '2026-01-01T00:00:00Z' }]
             },
-            '/api/environments/:team_id/insights_functions': {
+            '/v1/environments/:team_id/insights_functions': {
                 results: STORY_EXISTING_FN_FUNCTIONS,
                 count: STORY_EXISTING_FN_FUNCTIONS.length,
             },

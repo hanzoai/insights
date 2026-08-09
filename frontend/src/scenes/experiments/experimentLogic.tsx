@@ -2124,7 +2124,7 @@ export const experimentLogic = kea<experimentLogicType>([
             try {
                 if (isUpdate) {
                     response = await api.update(
-                        `api/projects/${values.currentProjectId}/experiments/${values.experimentId}`,
+                        `v1/projects/${values.currentProjectId}/experiments/${values.experimentId}`,
                         {
                             // Sends variant split and rollout through the feature_flag object,
                             // dropping the deprecated flag-config parameters keys.
@@ -2158,7 +2158,7 @@ export const experimentLogic = kea<experimentLogicType>([
                         return
                     }
                 } else {
-                    response = await api.create(`api/projects/${values.currentProjectId}/experiments`, {
+                    response = await api.create(`v1/projects/${values.currentProjectId}/experiments`, {
                         // A pre-existing flag is linked as-is: the API rejects explicit flag
                         // config for it, so only send config when the flag will be created.
                         // Key-aware so a stale match for a previously typed key can't suppress
@@ -2245,7 +2245,7 @@ export const experimentLogic = kea<experimentLogicType>([
             actions.setLaunchExperimentLoading(true)
             try {
                 const experiment: Experiment = await api.create(
-                    `/api/projects/${values.currentProjectId}/experiments/${values.experimentId}/launch`
+                    `/v1/projects/${values.currentProjectId}/experiments/${values.experimentId}/launch`
                 )
                 const experimentWithMetricOrdering = initializeMetricOrdering(experiment)
                 actions.setExperiment(experimentWithMetricOrdering)
@@ -2279,7 +2279,7 @@ export const experimentLogic = kea<experimentLogicType>([
             actions.setEndExperimentLoading(true)
             try {
                 const response: Experiment = await api.create(
-                    `/api/projects/${values.currentProjectId}/experiments/${values.experimentId}/end`,
+                    `/v1/projects/${values.currentProjectId}/experiments/${values.experimentId}/end`,
                     {
                         conclusion: values.experiment.conclusion,
                         conclusion_comment: values.experiment.conclusion_comment,
@@ -2311,7 +2311,7 @@ export const experimentLogic = kea<experimentLogicType>([
         pauseExperiment: async () => {
             try {
                 const response: Experiment = await api.create(
-                    `/api/projects/${values.currentProjectId}/experiments/${values.experimentId}/pause`
+                    `/v1/projects/${values.currentProjectId}/experiments/${values.experimentId}/pause`
                 )
                 actions.setExperiment(response)
                 actions.closePauseExperimentModal()
@@ -2322,7 +2322,7 @@ export const experimentLogic = kea<experimentLogicType>([
         resumeExperiment: async () => {
             try {
                 const response: Experiment = await api.create(
-                    `/api/projects/${values.currentProjectId}/experiments/${values.experimentId}/resume`
+                    `/v1/projects/${values.currentProjectId}/experiments/${values.experimentId}/resume`
                 )
                 actions.setExperiment(response)
                 actions.closeResumeExperimentModal()
@@ -2337,7 +2337,7 @@ export const experimentLogic = kea<experimentLogicType>([
             actions.setFreezeExposureLoading(true)
             try {
                 const response: Experiment = await api.create(
-                    `/api/projects/${values.currentProjectId}/experiments/${values.experimentId}/freeze_exposure`
+                    `/v1/projects/${values.currentProjectId}/experiments/${values.experimentId}/freeze_exposure`
                 )
                 actions.setExperiment(response)
                 refreshTreeItem('experiment', String(values.experimentId))
@@ -2355,7 +2355,7 @@ export const experimentLogic = kea<experimentLogicType>([
             actions.setUnfreezeExposureLoading(true)
             try {
                 const response: Experiment = await api.create(
-                    `/api/projects/${values.currentProjectId}/experiments/${values.experimentId}/unfreeze_exposure`
+                    `/v1/projects/${values.currentProjectId}/experiments/${values.experimentId}/unfreeze_exposure`
                 )
                 actions.setExperiment(response)
                 refreshTreeItem('experiment', String(values.experimentId))
@@ -2369,7 +2369,7 @@ export const experimentLogic = kea<experimentLogicType>([
         archiveExperiment: async ({ disableFeatureFlag }) => {
             try {
                 const response: Experiment = await api.create(
-                    `/api/projects/${values.currentProjectId}/experiments/${values.experimentId}/archive`,
+                    `/v1/projects/${values.currentProjectId}/experiments/${values.experimentId}/archive`,
                     { disable_feature_flag: disableFeatureFlag }
                 )
                 actions.setExperiment(response)
@@ -2382,7 +2382,7 @@ export const experimentLogic = kea<experimentLogicType>([
         unarchiveExperiment: async () => {
             try {
                 const response: Experiment = await api.create(
-                    `/api/projects/${values.currentProjectId}/experiments/${values.experimentId}/unarchive`
+                    `/v1/projects/${values.currentProjectId}/experiments/${values.experimentId}/unarchive`
                 )
                 actions.setExperiment(response)
                 refreshTreeItem('experiment', String(values.experimentId))
@@ -2576,7 +2576,7 @@ export const experimentLogic = kea<experimentLogicType>([
         resetRunningExperiment: async () => {
             try {
                 const response: Experiment = await api.create(
-                    `/api/projects/${values.currentProjectId}/experiments/${values.experimentId}/reset`
+                    `/v1/projects/${values.currentProjectId}/experiments/${values.experimentId}/reset`
                 )
                 actions.setExperiment(response)
                 refreshTreeItem('experiment', String(values.experimentId))
@@ -2622,7 +2622,7 @@ export const experimentLogic = kea<experimentLogicType>([
             actions.setEndExperimentLoading(true)
             try {
                 const response: Experiment = await api.create(
-                    `/api/projects/${values.currentProjectId}/experiments/${values.experimentId}/ship_variant`,
+                    `/v1/projects/${values.currentProjectId}/experiments/${values.experimentId}/ship_variant`,
                     {
                         variant_key: selectedVariantKey,
                         release_to_everyone: releaseToEveryone,
@@ -2674,7 +2674,7 @@ export const experimentLogic = kea<experimentLogicType>([
                     variant_screenshot_media_ids: variantPreviewMediaIds,
                 }
                 const response: Experiment = await api.update(
-                    `api/projects/${values.currentProjectId}/experiments/${values.experimentId}`,
+                    `v1/projects/${values.currentProjectId}/experiments/${values.experimentId}`,
                     {
                         ...toConcurrencyPayload(values.unmodifiedExperiment),
                         parameters: updatedParameters,
@@ -2704,7 +2704,7 @@ export const experimentLogic = kea<experimentLogicType>([
                     variant_notes: variantNotes,
                 }
                 const response: Experiment = await api.update(
-                    `api/projects/${values.currentProjectId}/experiments/${values.experimentId}`,
+                    `v1/projects/${values.currentProjectId}/experiments/${values.experimentId}`,
                     {
                         ...toConcurrencyPayload(values.unmodifiedExperiment),
                         parameters: updatedParameters,
@@ -2761,7 +2761,7 @@ export const experimentLogic = kea<experimentLogicType>([
             const combinedMetricsIds = [...existingMetricsIds, ...newMetricsIds]
 
             try {
-                await api.update(`api/projects/${values.currentProjectId}/experiments/${values.experimentId}`, {
+                await api.update(`v1/projects/${values.currentProjectId}/experiments/${values.experimentId}`, {
                     ...toConcurrencyPayload(values.unmodifiedExperiment),
                     saved_metrics_ids: combinedMetricsIds,
                     update_feature_flag_params: false,
@@ -2803,7 +2803,7 @@ export const experimentLogic = kea<experimentLogicType>([
             )
 
             try {
-                await api.update(`api/projects/${values.currentProjectId}/experiments/${values.experimentId}`, {
+                await api.update(`v1/projects/${values.currentProjectId}/experiments/${values.experimentId}`, {
                     ...toConcurrencyPayload(values.unmodifiedExperiment),
                     saved_metrics_ids: sharedMetricsIds,
                     metrics: cleanedMetrics,
@@ -2857,7 +2857,7 @@ export const experimentLogic = kea<experimentLogicType>([
                  * create a new dashboard
                  */
                 const dashboard: DashboardType = await api.create(
-                    `api/environments/${values.currentTeamId}/dashboards/`,
+                    `v1/environments/${values.currentTeamId}/dashboards/`,
                     {
                         name: 'Experiment: ' + values.experiment.name,
                         description: `Dashboard for [${experimentUrl}](${experimentUrl})`,
@@ -2892,7 +2892,7 @@ export const experimentLogic = kea<experimentLogicType>([
                     for (const query of metrics) {
                         const insightQuery = queryBuilder(query)
 
-                        await api.create(`api/projects/${projectLogic.values.currentProjectId}/insights`, {
+                        await api.create(`v1/projects/${projectLogic.values.currentProjectId}/insights`, {
                             name: query.name || undefined,
                             query: insightQuery,
                             dashboards: [dashboard.id],
@@ -2932,7 +2932,7 @@ export const experimentLogic = kea<experimentLogicType>([
         validateFeatureFlag: async ({ featureFlagKey }: { featureFlagKey: string }, breakpoint) => {
             await breakpoint(200)
             const response = await api.get(
-                `api/projects/${values.currentProjectId}/feature_flags/?${toParams({ search: featureFlagKey })}`
+                `v1/projects/${values.currentProjectId}/feature_flags/?${toParams({ search: featureFlagKey })}`
             )
             const existingErrors = {
                 // :KLUDGE: If there is no name error, we don't want to trigger the 'required' error early
@@ -3438,7 +3438,7 @@ export const experimentLogic = kea<experimentLogicType>([
                 if (values.experimentId && values.experimentId !== 'new') {
                     try {
                         let response: Experiment = await api.get(
-                            `api/projects/${values.currentProjectId}/experiments/${values.experimentId}`
+                            `v1/projects/${values.currentProjectId}/experiments/${values.experimentId}`
                         )
 
                         /**
@@ -3487,7 +3487,7 @@ export const experimentLogic = kea<experimentLogicType>([
                 updateExperiment: async (update: ExperimentUpdatePayload) => {
                     try {
                         const response: Experiment = await api.update(
-                            `api/projects/${values.currentProjectId}/experiments/${values.experimentId}`,
+                            `v1/projects/${values.currentProjectId}/experiments/${values.experimentId}`,
                             { ...toConcurrencyPayload(values.unmodifiedExperiment), ...update }
                         )
                         const responseWithMetricsOrdering = initializeMetricOrdering(response)
@@ -3508,7 +3508,7 @@ export const experimentLogic = kea<experimentLogicType>([
                             const preserved = conflictPreservedFields(update)
                             try {
                                 const fresh: Experiment = await api.get(
-                                    `api/projects/${values.currentProjectId}/experiments/${values.experimentId}`
+                                    `v1/projects/${values.currentProjectId}/experiments/${values.experimentId}`
                                 )
                                 const freshWithOrdering = initializeMetricOrdering(fresh)
                                 actions.setUnmodifiedExperiment(structuredClone(freshWithOrdering))

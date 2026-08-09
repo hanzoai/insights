@@ -79,7 +79,7 @@ export const TaxonomicBreakdownPopover = ({
                 <TaxonomicFilter
                     groupType={taxonomicType}
                     value={breakdownValue}
-                    hogQLExpressionShowBreakdownLabelHint
+                    insightsQLExpressionShowBreakdownLabelHint
                     onChange={(taxonomicGroup, value) => {
                         if (breakdownValue && breakdownType) {
                             replaceBreakdown(

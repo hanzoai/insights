@@ -54,7 +54,7 @@ export function BulkUpdateTagsForm({
     const submit = async (): Promise<void> => {
         setLoading(true)
         try {
-            const response = (await api.create(`api/projects/${currentProjectId}/${resource}/bulk_update_tags/`, {
+            const response = (await api.create(`v1/projects/${currentProjectId}/${resource}/bulk_update_tags/`, {
                 ids: Array.from(selectedIds),
                 action: tagAction,
                 tags: selectedTags,

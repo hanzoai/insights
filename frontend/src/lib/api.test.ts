@@ -50,7 +50,7 @@ describe('API helper', () => {
             )
 
             expect(fakeFetch).toHaveBeenCalledWith(
-                '/api/environments/2/events?properties=%5B%7B%22key%22%3A%22something%22%2C%22value%22%3A%22is_set%22%2C%22operator%22%3A%22is_set%22%2C%22type%22%3A%22event%22%7D%5D&limit=10&orderBy=%5B%22-timestamp%22%5D',
+                '/v1/environments/2/events?properties=%5B%7B%22key%22%3A%22something%22%2C%22value%22%3A%22is_set%22%2C%22operator%22%3A%22is_set%22%2C%22type%22%3A%22event%22%7D%5D&limit=10&orderBy=%5B%22-timestamp%22%5D',
                 {
                     signal: undefined,
                     headers: {
@@ -143,13 +143,13 @@ describe('API helper', () => {
         it('adds query kind to the query URL when present', async () => {
             await api.query({ kind: NodeKind.InsightsQLQuery, query: 'select 1' })
 
-            expect(fakeFetch.mock.calls[0][0]).toEqual('/api/environments/2/query/InsightsQLQuery/')
+            expect(fakeFetch.mock.calls[0][0]).toEqual('/v1/environments/2/query/InsightsQLQuery/')
         })
 
         it('keeps the query URL kind optional', async () => {
             await api.query({} as Record<string, any>)
 
-            expect(fakeFetch.mock.calls[0][0]).toEqual('/api/environments/2/query/')
+            expect(fakeFetch.mock.calls[0][0]).toEqual('/v1/environments/2/query/')
         })
 
         it('throws when the query URL kind does not match the request body', async () => {
@@ -210,27 +210,27 @@ describe('API helper', () => {
     })
 
     it('rejects project-based requests with void project ID', async () => {
-        await expect(api.get('/api/projects/2/')).resolves.not.toThrow()
-        await expect(api.get('/api/projects/089908')).resolves.not.toThrow()
-        await expect(api.get('/api/projects/089908?x')).resolves.not.toThrow()
-        await expect(api.get('/api/projects/xyz/dings/')).resolves.not.toThrow()
-        await expect(api.get('/api/projects/null/')).rejects.toStrictEqual({
+        await expect(api.get('/v1/projects/2/')).resolves.not.toThrow()
+        await expect(api.get('/v1/projects/089908')).resolves.not.toThrow()
+        await expect(api.get('/v1/projects/089908?x')).resolves.not.toThrow()
+        await expect(api.get('/v1/projects/xyz/dings/')).resolves.not.toThrow()
+        await expect(api.get('/v1/projects/null/')).rejects.toStrictEqual({
             detail: 'Cannot make request - project ID is unknown.',
             status: 0,
         })
-        await expect(api.get('/api/projects/null')).rejects.toStrictEqual({
+        await expect(api.get('/v1/projects/null')).rejects.toStrictEqual({
             detail: 'Cannot make request - project ID is unknown.',
             status: 0,
         })
-        await expect(api.get('/api/projects/null?x')).rejects.toStrictEqual({
+        await expect(api.get('/v1/projects/null?x')).rejects.toStrictEqual({
             detail: 'Cannot make request - project ID is unknown.',
             status: 0,
         })
-        await expect(api.get('/api/projects/null#x')).rejects.toStrictEqual({
+        await expect(api.get('/v1/projects/null#x')).rejects.toStrictEqual({
             detail: 'Cannot make request - project ID is unknown.',
             status: 0,
         })
-        await expect(api.get('/api/projects/null/dings')).rejects.toStrictEqual({
+        await expect(api.get('/v1/projects/null/dings')).rejects.toStrictEqual({
             detail: 'Cannot make request - project ID is unknown.',
             status: 0,
         })
@@ -246,7 +246,7 @@ describe('API helper', () => {
         })
 
         await expect(
-            api.create('/api/projects/2/external_data_sources/source-1/refresh_schemas/')
+            api.create('/v1/projects/2/external_data_sources/source-1/refresh_schemas/')
         ).rejects.toMatchObject({
             message: 'Could not fetch schemas from source.',
             status: 400,
@@ -273,9 +273,9 @@ describe('API helper', () => {
         })
 
         it('attaches the bearer token to requests routed to the OAuth backend host', async () => {
-            await api.get('/api/projects/2/insights/')
+            await api.get('/v1/projects/2/insights/')
             const [url, options] = fakeFetch.mock.calls[0]
-            expect(url).toEqual('https://us.hanzo.ai/api/projects/2/insights/')
+            expect(url).toEqual('https://us.hanzo.ai/v1/projects/2/insights/')
             expect(options.headers.Authorization).toEqual('Bearer oauth-token')
         })
 
@@ -304,10 +304,10 @@ describe('API helper', () => {
             ['truncated JSON from a response cut mid-stream', '{"results": [1, 2'],
         ])('rejects with a status-less, request-scoped ApiError when the body is %s', async (_desc, body) => {
             fakeFetch.mockResolvedValue(fakeResponse({ text: bodyOf(body) }))
-            const error = await api.get('api/environments/2/insights').catch((e) => e)
+            const error = await api.get('v1/environments/2/insights').catch((e) => e)
             expect(error).toBeInstanceOf(ApiError)
             // Method + path so occurrences are triageable in error tracking
-            expect(error.message).toContain('[GET /api/environments/2/insights]')
+            expect(error.message).toContain('[GET /v1/environments/2/insights]')
             expect(error.message).toContain('status 200')
             // No `status`: a 2xx on an ApiError would make retry/recovery checks
             // (`status === undefined || status >= 500`) treat this transient failure as a client error
@@ -316,13 +316,13 @@ describe('API helper', () => {
 
         it('carries the actual request method in the malformed-body error', async () => {
             fakeFetch.mockResolvedValue(fakeResponse({ text: bodyOf('<html></html>') }))
-            const error = await api.create('api/environments/2/insights', {}).catch((e) => e)
-            expect(error.message).toContain('[POST /api/environments/2/insights]')
+            const error = await api.create('v1/environments/2/insights', {}).catch((e) => e)
+            expect(error.message).toContain('[POST /v1/environments/2/insights]')
         })
 
         it('surfaces a body stream that fails mid-read as an ApiError instead of null', async () => {
             fakeFetch.mockResolvedValue(fakeResponse({ text: () => Promise.reject(new TypeError('network error')) }))
-            const error = await api.get('api/environments/2/insights').catch((e) => e)
+            const error = await api.get('v1/environments/2/insights').catch((e) => e)
             expect(error).toBeInstanceOf(ApiError)
             expect(error.status).toBeUndefined()
         })
@@ -333,13 +333,13 @@ describe('API helper', () => {
             ['a whitespace-only body', 200, ' \n '],
         ])('resolves to null for %s', async (_desc, status, body) => {
             fakeFetch.mockResolvedValue(fakeResponse({ status, text: bodyOf(body) }))
-            await expect(api.get('api/environments/2/insights')).resolves.toBeNull()
+            await expect(api.get('v1/environments/2/insights')).resolves.toBeNull()
         })
 
         it('propagates an AbortError instead of masquerading as a null result', async () => {
             const abortError = new DOMException('The operation was aborted', 'AbortError')
             fakeFetch.mockResolvedValue(fakeResponse({ text: () => Promise.reject(abortError) }))
-            await expect(api.get('api/environments/2/insights')).rejects.toBe(abortError)
+            await expect(api.get('v1/environments/2/insights')).rejects.toBe(abortError)
         })
     })
 

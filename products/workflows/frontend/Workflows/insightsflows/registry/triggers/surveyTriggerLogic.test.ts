@@ -34,7 +34,7 @@ describe('surveyTriggerLogic', () => {
         let loadMoreCalled = false
         useMocks({
             get: {
-                '/api/projects/:team_id/surveys/': ({ request }) => {
+                '/v1/projects/:team_id/surveys/': ({ request }) => {
                     if (listError) {
                         return [500, { detail: 'Server error' }]
                     }
@@ -48,7 +48,7 @@ describe('surveyTriggerLogic', () => {
                     }
                     return [200, { results: surveys, count: surveys.length }]
                 },
-                '/api/projects/:team_id/surveys/responses_count/': () => {
+                '/v1/projects/:team_id/surveys/responses_count/': () => {
                     return [200, responseCounts]
                 },
             },

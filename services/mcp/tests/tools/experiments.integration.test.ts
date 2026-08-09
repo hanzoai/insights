@@ -77,7 +77,7 @@ describe('Experiments', { concurrent: false }, () => {
             try {
                 await context.api.request({
                     method: 'PATCH',
-                    path: `/api/projects/${TEST_PROJECT_ID}/experiments/${experimentId}/`,
+                    path: `/v1/projects/${TEST_PROJECT_ID}/experiments/${experimentId}/`,
                     body: { deleted: true },
                 })
             } catch {
@@ -91,7 +91,7 @@ describe('Experiments', { concurrent: false }, () => {
             try {
                 await context.api.request({
                     method: 'DELETE',
-                    path: `/api/projects/${TEST_PROJECT_ID}/experiment_holdouts/${holdoutId}/`,
+                    path: `/v1/projects/${TEST_PROJECT_ID}/experiment_holdouts/${holdoutId}/`,
                 })
             } catch {
                 // Ignore cleanup failures

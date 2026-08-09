@@ -95,7 +95,7 @@ class TestDashboardWidgets(APIBaseTest):
         tile["widget"]["config"] = {"limit": 15, "orderBy": "occurrences"}
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [tile]},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -116,7 +116,7 @@ class TestDashboardWidgets(APIBaseTest):
         tile["show_description"] = True
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [tile]},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -135,7 +135,7 @@ class TestDashboardWidgets(APIBaseTest):
 
         tile = dashboard_json["tiles"][0]
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [{"id": tile["id"], "widget": {"id": tile["widget"]["id"], "name": "Renamed"}}]},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -152,7 +152,7 @@ class TestDashboardWidgets(APIBaseTest):
         tile = dashboard_json["tiles"][0]
         tile["widget"]["name"] = "Custom widget title"
         self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [tile]},
         )
 
@@ -176,7 +176,7 @@ class TestDashboardWidgets(APIBaseTest):
 
         foreign_widget_id = dashboard_json["tiles"][0]["widget"]["id"]
         response = self.client.patch(
-            f"/api/projects/{other_team.id}/dashboards/{other_dashboard_id}",
+            f"/v1/projects/{other_team.id}/dashboards/{other_dashboard_id}",
             {
                 "tiles": [
                     {
@@ -217,7 +217,7 @@ class TestDashboardWidgets(APIBaseTest):
             side_effect=deny_error_tracking_only,
         ):
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+                f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
                 {"tiles": [tile]},
             )
 
@@ -232,7 +232,7 @@ class TestDashboardWidgets(APIBaseTest):
         tile["widget"]["widget_type"] = "session_replay_list"
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [tile]},
         )
 
@@ -254,7 +254,7 @@ class TestDashboardWidgets(APIBaseTest):
                 return_value=False,
             ):
                 response = self.client.patch(
-                    f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+                    f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
                     {"tiles": [tile]},
                 )
         finally:
@@ -286,7 +286,7 @@ class TestDashboardWidgets(APIBaseTest):
         tile_layout = {"sm": {"x": 0, "y": 2, "w": 6, "h": 4}}
         tile["layouts"] = tile_layout
         self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [tile]},
         )
 
@@ -302,7 +302,7 @@ class TestDashboardWidgets(APIBaseTest):
         _, dashboard_json = self.dashboard_api.create_widget_tile(dashboard_id)
         tile = dashboard_json["tiles"][0]
         self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [{"id": tile["id"], "deleted": True}]},
         )
 
@@ -357,7 +357,7 @@ class TestDashboardWidgets(APIBaseTest):
             ],
         }
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/create_from_template_json",
+            f"/v1/projects/{self.team.id}/dashboards/create_from_template_json",
             {"template": template},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -401,7 +401,7 @@ class TestDashboardWidgets(APIBaseTest):
             side_effect=deny_error_tracking_only,
         ):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/dashboards/create_from_template_json",
+                f"/v1/projects/{self.team.id}/dashboards/create_from_template_json",
                 {"template": self._widget_template_payload()},
             )
 
@@ -438,7 +438,7 @@ class TestDashboardWidgets(APIBaseTest):
             side_effect=deny_error_tracking_only,
         ):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/dashboards/",
+                f"/v1/projects/{self.team.id}/dashboards/",
                 {"name": "ET from template", "use_template": template_name},
             )
 
@@ -455,7 +455,7 @@ class TestDashboardWidgets(APIBaseTest):
                 return_value=False,
             ):
                 response = self.client.post(
-                    f"/api/projects/{self.team.id}/dashboards/create_from_template_json",
+                    f"/v1/projects/{self.team.id}/dashboards/create_from_template_json",
                     {"template": self._widget_template_payload()},
                 )
         finally:
@@ -467,7 +467,7 @@ class TestDashboardWidgets(APIBaseTest):
     @override_settings(IN_UNIT_TESTING=True)
     def test_create_from_template_json_widget_rejects_unknown_widget_type(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/create_from_template_json",
+            f"/v1/projects/{self.team.id}/dashboards/create_from_template_json",
             {"template": self._widget_template_payload(widget_type="not_a_real_widget_type")},
         )
 
@@ -477,7 +477,7 @@ class TestDashboardWidgets(APIBaseTest):
     @override_settings(IN_UNIT_TESTING=True)
     def test_create_from_template_json_widget_rejects_invalid_config(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/create_from_template_json",
+            f"/v1/projects/{self.team.id}/dashboards/create_from_template_json",
             {"template": self._widget_template_payload(config={"limit": 999})},
         )
 
@@ -503,7 +503,7 @@ class TestDashboardWidgets(APIBaseTest):
         tile = dashboard_json["tiles"][0]
         tile["widget"]["config"] = {"limit": 20}
         self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [tile]},
         )
 
@@ -519,12 +519,12 @@ class TestDashboardWidgets(APIBaseTest):
         tile["widget"]["name"] = "Top errors"
         tile["widget"]["description"] = "Weekly summary"
         self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{source_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{source_id}",
             {"tiles": [tile]},
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dest_id}/copy_tile",
+            f"/v1/projects/{self.team.id}/dashboards/{dest_id}/copy_tile",
             {"fromDashboardId": source_id, "tileId": tile["id"]},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -551,7 +551,7 @@ class TestDashboardWidgets(APIBaseTest):
         widget_id = tile["widget"]["id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{source_id}/move_tile",
+            f"/v1/projects/{self.team.id}/dashboards/{source_id}/move_tile",
             {"to_dashboard": dest_id, "tile": {"id": tile["id"]}},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -566,7 +566,7 @@ class TestDashboardWidgets(APIBaseTest):
 
     @override_settings(IN_UNIT_TESTING=True)
     def test_widget_catalog_lists_registered_types(self) -> None:
-        response = self.client.get(f"/api/projects/{self.team.id}/dashboards/widget_catalog/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/dashboards/widget_catalog/")
         assert response.status_code == status.HTTP_200_OK
 
         results = response.json()["results"]
@@ -580,7 +580,7 @@ class TestDashboardWidgets(APIBaseTest):
         dashboard_id, _ = self.dashboard_api.create_dashboard({"name": "dashboard"})
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
             {
                 "widgets": [
                     {"widget_type": "error_tracking_list", "config": {"limit": 8}, "name": "Errors"},
@@ -600,7 +600,7 @@ class TestDashboardWidgets(APIBaseTest):
         dashboard_id, _ = self.dashboard_api.create_dashboard({"name": "dashboard"})
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
             {"widgets": [{"widget_type": "error_tracking", "config": {"limit": 10}}]},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -610,7 +610,7 @@ class TestDashboardWidgets(APIBaseTest):
         dashboard_id, _ = self.dashboard_api.create_dashboard({"name": "dashboard"})
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
             {"widgets": [{"widget_type": "unknown", "config": {}}]},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -626,7 +626,7 @@ class TestDashboardWidgets(APIBaseTest):
                 return_value=False,
             ):
                 response = self.client.post(
-                    f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
+                    f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
                     {"widgets": [{"widget_type": "error_tracking_list", "config": {"limit": 5}}]},
                 )
         finally:
@@ -675,7 +675,7 @@ class TestDashboardWidgets(APIBaseTest):
         mock_report_user_action.reset_mock()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
             {
                 "widgets": [
                     {"widget_type": "error_tracking_list", "config": {"limit": 8}, "name": "Errors"},
@@ -713,7 +713,7 @@ class TestDashboardWidgets(APIBaseTest):
         mock_report_user_action.reset_mock()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
             {
                 "widgets": [
                     {"widget_type": "session_replay_list", "config": {"limit": 5}, "name": "Recent replays"},
@@ -747,7 +747,7 @@ class TestDashboardWidgets(APIBaseTest):
         mock_report_user_action.reset_mock()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
             {"widgets": [{"widget_type": widget_type, "config": {"limit": 5}}]},
         )
         assert response.status_code == status.HTTP_201_CREATED
@@ -771,7 +771,7 @@ class TestDashboardWidgets(APIBaseTest):
         mock_report_user_action.reset_mock()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/delete_tile",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/delete_tile",
             {"tile_id": tile_id},
         )
         assert response.status_code == status.HTTP_204_NO_CONTENT
@@ -809,7 +809,7 @@ class TestDashboardWidgets(APIBaseTest):
         mock_report_user_action.reset_mock()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [{"id": tile_id, "deleted": True}]},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -827,7 +827,7 @@ class TestDashboardWidgets(APIBaseTest):
         # Re-sending the same soft-delete payload must not double-report the removal
         mock_report_user_action.reset_mock()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [{"id": tile_id, "deleted": True}]},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -860,7 +860,7 @@ class TestDashboardWidgets(APIBaseTest):
         mock_report_user_action.reset_mock()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [tile]},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -896,7 +896,7 @@ class TestDashboardWidgets(APIBaseTest):
         mock_report_user_action.reset_mock()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [tile]},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -923,7 +923,7 @@ class TestDashboardWidgets(APIBaseTest):
         mock_report_user_action.reset_mock()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [tile]},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -936,7 +936,7 @@ class TestDashboardWidgets(APIBaseTest):
         dashboard_id, _ = self.dashboard_api.create_dashboard({"name": "dashboard"})
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
             {
                 "widgets": [
                     {"widget_type": "error_tracking_list", "config": {"limit": 5}, "name": "Errors A"},
@@ -984,7 +984,7 @@ class TestDashboardWidgets(APIBaseTest):
             DashboardTile.objects.create(dashboard=dashboard, team_id=self.team.id, insight=insight, layouts={})
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
             {"widgets": [{"widget_type": "error_tracking_list", "config": {"limit": 5}}]},
         )
         assert response.status_code == status.HTTP_201_CREATED
@@ -999,7 +999,7 @@ class TestDashboardWidgets(APIBaseTest):
         dashboard_id, _ = self.dashboard_api.create_dashboard({"name": "dashboard"})
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
             {"widgets": []},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -1009,7 +1009,7 @@ class TestDashboardWidgets(APIBaseTest):
         dashboard_id, _ = self.dashboard_api.create_dashboard({"name": "dashboard"})
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
             {
                 "widgets": [
                     {"widget_type": "error_tracking_list", "config": {"limit": 5}},
@@ -1055,7 +1055,7 @@ class TestDashboardWidgets(APIBaseTest):
         tile["widget"]["config"] = {"limit": 15}
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [tile]},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -1070,7 +1070,7 @@ class TestDashboardWidgets(APIBaseTest):
         dashboard_id, _ = self.dashboard_api.create_dashboard({"name": "dashboard"})
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
             {"widgets": [{"widget_type": "error_tracking_list", "config": {"limit": 8}}]},
         )
         assert response.status_code == status.HTTP_201_CREATED
@@ -1108,7 +1108,7 @@ class TestDashboardWidgets(APIBaseTest):
         mock_report_user_action.reset_mock()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
             {
                 "widgets": [
                     {"widget_type": "error_tracking_list", "config": {"limit": 8}, "name": "Widget 20"},
@@ -1165,7 +1165,7 @@ class TestDashboardWidgetsBatchUpdate(APIBaseTest):
     def _batch_update(self, dashboard_id: int, widgets: list[dict[str, Any]], team_id: int | None = None) -> Any:
         team_id = team_id or self.team.id
         return self.client.patch(
-            f"/api/projects/{team_id}/dashboards/{dashboard_id}/widgets/batch_update/",
+            f"/v1/projects/{team_id}/dashboards/{dashboard_id}/widgets/batch_update/",
             {"widgets": widgets},
         )
 
@@ -1379,7 +1379,7 @@ class TestDashboardWidgetsBatchUpdate(APIBaseTest):
         tile = dashboard_json["tiles"][0]
         layout = {"sm": {"x": 0, "y": 3, "w": 6, "h": 4}}
         self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [{"id": tile["id"], "layouts": layout}]},
         )
 
@@ -1510,7 +1510,7 @@ class TestDashboardWidgetOpenApiSchema(APIBaseTest):
     def test_batch_add_rejects_unknown_widget_type(self) -> None:
         dashboard_id, _ = self.dashboard_api.create_dashboard({"name": "dash"})
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/widgets/batch/",
             {"widgets": [{"widget_type": "not_a_real_widget", "config": {"limit": 5}}]},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST

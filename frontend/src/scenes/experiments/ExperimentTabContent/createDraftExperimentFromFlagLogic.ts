@@ -128,7 +128,7 @@ export const createDraftExperimentFromFlagLogic = kea<createDraftExperimentFromF
 
             try {
                 const experiment: Experiment = await api.create(
-                    `api/projects/${values.currentProjectId}/experiments`,
+                    `v1/projects/${values.currentProjectId}/experiments`,
                     payload
                 )
                 actions.createDraftExperimentSuccess(experiment)

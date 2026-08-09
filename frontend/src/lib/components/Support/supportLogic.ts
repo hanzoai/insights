@@ -1211,7 +1211,7 @@ export const supportLogic = kea<supportLogicType>([
                     return
                 }
 
-                await api.create('/api/support/ensure-zendesk-organization', {
+                await api.create('/v1/support/ensure-zendesk-organization', {
                     organization_id: currentOrganization.id,
                     organization_name: currentOrganization.name,
                 })

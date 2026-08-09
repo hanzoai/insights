@@ -284,7 +284,7 @@ export const cliAuthorizeLogic = kea<cliAuthorizeLogicType>([
             [] as { id: number; name: string }[],
             {
                 loadProjects: async (organizationId: string) => {
-                    const response = await api.get(`api/organizations/${organizationId}/projects/`)
+                    const response = await api.get(`v1/organizations/${organizationId}/projects/`)
                     return response.results || []
                 },
             },
@@ -310,7 +310,7 @@ export const cliAuthorizeLogic = kea<cliAuthorizeLogicType>([
             }),
             submit: async ({ userCode, projectId, scopes }) => {
                 try {
-                    const response = await api.create('api/cli-auth/authorize/', {
+                    const response = await api.create('v1/cli-auth/authorize/', {
                         user_code: userCode.toUpperCase().replace(/\s/g, ''),
                         project_id: projectId,
                         scopes: scopes,

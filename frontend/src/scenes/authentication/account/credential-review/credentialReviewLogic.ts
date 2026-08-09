@@ -34,7 +34,7 @@ export const credentialReviewLogic = kea<credentialReviewLogicType>([
     listeners({
         markComplete: async () => {
             try {
-                await api.create('api/users/@me/credentials_review_complete/')
+                await api.create('v1/users/@me/credentials_review_complete/')
             } catch {
                 toast.error('Could not save your review. Try again.')
                 return

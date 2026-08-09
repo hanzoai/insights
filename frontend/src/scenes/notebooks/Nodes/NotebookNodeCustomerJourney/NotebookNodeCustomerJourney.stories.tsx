@@ -85,13 +85,13 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                'api/environments/:team_id/customer_journeys/': journeysList,
-                'api/environments/:team_id/customer_profile_configs/': { count: 0, results: [] },
-                'api/projects/:team_id/notebooks/': notebooksListMock,
-                'api/projects/:team_id/notebooks/cj-all-completed/': makeNotebook('cj-all-completed'),
-                'api/projects/:team_id/notebooks/cj-some-completed/': makeNotebook('cj-some-completed'),
-                'api/projects/:team_id/notebooks/cj-optional-steps/': makeNotebook('cj-optional-steps'),
-                'api/projects/:team_id/notebooks/cj-none-completed/': makeNotebook('cj-none-completed'),
+                'v1/environments/:team_id/customer_journeys/': journeysList,
+                'v1/environments/:team_id/customer_profile_configs/': { count: 0, results: [] },
+                'v1/projects/:team_id/notebooks/': notebooksListMock,
+                'v1/projects/:team_id/notebooks/cj-all-completed/': makeNotebook('cj-all-completed'),
+                'v1/projects/:team_id/notebooks/cj-some-completed/': makeNotebook('cj-some-completed'),
+                'v1/projects/:team_id/notebooks/cj-optional-steps/': makeNotebook('cj-optional-steps'),
+                'v1/projects/:team_id/notebooks/cj-none-completed/': makeNotebook('cj-none-completed'),
             },
         }),
     ],
@@ -103,8 +103,8 @@ type Story = StoryObj<{}>
 export const AllStepsCompleted: Story = {
     render: () => {
         useStorybookMocks({
-            get: { 'api/environments/:team_id/insights/1/': makeInsight() },
-            post: { 'api/environments/:team_id/query/FunnelsQuery/': { result: allCompletedSteps() } },
+            get: { 'v1/environments/:team_id/insights/1/': makeInsight() },
+            post: { 'v1/environments/:team_id/query/FunnelsQuery/': { result: allCompletedSteps() } },
         })
         return <AppWithProfileContext />
     },
@@ -117,8 +117,8 @@ export const AllStepsCompleted: Story = {
 export const SomeStepsCompleted: Story = {
     render: () => {
         useStorybookMocks({
-            get: { 'api/environments/:team_id/insights/1/': makeInsight() },
-            post: { 'api/environments/:team_id/query/FunnelsQuery/': { result: someCompletedSteps() } },
+            get: { 'v1/environments/:team_id/insights/1/': makeInsight() },
+            post: { 'v1/environments/:team_id/query/FunnelsQuery/': { result: someCompletedSteps() } },
         })
         return <AppWithProfileContext />
     },
@@ -131,8 +131,8 @@ export const SomeStepsCompleted: Story = {
 export const WithOptionalSteps: Story = {
     render: () => {
         useStorybookMocks({
-            get: { 'api/environments/:team_id/insights/1/': makeInsight([1, 3]) },
-            post: { 'api/environments/:team_id/query/FunnelsQuery/': { result: optionalStepResults() } },
+            get: { 'v1/environments/:team_id/insights/1/': makeInsight([1, 3]) },
+            post: { 'v1/environments/:team_id/query/FunnelsQuery/': { result: optionalStepResults() } },
         })
         return <AppWithProfileContext />
     },
@@ -145,8 +145,8 @@ export const WithOptionalSteps: Story = {
 export const NoStepsCompleted: Story = {
     render: () => {
         useStorybookMocks({
-            get: { 'api/environments/:team_id/insights/1/': makeInsight() },
-            post: { 'api/environments/:team_id/query/FunnelsQuery/': { result: noCompletedSteps() } },
+            get: { 'v1/environments/:team_id/insights/1/': makeInsight() },
+            post: { 'v1/environments/:team_id/query/FunnelsQuery/': { result: noCompletedSteps() } },
         })
         return <AppWithProfileContext />
     },

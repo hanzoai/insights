@@ -267,7 +267,7 @@ class BatchImportSupportViewSet(viewsets.ReadOnlyModelViewSet):
     To mint a key (the scope is hidden from the PAT UI picker): create a key in the UI
     with `user:read`, then add `batch_import_support:read` to its scopes via Django admin.
     `user:read` is required for MCP use: tool discovery verifies staffness via
-    `/api/users/@me/` and hides these tools (fail-closed) when it cannot. The key must be
+    `/v1/users/@me/` and hides these tools (fail-closed) when it cannot. The key must be
     unscoped - keys with scoped_teams/scoped_organizations are rejected on root-level
     endpoints (scoped_teams centrally, scoped_organizations via
     UnscopedPersonalAPIKeyPermission below - the central org check cannot anchor on a

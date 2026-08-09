@@ -44,7 +44,7 @@ export function buildMarkdownNotebookContent(markdown: string, nodeId: string = 
 }
 
 export function notebookPathFor(projectId: string, shortId: string): string {
-    return `/api/projects/${encodeURIComponent(projectId)}/notebooks/${encodeURIComponent(shortId)}/`
+    return `/v1/projects/${encodeURIComponent(projectId)}/notebooks/${encodeURIComponent(shortId)}/`
 }
 
 export async function fetchMarkdownNotebook(context: Context, shortId: string): Promise<MarkdownNotebookState> {

@@ -19,9 +19,9 @@ type Story = StoryObj<typeof EndpointsUsageTrendsChart>
 const DAYS = ['2026-07-01', '2026-07-02', '2026-07-03', '2026-07-04', '2026-07-05', '2026-07-06', '2026-07-07']
 
 const REQUESTS_BY_ENDPOINT: Record<string, number[]> = {
-    '/api/events': [210, 190, 260, 240, 300, 330, 290],
-    '/api/persons': [90, 110, 80, 130, 120, 140, 100],
-    '/api/insights': [40, 55, 60, 45, 70, 65, 80],
+    '/v1/events': [210, 190, 260, 240, 300, 330, 290],
+    '/v1/persons': [90, 110, 80, 130, 120, 140, 100],
+    '/v1/insights': [40, 55, 60, 45, 70, 65, 80],
 }
 
 /**

@@ -34,7 +34,7 @@ const tool = (): ToolBase<typeof schema, unknown> => ({
             }
         }
         const qs = searchParams.toString()
-        const basePath = `/api/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/jobs/`
+        const basePath = `/v1/projects/${encodeURIComponent(String(projectId))}/external_data_sources/${encodeURIComponent(String(params.id))}/jobs/`
         const result = await context.api.request<unknown>({
             method: 'GET',
             path: qs ? `${basePath}?${qs}` : basePath,

@@ -385,7 +385,7 @@ export const savedInsightsLogic = kea<savedInsightsLogicType>([
                 }
 
                 const legacyResponse: CountedPaginatedResponse<InsightModel> = await api.get(
-                    `api/environments/${teamLogic.values.currentTeamId}/insights/?${toParams(params)}`
+                    `v1/environments/${teamLogic.values.currentTeamId}/insights/?${toParams(params)}`
                 )
 
                 // Cancel if a newer request came in while this one was in flight
@@ -441,7 +441,7 @@ export const savedInsightsLogic = kea<savedInsightsLogicType>([
             null as InsightBulkDeleteResponseApi | null,
             {
                 bulkDeleteInsights: async ({ ids }: { ids: number[] }) => {
-                    return (await api.create(`api/environments/${values.currentTeamId}/insights/bulk_delete/`, {
+                    return (await api.create(`v1/environments/${values.currentTeamId}/insights/bulk_delete/`, {
                         ids,
                     })) as InsightBulkDeleteResponseApi
                 },
@@ -451,7 +451,7 @@ export const savedInsightsLogic = kea<savedInsightsLogicType>([
             null as InsightBulkRestoreResponseApi | null,
             {
                 bulkRestoreInsights: async ({ ids }: { ids: number[] }) => {
-                    return (await api.create(`api/environments/${values.currentTeamId}/insights/bulk_restore/`, {
+                    return (await api.create(`v1/environments/${values.currentTeamId}/insights/bulk_restore/`, {
                         ids,
                     })) as InsightBulkRestoreResponseApi
                 },

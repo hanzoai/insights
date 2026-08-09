@@ -35,7 +35,7 @@ describe('subscriptionsSceneLogic', () => {
         subscriptionRequestUrls = []
         useMocks({
             get: {
-                '/api/projects/:team_id/subscriptions/': ({ request }) => {
+                '/v1/projects/:team_id/subscriptions/': ({ request }) => {
                     subscriptionRequestUrls.push(request.url)
                     return [200, EMPTY_SUBSCRIPTIONS]
                 },

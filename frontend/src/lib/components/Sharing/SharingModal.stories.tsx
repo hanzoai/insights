@@ -37,9 +37,9 @@ const meta: Meta<StoryArgs> = {
         useStorybookMocks({
             get: {
                 ...[
-                    '/api/environments/:id/insights/:insight_id/sharing/',
-                    '/api/environments/:id/dashboards/:dashboard_id/sharing/',
-                    '/api/environments/:id/session_recordings/:recording_id/sharing/',
+                    '/v1/environments/:id/insights/:insight_id/sharing/',
+                    '/v1/environments/:id/dashboards/:dashboard_id/sharing/',
+                    '/v1/environments/:id/session_recordings/:recording_id/sharing/',
                 ].reduce(
                     (acc, url) =>
                         Object.assign(acc, {
@@ -52,12 +52,12 @@ const meta: Meta<StoryArgs> = {
                         }),
                     {}
                 ),
-                '/api/environments/:id/insights/': { results: [fakeInsight] },
+                '/v1/environments/:id/insights/': { results: [fakeInsight] },
             },
             patch: [
-                '/api/environments/:id/insights/:insight_id/sharing/',
-                '/api/environments/:id/dashboards/:dashboard_id/sharing/',
-                '/api/environments/:id/session_recordings/:recording_id/sharing/',
+                '/v1/environments/:id/insights/:insight_id/sharing/',
+                '/v1/environments/:id/dashboards/:dashboard_id/sharing/',
+                '/v1/environments/:id/session_recordings/:recording_id/sharing/',
             ].reduce(
                 (acc, url) =>
                     Object.assign(acc, {

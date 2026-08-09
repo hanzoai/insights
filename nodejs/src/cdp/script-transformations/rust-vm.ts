@@ -4,7 +4,7 @@ import { KNOWN_BOT_IP_LIST, KNOWN_BOT_UA_LIST } from './bots/bots'
 
 /**
  * Shared access to the `@hanzo/scriptvm-node` napi addon (the Rust ScriptVM). The addon is optional —
- * when it isn't built for this environment, `loadHogvmNodeModule` returns null and callers fall
+ * when it isn't built for this environment, `loadScriptvmNodeModule` returns null and callers fall
  * back to the Node VM.
  */
 
@@ -45,24 +45,24 @@ export interface RustExecResult {
     logsTruncated?: boolean
 }
 
-export interface HogvmNodeModule {
+export interface ScriptvmNodeModule {
     init(options: { mmdbPath?: string; knownBotUaList?: string[]; knownBotIpList?: string[] }): void
     executeSync(program: unknown[], globals: unknown, options?: { maxSteps?: number }): RustExecResult
 }
 
-let cachedModule: HogvmNodeModule | null | undefined = undefined
+let cachedModule: ScriptvmNodeModule | null | undefined = undefined
 
 /**
  * Load and initialize the native addon once per process (`init` is idempotent on the Rust side).
  * Returns null when the addon isn't built for this environment. `options` only take effect on the
  * first call in the process — later callers always get the module as first configured.
  */
-export function loadHogvmNodeModule(options: { mmdbPath: string }): HogvmNodeModule | null {
+export function loadScriptvmNodeModule(options: { mmdbPath: string }): ScriptvmNodeModule | null {
     if (cachedModule !== undefined) {
         return cachedModule
     }
     try {
-        const module_: HogvmNodeModule = require('@hanzo/scriptvm-node')
+        const module_: ScriptvmNodeModule = require('@hanzo/scriptvm-node')
         module_.init({
             mmdbPath: options.mmdbPath,
             knownBotUaList: KNOWN_BOT_UA_LIST,
@@ -76,6 +76,6 @@ export function loadHogvmNodeModule(options: { mmdbPath: string }): HogvmNodeMod
     return cachedModule
 }
 
-export function resetHogvmNodeModuleCacheForTests(): void {
+export function resetScriptvmNodeModuleCacheForTests(): void {
     cachedModule = undefined
 }

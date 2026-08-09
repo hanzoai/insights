@@ -85,11 +85,11 @@ Look at the existing call and extract:
 Generated function names follow the `{resource}{Action}` convention:
 
 ```text
-surveysList          — GET    /api/projects/{id}/surveys/
-surveysCreate        — POST   /api/projects/{id}/surveys/
-surveysRetrieve      — GET    /api/projects/{id}/surveys/{id}/
-surveysPartialUpdate — PATCH  /api/projects/{id}/surveys/{id}/
-surveysDestroy       — DELETE /api/projects/{id}/surveys/{id}/
+surveysList          — GET    /v1/projects/{id}/surveys/
+surveysCreate        — POST   /v1/projects/{id}/surveys/
+surveysRetrieve      — GET    /v1/projects/{id}/surveys/{id}/
+surveysPartialUpdate — PATCH  /v1/projects/{id}/surveys/{id}/
+surveysDestroy       — DELETE /v1/projects/{id}/surveys/{id}/
 ```
 
 **Where to search:**

@@ -4,7 +4,7 @@
     "description": "Insights Script Virtual Machine",
     "license": "MIT",
     "author": "Insights <hey@hanzo.ai>",
-    "repository": "https://github.com/PostHog/posthog",
+    "repository": "https://github.com/hanzoai/insights",
     "source": "src/index.ts",
     "files": [
         "dist",

@@ -32,7 +32,7 @@ its own `SUPPORT_SLACK_*` credentials and `/api/conversations/v1/slack/*` routes
 
 ## The endpoints
 
-All under `products/conversations/backend/api/urls.py`, prefixed `/api/conversations/`:
+All under `products/conversations/backend/api/urls.py`, prefixed `/v1/conversations/`:
 
 | Route                    | Purpose                                                       | Reachability             |
 | ------------------------ | ------------------------------------------------------------- | ------------------------ |

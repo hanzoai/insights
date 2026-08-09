@@ -24,7 +24,7 @@ const DEFAULT_CONFIG = LOGS_CATALOG.defaultConfig as Record<string, unknown>
 
 const logsServicesMock = mswDecorator({
     get: {
-        '/api/environments/:team_id/logs/values': () => [
+        '/v1/environments/:team_id/logs/values': () => [
             200,
             { results: [{ name: 'api' }, { name: 'web' }, { name: 'worker' }, { name: 'billing-service' }] },
         ],

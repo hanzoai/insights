@@ -27,7 +27,7 @@ def generate_openapi_spec(
         version: Specific version to generate spec for. If None, uses current version.
     """
     base_url = settings.SITE_URL
-    run_path = f"/api/projects/{team_id}/endpoints/{endpoint.name}/run"
+    run_path = f"/v1/projects/{team_id}/endpoints/{endpoint.name}/run"
     target_version = version or endpoint.get_version()
     description = target_version.description
 

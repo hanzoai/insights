@@ -90,7 +90,7 @@ describe('ApiClient', () => {
         })
 
         // Call the private fetch method
-        await (client as any).fetch('https://example.com/api/test', {
+        await (client as any).fetch('https://example.com/v1/test', {
             method: 'POST',
             body: JSON.stringify({ key: 'value' }),
         })
@@ -117,7 +117,7 @@ describe('ApiClient', () => {
             clientUserAgent: 'insights/wizard 1.0.0',
         })
 
-        await (client as any).fetch('https://example.com/api/test', {
+        await (client as any).fetch('https://example.com/v1/test', {
             method: 'POST',
             body: JSON.stringify({ key: 'value' }),
         })
@@ -146,7 +146,7 @@ describe('ApiClient', () => {
             mcpClientName: 'claude-code',
         })
 
-        await (client as any).fetch('https://example.com/api/test', {
+        await (client as any).fetch('https://example.com/v1/test', {
             method: 'POST',
             body: JSON.stringify({ key: 'value' }),
         })
@@ -175,7 +175,7 @@ describe('ApiClient', () => {
             mcpConsumer: 'slack',
         })
 
-        await (client as any).fetch('https://example.com/api/test', { method: 'GET' })
+        await (client as any).fetch('https://example.com/v1/test', { method: 'GET' })
 
         const [, options] = mockFetch.mock.calls[0]!
         expect(options.headers['User-Agent']).toBe(USER_AGENT)
@@ -205,7 +205,7 @@ describe('ApiClient', () => {
             ...extraConfig,
         })
 
-        await (client as any).fetch('https://example.com/api/test', { method: 'GET' })
+        await (client as any).fetch('https://example.com/v1/test', { method: 'GET' })
 
         const [, options] = mockFetch.mock.calls[0]!
         for (const [header, value] of Object.entries(expectedHeaders)) {
@@ -243,7 +243,7 @@ describe('ApiClient', () => {
 
             expect(mockFetch).toHaveBeenCalledTimes(1)
             const [url] = mockFetch.mock.calls[0]!
-            expect(url).toBe('https://example.com/api/projects/1/insights/42/')
+            expect(url).toBe('https://example.com/v1/projects/1/insights/42/')
 
             vi.unstubAllGlobals()
         })
@@ -262,7 +262,7 @@ describe('ApiClient', () => {
 
             expect(mockFetch).toHaveBeenCalledTimes(1)
             const [url] = mockFetch.mock.calls[0]!
-            expect(url).toContain('https://example.com/api/projects/1/insights/42/?')
+            expect(url).toContain('https://example.com/v1/projects/1/insights/42/?')
             expect(url).toContain(`variables_override=${encodeURIComponent(variablesOverride)}`)
             expect(url).toContain(`filters_override=${encodeURIComponent(filtersOverride)}`)
 
@@ -279,7 +279,7 @@ describe('ApiClient', () => {
 
             expect(mockFetch).toHaveBeenCalledTimes(1)
             const [url] = mockFetch.mock.calls[0]!
-            expect(url).toContain('/api/projects/1/insights/?short_id=abc12345')
+            expect(url).toContain('/v1/projects/1/insights/?short_id=abc12345')
             expect(result.success).toBe(true)
 
             vi.unstubAllGlobals()
@@ -300,7 +300,7 @@ describe('ApiClient', () => {
             // and applies overrides from query_params, so a single hop suffices.
             expect(mockFetch).toHaveBeenCalledTimes(1)
             const [url] = mockFetch.mock.calls[0]!
-            expect(url).toContain('/api/projects/1/insights/?')
+            expect(url).toContain('/v1/projects/1/insights/?')
             expect(url).toContain('short_id=abc12345')
             expect(url).toContain(`variables_override=${encodeURIComponent(variablesOverride)}`)
             expect(url).not.toContain('filters_override')

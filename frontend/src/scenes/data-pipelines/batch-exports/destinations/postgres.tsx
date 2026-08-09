@@ -1,5 +1,5 @@
-import { IconInfo } from '@hanzo/icons'
 import { Banner, Checkbox, Input, Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { IntegrationChoice } from 'lib/components/CyclotronJob/integrations/IntegrationChoice'
 import { Field } from 'lib/elements/Field'
@@ -20,7 +20,7 @@ export const postgresDefinition: DestinationDefinition = {
         // Legacy inline-credential exports keep their original fields when edited.
         return ['host', 'port', 'database', 'schema', 'table_name']
     },
-    eventTableOverrides: { teamIdHogql: 'toInt32(team_id)' },
+    eventTableOverrides: { teamIdInsightsql: 'toInt32(team_id)' },
     Fields: function PostgresFields({ isNew, formValues }) {
         const useIntegration = isNew || !!formValues.integration_id
 

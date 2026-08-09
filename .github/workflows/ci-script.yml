@@ -51,7 +51,7 @@ jobs:
                         - 'common/scriptvm/**/*'
                         - 'insights/insightsql/**/*'
                         - 'bin/script'
-                        - 'bin/hoge'
+                        - 'bin/scriptc'
                         - 'package.json'
                         - requirements.txt
                         - requirements-dev.txt

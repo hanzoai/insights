@@ -1,7 +1,7 @@
 /**
  * Shared helpers for the `/shared/{token}` unauthenticated playwright tests
  * (dashboard, insight, notebook). Centralises the network-leak assertion so a
- * silent 401/403 against /api/* fails the test even if the page still renders.
+ * silent 401/403 against /v1/* fails the test even if the page still renders.
  *
  * The class of regression we keep tripping on is "shared mode silently leaks an
  * authenticated request" — the page may still render, but the leak is the
@@ -16,7 +16,7 @@ interface RecordedFailure {
 }
 
 /**
- * Open a Page in the supplied context and record EVERY /api/* response with
+ * Open a Page in the supplied context and record EVERY /v1/* response with
  * status >= 400. The recording is unfiltered — what to allow vs flag is the
  * caller's job (see `expectNoTeamScopedApiLeaks` below).
  *
@@ -34,7 +34,7 @@ export async function openUnauthenticatedSharedPage(context: BrowserContext): Pr
     unauthPage.on('response', (response) => {
         const url = response.url()
         const status = response.status()
-        if (!url.includes('/api/') || status < 400) {
+        if (!url.includes('/v1/') || status < 400) {
             return
         }
         failedApiResponses.push({ method: response.request().method(), url, status })
@@ -44,9 +44,9 @@ export async function openUnauthenticatedSharedPage(context: BrowserContext): Pr
 }
 
 /**
- * Assert that no `/api/(environments|projects)/{team}/{resource}` request
- * 4xx'd while the shared page was rendering. Other paths (`/api/flags/`,
- * `/api/users/@me/`, `/api/organizations/...`, `/api/user_home_settings/`,
+ * Assert that no `/v1/(environments|projects)/{team}/{resource}` request
+ * 4xx'd while the shared page was rendering. Other paths (`/v1/flags/`,
+ * `/v1/users/@me/`, `/v1/organizations/...`, `/v1/user_home_settings/`,
  * etc) are intentionally NOT covered here — they have legitimate unauth
  * failure modes, and the `client_request_failure` insights event tags them
  * with `is_shared_view` so production telemetry still surfaces leaks.

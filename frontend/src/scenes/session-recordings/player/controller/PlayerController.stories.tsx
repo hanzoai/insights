@@ -35,8 +35,8 @@ const meta: Meta<ControllerStoryProps> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/notebooks/recording_comments': { results: [] },
-                '/api/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
+                '/v1/projects/:team_id/notebooks/recording_comments': { results: [] },
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
                     if (new URL(request.url).searchParams.get('source') === 'blob_v2') {
                         return new HttpResponse(snapshotsAsJSONLines())
                     }
@@ -54,10 +54,10 @@ const meta: Meta<ControllerStoryProps> = {
                         },
                     ]
                 },
-                '/api/environments/:team_id/session_recordings/:id': () => [200, recordingMetaJson],
+                '/v1/environments/:team_id/session_recordings/:id': () => [200, recordingMetaJson],
             },
             post: {
-                '/api/environments/:team_id/query/:kind': async ({ request }) => {
+                '/v1/environments/:team_id/query/:kind': async ({ request }) => {
                     const body = (await request.json()) as Record<string, any>
                     if (body.query.kind === 'EventsQuery') {
                         return [200, recordingEventsJson]

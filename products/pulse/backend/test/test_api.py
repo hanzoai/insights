@@ -10,6 +10,7 @@ from temporalio.exceptions import WorkflowAlreadyStartedError
 
 from insights.constants import AvailableFeature
 from insights.models import OrganizationMembership
+from insights.models.ee_models import AccessControl
 from insights.models.scoping import team_scope
 from insights.models.team import Team
 from insights.rate_limit import AIBurstRateThrottle, AISustainedRateThrottle
@@ -18,8 +19,6 @@ from insights.slo.types import SloOperation
 from products.product_analytics.backend.models.insight import Insight
 from products.pulse.backend.api.brief import ProductBriefViewSet
 from products.pulse.backend.models import BriefConfig, ProductBrief
-
-from insights.models.ee_models import AccessControl
 
 
 def _temporal_client() -> MagicMock:
@@ -38,14 +37,14 @@ class TestPulseAPI(APIBaseTest):
 
     def test_generate_requires_flag(self, mock_connect: MagicMock, mock_flag: MagicMock) -> None:
         mock_flag.return_value = False
-        response = self.client.post(f"/api/projects/{self.team.id}/pulse/briefs/generate/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/pulse/briefs/generate/")
         assert response.status_code == status.HTTP_403_FORBIDDEN
         mock_connect.assert_not_called()
 
     def test_generate_requires_ai_consent(self, mock_connect: MagicMock, _mock_flag: MagicMock) -> None:
         self.organization.is_ai_data_processing_approved = False
         self.organization.save()
-        response = self.client.post(f"/api/projects/{self.team.id}/pulse/briefs/generate/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/pulse/briefs/generate/")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         # The frontend matches this code to show the consent banner — it is part of the API contract.
         assert response.json()["code"] == "ai_consent_required"
@@ -55,7 +54,7 @@ class TestPulseAPI(APIBaseTest):
         client = _temporal_client()
         mock_connect.return_value = client
         response = self.client.post(
-            f"/api/projects/{self.team.id}/pulse/briefs/generate/",
+            f"/v1/projects/{self.team.id}/pulse/briefs/generate/",
             {"period": {"period_type": "last_n_days", "days": 14}},
             format="json",
         )
@@ -81,7 +80,7 @@ class TestPulseAPI(APIBaseTest):
             config = BriefConfig.objects.create(team=self.team, created_by=self.user, name="Configured")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/pulse/briefs/generate/", {"config_id": str(config.id)}
+            f"/v1/projects/{self.team.id}/pulse/briefs/generate/", {"config_id": str(config.id)}
         )
 
         assert response.status_code == status.HTTP_201_CREATED, response.json()
@@ -99,7 +98,7 @@ class TestPulseAPI(APIBaseTest):
         api_key = self.create_personal_api_key_with_scopes(["project:write"])
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/pulse/briefs/generate/",
+            f"/v1/projects/{self.team.id}/pulse/briefs/generate/",
             headers={"authorization": f"Bearer {api_key}"},
         )
 
@@ -116,7 +115,7 @@ class TestPulseAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/pulse/briefs/generate/",
+            f"/v1/projects/{self.team.id}/pulse/briefs/generate/",
             headers={"authorization": f"Bearer {api_key}"},
         )
 
@@ -132,7 +131,7 @@ class TestPulseAPI(APIBaseTest):
         api_key = self.create_personal_api_key_with_scopes(["project:read"])
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/pulse/briefs/{brief.id}/",
+            f"/v1/projects/{self.team.id}/pulse/briefs/{brief.id}/",
             headers={"authorization": f"Bearer {api_key}"},
         )
 
@@ -146,7 +145,7 @@ class TestPulseAPI(APIBaseTest):
         client = _temporal_client()
         client.start_workflow.side_effect = WorkflowAlreadyStartedError("pulse-brief-x", "pulse-generate-brief")
         mock_connect.return_value = client
-        response = self.client.post(f"/api/projects/{self.team.id}/pulse/briefs/generate/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/pulse/briefs/generate/")
         assert response.status_code == status.HTTP_409_CONFLICT
         assert not ProductBrief.objects.for_team(self.team.pk).exists()
         # Contention is a distinct analytics signal from a successful generate.
@@ -158,7 +157,7 @@ class TestPulseAPI(APIBaseTest):
         client = _temporal_client()
         client.start_workflow.side_effect = RuntimeError("temporal down")
         mock_connect.return_value = client
-        response = self.client.post(f"/api/projects/{self.team.id}/pulse/briefs/generate/")
+        response = self.client.post(f"/v1/projects/{self.team.id}/pulse/briefs/generate/")
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         brief = ProductBrief.objects.for_team(self.team.pk).get()
         assert brief.status == ProductBrief.Status.FAILED
@@ -171,9 +170,7 @@ class TestPulseAPI(APIBaseTest):
         with team_scope(other_team.pk, canonical=True):
             foreign_config = BriefConfig.objects.create(team=other_team, name="foreign")
         for config_id in [str(foreign_config.id), str(uuid.uuid4())]:
-            response = self.client.post(
-                f"/api/projects/{self.team.id}/pulse/briefs/generate/", {"config_id": config_id}
-            )
+            response = self.client.post(f"/v1/projects/{self.team.id}/pulse/briefs/generate/", {"config_id": config_id})
             assert response.status_code == status.HTTP_400_BAD_REQUEST, config_id
             assert "Brief config not found." in str(response.json())
         assert not ProductBrief.objects.for_team(self.team.pk).exists()
@@ -183,7 +180,7 @@ class TestPulseAPI(APIBaseTest):
         other_team = Team.objects.create(organization=self.organization, name="other")
         with team_scope(other_team.pk, canonical=True):
             other_brief = ProductBrief.objects.create(team=other_team, trigger=ProductBrief.Trigger.ON_DEMAND)
-        response = self.client.get(f"/api/projects/{self.team.id}/pulse/briefs/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/pulse/briefs/")
         assert response.status_code == status.HTTP_200_OK
         assert str(other_brief.id) not in [row["id"] for row in response.json()["results"]]
 
@@ -198,8 +195,8 @@ class TestPulseAPI(APIBaseTest):
                 trigger=ProductBrief.Trigger.ON_DEMAND,
             )
 
-        configs = self.client.get(f"/api/projects/{self.team.id}/pulse/brief_configs/").json()["results"]
-        briefs = self.client.get(f"/api/projects/{self.team.id}/pulse/briefs/").json()["results"]
+        configs = self.client.get(f"/v1/projects/{self.team.id}/pulse/brief_configs/").json()["results"]
+        briefs = self.client.get(f"/v1/projects/{self.team.id}/pulse/briefs/").json()["results"]
 
         assert str(other_config.id) not in [row["id"] for row in configs]
         assert str(other_brief.id) not in [row["id"] for row in briefs]
@@ -220,9 +217,9 @@ class TestPulseAPI(APIBaseTest):
             access_level="member",
         )
 
-        list_response = self.client.get(f"/api/projects/{self.team.id}/pulse/brief_configs/")
-        create_response = self.client.post(f"/api/projects/{self.team.id}/pulse/brief_configs/", {"name": "allowed"})
-        generate_response = self.client.post(f"/api/projects/{self.team.id}/pulse/briefs/generate/")
+        list_response = self.client.get(f"/v1/projects/{self.team.id}/pulse/brief_configs/")
+        create_response = self.client.post(f"/v1/projects/{self.team.id}/pulse/brief_configs/", {"name": "allowed"})
+        generate_response = self.client.post(f"/v1/projects/{self.team.id}/pulse/briefs/generate/")
 
         assert list_response.status_code == status.HTTP_200_OK
         assert create_response.status_code == status.HTTP_201_CREATED
@@ -232,7 +229,7 @@ class TestPulseAPI(APIBaseTest):
     def test_config_crud_roundtrip(self, _mock_connect: MagicMock, _mock_flag: MagicMock) -> None:
         insight = Insight.objects.create(team=self.team, name="Pageviews")
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/pulse/brief_configs/",
+            f"/v1/projects/{self.team.id}/pulse/brief_configs/",
             {
                 "name": "Feature flags focus",
                 "focus_prompt": "flags team",
@@ -242,12 +239,12 @@ class TestPulseAPI(APIBaseTest):
         assert create_response.status_code == status.HTTP_201_CREATED, create_response.json()
         config_id = create_response.json()["id"]
 
-        list_response = self.client.get(f"/api/projects/{self.team.id}/pulse/brief_configs/")
+        list_response = self.client.get(f"/v1/projects/{self.team.id}/pulse/brief_configs/")
         assert list_response.status_code == status.HTTP_200_OK
         assert [row["id"] for row in list_response.json()["results"]] == [config_id]
 
         patch_response = self.client.patch(
-            f"/api/projects/{self.team.id}/pulse/brief_configs/{config_id}/", {"name": "Renamed"}
+            f"/v1/projects/{self.team.id}/pulse/brief_configs/{config_id}/", {"name": "Renamed"}
         )
         assert patch_response.status_code == status.HTTP_200_OK
         assert patch_response.json()["name"] == "Renamed"
@@ -257,18 +254,18 @@ class TestPulseAPI(APIBaseTest):
                 team=self.team, config_id=config_id, trigger=ProductBrief.Trigger.ON_DEMAND
             )
 
-        delete_response = self.client.delete(f"/api/projects/{self.team.id}/pulse/brief_configs/{config_id}/")
+        delete_response = self.client.delete(f"/v1/projects/{self.team.id}/pulse/brief_configs/{config_id}/")
         assert delete_response.status_code == status.HTTP_204_NO_CONTENT
-        assert self.client.get(f"/api/projects/{self.team.id}/pulse/brief_configs/").json()["results"] == []
+        assert self.client.get(f"/v1/projects/{self.team.id}/pulse/brief_configs/").json()["results"] == []
         # Soft delete: brief history keeps its config pointer and the row is recoverable.
         brief.refresh_from_db()
         assert str(brief.config_id) == config_id
         restore_response = self.client.patch(
-            f"/api/projects/{self.team.id}/pulse/brief_configs/{config_id}/", {"deleted": False}
+            f"/v1/projects/{self.team.id}/pulse/brief_configs/{config_id}/", {"deleted": False}
         )
         assert restore_response.status_code == status.HTTP_200_OK
         assert [
-            row["id"] for row in self.client.get(f"/api/projects/{self.team.id}/pulse/brief_configs/").json()["results"]
+            row["id"] for row in self.client.get(f"/v1/projects/{self.team.id}/pulse/brief_configs/").json()["results"]
         ] == [config_id]
 
     def test_generate_with_soft_deleted_config_returns_400(
@@ -277,7 +274,7 @@ class TestPulseAPI(APIBaseTest):
         with team_scope(self.team.pk, canonical=True):
             config = BriefConfig.objects.create(team=self.team, name="gone", deleted=True)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/pulse/briefs/generate/", {"config_id": str(config.id)}
+            f"/v1/projects/{self.team.id}/pulse/briefs/generate/", {"config_id": str(config.id)}
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Brief config not found." in str(response.json())
@@ -285,7 +282,7 @@ class TestPulseAPI(APIBaseTest):
 
     def test_config_rejects_unavailable_anchor(self, _mock_connect: MagicMock, _mock_flag: MagicMock) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/pulse/brief_configs/",
+            f"/v1/projects/{self.team.id}/pulse/brief_configs/",
             {"name": "Restricted", "anchors": {"insights": ["missing"]}},
             format="json",
         )
@@ -302,7 +299,7 @@ class TestPulseAPI(APIBaseTest):
             )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/pulse/briefs/generate/", {"config_id": str(config.id)}
+            f"/v1/projects/{self.team.id}/pulse/briefs/generate/", {"config_id": str(config.id)}
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -311,7 +308,7 @@ class TestPulseAPI(APIBaseTest):
 
     def test_config_focus_prompt_length_capped(self, _mock_connect: MagicMock, _mock_flag: MagicMock) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/pulse/brief_configs/",
+            f"/v1/projects/{self.team.id}/pulse/brief_configs/",
             {"name": "too long", "focus_prompt": "x" * 2001},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -322,7 +319,7 @@ class TestPulseAPI(APIBaseTest):
     ) -> None:
         # Valid knobs persist; an out-of-range knob is rejected at the serializer (wiring guard).
         response = self.client.post(
-            f"/api/projects/{self.team.id}/pulse/brief_configs/",
+            f"/v1/projects/{self.team.id}/pulse/brief_configs/",
             {"name": "Tuned", "settings": {"confidence_threshold": 0.8}},
             format="json",
         )
@@ -330,7 +327,7 @@ class TestPulseAPI(APIBaseTest):
         assert response.json()["settings"]["confidence_threshold"] == 0.8
 
         bad = self.client.post(
-            f"/api/projects/{self.team.id}/pulse/brief_configs/",
+            f"/v1/projects/{self.team.id}/pulse/brief_configs/",
             {"name": "Bad", "settings": {"confidence_threshold": 5.0}},
             format="json",
         )
@@ -338,7 +335,7 @@ class TestPulseAPI(APIBaseTest):
 
     def test_generate_rejects_last_n_days_without_days(self, mock_connect: MagicMock, _mock_flag: MagicMock) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/pulse/briefs/generate/",
+            f"/v1/projects/{self.team.id}/pulse/briefs/generate/",
             {"period": {"period_type": "last_n_days"}},
             format="json",
         )

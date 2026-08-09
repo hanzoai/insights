@@ -2,12 +2,12 @@ import { promisify } from 'node:util'
 import { gunzip, gzip } from 'node:zlib'
 import { Counter, Gauge } from 'prom-client'
 
-import { INSIGHTS_INVOCATION_RESULTS_OUTPUT, HogInvocationResultsOutput } from '~/common/outputs'
+import { HogInvocationResultsOutput, INSIGHTS_INVOCATION_RESULTS_OUTPUT } from '~/common/outputs'
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
 import { safeDatastoreString } from '~/common/utils/db/utils'
+import { captureException } from '~/common/utils/insights'
 import { parseJSON } from '~/common/utils/json-parse'
 import { logger } from '~/common/utils/logger'
-import { captureException } from '~/common/utils/insights'
 
 import type { CdpOutput } from '../../cdp-services'
 import { RerunFilter, RerunFunctionKind, rerunWrapperKindFor } from '../../rerun/rerun-job.types'
@@ -76,8 +76,9 @@ export interface HogInvocationResultRow {
     is_deleted: 0 | 1
 }
 
-const isInsightsFunctionInvocation = (invocation: CyclotronJobInvocation): invocation is CyclotronJobInvocationInsightsFunction =>
-    'insightsFunction' in invocation
+const isInsightsFunctionInvocation = (
+    invocation: CyclotronJobInvocation
+): invocation is CyclotronJobInvocationInsightsFunction => 'insightsFunction' in invocation
 
 const isFlowInvocation = (invocation: CyclotronJobInvocation): invocation is CyclotronJobInvocationFlow =>
     'flow' in invocation

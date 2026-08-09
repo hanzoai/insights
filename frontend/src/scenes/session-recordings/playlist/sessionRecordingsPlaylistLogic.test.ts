@@ -82,19 +82,19 @@ describe('sessionRecordingsPlaylistLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/session_recordings/properties': {
+                '/v1/environments/:team_id/session_recordings/properties': {
                     results: [
                         { id: 's1', properties: { blah: 'blah1' } },
                         { id: 's2', properties: { blah: 'blah2' } },
                     ],
                 },
 
-                '/api/projects/:team_id/property_definitions/seen_together': ({ request }) => {
+                '/v1/projects/:team_id/property_definitions/seen_together': ({ request }) => {
                     const eventNames = new URL(request.url).searchParams.getAll('event_names')
                     return [200, Object.fromEntries(eventNames.map((name) => [name, name === '$pageview']))]
                 },
 
-                '/api/environments/:team_id/session_recordings': ({ request }) => {
+                '/v1/environments/:team_id/session_recordings': ({ request }) => {
                     const { searchParams } = new URL(request.url)
                     if (
                         (searchParams.get('events')?.length || 0) > 0 &&
@@ -157,7 +157,7 @@ describe('sessionRecordingsPlaylistLogic', () => {
                         },
                     ]
                 },
-                '/api/projects/:team/session_recording_playlists/:playlist_id/recordings': () => {
+                '/v1/projects/:team/session_recording_playlists/:playlist_id/recordings': () => {
                     return [
                         200,
                         {

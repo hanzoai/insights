@@ -178,8 +178,8 @@ describe('maxLogic', () => {
             ...maxMocks,
             get: {
                 ...maxMocks.get,
-                '/api/environments/:team_id/conversations/': { results: [] },
-                [`/api/environments/:team_id/conversations/${mockConversationId}`]: () => [
+                '/v1/environments/:team_id/conversations/': { results: [] },
+                [`/v1/environments/:team_id/conversations/${mockConversationId}`]: () => [
                     404,
                     { detail: 'Not found' },
                 ],
@@ -294,7 +294,7 @@ describe('maxLogic', () => {
     const sidePanelCases = PAGES.flatMap((page) => routeActions.map((action) => ({ page, ...action })))
 
     it.each(sidePanelCases)('side panel chat keeps the main content on $page on $name', async ({ page, act }) => {
-        useMocks({ get: { '/api/environments/:team_id/conversations/:id': MOCK_CONVERSATION } })
+        useMocks({ get: { '/v1/environments/:team_id/conversations/:id': MOCK_CONVERSATION } })
         router.actions.push(page)
 
         logic = maxLogic({ panelId: SIDE_PANEL_PANEL_ID })
@@ -306,7 +306,7 @@ describe('maxLogic', () => {
     })
 
     it.each(routeActions)('embedded chat keeps the current route on $name', async ({ act }) => {
-        useMocks({ get: { '/api/environments/:team_id/conversations/:id': MOCK_CONVERSATION } })
+        useMocks({ get: { '/v1/environments/:team_id/conversations/:id': MOCK_CONVERSATION } })
         router.actions.push('/notebooks/notebook-short-id')
 
         logic = maxLogic({
@@ -322,7 +322,7 @@ describe('maxLogic', () => {
     })
 
     it.each(routeActions)('scene chat navigates to /ai on $name', async ({ act }) => {
-        useMocks({ get: { '/api/environments/:team_id/conversations/:id': MOCK_CONVERSATION } })
+        useMocks({ get: { '/v1/environments/:team_id/conversations/:id': MOCK_CONVERSATION } })
         router.actions.push('/insights/abc123')
 
         logic = maxLogic({ panelId: 'test' })
@@ -562,7 +562,7 @@ describe('maxLogic', () => {
                 ...maxMocks,
                 get: {
                     ...maxMocks.get,
-                    '/api/environments/:team_id/conversations/': { results: [MOCK_CONVERSATION] },
+                    '/v1/environments/:team_id/conversations/': { results: [MOCK_CONVERSATION] },
                 },
             })
 
@@ -631,7 +631,7 @@ describe('maxLogic', () => {
                 ...maxMocks,
                 get: {
                     ...maxMocks.get,
-                    '/api/environments/:team_id/conversations/': { results: [MOCK_CONVERSATION] },
+                    '/v1/environments/:team_id/conversations/': { results: [MOCK_CONVERSATION] },
                 },
             })
 

@@ -23,13 +23,13 @@ class TestProductTourDraft(APIBaseTest):
         return ProductTour.objects.create(**defaults)
 
     def _draft_url(self, tour_id):
-        return f"/api/projects/{self.team.id}/product_tours/{tour_id}/draft/"
+        return f"/v1/projects/{self.team.id}/product_tours/{tour_id}/draft/"
 
     def _publish_url(self, tour_id):
-        return f"/api/projects/{self.team.id}/product_tours/{tour_id}/publish_draft/"
+        return f"/v1/projects/{self.team.id}/product_tours/{tour_id}/publish_draft/"
 
     def _discard_url(self, tour_id):
-        return f"/api/projects/{self.team.id}/product_tours/{tour_id}/discard_draft/"
+        return f"/v1/projects/{self.team.id}/product_tours/{tour_id}/discard_draft/"
 
     def test_draft_save_stores_data_in_draft_content(self):
         tour = self._create_tour()
@@ -164,7 +164,7 @@ class TestProductTourDraft(APIBaseTest):
         tour.draft_content = {"name": "Drafted"}
         tour.save(update_fields=["draft_content"])
 
-        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/{tour.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/product_tours/{tour.id}/")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -174,7 +174,7 @@ class TestProductTourDraft(APIBaseTest):
     def test_read_serializer_has_draft_false_when_no_draft(self):
         tour = self._create_tour()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/{tour.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/product_tours/{tour.id}/")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -188,7 +188,7 @@ class TestProductTourDraft(APIBaseTest):
         tour.save(update_fields=["draft_content"])
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour.id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour.id}/",
             data={"name": "Directly updated"},
             format="json",
         )
@@ -203,7 +203,7 @@ class TestProductTourDraft(APIBaseTest):
         tour.draft_content = {"name": "Drafted"}
         tour.save(update_fields=["draft_content"])
 
-        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/{tour.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/product_tours/{tour.id}/")
         data = response.json()
 
         # Main API includes draft_content

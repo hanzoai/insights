@@ -632,7 +632,7 @@ class TestBatchImportAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "s3",
                 "content_type": "captured",
@@ -651,7 +651,7 @@ class TestBatchImportAPI(APIBaseTest):
     def test_amplitude_validation_requires_at_least_one_option(self):
         """Test that Amplitude migrations require at least one of import_events or generate_identify_events"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "amplitude",
                 "content_type": "amplitude",
@@ -675,7 +675,7 @@ class TestBatchImportAPI(APIBaseTest):
     def test_mixpanel_migration_does_not_include_amplitude_specific_fields(self):
         """Test that Mixpanel migrations don't include Amplitude-specific fields in config"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "mixpanel",
                 "content_type": "mixpanel",
@@ -701,7 +701,7 @@ class TestBatchImportAPI(APIBaseTest):
     def test_amplitude_migration_includes_amplitude_specific_fields(self):
         """Test that Amplitude migrations include import_events and generate_identify_events in config"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "amplitude",
                 "content_type": "amplitude",
@@ -726,7 +726,7 @@ class TestBatchImportAPI(APIBaseTest):
     def test_amplitude_migration_with_group_identify_events(self):
         """Test that Amplitude migrations can include generate_group_identify_events in config"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "amplitude",
                 "content_type": "amplitude",
@@ -754,7 +754,7 @@ class TestBatchImportAPI(APIBaseTest):
     def test_amplitude_migration_group_identify_events_defaults_to_false(self):
         """Test that generate_group_identify_events defaults to False when not specified"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "amplitude",
                 "content_type": "amplitude",
@@ -786,7 +786,7 @@ class TestBatchImportAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "s3",
                 "content_type": "captured",
@@ -816,7 +816,7 @@ class TestBatchImportAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "s3",
                 "content_type": "captured",
@@ -837,7 +837,7 @@ class TestBatchImportAPI(APIBaseTest):
         end_date = start_date + timedelta(days=366)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "mixpanel",
                 "content_type": "mixpanel",
@@ -858,7 +858,7 @@ class TestBatchImportAPI(APIBaseTest):
         end_date = start_date + timedelta(days=300)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "amplitude",
                 "content_type": "amplitude",
@@ -878,7 +878,7 @@ class TestBatchImportAPI(APIBaseTest):
         end_date = datetime(2023, 1, 1, 0, 0, 0)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "amplitude",
                 "content_type": "amplitude",
@@ -895,7 +895,7 @@ class TestBatchImportAPI(APIBaseTest):
     def test_s3_prefix_can_be_empty_string(self):
         """Test that s3_prefix field accepts empty strings"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "s3",
                 "content_type": "captured",
@@ -916,7 +916,7 @@ class TestBatchImportAPI(APIBaseTest):
     def test_s3_prefix_can_be_omitted(self):
         """Test that s3_prefix field can be omitted from the request"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "s3",
                 "content_type": "captured",
@@ -937,7 +937,7 @@ class TestBatchImportAPI(APIBaseTest):
     def test_s3_gzip_migration_creates_correct_import_config(self):
         """Test that s3_gzip source type creates import_config with type s3_gzip"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "s3_gzip",
                 "content_type": "captured",
@@ -977,7 +977,7 @@ class TestBatchImportAPI(APIBaseTest):
             lease_id=lease_id,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/managed_migrations")
+        response = self.client.get(f"/v1/projects/{self.team.id}/managed_migrations")
 
         self.assertEqual(response.status_code, 200)
         results = response.json()["results"]
@@ -998,7 +998,7 @@ class TestBatchImportAPI(APIBaseTest):
             backoff_until=datetime.now(tz=UTC) + timedelta(hours=1),
         )
 
-        response = self.client.post(f"/api/projects/{self.team.id}/managed_migrations/{batch_import.id}/resume")
+        response = self.client.post(f"/v1/projects/{self.team.id}/managed_migrations/{batch_import.id}/resume")
 
         self.assertEqual(response.status_code, 200)
         batch_import.refresh_from_db()
@@ -1039,7 +1039,7 @@ class TestBatchImportAPI(APIBaseTest):
         expected = {"import_config": original_config, "status": BatchImport.Status.RUNNING}[attr]
 
         response = getattr(self.client, method)(
-            f"/api/projects/{self.team.id}/managed_migrations/{batch_import.id}",
+            f"/v1/projects/{self.team.id}/managed_migrations/{batch_import.id}",
             payload,
             format="json",
         )
@@ -1051,7 +1051,7 @@ class TestBatchImportAPI(APIBaseTest):
     @parameterized.expand([("s3",), ("s3_gzip",)])
     def test_s3_import_with_endpoint_url(self, source_type):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": source_type,
                 "content_type": "captured",
@@ -1072,7 +1072,7 @@ class TestBatchImportAPI(APIBaseTest):
 
     def test_s3_import_without_endpoint_url_omits_key(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "s3",
                 "content_type": "captured",
@@ -1090,7 +1090,7 @@ class TestBatchImportAPI(APIBaseTest):
 
     def test_s3_import_with_empty_endpoint_url_omits_key(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "s3",
                 "content_type": "captured",
@@ -1109,7 +1109,7 @@ class TestBatchImportAPI(APIBaseTest):
 
     def test_s3_import_with_invalid_endpoint_url_returns_400(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "s3",
                 "content_type": "captured",
@@ -1129,7 +1129,7 @@ class TestBatchImportAPI(APIBaseTest):
     @patch("products.managed_migrations.backend.api.batch_imports.hanzo_insights.feature_enabled", return_value=True)
     def test_s3_import_with_iam_role_creates_config_without_secrets(self, _mock_flag):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "s3",
                 "content_type": "captured",
@@ -1151,7 +1151,7 @@ class TestBatchImportAPI(APIBaseTest):
     @patch("products.managed_migrations.backend.api.batch_imports.hanzo_insights.feature_enabled", return_value=False)
     def test_s3_import_with_role_rejected_when_flag_off(self, _mock_flag):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {
                 "source_type": "s3",
                 "content_type": "captured",
@@ -1167,7 +1167,7 @@ class TestBatchImportAPI(APIBaseTest):
     @patch("products.managed_migrations.backend.api.batch_imports.hanzo_insights.feature_enabled", return_value=True)
     def test_aws_iam_setup_returns_policy_material(self, _mock_flag):
         with self.settings(MANAGED_MIGRATIONS_IMPORT_ROLE_ARN="arn:aws:iam::999999999999:role/InsightsBatchImport"):
-            response = self.client.get(f"/api/projects/{self.team.id}/managed_migrations/aws_iam_setup")
+            response = self.client.get(f"/v1/projects/{self.team.id}/managed_migrations/aws_iam_setup")
 
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -1180,7 +1180,7 @@ class TestBatchImportAPI(APIBaseTest):
     @patch("products.managed_migrations.backend.api.batch_imports.hanzo_insights.feature_enabled", return_value=True)
     def test_aws_iam_setup_unavailable_without_role_arn_setting(self, _mock_flag):
         with self.settings(MANAGED_MIGRATIONS_IMPORT_ROLE_ARN=""):
-            response = self.client.get(f"/api/projects/{self.team.id}/managed_migrations/aws_iam_setup")
+            response = self.client.get(f"/v1/projects/{self.team.id}/managed_migrations/aws_iam_setup")
 
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.json()["available"])
@@ -1188,7 +1188,7 @@ class TestBatchImportAPI(APIBaseTest):
     @patch("products.managed_migrations.backend.api.batch_imports.hanzo_insights.feature_enabled", return_value=False)
     def test_aws_iam_setup_unavailable_when_flag_off(self, _mock_flag):
         with self.settings(MANAGED_MIGRATIONS_IMPORT_ROLE_ARN="arn:aws:iam::999999999999:role/InsightsBatchImport"):
-            response = self.client.get(f"/api/projects/{self.team.id}/managed_migrations/aws_iam_setup")
+            response = self.client.get(f"/v1/projects/{self.team.id}/managed_migrations/aws_iam_setup")
 
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.json()["available"])
@@ -1218,7 +1218,7 @@ class TestBatchImportTrialAPI(APIBaseTest):
 
     def test_create_trial_sets_trial_sink_and_limit(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {**self.S3_PAYLOAD, "is_trial": True, "trial_record_limit": 500},
         )
 
@@ -1231,7 +1231,7 @@ class TestBatchImportTrialAPI(APIBaseTest):
     @parameterized.expand([("zero", 0), ("above_max", 50_001)])
     def test_trial_record_limit_out_of_bounds_is_rejected(self, _name, limit):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {**self.S3_PAYLOAD, "is_trial": True, "trial_record_limit": limit},
         )
 
@@ -1242,7 +1242,7 @@ class TestBatchImportTrialAPI(APIBaseTest):
         self._create_import(is_trial=False)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {**self.S3_PAYLOAD, "is_trial": True},
         )
 
@@ -1251,7 +1251,7 @@ class TestBatchImportTrialAPI(APIBaseTest):
     def test_real_import_allowed_while_trial_is_running(self):
         self._create_import(is_trial=True)
 
-        response = self.client.post(f"/api/projects/{self.team.id}/managed_migrations", self.S3_PAYLOAD)
+        response = self.client.post(f"/v1/projects/{self.team.id}/managed_migrations", self.S3_PAYLOAD)
 
         self.assertEqual(response.status_code, 201, response.json())
 
@@ -1259,7 +1259,7 @@ class TestBatchImportTrialAPI(APIBaseTest):
         existing = self._create_import(is_trial=True)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/managed_migrations",
+            f"/v1/projects/{self.team.id}/managed_migrations",
             {**self.S3_PAYLOAD, "is_trial": True},
         )
 
@@ -1270,7 +1270,7 @@ class TestBatchImportTrialAPI(APIBaseTest):
     def test_trial_records_rejects_non_trial_imports(self):
         batch_import = self._create_import(is_trial=False)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/managed_migrations/{batch_import.id}/trial_records")
+        response = self.client.get(f"/v1/projects/{self.team.id}/managed_migrations/{batch_import.id}/trial_records")
 
         self.assertEqual(response.status_code, 400)
 
@@ -1291,7 +1291,7 @@ class TestBatchImportTrialAPI(APIBaseTest):
             return_value=records,
         ) as mock_read:
             response = self.client.get(
-                f"/api/projects/{self.team.id}/managed_migrations/{batch_import.id}/trial_records?page=1"
+                f"/v1/projects/{self.team.id}/managed_migrations/{batch_import.id}/trial_records?page=1"
             )
 
         self.assertEqual(response.status_code, 200)
@@ -1314,7 +1314,7 @@ class TestBatchImportTrialAPI(APIBaseTest):
             state={"parts": [], "trial": {"records_emitted": 0, "pages_written": 0, "summary": {"source_records": 0}}},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/managed_migrations/{batch_import.id}/trial_records")
+        response = self.client.get(f"/v1/projects/{self.team.id}/managed_migrations/{batch_import.id}/trial_records")
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
@@ -1336,7 +1336,7 @@ class TestBatchImportTrialAPI(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/managed_migrations/{batch_import.id}/trial_records?page=2"
+            f"/v1/projects/{self.team.id}/managed_migrations/{batch_import.id}/trial_records?page=2"
         )
 
         self.assertEqual(response.status_code, 404)
@@ -1354,7 +1354,7 @@ class TestBatchImportTrialAPI(APIBaseTest):
             side_effect=trial_storage.TrialResultsUnavailable("gone"),
         ):
             response = self.client.get(
-                f"/api/projects/{self.team.id}/managed_migrations/{batch_import.id}/trial_records"
+                f"/v1/projects/{self.team.id}/managed_migrations/{batch_import.id}/trial_records"
             )
 
         self.assertEqual(response.status_code, 410)
@@ -1362,7 +1362,7 @@ class TestBatchImportTrialAPI(APIBaseTest):
     def test_promote_creates_real_import_with_capture_sink_and_copied_secrets(self):
         trial = self._create_import(status=BatchImport.Status.COMPLETED, is_trial=True)
 
-        response = self.client.post(f"/api/projects/{self.team.id}/managed_migrations/{trial.id}/promote")
+        response = self.client.post(f"/v1/projects/{self.team.id}/managed_migrations/{trial.id}/promote")
 
         self.assertEqual(response.status_code, 201, response.json())
         promoted = BatchImport.objects.get(id=response.json()["id"])
@@ -1377,14 +1377,14 @@ class TestBatchImportTrialAPI(APIBaseTest):
     def test_promote_is_single_use(self):
         trial = self._create_import(status=BatchImport.Status.COMPLETED, is_trial=True)
 
-        first = self.client.post(f"/api/projects/{self.team.id}/managed_migrations/{trial.id}/promote")
+        first = self.client.post(f"/v1/projects/{self.team.id}/managed_migrations/{trial.id}/promote")
         self.assertEqual(first.status_code, 201, first.json())
 
         # Once the promoted import is no longer running, the RUNNING-conflict
         # check no longer applies — re-promotion must still be rejected.
         BatchImport.objects.filter(id=first.json()["id"]).update(status=BatchImport.Status.COMPLETED)
 
-        second = self.client.post(f"/api/projects/{self.team.id}/managed_migrations/{trial.id}/promote")
+        second = self.client.post(f"/v1/projects/{self.team.id}/managed_migrations/{trial.id}/promote")
 
         self.assertEqual(second.status_code, 400)
         self.assertIn("already been promoted", second.json()["error"])
@@ -1399,7 +1399,7 @@ class TestBatchImportTrialAPI(APIBaseTest):
     def test_promote_rejects_ineligible_jobs(self, _name, is_trial, job_status):
         batch_import = self._create_import(status=job_status, is_trial=is_trial)
 
-        response = self.client.post(f"/api/projects/{self.team.id}/managed_migrations/{batch_import.id}/promote")
+        response = self.client.post(f"/v1/projects/{self.team.id}/managed_migrations/{batch_import.id}/promote")
 
         self.assertEqual(response.status_code, 400)
 
@@ -1407,7 +1407,7 @@ class TestBatchImportTrialAPI(APIBaseTest):
         trial = self._create_import(status=BatchImport.Status.COMPLETED, is_trial=True)
         self._create_import(is_trial=False)
 
-        response = self.client.post(f"/api/projects/{self.team.id}/managed_migrations/{trial.id}/promote")
+        response = self.client.post(f"/v1/projects/{self.team.id}/managed_migrations/{trial.id}/promote")
 
         self.assertEqual(response.status_code, 400)
         self.assertIn("Cannot create a new batch import", response.json()["error"])

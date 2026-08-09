@@ -179,7 +179,7 @@ async def test_file_download_retrieve_returns_error(
     await async_client.aforce_login(user)
 
     status_response = await async_client.get(
-        f"/api/projects/{team.pk}/file_download_batch_exports/{run.id}",
+        f"/v1/projects/{team.pk}/file_download_batch_exports/{run.id}",
     )
     data = status_response.json()
     assert data["status"] == "Failed", status_response.json()
@@ -220,7 +220,7 @@ async def test_file_download_retrieve_returns_files(
     await async_client.aforce_login(user)
 
     status_response = await async_client.get(
-        f"/api/projects/{team.pk}/file_download_batch_exports/{run.id}",
+        f"/v1/projects/{team.pk}/file_download_batch_exports/{run.id}",
     )
     data = status_response.json()
     assert data["status"] == "Completed", status_response.json()
@@ -252,7 +252,7 @@ async def test_file_download_retrieve_returns_empty_when_no_data_exported(
     await async_client.aforce_login(user)
 
     status_response = await async_client.get(
-        f"/api/projects/{team.pk}/file_download_batch_exports/{run.id}",
+        f"/v1/projects/{team.pk}/file_download_batch_exports/{run.id}",
     )
     data = status_response.json()
     assert data["status"] == "Completed", status_response.json()
@@ -281,7 +281,7 @@ async def test_file_download_download_fails_when_not_completed(
         )
 
         response = await async_client.get(
-            f"/api/projects/{team.pk}/file_download_batch_exports/{run.id}/download",
+            f"/v1/projects/{team.pk}/file_download_batch_exports/{run.id}/download",
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -321,18 +321,18 @@ async def test_file_download_download(
     # The first file is special as it should also be the one returned when no part is
     # passed.
     response = await async_client.get(
-        f"/api/projects/{team.pk}/file_download_batch_exports/{run.id}/download",
+        f"/v1/projects/{team.pk}/file_download_batch_exports/{run.id}/download",
     )
     no_part_pre_signed_url = urlsplit(response["Location"])
 
     first_file = file_downloads[0]
     response = await async_client.get(
-        f"/api/projects/{team.pk}/file_download_batch_exports/{run.id}/download/{first_file.id}",
+        f"/v1/projects/{team.pk}/file_download_batch_exports/{run.id}/download/{first_file.id}",
     )
     first_file_pre_signed_url = urlsplit(response["Location"])
 
     response = await async_client.get(
-        f"/api/projects/{team.pk}/file_download_batch_exports/{run.id}/download/0",
+        f"/v1/projects/{team.pk}/file_download_batch_exports/{run.id}/download/0",
     )
     first_index_pre_signed_url = urlsplit(response["Location"])
 
@@ -348,12 +348,12 @@ async def test_file_download_download(
 
     for index, file_download in enumerate(file_downloads[1:], start=1):
         response = await async_client.get(
-            f"/api/projects/{team.pk}/file_download_batch_exports/{run.id}/download/{file_download.id}",
+            f"/v1/projects/{team.pk}/file_download_batch_exports/{run.id}/download/{file_download.id}",
         )
         file_pre_signed_url = urlsplit(response["Location"])
 
         response = await async_client.get(
-            f"/api/projects/{team.pk}/file_download_batch_exports/{run.id}/download/{index}",
+            f"/v1/projects/{team.pk}/file_download_batch_exports/{run.id}/download/{index}",
         )
         index_pre_signed_url = urlsplit(response["Location"])
 
@@ -390,7 +390,7 @@ async def test_file_download_create_rejects_when_concurrency_limit_reached(
     await async_client.aforce_login(user)
 
     response = await async_client.post(
-        f"/api/projects/{team.pk}/file_download_batch_exports",
+        f"/v1/projects/{team.pk}/file_download_batch_exports",
         {
             "file": {
                 "format": "Parquet",
@@ -421,7 +421,7 @@ async def test_file_download_create_rejects_future_data_interval_end(
 
     data_interval_end_iso = (now + dt.timedelta(hours=1)).isoformat()
     response = await async_client.post(
-        f"/api/projects/{team.pk}/file_download_batch_exports",
+        f"/v1/projects/{team.pk}/file_download_batch_exports",
         {
             "file": {
                 "format": "Parquet",
@@ -480,7 +480,7 @@ async def test_file_download_list_returns_run_ids_and_statuses(
 
     await async_client.aforce_login(user)
 
-    response = await async_client.get(f"/api/projects/{team.pk}/file_download_batch_exports")
+    response = await async_client.get(f"/v1/projects/{team.pk}/file_download_batch_exports")
 
     assert response.status_code == status.HTTP_200_OK, response.json()
     data = response.json()
@@ -506,7 +506,7 @@ async def test_file_download_end_to_end(
         workflow_runner=UnsandboxedWorkflowRunner(),
     ):
         response = await async_client.post(
-            f"/api/projects/{team.pk}/file_download_batch_exports",
+            f"/v1/projects/{team.pk}/file_download_batch_exports",
             {
                 "file": {
                     "format": "Parquet",
@@ -528,7 +528,7 @@ async def test_file_download_end_to_end(
         files = None
         while True:
             status_response = await async_client.get(
-                f"/api/projects/{team.pk}/file_download_batch_exports/{run_id}",
+                f"/v1/projects/{team.pk}/file_download_batch_exports/{run_id}",
             )
             data = status_response.json()
             assert data["status"] in ("Starting", "Running", "Completed"), status_response.json()
@@ -547,7 +547,7 @@ async def test_file_download_end_to_end(
 
     assert len(files) == 1
     response = await async_client.get(
-        f"/api/projects/{team.pk}/file_download_batch_exports/{run_id}/download/{files[0]}",
+        f"/v1/projects/{team.pk}/file_download_batch_exports/{run_id}/download/{files[0]}",
     )
     assert response.status_code == 302
     pre_signed_url = response["Location"]
@@ -594,7 +594,7 @@ async def test_file_download_cancel_mocked(
     with unittest.mock.patch("products.batch_exports.backend.api.file_download.sync_connect") as mocked_connect:
         mocked_connect.return_value = mocked_client
         status_response = await async_client.post(
-            f"/api/projects/{team.pk}/file_download_batch_exports/{run.id}/cancel",
+            f"/v1/projects/{team.pk}/file_download_batch_exports/{run.id}/cancel",
         )
 
     mocked_client.get_workflow_handle.assert_called_once_with(workflow_id=run.workflow_id)
@@ -654,7 +654,7 @@ class TestFileDownloadInsightsQL:
 
         with unittest.mock.patch(self.INSIGHTSQL_FLAG_PATCH_TARGET, return_value=False) as mock_flag:
             response = await async_client.post(
-                f"/api/projects/{team.pk}/file_download_batch_exports",
+                f"/v1/projects/{team.pk}/file_download_batch_exports",
                 {
                     "file": {"format": "Parquet"},
                     "model": "insightsql",
@@ -743,7 +743,7 @@ class TestFileDownloadInsightsQL:
                 body[key] = value
 
         response = await async_client.post(
-            f"/api/projects/{team.pk}/file_download_batch_exports",
+            f"/v1/projects/{team.pk}/file_download_batch_exports",
             body,
             content_type="application/json",
         )
@@ -773,7 +773,7 @@ class TestFileDownloadInsightsQL:
 
         before = dt.datetime.now(dt.UTC)
         response = await async_client.post(
-            f"/api/projects/{team.pk}/file_download_batch_exports",
+            f"/v1/projects/{team.pk}/file_download_batch_exports",
             {
                 "file": {"format": "Parquet"},
                 "model": "insightsql",
@@ -807,7 +807,9 @@ class TestFileDownloadInsightsQL:
 
     @pytest.mark.usefixtures("override_file_download_settings", "enable_insightsql_flag")
     @pytest.mark.django_db(transaction=True)
-    async def test_end_to_end(self, async_client: AsyncClient, temporal_client, team, user, insightsql_export_test_events):
+    async def test_end_to_end(
+        self, async_client: AsyncClient, temporal_client, team, user, insightsql_export_test_events
+    ):
         """A insightsql export produces a downloadable file whose contents match the query results."""
         await async_client.aforce_login(user)
 
@@ -824,7 +826,7 @@ class TestFileDownloadInsightsQL:
             workflow_runner=UnsandboxedWorkflowRunner(),
         ):
             response = await async_client.post(
-                f"/api/projects/{team.pk}/file_download_batch_exports",
+                f"/v1/projects/{team.pk}/file_download_batch_exports",
                 {
                     "file": {"format": "Parquet", "compression": "zstd"},
                     "model": "insightsql",
@@ -841,7 +843,7 @@ class TestFileDownloadInsightsQL:
             files = None
             while True:
                 status_response = await async_client.get(
-                    f"/api/projects/{team.pk}/file_download_batch_exports/{run_id}",
+                    f"/v1/projects/{team.pk}/file_download_batch_exports/{run_id}",
                 )
                 data = status_response.json()
                 assert data["status"] in ("Starting", "Running", "Completed"), status_response.json()
@@ -858,7 +860,7 @@ class TestFileDownloadInsightsQL:
 
         assert files is not None and len(files) == 1
         response = await async_client.get(
-            f"/api/projects/{team.pk}/file_download_batch_exports/{run_id}/download/{files[0]}",
+            f"/v1/projects/{team.pk}/file_download_batch_exports/{run_id}/download/{files[0]}",
         )
         assert response.status_code == 302
         pre_signed_url = response["Location"]

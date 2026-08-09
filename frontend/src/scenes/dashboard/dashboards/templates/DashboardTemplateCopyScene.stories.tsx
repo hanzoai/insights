@@ -70,13 +70,13 @@ const organizationWithSingleProject: OrganizationType = {
     teams: [MOCK_DEFAULT_TEAM],
 }
 
-const templateDetailPath = `/api/projects/:team_id/dashboard_templates/${SOURCE_TEMPLATE_ID}/`
+const templateDetailPath = `/v1/projects/:team_id/dashboard_templates/${SOURCE_TEMPLATE_ID}/`
 
-const copyBetweenProjectsPath = '/api/projects/:team_id/dashboard_templates/copy_between_projects/'
+const copyBetweenProjectsPath = '/v1/projects/:team_id/dashboard_templates/copy_between_projects/'
 
 const baseMocks = {
     get: {
-        '/api/organizations/@current/': (): [number, OrganizationType] => [200, organizationWithTwoProjects],
+        '/v1/organizations/@current/': (): [number, OrganizationType] => [200, organizationWithTwoProjects],
         [templateDetailPath]: (): [number, DashboardTemplateType] => [200, mockSourceTemplate],
     },
     post: {
@@ -142,7 +142,7 @@ export const Default: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/organizations/@current/': (): [number, OrganizationType] => [
+                '/v1/organizations/@current/': (): [number, OrganizationType] => [
                     200,
                     organizationWithSeveralProjects,
                 ],
@@ -172,7 +172,7 @@ export const LoadError: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/organizations/@current/': (): [number, OrganizationType] => [200, organizationWithTwoProjects],
+                '/v1/organizations/@current/': (): [number, OrganizationType] => [200, organizationWithTwoProjects],
                 [templateDetailPath]: (): [number] => [404],
             },
         }),
@@ -188,7 +188,7 @@ export const NoOtherProjectsInOrganization: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/organizations/@current/': (): [number, OrganizationType] => [200, organizationWithSingleProject],
+                '/v1/organizations/@current/': (): [number, OrganizationType] => [200, organizationWithSingleProject],
                 [templateDetailPath]: [200, mockSourceTemplate],
             },
         }),

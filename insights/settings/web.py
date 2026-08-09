@@ -130,6 +130,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # First, so the resolver and every middleware below see one spelling of the API path.
+    "insights.middleware.ApiRewriteMiddleware",
     "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "insights.gzip_middleware.ScopedGZipMiddleware",
     "insights.middleware.per_request_logging_context_middleware",
@@ -150,7 +152,7 @@ MIDDLEWARE = [
     "insights.middleware.CSPMiddleware",
     "django.middleware.common.CommonMiddleware",
     # Below CorsMiddleware so responses get CORS headers; above auth/CSRF and URL
-    # resolution so the /api/environments → /api/projects rewrite is in place before the
+    # resolution so the /v1/environments → /v1/projects rewrite is in place before the
     # request is routed and authenticated.
     "insights.middleware.EnvironmentsRewriteMiddleware",
     "insights.middleware.CsrfOrKeyViewMiddleware",
@@ -262,7 +264,7 @@ LOGIN_URL = "/login"
 LOGOUT_URL = "/logout"
 LOGIN_REDIRECT_URL = "/"
 APPEND_SLASH = False
-CORS_URLS_REGEX = r"^(/site_app/|/array/|/static/|/oauth/token/?|/toolbar_oauth/check|/api/(?!early_access_features|surveys|web_experiments).*$)"
+CORS_URLS_REGEX = r"^(/site_app/|/array/|/static/|/oauth/token/?|/toolbar_oauth/check|/v1/(?!early_access_features|surveys|web_experiments).*$)"
 CORS_ALLOW_HEADERS = default_headers + CORS_ALLOWED_TRACING_HEADERS
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
@@ -883,7 +885,7 @@ GZIP_POST_RESPONSE_ALLOW_LIST = get_list(
         "GZIP_POST_RESPONSE_ALLOW_LIST",
         ",".join(
             [
-                "^/?api/(environments|projects)/\\d+/query/?$",
+                "^/?v1/(environments|projects)/\\d+/query/?$",
             ]
         ),
     )
@@ -895,35 +897,35 @@ GZIP_RESPONSE_ALLOW_LIST = get_list(
         ",".join(
             [
                 "^/?external_surveys/[^/]+/?$",
-                "^/?api/plugin_config/\\d+/frontend/?$",
-                "^/?api/(environments|projects)/@current/property_definitions/?$",
-                "^/?api/(environments|projects)/\\d+/event_definitions/?$",
-                "^/?api/(environments|projects)/\\d+/insights/(trend|funnel)/?$",
-                "^/?api/(environments|projects)/\\d+/insights/?$",
-                "^/?api/(environments|projects)/\\d+/insights/\\d+/?$",
-                "^/?api/(environments|projects)/\\d+/dashboards/\\d+/?$",
-                "^/?api/(environments|projects)/\\d+/dashboards/?$",
-                "^/?api/(environments|projects)/\\d+/actions/?$",
-                "^/?api/(environments|projects)/\\d+/session_recordings/?$",
-                "^/?api/(environments|projects)/\\d+/session_recordings/.*$",
-                "^/?api/(environments|projects)/\\d+/session_recording_playlists/?$",
-                "^/?api/(environments|projects)/\\d+/session_recording_playlists/.*$",
-                "^/?api/(environments|projects)/\\d+/performance_events/?$",
-                "^/?api/(environments|projects)/\\d+/performance_events/.*$",
-                "^/?api/(environments|projects)/\\d+/exports/\\d+/content/?$",
-                "^/?api/(environments|projects)/\\d+/my_notifications/?$",
-                "^/?api/(environments|projects)/\\d+/uploaded_media/?$",
+                "^/?v1/plugin_config/\\d+/frontend/?$",
+                "^/?v1/(environments|projects)/@current/property_definitions/?$",
+                "^/?v1/(environments|projects)/\\d+/event_definitions/?$",
+                "^/?v1/(environments|projects)/\\d+/insights/(trend|funnel)/?$",
+                "^/?v1/(environments|projects)/\\d+/insights/?$",
+                "^/?v1/(environments|projects)/\\d+/insights/\\d+/?$",
+                "^/?v1/(environments|projects)/\\d+/dashboards/\\d+/?$",
+                "^/?v1/(environments|projects)/\\d+/dashboards/?$",
+                "^/?v1/(environments|projects)/\\d+/actions/?$",
+                "^/?v1/(environments|projects)/\\d+/session_recordings/?$",
+                "^/?v1/(environments|projects)/\\d+/session_recordings/.*$",
+                "^/?v1/(environments|projects)/\\d+/session_recording_playlists/?$",
+                "^/?v1/(environments|projects)/\\d+/session_recording_playlists/.*$",
+                "^/?v1/(environments|projects)/\\d+/performance_events/?$",
+                "^/?v1/(environments|projects)/\\d+/performance_events/.*$",
+                "^/?v1/(environments|projects)/\\d+/exports/\\d+/content/?$",
+                "^/?v1/(environments|projects)/\\d+/my_notifications/?$",
+                "^/?v1/(environments|projects)/\\d+/uploaded_media/?$",
                 "^/uploaded_media/.*$",
-                "^/api/element/stats/?$",
-                "^/api/(environments|projects)/\\d+/cohorts/?$",
-                "^/api/(environments|projects)/\\d+/persons/?$",
-                "^/api/organizations/@current/plugins/?$",
-                "^api/(environments|projects)/@current/feature_flags/my_flags/?$",
-                "^/?api/(environments|projects)/\\d+/query/?$",
+                "^/v1/element/stats/?$",
+                "^/v1/(environments|projects)/\\d+/cohorts/?$",
+                "^/v1/(environments|projects)/\\d+/persons/?$",
+                "^/v1/organizations/@current/plugins/?$",
+                "^v1/(environments|projects)/@current/feature_flags/my_flags/?$",
+                "^/?v1/(environments|projects)/\\d+/query/?$",
                 # Deploy-static source catalog (no user input or secrets reflected): several
                 # hundred KB of JSON that compresses ~7x.
-                "^/?api/(environments|projects)/(\\d+|@current)/external_data_sources/wizard/?$",
-                "^/?api/instance_status/?$",
+                "^/?v1/(environments|projects)/(\\d+|@current)/external_data_sources/wizard/?$",
+                "^/?v1/instance_status/?$",
                 "^/array/.*$",
             ]
         ),
@@ -1008,12 +1010,12 @@ KAFKA_PRODUCE_ACK_TIMEOUT_SECONDS = int(os.getenv("KAFKA_PRODUCE_ACK_TIMEOUT_SEC
 API_QUERIES_ENABLED = get_from_env("API_QUERIES_ENABLED", False, type_cast=str_to_bool)
 
 ####
-# /api/environments deprecation
+# /v1/environments deprecation
 
-# Requests to /api/environments/* are served through the equivalent /api/projects/*
+# Requests to /v1/environments/* are served through the equivalent /v1/projects/*
 # viewset via an in-process path rewrite — see insights.middleware.EnvironmentsRewriteMiddleware.
 # ISO date announced to integrators via the `Sunset` response header (RFC 8594) on
-# /api/environments/* responses. Empty string omits the header.
+# /v1/environments/* responses. Empty string omits the header.
 API_ENVIRONMENTS_SUNSET_DATE = get_from_env("API_ENVIRONMENTS_SUNSET_DATE", "2026-07-31")
 
 # Query service SLO sampling rate. Each QueryRunner.run() call emits two events

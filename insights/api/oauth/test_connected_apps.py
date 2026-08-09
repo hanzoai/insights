@@ -46,7 +46,7 @@ class TestConnectedAppsViewSet(APIBaseTest):
         app = self._create_app("Claude Code", logo_uri="https://example.com/logo.png")
         self._create_token(app)
 
-        response = self.client.get("/api/oauth/connected-apps/")
+        response = self.client.get("/v1/oauth/connected-apps/")
 
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()) == 1
@@ -61,7 +61,7 @@ class TestConnectedAppsViewSet(APIBaseTest):
         app = self._create_app()
         self._create_token(app, expires_hours=-1)
 
-        response = self.client.get("/api/oauth/connected-apps/")
+        response = self.client.get("/v1/oauth/connected-apps/")
 
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()) == 0
@@ -71,7 +71,7 @@ class TestConnectedAppsViewSet(APIBaseTest):
         app = self._create_app()
         self._create_token(app, user=other_user)
 
-        response = self.client.get("/api/oauth/connected-apps/")
+        response = self.client.get("/v1/oauth/connected-apps/")
 
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()) == 0
@@ -81,7 +81,7 @@ class TestConnectedAppsViewSet(APIBaseTest):
         self._create_token(app, scope="read")
         self._create_token(app, scope="write")
 
-        response = self.client.get("/api/oauth/connected-apps/")
+        response = self.client.get("/v1/oauth/connected-apps/")
 
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()) == 1
@@ -93,7 +93,7 @@ class TestConnectedAppsViewSet(APIBaseTest):
         self._create_token(app1)
         self._create_token(app2)
 
-        response = self.client.get("/api/oauth/connected-apps/")
+        response = self.client.get("/v1/oauth/connected-apps/")
 
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()) == 2
@@ -102,7 +102,7 @@ class TestConnectedAppsViewSet(APIBaseTest):
         app = self._create_app(is_verified=True, is_first_party=True)
         self._create_token(app)
 
-        response = self.client.get("/api/oauth/connected-apps/")
+        response = self.client.get("/v1/oauth/connected-apps/")
 
         data = response.json()[0]
         assert data["is_verified"] is True
@@ -113,7 +113,7 @@ class TestConnectedAppsViewSet(APIBaseTest):
         self._create_token(app)
         self._create_token(app, scope="admin")
 
-        response = self.client.post(f"/api/oauth/connected-apps/{app.id}/revoke/")
+        response = self.client.post(f"/v1/oauth/connected-apps/{app.id}/revoke/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert OAuthAccessToken.objects.filter(user=self.user, application=app).count() == 0
@@ -128,7 +128,7 @@ class TestConnectedAppsViewSet(APIBaseTest):
             access_token=access_token,
         )
 
-        self.client.post(f"/api/oauth/connected-apps/{app.id}/revoke/")
+        self.client.post(f"/v1/oauth/connected-apps/{app.id}/revoke/")
 
         assert OAuthRefreshToken.objects.filter(user=self.user, application=app, revoked__isnull=True).count() == 0
 
@@ -145,7 +145,7 @@ class TestConnectedAppsViewSet(APIBaseTest):
             code_challenge_method="S256",
         )
 
-        self.client.post(f"/api/oauth/connected-apps/{app.id}/revoke/")
+        self.client.post(f"/v1/oauth/connected-apps/{app.id}/revoke/")
 
         assert OAuthGrant.objects.filter(user=self.user, application=app).count() == 0
 
@@ -155,12 +155,12 @@ class TestConnectedAppsViewSet(APIBaseTest):
         self._create_token(app)
         self._create_token(app, user=other_user)
 
-        self.client.post(f"/api/oauth/connected-apps/{app.id}/revoke/")
+        self.client.post(f"/v1/oauth/connected-apps/{app.id}/revoke/")
 
         assert OAuthAccessToken.objects.filter(user=other_user, application=app).count() == 1
 
     def test_revoke_nonexistent_app_returns_404(self):
-        response = self.client.post(f"/api/oauth/connected-apps/{uuid.uuid4()}/revoke/")
+        response = self.client.post(f"/v1/oauth/connected-apps/{uuid.uuid4()}/revoke/")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -168,18 +168,18 @@ class TestConnectedAppsViewSet(APIBaseTest):
         app = self._create_app()
         self._create_token(app, expires_hours=-1)
 
-        response = self.client.post(f"/api/oauth/connected-apps/{app.id}/revoke/")
+        response = self.client.post(f"/v1/oauth/connected-apps/{app.id}/revoke/")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_unauthenticated_request_is_rejected(self):
         unauthenticated_client = APIClient()
-        response = unauthenticated_client.get("/api/oauth/connected-apps/")
+        response = unauthenticated_client.get("/v1/oauth/connected-apps/")
 
         assert response.status_code in [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN]
 
     def test_list_returns_empty_when_no_connected_apps(self):
-        response = self.client.get("/api/oauth/connected-apps/")
+        response = self.client.get("/v1/oauth/connected-apps/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == []

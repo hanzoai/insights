@@ -113,7 +113,7 @@ class TestCreateFlagGateAPI(APIBaseTest):
         self._enable_policy()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {"key": "born-active", "active": True, "filters": {"groups": [{"rollout_percentage": 100}]}},
             format="json",
         )
@@ -128,7 +128,7 @@ class TestCreateFlagGateAPI(APIBaseTest):
         self._enable_policy()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {"key": "born-active-implicit", "filters": {"groups": [{"rollout_percentage": 100}]}},
             format="json",
         )
@@ -141,7 +141,7 @@ class TestCreateFlagGateAPI(APIBaseTest):
         self._enable_policy()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {"key": "born-disabled", "active": False, "filters": {"groups": [{"rollout_percentage": 100}]}},
             format="json",
         )
@@ -151,7 +151,7 @@ class TestCreateFlagGateAPI(APIBaseTest):
 
     def test_create_active_flag_without_policy_succeeds(self, _mock_enabled):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {"key": "no-policy", "active": True, "filters": {"groups": [{"rollout_percentage": 100}]}},
             format="json",
         )
@@ -163,7 +163,7 @@ class TestCreateFlagGateAPI(APIBaseTest):
         self._enable_policy()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {"key": "born-active", "active": True, "filters": {"groups": [{"rollout_percentage": 100}]}},
             format="json",
         )
@@ -187,7 +187,7 @@ class TestCreateFlagGateAPI(APIBaseTest):
         self._update_policy({"type": "before_after", "field": "rollout_percentage", "operator": ">", "value": 0})
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {"key": "rollout-gated", "active": False, "filters": {"groups": [{"rollout_percentage": 100}]}},
             format="json",
         )
@@ -210,7 +210,7 @@ class TestCreateFlagGateAPI(APIBaseTest):
         self._update_policy({"type": "before_after", "field": "rollout_percentage", "operator": ">", "value": 0})
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {"key": "born-active-rollout", "active": True, "filters": {"groups": [{"rollout_percentage": 100}]}},
             format="json",
         )
@@ -227,7 +227,7 @@ class TestCreateFlagGateAPI(APIBaseTest):
         self._update_policy({"type": "before_after", "field": "rollout_percentage", "operator": ">", "value": 0})
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {"key": "remote-config-flag", "active": False, "is_remote_configuration": True},
             format="json",
         )
@@ -246,7 +246,7 @@ class TestCreateFlagGateAPI(APIBaseTest):
         self._enable_policy()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {"key": "born-active", "active": True, "filters": {"groups": [{"rollout_percentage": 100}]}},
             format="json",
         )

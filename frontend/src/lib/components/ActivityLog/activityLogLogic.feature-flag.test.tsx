@@ -12,7 +12,7 @@ describe('the activity log logic', () => {
     describe('humanizing feature flags', () => {
         const featureFlagsTestSetup = makeTestSetup(
             ActivityScope.FEATURE_FLAG,
-            `/api/projects/${MOCK_TEAM_ID}/feature_flags/7/activity/`
+            `/v1/projects/${MOCK_TEAM_ID}/feature_flags/7/activity/`
         )
 
         it('can handle change of key', async () => {

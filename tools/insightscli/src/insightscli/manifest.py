@@ -12,10 +12,10 @@ import yaml
 def _find_repo_root() -> Path:
     """Find repo root by walking up from cwd looking for insightscli.yaml."""
     # Check env var first
-    if env_manifest := os.environ.get("HOGLI_MANIFEST"):
+    if env_manifest := os.environ.get("INSIGHTSCLI_MANIFEST"):
         p = Path(env_manifest).resolve()
         if not p.is_file():
-            raise ValueError(f"HOGLI_MANIFEST={env_manifest!r} does not point to an existing file")
+            raise ValueError(f"INSIGHTSCLI_MANIFEST={env_manifest!r} does not point to an existing file")
         return p.parent
 
     # Walk up from cwd looking for insightscli.yaml
@@ -31,10 +31,10 @@ def _find_repo_root() -> Path:
 def _find_manifest_file(repo_root: Path) -> Path:
     """Find manifest file location."""
     # Env var takes precedence
-    if env_manifest := os.environ.get("HOGLI_MANIFEST"):
+    if env_manifest := os.environ.get("INSIGHTSCLI_MANIFEST"):
         p = Path(env_manifest).resolve()
         if not p.is_file():
-            raise ValueError(f"HOGLI_MANIFEST={env_manifest!r} does not point to an existing file")
+            raise ValueError(f"INSIGHTSCLI_MANIFEST={env_manifest!r} does not point to an existing file")
         return p
 
     return repo_root / "insightscli.yaml"

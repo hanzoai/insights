@@ -151,7 +151,7 @@ class TestSyncBillingFlows(APIBaseTest):
 
         with self.captureOnCommitCallbacks(execute=True):
             response = self.client.patch(
-                f"/api/organizations/@current/members/{member.uuid}/",
+                f"/v1/organizations/@current/members/{member.uuid}/",
                 {"level": OrganizationMembership.Level.ADMIN.value},
             )
 
@@ -166,7 +166,7 @@ class TestSyncBillingFlows(APIBaseTest):
         mock_delay.reset_mock()
 
         with self.captureOnCommitCallbacks(execute=True):
-            response = self.client.delete(f"/api/organizations/@current/members/{member.uuid}/")
+            response = self.client.delete(f"/v1/organizations/@current/members/{member.uuid}/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         mock_delay.assert_called_once_with(str(self.organization.id))

@@ -1961,7 +1961,8 @@ function MenuTrigger({
     const dwhGroup = groups.find((g) => g.type === TaxonomicFilterGroupType.DataWarehouse)
     const insightsqlGroup = groups.find((g) => g.type === TaxonomicFilterGroupType.InsightsQLExpression)
     const showDwhShortcut = shortcutGroups.includes(TaxonomicFilterGroupType.DataWarehouse) && !!dwhGroup
-    const showHogqlShortcut = shortcutGroups.includes(TaxonomicFilterGroupType.InsightsQLExpression) && !!insightsqlGroup
+    const showInsightsqlShortcut =
+        shortcutGroups.includes(TaxonomicFilterGroupType.InsightsQLExpression) && !!insightsqlGroup
 
     return (
         <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
@@ -2028,7 +2029,7 @@ function MenuTrigger({
                         </DropdownMenuGroup>
                     </>
                 )}
-                {(showDwhShortcut || showHogqlShortcut) && <DropdownMenuSeparator />}
+                {(showDwhShortcut || showInsightsqlShortcut) && <DropdownMenuSeparator />}
                 {showDwhShortcut && dwhGroup && (
                     <DropdownMenuItem
                         onClick={() => {
@@ -2041,7 +2042,7 @@ function MenuTrigger({
                         {dwhGroup.name}
                     </DropdownMenuItem>
                 )}
-                {showHogqlShortcut && insightsqlGroup && (
+                {showInsightsqlShortcut && insightsqlGroup && (
                     <DropdownMenuItem
                         onClick={() => {
                             setMenuOpen(false)

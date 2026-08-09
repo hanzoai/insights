@@ -37,13 +37,13 @@ class TestLLMModelsListResponseSerializer(SimpleTestCase):
 
 class TestLLMModelsViewSet(APIBaseTest):
     def test_requires_provider_query_param(self):
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/models/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/models/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("provider", response.data["detail"].lower())
 
     def test_rejects_invalid_provider(self):
         response = self.client.get(
-            f"/api/environments/{self.team.id}/llm_analytics/models/?provider=not-a-real-provider"
+            f"/v1/environments/{self.team.id}/llm_analytics/models/?provider=not-a-real-provider"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("invalid provider", response.data["detail"].lower())
@@ -52,7 +52,7 @@ class TestLLMModelsViewSet(APIBaseTest):
     def test_returns_models_for_valid_provider(self, mock_config_cls):
         mock_config_cls.return_value.get_available_models.return_value = ["gpt-4o-mini", "gpt-4o"]
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/models/?provider=openai")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/models/?provider=openai")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("models", response.data)
@@ -61,5 +61,5 @@ class TestLLMModelsViewSet(APIBaseTest):
 
     def test_unauthenticated_user_cannot_list_models(self):
         self.client.logout()
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/models/?provider=openai")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/models/?provider=openai")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

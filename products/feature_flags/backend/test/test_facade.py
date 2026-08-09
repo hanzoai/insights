@@ -505,9 +505,7 @@ class TestReplaceVariantDistribution:
         current_filters = {
             "groups": [
                 {
-                    "properties": [
-                        {"key": "email", "type": "person", "value": "@hanzo.ai", "operator": "icontains"}
-                    ],
+                    "properties": [{"key": "email", "type": "person", "value": "@hanzo.ai", "operator": "icontains"}],
                     "rollout_percentage": 50,
                     "variant": "test",
                 }
@@ -560,7 +558,7 @@ class TestEarlyAccessFeatureSystemWrites(APIBaseTest):
     @patch("products.approvals.backend.decorators._is_approvals_enabled", return_value=True)
     def test_destroy_and_demote_never_require_approval(self, _name, method, expected_status, _mock_enabled):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/early_access_feature/",
+            f"/v1/projects/{self.team.id}/early_access_feature/",
             data={"name": "Gated feature", "stage": "beta"},
             format="json",
         )
@@ -582,7 +580,7 @@ class TestEarlyAccessFeatureSystemWrites(APIBaseTest):
             created_by=self.user,
         )
 
-        url = f"/api/projects/{self.team.id}/early_access_feature/{feature_id}"
+        url = f"/v1/projects/{self.team.id}/early_access_feature/{feature_id}"
         if method == "delete":
             response = self.client.delete(f"{url}/")
         else:

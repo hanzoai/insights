@@ -13,7 +13,7 @@ class TestViewLinkAccessControl(WarehouseAccessControlTestMixin):
     resource = "warehouse_objects"
 
     def _list_url(self) -> str:
-        return f"/api/environments/{self.team.pk}/warehouse_view_links/"
+        return f"/v1/environments/{self.team.pk}/warehouse_view_links/"
 
     def _join_payload(self) -> dict:
         return {

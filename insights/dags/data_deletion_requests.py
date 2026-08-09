@@ -1182,7 +1182,7 @@ def delete_person_profiles_op(
     On per-person failures, errors are recorded in op metadata and the request is allowed to
     transition to COMPLETED — Postgres rows remain for the failed UUIDs and the operator can
     submit a follow-up request for them. This mirrors the best-effort semantics of the
-    `POST /api/projects/:id/persons/bulk_delete/` endpoint and avoids flipping the whole
+    `POST /v1/projects/:id/persons/bulk_delete/` endpoint and avoids flipping the whole
     request to FAILED after upstream events/recordings ops have already done their work.
     """
     if not person_removal.drop_profiles:

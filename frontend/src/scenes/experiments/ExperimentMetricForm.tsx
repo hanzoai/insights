@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react'
 
-import { IconInfo, IconPencil } from '@hanzo/icons'
 import { Banner, Input } from '@hanzo/elements'
+import { IconInfo, IconPencil } from '@hanzo/icons'
 
 import { DataWarehousePopoverField } from 'lib/components/TaxonomicFilter/types'
 import { IconOpenInNew } from 'lib/elements/icons'
 import { Label } from 'lib/elements/Label'
+import { Link } from 'lib/elements/Link'
 import { Radio } from 'lib/elements/Radio'
 import { Select } from 'lib/elements/Select'
+import { Spinner } from 'lib/elements/Spinner'
 import { Tag } from 'lib/elements/Tag'
 import { toast } from 'lib/elements/Toast'
-import { Link } from 'lib/elements/Link'
-import { Spinner } from 'lib/elements/Spinner'
 import { Tooltip } from 'lib/elements/Tooltip'
 import { ActionFilter } from 'scenes/insights/filters/ActionFilter/ActionFilter'
 import { urls } from 'scenes/urls'
@@ -117,7 +117,7 @@ const dataWarehousePopoverFields: DataWarehousePopoverField[] = [
         label: 'Events Join Key',
         description: 'The field on Insights events to match against the data warehouse join key (usually distinct_id)',
         allowInsightsQL: true,
-        hogQLOnly: true,
+        insightsQLOnly: true,
         tableName: 'events',
     },
 ]
@@ -316,8 +316,7 @@ export function ExperimentMetricForm({
                             </>
                         ) : (
                             <>
-                                Counts only after exposure event (<Tag>{resolvedExposureEvent}</Tag> by
-                                default)
+                                Counts only after exposure event (<Tag>{resolvedExposureEvent}</Tag> by default)
                             </>
                         )}
                         <Tooltip

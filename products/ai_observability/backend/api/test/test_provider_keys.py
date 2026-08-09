@@ -49,7 +49,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
 
     def test_unauthenticated_user_cannot_access_provider_keys(self):
         self.client.logout()
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/provider_keys/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     @patch("products.ai_observability.backend.api.provider_keys.validate_provider_key")
@@ -57,7 +57,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.OK, None)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/",
             {"provider": "openai", "name": "My Key", "api_key": "sk-test-key-12345"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -80,7 +80,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.OK, None)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/",
             {"provider": "openai", "name": "My Key", "api_key": "sk-test-key-12345", "set_as_active": True},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -93,7 +93,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
 
     def test_api_key_required_on_create(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/",
             {"provider": "openai", "name": "My Key"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -101,7 +101,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
 
     def test_invalid_api_key_format_rejected(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/",
             {"provider": "openai", "name": "My Key", "api_key": "invalid-key"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -112,7 +112,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.INVALID, "Invalid API key")
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/",
             {"provider": "openai", "name": "My Key", "api_key": "sk-test-invalid"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -140,7 +140,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/provider_keys/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 2)
 
@@ -158,7 +158,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["name"], "My Key")
         self.assertEqual(response.data["provider"], "openai")
@@ -175,7 +175,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/",
             {"name": "Updated Name"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -197,7 +197,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/",
             {"api_key": "sk-new-key-12345"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -220,7 +220,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/",
             {"api_key": "fw-new-key-12345"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -239,7 +239,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(LLMProviderKey.objects.count(), 0)
 
@@ -254,10 +254,10 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{other_key.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{other_key.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/provider_keys/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 0)
 
@@ -272,7 +272,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{other_key.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{other_key.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(LLMProviderKey.objects.filter(id=other_key.id).count(), 1)
 
@@ -289,7 +289,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.post(f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/validate/")
+        response = self.client.post(f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/validate/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["state"], "ok")
 
@@ -348,7 +348,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.post(f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/validate/")
+        response = self.client.post(f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/validate/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["state"], "invalid")
         self.assertEqual(response.data["error_message"], "Invalid API key")
@@ -367,7 +367,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.post(f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/validate/")
+        response = self.client.post(f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/validate/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @patch("products.ai_observability.backend.api.provider_keys.validate_provider_key")
@@ -375,7 +375,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.OK, None)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/",
             {"provider": "openrouter", "name": "OpenRouter Key", "api_key": "sk-or-v1-test-key-12345"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -391,7 +391,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.OK, None)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/",
             {"provider": "openrouter", "name": "OpenRouter Key", "api_key": "any-format-key"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -401,7 +401,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.OK, None)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/",
             {"provider": "fireworks", "name": "Fireworks Key", "api_key": "fw-test-key-12345"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -417,7 +417,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.OK, None)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/",
             {"provider": "fireworks", "name": "Fireworks Key", "api_key": "any-format-key"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -427,7 +427,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.OK, None)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/",
             {"provider": "together_ai", "name": "Together AI Key", "api_key": "together-test-key-12345"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -443,7 +443,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.OK, None)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/",
             {"provider": "together_ai", "name": "Together AI Key", "api_key": "any-format-key"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -453,7 +453,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.OK, None)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/",
             {"provider": "minimax", "name": "MiniMax Key", "api_key": "minimax-test-key-12345"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -469,7 +469,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.OK, None)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/",
             {"provider": "minimax", "name": "MiniMax Key", "api_key": "any-format-key"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -479,7 +479,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.OK, None)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/",
             {"provider": "zeabur", "name": "Zeabur AI Hub Key", "api_key": "sk-zeabur-test-key-12345"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -495,7 +495,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.OK, None)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/",
             {"provider": "zeabur", "name": "Zeabur AI Hub Key", "api_key": "no-prefix-key"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -507,7 +507,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.OK, None)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/",
             {
                 "provider": "azure_openai",
                 "name": "Azure Key",
@@ -533,7 +533,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
 
     def test_create_azure_openai_without_endpoint_fails(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/",
             {
                 "provider": "azure_openai",
                 "name": "Azure Key",
@@ -545,7 +545,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
 
     def test_create_azure_openai_with_non_azure_endpoint_fails(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/",
             {
                 "provider": "azure_openai",
                 "name": "Azure Key",
@@ -572,7 +572,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/",
             {"azure_endpoint": "https://new.openai.azure.com/"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -599,7 +599,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.post(f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/validate/")
+        response = self.client.post(f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/validate/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         mock_validate.assert_called_once_with(
             "azure_openai",
@@ -625,7 +625,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/",
             {
                 "api_key": "new-key",
                 "azure_endpoint": "https://new.openai.azure.com/",
@@ -644,7 +644,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.OK, None)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/",
             {
                 "provider": "azure_openai",
                 "name": "Azure Key",
@@ -680,7 +680,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/",
             {"azure_endpoint": "https://new.openai.azure.com/"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -706,7 +706,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
         cache.set(cache_key, ["stale-deployment-name"], timeout=60)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/",
             {"name": "Renamed"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -747,7 +747,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
             patch("products.ai_observability.backend.api.provider_keys.reload_taggers_on_workers") as mock_taggers,
             self.captureOnCommitCallbacks(execute=True),
         ):
-            response = self.client.delete(f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/")
+            response = self.client.delete(f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         mock_evals.assert_not_called()
@@ -771,7 +771,7 @@ class TestLLMProviderKeyViewSet(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/llm_analytics/provider_keys/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["results"][0]["id"], str(key2.id))
         self.assertEqual(response.data["results"][1]["id"], str(key1.id))
@@ -786,7 +786,7 @@ class TestLLMProviderKeyValidationViewSet(APIBaseTest):
     def test_unauthenticated_user_cannot_validate(self):
         self.client.logout()
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_key_validations/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_key_validations/",
             {"api_key": "sk-test"},
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -796,7 +796,7 @@ class TestLLMProviderKeyValidationViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.OK, None)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_key_validations/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_key_validations/",
             {"api_key": "sk-test-key"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -809,7 +809,7 @@ class TestLLMProviderKeyValidationViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.INVALID, "Invalid API key")
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_key_validations/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_key_validations/",
             {"api_key": "sk-invalid-key"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -821,7 +821,7 @@ class TestLLMProviderKeyValidationViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.OK, None)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_key_validations/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_key_validations/",
             {"api_key": "sk-or-v1-test-key", "provider": "openrouter"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -833,7 +833,7 @@ class TestLLMProviderKeyValidationViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.OK, None)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_key_validations/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_key_validations/",
             {"api_key": "fw-test-key", "provider": "fireworks"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -845,7 +845,7 @@ class TestLLMProviderKeyValidationViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.OK, None)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_key_validations/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_key_validations/",
             {"api_key": "together-test-key", "provider": "together_ai"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -857,7 +857,7 @@ class TestLLMProviderKeyValidationViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.OK, None)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_key_validations/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_key_validations/",
             {"api_key": "minimax-test-key", "provider": "minimax"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -869,7 +869,7 @@ class TestLLMProviderKeyValidationViewSet(APIBaseTest):
         mock_validate.return_value = (LLMProviderKey.State.OK, None)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_key_validations/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_key_validations/",
             {"api_key": "sk-zeabur-test-key", "provider": "zeabur"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -878,7 +878,7 @@ class TestLLMProviderKeyValidationViewSet(APIBaseTest):
 
     def test_pre_validate_requires_api_key(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_key_validations/",
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_key_validations/",
             {},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -915,7 +915,7 @@ class TestLLMProviderKeyDependentConfigs(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/dependent_configs/"
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/dependent_configs/"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["evaluations"]), 1)
@@ -948,7 +948,7 @@ class TestLLMProviderKeyDependentConfigs(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/dependent_configs/"
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/dependent_configs/"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["evaluations"]), 0)
@@ -980,7 +980,7 @@ class TestLLMProviderKeyDependentConfigs(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key1.id}/dependent_configs/"
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key1.id}/dependent_configs/"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["alternative_keys"]), 1)
@@ -1006,7 +1006,7 @@ class TestLLMProviderKeyDependentConfigs(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key1.id}/dependent_configs/"
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key1.id}/dependent_configs/"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["alternative_keys"]), 0)
@@ -1036,7 +1036,7 @@ class TestLLMProviderKeyDependentConfigs(APIBaseTest):
         )
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key1.id}/?replacement_key_id={key2.id}"
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key1.id}/?replacement_key_id={key2.id}"
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -1064,7 +1064,7 @@ class TestLLMProviderKeyDependentConfigs(APIBaseTest):
         config = EvaluationConfig.objects.create(team=self.team, active_provider_key=key1)
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key1.id}/?replacement_key_id={key2.id}"
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key1.id}/?replacement_key_id={key2.id}"
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -1099,7 +1099,7 @@ class TestLLMProviderKeyDependentConfigs(APIBaseTest):
         config = EvaluationConfig.objects.create(team=self.team, active_provider_key=active_key)
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key1.id}/?replacement_key_id={key2.id}"
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key1.id}/?replacement_key_id={key2.id}"
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -1126,7 +1126,7 @@ class TestLLMProviderKeyDependentConfigs(APIBaseTest):
         config = EvaluationConfig.objects.create(team=self.team, active_provider_key=key1)
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key1.id}/?replacement_key_id={key2.id}"
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key1.id}/?replacement_key_id={key2.id}"
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -1160,7 +1160,7 @@ class TestLLMProviderKeyDependentConfigs(APIBaseTest):
             enabled=True,
         )
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         model_config.refresh_from_db()
@@ -1199,7 +1199,7 @@ class TestLLMProviderKeyDependentConfigs(APIBaseTest):
         )
         self.assertEqual(paused_eval.status, "paused")
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         paused_eval.refresh_from_db()
@@ -1225,7 +1225,7 @@ class TestLLMProviderKeyDependentConfigs(APIBaseTest):
         )
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{openai_key.id}/?replacement_key_id={anthropic_key.id}"
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{openai_key.id}/?replacement_key_id={anthropic_key.id}"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("same provider", response.data["detail"])
@@ -1242,7 +1242,7 @@ class TestLLMProviderKeyDependentConfigs(APIBaseTest):
         )
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/?replacement_key_id=00000000-0000-0000-0000-000000000000"
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/?replacement_key_id=00000000-0000-0000-0000-000000000000"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("not found", response.data["detail"])
@@ -1265,7 +1265,7 @@ class TestLLMProviderKeyDependentConfigs(APIBaseTest):
         )
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/?replacement_key_id={key.id}"
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/?replacement_key_id={key.id}"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("key being deleted", response.data["detail"])
@@ -1293,7 +1293,7 @@ class TestLLMProviderKeyDependentConfigs(APIBaseTest):
         )
 
         response = self.client.delete(
-            f"/api/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/?replacement_key_id={other_key.id}"
+            f"/v1/environments/{self.team.id}/llm_analytics/provider_keys/{key.id}/?replacement_key_id={other_key.id}"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(LLMProviderKey.objects.filter(id=key.id).count(), 1)

@@ -14,7 +14,7 @@ class TestTeamDefaultReleaseConditions(APIBaseTest):
         super().setUp()
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
-        self.url = f"/api/environments/{self.team.id}/default_release_conditions/"
+        self.url = f"/v1/environments/{self.team.id}/default_release_conditions/"
 
     def test_get_returns_empty_defaults_for_fresh_team(self):
         response = self.client.get(self.url)

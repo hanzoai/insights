@@ -117,7 +117,7 @@ export const approvalLogic = kea<approvalLogicType>([
                     }
 
                     const response = await api.get<ChangeRequest>(
-                        `api/environments/${values.currentTeamId}/change_requests/${props.id}/`
+                        `v1/environments/${values.currentTeamId}/change_requests/${props.id}/`
                     )
                     return response
                 },
@@ -176,7 +176,7 @@ export const approvalLogic = kea<approvalLogicType>([
             approveChangeRequest: async ({ reason }) => {
                 try {
                     const response = await api.create(
-                        `api/environments/${values.currentTeamId}/change_requests/${props.id}/approve/`,
+                        `v1/environments/${values.currentTeamId}/change_requests/${props.id}/approve/`,
                         { reason: reason || '' }
                     )
 
@@ -196,7 +196,7 @@ export const approvalLogic = kea<approvalLogicType>([
             },
             rejectChangeRequest: async ({ reason }) => {
                 try {
-                    await api.create(`api/environments/${values.currentTeamId}/change_requests/${props.id}/reject/`, {
+                    await api.create(`v1/environments/${values.currentTeamId}/change_requests/${props.id}/reject/`, {
                         reason,
                     })
                     toast.success('Change request rejected')
@@ -207,7 +207,7 @@ export const approvalLogic = kea<approvalLogicType>([
             },
             cancelChangeRequest: async ({ reason }) => {
                 try {
-                    await api.create(`api/environments/${values.currentTeamId}/change_requests/${props.id}/cancel/`, {
+                    await api.create(`v1/environments/${values.currentTeamId}/change_requests/${props.id}/cancel/`, {
                         reason,
                     })
                     toast.success('Change request canceled')

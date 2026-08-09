@@ -11,7 +11,7 @@ The Loop's `instructions` stay minimal; the checked-in `SKILL.md` in this direct
 
 ## Create the loop
 
-`POST /api/projects/:project_id/loops/` (session, personal API key, or OAuth):
+`POST /v1/projects/:project_id/loops/` (session, personal API key, or OAuth):
 
 ```json
 {
@@ -66,8 +66,8 @@ Keep that boundary least-privilege:
 
 ## Testing before enabling for real
 
-1. Dry-run the config: `POST /api/projects/:project_id/loops/:id/preview/`.
-2. Manual fire: `POST /api/projects/:project_id/loops/:id/run/` with instructions appended via the run input to scope the sweep, e.g. "for this run, only process PR #NNNNN" against a disposable conflicting PR you opened yourself.
+1. Dry-run the config: `POST /v1/projects/:project_id/loops/:id/preview/`.
+2. Manual fire: `POST /v1/projects/:project_id/loops/:id/run/` with instructions appended via the run input to scope the sweep, e.g. "for this run, only process PR #NNNNN" against a disposable conflicting PR you opened yourself.
 3. Verify on that PR: exactly one signed commit on the head branch, no new PR opened, the sticky marker comment present, and a second manual fire skips the PR (marker dedup).
 4. Only then leave the push trigger enabled.
 

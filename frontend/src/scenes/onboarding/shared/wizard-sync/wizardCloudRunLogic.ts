@@ -232,7 +232,7 @@ export const wizardCloudRunLogic = kea<wizardCloudRunLogicType>([
                 // layer (installationProgressLogic), which streams this run's TaskRun pipeline merged
                 // with the wizard session detail.
                 const { task_id, run_id } = await api.create<{ task_id: string; run_id: string; status: string }>(
-                    'api/wizard/cloud_run',
+                    'v1/wizard/cloud_run',
                     {
                         project_id: currentProjectId,
                         repository,

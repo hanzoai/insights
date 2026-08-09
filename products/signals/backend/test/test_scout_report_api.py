@@ -78,10 +78,10 @@ class TestScoutReportAPI(APIBaseTest):
         self.addCleanup(patch.stopall)
 
     def _emit_url(self, run_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/runs/{run_id}/emit-report/"
+        return f"/v1/projects/{self.team.id}/signals/scout/runs/{run_id}/emit-report/"
 
     def _edit_url(self, run_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/scout/runs/{run_id}/edit-report/"
+        return f"/v1/projects/{self.team.id}/signals/scout/runs/{run_id}/edit-report/"
 
     def _payload(self, **overrides) -> dict:
         body: dict = {
@@ -486,11 +486,11 @@ class TestScoutReportAPI(APIBaseTest):
         )
         self._seed_skill_owner("quietowner", skill_name="signals-scout-quiet")
 
-        quiet = self.client.get(f"/api/projects/{self.team.id}/llm_skills/name/signals-scout-quiet/")
+        quiet = self.client.get(f"/v1/projects/{self.team.id}/llm_skills/name/signals-scout-quiet/")
         assert quiet.status_code == status.HTTP_200_OK, quiet.json()
         assert quiet.json()["owners"] == []
 
-        report_channel = self.client.get(f"/api/projects/{self.team.id}/llm_skills/name/signals-scout-general/")
+        report_channel = self.client.get(f"/v1/projects/{self.team.id}/llm_skills/name/signals-scout-general/")
         assert report_channel.status_code == status.HTTP_200_OK, report_channel.json()
         assert [entry["email"] for entry in report_channel.json()["owners"]] == [owner.email]
 

@@ -49,7 +49,7 @@ class TestInsightsConnectionForward:
         )
 
     def _forward_url(self) -> str:
-        return f"/api/environments/{self.team.pk}/insights_connections/{self.integration.id}/forward/"
+        return f"/v1/environments/{self.team.pk}/insights_connections/{self.integration.id}/forward/"
 
     def test_forward_injects_token_and_passes_through(self, client: HttpClient):
         client.force_login(self.user)
@@ -66,7 +66,7 @@ class TestInsightsConnectionForward:
         assert response.json() == {"status": 200, "data": {"results": [1, 2, 3]}}
         method, url = mock_request.call_args[0][0], mock_request.call_args[0][1]
         assert method == "GET"
-        assert url == "https://eu.hanzo.ai/api/projects/2/insights/"
+        assert url == "https://eu.hanzo.ai/v1/projects/2/insights/"
         assert mock_request.call_args[1]["headers"]["Authorization"] == "Bearer AT"
         assert mock_request.call_args[1]["params"] == {"limit": "5"}
         assert mock_request.call_args[1]["allow_redirects"] is False
@@ -124,7 +124,7 @@ class TestInsightsConnectionForward:
     def test_forward_unknown_connection_is_404(self, client: HttpClient):
         client.force_login(self.user)
         response = client.post(
-            f"/api/environments/{self.team.pk}/insights_connections/nonexistent/forward/",
+            f"/v1/environments/{self.team.pk}/insights_connections/nonexistent/forward/",
             {"method": "GET", "path": "api/projects/2/insights/"},
             content_type="application/json",
         )

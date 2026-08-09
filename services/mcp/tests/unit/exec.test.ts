@@ -613,7 +613,7 @@ describe('exec tool', () => {
                         status: 429,
                         statusText: 'Too Many Requests',
                         body: 'rate limited',
-                        url: 'https://example.com/api/projects/1/insights/',
+                        url: 'https://example.com/v1/projects/1/insights/',
                         method: 'GET',
                     })
                 },

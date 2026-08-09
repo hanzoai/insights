@@ -23,7 +23,7 @@ describe('visionQuotaLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/vision/quota/': quota,
+                '/v1/projects/:team/vision/quota/': quota,
             },
         })
         initKeaTests()

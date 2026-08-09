@@ -90,7 +90,7 @@ const S2_BASE_ROW = ['s2', 'GB', 'Safari', 'Mobile', 'iOS', 'iOS 14', 'google.co
 const useQueryMocks = (handler: (query: string) => unknown): void => {
     useMocks({
         post: {
-            '/api/environments/:team_id/query/:kind': async (info: any) => {
+            '/v1/environments/:team_id/query/:kind': async (info: any) => {
                 const body = await info.request.json()
                 return handler(body.query.query)
             },
@@ -104,7 +104,7 @@ describe('sessionRecordingsListPropertiesLogic', () => {
     beforeEach(() => {
         useMocks({
             post: {
-                '/api/environments/:team_id/query/:kind': {
+                '/v1/environments/:team_id/query/:kind': {
                     results: [S1_BASE_ROW, S2_BASE_ROW],
                 },
             },

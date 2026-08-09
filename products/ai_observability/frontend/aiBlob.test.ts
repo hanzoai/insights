@@ -15,7 +15,7 @@ describe('aiBlob', () => {
     })
 
     it('resolves a pointer to the environment endpoint', () => {
-        expect(resolveAiBlobUrl(POINTER, 1)).toBe(`/api/projects/1/ai_blob/v1/sha256/${HASH}`)
+        expect(resolveAiBlobUrl(POINTER, 1)).toBe(`/v1/projects/1/ai_blob/v1/sha256/${HASH}`)
     })
 
     it.each([
@@ -39,11 +39,11 @@ describe('aiBlob', () => {
         ['application/pdf', `data:application/pdf;base64,${POINTER}`],
     ])('resolves a pointer that a recipe wrapped in a %s data uri', (_mime, wrapped) => {
         expect(parseAiBlobPointer(wrapped)).toMatchObject({ hash: HASH })
-        expect(resolveAiBlobUrl(wrapped, 1)).toBe(`/api/projects/1/ai_blob/v1/sha256/${HASH}`)
+        expect(resolveAiBlobUrl(wrapped, 1)).toBe(`/v1/projects/1/ai_blob/v1/sha256/${HASH}`)
     })
 
     it('resolves a pointer data field to the blob endpoint, ignoring the passed mime type', () => {
-        expect(resolveDataUri(POINTER, 'image/png', 1)).toBe(`/api/projects/1/ai_blob/v1/sha256/${HASH}`)
+        expect(resolveDataUri(POINTER, 'image/png', 1)).toBe(`/v1/projects/1/ai_blob/v1/sha256/${HASH}`)
     })
 
     it('builds a data: URI from raw base64 when the data field is not a pointer', () => {

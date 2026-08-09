@@ -97,7 +97,7 @@ describe('useGroupList', () => {
     describe('remote-only group', () => {
         it('fetches via the endpoint and exposes results', async () => {
             apiGet.mockResolvedValueOnce({ results: [{ name: 'remote-1' }, { name: 'remote-2' }], count: 2 })
-            const group = makeGroup({ endpoint: 'api/projects/1/event_definitions' })
+            const group = makeGroup({ endpoint: 'v1/projects/1/event_definitions' })
             const { result } = renderHook(() => useGroupList({ group, searchQuery: '' }))
             expect(result.current.isLoading).toBe(true)
             await waitFor(() => expect(result.current.totalResultCount).toBe(2))
@@ -131,7 +131,7 @@ describe('useGroupList', () => {
             apiGet.mockResolvedValue({ results: [], count: 0 })
             const base = {
                 type: TaxonomicFilterGroupType.EventProperties,
-                endpoint: 'api/projects/1/property_definitions',
+                endpoint: 'v1/projects/1/property_definitions',
             }
             renderHook(() => useGroupList({ group: makeGroup({ ...base, ...a }), searchQuery: '' }))
             renderHook(() => useGroupList({ group: makeGroup({ ...base, ...b }), searchQuery: '' }))
@@ -147,7 +147,7 @@ describe('useGroupList', () => {
 
         it('respects minSearchQueryLength gating', () => {
             const group = makeGroup({
-                endpoint: 'api/projects/1/whatever',
+                endpoint: 'v1/projects/1/whatever',
                 minSearchQueryLength: 3,
             })
             const { result } = renderHook(() => useGroupList({ group, searchQuery: 'ab' }))
@@ -160,7 +160,7 @@ describe('useGroupList', () => {
             apiGet
                 .mockResolvedValueOnce({ results: [{ name: 'a' }], count: 1 })
                 .mockResolvedValueOnce({ results: [{ name: 'b' }], count: 1 })
-            const group = makeGroup({ endpoint: 'api/projects/1/event_definitions' })
+            const group = makeGroup({ endpoint: 'v1/projects/1/event_definitions' })
             const { result, rerender } = renderHook(({ q }: { q: string }) => useGroupList({ group, searchQuery: q }), {
                 initialProps: { q: '' },
             })
@@ -177,8 +177,8 @@ describe('useGroupList', () => {
                 // extra full count fetch
                 .mockResolvedValueOnce({ count: 9 })
             const group = makeGroup({
-                endpoint: 'api/projects/1/property_definitions',
-                scopedEndpoint: 'api/projects/1/property_definitions?scoped',
+                endpoint: 'v1/projects/1/property_definitions',
+                scopedEndpoint: 'v1/projects/1/property_definitions?scoped',
             })
             const { result } = renderHook(() => useGroupList({ group, searchQuery: '' }))
             await waitFor(() => expect(result.current.totalResultCount).toBe(1))
@@ -194,8 +194,8 @@ describe('useGroupList', () => {
                 // after expand: 9 results
                 .mockResolvedValueOnce({ results: Array.from({ length: 9 }, (_, i) => ({ name: `r${i}` })), count: 9 })
             const group = makeGroup({
-                endpoint: 'api/projects/1/property_definitions',
-                scopedEndpoint: 'api/projects/1/property_definitions?scoped',
+                endpoint: 'v1/projects/1/property_definitions',
+                scopedEndpoint: 'v1/projects/1/property_definitions?scoped',
             })
             const { result } = renderHook(() => useGroupList({ group, searchQuery: '' }))
             await waitFor(() => expect(result.current.totalResultCount).toBe(1))
@@ -212,7 +212,7 @@ describe('useGroupList', () => {
             })
             const group = makeGroup({
                 type: TaxonomicFilterGroupType.Cohorts,
-                endpoint: 'api/projects/1/cohorts/',
+                endpoint: 'v1/projects/1/cohorts/',
                 clientFilterFirstPage: true,
             })
             const { result, rerender } = renderHook(({ q }: { q: string }) => useGroupList({ group, searchQuery: q }), {
@@ -236,7 +236,7 @@ describe('useGroupList', () => {
             })
             const group = makeGroup({
                 type: TaxonomicFilterGroupType.Cohorts,
-                endpoint: 'api/projects/1/cohorts/',
+                endpoint: 'v1/projects/1/cohorts/',
                 clientFilterFirstPage: true,
             })
             const { result, rerender } = renderHook(({ q }: { q: string }) => useGroupList({ group, searchQuery: q }), {
@@ -342,7 +342,7 @@ describe('useGroupList', () => {
 
         it('remote group with no search and no remote data shows loading then settles', async () => {
             apiGet.mockResolvedValueOnce({ results: [], count: 0 })
-            const group = makeGroup({ endpoint: 'api/projects/1/event_definitions' })
+            const group = makeGroup({ endpoint: 'v1/projects/1/event_definitions' })
             const { result } = renderHook(() => useGroupList({ group, searchQuery: '' }))
             expect(result.current.showLoadingState).toBe(true)
             await waitFor(() => expect(result.current.isLoading).toBe(false))
@@ -352,7 +352,7 @@ describe('useGroupList', () => {
             apiGet.mockResolvedValueOnce({ results: [], count: 0 })
             const group = makeGroup({
                 type: TaxonomicFilterGroupType.Events,
-                endpoint: 'api/projects/1/event_definitions',
+                endpoint: 'v1/projects/1/event_definitions',
             })
             const { result } = renderHook(() =>
                 useGroupList({ group, searchQuery: 'unseen', allowNonCapturedEvents: true })

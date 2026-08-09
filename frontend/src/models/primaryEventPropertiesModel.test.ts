@@ -14,14 +14,14 @@ describe('the primary event properties model', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team_id/event_definitions/primary_properties/': () => [
+                '/v1/projects/:team_id/event_definitions/primary_properties/': () => [
                     200,
                     { primary_properties: { my_event: 'existing_prop' } },
                 ],
-                '/api/projects/:team_id/event_definitions/by_name/': () => [200, { id: 'def-1', name: 'my_event' }],
+                '/v1/projects/:team_id/event_definitions/by_name/': () => [200, { id: 'def-1', name: 'my_event' }],
             },
             patch: {
-                '/api/projects/:team_id/event_definitions/:id/': async ({ request }) => [
+                '/v1/projects/:team_id/event_definitions/:id/': async ({ request }) => [
                     200,
                     {
                         id: 'def-1',
@@ -75,7 +75,7 @@ describe('the primary event properties model', () => {
 
     it('leaves the loaded map unchanged when the update request fails', async () => {
         useMocks({
-            patch: { '/api/projects/:team_id/event_definitions/:id/': () => [403, { detail: 'nope' }] },
+            patch: { '/v1/projects/:team_id/event_definitions/:id/': () => [403, { detail: 'nope' }] },
         })
         logic.actions.loadPrimaryPropertiesSuccess({ my_event: 'existing_prop' }, { names: ['my_event'] })
 
@@ -89,9 +89,9 @@ describe('the primary event properties model', () => {
     it('does not attempt an update when the event definition lookup fails', async () => {
         let updateAttempted = false
         useMocks({
-            get: { '/api/projects/:team_id/event_definitions/by_name/': () => [404, { detail: 'not found' }] },
+            get: { '/v1/projects/:team_id/event_definitions/by_name/': () => [404, { detail: 'not found' }] },
             patch: {
-                '/api/projects/:team_id/event_definitions/:id/': () => {
+                '/v1/projects/:team_id/event_definitions/:id/': () => {
                     updateAttempted = true
                     return [200, {}]
                 },
@@ -111,7 +111,7 @@ describe('the primary event properties model', () => {
         // Deliberate loader failure — kea-loaders would log it
         silenceKeaLoadersErrors()
         useMocks({
-            get: { '/api/projects/:team_id/event_definitions/primary_properties/': () => [500, {}] },
+            get: { '/v1/projects/:team_id/event_definitions/primary_properties/': () => [500, {}] },
         })
 
         await expectLogic(logic, () => {

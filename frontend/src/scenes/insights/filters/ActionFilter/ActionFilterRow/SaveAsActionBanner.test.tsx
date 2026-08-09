@@ -33,9 +33,9 @@ describe('SaveAsActionBanner', () => {
     beforeEach(() => {
         initKeaTests()
         useMocks({
-            get: { '/api/projects/:team/actions/': { results: [] } },
+            get: { '/v1/projects/:team/actions/': { results: [] } },
             post: {
-                '/api/projects/:team/actions/': () => [200, { id: 42, name: 'Test Action', steps: [] }],
+                '/v1/projects/:team/actions/': () => [200, { id: 42, name: 'Test Action', steps: [] }],
             },
         })
         actionsModel.mount()

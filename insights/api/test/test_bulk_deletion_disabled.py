@@ -20,7 +20,7 @@ class TestBulkDeletionDisabled(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
 
-        response = self.client.delete(f"/api/environments/{self.additional_team.id}/")
+        response = self.client.delete(f"/v1/environments/{self.additional_team.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("temporarily disabled", response.json()["detail"])
@@ -34,7 +34,7 @@ class TestBulkDeletionDisabled(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
 
-        response = self.client.delete(f"/api/environments/{self.additional_team.id}/")
+        response = self.client.delete(f"/v1/environments/{self.additional_team.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         mock_start_deletion.assert_called_once()
@@ -55,7 +55,7 @@ class TestBulkDeletionDisabled(APIBaseTest):
             id=project_id, project=test_project, organization=self.organization, name="Test Team for Deletion"
         )
 
-        response = self.client.delete(f"/api/projects/{test_project.id}/")
+        response = self.client.delete(f"/v1/projects/{test_project.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("temporarily disabled", response.json()["detail"])
@@ -67,7 +67,7 @@ class TestBulkDeletionDisabled(APIBaseTest):
         """Test that organization deletion returns 400 when DISABLE_BULK_DELETES is True."""
         test_org, org_membership, _ = Organization.objects.bootstrap(self.user, name="Test Org for Deletion")
 
-        response = self.client.delete(f"/api/organizations/{test_org.id}/")
+        response = self.client.delete(f"/v1/organizations/{test_org.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("temporarily disabled", response.json()["detail"])

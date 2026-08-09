@@ -9,7 +9,10 @@ from insights.insightsql.query import execute_insightsql_query
 
 from products.web_analytics.backend.insightsql_queries.bot_definitions import BOT_DEFINITIONS
 from products.web_analytics.backend.insightsql_queries.bot_ip_definitions import BOT_IP_DEFINITIONS
-from products.web_analytics.backend.insightsql_queries.bot_ua_fixtures import BOT_USER_AGENTS, CATEGORY_TO_TRAFFIC_CATEGORY
+from products.web_analytics.backend.insightsql_queries.bot_ua_fixtures import (
+    BOT_USER_AGENTS,
+    CATEGORY_TO_TRAFFIC_CATEGORY,
+)
 
 
 def _expected_ip_definition(ip: str):
@@ -397,7 +400,7 @@ class TestTrafficTypeIntegration(BaseTest):
             properties={
                 "$raw_user_agent": "Mozilla/5.0 (compatible; AhrefsBot/7.0; +http://ahrefs.com/robot/)",
                 "method": "GET",
-                "path": "/api/v1/health",
+                "path": "/v1/v1/health",
                 "status_code": 200,
             },
         )

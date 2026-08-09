@@ -195,7 +195,7 @@ class TestEngineeringAnalyticsAPI(APIBaseTest):
         connect_github_source_without_data(self.team, prefix="presentation")
 
     def _url(self, action: str) -> str:
-        return f"/api/projects/{self.team.id}/engineering_analytics/{action}/"
+        return f"/v1/projects/{self.team.id}/engineering_analytics/{action}/"
 
     def test_sources_serializes(self) -> None:
         sources = [

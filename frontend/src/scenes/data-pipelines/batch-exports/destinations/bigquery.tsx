@@ -1,5 +1,5 @@
-import { IconInfo } from '@hanzo/icons'
 import { Checkbox, Input, Tooltip } from '@hanzo/elements'
+import { IconInfo } from '@hanzo/icons'
 
 import { IntegrationChoice } from 'lib/components/CyclotronJob/integrations/IntegrationChoice'
 import { Field } from 'lib/elements/Field'
@@ -13,7 +13,7 @@ export const bigqueryDefinition: DestinationDefinition = {
     requiredFields: () => ['integration_id', 'dataset_id', 'table_id'],
     // Credentials and project_id now live on the integration; json_config_file is a removed legacy field.
     configKeys: ['dataset_id', 'table_id', 'use_json_type'],
-    eventTableOverrides: { teamIdHogql: 'team_id' },
+    eventTableOverrides: { teamIdInsightsql: 'team_id' },
     eventTableExtraFields: {
         bq_ingested_timestamp: {
             name: 'bq_ingested_timestamp',

@@ -204,14 +204,14 @@ class Command(BaseCommand):
     def _fetch_user_settings(self, host: str, api_key: str) -> dict[str, Any]:
         """Fetch user settings from Insights cloud API"""
         headers = {"Authorization": f"Bearer {api_key}"}
-        response = requests.get(f"{host}/api/users/@me/", headers=headers, timeout=30)
+        response = requests.get(f"{host}/v1/users/@me/", headers=headers, timeout=30)
         response.raise_for_status()
         return response.json()
 
     def _fetch_home_settings(self, host: str, api_key: str, team_id: int) -> dict[str, Any] | None:
         """Fetch user home settings from Insights cloud API"""
         headers = {"Authorization": f"Bearer {api_key}"}
-        response = requests.get(f"{host}/api/projects/{team_id}/user_home_settings/", headers=headers, timeout=30)
+        response = requests.get(f"{host}/v1/projects/{team_id}/user_home_settings/", headers=headers, timeout=30)
         if response.status_code == 404:
             return None
         response.raise_for_status()
@@ -220,7 +220,7 @@ class Command(BaseCommand):
     def _fetch_shortcuts(self, host: str, api_key: str, team_id: int) -> list[dict[str, Any]]:
         """Fetch shortcuts from Insights cloud API"""
         headers = {"Authorization": f"Bearer {api_key}"}
-        response = requests.get(f"{host}/api/projects/{team_id}/file_system_shortcuts/", headers=headers, timeout=30)
+        response = requests.get(f"{host}/v1/projects/{team_id}/file_system_shortcuts/", headers=headers, timeout=30)
         if response.status_code == 404:
             return []
         response.raise_for_status()

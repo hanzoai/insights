@@ -66,10 +66,10 @@ describe('maxThreadLogic', () => {
             ...maxMocks,
             get: {
                 ...maxMocks.get,
-                '/api/environments/:team_id/conversations/:conversation_id/': MOCK_IN_PROGRESS_CONVERSATION,
+                '/v1/environments/:team_id/conversations/:conversation_id/': MOCK_IN_PROGRESS_CONVERSATION,
                 // loadQueueData fires on mount; without a shaped default it hits the empty-response
                 // floor (no `messages`/`max_queue_messages`) and the queue reducers reduce to undefined.
-                '/api/environments/:team_id/conversations/:conversation_id/queue': {
+                '/v1/environments/:team_id/conversations/:conversation_id/queue': {
                     messages: [],
                     max_queue_messages: 0,
                 },

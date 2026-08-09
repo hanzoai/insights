@@ -180,7 +180,7 @@ class TestServicesQueryDateRange(DatastoreTestMixin, APIBaseTest):
 
     def _services(self, date_from: str, date_to: str) -> dict:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/logs/services",
+            f"/v1/projects/{self.team.id}/logs/services",
             data={
                 "query": {
                     "dateRange": {"date_from": date_from, "date_to": date_to},
@@ -214,7 +214,7 @@ class TestServicesQueryDateRange(DatastoreTestMixin, APIBaseTest):
         # `_services` above sends. Passing that flat shape straight to `LogsQuery` used to
         # raise an unhandled pydantic ValidationError (500) instead of running the query.
         response = self.client.post(
-            f"/api/projects/{self.team.id}/logs/services",
+            f"/v1/projects/{self.team.id}/logs/services",
             data={
                 "query": {
                     "dateRange": {"date_from": "2025-12-16T00:00:00Z", "date_to": "2025-12-16T23:59:59Z"},

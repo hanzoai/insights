@@ -219,7 +219,7 @@ class TestOrganizationActivityLogging(ActivityLogTestHelper):
         membership = member_user.join(organization=org, level=OrganizationMembership.Level.MEMBER)
         membership_id = str(membership.id)
 
-        response = self.client.delete(f"/api/organizations/{org.id}/members/{member_user.uuid}/")
+        response = self.client.delete(f"/v1/organizations/{org.id}/members/{member_user.uuid}/")
         self.assertEqual(response.status_code, 204)
 
         log = ActivityLog.objects.filter(
@@ -247,7 +247,7 @@ class TestOrganizationActivityLogging(ActivityLogTestHelper):
         membership = member_user.join(organization=org, level=OrganizationMembership.Level.MEMBER)
 
         response = self.client.patch(
-            f"/api/organizations/{org.id}/members/{member_user.uuid}/", {"level": 8}, format="json"
+            f"/v1/organizations/{org.id}/members/{member_user.uuid}/", {"level": 8}, format="json"
         )
         self.assertEqual(response.status_code, 200)
 
@@ -274,7 +274,7 @@ class TestOrganizationActivityLogging(ActivityLogTestHelper):
 
         # Use API to create the invite to properly set user context
         response = self.client.post(
-            f"/api/organizations/{org.id}/invites/",
+            f"/v1/organizations/{org.id}/invites/",
             {
                 "target_email": "invitee@example.com",
                 "level": OrganizationMembership.Level.MEMBER,
@@ -308,7 +308,7 @@ class TestOrganizationActivityLogging(ActivityLogTestHelper):
         org = Organization.objects.get(id=organization["id"])
 
         response = self.client.post(
-            f"/api/organizations/{org.id}/invites/",
+            f"/v1/organizations/{org.id}/invites/",
             {
                 "target_email": "delete-invitee@example.com",
                 "level": OrganizationMembership.Level.ADMIN,
@@ -319,7 +319,7 @@ class TestOrganizationActivityLogging(ActivityLogTestHelper):
         invite = OrganizationInvite.objects.get(target_email="delete-invitee@example.com")
         invite_id = str(invite.id)
 
-        response = self.client.delete(f"/api/organizations/{org.id}/invites/{invite.id}/")
+        response = self.client.delete(f"/v1/organizations/{org.id}/invites/{invite.id}/")
         self.assertEqual(response.status_code, 204)
 
         log = ActivityLog.objects.filter(organization_id=org.id, scope="OrganizationInvite", activity="deleted").first()
@@ -349,7 +349,7 @@ class TestOrganizationActivityLogging(ActivityLogTestHelper):
         )
 
         response = self.client.patch(
-            f"/api/organizations/{org.id}/",
+            f"/v1/organizations/{org.id}/",
             {"logo_media_id": str(media.id)},
             format="json",
         )
@@ -374,7 +374,7 @@ class TestOrganizationActivityLogging(ActivityLogTestHelper):
         self.assertEqual(logo_change["after"]["media_location"], "test-logo.png")
 
         response = self.client.patch(
-            f"/api/organizations/{org.id}/",
+            f"/v1/organizations/{org.id}/",
             {"logo_media_id": None},
             format="json",
         )

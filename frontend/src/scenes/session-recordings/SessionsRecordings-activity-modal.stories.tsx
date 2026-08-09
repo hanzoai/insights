@@ -26,7 +26,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             post: {
-                '/api/environments/:team_id/query/:kind': eventsQuery,
+                '/v1/environments/:team_id/query/:kind': eventsQuery,
             },
         }),
     ],
@@ -39,11 +39,11 @@ export const EventExplorerWithModal: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/session_recordings/:id/': () => [
+                '/v1/environments/:team_id/session_recordings/:id/': () => [
                     200,
                     { ...recordingMetaJson, id: 'modal-recording-001' },
                 ],
-                '/api/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
                     if (new URL(request.url).searchParams.get('source') === 'blob_v2') {
                         return new HttpResponse(snapshotsAsJSONLines())
                     }
@@ -63,7 +63,7 @@ export const EventExplorerWithModal: Story = {
                 },
             },
             post: {
-                '/api/environments/:team_id/query/:kind': eventsQuery,
+                '/v1/environments/:team_id/query/:kind': eventsQuery,
             },
         })
 
@@ -89,14 +89,14 @@ export const EventExplorerWithModalNotFound: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/session_recordings/:id': () => [404, { detail: 'Not found.' }],
-                '/api/environments/:team_id/session_recordings/:id/snapshots': () => [404, { detail: 'Not found.' }],
-                '/api/environments/:team_id/session_recordings/:id/capture_diagnostics': {
+                '/v1/environments/:team_id/session_recordings/:id': () => [404, { detail: 'Not found.' }],
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': () => [404, { detail: 'Not found.' }],
+                '/v1/environments/:team_id/session_recordings/:id/capture_diagnostics': {
                     properties: (eventsQuery.results[0][0] as Record<string, any>).properties,
                 },
             },
             post: {
-                '/api/environments/:team_id/query/:kind': eventsQuery,
+                '/v1/environments/:team_id/query/:kind': eventsQuery,
             },
         })
 

@@ -103,7 +103,7 @@ class TestExternalDataSchema(APIBaseTest):
         )
         with mock.patch.object(StripeSource, "validate_credentials", return_value=(True, None)):
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
             )
         payload = response.json()
 
@@ -154,7 +154,7 @@ class TestExternalDataSchema(APIBaseTest):
             mock.patch.object(StripeSource, "get_schemas", side_effect=raised_exception),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
             )
 
         assert response.status_code == 400
@@ -185,7 +185,7 @@ class TestExternalDataSchema(APIBaseTest):
             mock.patch.object(StripeSource, "get_schemas", return_value=[]) as get_schemas,
         ):
             self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
             )
         assert validate.call_args.kwargs["api_version"] == "v-schema-pin"
         assert get_schemas.call_args_list, "expected the probe to run discovery"
@@ -211,7 +211,7 @@ class TestExternalDataSchema(APIBaseTest):
         )
         with mock.patch.object(StripeSource, "get_schemas", return_value=[]) as get_schemas:
             self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/",
                 data={"sync_type": "full_refresh", "api_version": current_version},
             )
         assert get_schemas.call_args_list, "expected the webhook-only gate to probe discovery"
@@ -232,7 +232,7 @@ class TestExternalDataSchema(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
         )
 
         assert response.status_code == 400
@@ -253,7 +253,7 @@ class TestExternalDataSchema(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
         )
 
         assert response.status_code == 400
@@ -300,7 +300,7 @@ class TestExternalDataSchema(APIBaseTest):
         )
 
         response = await sync_to_async(self.client.post)(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
         )
         payload = response.json()
 
@@ -396,7 +396,7 @@ class TestExternalDataSchema(APIBaseTest):
             ),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
             )
 
         assert response.status_code == status.HTTP_200_OK
@@ -448,7 +448,7 @@ class TestExternalDataSchema(APIBaseTest):
             mock.patch.object(source_impl, "get_schemas", return_value=[fake_schema]),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
             )
 
         assert response.status_code == status.HTTP_200_OK
@@ -479,7 +479,7 @@ class TestExternalDataSchema(APIBaseTest):
             mock.patch.object(StripeSource, "get_schemas", return_value=all_schemas),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
             )
 
         assert response.status_code == status.HTTP_200_OK
@@ -507,7 +507,7 @@ class TestExternalDataSchema(APIBaseTest):
             mock.patch.object(StripeSource, "get_schemas", return_value=other_schemas),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/incremental_fields",
             )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -538,7 +538,7 @@ class TestExternalDataSchema(APIBaseTest):
             ),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "full_refresh"},
             )
 
@@ -573,7 +573,7 @@ class TestExternalDataSchema(APIBaseTest):
             ),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "full_refresh"},
             )
             assert response.status_code == 200
@@ -617,7 +617,7 @@ class TestExternalDataSchema(APIBaseTest):
             ),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={
                     "sync_type": "incremental",
                     "incremental_field": "updated_at",
@@ -631,7 +631,7 @@ class TestExternalDataSchema(APIBaseTest):
             assert schema.sync_type_config["incremental_field_lookback_seconds"] == 3600
 
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={
                     "sync_type": "incremental",
                     "incremental_field": "updated_at",
@@ -676,7 +676,7 @@ class TestExternalDataSchema(APIBaseTest):
             # A bare incremental_field edit — no sync_type re-sent — must actually persist, not just
             # echo the submitted value back in the response.
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"incremental_field": "updated_at"},
             )
 
@@ -706,7 +706,7 @@ class TestExternalDataSchema(APIBaseTest):
         # Setting incremental_field on a full_refresh schema without switching sync_type can't be
         # applied — it must fail loudly instead of returning 200 and dropping the change.
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
             data={"incremental_field": "updated_at"},
         )
 
@@ -716,7 +716,7 @@ class TestExternalDataSchema(APIBaseTest):
 
         # primary_key_columns is dropped the same way on a non-incremental schema, so it errors too.
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
             data={"primary_key_columns": ["other_id"]},
         )
 
@@ -768,7 +768,7 @@ class TestExternalDataSchema(APIBaseTest):
             mock.patch.object(StripeSource, "get_schemas", return_value=[incremental_schema, full_refresh_schema]),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/",
                 data={
                     "source_type": "Stripe",
                     "payload": {
@@ -830,7 +830,7 @@ class TestExternalDataSchema(APIBaseTest):
             ),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={
                     "sync_type": "incremental",
                     "incremental_field": "updated_at",
@@ -854,7 +854,7 @@ class TestExternalDataSchema(APIBaseTest):
             mock.patch.object(StripeSource, "get_schemas", return_value=[incremental_schema]),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/",
                 data={
                     "source_type": "Stripe",
                     "payload": {
@@ -951,7 +951,7 @@ class TestExternalDataSchema(APIBaseTest):
             ),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data=request_body,
             )
 
@@ -989,7 +989,7 @@ class TestExternalDataSchema(APIBaseTest):
             return_value=True,
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "cdc", "primary_key_columns": ["order_key"]},
             )
 
@@ -1034,7 +1034,7 @@ class TestExternalDataSchema(APIBaseTest):
 
         with self._xmin_discovery_patch():
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "xmin", "primary_key_columns": ["id"]},
             )
 
@@ -1058,7 +1058,7 @@ class TestExternalDataSchema(APIBaseTest):
 
         with self._xmin_discovery_patch():
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "xmin"},
             )
 
@@ -1083,7 +1083,7 @@ class TestExternalDataSchema(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
             data={"sync_type": "xmin", "primary_key_columns": ["id"]},
         )
 
@@ -1106,7 +1106,7 @@ class TestExternalDataSchema(APIBaseTest):
 
         with self._xmin_discovery_patch(supports_xmin=False):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "xmin", "primary_key_columns": ["id"]},
             )
 
@@ -1131,7 +1131,7 @@ class TestExternalDataSchema(APIBaseTest):
 
         with self._xmin_discovery_patch():
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"row_filters": [{"column": "id", "operator": ">", "value": "5"}]},
                 format="json",
             )
@@ -1170,7 +1170,7 @@ class TestExternalDataSchema(APIBaseTest):
             ),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "xmin", "primary_key_columns": ["id"], "sync_frequency": sync_frequency},
             )
 
@@ -1201,7 +1201,7 @@ class TestExternalDataSchema(APIBaseTest):
             ) as mock_trigger,
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "xmin", "primary_key_columns": ["id"]},
             )
 
@@ -1234,7 +1234,7 @@ class TestExternalDataSchema(APIBaseTest):
             mock.patch.object(DataWarehouseTable, "get_max_value_for_column", return_value=1),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "incremental", "incremental_field": "id", "incremental_field_type": "integer"},
             )
 
@@ -1290,7 +1290,7 @@ class TestExternalDataSchema(APIBaseTest):
             ),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_frequency": sync_frequency},
             )
 
@@ -1334,7 +1334,7 @@ class TestExternalDataSchema(APIBaseTest):
             ),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "full_refresh"},
             )
 
@@ -1363,7 +1363,7 @@ class TestExternalDataSchema(APIBaseTest):
             sync_frequency_interval=timedelta(minutes=1),
         )
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}")
 
         assert response.status_code == 200, response.content
         assert response.json()["sync_frequency"] == "1min"
@@ -1396,7 +1396,7 @@ class TestExternalDataSchema(APIBaseTest):
             ) as mock_sync_workflow,
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_frequency": "30day"},
             )
 
@@ -1434,7 +1434,7 @@ class TestExternalDataSchema(APIBaseTest):
             ) as mock_sync_workflow,
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_frequency": "30day"},
             )
 
@@ -1463,7 +1463,7 @@ class TestExternalDataSchema(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
             data={"should_sync": True},
         )
 
@@ -1521,7 +1521,7 @@ class TestExternalDataSchema(APIBaseTest):
             # wipe the cursor config, or the webhook initial sync degrades to an unbounded
             # full-history scan with no durable watermark progress.
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "webhook", "incremental_field": None, "incremental_field_type": None},
             )
 
@@ -1562,7 +1562,7 @@ class TestExternalDataSchema(APIBaseTest):
             mock.patch.object(DataWarehouseTable, "get_max_value_for_column", return_value=1),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "incremental", "incremental_field": "field", "incremental_field_type": "integer"},
             )
 
@@ -1591,7 +1591,7 @@ class TestExternalDataSchema(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
             data={
                 "sync_type": "incremental",
                 "incremental_field": "created",
@@ -1637,7 +1637,7 @@ class TestExternalDataSchema(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
             data={
                 "sync_type": "incremental",
                 "incremental_field": "created",
@@ -1670,7 +1670,7 @@ class TestExternalDataSchema(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
             data={"sync_type": "full_refresh"},
         )
 
@@ -1702,7 +1702,7 @@ class TestExternalDataSchema(APIBaseTest):
 
         with mock.patch.object(DataWarehouseTable, "get_max_value_for_column", return_value=1):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={
                     "sync_type": "append",
                     "incremental_field": "created",
@@ -1736,7 +1736,7 @@ class TestExternalDataSchema(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.pk}/external_data_schemas/",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/",
         )
 
         assert response.status_code == 200
@@ -1782,7 +1782,7 @@ class TestExternalDataSchema(APIBaseTest):
             mock.patch.object(StripeSource, "get_schemas", return_value=mock_webhook_schemas),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "webhook", "incremental_field": "created", "incremental_field_type": "integer"},
             )
 
@@ -1834,7 +1834,7 @@ class TestExternalDataSchema(APIBaseTest):
             mock.patch.object(StripeSource, "get_schemas", return_value=mock_webhook_schemas),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "webhook", "incremental_field": "created", "incremental_field_type": "integer"},
             )
 
@@ -1885,7 +1885,7 @@ class TestExternalDataSchema(APIBaseTest):
             mock.patch.object(StripeSource, "get_schemas", return_value=mock_webhook_schemas),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "webhook", "incremental_field": "created", "incremental_field_type": "integer"},
             )
 
@@ -1934,7 +1934,7 @@ class TestExternalDataSchema(APIBaseTest):
             mock.patch.object(StripeSource, "get_schemas", return_value=mock_webhook_schemas),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "webhook", "incremental_field": "created", "incremental_field_type": "integer"},
             )
 
@@ -1965,7 +1965,7 @@ class TestExternalDataSchema(APIBaseTest):
             ) as mock_get_or_create,
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "incremental", "incremental_field": "created", "incremental_field_type": "integer"},
             )
 
@@ -1995,7 +1995,7 @@ class TestExternalDataSchema(APIBaseTest):
             ) as mock_get_or_create,
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "full_refresh"},
             )
 
@@ -2035,7 +2035,7 @@ class TestExternalDataSchema(APIBaseTest):
             ) as mock_get_or_create,
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "webhook", "incremental_field": "id", "incremental_field_type": "integer"},
             )
 
@@ -2075,7 +2075,7 @@ class TestExternalDataSchema(APIBaseTest):
             ) as mock_get_or_create,
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
                 data={"sync_type": "webhook", "incremental_field": "created", "incremental_field_type": "integer"},
             )
 
@@ -2126,7 +2126,7 @@ class TestUpdateExternalDataSchema:
             schedule_desc = describe_schedule(temporal, str(schema.id))
 
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={
                 "id": str(schema.id),
                 "name": schema.name,
@@ -2165,7 +2165,7 @@ class TestUpdateExternalDataSchema:
         assert schedule_desc.schedule.state.paused is False
 
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             # here we try to mimic the payload from the frontend, which actually sends all fields, not just should_sync
             data={
                 "id": str(schema.id),
@@ -2201,7 +2201,7 @@ class TestUpdateExternalDataSchema:
 
         # pause the schedule
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={
                 "id": str(schema.id),
                 "name": schema.name,
@@ -2226,7 +2226,7 @@ class TestUpdateExternalDataSchema:
 
         # now turn it back on
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={
                 "id": str(schema.id),
                 "name": schema.name,
@@ -2265,7 +2265,7 @@ class TestUpdateExternalDataSchema:
         schema.save()
 
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={
                 "id": str(schema.id),
                 "name": schema.name,
@@ -2320,7 +2320,7 @@ class TestUpdateExternalDataSchema:
             ) as mock_sync_external_data_job_workflow,
         ):
             response = client.patch(
-                f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
                 data={
                     "id": str(schema.id),
                     "name": schema.name,
@@ -2384,7 +2384,7 @@ class TestUpdateExternalDataSchema:
             "products.warehouse_sources.backend.presentation.views.external_data_schema.Database.create_for"
         ):
             response = client.patch(
-                f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
                 data={
                     "id": str(schema.id),
                     "name": schema.name,
@@ -2447,7 +2447,7 @@ class TestUpdateExternalDataSchema:
             ) as mock_sync_external_data_job_workflow,
         ):
             response = client.patch(
-                f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
                 data={
                     "id": str(schema.id),
                     "name": schema.name,
@@ -2511,7 +2511,7 @@ class TestUpdateExternalDataSchema:
             "products.warehouse_sources.backend.presentation.views.external_data_schema.Database.create_for"
         ):
             response = client.patch(
-                f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
                 data={
                     "id": str(schema.id),
                     "name": schema.name,
@@ -2588,7 +2588,7 @@ class TestUpdateExternalDataSchema:
             ),
         ):
             response = client.patch(
-                f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
                 data={
                     "id": str(schema.id),
                     "name": schema.name,
@@ -2645,7 +2645,7 @@ class TestUpdateExternalDataSchema:
             },
         )
 
-        response = client.delete(f"/api/environments/{team.pk}/external_data_schemas/{schema.id}/delete_data")
+        response = client.delete(f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}/delete_data")
 
         assert response.status_code == 200
         schema.refresh_from_db()
@@ -2660,7 +2660,7 @@ class TestUpdateExternalDataSchema:
         assert schema is not None
 
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={
                 "id": str(schema.id),
                 "name": schema.name,
@@ -2685,7 +2685,7 @@ class TestUpdateExternalDataSchema:
         assert schema is not None
 
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={
                 "id": str(schema.id),
                 "name": schema.name,
@@ -2716,7 +2716,7 @@ class TestUpdateExternalDataSchema:
         assert schema is not None
 
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={
                 "id": str(schema.id),
                 "name": schema.name,
@@ -2750,7 +2750,7 @@ class TestUpdateExternalDataSchema:
         assert schema is not None
 
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={
                 "id": str(schema.id),
                 "name": schema.name,
@@ -2807,7 +2807,7 @@ class TestUpdateExternalDataSchema:
             ),
         ):
             response = client.patch(
-                f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
                 data={"should_sync": True},
                 content_type="application/json",
             )
@@ -2849,7 +2849,7 @@ class TestUpdateExternalDataSchema:
             ),
         ):
             response = client.patch(
-                f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
                 data={"should_sync": True},
                 content_type="application/json",
             )
@@ -2905,7 +2905,7 @@ class TestUpdateExternalDataSchema:
             ),
         ):
             response = client.patch(
-                f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+                f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
                 data={"should_sync": True},
                 content_type="application/json",
             )
@@ -2958,7 +2958,7 @@ class TestCancelExternalDataSchema(APIBaseTest):
         schema, job = self._create_schema_with_running_job(pipeline_version=ExternalDataJob.PipelineVersion.V3)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/cancel/",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/cancel/",
         )
 
         assert response.status_code == 200
@@ -3000,7 +3000,7 @@ class TestCancelExternalDataSchema(APIBaseTest):
         mock_cancel.side_effect = RPCError("cancel failed", RPCStatusCode[rpc_status_name], b"")
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/cancel/",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/cancel/",
         )
 
         assert response.status_code == 200
@@ -3023,7 +3023,7 @@ class TestCancelExternalDataSchema(APIBaseTest):
         schema, job = self._create_schema_with_running_job(pipeline_version=pipeline_version)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/cancel/",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/cancel/",
         )
 
         assert response.status_code == 200
@@ -3049,7 +3049,7 @@ class TestCancelExternalDataSchema(APIBaseTest):
         mock_cancel.side_effect = RPCError("workflow not found", RPCStatusCode.NOT_FOUND, b"")
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/cancel/",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/cancel/",
         )
 
         assert response.status_code == 200
@@ -3074,7 +3074,7 @@ class TestCancelExternalDataSchema(APIBaseTest):
         mock_cancel.side_effect = RPCError("temporal unavailable", RPCStatusCode.UNAVAILABLE, b"")
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/cancel/",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/cancel/",
         )
 
         assert response.status_code == 400
@@ -3099,7 +3099,7 @@ class TestCancelExternalDataSchema(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/cancel/",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/cancel/",
         )
 
         assert response.status_code == 400
@@ -3150,13 +3150,13 @@ class TestExternalDataSchemaAPIKeyScopes(APIBaseTest):
         headers = {"authorization": f"Bearer {api_key}"}
 
         if action == "list":
-            url = f"/api/environments/{self.team.pk}/external_data_schemas/"
+            url = f"/v1/environments/{self.team.pk}/external_data_schemas/"
             response = self.client.get(url, headers=headers)
         elif action == "retrieve":
-            url = f"/api/environments/{self.team.pk}/external_data_schemas/{self.schema.id}/"
+            url = f"/v1/environments/{self.team.pk}/external_data_schemas/{self.schema.id}/"
             response = self.client.get(url, headers=headers)
         elif action == "partial_update":
-            url = f"/api/environments/{self.team.pk}/external_data_schemas/{self.schema.id}/"
+            url = f"/v1/environments/{self.team.pk}/external_data_schemas/{self.schema.id}/"
             response = self.client.patch(url, {"should_sync": False}, format="json", headers=headers)
         else:
             self.fail(f"Unknown action: {action}")
@@ -3195,7 +3195,7 @@ class TestExternalDataSchemaSerializerValidation(APIBaseTest):
 
     def test_update_sync_type_null_clears_existing_value(self):
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{self.schema.id}/",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{self.schema.id}/",
             {"sync_type": None},
             format="json",
         )
@@ -3205,7 +3205,7 @@ class TestExternalDataSchemaSerializerValidation(APIBaseTest):
 
     def test_update_absent_sync_type_preserves_existing_value(self):
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{self.schema.id}/",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{self.schema.id}/",
             {"should_sync": True},
             format="json",
         )
@@ -3344,7 +3344,7 @@ class TestAvailableColumnsAcrossSqlSources(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/",
         )
         assert response.status_code == 200, response.json()
         payload = response.json()
@@ -3374,7 +3374,7 @@ class TestAvailableColumnsAcrossSqlSources(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/",
         )
         assert response.status_code == 200, response.json()
         assert response.json()["available_columns"] == []
@@ -3406,7 +3406,7 @@ class TestAvailableColumnsAcrossSqlSources(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/",
         )
         assert response.status_code == 200, response.json()
         # Sort by name: `columns` is JSONB, which doesn't preserve key insertion order.
@@ -3432,7 +3432,7 @@ class TestAvailableColumnsAcrossSqlSources(APIBaseTest):
         source = ExternalDataSource.objects.create(team=self.team, source_type=source_type)
 
         response = self.client.get(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
         )
         assert response.status_code == 200, response.json()
         assert response.json()["supports_column_selection"] is expected
@@ -3448,7 +3448,7 @@ class TestAvailableColumnsAcrossSqlSources(APIBaseTest):
         )
         schema = ExternalDataSchema.objects.create(name="Payout", team=self.team, source=source)
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
             data={"enabled_columns": ["id", "status"]},
         )
         assert response.status_code == 400
@@ -3477,7 +3477,7 @@ class TestExternalDataSchemaRetrieveSource(APIBaseTest):
         self, source_type: ExternalDataSourceType, expected_column_selection: bool, expected_row_filters: bool
     ):
         source, schema = self._create(source_type=source_type)
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/")
         assert response.status_code == 200, response.json()
         summary = response.json()["source"]
         assert summary["id"] == str(source.id)
@@ -3490,7 +3490,7 @@ class TestExternalDataSchemaRetrieveSource(APIBaseTest):
 
     def test_list_omits_source_summary(self):
         self._create()
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_schemas/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_schemas/")
         assert response.status_code == 200
         results = response.json()["results"]
         assert len(results) > 0
@@ -3502,7 +3502,7 @@ class TestExternalDataSchemaRetrieveSource(APIBaseTest):
             team=other_team, source_type=ExternalDataSourceType.STRIPE, job_inputs={}
         )
         schema = ExternalDataSchema.objects.create(name="Customers", team=other_team, source=source)
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/")
         assert response.status_code == 404
 
 
@@ -3535,7 +3535,7 @@ class TestExternalDataSchemaRowFilters(APIBaseTest):
 
     def _patch(self, schema: ExternalDataSchema, row_filters: Any):
         return self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
             data={"row_filters": row_filters},
         )
 
@@ -3564,7 +3564,7 @@ class TestExternalDataSchemaRowFilters(APIBaseTest):
         filters = [{"column": "id", "operator": "<=", "value": 5}]
         schema.row_filters = filters
         schema.save(update_fields=["row_filters"])
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}/")
         assert response.status_code == 200
         assert response.json()["row_filters"] == filters
 
@@ -3665,7 +3665,7 @@ class TestExternalDataSchemaApiVersionOverride(APIBaseTest):
 
     def _patch(self, schema, payload):
         return self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}",
             data=payload,
         )
 
@@ -3676,7 +3676,7 @@ class TestExternalDataSchemaApiVersionOverride(APIBaseTest):
             job_inputs={"auth_method": {"selection": "api_key", "stripe_secret_key": "123"}},
         )
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_schemas/",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/",
             data={"name": "Customer", "source": str(source.id), "api_version": "not-validated"},
         )
         assert response.status_code == 405
@@ -3757,7 +3757,7 @@ class TestExternalDataSchemaApiVersionOverride(APIBaseTest):
 
     def test_api_version_deprecation_surfaces_for_deprecated_override_only(self):
         schema = self._create_schema(api_version="1999-legacy")
-        url = f"/api/environments/{self.team.pk}/external_data_schemas/{schema.id}"
+        url = f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.id}"
 
         assert self.client.get(url).json()["api_version_deprecation"] is None
 

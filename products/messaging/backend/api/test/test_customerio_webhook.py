@@ -33,7 +33,7 @@ class TestCustomerIOWebhook(APIBaseTest):
             webhook_integration=self.integration,
             webhook_enabled=True,
         )
-        self.url = f"/api/environments/{self.team.id}/messaging/customerio/webhook/"
+        self.url = f"/v1/environments/{self.team.id}/messaging/customerio/webhook/"
 
         # Create categories that mimic a Customer.io import (key = "customerio_topic_{id}")
         self.cat_7 = MessageCategory.objects.create(team=self.team, key="customerio_topic_7", name="Product updates")
@@ -147,7 +147,7 @@ class TestCustomerIOWebhook(APIBaseTest):
 
         self.client.logout()
         response = self.client.post(
-            f"/api/environments/{other_team.id}/messaging/customerio/webhook/",
+            f"/v1/environments/{other_team.id}/messaging/customerio/webhook/",
             data=body_str,
             content_type="application/json",
             headers={"x-cio-signature": sig, "x-cio-timestamp": ts},

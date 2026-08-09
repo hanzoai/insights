@@ -14,8 +14,8 @@ Versioned migrations for the JSON query schema (`TrendsQuery`, `RetentionQuery`,
 
 Read/execute-time (always-on):
 
-- `/api/.../query` and `process_query_dict` upgrade before pydantic validation.
-- `POST /api/environments/:id/query/upgrade` is called by the frontend for untrusted queries (URL-embedded, notebook nodes).
+- `/v1/.../query` and `process_query_dict` upgrade before pydantic validation.
+- `POST /v1/environments/:id/query/upgrade` is called by the frontend for untrusted queries (URL-embedded, notebook nodes).
 - Insight serializers upgrade on read; caching, alerts, exports, and subscriptions go through `upgrade_query`.
 - Endpoints upgrade their immutable `EndpointVersion.query` snapshots at execution/materialization time; cohorts upgrade their saved `query` when compiling.
 

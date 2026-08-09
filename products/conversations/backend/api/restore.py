@@ -68,7 +68,7 @@ class RestoreRedeemSerializer(serializers.Serializer):
 
 class WidgetRestoreRequestView(APIView):
     """
-    POST /api/conversations/v1/widget/restore/request
+    POST /v1/conversations/v1/widget/restore/request
     Request a restore link to recover tickets from another browser/device.
 
     Always returns {"ok": true} to prevent email enumeration.
@@ -135,7 +135,7 @@ class WidgetRestoreRequestView(APIView):
 
 class WidgetRestoreRedeemView(APIView):
     """
-    POST /api/conversations/v1/widget/restore
+    POST /v1/conversations/v1/widget/restore
     Redeem a restore token to migrate tickets to the current browser session.
 
     Returns the migration result including status and migrated ticket IDs.

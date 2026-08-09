@@ -23,8 +23,8 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/annotations/': annotations,
-                '/api/projects/:team_id/annotations/:annotationId/': ({ params }) => [
+                '/v1/projects/:team_id/annotations/': annotations,
+                '/v1/projects/:team_id/annotations/:annotationId/': ({ params }) => [
                     200,
                     annotations.results.find((r) => r.id === Number(params['annotationId'])),
                 ],

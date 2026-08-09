@@ -62,7 +62,7 @@ class TestSparklineQueryRunner(DatastoreTestMixin, APIBaseTest):
         )
 
     def _make_sparkline_api_request(self, query_params, expected_status=status.HTTP_200_OK):
-        response = self.client.post(f"/api/projects/{self.team.id}/logs/sparkline", data={"query": query_params})
+        response = self.client.post(f"/v1/projects/{self.team.id}/logs/sparkline", data={"query": query_params})
         self.assertEqual(response.status_code, expected_status)
         return response.json() if expected_status == status.HTTP_200_OK else response
 

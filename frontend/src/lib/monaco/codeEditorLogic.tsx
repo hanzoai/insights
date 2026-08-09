@@ -28,12 +28,17 @@ import { setLatestVersionsOnQuery } from '~/queries/utils'
 import type { FeatureFlagsSet } from '../logic/featureFlagLogic'
 import { getContextSourceQuery } from './sourceQueryUtils'
 
-const METADATA_LANGUAGES = [HogLanguage.script, HogLanguage.hogQL, HogLanguage.hogQLExpr, HogLanguage.hogTemplate]
+const METADATA_LANGUAGES = [
+    HogLanguage.script,
+    HogLanguage.insightsQL,
+    HogLanguage.insightsQLExpr,
+    HogLanguage.hogTemplate,
+]
 const VIM_COMMAND_HISTORY_LIMIT = 50
 
 export interface ModelMarker extends editor.IMarkerData {
-    hogQLFix?: string
-    hogQLAIFixPrompt?: string
+    insightsQLFix?: string
+    insightsQLAIFixPrompt?: string
     start: number
     end: number
 }
@@ -137,7 +142,7 @@ export type codeEditorLogicType = MakeLogicType<
 >
 
 export const codeEditorLogic = kea<codeEditorLogicType>([
-    path(['lib', 'monaco', 'hogQLMetadataProvider']),
+    path(['lib', 'monaco', 'insightsQLMetadataProvider']),
     props({} as CodeEditorLogicProps),
     key((props) => props.key),
     actions({
@@ -220,8 +225,8 @@ export const codeEditorLogic = kea<codeEditorLogicType>([
                             endColumn: end.column,
                             message: error.message ?? 'Unknown error',
                             severity: severity,
-                            hogQLFix: error.fix?.startsWith('ai_prompt:') ? undefined : error.fix,
-                            hogQLAIFixPrompt: error.fix?.startsWith('ai_prompt:')
+                            insightsQLFix: error.fix?.startsWith('ai_prompt:') ? undefined : error.fix,
+                            insightsQLAIFixPrompt: error.fix?.startsWith('ai_prompt:')
                                 ? error.fix.slice('ai_prompt:'.length)
                                 : undefined,
                         }

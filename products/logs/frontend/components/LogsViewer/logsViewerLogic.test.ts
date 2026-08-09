@@ -72,8 +72,8 @@ describe('logsViewerLogic', () => {
     beforeEach(() => {
         useMocks({
             post: {
-                '/api/environments/:team_id/logs/query/': () => [200, { results: [], maxExportableLogs: 5000 }],
-                '/api/environments/:team_id/logs/sparkline/': () => [200, []],
+                '/v1/environments/:team_id/logs/query/': () => [200, { results: [], maxExportableLogs: 5000 }],
+                '/v1/environments/:team_id/logs/sparkline/': () => [200, []],
             },
         })
         localStorage.clear()

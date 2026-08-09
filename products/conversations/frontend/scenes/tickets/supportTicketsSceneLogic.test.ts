@@ -62,7 +62,7 @@ describe('supportTicketsSceneLogic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/conversations/tickets/': () => [200, { results: [], count: 0 }],
+                    '/v1/projects/:team_id/conversations/tickets/': () => [200, { results: [], count: 0 }],
                 },
             })
             initKeaTests()
@@ -140,7 +140,7 @@ describe('supportTicketsSceneLogic', () => {
             lastAssigneeParam = null
             useMocks({
                 get: {
-                    '/api/projects/:team_id/conversations/tickets/': ({ request }) => {
+                    '/v1/projects/:team_id/conversations/tickets/': ({ request }) => {
                         lastAssigneeParam = new URL(request.url).searchParams.get('assignee')
                         return [200, { count: 0, results: [] }]
                     },
@@ -190,8 +190,8 @@ describe('supportTicketsSceneLogic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/conversations/tickets/': () => [200, { count: 0, results: [] }],
-                    '/api/projects/:team_id/conversations/views/:short_id/': () => [404, { detail: 'Not found' }],
+                    '/v1/projects/:team_id/conversations/tickets/': () => [200, { count: 0, results: [] }],
+                    '/v1/projects/:team_id/conversations/views/:short_id/': () => [404, { detail: 'Not found' }],
                 },
             })
             initKeaTests()
@@ -265,7 +265,7 @@ describe('supportTicketsSceneLogic', () => {
             const pending: Record<string, { resolve: (view: SavedTicketView) => void }> = {}
             useMocks({
                 get: {
-                    '/api/projects/:team_id/conversations/views/:short_id/': ({ request }) => {
+                    '/v1/projects/:team_id/conversations/views/:short_id/': ({ request }) => {
                         const pathParts = new URL(request.url).pathname.split('/')
                         const shortId = pathParts[pathParts.length - 2]
                         return new Promise((resolve) => {
@@ -293,11 +293,11 @@ describe('supportTicketsSceneLogic', () => {
             let lastOrderBy: string | null = null
             useMocks({
                 get: {
-                    '/api/projects/:team_id/conversations/tickets/': ({ request }) => {
+                    '/v1/projects/:team_id/conversations/tickets/': ({ request }) => {
                         lastOrderBy = new URL(request.url).searchParams.get('order_by')
                         return [200, { count: 0, results: [] }]
                     },
-                    '/api/projects/:team_id/conversations/views/:short_id/': () => [
+                    '/v1/projects/:team_id/conversations/views/:short_id/': () => [
                         200,
                         makeSavedView('view-a', { status: ['open'] }),
                     ],
@@ -345,7 +345,7 @@ describe('supportTicketsSceneLogic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/conversations/tickets/': () => [200, { count: 0, results: [] }],
+                    '/v1/projects/:team_id/conversations/tickets/': () => [200, { count: 0, results: [] }],
                 },
             })
             initKeaTests()

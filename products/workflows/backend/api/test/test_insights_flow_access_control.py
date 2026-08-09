@@ -97,10 +97,10 @@ class TestInsightsFlowAccessControl(DatastoreTestMixin, APIBaseTest):
         )
 
     def _list_url(self) -> str:
-        return f"/api/projects/{self.team.pk}/insights_flows"
+        return f"/v1/projects/{self.team.pk}/insights_flows"
 
     def _detail_url(self, flow_id=None) -> str:
-        return f"/api/projects/{self.team.pk}/insights_flows/{flow_id or self.insights_flow.id}"
+        return f"/v1/projects/{self.team.pk}/insights_flows/{flow_id or self.insights_flow.id}"
 
     def _create_payload(self, name="new_workflow") -> dict:
         return {"name": name, "actions": [TRIGGER_ACTION]}

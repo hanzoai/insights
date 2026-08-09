@@ -17,11 +17,11 @@ describe('errorTrackingIssueSceneLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/error_tracking/issues/:id/': {},
-                '/api/environments/:team_id/error_tracking/issues/:id/fingerprints/': [],
+                '/v1/environments/:team_id/error_tracking/issues/:id/': {},
+                '/v1/environments/:team_id/error_tracking/issues/:id/fingerprints/': [],
             },
             post: {
-                '/api/environments/:team_id/query/': { results: [] },
+                '/v1/environments/:team_id/query/': { results: [] },
             },
         })
         initKeaTests()

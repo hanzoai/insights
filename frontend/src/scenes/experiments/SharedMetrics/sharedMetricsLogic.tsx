@@ -115,7 +115,7 @@ export const sharedMetricsLogic = kea<sharedMetricsLogicType>([
                         search: values.searchTerm || undefined,
                     })
                     const response: CountedPaginatedResponse<SharedMetric> = await api.get(
-                        `api/projects/${values.currentProjectId}/experiment_saved_metrics?${params}`
+                        `v1/projects/${values.currentProjectId}/experiment_saved_metrics?${params}`
                     )
                     // Discard stale responses that resolve after a newer search has fired
                     breakpoint()
@@ -136,7 +136,7 @@ export const sharedMetricsLogic = kea<sharedMetricsLogicType>([
         },
         updateSharedMetricTags: async ({ metricId, tags }) => {
             try {
-                await api.update(`api/projects/${values.currentProjectId}/experiment_saved_metrics/${metricId}`, {
+                await api.update(`v1/projects/${values.currentProjectId}/experiment_saved_metrics/${metricId}`, {
                     tags,
                 })
                 actions.loadSharedMetrics()
@@ -147,7 +147,7 @@ export const sharedMetricsLogic = kea<sharedMetricsLogicType>([
         },
         deleteSharedMetric: async ({ metricId }) => {
             try {
-                await api.delete(`api/projects/${values.currentProjectId}/experiment_saved_metrics/${metricId}`)
+                await api.delete(`v1/projects/${values.currentProjectId}/experiment_saved_metrics/${metricId}`)
                 toast.success('Shared metric deleted successfully')
                 actions.loadSharedMetrics()
             } catch {

@@ -24,10 +24,10 @@ describe('dataWarehouseViewsLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/warehouse_saved_queries/': { results: [] },
+                '/v1/environments/:team_id/warehouse_saved_queries/': { results: [] },
             },
             delete: {
-                '/api/environments/:team_id/warehouse_saved_queries/:id/': [204],
+                '/v1/environments/:team_id/warehouse_saved_queries/:id/': [204],
             },
         })
         initKeaTests()
@@ -52,12 +52,12 @@ describe('dataWarehouseViewsLogic', () => {
         let listCalls = 0
         useMocks({
             get: {
-                '/api/environments/:team_id/warehouse_saved_queries/': () => {
+                '/v1/environments/:team_id/warehouse_saved_queries/': () => {
                     listCalls += 1
                     return [200, { results: [{ id: 'view-123', name: 'v' }] }]
                 },
             },
-            delete: { '/api/environments/:team_id/warehouse_saved_queries/:id/': [204] },
+            delete: { '/v1/environments/:team_id/warehouse_saved_queries/:id/': [204] },
         })
 
         logic.actions.loadDataWarehouseSavedQueries()
@@ -83,13 +83,13 @@ describe('dataWarehouseViewsLogic', () => {
         let listCalls = 0
         useMocks({
             get: {
-                '/api/environments/:team_id/warehouse_saved_queries/': () => {
+                '/v1/environments/:team_id/warehouse_saved_queries/': () => {
                     listCalls += 1
                     return [200, { results: [{ id: 'view-1', name: 'v1', is_materialized: isMaterialized }] }]
                 },
             },
             post: {
-                '/api/projects/:team_id/warehouse_saved_queries/:id/materialize/': [200],
+                '/v1/projects/:team_id/warehouse_saved_queries/:id/materialize/': [200],
             },
         })
 
@@ -125,7 +125,7 @@ describe('dataWarehouseViewsLogic', () => {
         let requestedFrequency: string | undefined
         useMocks({
             post: {
-                '/api/projects/:team_id/warehouse_saved_queries/:id/materialize/': async ({ request }) => {
+                '/v1/projects/:team_id/warehouse_saved_queries/:id/materialize/': async ({ request }) => {
                     requestedFrequency = ((await request.json()) as { sync_frequency?: string }).sync_frequency
                     return [200]
                 },
@@ -145,12 +145,12 @@ describe('dataWarehouseViewsLogic', () => {
         [
             'materialize',
             () => logic.actions.materializeDataWarehouseSavedQuery('view-1', '24hour'),
-            { post: { '/api/projects/:team_id/warehouse_saved_queries/:id/materialize/': [400, rejection] } },
+            { post: { '/v1/projects/:team_id/warehouse_saved_queries/:id/materialize/': [400, rejection] } },
         ],
         [
             'sync frequency update',
             () => logic.actions.updateDataWarehouseSavedQuery({ id: 'view-1', sync_frequency: '24hour' }),
-            { patch: { '/api/environments/:team_id/warehouse_saved_queries/:id/': [400, rejection] } },
+            { patch: { '/v1/environments/:team_id/warehouse_saved_queries/:id/': [400, rejection] } },
         ],
     ])('surfaces why the server rejected the cadence on %s', async (_name, act, mocks) => {
         const toastErrorSpy = jest.spyOn(toast, 'error').mockImplementation(() => ({ id: 'x' }) as any)
@@ -169,7 +169,7 @@ describe('dataWarehouseViewsLogic', () => {
         jest.useFakeTimers()
         useMocks({
             get: {
-                '/api/environments/:team_id/warehouse_saved_queries/': () => [
+                '/v1/environments/:team_id/warehouse_saved_queries/': () => [
                     200,
                     {
                         results: [
@@ -180,7 +180,7 @@ describe('dataWarehouseViewsLogic', () => {
                 ],
             },
             post: {
-                '/api/projects/:team_id/warehouse_saved_queries/:id/materialize/': [200],
+                '/v1/projects/:team_id/warehouse_saved_queries/:id/materialize/': [200],
             },
         })
 

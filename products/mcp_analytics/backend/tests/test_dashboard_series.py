@@ -252,7 +252,7 @@ class TestMCPDashboardSeriesGate(_MCPAnalyticsTeamScopedTestMixin, DatastoreTest
         PersonalAPIKey.objects.create(label="test", user=self.user, secure_value=hash_key_value(value), scopes=scopes)
 
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/query/",
+            f"/v1/projects/{self.team.pk}/query/",
             {"query": {"kind": kind}},
             HTTP_AUTHORIZATION=f"Bearer {value}",
         )

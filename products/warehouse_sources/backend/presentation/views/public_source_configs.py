@@ -58,7 +58,7 @@ class PublicSourceConfigViewSet(viewsets.ViewSet):
     input field schemas needed to render setup forms and, for fixed-schema
     sources, the documented table catalog rendered on hanzo.ai docs.
 
-    This is the data-warehouse equivalent of ``/api/public_insights_function_templates``.
+    This is the data-warehouse equivalent of ``/v1/public_insights_function_templates``.
     """
 
     permission_classes = [permissions.AllowAny]

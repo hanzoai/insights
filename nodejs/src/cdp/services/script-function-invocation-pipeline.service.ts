@@ -1,6 +1,6 @@
 import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
-import { logger } from '~/common/utils/logger'
 import { captureException } from '~/common/utils/insights'
+import { logger } from '~/common/utils/logger'
 
 import { RedisV2 } from '../../common/redis/redis-v2'
 import { KeyedRateLimitRequest, KeyedRateLimiterService } from '../../common/services/keyed-rate-limiter.service'
@@ -17,11 +17,11 @@ import {
 } from '../types'
 import { buildInsightsFunctionInvocations } from '../utils/invocation-utils'
 import { mirrorCompare } from '../utils/mirror-call'
-import { HogInputsService } from './script-inputs.service'
 import { InsightsFunctionManagerService } from './managers/script-function-manager.service'
 import { InsightsFunctionMonitoringService } from './monitoring/script-function-monitoring.service'
 import { HogMaskerService } from './monitoring/script-masker.service'
 import { HogWatcherService, HogWatcherState } from './monitoring/script-watcher.service'
+import { HogInputsService } from './script-inputs.service'
 
 export interface InsightsFunctionInvocationPipelineConfig {
     CDP_RATE_LIMITER_BUCKET_SIZE: number

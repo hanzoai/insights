@@ -106,7 +106,7 @@ Fired after every `toolbarFetch` call. Covers all toolbar API endpoints.
 | Property          | Type      | Description                                        |
 | ----------------- | --------- | -------------------------------------------------- |
 | `method`          | `string`  | HTTP method (`GET`, `POST`, `PATCH`, `DELETE`)     |
-| `pathname`        | `string`  | API path (e.g., `/api/projects/@current/actions/`) |
+| `pathname`        | `string`  | API path (e.g., `/v1/projects/@current/actions/`) |
 | `status`          | `number`  | HTTP response status code                          |
 | `duration_ms`     | `number`  | Total time including any token retry               |
 | `did_token_retry` | `boolean` | Whether a 401 triggered a token refresh + retry    |

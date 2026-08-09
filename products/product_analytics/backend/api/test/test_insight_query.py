@@ -279,7 +279,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights/{insight_id}",
+            f"/v1/projects/{self.team.id}/insights/{insight_id}",
             {
                 "query": {
                     "kind": "FunnelsQuery",
@@ -343,7 +343,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     )
     def test_mcp_create_normalizes_query(self, _name, query, expected_kind, expected_source_kind) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/",
+            f"/v1/projects/{self.team.id}/insights/",
             data={"name": "Test insight", "favorited": False, "saved": True, "query": query},
             HTTP_X_INSIGHTS_CLIENT="mcp",
         )
@@ -355,7 +355,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_mcp_create_rejects_disallowed_query_kind(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/",
+            f"/v1/projects/{self.team.id}/insights/",
             data={
                 "name": "Unsupported insight",
                 "favorited": False,

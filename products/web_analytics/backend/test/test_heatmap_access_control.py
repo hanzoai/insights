@@ -78,10 +78,10 @@ class TestHeatmapAccessControl(DatastoreTestMixin, APIBaseTest):
         )
 
     def _list_url(self) -> str:
-        return f"/api/environments/{self.team.pk}/saved/"
+        return f"/v1/environments/{self.team.pk}/saved/"
 
     def _detail_url(self, short_id=None) -> str:
-        return f"/api/environments/{self.team.pk}/saved/{short_id or self.heatmap.short_id}/"
+        return f"/v1/environments/{self.team.pk}/saved/{short_id or self.heatmap.short_id}/"
 
     @parameterized.expand(
         [
@@ -365,7 +365,7 @@ class TestHeatmapAggregateQueryAccessControl(DatastoreTestMixin, APIBaseTest):
             params["url_exact"] = url_exact
         if url_pattern is not None:
             params["url_pattern"] = url_pattern
-        return self.client.get(f"/api/environments/{self.team.pk}/heatmaps/", params)
+        return self.client.get(f"/v1/environments/{self.team.pk}/heatmaps/", params)
 
     def test_object_grant_does_not_expose_aggregate_data_for_other_urls(self):
         response = self._query_aggregate(url_exact="https://example.com/secret-unrelated-page")
@@ -457,7 +457,7 @@ class TestHeatmapAggregateQueryAccessControl(DatastoreTestMixin, APIBaseTest):
     def test_events_drilldown_does_not_expose_other_urls(self):
         self.client.force_login(self.viewer_user)
         response = self.client.get(
-            f"/api/environments/{self.team.pk}/heatmaps/events/"
+            f"/v1/environments/{self.team.pk}/heatmaps/events/"
             "?type=click&date_from=2023-03-01"
             "&url_exact=https://example.com/secret-unrelated-page"
             '&points=[{"x":0.1,"y":320}]'

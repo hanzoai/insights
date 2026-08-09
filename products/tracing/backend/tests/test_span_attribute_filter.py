@@ -79,7 +79,7 @@ class TestSpanAttributeFilter(DatastoreTestMixin, APIBaseTest):
                 "filterGroup": [prop],
             }
         }
-        res = self.client.post(f"/api/projects/{self.team.id}/tracing/spans/query/", body, format="json")
+        res = self.client.post(f"/v1/projects/{self.team.id}/tracing/spans/query/", body, format="json")
         self.assertEqual(res.status_code, 200, res.content)
         return sorted(row["service_name"] for row in res.json()["results"])
 
@@ -202,7 +202,7 @@ class TestSpanAttributeFilter(DatastoreTestMixin, APIBaseTest):
                 "filterGroup": [prop],
             }
         }
-        res = self.client.post(f"/api/projects/{self.team.id}/tracing/spans/count/", body, format="json")
+        res = self.client.post(f"/v1/projects/{self.team.id}/tracing/spans/count/", body, format="json")
         self.assertEqual(res.status_code, 200, res.content)
         return res.json()["count"]
 
@@ -237,5 +237,5 @@ class TestSpanAttributeFilter(DatastoreTestMixin, APIBaseTest):
                 ],
             }
         }
-        res = self.client.post(f"/api/projects/{self.team.id}/tracing/spans/query/", body, format="json")
+        res = self.client.post(f"/v1/projects/{self.team.id}/tracing/spans/query/", body, format="json")
         self.assertEqual(res.status_code, 400, res.content)

@@ -383,7 +383,7 @@ class TestPythonGeneratorAPI(APIBaseTest):
 
     @patch("insights.api.event_definition_generators.base.report_user_action")
     def test_python_endpoint_success(self, mock_report):
-        response = self.client.get(f"/api/projects/{self.project.id}/event_definitions/python")
+        response = self.client.get(f"/v1/projects/{self.project.id}/event_definitions/python")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.json()
@@ -405,7 +405,7 @@ class TestPythonGeneratorAPI(APIBaseTest):
         EventDefinition.objects.create(team=self.team, project=self.project, name="$money")
         EventDefinition.objects.create(team=self.team, project=self.project, name="$pageview")
 
-        response = self.client.get(f"/api/projects/{self.project.id}/event_definitions/python")
+        response = self.client.get(f"/v1/projects/{self.project.id}/event_definitions/python")
 
         code = response.json()["content"]
         self.assertNotIn("capture_money", code)
@@ -415,7 +415,7 @@ class TestPythonGeneratorAPI(APIBaseTest):
     def test_python_endpoint_handles_no_events(self, mock_report):
         EventDefinition.objects.filter(team=self.team).delete()
 
-        response = self.client.get(f"/api/projects/{self.project.id}/event_definitions/python")
+        response = self.client.get(f"/v1/projects/{self.project.id}/event_definitions/python")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -426,10 +426,10 @@ class TestPythonGeneratorAPI(APIBaseTest):
         self._test_telemetry_called(mock_report)
 
     def test_python_schema_hash_is_deterministic(self):
-        response1 = self.client.get(f"/api/projects/{self.project.id}/event_definitions/python")
+        response1 = self.client.get(f"/v1/projects/{self.project.id}/event_definitions/python")
         hash1 = response1.json()["schema_hash"]
 
-        response2 = self.client.get(f"/api/projects/{self.project.id}/event_definitions/python")
+        response2 = self.client.get(f"/v1/projects/{self.project.id}/event_definitions/python")
         hash2 = response2.json()["schema_hash"]
 
         self.assertEqual(hash1, hash2, "Schema hash should be deterministic")
@@ -461,7 +461,7 @@ class TestPythonGeneratorAPI(APIBaseTest):
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir_path = Path(tmpdir)
 
-            response = self.client.get(f"/api/projects/{self.project.id}/event_definitions/python")
+            response = self.client.get(f"/v1/projects/{self.project.id}/event_definitions/python")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             python_content = response.json()["content"]
 

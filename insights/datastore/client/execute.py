@@ -397,7 +397,7 @@ def sync_execute(
     if ch_user == DatastoreUser.DEFAULT:
         if is_api_key_auth:
             ch_user = DatastoreUser.API
-        elif tags.kind == "request" and "api/" in tags_id and "capture" not in tags_id:
+        elif tags.kind == "request" and tags_id.startswith("/v1/") and "capture" not in tags_id:
             # process requests made to API from the PH app
             ch_user = DatastoreUser.APP
         elif tags.feature == Feature.CACHE_WARMUP:

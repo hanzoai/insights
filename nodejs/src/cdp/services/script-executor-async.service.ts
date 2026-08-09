@@ -21,11 +21,11 @@ import { resolveAwsSigV4Credentials, signAwsRequest } from '../utils/aws-sigv4'
 import { cdpTrackedFetch, isFetchResponseRetriable } from '../utils/cdp-fetch'
 import { createInvocationResult } from '../utils/invocation-utils'
 import { isNonFailureStatus } from '../utils/non-failure-status-codes'
-import { HogExecutorExecuteOptions, HogExecutorPreviousResult, HogExecutorService } from './script-executor.service'
-import { HogInputsService } from './script-inputs.service'
 import { EmailService } from './messaging/email.service'
 import { PushNotificationService } from './messaging/push-notification.service'
 import { RecipientTokensService } from './messaging/recipient-tokens.service'
+import { HogExecutorExecuteOptions, HogExecutorPreviousResult, HogExecutorService } from './script-executor.service'
+import { HogInputsService } from './script-inputs.service'
 import {
     SELF_LOOP_MAX_DEPTH,
     getSelfLoopDepth,
@@ -493,7 +493,7 @@ export class HogExecutorAsyncService {
         // name and message so the terminal log stops reading as "status 500"
         // with an empty body and instead tells the customer what actually
         // happened (connect timeout, socket abort, DNS failure, etc.).
-        const hogVmResponse: {
+        const scriptVmResponse: {
             status: number
             body: unknown
         } = {
@@ -502,8 +502,8 @@ export class HogExecutorAsyncService {
         }
 
         // Finally we create the response object as the VM expects
-        result.invocation.state.vmState!.stack.push(hogVmResponse)
-        result.execResult = hogVmResponse
+        result.invocation.state.vmState!.stack.push(scriptVmResponse)
+        result.execResult = scriptVmResponse
 
         result.metrics.push({
             team_id: invocation.teamId,

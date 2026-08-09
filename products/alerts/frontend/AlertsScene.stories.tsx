@@ -178,7 +178,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/alerts/': toPaginatedResponse(alerts),
+                '/v1/environments/:team_id/alerts/': toPaginatedResponse(alerts),
             },
         }),
     ],
@@ -194,7 +194,7 @@ export const EmptyState: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/alerts/': EMPTY_PAGINATED_RESPONSE,
+                '/v1/environments/:team_id/alerts/': EMPTY_PAGINATED_RESPONSE,
             },
         }),
     ],
@@ -207,7 +207,7 @@ export const LogAlerts: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/logs/alerts/': [
+                '/v1/projects/:team_id/logs/alerts/': [
                     200,
                     { count: logAlerts.length, next: null, previous: null, results: logAlerts },
                 ],
@@ -223,7 +223,7 @@ export const EmptyLogAlerts: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/logs/alerts/': EMPTY_PAGINATED_RESPONSE,
+                '/v1/projects/:team_id/logs/alerts/': EMPTY_PAGINATED_RESPONSE,
             },
         }),
     ],

@@ -28,7 +28,7 @@ export const Empty: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/insights/': async () => {
+                '/v1/environments/:team_id/insights/': async () => {
                     await delay(100)
                     return HttpResponse.json({ count: 1, results: [{ ...insight, result: [] }] })
                 },
@@ -43,11 +43,11 @@ export const ServerError: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/insights/': async () => {
+                '/v1/environments/:team_id/insights/': async () => {
                     await delay(100)
                     return HttpResponse.json({ count: 1, results: [{ ...insight, result: null }] })
                 },
-                '/api/environments/:team_id/insights/:id': async () => {
+                '/v1/environments/:team_id/insights/:id': async () => {
                     await delay(100)
                     return HttpResponse.json(
                         {
@@ -61,7 +61,7 @@ export const ServerError: Story = {
             post: {
                 // The query path must fail like the legacy endpoints above — otherwise the
                 // default query mock succeeds and renders a freshness bar over the error state.
-                '/api/environments/:team_id/query/:kind/': async () => {
+                '/v1/environments/:team_id/query/:kind/': async () => {
                     await delay(100)
                     return HttpResponse.json(
                         {
@@ -82,7 +82,7 @@ export const QueryServerError: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/insights/': async () => {
+                '/v1/environments/:team_id/insights/': async () => {
                     await delay(100)
                     return HttpResponse.json({
                         count: 1,
@@ -91,7 +91,7 @@ export const QueryServerError: Story = {
                 },
             },
             post: {
-                '/api/environments/:team_id/query/:kind/': async () => {
+                '/v1/environments/:team_id/query/:kind/': async () => {
                     await delay(100)
                     return HttpResponse.json(
                         {
@@ -117,13 +117,13 @@ export const ValidationError: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/insights/': async () => {
+                '/v1/environments/:team_id/insights/': async () => {
                     await delay(100)
                     return HttpResponse.json({ count: 1, results: [{ ...insight, result: null }] })
                 },
             },
             post: {
-                '/api/environments/:team_id/insights/:id': async () => {
+                '/v1/environments/:team_id/insights/:id': async () => {
                     await delay(100)
                     return HttpResponse.json(
                         {
@@ -135,7 +135,7 @@ export const ValidationError: Story = {
                 },
                 // Fail the query path too, so the default query mock doesn't succeed and
                 // render a freshness bar over the error state.
-                '/api/environments/:team_id/query/:kind/': async () => {
+                '/v1/environments/:team_id/query/:kind/': async () => {
                     await delay(100)
                     return HttpResponse.json(
                         {
@@ -156,13 +156,13 @@ export const MemoryLimitExceeded: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/insights/': () => [
+                '/v1/environments/:team_id/insights/': () => [
                     200,
                     { count: 1, results: [{ ...insight, result: null }] },
                 ],
             },
             post: {
-                '/api/environments/:team_id/query/:kind/': async () => {
+                '/v1/environments/:team_id/query/:kind/': async () => {
                     await delay(100)
                     return HttpResponse.json(
                         {
@@ -190,13 +190,13 @@ export const EstimatedQueryExecutionTimeTooLong: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/insights/': () => [
+                '/v1/environments/:team_id/insights/': () => [
                     200,
                     { count: 1, results: [{ ...insight, result: null }] },
                 ],
             },
             post: {
-                '/api/environments/:team_id/query/:kind/': async () => {
+                '/v1/environments/:team_id/query/:kind/': async () => {
                     await delay(100)
                     return HttpResponse.json(
                         {
@@ -223,13 +223,13 @@ export const LongLoading: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/insights/': () => [
+                '/v1/environments/:team_id/insights/': () => [
                     200,
                     { count: 1, results: [{ ...insight, result: null }] },
                 ],
             },
             post: {
-                '/api/environments/:team_id/query/:kind/': async () => {
+                '/v1/environments/:team_id/query/:kind/': async () => {
                     await delay('infinite')
                     return HttpResponse.json({})
                 },

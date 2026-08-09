@@ -1,6 +1,7 @@
 import { useActions, useValues } from 'kea'
 import type { DragEvent, ReactNode } from 'react'
 
+import { Button, Card, Input, Label, SearchableSelect, Select } from '@hanzo/elements'
 import {
     IconCalculator,
     IconDatabase,
@@ -14,13 +15,12 @@ import {
     IconTrends,
     IconX,
 } from '@hanzo/icons'
-import { Button, Card, Input, Label, SearchableSelect, Select } from '@hanzo/elements'
 
 import { InsightsQLDropdown } from 'lib/components/InsightsQLDropdown/InsightsQLDropdown'
 import { Resizer } from 'lib/components/Resizer/Resizer'
 import { dayjs } from 'lib/dayjs'
-import { Icon123, IconAreaChart, IconHeatmap, IconTableChart } from 'lib/elements/icons'
 import { CalendarSelectInput } from 'lib/elements/Calendar/CalendarSelect'
+import { Icon123, IconAreaChart, IconHeatmap, IconTableChart } from 'lib/elements/icons'
 import { cn } from 'lib/utils/css-classes'
 
 import { ChartDisplayType } from '~/types'
@@ -122,9 +122,7 @@ export function BIEditor({ tabId }: { tabId: string }): JSX.Element {
             <div className="flex flex-wrap items-end justify-between gap-3">
                 <div className="flex min-w-0 flex-col gap-1">
                     <div className="flex items-center gap-1">
-                        <Label info="Fields are limited to this table and its related folders.">
-                            Data source
-                        </Label>
+                        <Label info="Fields are limited to this table and its related folders.">Data source</Label>
                         <Button
                             type="tertiary"
                             size="xsmall"
@@ -517,7 +515,7 @@ function ExpressionEditorButton({
 }): JSX.Element {
     return (
         <InsightsQLDropdown
-            hogQLValue={value}
+            insightsQLValue={value}
             onInsightsQLValueChange={onChange}
             tableName={field.source.table}
             connectionId={field.source.connectionId}

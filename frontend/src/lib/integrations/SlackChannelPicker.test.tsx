@@ -64,7 +64,7 @@ describe('SlackChannelPicker', () => {
         channelIdLookups = []
         useMocks({
             get: {
-                '/api/environments/:team_id/integrations/:id/channels': ({ request }) => {
+                '/v1/environments/:team_id/integrations/:id/channels': ({ request }) => {
                     const url = new URL(request.url)
                     const search = url.searchParams.get('search')
                     const channelId = url.searchParams.get('channel_id')
@@ -302,7 +302,7 @@ describe('SlackChannelPicker — inactive integration banner', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/integrations/:id/channels': () => [
+                '/v1/environments/:team_id/integrations/:id/channels': () => [
                     400,
                     {
                         type: 'validation_error',

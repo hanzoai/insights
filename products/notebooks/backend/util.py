@@ -258,7 +258,7 @@ def extract_inline_query_nodes(content: Any) -> list[tuple[str, dict[str, Any]]]
     Returns a list of ``(nodeId, query_dict)`` pairs. Used by the shared-notebook payload
     builder to pre-compute results for ad-hoc queries (DataTableNode, InsightsQLQuery, InsightVizNode
     without a saved insight reference, etc.) so the shared viewer can render them without
-    POSTing to ``/api/projects/<id>/query/`` — a path sharing tokens cannot reach.
+    POSTing to ``/v1/projects/<id>/query/`` — a path sharing tokens cannot reach.
 
     Saved insights are deliberately excluded; they go through
     :func:`extract_referenced_insight_short_ids` and the existing

@@ -14,7 +14,7 @@ describe('newNotificationDialogLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/integrations': { count: 0, results: [] },
+                '/v1/projects/:team/integrations': { count: 0, results: [] },
             },
         })
         initKeaTests()

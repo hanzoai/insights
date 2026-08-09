@@ -8,7 +8,7 @@ import type { ScratchpadEntryApi } from 'products/signals/frontend/generated/api
 
 import { SCRATCHPAD_PREVIEW_CHARS, scratchpadLogic } from './scratchpadLogic'
 
-const SCRATCHPAD_URL = '/api/projects/:team_id/signals/scout/scratchpad/'
+const SCRATCHPAD_URL = '/v1/projects/:team_id/signals/scout/scratchpad/'
 
 const entry = (key: string, content: string): ScratchpadEntryApi =>
     ({

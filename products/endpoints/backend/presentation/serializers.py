@@ -211,7 +211,7 @@ class EndpointResponseSerializer(serializers.Serializer):
         help_text="How fresh the data is, in seconds. One of: 900, 1800, 3600, 21600, 43200, 86400, 604800.",
     )
     endpoint_path = serializers.CharField(
-        help_text="Relative API path to execute this endpoint (e.g. /api/projects/{team_id}/endpoints/{name}/run).",
+        help_text="Relative API path to execute this endpoint (e.g. /v1/projects/{team_id}/endpoints/{name}/run).",
     )
     url = serializers.CharField(
         allow_null=True,

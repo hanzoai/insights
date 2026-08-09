@@ -36,7 +36,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
             state=MaterializedColumnSlotState.READY,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/materialized_column_slots/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/materialized_column_slots/")
 
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["results"]) == 1
@@ -57,14 +57,14 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
             state=MaterializedColumnSlotState.READY,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/materialized_column_slots/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/materialized_column_slots/")
 
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["results"]) == 0
 
     def test_slot_usage_empty(self):
         """Test slot usage when no slots are assigned."""
-        response = self.client.get(f"/api/environments/{self.team.id}/materialized_column_slots/slot_usage/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/materialized_column_slots/slot_usage/")
 
         assert response.status_code == status.HTTP_200_OK
         body = response.json()
@@ -88,7 +88,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
                 state=MaterializedColumnSlotState.READY if i == 2 else MaterializedColumnSlotState.PENDING,
             )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/materialized_column_slots/slot_usage/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/materialized_column_slots/slot_usage/")
 
         assert response.status_code == status.HTTP_200_OK
         body = response.json()
@@ -111,7 +111,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
                 state=MaterializedColumnSlotState.READY,
             )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/materialized_column_slots/slot_usage/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/materialized_column_slots/slot_usage/")
 
         assert response.status_code == status.HTTP_200_OK
         body = response.json()
@@ -158,7 +158,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
             state=MaterializedColumnSlotState.READY,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/materialized_column_slots/available_properties/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/materialized_column_slots/available_properties/")
 
         assert response.status_code == status.HTTP_200_OK
         prop_names = [p["name"] for p in response.json()]
@@ -190,7 +190,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
             type=PropertyDefinition.Type.EVENT,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/materialized_column_slots/available_properties/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/materialized_column_slots/available_properties/")
 
         assert response.status_code == status.HTTP_200_OK
         prop_names = [p["name"] for p in response.json()]
@@ -221,7 +221,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
             "mat_pp_$initial_utm_source": mock_person_column,
         }
 
-        response = self.client.get(f"/api/environments/{self.team.id}/materialized_column_slots/auto_materialized/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/materialized_column_slots/auto_materialized/")
 
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()) == 1
@@ -230,7 +230,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
     @patch("insights.api.materialized_column_slot.EE_AVAILABLE", False)
     def test_auto_materialized_returns_empty_without_ee(self):
         """Test that auto_materialized returns [] when EE not available."""
-        response = self.client.get(f"/api/environments/{self.team.id}/materialized_column_slots/auto_materialized/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/materialized_column_slots/auto_materialized/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == []
@@ -245,7 +245,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/materialized_column_slots/assign_slot/",
+            f"/v1/environments/{self.team.id}/materialized_column_slots/assign_slot/",
             {"property_definition_id": prop_def.id},
         )
 
@@ -281,7 +281,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/materialized_column_slots/assign_slot/",
+            f"/v1/environments/{self.team.id}/materialized_column_slots/assign_slot/",
             {"property_definition_id": new_prop.id},
         )
 
@@ -298,7 +298,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/materialized_column_slots/assign_slot/",
+            f"/v1/environments/{self.team.id}/materialized_column_slots/assign_slot/",
             {"property_definition_id": prop_def.id},
         )
 
@@ -324,7 +324,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/materialized_column_slots/assign_slot/",
+            f"/v1/environments/{self.team.id}/materialized_column_slots/assign_slot/",
             {"property_definition_id": prop_def.id},
         )
 
@@ -340,7 +340,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/materialized_column_slots/assign_slot/",
+            f"/v1/environments/{self.team.id}/materialized_column_slots/assign_slot/",
             {"property_definition_id": prop_def.id},
         )
 
@@ -357,7 +357,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/materialized_column_slots/assign_slot/",
+            f"/v1/environments/{self.team.id}/materialized_column_slots/assign_slot/",
             {"property_definition_id": prop_def.id},
         )
 
@@ -376,7 +376,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/materialized_column_slots/assign_slot/",
+            f"/v1/environments/{self.team.id}/materialized_column_slots/assign_slot/",
             {"property_definition_id": prop_def.id},
         )
 
@@ -399,7 +399,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/materialized_column_slots/assign_slot/",
+            f"/v1/environments/{self.team.id}/materialized_column_slots/assign_slot/",
             {"property_definition_id": prop_def.id},
         )
 
@@ -424,7 +424,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/materialized_column_slots/{slot.id}/retry_backfill/"
+            f"/v1/environments/{self.team.id}/materialized_column_slots/{slot.id}/retry_backfill/"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -453,7 +453,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/materialized_column_slots/{slot.id}/retry_backfill/"
+            f"/v1/environments/{self.team.id}/materialized_column_slots/{slot.id}/retry_backfill/"
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -474,7 +474,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
             state=MaterializedColumnSlotState.READY,
         )
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/materialized_column_slots/{slot.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/materialized_column_slots/{slot.id}/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
@@ -496,7 +496,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
             state=MaterializedColumnSlotState.BACKFILL,  # In progress!
         )
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/materialized_column_slots/{slot.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/materialized_column_slots/{slot.id}/")
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Cannot delete slot while backfill is in progress" in response.json()["error"]
@@ -527,7 +527,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
             **kwargs,
         )
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/materialized_column_slots/{slot.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/materialized_column_slots/{slot.id}/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not MaterializedColumnSlot.objects.filter(id=slot.id).exists()
@@ -539,10 +539,10 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
         self.user.save()
 
         endpoints = [
-            f"/api/environments/{self.team.id}/materialized_column_slots/",
-            f"/api/environments/{self.team.id}/materialized_column_slots/slot_usage/",
-            f"/api/environments/{self.team.id}/materialized_column_slots/available_properties/",
-            f"/api/environments/{self.team.id}/materialized_column_slots/auto_materialized/",
+            f"/v1/environments/{self.team.id}/materialized_column_slots/",
+            f"/v1/environments/{self.team.id}/materialized_column_slots/slot_usage/",
+            f"/v1/environments/{self.team.id}/materialized_column_slots/available_properties/",
+            f"/v1/environments/{self.team.id}/materialized_column_slots/auto_materialized/",
         ]
 
         for endpoint in endpoints:
@@ -567,7 +567,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
 
         # Should succeed because of impersonated session
         response = self.client.post(
-            f"/api/environments/{self.team.id}/materialized_column_slots/assign_slot/",
+            f"/v1/environments/{self.team.id}/materialized_column_slots/assign_slot/",
             {"property_definition_id": prop_def.id},
         )
 

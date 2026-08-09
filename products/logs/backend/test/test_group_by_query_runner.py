@@ -307,7 +307,7 @@ class TestGroupByAPI(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/logs/group-by",
+            f"/v1/projects/{self.team.id}/logs/group-by",
             data={
                 "query": {
                     "dateRange": {"date_from": "2026-06-23T12:00:00Z", "date_to": "2026-06-23T13:00:00Z"},
@@ -350,7 +350,7 @@ class TestGroupByAPI(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/logs/group-by",
+            f"/v1/projects/{self.team.id}/logs/group-by",
             data={
                 "query": {
                     "dateRange": {"date_from": "2026-06-23T12:00:00Z", "date_to": "2026-06-23T13:00:00Z"},
@@ -369,7 +369,7 @@ class TestGroupByAPI(DatastoreTestMixin, APIBaseTest):
 
     def test_endpoint_rejects_too_many_dimensions(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/logs/group-by",
+            f"/v1/projects/{self.team.id}/logs/group-by",
             data={
                 "query": {
                     "dateRange": {"date_from": "-1h"},
@@ -383,7 +383,7 @@ class TestGroupByAPI(DatastoreTestMixin, APIBaseTest):
 
     def test_endpoint_rejects_missing_group_by(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/logs/group-by",
+            f"/v1/projects/{self.team.id}/logs/group-by",
             data={"query": {"dateRange": {"date_from": "-1h"}}},
             format="json",
         )

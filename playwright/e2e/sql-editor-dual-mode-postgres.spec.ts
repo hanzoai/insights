@@ -63,14 +63,14 @@ test.describe('SQL Editor dual-mode synced Postgres source', () => {
                     INSERT INTO ${tableName} (id, label) VALUES (1, 'alpha'), (2, 'beta');
                 `,
             ])
-            await page.request.post('/api/login/', {
+            await page.request.post('/v1/login/', {
                 data: { email: LOGIN_USERNAME, password: LOGIN_PASSWORD },
             })
             await page.goto('/')
             await expect(page).toHaveURL(/\/project\/\d+/)
 
             await test.step('Create a synced Postgres source with live queries enabled', async () => {
-                const data = await callProjectApi(page, '/api/projects/@current/external_data_sources/', {
+                const data = await callProjectApi(page, '/v1/projects/@current/external_data_sources/', {
                     method: 'POST',
                     body: {
                         source_type: 'Postgres',
@@ -104,7 +104,7 @@ test.describe('SQL Editor dual-mode synced Postgres source', () => {
             await test.step('Refresh schemas so schema metadata is captured', async () => {
                 await callProjectApi(
                     page,
-                    `/api/projects/@current/external_data_sources/${sourceId}/refresh_schemas/`,
+                    `/v1/projects/@current/external_data_sources/${sourceId}/refresh_schemas/`,
                     {
                         method: 'POST',
                     }
@@ -150,7 +150,7 @@ test.describe('SQL Editor dual-mode synced Postgres source', () => {
         } finally {
             if (sourceId) {
                 try {
-                    await callProjectApi(page, `/api/projects/@current/external_data_sources/${sourceId}/`, {
+                    await callProjectApi(page, `/v1/projects/@current/external_data_sources/${sourceId}/`, {
                         method: 'DELETE',
                     })
                 } catch {

@@ -53,7 +53,7 @@ class TestTraceSpansLatencyHeatmap(_TraceSpansTestBase):
     def _heatmap(self, **extra_query: object) -> list[dict]:
         query: dict = {"dateRange": {"date_from": DATE_FROM, "date_to": DATE_TO}, **extra_query}
         response = self.client.post(
-            f"/api/projects/{self.team.id}/tracing/spans/latency-heatmap/",
+            f"/v1/projects/{self.team.id}/tracing/spans/latency-heatmap/",
             {"query": query},
             format="json",
         )
@@ -104,7 +104,7 @@ class TestTraceSpansLatencyHeatmap(_TraceSpansTestBase):
     def test_null_query_body_does_not_crash(self):
         # An explicit `{"query": null}` body must fall back to defaults, not AttributeError into a 500.
         response = self.client.post(
-            f"/api/projects/{self.team.id}/tracing/spans/latency-heatmap/",
+            f"/v1/projects/{self.team.id}/tracing/spans/latency-heatmap/",
             {"query": None},
             format="json",
         )

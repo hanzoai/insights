@@ -10,7 +10,7 @@ from products.logs.backend.models import LogsExclusionRule
 class TestLogsSamplingRulesAPI(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.base_url = f"/api/projects/{self.team.pk}/logs/sampling_rules/"
+        self.base_url = f"/v1/projects/{self.team.pk}/logs/sampling_rules/"
         self._ff_patcher = patch("hanzo_insights.feature_enabled", return_value=True)
         self._ff_patcher.start()
         self.addCleanup(self._ff_patcher.stop)

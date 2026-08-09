@@ -50,7 +50,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/organizations/:org_id/legal_documents': {
+                '/v1/organizations/:org_id/legal_documents': {
                     count: LEGAL_DOCUMENT_LIST.length,
                     results: LEGAL_DOCUMENT_LIST,
                     next: null,
@@ -82,7 +82,7 @@ export const NewBAA: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/billing/': {
+                '/v1/billing/': {
                     products: [
                         {
                             type: 'platform_and_support',
@@ -109,7 +109,7 @@ export const NewBAATrial: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/billing/': {
+                '/v1/billing/': {
                     products: [
                         {
                             type: 'platform_and_support',
@@ -142,7 +142,7 @@ export const NewBAAEnterpriseTrial: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/billing/': {
+                '/v1/billing/': {
                     products: [
                         {
                             type: 'platform_and_support',

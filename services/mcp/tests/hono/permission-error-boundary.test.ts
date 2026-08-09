@@ -17,7 +17,7 @@ function buildWrappedPermissionError(): Error {
     const original = new InsightsPermissionError({
         detail: "API key missing required scope 'user:read'",
         missingScope: 'user:read',
-        url: 'https://us.hanzo.ai/api/users/@me/',
+        url: 'https://us.hanzo.ai/v1/users/@me/',
         method: 'GET',
     })
     return wrapError(`Failed to get user: ${original.message}`, original)

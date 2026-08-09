@@ -177,13 +177,15 @@ describe('InsightsFunctionManager', () => {
         })
 
         it('for both', async () => {
-            expect((await manager.getInsightsFunctionsForTeam(teamId1, ['destination', 'transformation'])).length).toEqual(2)
-            expect((await manager.getInsightsFunctionsForTeam(teamId1, ['destination', 'transformation']))[0].type).toEqual(
-                'destination'
-            )
-            expect((await manager.getInsightsFunctionsForTeam(teamId1, ['destination', 'transformation']))[1].type).toEqual(
-                'transformation'
-            )
+            expect(
+                (await manager.getInsightsFunctionsForTeam(teamId1, ['destination', 'transformation'])).length
+            ).toEqual(2)
+            expect(
+                (await manager.getInsightsFunctionsForTeam(teamId1, ['destination', 'transformation']))[0].type
+            ).toEqual('destination')
+            expect(
+                (await manager.getInsightsFunctionsForTeam(teamId1, ['destination', 'transformation']))[1].type
+            ).toEqual('transformation')
         })
     })
 
@@ -259,7 +261,9 @@ describe('InsightsFunctionManager', () => {
     })
 
     it('does not return deleted functions when fetched by id', async () => {
-        expect(await manager.getInsightsFunction(insightsFunctions[0].id)).toMatchObject({ id: insightsFunctions[0].id })
+        expect(await manager.getInsightsFunction(insightsFunctions[0].id)).toMatchObject({
+            id: insightsFunctions[0].id,
+        })
 
         // Soft-delete without disabling, as deletion via the django API leaves `enabled` untouched
         await hub.postgres.query(
@@ -386,7 +390,11 @@ describe('Hogfunction Manager - Execution Order', () => {
             'testKey'
         )
 
-        manager['onInsightsFunctionsReloaded'](teamId, [insightsFunctions[2].id, insightsFunctions[1].id, insightsFunctions[0].id])
+        manager['onInsightsFunctionsReloaded'](teamId, [
+            insightsFunctions[2].id,
+            insightsFunctions[1].id,
+            insightsFunctions[0].id,
+        ])
         teamFunctions = await manager.getInsightsFunctionsForTeam(teamId, ['transformation'])
         expect(teamFunctions).toHaveLength(3)
         expect(teamFunctions.map((f) => ({ name: f.name, order: f.execution_order }))).toEqual([

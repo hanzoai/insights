@@ -14,7 +14,7 @@ test.describe('Event ingestion', () => {
         let apiToken = ''
 
         await test.step('fetch the team api token', async () => {
-            const team = await request.get(`/api/environments/${workspace.team_id}/`, { headers: authHeaders })
+            const team = await request.get(`/v1/environments/${workspace.team_id}/`, { headers: authHeaders })
             expect(team.ok()).toBe(true)
             apiToken = (await team.json()).api_token
         })
@@ -35,7 +35,7 @@ test.describe('Event ingestion', () => {
             await expect
                 .poll(
                     async () => {
-                        const resp = await request.post(`/api/environments/${workspace.team_id}/query/`, {
+                        const resp = await request.post(`/v1/environments/${workspace.team_id}/query/`, {
                             headers: authHeaders,
                             data: {
                                 // Without this the endpoint serves a cached result for up to 5 minutes,

@@ -67,7 +67,7 @@ describe('welcomeDialogLogic', () => {
         window.sessionStorage.clear()
         useMocks({
             get: {
-                '/api/organizations/@current/welcome/current/': mockPayload,
+                '/v1/organizations/@current/welcome/current/': mockPayload,
             },
         })
         initKeaTests()

@@ -85,7 +85,7 @@ class TestFlatSpanQuery(DatastoreTestMixin, APIBaseTest):
                 **overrides,
             }
         }
-        res = self.client.post(f"/api/projects/{self.team.id}/tracing/spans/query/", body, format="json")
+        res = self.client.post(f"/v1/projects/{self.team.id}/tracing/spans/query/", body, format="json")
         self.assertEqual(res.status_code, 200, res.content)
         return res.json()
 

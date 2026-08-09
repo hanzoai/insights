@@ -249,7 +249,10 @@ describe('SourceWebhooksConsumer', () => {
                 // Verify that queueInvocationResults WAS called for regular webhooks (this captures the event)
                 expect(mockQueueInvocationResults).toHaveBeenCalledTimes(1)
                 const result = mockQueueInvocationResults.mock.calls[0][0][0]
-                expect(result.capturedInsightsEvents[0].properties).toHaveProperty('$insights_function_execution_count', 1)
+                expect(result.capturedInsightsEvents[0].properties).toHaveProperty(
+                    '$insights_function_execution_count',
+                    1
+                )
 
                 await waitForBackgroundTasks()
                 expect(mockInternalFetch).toHaveBeenCalledTimes(1)

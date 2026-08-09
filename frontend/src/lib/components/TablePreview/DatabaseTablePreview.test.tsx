@@ -51,7 +51,7 @@ describe('DatabaseTablePreview', () => {
 
         useMocks({
             post: {
-                '/api/environments/:team/query/:kind': () => {
+                '/v1/environments/:team/query/:kind': () => {
                     queryCount += 1
                     return [200, { columns: [], results: [] }]
                 },
@@ -148,7 +148,7 @@ describe('DatabaseTablePreview', () => {
 
             useMocks({
                 post: {
-                    '/api/environments/:team/query/:kind': async ({ request }) => {
+                    '/v1/environments/:team/query/:kind': async ({ request }) => {
                         const queryString = queryStringFromRequestBody(await request.json())
                         executedQueries.push(queryString)
 
@@ -200,7 +200,7 @@ describe('DatabaseTablePreview', () => {
 
         useMocks({
             post: {
-                '/api/environments/:team/query/:kind': async ({ request }) => {
+                '/v1/environments/:team/query/:kind': async ({ request }) => {
                     const queryString = queryStringFromRequestBody(await request.json())
                     executedQueries.push(queryString)
 

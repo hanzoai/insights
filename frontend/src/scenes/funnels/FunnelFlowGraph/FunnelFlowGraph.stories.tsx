@@ -26,8 +26,8 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                'api/environments/:team_id/customer_journeys/': journeysList,
-                'api/environments/:team_id/customer_profile_configs/': { count: 0, results: [] },
+                'v1/environments/:team_id/customer_journeys/': journeysList,
+                'v1/environments/:team_id/customer_profile_configs/': { count: 0, results: [] },
             },
         }),
     ],
@@ -39,9 +39,9 @@ type Story = StoryObj<{}>
 export const JourneyWithRequiredSteps: Story = {
     render: () => {
         useStorybookMocks({
-            get: { 'api/environments/:team_id/insights/1/': makeInsight() },
+            get: { 'v1/environments/:team_id/insights/1/': makeInsight() },
             post: {
-                'api/environments/:team_id/query/FunnelsQuery/': {
+                'v1/environments/:team_id/query/FunnelsQuery/': {
                     result: allCompletedSteps(),
                     total_median_conversion_time: 270,
                 },
@@ -58,9 +58,9 @@ export const JourneyWithRequiredSteps: Story = {
 export const JourneyWithEmptySteps: Story = {
     render: () => {
         useStorybookMocks({
-            get: { 'api/environments/:team_id/insights/1/': makeInsight() },
+            get: { 'v1/environments/:team_id/insights/1/': makeInsight() },
             post: {
-                'api/environments/:team_id/query/FunnelsQuery/': {
+                'v1/environments/:team_id/query/FunnelsQuery/': {
                     result: someCompletedSteps(),
                     total_median_conversion_time: 90,
                 },
@@ -77,9 +77,9 @@ export const JourneyWithEmptySteps: Story = {
 export const JourneyWithOptionalSteps: Story = {
     render: () => {
         useStorybookMocks({
-            get: { 'api/environments/:team_id/insights/1/': makeInsight([1, 3]) },
+            get: { 'v1/environments/:team_id/insights/1/': makeInsight([1, 3]) },
             post: {
-                'api/environments/:team_id/query/FunnelsQuery/': {
+                'v1/environments/:team_id/query/FunnelsQuery/': {
                     result: optionalStepResults(),
                     total_median_conversion_time: 180,
                 },
