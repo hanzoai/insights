@@ -102,7 +102,7 @@ function TemplateEditor({
     return (
         <CodeEditorResizeable
             embedded
-            language="hogTemplate"
+            language="scriptTemplate"
             value={value}
             onChange={(nextValue) => onChange(nextValue ?? '')}
             globals={globals}

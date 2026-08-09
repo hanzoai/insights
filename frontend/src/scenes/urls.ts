@@ -273,7 +273,7 @@ export const urls = {
         urls.shared(token, exportOptions).replace('/shared/', '/embedded/'),
     debugQuery: (query?: string | Record<string, any>): string =>
         combineUrl('/debug', {}, query ? { q: typeof query === 'string' ? query : JSON.stringify(query) } : {}).url,
-    debugHog: (): string => '/debug/script',
+    debugScript: (): string => '/debug/script',
 
     moveToInsightsCloud: (): string => '/move-to-cloud',
     links: (params?: string): string =>

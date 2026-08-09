@@ -1,7 +1,7 @@
 export { getChart } from './chart-accessor'
 export type { Chart } from './chart-accessor'
-export { getHogChart } from '@hanzo/quill-charts/testing'
-export type { HogChart } from '@hanzo/quill-charts/testing'
+export { getScriptChart } from '@hanzo/quill-charts/testing'
+export type { ScriptChart } from '@hanzo/quill-charts/testing'
 export { createInsightTooltipAccessor } from './tooltip-helpers'
 export type { InsightTooltipAccessor } from './tooltip-helpers'
 export {

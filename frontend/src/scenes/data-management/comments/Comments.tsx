@@ -5,7 +5,7 @@ import { useEffect } from 'react'
 import { Button, Checkbox, Input, Select, Tooltip } from '@hanzo/elements'
 import { IconTrash } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -26,7 +26,7 @@ import { CommentType } from '~/types'
 
 import { SCOPE_OPTIONS, commentsLogic, openURLFor } from './commentsLogic'
 
-const MascotReporter = pngHoggie()
+const MascotReporter = pngMascot()
 
 const KIND_OPTIONS = [
     { value: 'any', label: 'Any' },
@@ -240,7 +240,7 @@ export function Comments(): JSX.Element {
                         thingName="comment"
                         description="Comments allow you to provide context and discussions on various elements in Insights."
                         isEmpty={shouldShowEmptyState}
-                        customHog={MascotReporter}
+                        customScript={MascotReporter}
                     />
                 </div>
                 {!shouldShowEmptyState && (

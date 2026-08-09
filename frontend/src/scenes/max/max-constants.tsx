@@ -623,7 +623,7 @@ export const TOOL_DEFINITIONS: Record<AssistantTool, ToolDefinition> = {
             return 'Setting up function filters...'
         },
     },
-    create_hog_transformation_function: {
+    create_script_transformation_function: {
         name: 'Write and tweak Script code',
         description: 'Write and tweak Script code of transformations',
         product: Scene.Transformations,
@@ -1256,7 +1256,7 @@ export const TOOL_DEFINITIONS: Record<AssistantTool, ToolDefinition> = {
             return 'Writing a custom parser...'
         },
     },
-    run_hog_eval_test: {
+    run_script_eval_test: {
         name: 'Test evaluation',
         description: 'Test evaluation code against sample events',
         product: Scene.AIObservabilityEvaluation,

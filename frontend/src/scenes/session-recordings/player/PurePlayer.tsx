@@ -7,8 +7,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Banner, Button } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
-import { WarningHog } from 'lib/components/mascots'
+import { pngMascot } from 'lib/brand/mascot'
+import { WarningScript } from 'lib/components/mascots'
 import { Link } from 'lib/elements/Link'
 import { FloatingContainerContext } from 'lib/hooks/useFloatingContainerContext'
 import useIsHovering from 'lib/hooks/useIsHovering'
@@ -38,7 +38,7 @@ import {
 } from './sessionRecordingPlayerLogic'
 import { SessionRecordingPlayerExplorer } from './view-explorer/SessionRecordingPlayerExplorer'
 
-const MascotConstruction2 = pngHoggie()
+const MascotConstruction2 = pngMascot()
 
 export interface PurePlayerProps {
     noMeta?: boolean
@@ -320,7 +320,7 @@ export function PurePlayer({ noMeta = false, noBorder = false }: PurePlayerProps
                                 <div className="flex flex-1 flex-col items-center justify-center p-4 text-center">
                                     {isOldAndInvalid && !isRecentAndInvalid ? (
                                         <>
-                                            <WarningHog height={200} width={200} />
+                                            <WarningScript height={200} width={200} />
                                             <h1>This recording can't be played</h1>
                                             <p className="max-w-120">
                                                 The snapshot of the screen taken when this recording started never

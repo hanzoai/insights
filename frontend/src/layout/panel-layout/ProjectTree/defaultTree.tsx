@@ -66,7 +66,7 @@ import {
     IconInsightStickiness,
     IconInsightTrends,
     IconInsightUserPaths,
-    IconStamphog,
+    IconStamp,
 } from 'lib/elements/icons'
 import { urls } from 'scenes/urls'
 
@@ -359,8 +359,8 @@ const iconTypes: Record<FileSystemIconType, { icon: JSX.Element; iconColor?: Fil
     code_review: {
         icon: <IconPullRequest />,
     },
-    stamphog: {
-        icon: <IconStamphog />,
+    stamp: {
+        icon: <IconStamp />,
     },
     exports: {
         icon: <IconDownload />,

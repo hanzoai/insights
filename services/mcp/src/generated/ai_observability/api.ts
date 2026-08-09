@@ -979,7 +979,7 @@ export const EvaluationsDestroyParams = /* @__PURE__ */ zod.object({
 /**
  * Test Script evaluation code against sample events without saving.
  */
-export const EvaluationsTestHogCreateParams = /* @__PURE__ */ zod.object({
+export const EvaluationsTestScriptCreateParams = /* @__PURE__ */ zod.object({
     project_id: zod
         .string()
         .describe(
@@ -987,20 +987,20 @@ export const EvaluationsTestHogCreateParams = /* @__PURE__ */ zod.object({
         ),
 })
 
-export const evaluationsTestHogCreateBodySampleCountDefault = 5
-export const evaluationsTestHogCreateBodySampleCountMax = 10
+export const evaluationsTestScriptCreateBodySampleCountDefault = 5
+export const evaluationsTestScriptCreateBodySampleCountMax = 10
 
-export const evaluationsTestHogCreateBodyAllowsNaDefault = false
-export const evaluationsTestHogCreateBodyTargetDefault = `generation`
-export const evaluationsTestHogCreateBodyTargetConfigOneWindowSecondsDefault = 1800
-export const evaluationsTestHogCreateBodyTargetConfigOneWindowSecondsMin = 10
-export const evaluationsTestHogCreateBodyTargetConfigOneWindowSecondsMax = 7200
+export const evaluationsTestScriptCreateBodyAllowsNaDefault = false
+export const evaluationsTestScriptCreateBodyTargetDefault = `generation`
+export const evaluationsTestScriptCreateBodyTargetConfigOneWindowSecondsDefault = 1800
+export const evaluationsTestScriptCreateBodyTargetConfigOneWindowSecondsMin = 10
+export const evaluationsTestScriptCreateBodyTargetConfigOneWindowSecondsMax = 7200
 
-export const evaluationsTestHogCreateBodyTargetConfigOneQuietPeriodSecondsDefault = 3600
-export const evaluationsTestHogCreateBodyTargetConfigOneQuietPeriodSecondsMin = 10
-export const evaluationsTestHogCreateBodyTargetConfigOneQuietPeriodSecondsMax = 86400
+export const evaluationsTestScriptCreateBodyTargetConfigOneQuietPeriodSecondsDefault = 3600
+export const evaluationsTestScriptCreateBodyTargetConfigOneQuietPeriodSecondsMin = 10
+export const evaluationsTestScriptCreateBodyTargetConfigOneQuietPeriodSecondsMax = 86400
 
-export const EvaluationsTestHogCreateBody = /* @__PURE__ */ zod.object({
+export const EvaluationsTestScriptCreateBody = /* @__PURE__ */ zod.object({
     source: zod
         .string()
         .min(1)
@@ -1008,12 +1008,12 @@ export const EvaluationsTestHogCreateBody = /* @__PURE__ */ zod.object({
     sample_count: zod
         .number()
         .min(1)
-        .max(evaluationsTestHogCreateBodySampleCountMax)
-        .default(evaluationsTestHogCreateBodySampleCountDefault)
+        .max(evaluationsTestScriptCreateBodySampleCountMax)
+        .default(evaluationsTestScriptCreateBodySampleCountDefault)
         .describe('Number of recent $ai_generation events to test against (1–10, default 5).'),
     allows_na: zod
         .boolean()
-        .default(evaluationsTestHogCreateBodyAllowsNaDefault)
+        .default(evaluationsTestScriptCreateBodyAllowsNaDefault)
         .describe('Whether the evaluation can return N\/A for non-applicable generations.'),
     conditions: zod
         .array(zod.record(zod.string(), zod.unknown()))
@@ -1022,7 +1022,7 @@ export const EvaluationsTestHogCreateBody = /* @__PURE__ */ zod.object({
     target: zod
         .enum(['generation', 'trace', 'session'])
         .describe('\* `generation` - Generation\n\* `trace` - Trace\n\* `session` - Session')
-        .default(evaluationsTestHogCreateBodyTargetDefault)
+        .default(evaluationsTestScriptCreateBodyTargetDefault)
         .describe(
             "What the evaluation runs against: 'generation' samples individual generations, 'trace' samples whole traces, and 'session' samples whole sessions that have gone quiet. Each target runs against the same globals it would run against online.\n\n\* `generation` - Generation\n\* `trace` - Trace\n\* `session` - Session"
         ),
@@ -1030,15 +1030,15 @@ export const EvaluationsTestHogCreateBody = /* @__PURE__ */ zod.object({
         .object({
             window_seconds: zod
                 .number()
-                .min(evaluationsTestHogCreateBodyTargetConfigOneWindowSecondsMin)
-                .max(evaluationsTestHogCreateBodyTargetConfigOneWindowSecondsMax)
-                .default(evaluationsTestHogCreateBodyTargetConfigOneWindowSecondsDefault)
+                .min(evaluationsTestScriptCreateBodyTargetConfigOneWindowSecondsMin)
+                .max(evaluationsTestScriptCreateBodyTargetConfigOneWindowSecondsMax)
+                .default(evaluationsTestScriptCreateBodyTargetConfigOneWindowSecondsDefault)
                 .describe('Aggregation window for trace samples, in seconds.'),
             quiet_period_seconds: zod
                 .number()
-                .min(evaluationsTestHogCreateBodyTargetConfigOneQuietPeriodSecondsMin)
-                .max(evaluationsTestHogCreateBodyTargetConfigOneQuietPeriodSecondsMax)
-                .default(evaluationsTestHogCreateBodyTargetConfigOneQuietPeriodSecondsDefault)
+                .min(evaluationsTestScriptCreateBodyTargetConfigOneQuietPeriodSecondsMin)
+                .max(evaluationsTestScriptCreateBodyTargetConfigOneQuietPeriodSecondsMax)
+                .default(evaluationsTestScriptCreateBodyTargetConfigOneQuietPeriodSecondsDefault)
                 .describe(
                     'For session samples: only sessions with no activity for this long are previewed, matching when a session evaluation would actually run.'
                 ),
@@ -2465,7 +2465,7 @@ export const TaggersCreateBody = /* @__PURE__ */ zod.object({
 /**
  * Test Script tagger code against sample events without saving.
  */
-export const TaggersTestHogCreateParams = /* @__PURE__ */ zod.object({
+export const TaggersTestScriptCreateParams = /* @__PURE__ */ zod.object({
     project_id: zod
         .string()
         .describe(
@@ -2473,15 +2473,15 @@ export const TaggersTestHogCreateParams = /* @__PURE__ */ zod.object({
         ),
 })
 
-export const taggersTestHogCreateBodySampleCountDefault = 5
-export const taggersTestHogCreateBodySampleCountMax = 10
+export const taggersTestScriptCreateBodySampleCountDefault = 5
+export const taggersTestScriptCreateBodySampleCountMax = 10
 
-export const taggersTestHogCreateBodyTagsItemNameMax = 100
+export const taggersTestScriptCreateBodyTagsItemNameMax = 100
 
-export const taggersTestHogCreateBodyTagsItemDescriptionDefault = ``
-export const taggersTestHogCreateBodyTagsItemDescriptionMax = 500
+export const taggersTestScriptCreateBodyTagsItemDescriptionDefault = ``
+export const taggersTestScriptCreateBodyTagsItemDescriptionMax = 500
 
-export const TaggersTestHogCreateBody = /* @__PURE__ */ zod.object({
+export const TaggersTestScriptCreateBody = /* @__PURE__ */ zod.object({
     source: zod
         .string()
         .min(1)
@@ -2489,20 +2489,20 @@ export const TaggersTestHogCreateBody = /* @__PURE__ */ zod.object({
     sample_count: zod
         .number()
         .min(1)
-        .max(taggersTestHogCreateBodySampleCountMax)
-        .default(taggersTestHogCreateBodySampleCountDefault)
+        .max(taggersTestScriptCreateBodySampleCountMax)
+        .default(taggersTestScriptCreateBodySampleCountDefault)
         .describe('Number of recent $ai_generation events to test against (1-10, default 5).'),
     tags: zod
         .array(
             zod.object({
                 name: zod
                     .string()
-                    .max(taggersTestHogCreateBodyTagsItemNameMax)
+                    .max(taggersTestScriptCreateBodyTagsItemNameMax)
                     .describe('Tag identifier to allow in Script test results.'),
                 description: zod
                     .string()
-                    .max(taggersTestHogCreateBodyTagsItemDescriptionMax)
-                    .default(taggersTestHogCreateBodyTagsItemDescriptionDefault)
+                    .max(taggersTestScriptCreateBodyTagsItemDescriptionMax)
+                    .default(taggersTestScriptCreateBodyTagsItemDescriptionDefault)
                     .describe('Optional description for the tag.'),
             })
         )

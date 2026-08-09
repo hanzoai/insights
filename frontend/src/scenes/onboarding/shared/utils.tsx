@@ -29,22 +29,22 @@ import {
     IconWarning,
 } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
-import { ExplorerHog, FeatureFlagHog, MailHog } from 'lib/components/mascots'
+import { pngMascot } from 'lib/brand/mascot'
+import { ExplorerScript, FeatureFlagScript, MailScript } from 'lib/components/mascots'
 import { Scene } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
 import { ProductKey } from '~/queries/schema/schema-general'
 import { type AvailableOnboardingProducts, type OnboardingProduct } from '~/types'
 
-const MascotChart = pngHoggie()
-const MascotConstruction = pngHoggie()
-const MascotDirector = pngHoggie()
-const MascotExperiment = pngHoggie()
-const MascotMagnifyingGlass = pngHoggie()
-const MascotReadingIsMagic = pngHoggie()
-const MascotReporter = pngHoggie()
-const MascotRobot = pngHoggie()
+const MascotChart = pngMascot()
+const MascotConstruction = pngMascot()
+const MascotDirector = pngMascot()
+const MascotExperiment = pngMascot()
+const MascotMagnifyingGlass = pngMascot()
+const MascotReadingIsMagic = pngMascot()
+const MascotReporter = pngMascot()
+const MascotRobot = pngMascot()
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string; color?: string }>> = {
     IconBolt,
@@ -143,7 +143,7 @@ export const availableOnboardingProducts: AvailableOnboardingProducts = {
             { title: 'Page performance metrics', problem: 'Find slow pages that hurt conversion' },
             { title: 'Conversion funnels', problem: 'See where visitors leave before converting' },
         ],
-        mascot: ExplorerHog,
+        mascot: ExplorerScript,
         icon: 'IconPieChart',
         iconColor: 'rgb(54 196 111)',
         url: urls.webAnalytics(),
@@ -215,7 +215,7 @@ export const availableOnboardingProducts: AvailableOnboardingProducts = {
             { title: 'Release conditions', problem: 'Control who sees what based on properties or cohorts' },
             { title: 'Multivariate flags', problem: 'Test multiple variants without redeploying' },
         ],
-        mascot: FeatureFlagHog,
+        mascot: FeatureFlagScript,
         icon: 'IconToggle',
         iconColor: 'rgb(48 171 198)',
         breadcrumbsName: 'Feature Flags',
@@ -288,7 +288,7 @@ export const availableOnboardingProducts: AvailableOnboardingProducts = {
             { title: 'Custom logic', problem: 'Build multi-step automations without a separate tool' },
             { title: 'Marketing Campaigns', problem: 'Send email campaigns on demand' },
         ],
-        mascot: MailHog,
+        mascot: MailScript,
         icon: 'IconGear',
         iconColor: 'var(--color-product-workflows-light)',
         url: urls.workflows(),

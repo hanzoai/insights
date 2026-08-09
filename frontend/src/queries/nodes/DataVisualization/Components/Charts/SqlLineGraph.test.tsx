@@ -8,7 +8,7 @@ import { ChartSettings, ChartSettingsFormatting, DataVisualizationNode } from '~
 import {
     type DataVizFixture,
     buildDataVisualizationQuery,
-    getHogChart,
+    getScriptChart,
     HOVER,
     MONTHS,
     renderDataVisualization,
@@ -117,8 +117,8 @@ const renderLine = (
 describe('SqlLineGraph', () => {
     describe('y-axis tick formatting', () => {
         const waitForYTicks = async (): Promise<string[]> => {
-            await waitFor(() => expect(getHogChart().yTicks().length).toBeGreaterThan(0))
-            return getHogChart().yTicks()
+            await waitFor(() => expect(getScriptChart().yTicks().length).toBeGreaterThan(0))
+            return getScriptChart().yTicks()
         }
 
         it('applies the column prefix/suffix to the left-axis ticks', async () => {
@@ -148,8 +148,8 @@ describe('SqlLineGraph', () => {
                 ],
             })
 
-            await waitFor(() => expect(getHogChart().hasRightAxis).toBe(true))
-            const chart = getHogChart()
+            await waitFor(() => expect(getScriptChart().hasRightAxis).toBe(true))
+            const chart = getScriptChart()
             const rightTicks = chart.yRightTicks()
             expect(chart.yTicks().every((tick) => tick.startsWith('$'))).toBe(true)
             expect(rightTicks.length).toBeGreaterThan(0)
@@ -165,8 +165,8 @@ describe('SqlLineGraph', () => {
                 ],
             })
 
-            await waitFor(() => expect(getHogChart().yTicks().length).toBeGreaterThan(0))
-            expect(getHogChart().yRightTicks()).toHaveLength(0)
+            await waitFor(() => expect(getScriptChart().yTicks().length).toBeGreaterThan(0))
+            expect(getScriptChart().yRightTicks()).toHaveLength(0)
         })
 
         it('floats only the right axis when its begin-at-zero is off', async () => {
@@ -178,16 +178,16 @@ describe('SqlLineGraph', () => {
                 ],
             })
 
-            await waitFor(() => expect(getHogChart().hasRightAxis).toBe(true))
-            expect(lowestTick(getHogChart().yRightTicks())).toBeGreaterThan(0)
-            expect(lowestTick(getHogChart().yTicks())).toBe(0)
+            await waitFor(() => expect(getScriptChart().hasRightAxis).toBe(true))
+            expect(lowestTick(getScriptChart().yRightTicks())).toBeGreaterThan(0)
+            expect(lowestTick(getScriptChart().yTicks())).toBe(0)
         })
     })
 
     describe('start at zero', () => {
         const waitForYTicks = async (): Promise<string[]> => {
-            await waitFor(() => expect(getHogChart().yTicks().length).toBeGreaterThan(0))
-            return getHogChart().yTicks()
+            await waitFor(() => expect(getScriptChart().yTicks().length).toBeGreaterThan(0))
+            return getScriptChart().yTicks()
         }
 
         it('clamps the left-axis baseline to 0 by default', async () => {
@@ -316,7 +316,7 @@ describe('SqlLineGraph', () => {
             )!
             fireEvent.click(bButton)
 
-            await waitFor(() => expect(getHogChart().seriesCount).toBe(1))
+            await waitFor(() => expect(getScriptChart().seriesCount).toBe(1))
             const tooltip = await sqlChart.hoverTooltip(HOVER, MONTHS.length)
             expect(tooltip.rows()).toEqual(['a'])
         })
@@ -341,8 +341,8 @@ describe('SqlLineGraph', () => {
             // Axis titles are a layout-dependent overlay that commits a tick after the
             // chart's aria-label appears, so read them through waitFor rather than synchronously.
             await waitFor(() => {
-                expect(getHogChart().xAxisLabel()).toBe(expectedX)
-                expect(getHogChart().yAxisLabel()).toBe(expectedY)
+                expect(getScriptChart().xAxisLabel()).toBe(expectedX)
+                expect(getScriptChart().yAxisLabel()).toBe(expectedY)
             })
         })
     })
@@ -355,9 +355,9 @@ describe('SqlLineGraph', () => {
             )
 
             await screen.findByLabelText(/chart with/i)
-            await waitFor(() => expect(getHogChart().xTicks().length).toBeGreaterThan(0))
+            await waitFor(() => expect(getScriptChart().xTicks().length).toBeGreaterThan(0))
             // Date-axis tick formatter renders month names (year shown at the Jan boundary).
-            expect(getHogChart().xTicks()).toEqual(expect.arrayContaining(['October', 'November', 'December']))
+            expect(getScriptChart().xTicks()).toEqual(expect.arrayContaining(['October', 'November', 'December']))
         })
 
         it('hides x-axis ticks when showXAxisTicks is false', async () => {
@@ -367,7 +367,7 @@ describe('SqlLineGraph', () => {
             )
 
             await screen.findByLabelText(/chart with/i)
-            expect(getHogChart().xTicks()).toHaveLength(0)
+            expect(getScriptChart().xTicks()).toHaveLength(0)
         })
     })
 
@@ -379,9 +379,9 @@ describe('SqlLineGraph', () => {
             )
 
             await screen.findByLabelText(/chart with/i)
-            await waitFor(() => expect(getHogChart().yTicks().length).toBeGreaterThan(0))
+            await waitFor(() => expect(getScriptChart().yTicks().length).toBeGreaterThan(0))
             // A log axis lays out ticks per power of ten (10, 20, … 100, 200, …) rather than evenly.
-            expect(getHogChart().yTicks()).toEqual(expect.arrayContaining(['10', '100']))
+            expect(getScriptChart().yTicks()).toEqual(expect.arrayContaining(['10', '100']))
         })
     })
 
@@ -393,7 +393,7 @@ describe('SqlLineGraph', () => {
             )
 
             // One data series + one trend line = 2 rendered series.
-            await waitFor(() => expect(getHogChart().seriesCount).toBe(2))
+            await waitFor(() => expect(getScriptChart().seriesCount).toBe(2))
 
             const tooltip = await sqlChart.hoverTooltip(HOVER, MONTHS.length)
             expect(tooltip.rows()).toEqual(['a'])
@@ -422,7 +422,7 @@ describe('SqlLineGraph', () => {
             )
 
             await screen.findByLabelText(/chart with/i)
-            const lines = getHogChart().referenceLines()
+            const lines = getScriptChart().referenceLines()
             expect(lines.map((l) => l.label)).toEqual(expectedLabels)
             expect(lines.map((l) => l.orientation)).toEqual(expectedLabels.map(() => 'horizontal'))
         })
@@ -480,8 +480,8 @@ describe('SqlLineGraph', () => {
 
     describe('show values on series', () => {
         const waitForValueLabels = async (): Promise<string[]> => {
-            await waitFor(() => expect(getHogChart().valueLabels().length).toBeGreaterThan(0))
-            return getHogChart()
+            await waitFor(() => expect(getScriptChart().valueLabels().length).toBeGreaterThan(0))
+            return getScriptChart()
                 .valueLabels()
                 .map((label) => label.text)
         }
@@ -500,7 +500,7 @@ describe('SqlLineGraph', () => {
         it('draws no value labels when showValuesOnSeries is off', async () => {
             await renderChart({ yData: [ySeries('revenue', [1200, 1400, 1300])] })
 
-            expect(getHogChart().valueLabels()).toHaveLength(0)
+            expect(getScriptChart().valueLabels()).toHaveLength(0)
         })
     })
 })

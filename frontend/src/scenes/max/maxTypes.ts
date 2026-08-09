@@ -65,7 +65,7 @@ export interface MaxEvaluationContext {
     name?: string | null
     description?: string | null
     evaluation_type: EvaluationRuntime
-    hog_source?: string | null
+    script_source?: string | null
 }
 
 export interface MaxNotebookContext {
@@ -141,7 +141,7 @@ type MaxEvaluationContextInput = {
         name?: string | null
         description?: string | null
         evaluation_type: EvaluationRuntime
-        hog_source?: string | null
+        script_source?: string | null
     }
 }
 type MaxNotebookContextInput = {
@@ -220,7 +220,7 @@ export const createMaxContextHelpers = {
         name?: string | null
         description?: string | null
         evaluation_type: EvaluationRuntime
-        hog_source?: string | null
+        script_source?: string | null
     }): MaxEvaluationContextInput => ({
         type: MaxContextType.EVALUATION,
         data: evaluation,

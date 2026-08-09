@@ -34,7 +34,7 @@ const PushCard = ({
     </div>
 )
 
-// One card per pushable product, so a reviewer can eyeball every hoggie / brand color / tagline at once.
+// One card per pushable product, so a reviewer can eyeball every mascot / brand color / tagline at once.
 export const AllProducts: Story = {
     render: (): JSX.Element => {
         // 'session_replay' -> 'Session replay'. The live component titles the card with the product's

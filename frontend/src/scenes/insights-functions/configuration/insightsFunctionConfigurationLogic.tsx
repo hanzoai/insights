@@ -71,7 +71,7 @@ import {
     InsightsFunctionTemplateType,
     InsightsFunctionType,
     InsightsFunctionTypeType,
-    HogWatcherState,
+    ScriptWatcherState,
     PersonType,
     PropertyFilterType,
     PropertyGroupFilter,
@@ -355,7 +355,7 @@ export interface insightsFunctionConfigurationLogicValues {
     configurationTouches: Record<string, boolean>;
     configurationValidationErrors: DeepPartialMap<InsightsFunctionConfigurationType, ValidationErrorType>;
     contextId: InsightsFunctionConfigurationContextId;
-    currentHogCode: string;
+    currentScriptCode: string;
     currentInputs: CyclotronJobInputSchemaType[];
     defaultFormState: InsightsFunctionConfigurationType | null;
     eventsDataTableNode: DataTableNode | null;
@@ -384,10 +384,10 @@ export interface insightsFunctionConfigurationLogicValues {
     matchingFilters: PropertyGroupFilter;
     mightDropEvents: boolean;
     newFilters: CyclotronJobFiltersType | null;
-    newHogCode: string | null;
+    newScriptCode: string | null;
     newInputs: CyclotronJobInputSchemaType[] | null;
     oldFilters: CyclotronJobFiltersType | null;
-    oldHogCode: string | null;
+    oldScriptCode: string | null;
     oldInputs: CyclotronJobInputSchemaType[] | null;
     sampleGlobals: CyclotronJobInvocationGlobals | null;
     sampleGlobalsError: string | null;
@@ -426,7 +426,7 @@ export interface insightsFunctionConfigurationLogicActions {
     clearFiltersDiff: () => {
         value: true;
     };
-    clearHogCodeDiff: () => {
+    clearScriptCodeDiff: () => {
         value: true;
     };
     clearInputsDiff: () => {
@@ -546,8 +546,8 @@ export interface insightsFunctionConfigurationLogicActions {
     setNewFilters: (newFilters: CyclotronJobFiltersType) => {
         newFilters: CyclotronJobFiltersType;
     };
-    setNewHogCode: (newHogCode: string) => {
-        newHogCode: string;
+    setNewScriptCode: (newScriptCode: string) => {
+        newScriptCode: string;
     };
     setNewInputs: (newInputs: CyclotronJobInputSchemaType[]) => {
         newInputs: CyclotronJobInputSchemaType[];
@@ -555,8 +555,8 @@ export interface insightsFunctionConfigurationLogicActions {
     setOldFilters: (oldFilters: CyclotronJobFiltersType) => {
         oldFilters: CyclotronJobFiltersType;
     };
-    setOldHogCode: (oldHogCode: string) => {
-        oldHogCode: string;
+    setOldScriptCode: (oldScriptCode: string) => {
+        oldScriptCode: string;
     };
     setOldInputs: (oldInputs: CyclotronJobInputSchemaType[]) => {
         oldInputs: CyclotronJobInputSchemaType[];
@@ -694,7 +694,7 @@ export interface insightsFunctionConfigurationLogicMeta {
         mappingTemplates: (insightsFunction: InsightsFunctionType | null, template: InsightsFunctionTemplateType | null) => InsightsFunctionMappingTemplateType[];
         usesGroups: (configuration: InsightsFunctionConfigurationType) => boolean;
         mightDropEvents: (configuration: InsightsFunctionConfigurationType, type: InsightsFunctionTypeType) => boolean;
-        currentHogCode: (newHogCode: string | null, configuration: InsightsFunctionConfigurationType) => string;
+        currentScriptCode: (newScriptCode: string | null, configuration: InsightsFunctionConfigurationType) => string;
         currentInputs: (newInputs: CyclotronJobInputSchemaType[] | null, configuration: InsightsFunctionConfigurationType) => CyclotronJobInputSchemaType[];
         inputsDiff: (oldInputs: CyclotronJobInputSchemaType[] | null, newInputs: CyclotronJobInputSchemaType[] | null) => {
             newInputs: CyclotronJobInputSchemaType[];
@@ -751,9 +751,9 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
         setSampleGlobalsError: (error) => ({ error }),
         setSampleGlobals: (sampleGlobals: CyclotronJobInvocationGlobals | null) => ({ sampleGlobals }),
         setShowEventsList: (showEventsList: boolean) => ({ showEventsList }),
-        setOldHogCode: (oldHogCode: string) => ({ oldHogCode }),
-        setNewHogCode: (newHogCode: string) => ({ newHogCode }),
-        clearHogCodeDiff: true,
+        setOldScriptCode: (oldScriptCode: string) => ({ oldScriptCode }),
+        setNewScriptCode: (newScriptCode: string) => ({ newScriptCode }),
+        clearScriptCodeDiff: true,
         reportAIInsightsFunctionPrompted: true,
         reportAIInsightsFunctionAccepted: true,
         reportAIInsightsFunctionRejected: true,
@@ -817,18 +817,18 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                 setShowEventsList: (_, { showEventsList }) => showEventsList,
             },
         ],
-        oldHogCode: [
+        oldScriptCode: [
             null as string | null,
             {
-                setOldHogCode: (_, { oldHogCode }) => oldHogCode,
-                clearHogCodeDiff: () => null,
+                setOldScriptCode: (_, { oldScriptCode }) => oldScriptCode,
+                clearScriptCodeDiff: () => null,
             },
         ],
-        newHogCode: [
+        newScriptCode: [
             null as string | null,
             {
-                setNewHogCode: (_, { newHogCode }) => newHogCode,
-                clearHogCodeDiff: () => null,
+                setNewScriptCode: (_, { newScriptCode }) => newScriptCode,
+                clearScriptCodeDiff: () => null,
             },
         ],
         oldFilters: [
@@ -1142,8 +1142,8 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
             submit: async (data) => {
                 // Check HOG code size immediately before submission
                 if (data.script) {
-                    const hogSize = new Blob([data.script]).size
-                    if (hogSize > INSIGHTS_CODE_SIZE_LIMIT) {
+                    const scriptSize = new Blob([data.script]).size
+                    if (scriptSize > INSIGHTS_CODE_SIZE_LIMIT) {
                         toast.error(
                             `Script code exceeds maximum size of ${
                                 INSIGHTS_CODE_SIZE_LIMIT / 1024
@@ -1261,8 +1261,8 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
         willReEnableOnSave: [
             (s) => [s.configuration, s.insightsFunction],
             (configuration: InsightsFunctionConfigurationType, insightsFunction: InsightsFunctionType | null) => {
-                const hogState = insightsFunction?.status?.state ?? 0
-                return configuration?.enabled && hogState === HogWatcherState.disabled
+                const scriptState = insightsFunction?.status?.state ?? 0
+                return configuration?.enabled && scriptState === ScriptWatcherState.disabled
             },
         ],
 
@@ -1433,7 +1433,7 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                 const baseGlobals = sampleGlobals ?? exampleInvocationGlobals
 
                 // Transformations only receive `project` and `event` at runtime
-                // (see HogTransformerService.createInvocationGlobals). Hide `person`,
+                // (see ScriptTransformerService.createInvocationGlobals). Hide `person`,
                 // `groups`, `source`, etc. so input templates can't reference them
                 // and trigger a "Global variable not found" failure in production.
                 if (configuration.type === 'transformation') {
@@ -1710,16 +1710,16 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                 if (type !== 'transformation' && type !== 'transformation_log') {
                     return false
                 }
-                const hogCode = configuration.script || ''
+                const scriptCode = configuration.script || ''
 
-                return mightDropEvents(hogCode)
+                return mightDropEvents(scriptCode)
             },
         ],
 
-        currentHogCode: [
-            (s) => [s.newHogCode, s.configuration],
-            (newHogCode: string | null, configuration: InsightsFunctionConfigurationType) => {
-                return newHogCode ?? configuration.script ?? ''
+        currentScriptCode: [
+            (s) => [s.newScriptCode, s.configuration],
+            (newScriptCode: string | null, configuration: InsightsFunctionConfigurationType) => {
+                return newScriptCode ?? configuration.script ?? ''
             },
         ],
 

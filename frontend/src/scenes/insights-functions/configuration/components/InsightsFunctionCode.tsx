@@ -25,15 +25,15 @@ export function InsightsFunctionCode(): JSX.Element {
         templateHasChanged,
         type,
         mightDropEvents,
-        oldHogCode,
-        newHogCode,
+        oldScriptCode,
+        newScriptCode,
     } = useValues(insightsFunctionConfigurationLogic)
 
     const {
         setShowSource,
-        setOldHogCode,
-        setNewHogCode,
-        clearHogCodeDiff,
+        setOldScriptCode,
+        setNewScriptCode,
+        clearScriptCodeDiff,
         reportAIInsightsFunctionPrompted,
         reportAIInsightsFunctionAccepted,
         reportAIInsightsFunctionRejected,
@@ -44,7 +44,7 @@ export function InsightsFunctionCode(): JSX.Element {
 
     useAttachedContext([
         {
-            type: 'hog_code',
+            type: 'script_code',
             value: truncateInsightsFunctionContext(JSON.stringify(configuration.script ?? '')),
             label: 'Current Script code',
         },
@@ -121,30 +121,30 @@ export function InsightsFunctionCode(): JSX.Element {
                             )}
                             <CodeEditorResizeable
                                 language={type.startsWith('site_') ? 'typescript' : 'script'}
-                                value={newHogCode ?? value ?? ''}
-                                originalValue={oldHogCode && newHogCode ? oldHogCode : undefined}
+                                value={newScriptCode ?? value ?? ''}
+                                originalValue={oldScriptCode && newScriptCode ? oldScriptCode : undefined}
                                 onChange={(v) => {
                                     // If user manually edits while diff is showing, clear the diff
-                                    if (oldHogCode && newHogCode) {
-                                        clearHogCodeDiff()
+                                    if (oldScriptCode && newScriptCode) {
+                                        clearScriptCodeDiff()
                                     }
                                     onChange(v ?? '')
                                 }}
                                 globals={sampleGlobalsWithInputs}
-                                showDiffActions={!!(oldHogCode && newHogCode)}
+                                showDiffActions={!!(oldScriptCode && newScriptCode)}
                                 onAcceptChanges={() => {
-                                    if (newHogCode) {
-                                        onChange(newHogCode)
+                                    if (newScriptCode) {
+                                        onChange(newScriptCode)
                                     }
                                     reportAIInsightsFunctionAccepted()
-                                    clearHogCodeDiff()
+                                    clearScriptCodeDiff()
                                 }}
                                 onRejectChanges={() => {
-                                    if (oldHogCode) {
-                                        onChange(oldHogCode)
+                                    if (oldScriptCode) {
+                                        onChange(oldScriptCode)
                                     }
                                     reportAIInsightsFunctionRejected()
-                                    clearHogCodeDiff()
+                                    clearScriptCodeDiff()
                                 }}
                                 options={{
                                     minimap: {
@@ -158,7 +158,7 @@ export function InsightsFunctionCode(): JSX.Element {
                                         showInlineDetails: true,
                                     },
                                     quickSuggestionsDelay: 300,
-                                    readOnly: !!(oldHogCode && newHogCode),
+                                    readOnly: !!(oldScriptCode && newScriptCode),
                                 }}
                             />
                         </>
@@ -170,9 +170,9 @@ export function InsightsFunctionCode(): JSX.Element {
 
     return (
         <MaxTool
-            identifier="create_hog_transformation_function"
+            identifier="create_script_transformation_function"
             context={{
-                current_hog_code: configuration.script ?? '',
+                current_script_code: configuration.script ?? '',
             }}
             contextDescription={{
                 text: 'Current Script code',
@@ -180,9 +180,9 @@ export function InsightsFunctionCode(): JSX.Element {
             }}
             callback={(toolOutput: string) => {
                 // Store the old value before changing
-                setOldHogCode(configuration.script ?? '')
+                setOldScriptCode(configuration.script ?? '')
                 // Store the new value from Max Tool
-                setNewHogCode(toolOutput)
+                setNewScriptCode(toolOutput)
                 // Report that AI was prompted
                 reportAIInsightsFunctionPrompted()
                 // Don't immediately update the form - let user accept/reject

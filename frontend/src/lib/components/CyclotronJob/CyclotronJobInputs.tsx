@@ -208,7 +208,7 @@ function JsonConfigField(props: {
                 <Field.Pure error={error}>
                     <span className={clsx('group relative', props.className)}>
                         <CodeEditorResizeable
-                            language={props.templating ? (templatingKind === 'script' ? 'hogJson' : 'liquid') : 'json'}
+                            language={props.templating ? (templatingKind === 'script' ? 'scriptJson' : 'liquid') : 'json'}
                             value={formattedValue}
                             embedded={true}
                             onChange={(value) => setJsonValue(value || '{}')}
@@ -309,7 +309,7 @@ function CyclotronJobTemplateInput(props: {
                 minHeight="37" // Match other inputs
                 value={displayValue}
                 onChange={(val) => props.onChange?.({ ...props.input, value: val ?? '' })}
-                language={props.input.templating === 'script' ? 'hogTemplate' : 'liquid'}
+                language={props.input.templating === 'script' ? 'scriptTemplate' : 'liquid'}
                 globals={props.sampleGlobalsWithInputs ?? undefined}
             />
             <span className="absolute top-0 right-0 z-10 p-px opacity-0 transition-opacity group-hover:opacity-100">
@@ -452,10 +452,10 @@ function BooleanField({
     if (isTemplateMode) {
         // Boolean fields only support Script templating - Liquid renders as strings
         // which bypasses boolean type guarantees
-        const hogInput = input.templating === 'liquid' ? { ...input, templating: 'script' as const } : input
+        const scriptInput = input.templating === 'liquid' ? { ...input, templating: 'script' as const } : input
         return (
             <CyclotronJobTemplateInput
-                input={hogInput}
+                input={scriptInput}
                 onChange={(val) => onChange?.({ ...val, templating: 'script' })}
                 templating={templating}
                 sampleGlobalsWithInputs={sampleGlobalsWithInputs}

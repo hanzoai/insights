@@ -1,5 +1,5 @@
-import { isHogAST, isHogCallable, isHogClosure, isHogDate, isHogDateTime, isHogError } from '../objects'
-import { convertJSToHog } from '../utils'
+import { isScriptAST, isScriptCallable, isScriptClosure, isScriptDate, isScriptDateTime, isScriptError } from '../objects'
+import { convertJSToScript } from '../utils'
 
 const escapeCharsMap: Record<string, string> = {
     '\b': '\\b',
@@ -43,61 +43,61 @@ export function escapeIdentifier(identifier: string | number): string {
         .join('')}\``
 }
 
-export function printHogValue(obj: any, marked: Set<any> | undefined = undefined): string {
+export function printScriptValue(obj: any, marked: Set<any> | undefined = undefined): string {
     if (!marked) {
         marked = new Set()
     }
     if (typeof obj === 'object' && obj !== null && obj !== undefined) {
         if (
             marked.has(obj) &&
-            !isHogDateTime(obj) &&
-            !isHogDate(obj) &&
-            !isHogError(obj) &&
-            !isHogClosure(obj) &&
-            !isHogCallable(obj) &&
-            !isHogAST(obj)
+            !isScriptDateTime(obj) &&
+            !isScriptDate(obj) &&
+            !isScriptError(obj) &&
+            !isScriptClosure(obj) &&
+            !isScriptCallable(obj) &&
+            !isScriptAST(obj)
         ) {
             return 'null'
         }
         marked.add(obj)
         try {
             if (Array.isArray(obj)) {
-                if ((obj as any).__isHogTuple) {
+                if ((obj as any).__isScriptTuple) {
                     if (obj.length < 2) {
-                        return `tuple(${obj.map((o) => printHogValue(o, marked)).join(', ')})`
+                        return `tuple(${obj.map((o) => printScriptValue(o, marked)).join(', ')})`
                     }
-                    return `(${obj.map((o) => printHogValue(o, marked)).join(', ')})`
+                    return `(${obj.map((o) => printScriptValue(o, marked)).join(', ')})`
                 }
-                return `[${obj.map((o) => printHogValue(o, marked)).join(', ')}]`
+                return `[${obj.map((o) => printScriptValue(o, marked)).join(', ')}]`
             }
-            if (isHogDateTime(obj)) {
+            if (isScriptDateTime(obj)) {
                 const millis = String(obj.dt)
                 return `DateTime(${millis}${millis.includes('.') ? '' : '.0'}, ${escapeString(obj.zone)})`
             }
-            if (isHogDate(obj)) {
+            if (isScriptDate(obj)) {
                 return `Date(${obj.year}, ${obj.month}, ${obj.day})`
             }
-            if (isHogError(obj)) {
+            if (isScriptError(obj)) {
                 return `${String(obj.type)}(${escapeString(obj.message)}${
-                    obj.payload ? `, ${printHogValue(obj.payload, marked)}` : ''
+                    obj.payload ? `, ${printScriptValue(obj.payload, marked)}` : ''
                 })`
             }
-            if (isHogClosure(obj)) {
-                return printHogValue(obj.callable, marked)
+            if (isScriptClosure(obj)) {
+                return printScriptValue(obj.callable, marked)
             }
-            if (isHogCallable(obj)) {
-                return `fn<${escapeIdentifier(obj.name ?? 'lambda')}(${printHogValue(obj.argCount)})>`
+            if (isScriptCallable(obj)) {
+                return `fn<${escapeIdentifier(obj.name ?? 'lambda')}(${printScriptValue(obj.argCount)})>`
             }
-            if (isHogAST(obj)) {
+            if (isScriptAST(obj)) {
                 return `sql(${new InsightsQLPrinter(false, marked).print(obj)})`
             }
             if (obj instanceof Map) {
                 return `{${Array.from(obj.entries())
-                    .map(([key, value]) => `${printHogValue(key, marked)}: ${printHogValue(value, marked)}`)
+                    .map(([key, value]) => `${printScriptValue(key, marked)}: ${printScriptValue(value, marked)}`)
                     .join(', ')}}`
             }
             return `{${Object.entries(obj)
-                .map(([key, value]) => `${printHogValue(key, marked)}: ${printHogValue(value, marked)}`)
+                .map(([key, value]) => `${printScriptValue(key, marked)}: ${printScriptValue(value, marked)}`)
                 .join(', ')}}`
         } finally {
             marked.delete(obj)
@@ -112,11 +112,11 @@ export function printHogValue(obj: any, marked: Set<any> | undefined = undefined
     return obj.toString()
 }
 
-export function printHogStringOutput(obj: any): string {
+export function printScriptStringOutput(obj: any): string {
     if (typeof obj === 'string') {
         return obj
     }
-    return printHogValue(obj)
+    return printScriptValue(obj)
 }
 
 type ASTNode = Map<string, any> | null
@@ -148,8 +148,8 @@ export class InsightsQLPrinter {
             return ''
         }
         if (!(node instanceof Map)) {
-            if (isHogAST(node)) {
-                node = convertJSToHog(node)
+            if (isScriptAST(node)) {
+                node = convertJSToScript(node)
             } else {
                 return this.escapeValue(node)
             }
@@ -752,6 +752,6 @@ export class InsightsQLPrinter {
     }
 
     private escapeValue(value: any): string {
-        return printHogValue(value, this.marked)
+        return printScriptValue(value, this.marked)
     }
 }

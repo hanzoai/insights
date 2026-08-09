@@ -13,8 +13,8 @@ import { escapeInsightsQLString, insightsql } from '~/queries/utils'
 import { InsightsFunctionTypeType, LogEntryLevel, PersonType } from '~/types'
 
 import { insightsFunctionsRerunCreate } from 'products/cdp/frontend/generated/api'
-import type { HogInvocationRerunFilterStatusEnumApi } from 'products/cdp/frontend/generated/api.schemas'
-import { hogFlowsRerunCreate } from 'products/workflows/frontend/generated/api'
+import type { ScriptInvocationRerunFilterStatusEnumApi } from 'products/cdp/frontend/generated/api.schemas'
+import { flowsRerunCreate } from 'products/workflows/frontend/generated/api'
 
 export const INSIGHTS_INVOCATIONS_PAGE_SIZE = 100
 
@@ -24,12 +24,12 @@ export const INSIGHTS_INVOCATIONS_RERUN_MAX_COUNT = 10000
 
 export type RunStatus = 'running' | 'succeeded' | 'failed'
 
-export type HogInvocationsFunctionKind = 'insights_function' | 'hog_flow'
+export type ScriptInvocationsFunctionKind = 'insights_function' | 'script_flow'
 
-export type RunRowKind = 'insights_function' | 'hog_flow' | 'insights_function_rerun' | 'hog_flow_rerun'
+export type RunRowKind = 'insights_function' | 'script_flow' | 'insights_function_rerun' | 'script_flow_rerun'
 
 export const isRerunWrapperKind = (kind: RunRowKind): boolean =>
-    kind === 'insights_function_rerun' || kind === 'hog_flow_rerun'
+    kind === 'insights_function_rerun' || kind === 'script_flow_rerun'
 
 /**
  * Script function types a cyclotron worker executes, so a re-run (which re-enqueues onto the
@@ -43,10 +43,10 @@ export const RERUNNABLE_FN_FUNCTION_TYPES: InsightsFunctionTypeType[] = ['destin
 export const isRerunnableInsightsFunctionType = (type?: InsightsFunctionTypeType | null): boolean =>
     !!type && RERUNNABLE_FN_FUNCTION_TYPES.includes(type)
 
-const rerunWrapperKindFor = (kind: HogInvocationsFunctionKind): RunRowKind =>
-    kind === 'hog_flow' ? 'hog_flow_rerun' : 'insights_function_rerun'
+const rerunWrapperKindFor = (kind: ScriptInvocationsFunctionKind): RunRowKind =>
+    kind === 'script_flow' ? 'script_flow_rerun' : 'insights_function_rerun'
 
-export interface HogInvocationRow {
+export interface ScriptInvocationRow {
     invocation_id: string
     function_kind: RunRowKind
     status: RunStatus
@@ -74,14 +74,14 @@ export interface HogInvocationRow {
 
 export type RunsOrderBy = 'latest_scheduled' | 'first_scheduled'
 
-export interface HogInvocationsFilters {
+export interface ScriptInvocationsFilters {
     date_from: string
     date_to?: string
     status?: RunStatus[]
     error_kind?: string[]
     /**
      * Row-kind filter: scope the list to real invocations (`insights_function` /
-     * `hog_flow`), to rerun wrapper jobs (`*_rerun`), or show both.
+     * `script_flow`), to rerun wrapper jobs (`*_rerun`), or show both.
      */
     kind?: 'invocations' | 'rerun_jobs'
     search?: string
@@ -102,10 +102,10 @@ export interface HogInvocationsFilters {
     log_levels?: LogEntryLevel[]
 }
 
-export interface HogInvocationsLogicProps {
+export interface ScriptInvocationsLogicProps {
     /** InsightsFunction.id or InsightsFlow.id */
     id: string
-    functionKind: HogInvocationsFunctionKind
+    functionKind: ScriptInvocationsFunctionKind
     /**
      * Scope the list to invocations spawned by a single parent run. Batch-triggered
      * workflows fan out one child invocation per person, each tagged with the batch
@@ -155,7 +155,7 @@ const URL_PARAMS = {
     log_levels: `${URL_PARAM_PREFIX}log_levels`,
 } as const
 
-const filtersToSearchParams = (filters: HogInvocationsFilters): Record<string, string | undefined> => ({
+const filtersToSearchParams = (filters: ScriptInvocationsFilters): Record<string, string | undefined> => ({
     [URL_PARAMS.date_from]: filters.date_from === '-24h' ? undefined : filters.date_from,
     [URL_PARAMS.date_to]: filters.date_to,
     [URL_PARAMS.status]: filters.status?.length ? filters.status.join(',') : undefined,
@@ -168,8 +168,8 @@ const filtersToSearchParams = (filters: HogInvocationsFilters): Record<string, s
     [URL_PARAMS.log_levels]: filters.log_levels?.length ? filters.log_levels.join(',') : undefined,
 })
 
-const searchParamsToFilters = (searchParams: Record<string, string | undefined>): Partial<HogInvocationsFilters> => {
-    const next: Partial<HogInvocationsFilters> = {}
+const searchParamsToFilters = (searchParams: Record<string, string | undefined>): Partial<ScriptInvocationsFilters> => {
+    const next: Partial<ScriptInvocationsFilters> = {}
     const dateFrom = searchParams[URL_PARAMS.date_from]
     if (dateFrom) {
         next.date_from = dateFrom
@@ -209,7 +209,7 @@ const searchParamsToFilters = (searchParams: Record<string, string | undefined>)
     return next
 }
 
-const DEFAULT_FILTERS: HogInvocationsFilters = {
+const DEFAULT_FILTERS: ScriptInvocationsFilters = {
     date_from: '-24h',
     date_to: undefined,
     status: undefined,
@@ -225,7 +225,7 @@ const DEFAULT_FILTERS: HogInvocationsFilters = {
  * subset. Lets callers outside the tab (e.g. the workflow metrics tiles) point at it without
  * duplicating the URL param scheme. Unset keys fall back to defaults and are dropped from the URL.
  */
-export function buildHogInvocationsSearchParams(filters: Partial<HogInvocationsFilters>): Record<string, string> {
+export function buildScriptInvocationsSearchParams(filters: Partial<ScriptInvocationsFilters>): Record<string, string> {
     const params = filtersToSearchParams({ ...DEFAULT_FILTERS, ...filters })
     return Object.fromEntries(
         Object.entries(params).filter((entry): entry is [string, string] => entry[1] !== undefined)
@@ -316,11 +316,11 @@ export const resolveDateRange = (filters: {
 
 /**
  * Inline date predicate for the inner subquery's WHERE clause. `filtersOverride`
- * doesn't bind to a timestamp field on `hog_invocation_results` (no marker on
+ * doesn't bind to a timestamp field on `script_invocation_results` (no marker on
  * the schema), so we apply the window directly. UTC + the CH DateTime64 literal
  * format keeps partition pruning working.
  */
-export const dateClauseFor = (filters: HogInvocationsFilters): ReturnType<typeof insightsql.raw> => {
+export const dateClauseFor = (filters: ScriptInvocationsFilters): ReturnType<typeof insightsql.raw> => {
     const { start, end } = resolveDateRange(filters)
     // InsightsQL interprets bare datetime literals in the *team* timezone (DateTime
     // fields are compared as toTimeZone(field, team_tz)), so format the window
@@ -337,8 +337,8 @@ export const dateClauseFor = (filters: HogInvocationsFilters): ReturnType<typeof
  * (undefined) returns both kinds for this function id.
  */
 export const kindClauseFor = (
-    props: HogInvocationsLogicProps,
-    filters: HogInvocationsFilters
+    props: ScriptInvocationsLogicProps,
+    filters: ScriptInvocationsFilters
 ): ReturnType<typeof insightsql.raw> => {
     const wrapperKind = rerunWrapperKindFor(props.functionKind)
     if (filters.kind === 'invocations') {
@@ -357,7 +357,7 @@ export const kindClauseFor = (
  * SELECT aliases `parent_run_id` to `argMax(parent_run_id, version)` — there the name
  * resolves to that aggregate alias, which Datastore rejects in WHERE.
  */
-export const parentClauseFor = (props: HogInvocationsLogicProps): ReturnType<typeof insightsql.raw> =>
+export const parentClauseFor = (props: ScriptInvocationsLogicProps): ReturnType<typeof insightsql.raw> =>
     props.parentRunId ? insightsql.raw(`AND parent_run_id = ${escapeInsightsQLString(props.parentRunId)}`) : insightsql.raw('')
 
 /**
@@ -368,8 +368,8 @@ export const parentClauseFor = (props: HogInvocationsLogicProps): ReturnType<typ
  * invocations appear. Returns an empty clause when the filter is off.
  */
 export const problemClauseFor = (
-    props: HogInvocationsLogicProps,
-    filters: HogInvocationsFilters
+    props: ScriptInvocationsLogicProps,
+    filters: ScriptInvocationsFilters
 ): ReturnType<typeof insightsql.raw> => {
     if (!filters.problem_only) {
         return insightsql.raw('')
@@ -393,8 +393,8 @@ export const problemClauseFor = (
  * the outer `scheduled_at` filter already bounds which invocations appear. Empty when no search.
  */
 export const buildSearchClause = (
-    props: HogInvocationsLogicProps,
-    filters: HogInvocationsFilters
+    props: ScriptInvocationsLogicProps,
+    filters: ScriptInvocationsFilters
 ): ReturnType<typeof insightsql.raw> => {
     const search = filters.search?.trim()
     if (!search) {
@@ -433,7 +433,7 @@ interface SparklineTier {
     intervalMs: number
     bucketExpr: string
 }
-const pickSparklineTier = (filters: HogInvocationsFilters): SparklineTier => {
+const pickSparklineTier = (filters: ScriptInvocationsFilters): SparklineTier => {
     const { start, end } = resolveDateRange(filters)
     const hours = end.diff(start, 'hour')
     if (hours < 24) {
@@ -457,7 +457,7 @@ const pickSparklineTier = (filters: HogInvocationsFilters): SparklineTier => {
  * `toStartOfInterval` / `toStartOfMinute` etc.), so the keys we use to look
  * up CH counts line up regardless of timezone formatting.
  */
-const generateSparklineBuckets = (filters: HogInvocationsFilters, intervalMs: number): string[] => {
+const generateSparklineBuckets = (filters: ScriptInvocationsFilters, intervalMs: number): string[] => {
     const { start, end } = resolveDateRange(filters)
     const snap = (t: dayjs.Dayjs): number => Math.floor(t.valueOf() / intervalMs) * intervalMs
     const out: string[] = []
@@ -473,7 +473,7 @@ const SPARKLINE_STATUS_COLORS: Record<RunStatus, string> = {
     failed: 'danger',
 }
 
-async function fetchSparkline(props: HogInvocationsLogicProps, filters: HogInvocationsFilters): Promise<SparklineData> {
+async function fetchSparkline(props: ScriptInvocationsLogicProps, filters: ScriptInvocationsFilters): Promise<SparklineData> {
     const { intervalMs, bucketExpr } = pickSparklineTier(filters)
 
     // Filters reference the SELECT aliases (status / error_kind) so we don't
@@ -511,7 +511,7 @@ async function fetchSparkline(props: HogInvocationsLogicProps, filters: HogInvoc
                 argMax(distinct_id, version)    AS distinct_id,
                 argMax(person_id, version)      AS person_id,
                 argMax(first_scheduled_at, version) AS first_scheduled
-            FROM insights.hog_invocation_results
+            FROM insights.script_invocation_results
             WHERE ${kindClause}
               AND function_id = ${props.id}
               ${parentClauseFor(props)}
@@ -529,7 +529,7 @@ async function fetchSparkline(props: HogInvocationsLogicProps, filters: HogInvoc
     `
     const response = await api.queryInsightsQL(
         query,
-        { scene: 'HogInvocations', productKey: 'pipeline_destinations' },
+        { scene: 'ScriptInvocations', productKey: 'pipeline_destinations' },
         {
             refresh: 'force_blocking',
             filtersOverride: { date_from: filters.date_from, date_to: filters.date_to },
@@ -563,10 +563,10 @@ async function fetchSparkline(props: HogInvocationsLogicProps, filters: HogInvoc
 }
 
 async function fetchRunsPage(
-    props: HogInvocationsLogicProps,
-    filters: HogInvocationsFilters,
+    props: ScriptInvocationsLogicProps,
+    filters: ScriptInvocationsFilters,
     offset: number
-): Promise<HogInvocationRow[]> {
+): Promise<ScriptInvocationRow[]> {
     // HAVING clauses reference the SELECT aliases below — wrapping the column
     // again as `argMax(status, version)` makes InsightsQL substitute `status` for
     // its alias and produce a nested aggregate.
@@ -610,7 +610,7 @@ async function fetchRunsPage(
             argMax(distinct_id, version)    AS distinct_id,
             argMax(person_id, version)      AS person_id,
             argMax(parent_run_id, version)  AS parent_run_id
-        FROM insights.hog_invocation_results
+        FROM insights.script_invocation_results
         WHERE ${kindClause}
           AND function_id = ${props.id}
           ${dateClause}
@@ -629,7 +629,7 @@ async function fetchRunsPage(
 
     const response = await api.queryInsightsQL(
         query,
-        { scene: 'HogInvocations', productKey: 'pipeline_destinations' },
+        { scene: 'ScriptInvocations', productKey: 'pipeline_destinations' },
         {
             refresh: 'force_blocking',
             filtersOverride: {
@@ -639,7 +639,7 @@ async function fetchRunsPage(
         }
     )
 
-    const rows = (response.results ?? []).map((row): HogInvocationRow => {
+    const rows = (response.results ?? []).map((row): ScriptInvocationRow => {
         const [
             invocation_id,
             function_kind,
@@ -708,7 +708,7 @@ async function fetchRunsPage(
  * reads as a clean success. Kept off the runs query's critical path — see `enrichProblems`.
  */
 async function fetchProblemLevels(
-    props: HogInvocationsLogicProps,
+    props: ScriptInvocationsLogicProps,
     ids: string[]
 ): Promise<Record<string, 'warn' | 'error'>> {
     if (ids.length === 0) {
@@ -725,7 +725,7 @@ async function fetchProblemLevels(
         HAVING sev > 0
     `
     const severityResponse = await api.queryInsightsQL(severityQuery, {
-        scene: 'HogInvocations',
+        scene: 'ScriptInvocations',
         productKey: 'pipeline_destinations',
     })
     const levelByInvocationId: Record<string, 'warn' | 'error'> = {}
@@ -737,10 +737,10 @@ async function fetchProblemLevels(
 }
 
 // Generated by kea-typegen. Update if you're an agent, ignore if you're human.
-export interface hogInvocationsLogicValues {
+export interface scriptInvocationsLogicValues {
     canBulkRerun: boolean
     expandedIds: Record<string, boolean>
-    filters: HogInvocationsFilters
+    filters: ScriptInvocationsFilters
     hasLoadedOnce: boolean
     hasMore: boolean
     hasRunningRows: boolean
@@ -756,7 +756,7 @@ export interface hogInvocationsLogicValues {
     personSearchResultsLoading: boolean
     pickedPerson: PersonType | null
     rerunableSelectedIds: string[]
-    runs: HogInvocationRow[]
+    runs: ScriptInvocationRow[]
     runsLoading: boolean
     selectAllState: 'all' | 'none' | 'some'
     selectableIds: string[]
@@ -768,7 +768,7 @@ export interface hogInvocationsLogicValues {
 }
 
 // Generated by kea-typegen. Update if you're an agent, ignore if you're human.
-export interface hogInvocationsLogicActions {
+export interface scriptInvocationsLogicActions {
     bulkRerun: (params: BulkRerunParams) => {
         params: BulkRerunParams
     }
@@ -784,10 +784,10 @@ export interface hogInvocationsLogicActions {
         errorObject?: any
     }
     enrichProblemsSuccess: (
-        runs: HogInvocationRow[],
+        runs: ScriptInvocationRow[],
         payload?: string[] | null
     ) => {
-        runs: HogInvocationRow[]
+        runs: ScriptInvocationRow[]
         payload?: string[] | null
     }
     hydratePeople: (personIds: string[]) => {
@@ -832,10 +832,10 @@ export interface hogInvocationsLogicActions {
         errorObject?: any
     }
     loadMoreSuccess: (
-        runs: HogInvocationRow[],
+        runs: ScriptInvocationRow[],
         payload?: any
     ) => {
-        runs: HogInvocationRow[]
+        runs: ScriptInvocationRow[]
         payload?: any
     }
     loadRuns: (_: any) => any
@@ -847,10 +847,10 @@ export interface hogInvocationsLogicActions {
         errorObject?: any
     }
     loadRunsSuccess: (
-        runs: HogInvocationRow[],
+        runs: ScriptInvocationRow[],
         payload?: any
     ) => {
-        runs: HogInvocationRow[]
+        runs: ScriptInvocationRow[]
         payload?: any
     }
     loadSparkline: (_: any) => any
@@ -905,8 +905,8 @@ export interface hogInvocationsLogicActions {
         expanded: boolean
         invocationId: string
     }
-    setFilters: (filters: Partial<HogInvocationsFilters>) => {
-        filters: Partial<HogInvocationsFilters>
+    setFilters: (filters: Partial<ScriptInvocationsFilters>) => {
+        filters: Partial<ScriptInvocationsFilters>
     }
     setHasMore: (hasMore: boolean) => {
         hasMore: boolean
@@ -923,37 +923,37 @@ export interface hogInvocationsLogicActions {
 }
 
 // Generated by kea-typegen. Update if you're an agent, ignore if you're human.
-export interface hogInvocationsLogicMeta {
+export interface scriptInvocationsLogicMeta {
     key: string
     __keaTypeGenInternalSelectorTypes: {
-        statusCounts: (runs: HogInvocationRow[]) => Record<RunStatus, number>
+        statusCounts: (runs: ScriptInvocationRow[]) => Record<RunStatus, number>
         selectedCount: (selectedIds: Record<string, boolean>) => number
         canBulkRerun: (selectedCount: number) => boolean
-        rerunableSelectedIds: (selectedIds: Record<string, boolean>, runs: HogInvocationRow[]) => string[]
-        hasRunningRows: (runs: HogInvocationRow[]) => boolean
-        selectableIds: (runs: HogInvocationRow[]) => string[]
+        rerunableSelectedIds: (selectedIds: Record<string, boolean>, runs: ScriptInvocationRow[]) => string[]
+        hasRunningRows: (runs: ScriptInvocationRow[]) => boolean
+        selectableIds: (runs: ScriptInvocationRow[]) => string[]
         selectAllState: (selectedIds: Record<string, boolean>, selectableIds: string[]) => 'all' | 'none' | 'some'
     }
 }
 
-export type hogInvocationsLogicType = MakeLogicType<
-    hogInvocationsLogicValues,
-    hogInvocationsLogicActions,
-    HogInvocationsLogicProps,
-    hogInvocationsLogicMeta
+export type scriptInvocationsLogicType = MakeLogicType<
+    scriptInvocationsLogicValues,
+    scriptInvocationsLogicActions,
+    ScriptInvocationsLogicProps,
+    scriptInvocationsLogicMeta
 >
 
 /**
  * Rerun is async — the `/rerun` endpoint enqueues a cyclotron wrapper job;
  * new lifecycle rows show up here once the worker drains it.
  */
-export const hogInvocationsLogic = kea<hogInvocationsLogicType>([
-    path((id) => ['scenes', 'insights-functions', 'invocations', 'hogInvocationsLogic', id]),
-    props({} as HogInvocationsLogicProps),
+export const scriptInvocationsLogic = kea<scriptInvocationsLogicType>([
+    path((id) => ['scenes', 'insights-functions', 'invocations', 'scriptInvocationsLogic', id]),
+    props({} as ScriptInvocationsLogicProps),
     key((props) => `${props.functionKind}:${props.id}${props.parentRunId ? `:${props.parentRunId}` : ''}`),
 
     actions({
-        setFilters: (filters: Partial<HogInvocationsFilters>) => ({ filters }),
+        setFilters: (filters: Partial<ScriptInvocationsFilters>) => ({ filters }),
         resetFilters: true,
         refresh: true,
         toggleSelected: (invocationId: string) => ({ invocationId }),
@@ -972,7 +972,7 @@ export const hogInvocationsLogic = kea<hogInvocationsLogicType>([
     }),
 
     reducers(({ props }) => {
-        const defaultFilters: HogInvocationsFilters = props.defaultDateFrom
+        const defaultFilters: ScriptInvocationsFilters = props.defaultDateFrom
             ? { ...DEFAULT_FILTERS, date_from: props.defaultDateFrom }
             : DEFAULT_FILTERS
         return {
@@ -1044,7 +1044,7 @@ export const hogInvocationsLogic = kea<hogInvocationsLogicType>([
 
     loaders(({ props, values, actions, cache }) => ({
         runs: [
-            [] as HogInvocationRow[],
+            [] as ScriptInvocationRow[],
             {
                 loadRuns: async (_, breakpoint) => {
                     await breakpoint(100)
@@ -1152,7 +1152,7 @@ export const hogInvocationsLogic = kea<hogInvocationsLogicType>([
                         WHERE id IN (${idList})
                     `
                     const response = await api.queryInsightsQL(query, {
-                        scene: 'HogInvocations',
+                        scene: 'ScriptInvocations',
                         productKey: 'pipeline_destinations',
                     })
                     breakpoint()
@@ -1176,7 +1176,7 @@ export const hogInvocationsLogic = kea<hogInvocationsLogicType>([
     selectors({
         statusCounts: [
             (s) => [s.runs],
-            (runs: HogInvocationRow[]): Record<RunStatus, number> => {
+            (runs: ScriptInvocationRow[]): Record<RunStatus, number> => {
                 const counts: Record<RunStatus, number> = { running: 0, succeeded: 0, failed: 0 }
                 for (const r of runs) {
                     counts[r.status] = (counts[r.status] ?? 0) + 1
@@ -1194,7 +1194,7 @@ export const hogInvocationsLogic = kea<hogInvocationsLogicType>([
         ],
         rerunableSelectedIds: [
             (s) => [s.selectedIds, s.runs],
-            (selectedIds: Record<string, boolean>, runs: HogInvocationRow[]): string[] => {
+            (selectedIds: Record<string, boolean>, runs: ScriptInvocationRow[]): string[] => {
                 const ids = Object.keys(selectedIds)
                 if (ids.length === 0) {
                     return []
@@ -1209,11 +1209,11 @@ export const hogInvocationsLogic = kea<hogInvocationsLogicType>([
         ],
         hasRunningRows: [
             (s) => [s.runs],
-            (runs: HogInvocationRow[]): boolean => runs.some((r) => r.status === 'running'),
+            (runs: ScriptInvocationRow[]): boolean => runs.some((r) => r.status === 'running'),
         ],
         selectableIds: [
             (s) => [s.runs],
-            (runs: HogInvocationRow[]): string[] =>
+            (runs: ScriptInvocationRow[]): string[] =>
                 runs
                     .filter((r) => !isRerunWrapperKind(r.function_kind) && r.status !== 'running')
                     .map((r) => r.invocation_id),
@@ -1313,7 +1313,7 @@ export const hogInvocationsLogic = kea<hogInvocationsLogicType>([
                     // defaults a missing status to ['failed'], which would silently drop
                     // succeeded rows the user explicitly selected. The ID restriction
                     // alone determines what gets rerun (the worker still skips in-flight).
-                    status: ['running', 'succeeded', 'failed'] as HogInvocationRerunFilterStatusEnumApi[],
+                    status: ['running', 'succeeded', 'failed'] as ScriptInvocationRerunFilterStatusEnumApi[],
                 },
             }
 
@@ -1321,7 +1321,7 @@ export const hogInvocationsLogic = kea<hogInvocationsLogicType>([
                 const response =
                     props.functionKind === 'insights_function'
                         ? await insightsFunctionsRerunCreate(String(teamId), props.id, requestBody)
-                        : await hogFlowsRerunCreate(String(teamId), props.id, requestBody)
+                        : await flowsRerunCreate(String(teamId), props.id, requestBody)
                 toast.success(
                     `Rerun job ${response.rerun_job_id.slice(0, 8)}… queued. Updated rows will appear here as the worker drains the job.`
                 )
@@ -1348,7 +1348,7 @@ export const hogInvocationsLogic = kea<hogInvocationsLogicType>([
                     window_start: windowStart,
                     window_end: windowEnd,
                     status: params.status?.length
-                        ? (params.status as HogInvocationRerunFilterStatusEnumApi[])
+                        ? (params.status as ScriptInvocationRerunFilterStatusEnumApi[])
                         : undefined,
                     error_kind: params.error_kind?.length ? params.error_kind : undefined,
                     max_count: params.max_count,
@@ -1360,7 +1360,7 @@ export const hogInvocationsLogic = kea<hogInvocationsLogicType>([
                 const response =
                     props.functionKind === 'insights_function'
                         ? await insightsFunctionsRerunCreate(String(teamId), props.id, requestBody)
-                        : await hogFlowsRerunCreate(String(teamId), props.id, requestBody)
+                        : await flowsRerunCreate(String(teamId), props.id, requestBody)
                 toast.success(
                     `Re-run job ${response.rerun_job_id.slice(0, 8)}… queued. Matching invocations will be re-run in the background.`
                 )
@@ -1407,7 +1407,7 @@ export const hogInvocationsLogic = kea<hogInvocationsLogicType>([
             // Diff against current state to avoid looping with actionToUrl.
             const changed = Object.entries(next).some(
                 ([key, value]) =>
-                    JSON.stringify(value) !== JSON.stringify(values.filters[key as keyof HogInvocationsFilters])
+                    JSON.stringify(value) !== JSON.stringify(values.filters[key as keyof ScriptInvocationsFilters])
             )
             if (changed) {
                 actions.setFilters(next)

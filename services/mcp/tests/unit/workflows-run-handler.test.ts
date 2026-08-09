@@ -44,7 +44,7 @@ describe('workflows-test-run handler', () => {
 
         const call = request.mock.calls[0]![0] as RequestArgs
         expect(call.method).toBe('POST')
-        expect(call.path).toBe('/api/projects/1/hog_flows/wf-123/invocations/')
+        expect(call.path).toBe('/api/projects/1/script_flows/wf-123/invocations/')
     })
 
     it('forwards globals, mock_async_functions, and current_action_id in the body', async () => {

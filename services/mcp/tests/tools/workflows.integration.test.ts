@@ -54,7 +54,7 @@ describe('Workflows', { concurrent: false }, () => {
             try {
                 await context.api.request({
                     method: 'DELETE',
-                    path: `/v1/projects/${encodeURIComponent(String(projectId))}/hog_flows/${encodeURIComponent(id)}/`,
+                    path: `/v1/projects/${encodeURIComponent(String(projectId))}/script_flows/${encodeURIComponent(id)}/`,
                 })
             } catch {
                 // Best effort — workflow may already be gone
@@ -419,7 +419,7 @@ describe('Workflows', { concurrent: false }, () => {
     // workflows-test-run hits the invocations endpoint, which forwards to the CDP plugin
     // server (CDP_API_URL). That container isn't started in MCP CI (only the `temporal`
     // compose profile is enabled), so the happy-path returns 500 from a DNS failure.
-    // Coverage for the endpoint lives in insights/api/test/test_hog_flow.py
+    // Coverage for the endpoint lives in insights/api/test/test_script_flow.py
     // (test_can_call_a_test_invocation) with CDP mocked, and at the MCP unit layer
     // (tests/unit/workflows-run-handler.test.ts) for the handler wiring.
 

@@ -13,7 +13,7 @@
 // with upstream restores the illustrations and the code that draws them, and a
 // frontend that compiles looks like one that is correct.
 //
-//     const MascotJudge = pngHoggie()
+//     const MascotJudge = pngMascot()
 //     <MascotJudge className="w-20 h-20" />
 import { ComponentType, SVGAttributes } from 'react'
 
@@ -28,8 +28,8 @@ export interface AssetSvgProps extends SVGAttributes<SVGElement> {
 }
 
 /** An illustration slot that draws nothing. */
-export function pngHoggie(): ComponentType<AssetSvgProps> {
-    return function NullHoggie(props: AssetSvgProps): JSX.Element | null {
+export function pngMascot(): ComponentType<AssetSvgProps> {
+    return function NullMascot(props: AssetSvgProps): JSX.Element | null {
         void props
         return null
     }
