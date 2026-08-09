@@ -304,7 +304,7 @@ describe('ErrorTrackingPipeline', () => {
                 ),
                 dlq: new SingleIngestionOutput('dlq', 'error_tracking_dlq', mockKafkaProducer, 'test'),
                 overflow: new SingleIngestionOutput('overflow', 'error_tracking_overflow', mockKafkaProducer, 'test'),
-                topfn: new SingleIngestionOutput('tophog', 'datastore_topfn_test', mockKafkaProducer, 'test'),
+                topfn: new SingleIngestionOutput('topfn', 'datastore_topfn_test', mockKafkaProducer, 'test'),
                 app_metrics: new SingleIngestionOutput(
                     'app_metrics',
                     'datastore_app_metrics2_test',
