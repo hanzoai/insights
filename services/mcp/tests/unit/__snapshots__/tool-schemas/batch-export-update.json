@@ -407,7 +407,7 @@
             "type": "string"
         },
         "model": {
-            "description": "Which data model to export (events, persons, sessions).\n\n* `events` - Events\n* `persons` - Persons\n* `sessions` - Sessions\n* `insightsql` - Hogql",
+            "description": "Which data model to export (events, persons, sessions).\n\n* `events` - Events\n* `persons` - Persons\n* `sessions` - Sessions\n* `insightsql` - Insightsql",
             "enum": ["events", "persons", "sessions", "insightsql"],
             "type": "string"
         },

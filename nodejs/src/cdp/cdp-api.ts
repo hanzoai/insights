@@ -29,23 +29,27 @@ import {
     InsightsFunctionWebhookResult,
     SourceWebhookError,
 } from './consumers/cdp-source-webhooks.consumer'
-import { HogTransformerService, createHogTransformerService } from './script-transformations/script-transformer.service'
 import { RerunJobManager } from './rerun/rerun-job.manager'
 import { RerunRequest } from './rerun/rerun-job.types'
-import { InsightsFlowAction } from './schema/hogflow'
-import { BatchExportInsightsFunctionService, NotFoundError, ParseError } from './services/batch-export-script-function.service'
+import { InsightsFlowAction } from './schema/insightsflow'
+import { HogTransformerService, createHogTransformerService } from './script-transformations/script-transformer.service'
+import {
+    BatchExportInsightsFunctionService,
+    NotFoundError,
+    ParseError,
+} from './services/batch-export-script-function.service'
 import type { CyclotronV2JobProducer } from './services/cyclotron-v2'
-import { HogExecutorAsyncService, HogExecutorExecuteAsyncOptions } from './services/script-executor-async.service'
-import { MAX_ASYNC_STEPS } from './services/script-executor.service'
-import { HogInputsService } from './services/script-inputs.service'
 import {
     BatchResolverState,
     HOGFLOW_BATCH_RESOLVE_QUEUE,
     serializeResolverState,
 } from './services/insightsflows/batch-resolver.types'
-import { InsightsFlowExecutorService, createInsightsFlowInvocation } from './services/insightsflows/hogflow-executor.service'
-import { InsightsFlowManagerService } from './services/insightsflows/hogflow-manager.service'
-import { matchesWaitUntilCondition } from './services/insightsflows/hogflow-utils'
+import {
+    InsightsFlowExecutorService,
+    createInsightsFlowInvocation,
+} from './services/insightsflows/insightsflow-executor.service'
+import { InsightsFlowManagerService } from './services/insightsflows/insightsflow-manager.service'
+import { matchesWaitUntilCondition } from './services/insightsflows/insightsflow-utils'
 import { InvocationResultsService } from './services/invocation-results.service'
 import { JobQueue } from './services/job-queue/job-queue.interface'
 import { GroupsManagerService } from './services/managers/groups-manager.service'
@@ -55,6 +59,9 @@ import { EmailTrackingCodeSigner } from './services/messaging/helpers/tracking-c
 import { RecipientTokensService } from './services/messaging/recipient-tokens.service'
 import { HogWatcherService, HogWatcherState } from './services/monitoring/script-watcher.service'
 import { NativeDestinationExecutorService } from './services/native-destination-executor.service'
+import { HogExecutorAsyncService, HogExecutorExecuteAsyncOptions } from './services/script-executor-async.service'
+import { MAX_ASYNC_STEPS } from './services/script-executor.service'
+import { HogInputsService } from './services/script-inputs.service'
 import { SegmentDestinationExecutorService } from './services/segment-destination-executor.service'
 import { INSIGHTS_FUNCTION_TEMPLATES } from './templates'
 import { InsightsFunctionInvocationGlobals, InsightsFunctionType, MinimalLogEntry } from './types'
@@ -64,10 +71,10 @@ import {
     isSegmentPluginInsightsFunction,
     sanitizeLogMessage,
 } from './utils'
-import { convertToInsightsFunctionFilterGlobal } from './utils/script-function-filtering'
 import { buildInsightsFunctionInvocations } from './utils/invocation-utils'
-import { JWT, InsightsJwtAudience } from './utils/jwt-utils'
+import { InsightsJwtAudience, JWT } from './utils/jwt-utils'
 import { mirrorCall, mirrorCompare } from './utils/mirror-call'
+import { convertToInsightsFunctionFilterGlobal } from './utils/script-function-filtering'
 
 // Allowlist of safe content types for webhook responses to prevent XSS
 const SAFE_CONTENT_TYPES = new Set([
@@ -247,7 +254,10 @@ export class CdpApi {
                 fn(req, res).catch(next)
 
         // API routes (authentication handled globally by middleware)
-        router.post('/api/projects/:team_id/insights_functions/:id/invocations', asyncHandler(this.postFunctionInvocation))
+        router.post(
+            '/api/projects/:team_id/insights_functions/:id/invocations',
+            asyncHandler(this.postFunctionInvocation)
+        )
         router.post('/api/projects/:team_id/hog_flows/:id/invocations', asyncHandler(this.insightsflowInvocation))
         router.post(
             '/api/projects/:team_id/hog_flows/:id/scheduled_invocations',
@@ -262,7 +272,10 @@ export class CdpApi {
             asyncHandler(this.postRerunInvocations('insights_function'))
         )
         router.post('/api/projects/:team_id/hog_flows/:id/rerun', asyncHandler(this.postRerunInvocations('hog_flow')))
-        router.get('/api/projects/:team_id/hog_flows/:id/in_flight_count', asyncHandler(this.getInsightsFlowInFlightCount))
+        router.get(
+            '/api/projects/:team_id/hog_flows/:id/in_flight_count',
+            asyncHandler(this.getInsightsFlowInFlightCount)
+        )
         router.post(
             '/api/projects/:team_id/hog_flows/:id/reschedule_parked',
             asyncHandler(this.postInsightsFlowRescheduleParked)
@@ -394,7 +407,8 @@ export class CdpApi {
                     function_name: insightsFunctions[x.function_id]?.name,
                     function_team_id: insightsFunctions[x.function_id]?.team_id,
                     function_type: insightsFunctions[x.function_id]?.type,
-                    function_enabled: insightsFunctions[x.function_id]?.enabled && !insightsFunctions[x.function_id]?.deleted,
+                    function_enabled:
+                        insightsFunctions[x.function_id]?.enabled && !insightsFunctions[x.function_id]?.deleted,
                 }))
 
                 res.json({
@@ -488,7 +502,11 @@ export class CdpApi {
                     invocations,
                     logs: filterLogs,
                     metrics: filterMetrics,
-                } = await buildInsightsFunctionInvocations(this.hogInputsService, [compoundConfiguration], triggerGlobals)
+                } = await buildInsightsFunctionInvocations(
+                    this.hogInputsService,
+                    [compoundConfiguration],
+                    triggerGlobals
+                )
 
                 // Add metrics to the logs
                 filterMetrics.forEach((metric) => {

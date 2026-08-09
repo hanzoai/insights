@@ -1,4 +1,4 @@
-import { InsightsFlowActionSchema, InsightsFlowSchema } from './hogflow'
+import { InsightsFlowActionSchema, InsightsFlowSchema } from './insightsflow'
 
 describe('hogflow schema', () => {
     const commonActionFields = {

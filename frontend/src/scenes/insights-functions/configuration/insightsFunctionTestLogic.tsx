@@ -245,7 +245,7 @@ export const insightsFunctionTestLogic = kea<insightsFunctionTestLogicType>([
         return id ?? templateId ?? 'new'
     }),
 
-    path((id) => ['scenes', 'pipeline', 'hogfunctions', 'insightsFunctionTestLogic', id]),
+    path((id) => ['scenes', 'pipeline', 'insightsfunctions', 'insightsFunctionTestLogic', id]),
     connect((props: InsightsFunctionConfigurationLogicProps) => ({
         values: [
             insightsFunctionConfigurationLogic(props),
@@ -495,7 +495,7 @@ export const insightsFunctionTestLogic = kea<insightsFunctionTestLogicType>([
                             : 'Please fix the configuration errors before testing.'
 
                     toast.error(message, {
-                        toastId: 'hogfunction-validation-error',
+                        toastId: 'insightsfunction-validation-error',
                     })
 
                     // Show the errors in the UI

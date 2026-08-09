@@ -47,7 +47,7 @@ describe('useTaxonomicGroupsContext', () => {
             maxContextOptions: [],
             hideBehavioralCohorts: false,
             propertyFilters: { excludedProperties: {} },
-            hogQLExpressionComponentProps: { showBreakdownLabelHint: false },
+            insightsQLExpressionComponentProps: { showBreakdownLabelHint: false },
         })
         expect(ctx.metadataSource).toEqual({ kind: 'InsightsQLQuery', query: 'select event from events' })
         expect(Array.isArray(ctx.groupAnalyticsTaxonomicGroups)).toBe(true)
@@ -62,8 +62,8 @@ describe('useTaxonomicGroupsContext', () => {
                     suggestedFiltersLabel: 'Top picks',
                     hideBehavioralCohorts: true,
                     excludedProperties: { [TaxonomicFilterGroupType.Events]: ['blocked'] },
-                    hogQLGlobals: { foo: 1 },
-                    hogQLExpressionShowBreakdownLabelHint: true,
+                    insightsQLGlobals: { foo: 1 },
+                    insightsQLExpressionShowBreakdownLabelHint: true,
                 }),
             { wrapper }
         )
@@ -73,7 +73,7 @@ describe('useTaxonomicGroupsContext', () => {
         expect(result.current.propertyFilters.excludedProperties).toEqual({
             [TaxonomicFilterGroupType.Events]: ['blocked'],
         })
-        expect(result.current.hogQLExpressionComponentProps).toEqual({
+        expect(result.current.insightsQLExpressionComponentProps).toEqual({
             globals: { foo: 1 },
             showBreakdownLabelHint: true,
         })

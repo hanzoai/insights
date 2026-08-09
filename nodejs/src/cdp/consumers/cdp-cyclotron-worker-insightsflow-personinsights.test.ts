@@ -2,7 +2,7 @@ import { createMockJobQueue } from '~/tests/helpers/mocks/job-queue.mock'
 
 import { DateTime } from 'luxon'
 
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { InsightsFlow } from '~/cdp/schema/insightsflow'
 import { PersonReadRepository } from '~/common/persons/repositories/person-repository'
 import { closeHub, createHub } from '~/common/utils/db/hub'
 import { UUIDT } from '~/common/utils/utils'
@@ -10,7 +10,7 @@ import { createCdpConsumerDeps } from '~/tests/helpers/cdp'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { Hub, InternalPerson, Team } from '../../types'
-import { FixtureInsightsFlowBuilder } from '../_tests/builders/hogflow.builder'
+import { FixtureInsightsFlowBuilder } from '../_tests/builders/insightsflow.builder'
 import { createInsightsFlowInvocationContext, insertInsightsFlow } from '../_tests/fixtures-insightsflows'
 import {
     CyclotronJobInvocation,
@@ -18,7 +18,7 @@ import {
     CyclotronJobInvocationResult,
     InsightsFlowInvocationContext,
 } from '../types'
-import { CdpCyclotronWorkerInsightsFlow } from './cdp-cyclotron-worker-hogflow.consumer'
+import { CdpCyclotronWorkerInsightsFlow } from './cdp-cyclotron-worker-insightsflow.consumer'
 
 jest.setTimeout(1000)
 

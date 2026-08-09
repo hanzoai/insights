@@ -9,7 +9,7 @@ import express from 'ultimate-express'
 
 import { insertInsightsFunction, insertInsightsFunctionTemplate } from '~/cdp/_tests/fixtures'
 import { CdpApi } from '~/cdp/cdp-api'
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { InsightsFlow } from '~/cdp/schema/insightsflow'
 import { template as pixelTemplate } from '~/cdp/templates/_sources/pixel/pixel.template'
 import { template as incomingWebhookTemplate } from '~/cdp/templates/_sources/webhook/incoming_webhook.template'
 import { CyclotronJobInvocationInsightsFunction, CyclotronJobInvocationResult, InsightsFunctionType } from '~/cdp/types'
@@ -21,7 +21,7 @@ import { forSnapshot } from '~/tests/helpers/snapshots'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '~/types'
 
-import { FixtureInsightsFlowBuilder } from '../_tests/builders/hogflow.builder'
+import { FixtureInsightsFlowBuilder } from '../_tests/builders/insightsflow.builder'
 import { insertInsightsFlow } from '../_tests/fixtures-insightsflows'
 import { getCustomHttpResponse } from '../consumers/cdp-source-webhooks.consumer'
 import { HogWatcherState } from '../services/monitoring/script-watcher.service'
@@ -249,7 +249,10 @@ describe('SourceWebhooksConsumer', () => {
                 // Verify that queueInvocationResults WAS called for regular webhooks (this captures the event)
                 expect(mockQueueInvocationResults).toHaveBeenCalledTimes(1)
                 const result = mockQueueInvocationResults.mock.calls[0][0][0]
-                expect(result.capturedInsightsEvents[0].properties).toHaveProperty('$insights_function_execution_count', 1)
+                expect(result.capturedInsightsEvents[0].properties).toHaveProperty(
+                    '$insights_function_execution_count',
+                    1
+                )
 
                 await waitForBackgroundTasks()
                 expect(mockInternalFetch).toHaveBeenCalledTimes(1)

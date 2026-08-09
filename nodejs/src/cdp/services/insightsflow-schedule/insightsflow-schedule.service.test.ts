@@ -1,4 +1,4 @@
-import { InsightsFlowScheduleService } from './hogflow-schedule.service'
+import { InsightsFlowScheduleService } from './insightsflow-schedule.service'
 
 const mockFetch = jest.fn()
 

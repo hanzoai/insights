@@ -162,7 +162,7 @@ export const asLink = (person?: PersonPropType | null): string | undefined => {
 
 /**
  * Parse a row from the InsightsQL person query into a PersonType.
- * Column order matches getHogqlQueryStringForPersonId:
+ * Column order matches getInsightsqlQueryStringForPersonId:
  * [id, distinct_ids, properties, is_identified, created_at, last_seen_at]
  */
 export function parsePersonFromInsightsQLRow(row: any[]): PersonType {
@@ -181,7 +181,7 @@ export function parsePersonFromInsightsQLRow(row: any[]): PersonType {
     }
 }
 
-export const getHogqlQueryStringForPersonId = (): InsightsQLQueryString => {
+export const getInsightsqlQueryStringForPersonId = (): InsightsQLQueryString => {
     return insightsql`SELECT
                     id,
                     groupArray(101)(pdi2.distinct_id) as distinct_ids,

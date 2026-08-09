@@ -1,12 +1,16 @@
 import { DateTime } from 'luxon'
 import { Counter, Summary } from 'prom-client'
 
-import { InsightsFlow, InsightsFlowAction } from '~/cdp/schema/hogflow'
-import { CyclotronJobInvocationInsightsFlow, CyclotronJobInvocationResult, InsightsFunctionFilterGlobals } from '~/cdp/types'
+import { InsightsFlow, InsightsFlowAction } from '~/cdp/schema/insightsflow'
+import {
+    CyclotronJobInvocationInsightsFlow,
+    CyclotronJobInvocationResult,
+    InsightsFunctionFilterGlobals,
+} from '~/cdp/types'
 import { execHog } from '~/cdp/utils/script-exec'
 import { filterFunctionInstrumented } from '~/cdp/utils/script-function-filtering'
-import { logger } from '~/common/utils/logger'
 import { captureException } from '~/common/utils/insights'
+import { logger } from '~/common/utils/logger'
 
 // The run's position (or the edge it needs next) no longer exists in the flow's graph - the
 // workflow was edited underneath an in-flight run. This is a user action, not a defect: the
@@ -34,7 +38,11 @@ export const findActionByType = <T extends InsightsFlowAction['type']>(
     return action as Extract<InsightsFlowAction, { type: T }>
 }
 
-export const findNextAction = (hogFlow: InsightsFlow, currentActionId: string, edgeIndex?: number): InsightsFlowAction => {
+export const findNextAction = (
+    hogFlow: InsightsFlow,
+    currentActionId: string,
+    edgeIndex?: number
+): InsightsFlowAction => {
     const edges = hogFlow.edges.filter((edge) => edge.from === currentActionId)
 
     let nextActionId: string | undefined

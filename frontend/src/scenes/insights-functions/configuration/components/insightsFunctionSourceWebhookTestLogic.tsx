@@ -6,7 +6,10 @@ import { publicWebhooksHostOrigin } from 'lib/utils/apiHost'
 import { tryJsonParse } from 'lib/utils/json'
 
 import type { InsightsFunctionConfigurationType } from '../../../../types'
-import { InsightsFunctionConfigurationLogicProps, insightsFunctionConfigurationLogic } from '../insightsFunctionConfigurationLogic'
+import {
+    InsightsFunctionConfigurationLogicProps,
+    insightsFunctionConfigurationLogic,
+} from '../insightsFunctionConfigurationLogic'
 
 export type InsightsFunctionSourceWebhookTestForm = {
     method: string
@@ -108,7 +111,7 @@ export const insightsFunctionSourceWebhookTestLogic = kea<insightsFunctionSource
         return id ?? templateId ?? 'new'
     }),
 
-    path((id) => ['scenes', 'pipeline', 'hogfunctions', 'insightsFunctionSourceWebhookTestLogic', id]),
+    path((id) => ['scenes', 'pipeline', 'insightsfunctions', 'insightsFunctionSourceWebhookTestLogic', id]),
     connect((props: InsightsFunctionConfigurationLogicProps) => ({
         values: [insightsFunctionConfigurationLogic(props), ['configuration', 'templateId']],
     })),
