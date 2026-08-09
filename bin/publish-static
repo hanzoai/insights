@@ -159,8 +159,18 @@ def main() -> int:
     # while it is still being served. Two trees now simply write two manifests
     # and both are retained, which is the same property that makes the asset
     # keys safe. Both racing builds publish, so the origin ends up holding both.
+    # OUTSIDE the prefix the ingress serves, not a dot-directory inside it. The
+    # staticFiles middleware resolves the whole request path under its root, and
+    # a percent-encoded ../ survives long enough to climb out of static/ --
+    # measured: /static/%2e%2e%2f.builds/<v>.txt returned the manifest, 200.
+    # It cannot climb past the root itself (sibling prefixes answer 404, and the
+    # middleware has a test for that), so nothing here was exposed that a browser
+    # could not already fetch. But a list of what the tree contains is bookkeeping
+    # ABOUT the tree, and putting it where the tree is served means the only thing
+    # keeping it private is a path-cleaning rule. A sibling prefix is out of reach
+    # by construction.
     body = "\n".join(sorted(files)).encode()
-    key = f"{prefix}/.builds/{version}-{hashlib.sha256(body).hexdigest()[:12]}.txt"
+    key = f"{prefix}-builds/{version}-{hashlib.sha256(body).hexdigest()[:12]}.txt"
     s3.put_object(Bucket=bucket, Key=key, Body=body, ContentType="text/plain")
 
     print(f"published {counts['put']} ({uploaded / 1048576:.1f} MB), "
