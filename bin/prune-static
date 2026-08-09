@@ -38,12 +38,23 @@ from __future__ import annotations
 
 import os
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import boto3
 from botocore.config import Config
 
 HORIZON = timedelta(days=30)
+
+# Never delete an object younger than this, whatever the manifests say. A publish
+# takes minutes, so a day puts the in-flight race out of reach by construction.
+GRACE = timedelta(days=1)
+
+# The fewest builds to retain regardless of what the timestamps claim, so a wrong
+# clock cannot collapse retention to a single build.
+FLOOR = 10
+
+# An orphan set this large means a premise is wrong, not that the tree churned.
+CAP = 0.25
 
 
 def pages(s3, bucket: str, prefix: str):
@@ -74,26 +85,63 @@ def main() -> int:
         print("no build manifests -- refusing to prune an origin nothing claims", file=sys.stderr)
         return 1
 
-    cutoff = datetime.now(timezone.utc) - HORIZON
-    # The newest build is kept whatever its age. Without this a repo that stops
-    # shipping for a month would, on the very next prune, find every manifest
-    # expired and delete the assets of the build that is still serving.
-    keep = [m for m in manifests if m["LastModified"] >= cutoff] or [manifests[-1]]
+    cutoff = datetime.now(UTC) - HORIZON
+    # Two reasons to keep a build, and the second is not redundant. `datetime.now`
+    # is the RUNNER's clock while LastModified is the store's; a runner running
+    # more than a horizon fast makes every manifest look expired at once. Keeping
+    # the newest FLOOR regardless means the worst a bad clock can do is prune down
+    # to the last FLOOR builds instead of down to one. It also lets a repo that
+    # stops shipping for a month keep serving.
+    keep = [m for m in manifests if m["LastModified"] >= cutoff]
+    keep = sorted({m["Key"]: m for m in keep + manifests[-FLOOR:]}.values(),
+                  key=lambda o: o["LastModified"])
 
-    referenced: set[str] = set()
-    for m in keep:
-        body = s3.get_object(Bucket=bucket, Key=m["Key"])["Body"].read().decode()
-        referenced.update(f"{prefix}/static/{line}" for line in body.splitlines() if line)
+    def referenced_by(mans) -> set[str]:
+        out: set[str] = set()
+        for m in mans:
+            body = s3.get_object(Bucket=bucket, Key=m["Key"])["Body"].read().decode()
+            out.update(f"{prefix}/static/{line}" for line in body.splitlines() if line)
+        return out
 
+    referenced = referenced_by(keep)
     present = {o["Key"] for o in pages(s3, bucket, f"{prefix}/static/")}
-    orphans = sorted(present - referenced)
+
+    # A publish that finished between the two listings above has its objects in
+    # `present` and its manifest in neither list, so its keys would read as
+    # orphaned -- and the pin moves to exactly that build moments later. Both
+    # forge mirrors publish on every push, so this is not a narrow window. Re-read
+    # the manifests AFTER the object listing and count anything new as referenced.
+    fresh = [m for m in pages(s3, bucket, f"{prefix}-builds/")
+             if m["Key"] not in {k["Key"] for k in manifests}]
+    if fresh:
+        print(f"{len(fresh)} build(s) published while this ran -- counting them as referenced")
+        referenced |= referenced_by(fresh)
+
+    # And the belt to that brace: never delete anything young enough to belong to
+    # a publish still in flight. Age is used ONLY to protect here, never to
+    # condemn -- expiring BY age would delete the most stable chunks first, which
+    # is the whole reason retention reads manifests.
+    young = datetime.now(UTC) - GRACE
+    recent = {o["Key"] for o in pages(s3, bucket, f"{prefix}/static/")
+              if o["LastModified"] >= young}
+    orphans = sorted(present - referenced - recent)
     kept_keys = {m["Key"] for m in keep}
     stale = [m["Key"] for m in manifests if m["Key"] not in kept_keys]
 
-    print(f"{len(manifests)} builds on record, {len(keep)} inside the {HORIZON.days}-day horizon "
+    print(f"{len(manifests)} builds on record, {len(keep)} retained "
           f"({keep[0]['LastModified']:%Y-%m-%d} .. {keep[-1]['LastModified']:%Y-%m-%d})")
     print(f"{len(present)} objects present, {len(referenced)} still referenced, "
-          f"{len(orphans)} orphaned, {len(stale)} stale manifests")
+          f"{len(recent)} too young to touch, {len(orphans)} orphaned, "
+          f"{len(stale)} stale manifests")
+
+    # A correct prune removes a build's worth of churn. Anything approaching the
+    # size of the tree means a premise is wrong -- a truncated manifest, a
+    # half-read list, a prefix that moved -- and deleting on a wrong premise is
+    # not recoverable from here.
+    if present and len(orphans) > len(present) * CAP:
+        print(f"refusing: {len(orphans)} orphans is over {CAP:.0%} of {len(present)} objects "
+              f"-- that is not churn, something is wrong", file=sys.stderr)
+        return 1
 
     if not apply:
         print("\ndry run -- pass --apply to delete. First 10 orphans:")
@@ -102,11 +150,15 @@ def main() -> int:
         return 0
 
     doomed = orphans + stale
+    failed = 0
     for i in range(0, len(doomed), 1000):  # DeleteObjects takes at most 1000
         batch = doomed[i:i + 1000]
-        s3.delete_objects(Bucket=bucket, Delete={"Objects": [{"Key": k} for k in batch]})
-    print(f"deleted {len(doomed)}")
-    return 0
+        res = s3.delete_objects(Bucket=bucket, Delete={"Objects": [{"Key": k} for k in batch]})
+        for err in res.get("Errors", []):
+            print(f"delete failed: {err.get('Key')}: {err.get('Message')}", file=sys.stderr)
+            failed += 1
+    print(f"deleted {len(doomed) - failed} of {len(doomed)}")
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":
