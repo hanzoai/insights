@@ -434,7 +434,7 @@ def process_query_task(
 
 @shared_task(ignore_result=True)
 def pg_table_cache_hit_rate() -> None:
-    from statshog.defaults.django import statsd
+    from insights.statsd import statsd
 
     with connection.cursor() as cursor:
         try:
@@ -466,7 +466,7 @@ def pg_table_cache_hit_rate() -> None:
 
 @shared_task(ignore_result=True)
 def pg_plugin_server_query_timing() -> None:
-    from statshog.defaults.django import statsd
+    from insights.statsd import statsd
 
     with connection.cursor() as cursor:
         try:
@@ -518,10 +518,9 @@ HEARTBEAT_EVENT_TO_INGESTION_LAG_METRIC = {"$heartbeat": "ingestion_api"}
 @shared_task(ignore_result=True)
 @skip_team_scope_audit
 def ingestion_lag() -> None:
-    from statshog.defaults.django import statsd
-
     from insights.datastore.client import sync_execute
     from insights.models.team.team import Team
+    from insights.statsd import statsd
 
     query = f"""
     SELECT event, date_diff('second', max(timestamp), now())
@@ -579,9 +578,8 @@ KNOWN_CELERY_TASK_IDENTIFIERS = {
 
 @shared_task(ignore_result=True)
 def datastore_row_count() -> None:
-    from statshog.defaults.django import statsd
-
     from insights.datastore.client import sync_execute
+    from insights.statsd import statsd
 
     with pushed_metrics_registry("celery_datastore_row_count") as registry:
         row_count_gauge = Gauge(
@@ -646,9 +644,8 @@ def datastore_errors_count() -> None:
 
 @shared_task(ignore_result=True)
 def datastore_part_count() -> None:
-    from statshog.defaults.django import statsd
-
     from insights.datastore.client import sync_execute
+    from insights.statsd import statsd
 
     QUERY = """
         SELECT table, count(1) freq
@@ -677,9 +674,8 @@ def datastore_part_count() -> None:
 
 @shared_task(ignore_result=True)
 def datastore_mutation_count() -> None:
-    from statshog.defaults.django import statsd
-
     from insights.datastore.client import sync_execute
+    from insights.statsd import statsd
 
     QUERY = """
         SELECT
