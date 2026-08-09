@@ -13,7 +13,8 @@ from django.utils import timezone
 
 from prometheus_client import Counter
 from rest_framework.throttling import SimpleRateThrottle, UserRateThrottle
-from statshog.defaults.django import statsd
+
+from insights.statsd import statsd
 
 if TYPE_CHECKING:
     # This module is imported by DRF's DEFAULT_THROTTLE_CLASSES setting while rest_framework.views
