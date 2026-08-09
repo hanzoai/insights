@@ -1,4 +1,4 @@
-import { EventType } from 'insights-js/rrweb-types'
+import { EventType } from '@hanzo/insights-rrweb-types'
 
 import { SnapshotStore } from '@hanzo/replay-shared'
 
