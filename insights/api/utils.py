@@ -23,7 +23,6 @@ from rest_framework import request, serializers, status
 from rest_framework.decorators import action as drf_action
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import Field
-from statshog.defaults.django import statsd
 from urllib3 import HTTPConnectionPool, HTTPSConnectionPool, PoolManager
 
 from insights.schema import QueryTiming
@@ -41,6 +40,7 @@ from insights.models.entity import MathType
 from insights.models.filters.filter import Filter
 from insights.models.filters.stickiness_filter import StickinessFilter
 from insights.security.url_validation import has_authority_bypass_chars
+from insights.statsd import statsd
 from insights.utils import load_data_from_request
 from insights.utils_cors import cors_response
 
