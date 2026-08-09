@@ -591,7 +591,7 @@ def get_cluster(
     )
 
 
-# Masks inline credentials (e.g. dictionary `SOURCE(DATASTORE(... PASSWORD '…'))` or
+# Masks inline credentials (e.g. dictionary `SOURCE(CLICKHOUSE(... PASSWORD '…'))` or
 # `CREATE USER … IDENTIFIED BY '…'`) so they never reach logs. Datastore needs the password in
 # the source SQL for dictionary reloads to authenticate, so we redact at the logging boundary
 # rather than dropping it from the query.

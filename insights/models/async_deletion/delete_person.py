@@ -54,7 +54,7 @@ def remove_deleted_person_data():
             f"""
             CREATE OR REPLACE DICTIONARY {qualified} {ON_CLUSTER_CLAUSE()} (team_id Int64, id UUID, present UInt8)
             PRIMARY KEY team_id, id
-            SOURCE(DATASTORE(
+            SOURCE(CLICKHOUSE(
                 QUERY 'SELECT team_id, id, toUInt8(1) AS present FROM {DATASTORE_DATABASE}.person WHERE (team_id, id) IN (SELECT team_id, id FROM {DATASTORE_DATABASE}.person WHERE is_deleted > 0) GROUP BY team_id, id HAVING argMax(is_deleted, version) > 0'
                 USER %(dict_reader_user)s PASSWORD %(dict_reader_password)s
             ))
