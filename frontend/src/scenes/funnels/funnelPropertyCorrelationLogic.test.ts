@@ -24,24 +24,24 @@ describe('funnelPropertyCorrelationLogic', () => {
         useAvailableFeatures([AvailableFeature.CORRELATION_ANALYSIS, AvailableFeature.GROUP_ANALYTICS])
         useMocks({
             get: {
-                '/api/environments/@current': () => [
+                '/v1/environments/@current': () => [
                     200,
                     {
                         ...MOCK_DEFAULT_TEAM,
                         correlation_config: correlationConfig,
                     },
                 ],
-                '/api/environments/:team_id/insights/': { results: [{}] },
-                '/api/environments/:team_id/insights/:id/': {},
-                '/api/projects/:team/groups_types/': [],
-                '/api/environments/:team_id/persons/properties': [
+                '/v1/environments/:team_id/insights/': { results: [{}] },
+                '/v1/environments/:team_id/insights/:id/': {},
+                '/v1/projects/:team/groups_types/': [],
+                '/v1/environments/:team_id/persons/properties': [
                     { name: 'some property', count: 20 },
                     { name: 'another property', count: 10 },
                     { name: 'third property', count: 5 },
                 ],
             },
             patch: {
-                '/api/environments/:id': async ({ request }) => {
+                '/v1/environments/:id': async ({ request }) => {
                     const body = (await request.json()) as any
                     return [
                         200,
@@ -57,7 +57,7 @@ describe('funnelPropertyCorrelationLogic', () => {
                 },
             },
             post: {
-                '/api/environments/:team_id/insights/funnel/correlation': async ({ request }) => {
+                '/v1/environments/:team_id/insights/funnel/correlation': async ({ request }) => {
                     const data = (await request.json()) as any
                     const excludePropertyFromProjectNames = data?.funnel_correlation_exclude_names || []
                     const includePropertyNames = data?.funnel_correlation_names || []
@@ -100,7 +100,7 @@ describe('funnelPropertyCorrelationLogic', () => {
             },
         })
         initKeaTests(false)
-        window.INSIGHTS_APP_CONTEXT = undefined // to force API request to /api/environments/@current
+        window.INSIGHTS_APP_CONTEXT = undefined // to force API request to /v1/environments/@current
     })
 
     const defaultProps: InsightLogicProps = {

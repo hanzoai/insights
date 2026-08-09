@@ -50,9 +50,9 @@ const createEventTriggeredSurvey = (repeatedActivation: boolean): Survey => ({
 
 const surveyMocks = (survey: Survey): Parameters<typeof useMocks>[0] => ({
     get: {
-        '/api/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
-        '/api/projects/:team/surveys/test-survey/': () => [200, survey],
-        '/api/projects/:team/surveys/responses_count': () => [200, {}],
+        '/v1/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
+        '/v1/projects/:team/surveys/test-survey/': () => [200, survey],
+        '/v1/projects/:team/surveys/responses_count': () => [200, {}],
     },
 })
 

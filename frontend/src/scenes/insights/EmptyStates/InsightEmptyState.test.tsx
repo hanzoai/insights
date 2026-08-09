@@ -19,7 +19,7 @@ describe('EmptyStates', () => {
             initKeaTests()
             useMocks({
                 get: {
-                    '/api/projects/:projectId/tasks/': { count: 0, results: [] },
+                    '/v1/projects/:projectId/tasks/': { count: 0, results: [] },
                 },
             })
         })

@@ -268,7 +268,7 @@ describe('normalizePropertyFilterValue()', () => {
 describe('isAnyPropertyfilter()', () => {
     // A taxonomic-backed attribute filter that isn't recognized here resolves to no
     // activeTaxonomicGroup, so its value picker loses `valuesEndpoint` and falls back to a
-    // bogus `api/<type>/values` URL that returns nothing. Guards that regression for each
+    // bogus `v1/<type>/values` URL that returns nothing. Guards that regression for each
     // attribute family (metric_attribute broke exactly this way).
     it.each([PropertyFilterType.MetricAttribute, PropertyFilterType.LogAttribute, PropertyFilterType.SpanAttribute])(
         'recognizes %s as a property filter',

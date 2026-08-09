@@ -21,26 +21,26 @@ import { InboxScene } from './InboxScene'
 
 const sceneMocks = mswDecorator({
     get: {
-        '/api/projects/:id/signals/reports': () => [
+        '/v1/projects/:id/signals/reports': () => [
             200,
             { results: allReports, count: allReports.length, next: null, previous: null },
         ],
-        '/api/projects/:id/signals/reports/available_reviewers': () => [200, mockReviewers],
-        '/api/projects/:id/signals/reports/:reportId/artefacts': (req) => [
+        '/v1/projects/:id/signals/reports/available_reviewers': () => [200, mockReviewers],
+        '/v1/projects/:id/signals/reports/:reportId/artefacts': (req) => [
             200,
             mockArtefacts(req.params.reportId as string),
         ],
-        '/api/projects/:id/signals/reports/:reportId/signals': (req) => [
+        '/v1/projects/:id/signals/reports/:reportId/signals': (req) => [
             200,
             { report: null, signals: mockSignals(req.params.reportId as string, 4) },
         ],
-        '/api/projects/:id/tasks/:taskId': (req) => [200, mockTask(req.params.taskId as string)],
-        '/api/projects/:id/signals/source_configs': () => [200, mockSourceConfigs],
-        '/api/projects/:id/signals/config': () => [200, mockTeamConfig],
-        '/api/projects/:id/signals/scout/configs': () => [200, []],
-        '/api/projects/:id/signals/scout/runs': () => [200, []],
-        '/api/projects/:id/external_data_sources': () => [200, { results: [], count: 0 }],
-        '/api/projects/:id/external_data_sources/': () => [200, { results: [], count: 0 }],
+        '/v1/projects/:id/tasks/:taskId': (req) => [200, mockTask(req.params.taskId as string)],
+        '/v1/projects/:id/signals/source_configs': () => [200, mockSourceConfigs],
+        '/v1/projects/:id/signals/config': () => [200, mockTeamConfig],
+        '/v1/projects/:id/signals/scout/configs': () => [200, []],
+        '/v1/projects/:id/signals/scout/runs': () => [200, []],
+        '/v1/projects/:id/external_data_sources': () => [200, { results: [], count: 0 }],
+        '/v1/projects/:id/external_data_sources/': () => [200, { results: [], count: 0 }],
     },
 })
 
@@ -68,9 +68,9 @@ export const Empty: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:id/signals/reports': () => [200, { results: [], count: 0, next: null, previous: null }],
-                '/api/projects/:id/signals/source_configs': () => [200, mockSourceConfigs],
-                '/api/projects/:id/signals/scout/configs': () => [200, []],
+                '/v1/projects/:id/signals/reports': () => [200, { results: [], count: 0, next: null, previous: null }],
+                '/v1/projects/:id/signals/source_configs': () => [200, mockSourceConfigs],
+                '/v1/projects/:id/signals/scout/configs': () => [200, []],
             },
         }),
     ],
@@ -81,9 +81,9 @@ export const SelfDrivingOnboarding: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:id/signals/reports': () => [200, { results: [], count: 0, next: null, previous: null }],
-                '/api/projects/:id/signals/source_configs': () => [200, { results: [], count: 0 }],
-                '/api/projects/:id/signals/scout/configs': () => [200, []],
+                '/v1/projects/:id/signals/reports': () => [200, { results: [], count: 0, next: null, previous: null }],
+                '/v1/projects/:id/signals/source_configs': () => [200, { results: [], count: 0 }],
+                '/v1/projects/:id/signals/scout/configs': () => [200, []],
             },
         }),
     ],
@@ -96,12 +96,12 @@ export const SelfDrivingPaused: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:id/signals/reports': () => [
+                '/v1/projects/:id/signals/reports': () => [
                     200,
                     { results: allReports, count: allReports.length, next: null, previous: null },
                 ],
-                '/api/projects/:id/signals/source_configs': () => [200, { results: [], count: 0 }],
-                '/api/projects/:id/signals/scout/configs': () => [200, []],
+                '/v1/projects/:id/signals/source_configs': () => [200, { results: [], count: 0 }],
+                '/v1/projects/:id/signals/scout/configs': () => [200, []],
             },
         }),
     ],

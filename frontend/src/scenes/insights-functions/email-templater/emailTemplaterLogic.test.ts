@@ -38,8 +38,8 @@ describe('emailTemplaterLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/messaging_templates/': { results: [] },
-                '/api/projects/:team_id/property_definitions/': { results: [] },
+                '/v1/environments/:team_id/messaging_templates/': { results: [] },
+                '/v1/projects/:team_id/property_definitions/': { results: [] },
             },
         })
         initKeaTests()

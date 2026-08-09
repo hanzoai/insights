@@ -18,7 +18,7 @@ class TestLogsViewAPI(APIBaseTest):
 
     def setUp(self):
         super().setUp()
-        self.base_url = f"/api/environments/{self.team.pk}/logs/views/"
+        self.base_url = f"/v1/environments/{self.team.pk}/logs/views/"
         self._ff_patcher = patch("hanzo_insights.feature_enabled", return_value=True)
         self._ff_patcher.start()
         self.addCleanup(self._ff_patcher.stop)

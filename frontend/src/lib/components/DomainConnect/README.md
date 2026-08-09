@@ -12,7 +12,7 @@ Uses the [Domain Connect](https://www.domainconnect.org/) synchronous flow with 
 User clicks "Configure automatically"
         │
         ▼
-Frontend calls POST /api/environments/:id/integrations/domain-connect/apply-url
+Frontend calls POST /v1/environments/:id/integrations/domain-connect/apply-url
         │
         ▼
 Backend resolves context (email/proxy) → domain, template variables, service ID

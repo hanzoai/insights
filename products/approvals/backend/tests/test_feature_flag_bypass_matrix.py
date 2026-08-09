@@ -98,10 +98,10 @@ class TestDirectAndCreateBypassMatrix(FeatureFlagBypassMatrixBase):
     """
 
     def _patch(self, flag: FeatureFlag, data: dict[str, Any]) -> Any:
-        return self.client.patch(f"/api/projects/{self.team.id}/feature_flags/{flag.id}/", data, format="json")
+        return self.client.patch(f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/", data, format="json")
 
     def _post(self, data: dict[str, Any]) -> Any:
-        return self.client.post(f"/api/projects/{self.team.id}/feature_flags/", data, format="json")
+        return self.client.post(f"/v1/projects/{self.team.id}/feature_flags/", data, format="json")
 
     def test_direct_patch_enable_is_gated(self, _mock_enabled):
         _enable_policy_for(self, "feature_flag.enable")
@@ -439,7 +439,7 @@ class TestCopyBypassMatrix(APIBaseTest):
 
     def _copy(self, target_ids: list[int]) -> Any:
         return self.client.post(
-            f"/api/organizations/{self.organization.id}/feature_flags/copy_flags",
+            f"/v1/organizations/{self.organization.id}/feature_flags/copy_flags",
             {
                 "feature_flag_key": self.source_flag.key,
                 "from_project": self.source_flag.team_id,
@@ -483,7 +483,7 @@ class TestBypassMatrixControls(FeatureFlagBypassMatrixBase):
         _enable_policy_for(self, "feature_flag.enable")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {"key": "born-disabled", "active": False, "filters": {"groups": [{"rollout_percentage": 100}]}},
             format="json",
         )
@@ -496,7 +496,7 @@ class TestBypassMatrixControls(FeatureFlagBypassMatrixBase):
         flag = self._flag(active=False)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag.id}/", {"active": True}, format="json"
+            f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/", {"active": True}, format="json"
         )
 
         assert response.status_code == 200
@@ -521,7 +521,7 @@ class TestBypassMatrixControls(FeatureFlagBypassMatrixBase):
         flag = self._flag(active=False)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag.id}/", {"active": True}, format="json"
+            f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/", {"active": True}, format="json"
         )
         assert response.status_code == 409
         cr = ChangeRequest.objects.get(id=response.json()["change_request_id"])

@@ -315,7 +315,7 @@ export const startupProgramLogic = kea<startupProgramLogicType>([
                 }
 
                 try {
-                    await api.create('api/billing/startups/apply', valuesToSubmit)
+                    await api.create('v1/billing/startups/apply', valuesToSubmit)
                     actions.setFormSubmitted(true)
                     insights.capture('startup program application submitted', valuesToSubmit)
                 } catch (error: any) {

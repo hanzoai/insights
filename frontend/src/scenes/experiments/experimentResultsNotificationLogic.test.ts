@@ -29,7 +29,7 @@ describe('experimentResultsNotificationLogic', () => {
         // terminal (isRecalculating=false) state — the tests then drive transitions deterministically.
         useMocks({
             get: {
-                '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
+                '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
                     200,
                     {
                         id: 'seed',

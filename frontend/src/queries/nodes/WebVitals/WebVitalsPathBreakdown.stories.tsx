@@ -18,7 +18,7 @@ const meta: Meta<QueryProps<Node>> = {
     decorators: [
         mswDecorator({
             post: {
-                '/api/environments/:team_id/query/:kind/': async ({ request }) => {
+                '/v1/environments/:team_id/query/:kind/': async ({ request }) => {
                     const body = (await request.json()) as any
                     if (body.query.kind === 'WebVitalsPathBreakdownQuery') {
                         return [200, webVitalsPathBreakdown]

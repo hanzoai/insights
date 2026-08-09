@@ -59,9 +59,9 @@ class DatastoreUser(StrEnum):
     # Only resort to using during experimentation and development.
     # Once you're past that, create a dedicated user for your product/use-case and use that instead.
     DEFAULT = "default"
-    # All /api/ requests called programmatically
+    # All /v1/ requests called programmatically
     API = "api"
-    # All /api/ requests coming from our app
+    # All /v1/ requests coming from our app
     APP = "app"
     BATCH_EXPORT = "batch_export"
     COHORTS = "cohorts"

@@ -117,7 +117,7 @@ export const mergeSplitPersonLogic = kea<mergeSplitPersonLogicType>([
                             : values.selectedPersonToAssignSplit
                               ? { main_distinct_id: values.selectedPersonToAssignSplit }
                               : {}
-                    const splitAction = await api.create('api/person/' + values.person.id + '/split/', payload)
+                    const splitAction = await api.create('v1/person/' + values.person.id + '/split/', payload)
                     if (splitAction.success) {
                         toast.success(
                             'Person succesfully split. This may take up to a couple of minutes to complete.'

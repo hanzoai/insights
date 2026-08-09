@@ -11,7 +11,7 @@ class TestLogoDevEgress(SimpleTestCase):
         [
             ("img_brand_path", "https://img.logo.dev/linear.app?token=x", "/img/{domain}"),
             ("img_nested_brand_path", "https://img.logo.dev/some.brand.co", "/img/{domain}"),
-            ("search_api", "https://search.logo.dev/api/icons?query=linear", "/api/icons"),
+            ("search_api", "https://search.logo.dev/api/icons?query=linear", "/v1/icons"),
             ("no_url", None, "unknown"),
         ]
     )

@@ -254,7 +254,7 @@ export const sharedMetricModalLogic = kea<sharedMetricModalLogicType>([
                         search: values.searchTerm || undefined,
                     })
                     const response = (await api.get(
-                        `api/projects/${values.currentProjectId}/experiment_saved_metrics?${params}`
+                        `v1/projects/${values.currentProjectId}/experiment_saved_metrics?${params}`
                     )) as CountedPaginatedResponse<SharedMetric>
                     // Discard stale responses that resolve after a newer search has fired
                     breakpoint()
@@ -271,7 +271,7 @@ export const sharedMetricModalLogic = kea<sharedMetricModalLogicType>([
                             search: values.searchTerm || undefined,
                         })
                         response = (await api.get(
-                            `api/projects/${values.currentProjectId}/experiment_saved_metrics?${params}`
+                            `v1/projects/${values.currentProjectId}/experiment_saved_metrics?${params}`
                         )) as CountedPaginatedResponse<SharedMetric>
                         breakpoint()
                     }

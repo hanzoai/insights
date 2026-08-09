@@ -85,7 +85,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/web_analytics/recap/': () => [200, recapMock],
+                '/v1/projects/:team_id/web_analytics/recap/': () => [200, recapMock],
             },
         }),
     ],

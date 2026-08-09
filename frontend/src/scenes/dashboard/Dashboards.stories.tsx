@@ -40,8 +40,8 @@ const dashboard = {
 const insightMocks = dashboard.tiles.reduce((acc: Record<string, any>, tile: any) => {
     if (tile.insight) {
         // Add both the old project-based path and the new environment-based path
-        acc[`/api/projects/:team_id/insights/${tile.insight.id}/`] = tile.insight
-        acc[`/api/environments/:team_id/insights/${tile.insight.id}/`] = tile.insight
+        acc[`/v1/projects/:team_id/insights/${tile.insight.id}/`] = tile.insight
+        acc[`/v1/environments/:team_id/insights/${tile.insight.id}/`] = tile.insight
     }
     return acc
 }, {})
@@ -59,8 +59,8 @@ const insightFetchMock = ({ params }: MockResolverInfo): [number, any] => {
 
     // Fallback to checking our insight mocks
     const insight =
-        insightMocks[`/api/environments/:team_id/insights/${insightId}/`] ||
-        insightMocks[`/api/projects/:team_id/insights/${insightId}/`]
+        insightMocks[`/v1/environments/:team_id/insights/${insightId}/`] ||
+        insightMocks[`/v1/projects/:team_id/insights/${insightId}/`]
     if (insight) {
         return [200, insight]
     }
@@ -77,25 +77,25 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/dashboards/': __dashboards as any,
-                [`/api/environments/:team_id/dashboards/${BASE_DASHBOARD_ID}/`]: dashboard,
+                '/v1/environments/:team_id/dashboards/': __dashboards as any,
+                [`/v1/environments/:team_id/dashboards/${BASE_DASHBOARD_ID}/`]: dashboard,
                 ...insightMocks,
-                '/api/environments/:team_id/insights/:id/': insightFetchMock,
-                [`/api/environments/:team_id/dashboards/${BASE_DASHBOARD_ID}/collaborators/`]: [],
-                '/api/projects/:team_id/dashboard_templates/': __dashboard_templates as any,
-                '/api/projects/:team_id/dashboard_templates/json_schema/': __dashboard_template_schema as any,
-                '/api/environments/:team_id/dashboards/:dash_id/sharing/': {
+                '/v1/environments/:team_id/insights/:id/': insightFetchMock,
+                [`/v1/environments/:team_id/dashboards/${BASE_DASHBOARD_ID}/collaborators/`]: [],
+                '/v1/projects/:team_id/dashboard_templates/': __dashboard_templates as any,
+                '/v1/projects/:team_id/dashboard_templates/json_schema/': __dashboard_template_schema as any,
+                '/v1/environments/:team_id/dashboards/:dash_id/sharing/': {
                     created_at: '2023-02-25T13:28:20.454940Z',
                     enabled: false,
                     access_token: 'a-secret-token',
                 },
                 // Add variable data mock to prevent loading issues
-                '/api/environments/:team_id/warehouse/variables/': [],
+                '/v1/environments/:team_id/warehouse/variables/': [],
                 // Add team endpoint
-                '/api/environments/:team_id/': { id: BASE_DASHBOARD_ID, name: 'Test Team' },
+                '/v1/environments/:team_id/': { id: BASE_DASHBOARD_ID, name: 'Test Team' },
             },
             post: {
-                '/api/environments/:team_id/insights/cancel/': [201],
+                '/v1/environments/:team_id/insights/cancel/': [201],
             },
         }),
     ],
@@ -233,7 +233,7 @@ export const DashboardStates: StoryObj<{ state: DashboardState }> = {
 
         useStorybookMocks({
             get: {
-                [`/api/environments/:team_id/dashboards/${DASHBOARD_STATE_ID}/`]: response,
+                [`/v1/environments/:team_id/dashboards/${DASHBOARD_STATE_ID}/`]: response,
             },
         })
 

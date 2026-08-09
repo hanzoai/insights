@@ -519,7 +519,7 @@ export class ApiClient {
         return {
             list: async (): Promise<Result<Schemas.OrganizationBasic[]>> => {
                 const result = await this.fetchJson<{ results: Schemas.OrganizationBasic[] }>(
-                    `${this.baseUrl}/api/organizations/`
+                    `${this.baseUrl}/v1/organizations/`
                 )
 
                 if (result.success) {
@@ -529,14 +529,14 @@ export class ApiClient {
             },
 
             get: async ({ orgId }: { orgId: string }): Promise<Result<Schemas.OrganizationBasic>> => {
-                return this.fetchJson<Schemas.OrganizationBasic>(`${this.baseUrl}/api/organizations/${orgId}/`)
+                return this.fetchJson<Schemas.OrganizationBasic>(`${this.baseUrl}/v1/organizations/${orgId}/`)
             },
 
             projects: ({ orgId }: { orgId: string }) => {
                 return {
                     list: async (): Promise<Result<Schemas.ProjectBackwardCompat[]>> => {
                         const result = await this.fetchJson<{ results: Schemas.ProjectBackwardCompat[] }>(
-                            `${this.baseUrl}/api/organizations/${orgId}/projects/`
+                            `${this.baseUrl}/v1/organizations/${orgId}/projects/`
                         )
 
                         if (result.success) {
@@ -552,7 +552,7 @@ export class ApiClient {
     apiKeys(): Endpoint {
         return {
             current: async (): Promise<Result<ApiRedactedPersonalApiKey>> => {
-                return this.fetchJson<ApiRedactedPersonalApiKey>(`${this.baseUrl}/api/personal_api_keys/@current`)
+                return this.fetchJson<ApiRedactedPersonalApiKey>(`${this.baseUrl}/v1/personal_api_keys/@current`)
             },
         }
     }
@@ -575,7 +575,7 @@ export class ApiClient {
     projects(): Endpoint {
         return {
             get: async ({ projectId }: { projectId: string }): Promise<Result<Schemas.ProjectBackwardCompat>> => {
-                return this.fetchJson<Schemas.ProjectBackwardCompat>(`${this.baseUrl}/api/projects/${projectId}/`)
+                return this.fetchJson<Schemas.ProjectBackwardCompat>(`${this.baseUrl}/v1/projects/${projectId}/`)
             },
 
             propertyDefinitions: async ({
@@ -611,7 +611,7 @@ export class ApiClient {
 
                     const searchParams = getSearchParamsFromRecord(params)
 
-                    const url = `${this.baseUrl}/api/projects/${projectId}/property_definitions/?${searchParams}`
+                    const url = `${this.baseUrl}/v1/projects/${projectId}/property_definitions/?${searchParams}`
 
                     const response = await this.fetch(url)
 
@@ -647,7 +647,7 @@ export class ApiClient {
                         offset: offset ?? 0,
                     })
 
-                    const requestUrl = `${this.baseUrl}/api/projects/${projectId}/event_definitions/?${searchParams}`
+                    const requestUrl = `${this.baseUrl}/v1/projects/${projectId}/event_definitions/?${searchParams}`
 
                     const response = await this.fetch(requestUrl)
 
@@ -680,7 +680,7 @@ export class ApiClient {
                 try {
                     // Fetching the event definition by name to get its ID
                     const searchParams = new URLSearchParams({ name: eventName })
-                    const findUrl = `${this.baseUrl}/api/projects/${projectId}/event_definitions/by_name/?${searchParams}`
+                    const findUrl = `${this.baseUrl}/v1/projects/${projectId}/event_definitions/by_name/?${searchParams}`
 
                     const findResponse = await this.fetch(findUrl)
 
@@ -698,7 +698,7 @@ export class ApiClient {
                     const eventDef = (await findResponse.json()) as ApiEventDefinition
 
                     // Updating the event definition by ID
-                    const updateUrl = `${this.baseUrl}/api/projects/${projectId}/event_definitions/${eventDef.id}/`
+                    const updateUrl = `${this.baseUrl}/v1/projects/${projectId}/event_definitions/${eventDef.id}/`
 
                     const updateResponse = await this.fetch(updateUrl, {
                         method: 'PATCH',
@@ -745,7 +745,7 @@ export class ApiClient {
                         type: type ?? 'event',
                         group_type_index: groupTypeIndex,
                     })
-                    const findUrl = `${this.baseUrl}/api/projects/${projectId}/property_definitions/?${findParams}`
+                    const findUrl = `${this.baseUrl}/v1/projects/${projectId}/property_definitions/?${findParams}`
 
                     const findResponse = await this.fetch(findUrl)
 
@@ -765,7 +765,7 @@ export class ApiClient {
                         }
                     }
 
-                    const updateUrl = `${this.baseUrl}/api/projects/${projectId}/property_definitions/${propertyDef.id}/`
+                    const updateUrl = `${this.baseUrl}/v1/projects/${projectId}/property_definitions/${propertyDef.id}/`
 
                     const updateResponse = await this.fetch(updateUrl, {
                         method: 'PATCH',
@@ -793,7 +793,7 @@ export class ApiClient {
             }): Promise<Result<Schemas.ProjectBackwardCompat>> => {
                 // path_cleaning_filters is a whole-list field on the project — the caller is
                 // responsible for having merged the desired rules into `filters` first.
-                return this.fetchJson<Schemas.ProjectBackwardCompat>(`${this.baseUrl}/api/projects/${projectId}/`, {
+                return this.fetchJson<Schemas.ProjectBackwardCompat>(`${this.baseUrl}/v1/projects/${projectId}/`, {
                     method: 'PATCH',
                     body: JSON.stringify({ path_cleaning_filters: filters }),
                 })
@@ -805,7 +805,7 @@ export class ApiClient {
         return {
             get: async ({ experimentId }: { experimentId: number }): Promise<Result<Experiment>> => {
                 return this.fetchJson<Experiment>(
-                    `${this.baseUrl}/api/projects/${projectId}/experiments/${experimentId}/`
+                    `${this.baseUrl}/v1/projects/${projectId}/experiments/${experimentId}/`
                 )
             },
 
@@ -869,7 +869,7 @@ export class ApiClient {
                 }
 
                 const result = await this.fetchJson<ExperimentExposureQueryResponse>(
-                    `${this.baseUrl}/api/environments/${projectId}/query/`,
+                    `${this.baseUrl}/v1/environments/${projectId}/query/`,
                     {
                         method: 'POST',
                         body: JSON.stringify(queryRequest),
@@ -966,7 +966,7 @@ export class ApiClient {
                             }
 
                             const result = await this.fetchJson<unknown>(
-                                `${this.baseUrl}/api/environments/${projectId}/query/`,
+                                `${this.baseUrl}/v1/environments/${projectId}/query/`,
                                 {
                                     method: 'POST',
                                     body: JSON.stringify(queryRequest),
@@ -996,7 +996,7 @@ export class ApiClient {
                             }
 
                             const result = await this.fetchJson<unknown>(
-                                `${this.baseUrl}/api/environments/${projectId}/query/`,
+                                `${this.baseUrl}/v1/environments/${projectId}/query/`,
                                 {
                                     method: 'POST',
                                     body: JSON.stringify(queryRequest),
@@ -1052,7 +1052,7 @@ export class ApiClient {
                     // variables_override / filters_override from query_params. So
                     // short_id resolution + override application happen in one hop.
                     params.set('short_id', insightId)
-                    const url = `${this.baseUrl}/api/projects/${projectId}/insights/?${params}`
+                    const url = `${this.baseUrl}/v1/projects/${projectId}/insights/?${params}`
 
                     const result = await this.fetchJson<{ results: Schemas.Insight[] }>(url)
 
@@ -1075,12 +1075,12 @@ export class ApiClient {
 
                 const queryString = params.toString() ? `?${params}` : ''
                 return this.fetchJson<Schemas.Insight>(
-                    `${this.baseUrl}/api/projects/${projectId}/insights/${insightId}/${queryString}`
+                    `${this.baseUrl}/v1/projects/${projectId}/insights/${insightId}/${queryString}`
                 )
             },
 
             create: async ({ data }: { data: Record<string, any> }): Promise<Result<Schemas.Insight>> => {
-                return this.fetchJson<Schemas.Insight>(`${this.baseUrl}/api/projects/${projectId}/insights/`, {
+                return this.fetchJson<Schemas.Insight>(`${this.baseUrl}/v1/projects/${projectId}/insights/`, {
                     method: 'POST',
                     body: JSON.stringify({ ...data, saved: true }),
                 })
@@ -1088,7 +1088,7 @@ export class ApiClient {
 
             update: async ({ insightId, data }: { insightId: number; data: any }): Promise<Result<Schemas.Insight>> => {
                 return this.fetchJson<Schemas.Insight>(
-                    `${this.baseUrl}/api/projects/${projectId}/insights/${insightId}/`,
+                    `${this.baseUrl}/v1/projects/${projectId}/insights/${insightId}/`,
                     {
                         method: 'PATCH',
                         body: JSON.stringify(data),
@@ -1103,7 +1103,7 @@ export class ApiClient {
             }): Promise<Result<{ success: boolean; message: string }>> => {
                 try {
                     const response = await this.fetch(
-                        `${this.baseUrl}/api/projects/${projectId}/insights/${insightId}/`,
+                        `${this.baseUrl}/v1/projects/${projectId}/insights/${insightId}/`,
                         {
                             method: 'PATCH',
                             body: JSON.stringify({ deleted: true }),
@@ -1142,7 +1142,7 @@ export class ApiClient {
                     }
                     const qStr = qs.toString()
                     const result = await this.fetchJson<{ results: Schemas.Insight[] }>(
-                        `${this.baseUrl}/api/projects/${projectId}/insights/${qStr ? `?${qStr}` : ''}`
+                        `${this.baseUrl}/v1/projects/${projectId}/insights/${qStr ? `?${qStr}` : ''}`
                     )
                     if (!result.success) {
                         throw result.error
@@ -1154,7 +1154,7 @@ export class ApiClient {
             },
 
             query: async ({ query }: { query: Record<string, any> }): Promise<Result<QueryEndpointResponse>> => {
-                const url = `${this.baseUrl}/api/environments/${projectId}/query/`
+                const url = `${this.baseUrl}/v1/environments/${projectId}/query/`
 
                 return this.fetchJson<QueryEndpointResponse>(url, {
                     method: 'POST',
@@ -1186,7 +1186,7 @@ export class ApiClient {
                     ch_table_names?: string[] | null
                 }>
             > => {
-                const url = `${this.baseUrl}/api/environments/${projectId}/query/`
+                const url = `${this.baseUrl}/v1/environments/${projectId}/query/`
                 const queryBody: Record<string, unknown> = { kind: 'InsightsQLMetadata', language, query }
                 if (connectionId) {
                     queryBody.connectionId = connectionId
@@ -1204,7 +1204,7 @@ export class ApiClient {
                 }
 
                 const result = await this.fetchJson<unknown[]>(
-                    `${this.baseUrl}/api/environments/${projectId}/max_tools/create_and_query_insight/`,
+                    `${this.baseUrl}/v1/environments/${projectId}/max_tools/create_and_query_insight/`,
                     {
                         method: 'POST',
                         body: JSON.stringify(requestBody),
@@ -1229,7 +1229,7 @@ export class ApiClient {
     }
 
     query({ projectId }: { projectId: string }): Endpoint {
-        const queryUrl = `${this.baseUrl}/api/environments/${projectId}/query/`
+        const queryUrl = `${this.baseUrl}/v1/environments/${projectId}/query/`
 
         // Bridge assistant-facing schema shape to the query API shape.
         // The LLM emits `filterGroup` as a flat array; the API expects a nested PropertyGroupFilter.
@@ -1276,7 +1276,7 @@ export class ApiClient {
                 offset?: number
             }>({
                 method: 'POST',
-                path: `/api/environments/${projectId}/query/`,
+                path: `/v1/environments/${projectId}/query/`,
                 body: { query: wrappedQuery },
             })
 
@@ -1347,7 +1347,7 @@ export class ApiClient {
                     warnings?: (DataWarehouseSyncWarning | AccessControlFilterWarning)[] | null
                 }>({
                     method: 'POST',
-                    path: `/api/environments/${projectId}/query/`,
+                    path: `/v1/environments/${projectId}/query/`,
                     body: { query: normalizeQuery(query) },
                 })
             },
@@ -1400,7 +1400,7 @@ export class ApiClient {
     users(): Endpoint {
         return {
             me: async (): Promise<Result<ApiUser>> => {
-                const result = await this.fetchJson<ApiUser>(`${this.baseUrl}/api/users/@me/`)
+                const result = await this.fetchJson<ApiUser>(`${this.baseUrl}/v1/users/@me/`)
 
                 if (!result.success) {
                     return result
@@ -1443,7 +1443,7 @@ export class ApiClient {
                     }
                 }
 
-                const url = `${this.baseUrl}/api/projects/${projectId}/search/${searchParams.toString() ? `?${searchParams}` : ''}`
+                const url = `${this.baseUrl}/v1/projects/${projectId}/search/${searchParams.toString() ? `?${searchParams}` : ''}`
 
                 return this.fetchJson<SearchResponse>(url)
             },
@@ -1451,7 +1451,7 @@ export class ApiClient {
     }
 
     async getGroupTypes(projectId: string): Promise<GroupType[]> {
-        const result = await this.fetchJson<GroupType[]>(`${this.baseUrl}/api/projects/${projectId}/groups_types/`)
+        const result = await this.fetchJson<GroupType[]>(`${this.baseUrl}/v1/projects/${projectId}/groups_types/`)
         if (!result.success) {
             throw new Error(result.error.message)
         }

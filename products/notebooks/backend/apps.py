@@ -25,7 +25,7 @@ class NotebooksConfig(AppConfig):
             "notebooks",
             "Notebook",
             lookup_field="short_id",
-            undo_message="Send PATCH /api/projects/@current/notebooks/{id} with deleted=false.",
+            undo_message="Send PATCH /v1/projects/@current/notebooks/{id} with deleted=false.",
         )
 
         def _post_delete(context, notebook):

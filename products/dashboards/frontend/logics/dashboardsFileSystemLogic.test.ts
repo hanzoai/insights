@@ -19,8 +19,8 @@ describe('dashboardsFileSystemLogic', () => {
 
     useMocks({
         get: {
-            '/api/environments/:team_id/dashboards/': () => [200, { count: 0, results: [], next: null }],
-            '/api/projects/:team_id/dashboards/': () => [200, { count: 0, results: [], next: null }],
+            '/v1/environments/:team_id/dashboards/': () => [200, { count: 0, results: [], next: null }],
+            '/v1/projects/:team_id/dashboards/': () => [200, { count: 0, results: [], next: null }],
         },
     })
 

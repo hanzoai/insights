@@ -18,7 +18,7 @@ class TestQuickFilters(APIBaseTest):
         contexts: list[str] | None = None,
     ) -> tuple[dict, QuickFilter]:
         response = self.client.post(
-            f"/api/environments/{self.team.id}/quick_filters/",
+            f"/v1/environments/{self.team.id}/quick_filters/",
             {
                 "name": name,
                 "property_name": property_name,
@@ -46,7 +46,7 @@ class TestQuickFilters(APIBaseTest):
         self._create_quick_filter("Filter 1", "$prop1")
         self._create_quick_filter("Filter 2", "$prop2")
 
-        response = self.client.get(f"/api/environments/{self.team.id}/quick_filters/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/quick_filters/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 2)
@@ -56,12 +56,12 @@ class TestQuickFilters(APIBaseTest):
         self._create_quick_filter("Logs Filter", "$logs_prop", contexts=["logs-filters"])
 
         # Unfiltered returns both
-        response = self.client.get(f"/api/environments/{self.team.id}/quick_filters/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/quick_filters/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 2)
 
         # Filtered by context returns only the matching one
-        response = self.client.get(f"/api/environments/{self.team.id}/quick_filters/?context=dashboards")
+        response = self.client.get(f"/v1/environments/{self.team.id}/quick_filters/?context=dashboards")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(len(results), 1)
@@ -70,7 +70,7 @@ class TestQuickFilters(APIBaseTest):
     def test_delete_quick_filter(self):
         _, quick_filter = self._create_quick_filter()
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/quick_filters/{quick_filter.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/quick_filters/{quick_filter.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(QuickFilter.objects.filter(id=quick_filter.id).exists())
@@ -105,7 +105,7 @@ class TestQuickFilters(APIBaseTest):
             quick_filter_ids=[],
         )
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/quick_filters/{qf1.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/quick_filters/{qf1.id}/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         dashboard_1.refresh_from_db()
@@ -127,7 +127,7 @@ class TestQuickFilters(APIBaseTest):
         dashboard = Dashboard.objects.create(team=other_team, name="Other Dashboard")
 
         response = self.client.patch(
-            f"/api/environments/{other_team.id}/dashboards/{dashboard.id}/",
+            f"/v1/environments/{other_team.id}/dashboards/{dashboard.id}/",
             {"quick_filter_ids": [str(quick_filter.id)]},
             format="json",
         )

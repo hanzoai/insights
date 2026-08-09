@@ -9,17 +9,17 @@ The `/api/feature_flag/local_evaluation` endpoint was historically served by a d
 ```text
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Django API                               │
-│          (routed via Contour from /api/* paths)                 │
+│          (routed via Contour from /v1/* paths)                 │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  Project-scoped (CRUD + management)                             │
-│  /api/projects/{id}/feature_flags/                              │
+│  /v1/projects/{id}/feature_flags/                              │
 │                                                                 │
 │  Organization-scoped (cross-team ops)                           │
-│  /api/organizations/{id}/feature_flags/                         │
+│  /v1/organizations/{id}/feature_flags/                         │
 │                                                                 │
 │  Legacy (derives team from user session)                        │
-│  /api/feature_flag/                                             │
+│  /v1/feature_flag/                                             │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
          │                          │
@@ -47,7 +47,7 @@ All in `insights/api/feature_flag.py` unless noted otherwise.
 
 ### CRUD operations
 
-Standard REST on `/api/projects/{id}/feature_flags/`. Hard `DELETE` is blocked — use `PATCH` with `deleted: true` for soft delete.
+Standard REST on `/v1/projects/{id}/feature_flags/`. Hard `DELETE` is blocked — use `PATCH` with `deleted: true` for soft delete.
 
 ### Custom actions
 
@@ -65,8 +65,8 @@ Standard REST on `/api/projects/{id}/feature_flags/`. Hard `DELETE` is blocked �
 
 | Method | URL                                                 | Description                                     |
 | ------ | --------------------------------------------------- | ----------------------------------------------- |
-| `GET`  | `/api/organizations/{id}/feature_flags/{key}/`      | Get a flag by key across all accessible teams   |
-| `POST` | `/api/organizations/{id}/feature_flags/copy_flags/` | Copy a flag from one project to target projects |
+| `GET`  | `/v1/organizations/{id}/feature_flags/{key}/`      | Get a flag by key across all accessible teams   |
+| `POST` | `/v1/organizations/{id}/feature_flags/copy_flags/` | Copy a flag from one project to target projects |
 
 `copy_flags` requires editor access to `feature_flag` in each target project, not just visibility.
 A caller who can see a project but can't edit flags there gets a `failed` entry for that target instead of a copy.

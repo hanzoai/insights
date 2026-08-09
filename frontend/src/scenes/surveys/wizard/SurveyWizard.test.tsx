@@ -53,12 +53,12 @@ describe('SurveyWizard', () => {
 
         useMocks({
             get: {
-                '/api/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
-                '/api/projects/:team/surveys/test-survey/': () => [200, createGuidedSurvey()],
-                '/api/projects/:team/surveys/responses_count': () => [200, {}],
+                '/v1/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
+                '/v1/projects/:team/surveys/test-survey/': () => [200, createGuidedSurvey()],
+                '/v1/projects/:team/surveys/responses_count': () => [200, {}],
             },
             patch: {
-                '/api/environments/:team_id/add_product_intent/': () => [200, {}],
+                '/v1/environments/:team_id/add_product_intent/': () => [200, {}],
             },
         })
 

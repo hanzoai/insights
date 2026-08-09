@@ -230,14 +230,14 @@ describe('llmEvaluationLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:teamId/llm_analytics/provider_keys/': { results: mockProviderKeys },
-                '/api/environments/:teamId/llm_analytics/evaluation_config/': {
+                '/v1/environments/:teamId/llm_analytics/provider_keys/': { results: mockProviderKeys },
+                '/v1/environments/:teamId/llm_analytics/evaluation_config/': {
                     active_provider_key: null,
                     created_at: '2024-01-01T00:00:00Z',
                     updated_at: '2024-01-01T00:00:00Z',
                 },
-                '/api/projects/:teamId/evaluations/:id/': mockEvaluation,
-                '/api/environments/:teamId/llm_analytics/models/': {
+                '/v1/projects/:teamId/evaluations/:id/': mockEvaluation,
+                '/v1/environments/:teamId/llm_analytics/models/': {
                     models: [{ id: 'gpt-5-mini' }, { id: 'gpt-5' }],
                 },
             },
@@ -1408,7 +1408,7 @@ return result`,
             let requestBody: Record<string, unknown> | undefined
             useMocks({
                 post: {
-                    '/api/projects/:teamId/evaluations/test_hog/': async ({ request }) => {
+                    '/v1/projects/:teamId/evaluations/test_hog/': async ({ request }) => {
                         requestBody = (await request.json()) as Record<string, unknown>
                         return {
                             results: [
@@ -1458,7 +1458,7 @@ return result`,
             })
             useMocks({
                 post: {
-                    '/api/projects/:teamId/evaluations/test_hog/': () => pendingResponse,
+                    '/v1/projects/:teamId/evaluations/test_hog/': () => pendingResponse,
                 },
             })
             logic = llmEvaluationLogic({ evaluationId: 'new' })
@@ -1498,7 +1498,7 @@ return result`,
             let evaluationCreateCount = 0
             useMocks({
                 post: {
-                    '/api/projects/:teamId/evaluations/': () => {
+                    '/v1/projects/:teamId/evaluations/': () => {
                         evaluationCreateCount += 1
                         return mockEvaluation
                     },
@@ -1553,7 +1553,7 @@ return result`,
 
             useMocks({
                 get: {
-                    '/api/projects/:teamId/llm_analytics/evaluation_reports/': () => {
+                    '/v1/projects/:teamId/llm_analytics/evaluation_reports/': () => {
                         reportListRequestCount += 1
                         return reportListRequestCount === 1
                             ? initialReportsPromise
@@ -1561,14 +1561,14 @@ return result`,
                     },
                 },
                 patch: {
-                    '/api/projects/:teamId/evaluations/:id/': () => mockEvaluation,
-                    '/api/projects/:teamId/llm_analytics/evaluation_reports/:id/': () => {
+                    '/v1/projects/:teamId/evaluations/:id/': () => mockEvaluation,
+                    '/v1/projects/:teamId/llm_analytics/evaluation_reports/:id/': () => {
                         reportWriteCount += 1
                         return mockEvaluationReport
                     },
                 },
                 post: {
-                    '/api/projects/:teamId/llm_analytics/evaluation_reports/': () => {
+                    '/v1/projects/:teamId/llm_analytics/evaluation_reports/': () => {
                         reportWriteCount += 1
                         return mockEvaluationReport
                     },
@@ -1609,23 +1609,23 @@ return result`,
 
             useMocks({
                 get: {
-                    '/api/projects/:teamId/llm_analytics/evaluation_reports/': () => {
+                    '/v1/projects/:teamId/llm_analytics/evaluation_reports/': () => {
                         reportListCount += 1
                         return { results: [mockEvaluationReport] }
                     },
                 },
                 post: {
-                    '/api/projects/:teamId/evaluations/': () => {
+                    '/v1/projects/:teamId/evaluations/': () => {
                         evaluationCreateCount += 1
                         return mockSentimentEvaluation
                     },
-                    '/api/projects/:teamId/llm_analytics/evaluation_reports/': () => {
+                    '/v1/projects/:teamId/llm_analytics/evaluation_reports/': () => {
                         reportCreateCount += 1
                         return mockEvaluationReport
                     },
                 },
                 patch: {
-                    '/api/projects/:teamId/llm_analytics/evaluation_reports/:id/': () => {
+                    '/v1/projects/:teamId/llm_analytics/evaluation_reports/:id/': () => {
                         reportUpdateCount += 1
                         return mockEvaluationReport
                     },
@@ -1661,16 +1661,16 @@ return result`,
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/environments/:teamId/llm_analytics/provider_keys/': { results: mockProviderKeys },
-                    '/api/environments/:teamId/llm_analytics/evaluation_config/': {
+                    '/v1/environments/:teamId/llm_analytics/provider_keys/': { results: mockProviderKeys },
+                    '/v1/environments/:teamId/llm_analytics/evaluation_config/': {
                         active_provider_key: null,
                         created_at: '2024-01-01T00:00:00Z',
                         updated_at: '2024-01-01T00:00:00Z',
                     },
-                    '/api/projects/:teamId/evaluations/:id/': mockEvaluation,
+                    '/v1/projects/:teamId/evaluations/:id/': mockEvaluation,
                 },
                 patch: {
-                    '/api/projects/:teamId/evaluations/:id/': () => [
+                    '/v1/projects/:teamId/evaluations/:id/': () => [
                         400,
                         {
                             enabled: ['Add a provider API key to enable this evaluation.'],

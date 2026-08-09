@@ -76,7 +76,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
     # List & retrieve domains
 
     def test_can_list_and_retrieve_domains(self):
-        response = self.client.get("/api/organizations/@current/domains")
+        response = self.client.get("/v1/organizations/@current/domains")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(response_data["count"], 1)
@@ -89,7 +89,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         self.assertEqual(item["sso_enforcement"], "")
         self.assertRegex(item["verification_challenge"], r"[0-9A-Za-z_-]{32}")
 
-        retrieve_response = self.client.get(f"/api/organizations/{self.organization.id}/domains/{self.domain.id}")
+        retrieve_response = self.client.get(f"/v1/organizations/{self.organization.id}/domains/{self.domain.id}")
         self.assertEqual(retrieve_response.status_code, status.HTTP_200_OK)
         self.assertEqual(retrieve_response.json(), response_data["results"][0])
 
@@ -97,11 +97,11 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
 
-        response = self.client.get(f"/api/organizations/@current/domains/{self.another_domain.id}")
+        response = self.client.get(f"/v1/organizations/@current/domains/{self.another_domain.id}")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.json(), self.not_found_response())
 
-        response = self.client.get(f"/api/organizations/{self.another_org.id}/domains/{self.another_domain.id}")
+        response = self.client.get(f"/v1/organizations/{self.another_org.id}/domains/{self.another_domain.id}")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response.json(), self.permission_denied_response())
 
@@ -118,7 +118,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
 
         with self.is_cloud(True):
             response = self.client.post(
-                "/api/organizations/@current/domains/",
+                "/v1/organizations/@current/domains/",
                 {
                     "domain": "the.hanzo.ai",
                     "verified_at": "2022-01-01T14:25:25.000Z",  # ignore me
@@ -158,7 +158,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
 
         with self.is_cloud(True):
             response = self.client.post(
-                "/api/organizations/@current/domains/",
+                "/v1/organizations/@current/domains/",
                 {
                     "domain": "the.hanzo.ai",
                     "verified_at": "2022-01-01T14:25:25.000Z",  # ignore me
@@ -175,7 +175,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
 
-        response = self.client.post("/api/organizations/@current/domains/", {"domain": "i-registered-first.com"})
+        response = self.client.post("/v1/organizations/@current/domains/", {"domain": "i-registered-first.com"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -196,7 +196,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
 
-        response = self.client.post("/api/organizations/@current/domains/", {"domain": "test@hanzo.ai"})
+        response = self.client.post("/v1/organizations/@current/domains/", {"domain": "test@hanzo.ai"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -228,7 +228,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         )
 
         with freeze_time("2021-08-08T20:20:08Z"):
-            response = self.client.post(f"/api/organizations/@current/domains/{self.domain.id}/verify")
+            response = self.client.post(f"/v1/organizations/@current/domains/{self.domain.id}/verify")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.domain.refresh_from_db()
@@ -255,7 +255,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
 
         with freeze_time("2021-10-10T10:10:10Z"):
             with self.is_cloud(True):
-                response = self.client.post(f"/api/organizations/@current/domains/{self.domain.id}/verify")
+                response = self.client.post(f"/v1/organizations/@current/domains/{self.domain.id}/verify")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.domain.refresh_from_db()
@@ -276,7 +276,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
 
         with freeze_time("2021-10-10T10:10:10Z"):
             with self.is_cloud(True):
-                response = self.client.post(f"/api/organizations/@current/domains/{self.domain.id}/verify")
+                response = self.client.post(f"/v1/organizations/@current/domains/{self.domain.id}/verify")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.domain.refresh_from_db()
@@ -307,7 +307,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
 
         with freeze_time("2021-10-10T10:10:10Z"):
             with self.is_cloud(True):
-                response = self.client.post(f"/api/organizations/@current/domains/{self.domain.id}/verify")
+                response = self.client.post(f"/v1/organizations/@current/domains/{self.domain.id}/verify")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.domain.refresh_from_db()
@@ -325,7 +325,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         self.domain.verified_at = timezone.now()
         self.domain.save()
 
-        response = self.client.post(f"/api/organizations/@current/domains/{self.domain.id}/verify")
+        response = self.client.post(f"/v1/organizations/@current/domains/{self.domain.id}/verify")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -339,7 +339,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
 
     def test_only_admin_can_create_verified_domains(self):
         count = OrganizationDomain.objects.count()
-        response = self.client.post("/api/organizations/@current/domains/", {"domain": "evil.hanzo.ai"})
+        response = self.client.post("/v1/organizations/@current/domains/", {"domain": "evil.hanzo.ai"})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.json(),
@@ -349,7 +349,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         self.assertEqual(OrganizationDomain.objects.count(), count)
 
     def test_only_admin_can_request_verification(self):
-        response = self.client.post(f"/api/organizations/@current/domains/{self.domain.id}/verify")
+        response = self.client.post(f"/v1/organizations/@current/domains/{self.domain.id}/verify")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.json(),
@@ -372,7 +372,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         self.domain.save()
 
         response = self.client.patch(
-            f"/api/organizations/@current/domains/{self.domain.id}/",
+            f"/v1/organizations/@current/domains/{self.domain.id}/",
             {"sso_enforcement": "google-oauth2", "jit_provisioning_enabled": True},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -389,7 +389,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
 
         # SSO Enforcement
         response = self.client.patch(
-            f"/api/organizations/@current/domains/{self.domain.id}/",
+            f"/v1/organizations/@current/domains/{self.domain.id}/",
             {"sso_enforcement": "google-oauth2"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -407,7 +407,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
 
         # JIT Provisioning
         response = self.client.patch(
-            f"/api/organizations/@current/domains/{self.domain.id}/",
+            f"/v1/organizations/@current/domains/{self.domain.id}/",
             {"jit_provisioning_enabled": True},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -428,7 +428,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         self.organization_membership.save()
 
         response = self.client.patch(
-            f"/api/organizations/@current/domains/{self.domain.id}/",
+            f"/v1/organizations/@current/domains/{self.domain.id}/",
             {"verified_at": "2020-01-01T12:12:12Z", "verification_challenge": "123"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -441,7 +441,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         original_domain = self.domain.domain
 
         response = self.client.patch(
-            f"/api/organizations/@current/domains/{self.domain.id}/",
+            f"/v1/organizations/@current/domains/{self.domain.id}/",
             {"domain": "evil.com"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -457,7 +457,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         original_domain = self.domain.domain
 
         response = self.client.patch(
-            f"/api/organizations/@current/domains/{self.domain.id}/",
+            f"/v1/organizations/@current/domains/{self.domain.id}/",
             {"domain": "victim-corp.com"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -471,7 +471,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         self.domain.save()
 
         response = self.client.patch(
-            f"/api/organizations/{self.organization.id}/domains/{self.domain.id}/",
+            f"/v1/organizations/{self.organization.id}/domains/{self.domain.id}/",
             {"sso_enforcement": "google-oauth2", "jit_provisioning_enabled": True},
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -490,7 +490,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         self.another_domain.save()
 
         response = self.client.patch(
-            f"/api/organizations/{self.another_org.id}/domains/{self.another_domain.id}/",
+            f"/v1/organizations/{self.another_org.id}/domains/{self.another_domain.id}/",
             {"sso_enforcement": "google-oauth2", "jit_provisioning_enabled": True},
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -506,7 +506,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
 
-        response = self.client.delete(f"/api/organizations/@current/domains/{self.domain.id}")
+        response = self.client.delete(f"/v1/organizations/@current/domains/{self.domain.id}")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(response.content, b"")
 
@@ -556,7 +556,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
                 organization=self.organization, domain=domain, verified_at=timezone.now() if verified else None
             )
 
-        response = self.client.delete(f"/api/organizations/@current/domains/{domains[target].id}")
+        response = self.client.delete(f"/v1/organizations/@current/domains/{domains[target].id}")
 
         self.assertEqual(response.status_code, expected_status, response.content)
         blocked = expected_status == status.HTTP_400_BAD_REQUEST
@@ -565,7 +565,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
             self.assertEqual(response.json()["code"], "would_block_self")
 
     def test_only_admin_can_delete_domain(self):
-        response = self.client.delete(f"/api/organizations/@current/domains/{self.domain.id}")
+        response = self.client.delete(f"/v1/organizations/@current/domains/{self.domain.id}")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.json(),
@@ -577,7 +577,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
 
-        response = self.client.delete(f"/api/organizations/{self.another_org.id}/domains/{self.another_domain.id}")
+        response = self.client.delete(f"/v1/organizations/{self.another_org.id}/domains/{self.another_domain.id}")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response.json(), self.permission_denied_response())
         self.another_domain.refresh_from_db()

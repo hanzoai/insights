@@ -122,10 +122,10 @@ describe('experimentMetricsLogic', () => {
         // Default handlers so every afterMount-driven load/trigger has a mock; tests override per-case.
         useMocks({
             get: {
-                '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
+                '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
             },
             post: {
-                '/api/projects/:team_id/experiments/:id/metrics_recalculation/': () => [201, pendingRecalculation],
+                '/v1/projects/:team_id/experiments/:id/metrics_recalculation/': () => [201, pendingRecalculation],
             },
         })
         initKeaTests()
@@ -159,7 +159,7 @@ describe('experimentMetricsLogic', () => {
             const latestMock = jest.fn(() => [200, completedRecalculation])
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': latestMock,
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': latestMock,
                 },
             })
             logic = experimentMetricsLogic({ experiment: draft })
@@ -177,7 +177,7 @@ describe('experimentMetricsLogic', () => {
             const latestMock = jest.fn(() => [200, completedRecalculation])
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': latestMock,
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': latestMock,
                 },
             })
             logic = experimentMetricsLogic({ experiment: stopped })
@@ -192,7 +192,7 @@ describe('experimentMetricsLogic', () => {
         it('loads the latest completed recalculation and maps results by metric position', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
                         200,
                         completedRecalculation,
                     ],
@@ -237,7 +237,7 @@ describe('experimentMetricsLogic', () => {
             }
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
                         200,
                         discoveryFailure,
                     ],
@@ -276,14 +276,14 @@ describe('experimentMetricsLogic', () => {
             }
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/:recalc_id/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/:recalc_id/': () => [
                         200,
                         inProgressWithFailures,
                     ],
                 },
                 post: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/': () => [201, manualPending],
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/': () => [201, manualPending],
                 },
             })
             jest.useFakeTimers()
@@ -304,7 +304,7 @@ describe('experimentMetricsLogic', () => {
         it('surfaces per-metric errors when the latest run loaded on mount is a partial failure', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
                         200,
                         partialFailureRecalculation,
                     ],
@@ -323,13 +323,13 @@ describe('experimentMetricsLogic', () => {
         it('shows no error toast on 404 (a fresh recalc is triggered instead)', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
                         404,
                         { detail: 'No completed recalculation found' },
                     ],
                 },
                 post: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/': () => [201, pendingRecalculation],
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/': () => [201, pendingRecalculation],
                 },
             })
             mountLogic()
@@ -345,7 +345,7 @@ describe('experimentMetricsLogic', () => {
         it('toggles recalculationLoading true while in flight then false when done', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
                         200,
                         completedRecalculation,
                     ],
@@ -364,11 +364,11 @@ describe('experimentMetricsLogic', () => {
             let capturedBody: any
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
                 },
                 post: {
                     // Return a terminal run so triggerRecalculation finishes without arming a poll timer.
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/': async ({ request }) => {
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/': async ({ request }) => {
                         capturedBody = await request.json()
                         return [201, completedRecalculation2]
                     },
@@ -385,16 +385,16 @@ describe('experimentMetricsLogic', () => {
             const createMock = jest.fn(() => [201, pendingRecalculation])
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
                         200,
                         { ...completedRecalculation, active_run: { id: 'recalc-2', status: 'in_progress' } },
                     ],
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/:recalc_id/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/:recalc_id/': () => [
                         200,
                         completedRecalculation2,
                     ],
                 },
-                post: { '/api/projects/:team_id/experiments/:id/metrics_recalculation/': createMock },
+                post: { '/v1/projects/:team_id/experiments/:id/metrics_recalculation/': createMock },
             })
             jest.useFakeTimers()
             mountLogic()
@@ -424,11 +424,11 @@ describe('experimentMetricsLogic', () => {
             const retrieveMock = jest.fn(() => [200, { ...pendingRecalculation, status: 'in_progress' }])
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
                         200,
                         { ...completedRecalculation, active_run: { id: 'recalc-2', status: 'in_progress' } },
                     ],
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/:recalc_id/': retrieveMock,
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/:recalc_id/': retrieveMock,
                 },
             })
             jest.useFakeTimers()
@@ -452,7 +452,7 @@ describe('experimentMetricsLogic', () => {
             // resolved, so neither the config-change heal path nor the timeseries-fallback path fires.
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
                         200,
                         freshCompletedRecalculation,
                     ],
@@ -469,14 +469,14 @@ describe('experimentMetricsLogic', () => {
             let capturedBody: any
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
                         200,
                         timeseriesFallbackRecalculation,
                     ],
                 },
                 post: {
                     // Return a terminal run so triggerRecalculation finishes without arming a poll timer.
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/': async ({ request }) => {
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/': async ({ request }) => {
                         capturedBody = await request.json()
                         return [201, completedRecalculation2]
                     },
@@ -499,18 +499,18 @@ describe('experimentMetricsLogic', () => {
             const coldRunInProgressEmpty = { ...coldRunPending, status: 'in_progress', results: [] }
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
                         200,
                         timeseriesFallbackRecalculation,
                     ],
                     // The polled cold_run is still in progress with no results yet.
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/:recalc_id/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/:recalc_id/': () => [
                         200,
                         coldRunInProgressEmpty,
                     ],
                 },
                 post: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/': () => [201, coldRunPending],
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/': () => [201, coldRunPending],
                 },
             })
             jest.useFakeTimers()
@@ -530,10 +530,10 @@ describe('experimentMetricsLogic', () => {
         it('starts polling after triggering a non-terminal recalculation', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
                 },
                 post: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/': () => [
                         201,
                         inProgressRecalculation,
                     ],
@@ -547,10 +547,10 @@ describe('experimentMetricsLogic', () => {
         it('does not poll when the triggered recalculation is already terminal', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
                 },
                 post: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/': () => [
                         201,
                         completedRecalculation2,
                     ],
@@ -572,8 +572,8 @@ describe('experimentMetricsLogic', () => {
             const draft = { ...EXPERIMENT, status: undefined, start_date: null, end_date: null } as Experiment
             const createMock = jest.fn(() => [201, pendingRecalculation])
             useMocks({
-                get: { '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}] },
-                post: { '/api/projects/:team_id/experiments/:id/metrics_recalculation/': createMock },
+                get: { '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}] },
+                post: { '/v1/projects/:team_id/experiments/:id/metrics_recalculation/': createMock },
             })
             logic = experimentMetricsLogic({ experiment: draft })
             logic.mount()
@@ -588,8 +588,8 @@ describe('experimentMetricsLogic', () => {
             const stopped = { ...EXPERIMENT, status: undefined, end_date: '2025-01-01T00:00:00Z' } as Experiment
             const createMock = jest.fn(() => [201, pendingRecalculation])
             useMocks({
-                get: { '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}] },
-                post: { '/api/projects/:team_id/experiments/:id/metrics_recalculation/': createMock },
+                get: { '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}] },
+                post: { '/v1/projects/:team_id/experiments/:id/metrics_recalculation/': createMock },
             })
             logic = experimentMetricsLogic({ experiment: stopped })
             logic.mount()
@@ -605,7 +605,7 @@ describe('experimentMetricsLogic', () => {
         it('exposes progress and isRecalculating while a run is in progress', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
                         200,
                         { ...inProgressRecalculation, total_metrics: 5, completed_metrics: 2 },
                     ],
@@ -623,7 +623,7 @@ describe('experimentMetricsLogic', () => {
         it('is not recalculating once the run is completed', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [
                         200,
                         completedRecalculation,
                     ],
@@ -641,7 +641,7 @@ describe('experimentMetricsLogic', () => {
         it('defaults progress to zeroes and lastRefresh to null when there is no recalculation', () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
                 },
             })
             mountLogic()
@@ -661,14 +661,14 @@ describe('experimentMetricsLogic', () => {
             let call = 0
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/:recalc_id/': () => {
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/:recalc_id/': () => {
                         call += 1
                         return [200, call === 1 ? inProgressRecalculation : completedRecalculation2]
                     },
                 },
                 post: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/': () => [
                         201,
                         inProgressRecalculation,
                     ],
@@ -691,14 +691,14 @@ describe('experimentMetricsLogic', () => {
         it('on partial failure: loads successes, sets per-metric errors, and shows a tailored toast', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/:recalc_id/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/:recalc_id/': () => [
                         200,
                         partialFailureRecalculation,
                     ],
                 },
                 post: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/': () => [
                         201,
                         inProgressRecalculation,
                     ],
@@ -725,14 +725,14 @@ describe('experimentMetricsLogic', () => {
             let retrieveCalls = 0
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/:recalc_id/': () => {
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/:recalc_id/': () => {
                         retrieveCalls += 1
                         return [500, {}]
                     },
                 },
                 post: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/': () => [
                         201,
                         inProgressRecalculation,
                     ],
@@ -757,14 +757,14 @@ describe('experimentMetricsLogic', () => {
         it('on a cold_run, applies partial results mid-flight before the run is terminal', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/:recalc_id/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/:recalc_id/': () => [
                         200,
                         coldRunInProgressPartial,
                     ],
                 },
                 post: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/': () => [201, coldRunPending],
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/': () => [201, coldRunPending],
                 },
             })
             jest.useFakeTimers()
@@ -783,14 +783,14 @@ describe('experimentMetricsLogic', () => {
         it('on a non-cold_run, applies partial results mid-flight so refreshed values stream in', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/:recalc_id/': () => [
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}],
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/:recalc_id/': () => [
                         200,
                         manualInProgressPartial,
                     ],
                 },
                 post: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/': () => [201, manualPending],
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/': () => [201, manualPending],
                 },
             })
             jest.useFakeTimers()
@@ -888,7 +888,7 @@ describe('experimentMetricsLogic', () => {
             const latestMock = jest.fn(() => [200, completedRecalculation])
             useMocks({
                 get: {
-                    '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': latestMock,
+                    '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': latestMock,
                 },
             })
             mountLogic()
@@ -913,8 +913,8 @@ describe('experimentMetricsLogic', () => {
             const latestMock = jest.fn(() => [200, completedRecalculation])
             const createMock = jest.fn(() => [201, pendingRecalculation])
             useMocks({
-                get: { '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': latestMock },
-                post: { '/api/projects/:team_id/experiments/:id/metrics_recalculation/': createMock },
+                get: { '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': latestMock },
+                post: { '/v1/projects/:team_id/experiments/:id/metrics_recalculation/': createMock },
             })
             mountLogic()
 
@@ -937,8 +937,8 @@ describe('experimentMetricsLogic', () => {
             })
             const createMock = jest.fn(() => [201, pendingRecalculation])
             useMocks({
-                get: { '/api/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}] },
-                post: { '/api/projects/:team_id/experiments/:id/metrics_recalculation/': createMock },
+                get: { '/v1/projects/:team_id/experiments/:id/metrics_recalculation/latest/': () => [404, {}] },
+                post: { '/v1/projects/:team_id/experiments/:id/metrics_recalculation/': createMock },
             })
             mountLogic()
 

@@ -468,7 +468,7 @@ def _get_bearer_token(scope: ASGIMessage) -> str | None:
 
 def _match_event_ingest_route(path: str) -> EventIngestRoute | None:
     # This runs as an ASGI wrapper, above Django's middleware, so a sandbox still posting
-    # to /api/ has not been rewritten yet — spell it the one way with the same function.
+    # to /v1/ has not been rewritten yet — spell it the one way with the same function.
     route_match = TASK_RUN_EVENT_INGEST_ROUTE.match(canonical(path))
     if route_match is None:
         return None

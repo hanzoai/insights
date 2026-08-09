@@ -39,8 +39,8 @@ const meta: Meta<{ width: number }> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/notebooks/recording_comments': { results: [] },
-                '/api/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
+                '/v1/projects/:team_id/notebooks/recording_comments': { results: [] },
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
                     if (new URL(request.url).searchParams.get('source') === 'blob_v2') {
                         return new HttpResponse(lateFullSnapshotAsJSONLines(LATE_SNAPSHOT_BASE, 60000))
                     }
@@ -58,10 +58,10 @@ const meta: Meta<{ width: number }> = {
                         },
                     ]
                 },
-                '/api/environments/:team_id/session_recordings/:id': () => [200, lateRecordingMeta],
+                '/v1/environments/:team_id/session_recordings/:id': () => [200, lateRecordingMeta],
             },
             post: {
-                '/api/environments/:team_id/query/:kind': async ({ request }) => {
+                '/v1/environments/:team_id/query/:kind': async ({ request }) => {
                     const body = (await request.json()) as Record<string, any>
                     if (body.query.kind === 'EventsQuery') {
                         return [200, recordingEventsJson]

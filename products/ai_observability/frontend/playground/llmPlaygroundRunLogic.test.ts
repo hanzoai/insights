@@ -26,13 +26,13 @@ describe('llmPlaygroundRunLogic', () => {
         setPlaygroundAccessLevel(AccessControlLevel.Editor)
         useMocks({
             get: {
-                '/api/llm_proxy/models/': [
+                '/v1/llm_proxy/models/': [
                     { id: 'gpt-5-mini', name: 'GPT-5 Mini', provider: 'OpenAI', description: '' },
                 ],
-                '/api/environments/:team_id/llm_analytics/evaluation_config/': {
+                '/v1/environments/:team_id/llm_analytics/evaluation_config/': {
                     active_provider_key: null,
                 },
-                '/api/environments/:team_id/llm_analytics/provider_keys/': {
+                '/v1/environments/:team_id/llm_analytics/provider_keys/': {
                     results: [],
                 },
             },

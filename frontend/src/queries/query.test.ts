@@ -14,7 +14,7 @@ describe('query', () => {
     beforeEach(() => {
         useMocks({
             post: {
-                '/api/environments/:team_id/query/:kind': async ({ request }) => {
+                '/v1/environments/:team_id/query/:kind': async ({ request }) => {
                     const data = (await request.json()) as any
                     if (data.query?.kind === 'InsightsQLQuery') {
                         return [

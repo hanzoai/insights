@@ -445,10 +445,10 @@ export const queryPerformanceLogic = kea<queryPerformanceLogicType>([
                     if (values.search) {
                         params.append('search', values.search)
                     }
-                    return await api.get(`api/debug_ch_queries/precomputation_teams/?${params.toString()}`)
+                    return await api.get(`v1/debug_ch_queries/precomputation_teams/?${params.toString()}`)
                 },
                 setPrecomputation: async ({ teamId, enabled }) => {
-                    const updated: PrecomputationTeam = await api.create('api/debug_ch_queries/precomputation_teams/', {
+                    const updated: PrecomputationTeam = await api.create('v1/debug_ch_queries/precomputation_teams/', {
                         team_id: teamId,
                         experiment_precomputation_enabled: enabled,
                     })
@@ -466,7 +466,7 @@ export const queryPerformanceLogic = kea<queryPerformanceLogicType>([
             null as CacheHealthResponse | null,
             {
                 loadCacheHealth: async () => {
-                    return await api.get('api/debug_ch_queries/cache_health/')
+                    return await api.get('v1/debug_ch_queries/cache_health/')
                 },
             },
         ],
@@ -474,7 +474,7 @@ export const queryPerformanceLogic = kea<queryPerformanceLogicType>([
             null as CacheGrowthResponse | null,
             {
                 loadCacheGrowth: async () => {
-                    return await api.get(`api/debug_ch_queries/cache_growth/?hours=${values.cacheGrowthHoursBack}`)
+                    return await api.get(`v1/debug_ch_queries/cache_growth/?hours=${values.cacheGrowthHoursBack}`)
                 },
             },
         ],
@@ -482,7 +482,7 @@ export const queryPerformanceLogic = kea<queryPerformanceLogicType>([
             null as PrecomputeOverviewResponse | null,
             {
                 loadPrecomputeOverview: async () => {
-                    return await api.get(`api/debug_ch_queries/precompute_overview/?hours=${values.overviewHoursBack}`)
+                    return await api.get(`v1/debug_ch_queries/precompute_overview/?hours=${values.overviewHoursBack}`)
                 },
             },
         ],
@@ -491,7 +491,7 @@ export const queryPerformanceLogic = kea<queryPerformanceLogicType>([
             {
                 loadPrecomputeTimeseries: async () => {
                     return await api.get(
-                        `api/debug_ch_queries/precompute_timeseries/?hours=${values.timeseriesHoursBack}`
+                        `v1/debug_ch_queries/precompute_timeseries/?hours=${values.timeseriesHoursBack}`
                     )
                 },
             },
@@ -518,7 +518,7 @@ export const queryPerformanceLogic = kea<queryPerformanceLogicType>([
                     if (values.exceptionCodeFilter) {
                         params.append('exception_code', values.exceptionCodeFilter)
                     }
-                    return await api.get(`api/debug_ch_queries/slowest_queries/?${params.toString()}`)
+                    return await api.get(`v1/debug_ch_queries/slowest_queries/?${params.toString()}`)
                 },
             },
         ],

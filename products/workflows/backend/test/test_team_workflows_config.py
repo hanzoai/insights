@@ -19,7 +19,7 @@ class TestTeamWorkflowsConfig(APIBaseTest):
         super().setUp()
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
-        self.url = f"/api/environments/{self.team.id}/"
+        self.url = f"/v1/environments/{self.team.id}/"
 
     def test_defaults_to_capture_disabled_when_no_extension_row_exists(self) -> None:
         response = self.client.get(self.url)

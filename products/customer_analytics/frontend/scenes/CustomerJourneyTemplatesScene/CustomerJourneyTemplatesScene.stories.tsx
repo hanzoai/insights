@@ -92,9 +92,9 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                'api/environments/:team_id/customer_profile_configs/': { count: 0, results: [] },
-                'api/environments/:team_id/customer_journeys/': { count: 0, results: [] },
-                'api/environments/:team_id/insights/': SAMPLE_FUNNELS,
+                'v1/environments/:team_id/customer_profile_configs/': { count: 0, results: [] },
+                'v1/environments/:team_id/customer_journeys/': { count: 0, results: [] },
+                'v1/environments/:team_id/insights/': SAMPLE_FUNNELS,
             },
         }),
     ],
@@ -107,7 +107,7 @@ export const TemplatesWithEventsConfigured: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                'api/environments/:team_id/': { ...CONFIGURED_EVENTS },
+                'v1/environments/:team_id/': { ...CONFIGURED_EVENTS },
             },
         })
         return <App />
@@ -122,7 +122,7 @@ export const TemplatesWithoutEventsConfigured: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                'api/environments/:team_id/': { ...EMPTY_EVENTS },
+                'v1/environments/:team_id/': { ...EMPTY_EVENTS },
             },
         })
         return <App />

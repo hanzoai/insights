@@ -172,7 +172,7 @@ const Header = (): JSX.Element => {
             },
             {
                 $type: 'http',
-                $message: 'GET /api/environments/:team_id/error_tracking/issues/',
+                $message: 'GET /v1/environments/:team_id/error_tracking/issues/',
                 $level: 'info',
                 $timestamp: new Date(now.getTime() - 1200).toISOString(),
             },

@@ -119,6 +119,6 @@
         }
     ],
     "next": null,
-    "initial": "/api/projects/1/persons/funnel/?funnel_aggregate_by_insightsql=properties.%24session_id",
+    "initial": "/v1/projects/1/persons/funnel/?funnel_aggregate_by_insightsql=properties.%24session_id",
     "missing_persons": 0
 }

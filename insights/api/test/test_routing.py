@@ -52,7 +52,7 @@ test_router = DefaultRouterPlusPlus()
 
 # A team_id-nested parent (distinct from the project_id-nested one below) so the mixin's
 # team_id vs project_id filtering can be exercised. Deliberately NOT named `environments`:
-# EnvironmentsRewriteMiddleware rewrites any `/api/environments/*` path onto `/api/projects/*`,
+# EnvironmentsRewriteMiddleware rewrites any `/v1/environments/*` path onto `/v1/projects/*`,
 # which would mask the team_id-lookup behavior these tests cover.
 test_team_nested_router = test_router.register(r"team_nested", FooViewSet, "team_nested")
 test_team_nested_router.register(r"foos", FooViewSet, "team_nested_foos", ["team_id"])
@@ -78,7 +78,7 @@ scoped_test_organizations_router.register(
 
 
 urlpatterns = [
-    path("api/", include(test_router.urls)),
+    path("v1/", include(test_router.urls)),
 ]
 
 
@@ -100,7 +100,7 @@ class TestTeamAndOrgViewSetMixinSpanTagging(APIBaseTest):
     def test_team_view_tags_request_span_with_team_id(self):
         tracer, exporter = self._recording_tracer()
         with tracer.start_as_current_span("test-request-root"):
-            response = self.client.get(f"/api/team_nested/{self.team.id}/foos/")
+            response = self.client.get(f"/v1/team_nested/{self.team.id}/foos/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self._root_span(exporter).attributes["team_id"], self.team.id)
 
@@ -108,7 +108,7 @@ class TestTeamAndOrgViewSetMixinSpanTagging(APIBaseTest):
         # Org-scoped views have no single team, so the stamp must not fire.
         tracer, exporter = self._recording_tracer()
         with tracer.start_as_current_span("test-request-root"):
-            response = self.client.get(f"/api/organizations/{self.organization.id}/foos/")
+            response = self.client.get(f"/v1/organizations/{self.organization.id}/foos/")
         self.assertEqual(response.status_code, 200)
         self.assertNotIn("team_id", self._root_span(exporter).attributes or {})
 
@@ -132,17 +132,17 @@ class TestTeamAndOrgViewSetMixin(APIBaseTest):
         self.current_team_annotation = Annotation.objects.create(team=self.team, organization=self.organization)
 
     def test_team_nested_filtering(self):
-        response = self.client.get(f"/api/team_nested/{self.team.id}/foos/")
+        response = self.client.get(f"/v1/team_nested/{self.team.id}/foos/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["count"], 1)  # Just current_team_annotation
 
     def test_project_nested_filtering(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/foos/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/foos/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["count"], 2)  # Both current_team_annotation and other_team_annotation
 
     def test_organization_nested_filtering(self):
-        response = self.client.get(f"/api/organizations/{self.organization.id}/foos/")
+        response = self.client.get(f"/v1/organizations/{self.organization.id}/foos/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["count"], 3)  # All except other_org_annotation
 
@@ -162,14 +162,14 @@ class TestTeamAndOrgViewSetMixin(APIBaseTest):
         # restored the pre-request value, not unconditionally None.
         pre_request_scope = get_current_team_id()
 
-        response = self.client.get(f"/api/team_nested/{other_team.id}/foos/current_scope/")
+        response = self.client.get(f"/v1/team_nested/{other_team.id}/foos/current_scope/")
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["team_id"], other_team.id)
         self.assertEqual(get_current_team_id(), pre_request_scope)
 
     def test_team_scope_context_set_from_url_for_project_view(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/foos/current_scope/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/foos/current_scope/")
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["team_id"], self.team.id)
@@ -249,7 +249,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         annotation = Annotation.objects.create(team=self.team, organization=self.organization, content="Test note")
 
         response = self.client.get(
-            f"/api/scoped_environments/{self.team.id}/scoped_foos/",
+            f"/v1/scoped_environments/{self.team.id}/scoped_foos/",
             headers={"authorization": f"Bearer {self.access_token.token}"},
         )
 
@@ -267,7 +267,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         Annotation.objects.create(team=other_team, organization=other_org)
 
         response = self.client.get(
-            f"/api/scoped_environments/{other_team.id}/scoped_foos/",
+            f"/v1/scoped_environments/{other_team.id}/scoped_foos/",
             headers={"authorization": f"Bearer {self.access_token.token}"},
         )
 
@@ -279,7 +279,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         Annotation.objects.create(team=self.team, organization=self.organization)
 
         response = self.client.get(
-            f"/api/scoped_organizations/{self.organization.id}/scoped_foos/",
+            f"/v1/scoped_organizations/{self.organization.id}/scoped_foos/",
             headers={"authorization": f"Bearer {self.access_token.token}"},
         )
 
@@ -297,7 +297,7 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/scoped_environments/{self.team.id}/scoped_foos/",
+            f"/v1/scoped_environments/{self.team.id}/scoped_foos/",
             headers={"authorization": f"Bearer {expired_token.token}"},
         )
 
@@ -307,18 +307,18 @@ class TestOAuthAccessTokenAuthentication(APIBaseTest):
         """Test that OAuth authentication is part of the authentication chain"""
         # First, verify session auth works
         Annotation.objects.create(team=self.team, organization=self.organization)
-        response = self.client.get(f"/api/scoped_environments/{self.team.id}/scoped_foos/")
+        response = self.client.get(f"/v1/scoped_environments/{self.team.id}/scoped_foos/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["count"], 1)
 
         # Logout and verify OAuth token works
         self.client.logout()
-        response = self.client.get(f"/api/scoped_environments/{self.team.id}/scoped_foos/")
+        response = self.client.get(f"/v1/scoped_environments/{self.team.id}/scoped_foos/")
         self.assertEqual(response.status_code, 401)
 
         # Now use OAuth token
         response = self.client.get(
-            f"/api/scoped_environments/{self.team.id}/scoped_foos/",
+            f"/v1/scoped_environments/{self.team.id}/scoped_foos/",
             headers={"authorization": f"Bearer {self.access_token.token}"},
         )
         self.assertEqual(response.status_code, 200)

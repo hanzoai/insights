@@ -201,7 +201,7 @@ export const selectExistingFeatureFlagModalLogic = kea<selectExistingFeatureFlag
             { results: [], count: 0 } as { results: FeatureFlagType[]; count: number },
             {
                 loadFeatureFlags: async () => {
-                    const url = `api/projects/${values.currentProjectId}/feature_flags/?${toParams({
+                    const url = `v1/projects/${values.currentProjectId}/feature_flags/?${toParams({
                         ...values.paramsFromFilters,
                         eligible_for_experiment: true,
                     })}`

@@ -78,9 +78,9 @@ describe('batchExportRunsLogic', () => {
         // eslint-disable-next-line react-hooks/rules-of-hooks -- useMocks is an MSW test helper, not a React hook
         useMocks({
             get: {
-                [`/api/environments/:team_id/batch_exports/${MOCK_BATCH_EXPORT_ID}/`]: MOCK_BATCH_EXPORT_CONFIG,
-                '/api/environments/:team_id/batch_exports/test/': { steps: [] },
-                [`/api/environments/:team_id/batch_exports/${MOCK_BATCH_EXPORT_ID}/runs/`]: runsResponse ?? {
+                [`/v1/environments/:team_id/batch_exports/${MOCK_BATCH_EXPORT_ID}/`]: MOCK_BATCH_EXPORT_CONFIG,
+                '/v1/environments/:team_id/batch_exports/test/': { steps: [] },
+                [`/v1/environments/:team_id/batch_exports/${MOCK_BATCH_EXPORT_ID}/runs/`]: runsResponse ?? {
                     results: [],
                     next: null,
                 },

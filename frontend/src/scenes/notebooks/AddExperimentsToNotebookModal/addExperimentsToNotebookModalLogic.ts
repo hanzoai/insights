@@ -117,7 +117,7 @@ export const addExperimentsToNotebookModalLogic = kea<addExperimentsToNotebookMo
                     params.order = order
                 }
 
-                const response = await api.get(`api/projects/${values.currentTeamId}/experiments/?${toParams(params)}`)
+                const response = await api.get(`v1/projects/${values.currentTeamId}/experiments/?${toParams(params)}`)
 
                 breakpoint()
                 return response

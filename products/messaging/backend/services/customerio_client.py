@@ -113,7 +113,7 @@ class CustomerIOTrackClient:
         self.api_key = api_key
         self.timeout = timeout
         base = self.EU_TRACK_URL if region.lower() == "eu" else self.US_TRACK_URL
-        self.entity_url = f"{base}/api/v2/entity"
+        self.entity_url = f"{base}/v1/v2/entity"
         self.session = requests.Session()
         self.session.headers.update({"Accept": "application/json", "Content-Type": "application/json"})
 

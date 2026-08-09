@@ -471,7 +471,7 @@ See [DECISIONS.md](./DECISIONS.md) for the "reuse the leaf, own the model" bound
   `REVIEWFN_TEAM_ID` (the run team), `REVIEWFN_RUN_USER_ID` (optional; falls back to the integration creator).
 
 **Triggers.** Five entry points drive the same `ReviewPRWorkflow`: the `run_review` CLI (manual / eval), the
-`reviewhog` **label** on a `Insights/insights` PR (a thin GitHub Action → `POST /api/review_hog/trigger`), a **UI**
+`reviewhog` **label** on a `Insights/insights` PR (a thin GitHub Action → `POST /v1/review_hog/trigger`), a **UI**
 "Review this PR" field in the Code review scene (any installation-accessible PR), an **inbox** trigger (a
 `TaskRun` receiver auto-reviews self-driving Signals implementations), and **MCP tools**
 (`review-script-reviews-{trigger,list,get}`, defined in `products/review_hog/mcp/tools.yaml` and gated on the

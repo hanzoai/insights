@@ -112,15 +112,15 @@ async function fetchHeatmapData(
 
 export function heatmapApiPath(context: HeatmapDataLogicProps['context'], endpoint: '' | 'events/'): string {
     if (context === 'in-app') {
-        // The unscoped /api/heatmap/ route resolves the team from the user's *global* current
+        // The unscoped /v1/heatmap/ route resolves the team from the user's *global* current
         // project, which any other tab can change, so pin the team this page was loaded for
         // instead. The app context team is also set on export renders (team_for_public_context).
         const teamId = getAppContext()?.current_team?.id
         if (teamId != null) {
-            return `/api/projects/${teamId}/heatmaps/${endpoint}`
+            return `/v1/projects/${teamId}/heatmaps/${endpoint}`
         }
     }
-    return `/api/heatmap/${endpoint}`
+    return `/v1/heatmap/${endpoint}`
 }
 
 export type HrefMatchType = 'exact' | 'pattern'

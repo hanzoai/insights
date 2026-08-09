@@ -180,20 +180,20 @@ const SearchContainer = ({ children }: { children: React.ReactNode }): JSX.Eleme
 )
 
 const SHARED_MOCKS = {
-    '/api/environments/:team_id/file_system/log_view/': () => [200, []],
-    '/api/environments/:team_id/persons/': () => [200, EMPTY_PAGINATED_RESPONSE],
-    '/api/environments/:team_id/groups/': () => [200, EMPTY_PAGINATED_RESPONSE],
+    '/v1/environments/:team_id/file_system/log_view/': () => [200, []],
+    '/v1/environments/:team_id/persons/': () => [200, EMPTY_PAGINATED_RESPONSE],
+    '/v1/environments/:team_id/groups/': () => [200, EMPTY_PAGINATED_RESPONSE],
 }
 
 export const Default: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/file_system/': async () => {
+                '/v1/environments/:team_id/file_system/': async () => {
                     await delay(10)
                     return HttpResponse.json(toPaginatedResponse(MOCK_RECENTS))
                 },
-                '/api/environments/:team_id/search/': () => [200, { results: [], counts: {} }],
+                '/v1/environments/:team_id/search/': () => [200, { results: [], counts: {} }],
                 ...SHARED_MOCKS,
             },
         })
@@ -218,15 +218,15 @@ export const ProductRecentsAndStarred: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/file_system/': async () => {
+                '/v1/environments/:team_id/file_system/': async () => {
                     await delay(10)
                     return HttpResponse.json(toPaginatedResponse(MOCK_PRODUCT_RECENTS))
                 },
-                '/api/environments/:team_id/file_system_shortcut/': async () => {
+                '/v1/environments/:team_id/file_system_shortcut/': async () => {
                     await delay(10)
                     return HttpResponse.json(toPaginatedResponse(MOCK_PRODUCT_STARRED))
                 },
-                '/api/environments/:team_id/search/': () => [200, { results: [], counts: {} }],
+                '/v1/environments/:team_id/search/': () => [200, { results: [], counts: {} }],
                 ...SHARED_MOCKS,
             },
         })
@@ -255,11 +255,11 @@ export const Searching: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/file_system/': async () => {
+                '/v1/environments/:team_id/file_system/': async () => {
                     await delay(10)
                     return HttpResponse.json(toPaginatedResponse(MOCK_RECENTS))
                 },
-                '/api/environments/:team_id/search/': async () => {
+                '/v1/environments/:team_id/search/': async () => {
                     await delay(100)
                     return HttpResponse.json(MOCK_SEARCH_RESULTS)
                 },

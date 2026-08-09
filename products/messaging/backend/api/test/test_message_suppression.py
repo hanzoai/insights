@@ -33,7 +33,7 @@ class TestRemoveSuppressionResetsSource(APIBaseTest):
     """
 
     def _url(self, action: str) -> str:
-        return f"/api/projects/{self.team.id}/messaging_suppressions/{action}/"
+        return f"/v1/projects/{self.team.id}/messaging_suppressions/{action}/"
 
     def test_remove_resets_source_to_bounce_so_future_auto_suppression_can_run(self) -> None:
         # Manual add → row exists as MANUAL, suppressed.

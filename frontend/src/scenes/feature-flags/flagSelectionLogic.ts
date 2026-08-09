@@ -432,13 +432,13 @@ export const flagSelectionLogic = kea<flagSelectionLogicType>([
                     if (allMatching) {
                         const { limit, offset, ...filters } = values.paramsFromFilters
                         const response = await api.create(
-                            `api/projects/${values.currentProjectId}/feature_flags/bulk_delete/`,
+                            `v1/projects/${values.currentProjectId}/feature_flags/bulk_delete/`,
                             { filters }
                         )
                         return response as BulkDeleteResult
                     }
                     const response = await api.create(
-                        `api/projects/${values.currentProjectId}/feature_flags/bulk_delete/`,
+                        `v1/projects/${values.currentProjectId}/feature_flags/bulk_delete/`,
                         { ids }
                     )
                     return response as BulkDeleteResult

@@ -41,10 +41,10 @@ describe('DistinctIdSelect', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team/persons/': { results: MOCK_PERSONS, next: null },
+                '/v1/environments/:team/persons/': { results: MOCK_PERSONS, next: null },
             },
             post: {
-                '/api/environments/:team/persons/batch_by_distinct_ids/': async ({ request }) => {
+                '/v1/environments/:team/persons/batch_by_distinct_ids/': async ({ request }) => {
                     const body = (await request.json()) as { distinct_ids?: string[] }
                     const distinctIds = body.distinct_ids ?? []
                     const results: Record<string, any> = {}
@@ -133,7 +133,7 @@ describe('DistinctIdSelect', () => {
     it('renders one option per distinct_id when a person owns multiple ids', async () => {
         useMocks({
             get: {
-                '/api/environments/:team/persons/': {
+                '/v1/environments/:team/persons/': {
                     results: [
                         {
                             id: 99,

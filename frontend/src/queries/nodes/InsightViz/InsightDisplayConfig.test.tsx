@@ -88,8 +88,8 @@ describe('InsightDisplayConfig', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/trend': [],
-                '/api/environments/:team_id/insights/': { results: [{}] },
+                '/v1/environments/:team_id/insights/trend': [],
+                '/v1/environments/:team_id/insights/': { results: [{}] },
             },
         })
         initKeaTests()

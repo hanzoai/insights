@@ -30,7 +30,7 @@ describe('organizationPersonalAPIKeysLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/organizations/:organization_id/personal_api_keys/': {
+                '/v1/organizations/:organization_id/personal_api_keys/': {
                     count: MOCK_KEYS.length,
                     next: null,
                     previous: null,

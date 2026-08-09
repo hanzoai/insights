@@ -12,7 +12,7 @@ from products.ai_observability.backend.models.trace_reviews import TraceReview, 
 
 class TestTraceReviewsApi(APIBaseTest):
     def _endpoint(self) -> str:
-        return f"/api/environments/{self.team.id}/llm_analytics/trace_reviews/"
+        return f"/v1/environments/{self.team.id}/llm_analytics/trace_reviews/"
 
     def _create_definition(
         self,

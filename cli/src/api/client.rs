@@ -274,11 +274,11 @@ impl PHClient {
 
         let base_url = Url::parse(&host)
             .map_err(|e| ClientError::InvalidUrl(format!("{e} {host}")))?
-            .join(&format!("api/{base}/{env_id}/"))
-            .map_err(|e| ClientError::InvalidUrl(format!("{e} {host}/api/{base}/{env_id}")))?
+            .join(&format!("v1/{base}/{env_id}/"))
+            .map_err(|e| ClientError::InvalidUrl(format!("{e} {host}/v1/{base}/{env_id}")))?
             .join(path)
             .map_err(|e| {
-                ClientError::InvalidUrl(format!("{e} {host}/api/{base}/{env_id}/{path}"))
+                ClientError::InvalidUrl(format!("{e} {host}/v1/{base}/{env_id}/{path}"))
             })?;
         Ok(base_url)
     }

@@ -50,8 +50,8 @@ describe('notebookLogic markdown editor state', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                [`/api/projects/@current/notebooks/${SHORT_ID}/`]: () => [200, cachedNotebook],
-                [`/api/projects/:project_id/notebooks/:short_id/kernel/status/`]: () => [200, { backend: null }],
+                [`/v1/projects/@current/notebooks/${SHORT_ID}/`]: () => [200, cachedNotebook],
+                [`/v1/projects/:project_id/notebooks/:short_id/kernel/status/`]: () => [200, { backend: null }],
             },
         })
         // localContent is a persisted reducer — clear it so tests don't leak into each other

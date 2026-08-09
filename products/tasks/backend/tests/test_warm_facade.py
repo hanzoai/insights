@@ -81,7 +81,7 @@ class TestWarmTaskSandbox(APIBaseTest):
         mock_warm.return_value = None
 
         response = self.client.post(
-            "/api/projects/@current/tasks/warm/",
+            "/v1/projects/@current/tasks/warm/",
             {
                 "repository": "insights/insights",
                 "github_integration": self.integration.id,
@@ -264,7 +264,12 @@ class TestCreateTaskWarmReuse(APIBaseTest):
         self.integration = Integration.objects.create(team=self.team, kind="github", config={})
 
     def _warm_run(
-        self, *, repository="insights/insights", branch="main", created_by=None, extra_state: dict[str, Any] | None = None
+        self,
+        *,
+        repository="insights/insights",
+        branch="main",
+        created_by=None,
+        extra_state: dict[str, Any] | None = None,
     ) -> tuple[Task, TaskRun]:
         task = Task.objects.create(
             team=self.team,
@@ -462,7 +467,7 @@ class TestCreateTaskWarmReuse(APIBaseTest):
 
         with patch(f"{FACADE}.signal_task_run_user_message", return_value=True) as m_signal:
             response = self.client.post(
-                "/api/projects/@current/tasks/",
+                "/v1/projects/@current/tasks/",
                 {
                     "description": "/millie readme this skill",
                     "repository": "insights/insights",

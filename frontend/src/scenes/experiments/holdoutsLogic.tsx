@@ -157,12 +157,12 @@ export const holdoutsLogic = kea<holdoutsLogicType>([
             [] as ExperimentHoldoutType[],
             {
                 loadHoldouts: async () => {
-                    const response = await api.get(`api/projects/${values.currentProjectId}/experiment_holdouts/`)
+                    const response = await api.get(`v1/projects/${values.currentProjectId}/experiment_holdouts/`)
                     return response.results as ExperimentHoldoutType[]
                 },
                 createHoldout: async () => {
                     const response = await api.create(
-                        `api/projects/${values.currentProjectId}/experiment_holdouts/`,
+                        `v1/projects/${values.currentProjectId}/experiment_holdouts/`,
                         values.holdout
                     )
                     actions.reportExperimentHoldoutCreated(response)
@@ -170,13 +170,13 @@ export const holdoutsLogic = kea<holdoutsLogicType>([
                 },
                 updateHoldout: async ({ id, holdout }) => {
                     const response = await api.update(
-                        `api/projects/${values.currentProjectId}/experiment_holdouts/${id}/`,
+                        `v1/projects/${values.currentProjectId}/experiment_holdouts/${id}/`,
                         holdout
                     )
                     return values.holdouts.map((h) => (h.id === id ? response : h)) as ExperimentHoldoutType[]
                 },
                 deleteHoldout: async ({ id }) => {
-                    await api.delete(`api/projects/${values.currentProjectId}/experiment_holdouts/${id}/`)
+                    await api.delete(`v1/projects/${values.currentProjectId}/experiment_holdouts/${id}/`)
                     return values.holdouts.filter((h) => h.id !== id)
                 },
             },

@@ -14,7 +14,7 @@ class TestPatternsAPI(DatastoreTestMixin, APIBaseTest):
         sync_execute(f"INSERT INTO logs FORMAT JSONEachRow\n{sql}")
 
     def _request(self, query: dict, expected_status: int = status.HTTP_200_OK):
-        response = self.client.post(f"/api/projects/{self.team.id}/logs/patterns", data={"query": query})
+        response = self.client.post(f"/v1/projects/{self.team.id}/logs/patterns", data={"query": query})
         self.assertEqual(response.status_code, expected_status)
         return response.json() if expected_status == status.HTTP_200_OK else response
 

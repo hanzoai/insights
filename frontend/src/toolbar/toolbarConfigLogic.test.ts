@@ -899,7 +899,7 @@ describe('toolbar toolbarConfigLogic', () => {
                 })
             })
 
-            const response = await toolbarFetch('/api/projects/@current/actions/')
+            const response = await toolbarFetch('/v1/projects/@current/actions/')
 
             expect(response.status).toBe(200)
             expect(logic.values.accessToken).toBe('new-access')
@@ -921,7 +921,7 @@ describe('toolbar toolbarConfigLogic', () => {
                 return Promise.resolve({ ok: false, status: 401, json: () => Promise.resolve({}) })
             })
 
-            await toolbarFetch('/api/projects/@current/actions/')
+            await toolbarFetch('/v1/projects/@current/actions/')
 
             expect(logic.values.accessToken).toBeNull()
             expect(logic.values.isAuthenticated).toBe(false)
@@ -943,7 +943,7 @@ describe('toolbar toolbarConfigLogic', () => {
                 return Promise.resolve({ ok: false, status: 401, json: () => Promise.resolve({}) })
             })
 
-            await toolbarFetch('/api/projects/@current/actions/')
+            await toolbarFetch('/v1/projects/@current/actions/')
 
             expect(refreshAttempted).toBe(false)
             expect(logic.values.accessToken).toBeNull()
@@ -967,7 +967,7 @@ describe('toolbar toolbarConfigLogic', () => {
                 })
             )
 
-            const response = await toolbarFetch('/api/projects/@current/actions/')
+            const response = await toolbarFetch('/v1/projects/@current/actions/')
 
             expect(response.status).toBe(200)
             // Only one fetch call (no refresh)
@@ -987,7 +987,7 @@ describe('toolbar toolbarConfigLogic', () => {
             // used to crash the OAuth chain with "Cannot read properties of undefined (reading 'status')".
             ;(global.fetch as jest.Mock).mockImplementation(() => Promise.resolve(undefined))
 
-            const response = await toolbarFetch('/api/projects/@current/actions/')
+            const response = await toolbarFetch('/v1/projects/@current/actions/')
 
             // Normalized into a synthetic failed response so callers can degrade gracefully.
             expect(response).toBeInstanceOf(Response)

@@ -30,7 +30,7 @@ describe('uiCustomizationLogic', () => {
         patchedUser = null
         useMocks({
             patch: {
-                '/api/users/@me/': async ({ request }) => {
+                '/v1/users/@me/': async ({ request }) => {
                     patchedUser = (await request.json()) as Partial<UserType>
                     return [200, { ...MOCK_DEFAULT_USER, ...patchedUser }]
                 },

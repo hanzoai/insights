@@ -20,7 +20,7 @@ const meta: Meta<ItemEventProps> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:project_id/event_definitions/primary_properties/': { primary_properties: {} },
+                '/v1/projects/:project_id/event_definitions/primary_properties/': { primary_properties: {} },
             },
         }),
     ],
@@ -125,7 +125,7 @@ export const CustomEventWithPrimaryProperty: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:project_id/event_definitions/primary_properties/': {
+                '/v1/projects/:project_id/event_definitions/primary_properties/': {
                     primary_properties: { order_placed: 'order_id' },
                 },
             },

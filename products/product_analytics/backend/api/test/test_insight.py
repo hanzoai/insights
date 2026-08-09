@@ -33,9 +33,9 @@ from insights.schema import (
     EventsNode,
     EventsQuery,
     FilterLogicalOperator,
+    InsightNodeKind,
     InsightsQLFilters,
     InsightsQLQuery,
-    InsightNodeKind,
     InsightVizNode,
     NodeKind,
     PropertyGroupFilter,
@@ -51,6 +51,7 @@ from insights.caching.insight_result import InsightResult
 from insights.constants import AvailableFeature
 from insights.insightsql_queries.query_runner import SHARED_FORCE_BLOCKING_STALENESS_WINDOW, ExecutionMode
 from insights.models import Filter, OrganizationMembership, SharingConfiguration, Team, User
+from insights.models.ee_models import AccessControl
 from insights.models.project import Project
 from insights.test.db_context_capturing import capture_db_queries
 from insights.test.persons import create_person
@@ -63,8 +64,6 @@ from products.dashboards.backend.models.dashboard_tile import DashboardTile, Tex
 from products.product_analytics.backend.models.insight import Insight, InsightViewed
 from products.product_analytics.backend.models.insight_variable import InsightVariable
 
-from insights.models.ee_models import AccessControl
-
 
 class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     maxDiff = None
@@ -75,8 +74,8 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     @parameterized.expand(
         [
-            ("trend", "/api/projects/{team_id}/insights/trend/"),
-            ("funnel", "/api/projects/{team_id}/insights/funnel/"),
+            ("trend", "/v1/projects/{team_id}/insights/trend/"),
+            ("funnel", "/v1/projects/{team_id}/insights/funnel/"),
         ]
     )
     def test_legacy_insight_endpoints_blocked_with_feature_flag(self, _name: str, path: str) -> None:
@@ -97,7 +96,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             "products.product_analytics.backend.api.insight.feature_enabled_or_false", return_value=True
         ) as mock_feature_enabled:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights/",
+                f"/v1/projects/{self.team.id}/insights/",
                 {"name": "Legacy filter insight", "filters": {"insight": "TRENDS", "events": [{"id": "$pageview"}]}},
             )
 
@@ -116,7 +115,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             "products.product_analytics.backend.api.insight.feature_enabled_or_false", return_value=True
         ) as mock_feature_enabled:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights/",
+                f"/v1/projects/{self.team.id}/insights/",
                 {
                     "name": "Query insight",
                     "query": InsightVizNode(source=TrendsQuery(series=[EventsNode(event="$pageview")])).model_dump(),
@@ -144,7 +143,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         # create without user
         Insight.objects.create(filters=Filter(data=filter_dict).to_dict(), team=self.team)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/", data={"user": "true"}).json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/", data={"user": "true"}).json()
 
         self.assertEqual(len(response["results"]), 1)
 
@@ -177,9 +176,9 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         # All of these three ways should return the same set of insights,
         # i.e. all insights in the test project regardless of environment
-        response_project = self.client.get(f"/api/projects/{self.project.id}/insights/").json()
-        response_env_current = self.client.get(f"/api/environments/{self.team.id}/insights/").json()
-        response_env_other = self.client.get(f"/api/environments/{other_team_in_project.id}/insights/").json()
+        response_project = self.client.get(f"/v1/projects/{self.project.id}/insights/").json()
+        response_env_current = self.client.get(f"/v1/environments/{self.team.id}/insights/").json()
+        response_env_other = self.client.get(f"/v1/environments/{other_team_in_project.id}/insights/").json()
 
         self.assertEqual({insight["id"] for insight in response_project["results"]}, {insight_a.id, insight_b.id})
         self.assertEqual({insight["id"] for insight in response_env_current["results"]}, {insight_a.id, insight_b.id})
@@ -215,7 +214,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         # Fields created_by and last_modified_by should be set to the current user
         with freeze_time("2021-08-23T12:00:00Z"):
             response_1 = self.client.post(
-                f"/api/projects/{self.team.id}/insights/",
+                f"/v1/projects/{self.team.id}/insights/",
                 {"name": "test"},
                 headers={"Referer": "https://hanzo.ai/my-referer", "X-Insights-Session-Id": "my-session-id"},
             )
@@ -261,7 +260,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         # BUT NOT last_modified_at or last_modified_by
         with freeze_time("2021-09-20T12:00:00Z"):
             response_2 = self.client.patch(
-                f"/api/projects/{self.team.id}/insights/{insight_id}",
+                f"/v1/projects/{self.team.id}/insights/{insight_id}",
                 {"favorited": True},
                 headers={"Referer": "https://hanzo.ai/my-referer", "X-Insights-Session-Id": "my-session-id"},
             )
@@ -307,7 +306,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         # AND last_modified_at plus last_modified_by
         with freeze_time("2021-10-21T12:00:00Z"):
             response_3 = self.client.patch(
-                f"/api/projects/{self.team.id}/insights/{insight_id}",
+                f"/v1/projects/{self.team.id}/insights/{insight_id}",
                 {"filters": {"events": []}},
             )
             self.assertEqual(response_3.status_code, status.HTTP_200_OK)
@@ -322,7 +321,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 response_3.json().items(),
             )
         with freeze_time("2021-12-23T12:00:00Z"):
-            response_4 = self.client.patch(f"/api/projects/{self.team.id}/insights/{insight_id}", {"name": "XYZ"})
+            response_4 = self.client.patch(f"/v1/projects/{self.team.id}/insights/{insight_id}", {"name": "XYZ"})
             self.assertEqual(response_4.status_code, status.HTTP_200_OK)
             self.assertLessEqual(
                 {
@@ -339,7 +338,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self.client.force_login(alt_user)
         with freeze_time("2022-01-01T12:00:00Z"):
             response_5 = self.client.patch(
-                f"/api/projects/{self.team.id}/insights/{insight_id}",
+                f"/v1/projects/{self.team.id}/insights/{insight_id}",
                 {"description": "Lorem ipsum."},
             )
             self.assertEqual(response_5.status_code, status.HTTP_200_OK)
@@ -378,7 +377,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         Insight.objects.create(filters=Filter(data=filter_dict).to_dict(), team=self.team)
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/",
+            f"/v1/projects/{self.team.id}/insights/",
             data={"saved": "true", "user": "true"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -420,7 +419,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         # create without user
         Insight.objects.create(filters=Filter(data=filter_dict).to_dict(), team=self.team)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?favorited=true&user=true")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?favorited=true&user=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertEqual(len(response.json()["results"]), 1)
@@ -464,12 +463,12 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         # Without filter, should return all 3 insights
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?saved=true")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?saved=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 3)
 
         # With filter, should exclude feature flag insights
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?saved=true&hide_feature_flag_insights=true")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?saved=true&hide_feature_flag_insights=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 1)
         self.assertEqual(response.json()["results"][0]["name"], "Regular Insight")
@@ -532,7 +531,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         query_params = {"from_dashboard": str(dashboard.id)}
         if refresh is not None:
             query_params["refresh"] = refresh
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/{insight.id}/", query_params)
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/{insight.id}/", query_params)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         if expect_recorded:
@@ -688,7 +687,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             short_id="12345678",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?short_id=12345678")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?short_id=12345678")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertEqual(len(response.json()["results"]), 1)
@@ -718,14 +717,14 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             name="other-team",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/{lookup(insight)}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/{lookup(insight)}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["id"], insight.id)
         self.assertEqual(response.json()["short_id"], "abcd1234")
         self.assertEqual(response.json()["name"], "dual-lookup")
 
     def test_retrieve_insight_by_unknown_short_id_returns_404(self) -> None:
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/notthere/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/notthere/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_retrieve_insight_by_numeric_short_id_falls_back_to_short_id(self) -> None:
@@ -740,7 +739,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             name="numeric-short-id",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/{numeric_short_id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/{numeric_short_id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["id"], insight.id)
         self.assertEqual(response.json()["short_id"], numeric_short_id)
@@ -760,7 +759,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
         Insight.objects.create(filters=Filter(data=filter_dict).to_dict(), team=self.team, saved=True)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?basic=true")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?basic=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertEqual(len(response.json()["results"]), 2)
@@ -805,7 +804,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         DashboardTile.objects.create(insight=unsaved_on_template, dashboard=template_dashboard)
         DashboardTile.objects.create(insight=unsaved_on_unlisted, dashboard=unlisted_dashboard)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?saved=true")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?saved=true")
         assert response.status_code == status.HTTP_200_OK
         returned = sorted(r["short_id"] for r in response.json()["results"])
 
@@ -828,7 +827,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             tag = Tag.objects.create(name=tag_name, team=self.team)
             TaggedItem.objects.create(insight=insight, tag=tag)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?search=needle")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?search=needle")
         assert response.status_code == status.HTTP_200_OK
         matching_short_ids = [r["short_id"] for r in response.json()["results"] if r["short_id"] == insight.short_id]
         assert len(matching_short_ids) == 1, (
@@ -879,7 +878,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         for name in insight_names:
             Insight.objects.create(name=name, team=self.team, filters={"events": [{"id": "$pageview"}]})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?search={search}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?search={search}")
         assert response.status_code == status.HTTP_200_OK
         result_names = [r["name"] for r in response.json()["results"]]
 
@@ -897,7 +896,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
         Insight.objects.create(name="Unrelated", team=self.team, filters={"events": [{"id": "$pageview"}]})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?search=signup")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?search=signup")
         assert response.status_code == status.HTTP_200_OK
         result_ids = [r["id"] for r in response.json()["results"]]
 
@@ -914,7 +913,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
         Insight.objects.create(name="Unrelated", team=self.team, filters={"events": [{"id": "$pageview"}]})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?search=revenue")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?search=revenue")
         assert response.status_code == status.HTTP_200_OK
         result_ids = [r["id"] for r in response.json()["results"]]
 
@@ -931,7 +930,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         a = Insight.objects.create(name="Alpha", team=self.team, filters={"events": [{"id": "$pageview"}]})
         b = Insight.objects.create(name="Beta", team=self.team, filters={"events": [{"id": "$pageview"}]})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?search={search}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?search={search}")
         assert response.status_code == status.HTTP_200_OK
         result_ids = {r["id"] for r in response.json()["results"]}
 
@@ -946,7 +945,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def test_list_filter_by_search_pathological_input_does_not_500(self, _name, search):
         Insight.objects.create(name="Dashboard overview", team=self.team, filters={"events": [{"id": "$pageview"}]})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/", {"search": search})
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/", {"search": search})
         assert response.status_code == status.HTTP_200_OK
 
     @parameterized.expand(
@@ -957,7 +956,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         ]
     )
     def test_list_filter_by_search_enforces_length_cap(self, _name, length, expected_status):
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/", {"search": "a" * length})
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/", {"search": "a" * length})
         assert response.status_code == expected_status
 
         if expected_status == status.HTTP_400_BAD_REQUEST:
@@ -967,14 +966,14 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_list_filter_by_search_nul_bytes_do_not_500(self):
         Insight.objects.create(name="Alpha", team=self.team, filters={"events": [{"id": "$pageview"}]})
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/", {"search": "\x00\x00\x00"})
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/", {"search": "\x00\x00\x00"})
         assert response.status_code == status.HTTP_200_OK
 
     def test_list_filter_by_search_explicit_order_overrides_relevance(self):
         older = Insight.objects.create(name="revenue funnel", team=self.team, filters={"events": [{"id": "$pageview"}]})
         newer = Insight.objects.create(name="revenue trends", team=self.team, filters={"events": [{"id": "$pageview"}]})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/", {"search": "revenue", "order": "-id"})
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/", {"search": "revenue", "order": "-id"})
         assert response.status_code == status.HTTP_200_OK
         result_ids = [r["id"] for r in response.json()["results"]]
         assert result_ids.index(newer.id) < result_ids.index(older.id), (
@@ -987,7 +986,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         # The frontend always sends order=-last_modified_at; the fix must hold under it, since
         # that re-sort is what buried exact matches beneath similar ones in the first place.
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?search=dashboard&order=-last_modified_at")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?search=dashboard&order=-last_modified_at")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
 
@@ -1000,7 +999,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def test_list_filter_by_search_match_type_absent_without_search(self):
         Insight.objects.create(name="Alpha", team=self.team, filters={"events": [{"id": "$pageview"}]})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
 
@@ -1013,7 +1012,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
         Insight.objects.create(name="Totally unrelated", team=self.team, filters={"events": [{"id": "$pageview"}]})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?search=ment")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?search=ment")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
 
@@ -1028,7 +1027,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             Insight.objects.create(name=name, team=self.team, filters={"events": [{"id": "$pageview"}]})
 
         with capture_db_queries() as capture_query_context:
-            response = self.client.get(f"/api/projects/{self.team.id}/insights/?search=revenue&basic=true")
+            response = self.client.get(f"/v1/projects/{self.team.id}/insights/?search=revenue&basic=true")
             assert response.status_code == status.HTTP_200_OK
 
         trigram_queries = [q for q in capture_query_context.captured_queries if "word_similarity" in q["sql"].lower()]
@@ -1060,7 +1059,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             self.assertEqual(Insight.objects.count(), i + 1)
 
             with capture_db_queries() as capture_query_context:
-                response = self.client.get(f"/api/projects/{self.team.id}/insights?basic=true")
+                response = self.client.get(f"/v1/projects/{self.team.id}/insights?basic=true")
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
                 self.assertEqual(len(response.json()["results"]), i + 1)
 
@@ -1098,7 +1097,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             )
             return insight_id
 
-        url = f"/api/projects/{self.team.id}/insights/?saved=true&order=-last_modified_at&limit=30{basic_query_param}"
+        url = f"/v1/projects/{self.team.id}/insights/?saved=true&order=-last_modified_at&limit=30{basic_query_param}"
 
         _create_insight_with_many_dashboards("first")
         with capture_db_queries() as ctx:
@@ -1134,7 +1133,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     @override_settings(PERSON_ON_EVENTS_OVERRIDE=False, PERSON_ON_EVENTS_V2_OVERRIDE=False)
     def test_listing_insights_with_alerts_does_not_nplus1(self) -> None:
-        url = f"/api/projects/{self.team.id}/insights/?saved=true&limit=30"
+        url = f"/v1/projects/{self.team.id}/insights/?saved=true&limit=30"
 
         def _create_insight_with_alerts(short_id: str) -> None:
             insight_id, _ = self.dashboard_api.create_insight(
@@ -1204,7 +1203,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             }
         )
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/insights/?insight=TRENDS")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/insights/?insight=TRENDS")
 
         self.assertEqual(len(response.json()["results"]), 2)
 
@@ -1228,16 +1227,14 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self.dashboard_api.add_insight_to_dashboard([dashboard_one_id], insight_one_id)
         self.dashboard_api.add_insight_to_dashboard([dashboard_one_id, dashboard_two_id], insight_two_id)
 
-        any_on_dashboard_one = self.client.get(
-            f"/api/projects/{self.team.id}/insights/?dashboards=[{dashboard_one_id}]"
-        )
+        any_on_dashboard_one = self.client.get(f"/v1/projects/{self.team.id}/insights/?dashboards=[{dashboard_one_id}]")
         self.assertEqual(any_on_dashboard_one.status_code, status.HTTP_200_OK)
         matched_insights = [insight["id"] for insight in any_on_dashboard_one.json()["results"]]
         assert sorted(matched_insights) == [insight_one_id, insight_two_id]
 
         # match is AND, not OR
         any_on_dashboard_one_and_two = self.client.get(
-            f"/api/projects/{self.team.id}/insights/?dashboards=[{dashboard_one_id}, {dashboard_two_id}]"
+            f"/v1/projects/{self.team.id}/insights/?dashboards=[{dashboard_one_id}, {dashboard_two_id}]"
         )
         self.assertEqual(any_on_dashboard_one_and_two.status_code, status.HTTP_200_OK)
         matched_insights = [insight["id"] for insight in any_on_dashboard_one_and_two.json()["results"]]
@@ -1246,9 +1243,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         # respects deleted tiles
         self.dashboard_api.update_insight(insight_two_id, {"dashboards": []})  # remove from all dashboards
 
-        any_on_dashboard_one = self.client.get(
-            f"/api/projects/{self.team.id}/insights/?dashboards=[{dashboard_one_id}]"
-        )
+        any_on_dashboard_one = self.client.get(f"/v1/projects/{self.team.id}/insights/?dashboards=[{dashboard_one_id}]")
         self.assertEqual(any_on_dashboard_one.status_code, status.HTTP_200_OK)
         matched_insights = [insight["id"] for insight in any_on_dashboard_one.json()["results"]]
         assert sorted(matched_insights) == [insight_one_id]
@@ -1256,7 +1251,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     @freeze_time("2012-01-14T03:21:34.000Z")
     def test_create_insight_items(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights",
+            f"/v1/projects/{self.team.id}/insights",
             data={
                 "name": "a created dashboard",
                 "filters": {
@@ -1300,7 +1295,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     @freeze_time("2012-01-14T03:21:34.000Z")
     def test_create_insight_with_no_names_logs_no_activity(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights",
+            f"/v1/projects/{self.team.id}/insights",
             data={
                 "filters": {
                     "events": [{"id": "$pageview"}],
@@ -1386,7 +1381,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         assert insight_json["dashboard_tiles"] == []
 
         insight_by_short_id = self.client.get(
-            f"/api/projects/{self.team.pk}/insights?short_id={insight_json['short_id']}"
+            f"/v1/projects/{self.team.pk}/insights?short_id={insight_json['short_id']}"
         )
         assert insight_by_short_id.json()["results"][0]["dashboard_tiles"] == []
 
@@ -1632,7 +1627,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
         mock_report_user_action.reset_mock()
 
-        self.client.get(f"/api/projects/{self.team.id}/insights/{insight_id}", HTTP_X_INSIGHTS_CLIENT="mcp")
+        self.client.get(f"/v1/projects/{self.team.id}/insights/{insight_id}", HTTP_X_INSIGHTS_CLIENT="mcp")
 
         mock_report_user_action.assert_any_call(
             self.user,
@@ -1669,7 +1664,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         insight_id, _ = self.dashboard_api.create_insight({})
         mock_report_user_action.reset_mock()
 
-        self.client.get(f"/api/projects/{self.team.id}/insights/{insight_id}")
+        self.client.get(f"/v1/projects/{self.team.id}/insights/{insight_id}")
 
         read_calls = [c for c in mock_report_user_action.call_args_list if c.args[1:2] == ("insight read",)]
         self.assertEqual(read_calls, [])
@@ -1728,7 +1723,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     @freeze_time("2012-01-14T03:21:34.000Z")
     def test_create_insight_logs_derived_name_if_there_is_no_name(self) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights",
+            f"/v1/projects/{self.team.id}/insights",
             data={
                 "derived_name": "pageview unique users",
                 "filters": {
@@ -1770,7 +1765,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             frozen_time.tick(delta=timedelta(minutes=10))
 
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/insights/{insight_id}",
+                f"/v1/projects/{self.team.id}/insights/{insight_id}",
                 {"name": "insight new name", "tags": ["add", "these", "tags"]},
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1788,7 +1783,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 Dashboard.PrivilegeLevel.CAN_EDIT,
             )
 
-            response = self.client.get(f"/api/projects/{self.team.id}/insights/{insight_id}")
+            response = self.client.get(f"/v1/projects/{self.team.id}/insights/{insight_id}")
 
             self.assertEqual(response.json()["name"], "insight new name")
 
@@ -1847,7 +1842,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertIsNotNone(original_filters_hash)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights/{insight_id}",
+            f"/v1/projects/{self.team.id}/insights/{insight_id}",
             {"filters_hash": "should not update the value"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1867,7 +1862,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             ["Custom filter", "100", None, None, None],
         ):
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/insights/{insight.id}",
+                f"/v1/projects/{self.team.id}/insights/{insight.id}",
                 {"filters": {"events": [{"id": "$pageview", "custom_name": custom_name}]}},
             )
 
@@ -1882,7 +1877,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         dashboard = Dashboard.objects.create(name="My Dashboard", team=self.team)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights",
+            f"/v1/projects/{self.team.id}/insights",
             data={
                 "filters": {
                     "insight": "FUNNELS",
@@ -1955,7 +1950,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         with freeze_time("2012-01-15T04:01:34.000Z"):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights",
+                f"/v1/projects/{self.team.id}/insights",
                 data={
                     "filters": {
                         "events": [{"id": "$pageview"}],
@@ -1972,14 +1967,14 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             ).json()
             self.assertEqual(response["last_refresh"], None)
 
-            response = self.client.get(f"/api/projects/{self.team.id}/insights/{response['id']}/?refresh=true").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/insights/{response['id']}/?refresh=true").json()
             self.assertEqual(response["result"][0]["data"], [0, 0, 0, 0, 0, 0, 2, 0])
             self.assertEqual(response["last_refresh"], "2012-01-15T04:01:34Z")
             self.assertEqual(response["last_modified_at"], "2012-01-15T04:01:34Z")
 
         with freeze_time("2012-01-15T05:01:34.000Z"):
             _create_event(team=self.team, event="$pageview", distinct_id="1")
-            response = self.client.get(f"/api/projects/{self.team.id}/insights/{response['id']}/?refresh=true").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/insights/{response['id']}/?refresh=true").json()
             self.assertEqual(response["result"][0]["data"], [0, 0, 0, 0, 0, 0, 2, 1])
             self.assertEqual(response["last_refresh"], "2012-01-15T05:01:34Z")
             self.assertEqual(response["last_modified_at"], "2012-01-15T04:01:34Z")  # did not change
@@ -1987,7 +1982,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         with freeze_time("2012-01-16T05:01:34.000Z"):
             # load it in the context of the dashboard, so has last 14 days as filter
             response = self.client.get(
-                f"/api/projects/{self.team.id}/insights/{response['id']}/?refresh=true&from_dashboard={dashboard_id}"
+                f"/v1/projects/{self.team.id}/insights/{response['id']}/?refresh=true&from_dashboard={dashboard_id}"
             ).json()
             self.assertEqual(
                 response["result"][0]["data"],
@@ -2013,7 +2008,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             self.assertEqual(response["last_modified_at"], "2012-01-15T04:01:34Z")  # did not change
 
         with freeze_time("2012-01-25T05:01:34.000Z"):
-            response = self.client.get(f"/api/projects/{self.team.id}/insights/{response['id']}/").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/insights/{response['id']}/").json()
             self.assertEqual(response["last_refresh"], None)
             self.assertEqual(response["last_modified_at"], "2012-01-15T04:01:34Z")  # did not change
 
@@ -2027,7 +2022,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         dashboard.save()
         with freeze_time("2012-01-16T05:01:34.000Z"):
             response = self.client.get(
-                f"/api/projects/{self.team.id}/insights/{response['id']}/?refresh=true&from_dashboard={dashboard_id}"
+                f"/v1/projects/{self.team.id}/insights/{response['id']}/?refresh=true&from_dashboard={dashboard_id}"
             ).json()
             self.assertEqual(
                 response["result"][0]["data"],
@@ -2068,7 +2063,10 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             ],
         ]
     )
-    @patch("insights.insightsql_queries.insights.trends.trends_query_runner.execute_insightsql_query", wraps=execute_insightsql_query)
+    @patch(
+        "insights.insightsql_queries.insights.trends.trends_query_runner.execute_insightsql_query",
+        wraps=execute_insightsql_query,
+    )
     def test_insight_refreshing_query(self, properties_filter, spy_execute_insightsql_query) -> None:
         dashboard_id, _ = self.dashboard_api.create_dashboard({"filters": {"date_from": "-14d"}})
 
@@ -2103,7 +2101,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         with freeze_time("2012-01-15T04:01:34.000Z"):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights",
+                f"/v1/projects/{self.team.id}/insights",
                 data={
                     "query": query_dict,
                     "dashboards": [dashboard_id],
@@ -2113,7 +2111,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             self.assertEqual(response["last_refresh"], None)
             insight_id = response["id"]
 
-            response = self.client.get(f"/api/projects/{self.team.id}/insights/{insight_id}/?refresh=true").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/insights/{insight_id}/?refresh=true").json()
             self.assertNotIn("code", response)
             self.assertEqual(spy_execute_insightsql_query.call_count, 1)
             self.assertEqual(response["result"][0]["data"], [0, 0, 0, 0, 0, 0, 2, 0])
@@ -2123,7 +2121,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         with freeze_time("2012-01-15T05:01:34.000Z"):
             _create_event(team=self.team, event="$pageview", distinct_id="1")
-            response = self.client.get(f"/api/projects/{self.team.id}/insights/{insight_id}/?refresh=true").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/insights/{insight_id}/?refresh=true").json()
             self.assertNotIn("code", response)
             self.assertEqual(spy_execute_insightsql_query.call_count, 2)
             self.assertEqual(response["result"][0]["data"], [0, 0, 0, 0, 0, 0, 2, 1])
@@ -2132,7 +2130,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             self.assertFalse(response["is_cached"])
 
         with freeze_time("2012-01-15T05:17:34.000Z"):
-            response = self.client.get(f"/api/projects/{self.team.id}/insights/{insight_id}/").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/insights/{insight_id}/").json()
             self.assertNotIn("code", response)
             self.assertEqual(spy_execute_insightsql_query.call_count, 2)
             self.assertEqual(response["result"][0]["data"], [0, 0, 0, 0, 0, 0, 2, 1])
@@ -2142,7 +2140,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         with freeze_time("2012-01-15T05:17:39.000Z"):
             # Make sure the /query/ endpoint reuses the same cached result
-            response = self.client.post(f"/api/projects/{self.team.id}/query/", {"query": query_dict}).json()
+            response = self.client.post(f"/v1/projects/{self.team.id}/query/", {"query": query_dict}).json()
             self.assertNotIn("code", response)
             self.assertEqual(spy_execute_insightsql_query.call_count, 2)
             self.assertEqual(response["results"][0]["data"], [0, 0, 0, 0, 0, 0, 2, 1])
@@ -2152,7 +2150,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         with freeze_time("2012-01-16T05:01:34.000Z"):
             # load it in the context of the dashboard, so has last 14 days as filter
             response = self.client.get(
-                f"/api/projects/{self.team.id}/insights/{insight_id}/?refresh=true&from_dashboard={dashboard_id}"
+                f"/v1/projects/{self.team.id}/insights/{insight_id}/?refresh=true&from_dashboard={dashboard_id}"
             ).json()
             self.assertNotIn("code", response)
             self.assertEqual(spy_execute_insightsql_query.call_count, 3)
@@ -2191,7 +2189,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
         with freeze_time("2012-01-16T05:01:34.000Z"):
             response = self.client.get(
-                f"/api/projects/{self.team.id}/insights/{insight_id}/?refresh=true&from_dashboard={dashboard_id}"
+                f"/v1/projects/{self.team.id}/insights/{insight_id}/?refresh=true&from_dashboard={dashboard_id}"
             ).json()
             self.assertNotIn("code", response)
             self.assertEqual(spy_execute_insightsql_query.call_count, 4)
@@ -2234,7 +2232,10 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             ],
         ]
     )
-    @patch("insights.insightsql_queries.insights.trends.trends_query_runner.execute_insightsql_query", wraps=execute_insightsql_query)
+    @patch(
+        "insights.insightsql_queries.insights.trends.trends_query_runner.execute_insightsql_query",
+        wraps=execute_insightsql_query,
+    )
     def test_insight_refreshing_query_async(self, properties_filter, spy_execute_insightsql_query) -> None:
         dashboard_id, _ = self.dashboard_api.create_dashboard({"filters": {"date_from": "-14d"}})
 
@@ -2269,7 +2270,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         with freeze_time("2012-01-15T04:01:34.000Z"):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights",
+                f"/v1/projects/{self.team.id}/insights",
                 data={
                     "query": query_dict,
                     "dashboards": [dashboard_id],
@@ -2279,7 +2280,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             self.assertEqual(response["last_refresh"], None)
             insight_id = response["id"]
 
-            response = self.client.get(f"/api/projects/{self.team.id}/insights/{insight_id}/?refresh=blocking").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/insights/{insight_id}/?refresh=blocking").json()
             self.assertNotIn("code", response)
             self.assertEqual(spy_execute_insightsql_query.call_count, 1)
             self.assertEqual(response["result"][0]["data"], [0, 0, 0, 0, 0, 0, 2, 0])
@@ -2290,7 +2291,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         with freeze_time("2012-01-15T05:17:39.000Z"):
             # Make sure the /query/ endpoint reuses the same cached result - ASYNC EXECUTION HERE!
             response = self.client.post(
-                f"/api/projects/{self.team.id}/query/", {"query": query_dict, "refresh": "async"}
+                f"/v1/projects/{self.team.id}/query/", {"query": query_dict, "refresh": "async"}
             ).json()
             self.assertNotIn("code", response)
             self.assertIsNone(response.get("query_status"))
@@ -2302,7 +2303,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         with freeze_time("2012-01-15T05:17:39.000Z"):
             # Now with force async requested - cache should be ignored
             response = self.client.post(
-                f"/api/projects/{self.team.id}/query/", {"query": query_dict, "refresh": "force_async"}
+                f"/v1/projects/{self.team.id}/query/", {"query": query_dict, "refresh": "force_async"}
             ).json()
             self.assertNotIn("code", response)
             self.assertIs(response.get("query_status", {}).get("query_async"), True)
@@ -2324,7 +2325,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         ).model_dump()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights",
+            f"/v1/projects/{self.team.id}/insights",
             data={
                 "query": query_dict,
                 "dashboards": [dashboard_id],
@@ -2333,7 +2334,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         insight_id = response["id"]
 
         # Check that cache miss contains query status
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/{insight_id}/?refresh=async").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/{insight_id}/?refresh=async").json()
         self.assertNotIn("code", response)
         self.assertEqual(response["result"], None)
         self.assertEqual(response["query_status"]["query_async"], True)
@@ -2351,13 +2352,13 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             {"query": query, "name": "insight", "dashboards": [dashboard_id]}
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/{insight_id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/{insight_id}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["query"], query)
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight_id}/?refresh=true&from_dashboard={dashboard_id}"
+            f"/v1/projects/{self.team.id}/insights/{insight_id}/?refresh=true&from_dashboard={dashboard_id}"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -2376,13 +2377,13 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             {"query": query, "name": "insight", "dashboards": [dashboard_id]}
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/{insight_id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/{insight_id}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["query"], query)
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight_id}/?refresh=true&from_dashboard={dashboard_id}"
+            f"/v1/projects/{self.team.id}/insights/{insight_id}/?refresh=true&from_dashboard={dashboard_id}"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -2399,13 +2400,13 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             {"query": query, "name": "insight", "dashboards": [dashboard_id]}
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/{insight_id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/{insight_id}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["query"], query)
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight_id}/?refresh=true&from_dashboard={dashboard_id}"
+            f"/v1/projects/{self.team.id}/insights/{insight_id}/?refresh=true&from_dashboard={dashboard_id}"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -2420,7 +2421,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         with freeze_time("2012-01-15T04:01:34.000Z"):
             response = self.client.get(
-                f"/api/projects/{self.team.id}/insights/trend/?events={json.dumps([{'id': '$pageview'}])}"
+                f"/v1/projects/{self.team.id}/insights/trend/?events={json.dumps([{'id': '$pageview'}])}"
             ).json()
 
         self.assertEqual(response["result"][0]["count"], 2)
@@ -2429,7 +2430,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def test_nonexistent_cohort_is_handled(self) -> None:
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/trend/?events={json.dumps([{'id': '$pageview'}])}&properties={json.dumps([{'type': 'cohort', 'key': 'id', 'value': 2137}])}"
+            f"/v1/projects/{self.team.id}/insights/trend/?events={json.dumps([{'id': '$pageview'}])}&properties={json.dumps([{'type': 'cohort', 'key': 'id', 'value': 2137}])}"
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.json())
@@ -2438,10 +2439,10 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         whatever_cohort_without_match_groups = Cohort.objects.create(team=self.team)
 
         response_nonexistent_property = self.client.get(
-            f"/api/projects/{self.team.id}/insights/trend/?events={json.dumps([{'id': '$pageview'}])}&properties={json.dumps([{'type': 'event', 'key': 'foo', 'value': 'barabarab'}])}"
+            f"/v1/projects/{self.team.id}/insights/trend/?events={json.dumps([{'id': '$pageview'}])}&properties={json.dumps([{'type': 'event', 'key': 'foo', 'value': 'barabarab'}])}"
         )
         response_cohort_without_match_groups = self.client.get(
-            f"/api/projects/{self.team.id}/insights/trend/?events={json.dumps([{'id': '$pageview'}])}&properties={json.dumps([{'type': 'cohort', 'key': 'id', 'value': whatever_cohort_without_match_groups.pk}])}"
+            f"/v1/projects/{self.team.id}/insights/trend/?events={json.dumps([{'id': '$pageview'}])}&properties={json.dumps([{'type': 'cohort', 'key': 'id', 'value': whatever_cohort_without_match_groups.pk}])}"
         )  # This should not throw an error, just act like there's no event matches
 
         self.assertEqual(response_nonexistent_property.status_code, 200)
@@ -2479,10 +2480,10 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         with self.settings(USE_PRECALCULATED_CH_COHORT_PEOPLE=True):  # Normally this is False in tests
             response_user_property = self.client.get(
-                f"/api/projects/{self.team.id}/insights/trend/?events={json.dumps([{'id': '$pageview'}])}&properties={json.dumps([{'type': 'person', 'key': 'foo', 'value': 'bar'}])}"
+                f"/v1/projects/{self.team.id}/insights/trend/?events={json.dumps([{'id': '$pageview'}])}&properties={json.dumps([{'type': 'person', 'key': 'foo', 'value': 'bar'}])}"
             )
             response_precalculated_cohort = self.client.get(
-                f"/api/projects/{self.team.id}/insights/trend/?events={json.dumps([{'id': '$pageview'}])}&properties={json.dumps([{'type': 'cohort', 'key': 'id', 'value': 113}])}"
+                f"/v1/projects/{self.team.id}/insights/trend/?events={json.dumps([{'id': '$pageview'}])}&properties={json.dumps([{'type': 'cohort', 'key': 'id', 'value': 113}])}"
             )
 
         self.assertEqual(response_precalculated_cohort.status_code, 200)
@@ -2508,7 +2509,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         with freeze_time("2012-01-15T04:01:34.000Z"):
             response = self.client.get(
-                f"/api/projects/{self.team.id}/insights/trend/",
+                f"/v1/projects/{self.team.id}/insights/trend/",
                 data={"events": json.dumps([{"id": "$pageview"}]), "compare": "true"},
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -2529,7 +2530,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         with freeze_time("2012-01-15T04:01:34.000Z"):
             response = self.client.get(
-                f"/api/projects/{self.team.id}/insights/trend/",
+                f"/v1/projects/{self.team.id}/insights/trend/",
                 data={
                     "events": json.dumps([{"id": "$pageview"}]),
                     "breakdown": "$some_property",
@@ -2544,7 +2545,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         _create_event(team=self.team, event="user signed up", distinct_id="1")
         _create_event(team=self.team, event="user did things", distinct_id="1")
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/funnel/",
+            f"/v1/projects/{self.team.id}/insights/funnel/",
             {
                 "events": [
                     {"id": "user signed up", "type": "events", "order": 0},
@@ -2568,7 +2569,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         _create_event(team=self.team, event="user signed up", distinct_id="1")
         _create_event(team=self.team, event="user did things", distinct_id="1")
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/funnel/?funnel_window_days=14&events={json.dumps([{'id': 'user signed up', 'type': 'events', 'order': 0}, {'id': 'user did things', 'type': 'events', 'order': 1}])}"
+            f"/v1/projects/{self.team.id}/insights/funnel/?funnel_window_days=14&events={json.dumps([{'id': 'user signed up', 'type': 'events', 'order': 0}, {'id': 'user did things', 'type': 'events', 'order': 1}])}"
         ).json()
 
         # datastore funnels don't have a loading system
@@ -2586,7 +2587,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight.id}/",
+            f"/v1/projects/{self.team.id}/insights/{insight.id}/",
         )
 
         self.assertEqual(response.status_code, 403, response.json())
@@ -2629,16 +2630,16 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response_invalid_token_retrieve = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight.id}/?sharing_access_token=abc",
+            f"/v1/projects/{self.team.id}/insights/{insight.id}/?sharing_access_token=abc",
         )
         response_incorrect_token_retrieve = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight.id}/?sharing_access_token={other_sharing_configuration.access_token}",
+            f"/v1/projects/{self.team.id}/insights/{insight.id}/?sharing_access_token={other_sharing_configuration.access_token}",
         )
         response_correct_token_retrieve = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight.id}/?sharing_access_token={sharing_configuration.access_token}",
+            f"/v1/projects/{self.team.id}/insights/{insight.id}/?sharing_access_token={sharing_configuration.access_token}",
         )
         response_correct_token_list = self.client.get(
-            f"/api/projects/{self.team.id}/insights/?sharing_access_token={sharing_configuration.access_token}",
+            f"/v1/projects/{self.team.id}/insights/?sharing_access_token={sharing_configuration.access_token}",
         )
 
         self.assertEqual(
@@ -2700,7 +2701,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response_retrieve = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{deleted_insight.id}/?sharing_access_token={sharing_configuration.access_token}",
+            f"/v1/projects/{self.team.id}/insights/{deleted_insight.id}/?sharing_access_token={sharing_configuration.access_token}",
         )
 
         self.assertEqual(response_retrieve.status_code, 404, response_retrieve.json())
@@ -2722,7 +2723,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response_retrieve = self.client.patch(
-            f"/api/projects/{self.team.id}/insights/{insight.id}/?sharing_access_token={sharing_configuration.access_token}",
+            f"/v1/projects/{self.team.id}/insights/{insight.id}/?sharing_access_token={sharing_configuration.access_token}",
             {"name": "Barfoo"},
         )
 
@@ -2750,10 +2751,10 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response_retrieve = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight.id}/?sharing_access_token={sharing_configuration.access_token}",
+            f"/v1/projects/{self.team.id}/insights/{insight.id}/?sharing_access_token={sharing_configuration.access_token}",
         )
         response_list = self.client.get(
-            f"/api/projects/{self.team.id}/insights/?short_id={insight.short_id}&sharing_access_token={sharing_configuration.access_token}",
+            f"/v1/projects/{self.team.id}/insights/?short_id={insight.short_id}&sharing_access_token={sharing_configuration.access_token}",
         )
 
         self.assertEqual(response_retrieve.status_code, 403, response_retrieve.json())
@@ -2811,13 +2812,13 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response_incorrect_token_retrieve = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight.id}/?sharing_access_token=abc",
+            f"/v1/projects/{self.team.id}/insights/{insight.id}/?sharing_access_token=abc",
         )
         response_correct_token_retrieve = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight.id}/?sharing_access_token={sharing_configuration.access_token}",
+            f"/v1/projects/{self.team.id}/insights/{insight.id}/?sharing_access_token={sharing_configuration.access_token}",
         )
         response_correct_token_list = self.client.get(
-            f"/api/projects/{self.team.id}/insights/?sharing_access_token={sharing_configuration.access_token}",
+            f"/v1/projects/{self.team.id}/insights/?sharing_access_token={sharing_configuration.access_token}",
         )
 
         self.assertEqual(
@@ -2859,7 +2860,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response_correct_token_list = self.client.get(
-            f"/api/projects/{self.team.id}/insights/?sharing_access_token={sharing_configuration.access_token}",
+            f"/v1/projects/{self.team.id}/insights/?sharing_access_token={sharing_configuration.access_token}",
         )
 
         self.assertEqual(
@@ -2877,7 +2878,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         with freeze_time("2012-01-15T04:01:34.000Z"):
             _create_event(team=self.team, event="$pageview", distinct_id="2")
             response = self.client.get(
-                f"/api/projects/{self.team.id}/insights/trend.csv/?events={json.dumps([{'id': '$pageview', 'custom_name': 'test custom'}])}&export_name=Pageview count&export_insight_id=test123"
+                f"/v1/projects/{self.team.id}/insights/trend.csv/?events={json.dumps([{'id': '$pageview', 'custom_name': 'test custom'}])}&export_name=Pageview count&export_insight_id=test123"
             )
 
         lines = response.content.splitlines()
@@ -2894,7 +2895,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     def _create_one_person_cohort(self, properties: list[dict[str, Any]]) -> int:
         create_person(team=self.team, properties=properties)
         cohort_one_id = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts",
+            f"/v1/projects/{self.team.id}/cohorts",
             data={"name": "whatever", "groups": [{"properties": properties}]},
         ).json()["id"]
         return cohort_one_id
@@ -2909,7 +2910,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         ]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/viewed",
+            f"/v1/projects/{self.team.id}/insights/viewed",
             {"insight_ids": [insight.id for insight in insights]},
         )
 
@@ -2935,14 +2936,14 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
         with freeze_time("2022-03-22T00:00:00.000Z"):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights/viewed",
+                f"/v1/projects/{self.team.id}/insights/viewed",
                 {"insight_ids": [insight.id]},
             )
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         with freeze_time("2022-03-23T00:00:00.000Z"):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights/viewed",
+                f"/v1/projects/{self.team.id}/insights/viewed",
                 {"insight_ids": [insight.id]},
             )
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -2964,7 +2965,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/viewed",
+            f"/v1/projects/{self.team.id}/insights/viewed",
             {"insight_ids": [insight.id]},
         )
 
@@ -2982,7 +2983,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
     )
     def test_insight_viewed_rejects_invalid_payloads(self, _name: str, payload: dict) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/viewed",
+            f"/v1/projects/{self.team.id}/insights/viewed",
             payload,
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -2998,14 +2999,14 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         # Pre-create rows for the first two insights at T1.
         with freeze_time("2022-03-22T00:00:00.000Z"):
             self.client.post(
-                f"/api/projects/{self.team.id}/insights/viewed",
+                f"/v1/projects/{self.team.id}/insights/viewed",
                 {"insight_ids": [insights[0].id, insights[1].id]},
             )
 
         # Submit all three at T2 — the first two should be UPDATEd, the third INSERTed.
         with freeze_time("2022-03-23T00:00:00.000Z"):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights/viewed",
+                f"/v1/projects/{self.team.id}/insights/viewed",
                 {"insight_ids": [insight.id for insight in insights]},
             )
 
@@ -3028,7 +3029,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/viewed",
+            f"/v1/projects/{self.team.id}/insights/viewed",
             {"insight_ids": [own_insight.id, other_team_insight.id, deleted_insight.id]},
         )
 
@@ -3049,14 +3050,14 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         with capture_db_queries() as ctx_few:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights/viewed",
+                f"/v1/projects/{self.team.id}/insights/viewed",
                 {"insight_ids": [insight.id for insight in few]},
             )
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         with capture_db_queries() as ctx_many:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights/viewed",
+                f"/v1/projects/{self.team.id}/insights/viewed",
                 {"insight_ids": [insight.id for insight in many]},
             )
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -3071,11 +3072,11 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         insight_1_id, _ = self.dashboard_api.create_insight({"short_id": "12345678"})
 
         self.client.post(
-            f"/api/projects/{self.team.id}/insights/viewed",
+            f"/v1/projects/{self.team.id}/insights/viewed",
             {"insight_ids": [insight_1_id]},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/my_last_viewed")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/my_last_viewed")
         response_data = response.json()
 
         # No results if no insights have been viewed
@@ -3114,15 +3115,15 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         self.client.post(
-            f"/api/projects/{self.team.id}/insights/viewed",
+            f"/v1/projects/{self.team.id}/insights/viewed",
             {"insight_ids": [insight_1_id]},
         )
         self.client.post(
-            f"/api/projects/{self.team.id}/insights/viewed",
+            f"/v1/projects/{self.team.id}/insights/viewed",
             {"insight_ids": [insight_2_id]},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/my_last_viewed")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/my_last_viewed")
         response_data = response.json()
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -3135,31 +3136,31 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         # multiple views of a single don't drown out other views
         self.client.post(
-            f"/api/projects/{self.team.id}/insights/viewed",
+            f"/v1/projects/{self.team.id}/insights/viewed",
             {"insight_ids": [insight_1_id]},
         )
         self.client.post(
-            f"/api/projects/{self.team.id}/insights/viewed",
+            f"/v1/projects/{self.team.id}/insights/viewed",
             {"insight_ids": [insight_1_id]},
         )
         self.client.post(
-            f"/api/projects/{self.team.id}/insights/viewed",
+            f"/v1/projects/{self.team.id}/insights/viewed",
             {"insight_ids": [insight_1_id]},
         )
 
         # soft-deleted insights aren't shown
         self.client.post(
-            f"/api/projects/{self.team.id}/insights/viewed",
+            f"/v1/projects/{self.team.id}/insights/viewed",
             {"insight_ids": [insight_3_id]},
         )
         self.dashboard_api.soft_delete(insight_3_id, "insights")
 
         self.client.post(
-            f"/api/projects/{self.team.id}/insights/viewed",
+            f"/v1/projects/{self.team.id}/insights/viewed",
             {"insight_ids": [insight_2_id]},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/my_last_viewed")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/my_last_viewed")
         response_data = response.json()
 
         # Insights are ordered by most recently viewed
@@ -3167,11 +3168,11 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         assert [r["id"] for r in response_data] == [insight_2_id, insight_1_id]
 
         self.client.post(
-            f"/api/projects/{self.team.id}/insights/viewed",
+            f"/v1/projects/{self.team.id}/insights/viewed",
             {"insight_ids": [insight_1_id]},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/my_last_viewed")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/my_last_viewed")
         response_data = response.json()
 
         # Order updates when an insight is viewed again
@@ -3197,7 +3198,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             team=self.team, user=other_user, insight_id=two_views_id, defaults={"last_viewed_at": viewed_at}
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/trending")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/trending")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         body = response.json()
         results = body["results"]
@@ -3226,11 +3227,11 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             defaults={"last_viewed_at": timezone.now() - timedelta(days=14)},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/trending?days=7")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/trending?days=7")
         ids = [r["id"] for r in response.json()["results"]]
         assert ids == [recent_id]
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/trending?days=30")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/trending?days=30")
         ids = [r["id"] for r in response.json()["results"]]
         assert set(ids) == {recent_id, old_id}
 
@@ -3246,7 +3247,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
         self.dashboard_api.soft_delete(deleted_id, "insights")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/trending")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/trending")
         ids = [r["id"] for r in response.json()["results"]]
         assert ids == [kept_id]
 
@@ -3257,13 +3258,13 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 team=self.team, user=self.user, insight_id=insight_id, defaults={"last_viewed_at": timezone.now()}
             )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/trending?limit=2")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/trending?limit=2")
         body = response.json()
         assert len(body["results"]) == 2
         assert body["count"] == 2
 
     def test_trending_insights_rejects_invalid_params(self) -> None:
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/trending?days=abc")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/trending?days=abc")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_get_recent_insights_with_feature_flag(self) -> None:
@@ -3293,7 +3294,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             short_id="00992281",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?feature_flag=insight-with-flag-used")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?feature_flag=insight-with-flag-used")
         response_data = response.json()
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -3338,7 +3339,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             short_id="query_noflag",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?feature_flag=my-test-flag")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?feature_flag=my-test-flag")
         response_data = response.json()
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -3400,17 +3401,17 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights/{insight_id}",
+            f"/v1/projects/{self.team.id}/insights/{insight_id}",
             {"dashboards": [dashboard_own_team.pk, dashboard_other_team.pk]},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_hard_delete_is_forbidden(self) -> None:
         insight_id, _ = self.dashboard_api.create_insight({"name": "to be deleted"})
-        api_response = self.client.delete(f"/api/projects/{self.team.id}/insights/{insight_id}")
+        api_response = self.client.delete(f"/v1/projects/{self.team.id}/insights/{insight_id}")
         self.assertEqual(api_response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
         self.assertEqual(
-            self.client.get(f"/api/projects/{self.team.id}/insights/{insight_id}").status_code,
+            self.client.get(f"/v1/projects/{self.team.id}/insights/{insight_id}").status_code,
             status.HTTP_200_OK,
         )
 
@@ -3418,7 +3419,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         insight_id, _ = self.dashboard_api.create_insight({"name": "to be deleted"})
         self.dashboard_api.get_insight(insight_id=insight_id, expected_status=status.HTTP_200_OK)
 
-        update_response = self.client.patch(f"/api/projects/{self.team.id}/insights/{insight_id}", {"deleted": True})
+        update_response = self.client.patch(f"/v1/projects/{self.team.id}/insights/{insight_id}", {"deleted": True})
         self.assertEqual(update_response.status_code, status.HTTP_200_OK)
 
         self.dashboard_api.get_insight(insight_id=insight_id, expected_status=status.HTTP_404_NOT_FOUND)
@@ -3427,7 +3428,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         insight_id, _ = self.dashboard_api.create_insight({"name": "an insight"})
 
         self.client.patch(
-            f"/api/projects/{self.team.id}/insights/{insight_id}",
+            f"/v1/projects/{self.team.id}/insights/{insight_id}",
             {
                 "deleted": True,
                 "name": "an insight",
@@ -3435,12 +3436,12 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         self.assertEqual(
-            self.client.get(f"/api/projects/{self.team.id}/insights/{insight_id}").status_code,
+            self.client.get(f"/v1/projects/{self.team.id}/insights/{insight_id}").status_code,
             status.HTTP_404_NOT_FOUND,
         )
 
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights/{insight_id}",
+            f"/v1/projects/{self.team.id}/insights/{insight_id}",
             {
                 "deleted": False,
                 "name": "an insight",
@@ -3449,7 +3450,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertEqual(update_response.status_code, status.HTTP_200_OK)
 
         self.assertEqual(
-            self.client.get(f"/api/projects/{self.team.id}/insights/{insight_id}").status_code,
+            self.client.get(f"/v1/projects/{self.team.id}/insights/{insight_id}").status_code,
             status.HTTP_200_OK,
         )
 
@@ -3478,7 +3479,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         other_update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights/{other_insight.id}",
+            f"/v1/projects/{self.team.id}/insights/{other_insight.id}",
             {"deleted": False},
         )
         self.assertEqual(other_update_response.status_code, status.HTTP_404_NOT_FOUND)
@@ -3487,7 +3488,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         # There is no good way of writing a test that tests this without it being very slow
         #  Just verify it doesn't throw an error
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/cancel",
+            f"/v1/projects/{self.team.id}/insights/cancel",
             {"client_query_id": f"testid"},
         )
         self.assertEqual(response.status_code, 201, response.content)
@@ -3505,7 +3506,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
     def _get_insight_with_client_query_id(self, client_query_id: str) -> dict:
         query_params = f"?events={json.dumps([{'id': '$pageview'}])}&client_query_id={client_query_id}"
-        return self.client.get(f"/api/projects/{self.team.id}/insights/trend/{query_params}").json()
+        return self.client.get(f"/v1/projects/{self.team.id}/insights/trend/{query_params}").json()
 
     def assert_insight_activity(self, insight_id: Optional[int], expected: list[dict]):
         activity_response = self.dashboard_api.get_insight_activity(insight_id)
@@ -3534,7 +3535,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         with freeze_time("2012-01-15T04:01:34.000Z"):
             # 25 events total
             response = self.client.get(
-                f"/api/projects/{self.team.id}/insights/trend/",
+                f"/v1/projects/{self.team.id}/insights/trend/",
                 data={"events": json.dumps([{"id": "$pageview"}])},
             )
             found_data_points = response.json()["result"][0]["count"]
@@ -3542,7 +3543,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
             # test trends global property filter
             response = self.client.get(
-                f"/api/projects/{self.team.id}/insights/trend/",
+                f"/v1/projects/{self.team.id}/insights/trend/",
                 data={
                     "events": json.dumps([{"id": "$pageview"}]),
                     "properties": json.dumps(
@@ -3565,7 +3566,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
             # test trends global property filter with a disallowed placeholder
             response_placeholder = self.client.get(
-                f"/api/projects/{self.team.id}/insights/trend/",
+                f"/v1/projects/{self.team.id}/insights/trend/",
                 data={
                     "events": json.dumps([{"id": "$pageview"}]),
                     "properties": json.dumps(
@@ -3600,7 +3601,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         with freeze_time("2012-01-15T04:01:34.000Z"):
             # test trends local property filter
             response = self.client.get(
-                f"/api/projects/{self.team.id}/insights/trend/",
+                f"/v1/projects/{self.team.id}/insights/trend/",
                 data={
                     "events": json.dumps(
                         [
@@ -3641,7 +3642,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         with freeze_time("2012-01-15T04:01:34.000Z"):
             # test trends breakdown
             response = self.client.get(
-                f"/api/projects/{self.team.id}/insights/trend/",
+                f"/v1/projects/{self.team.id}/insights/trend/",
                 data={
                     "events": json.dumps([{"id": "$pageview"}]),
                     "breakdown_type": "insightsql",
@@ -3676,7 +3677,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 properties={"int_value": 20},
             )
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights/funnel/",
+                f"/v1/projects/{self.team.id}/insights/funnel/",
                 {
                     "events": [
                         {"id": "user signed up", "type": "events", "order": 0},
@@ -3728,7 +3729,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 properties={"int_value": 20},
             )
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights/funnel/",
+                f"/v1/projects/{self.team.id}/insights/funnel/",
                 {
                     "events": [
                         {
@@ -3800,7 +3801,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 properties={"int_value": 20},
             )
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights/funnel/",
+                f"/v1/projects/{self.team.id}/insights/funnel/",
                 {
                     "breakdown_type": "insightsql",
                     "breakdowns": [{"property": "person.properties.fish", "type": "insightsql"}],
@@ -3855,7 +3856,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 properties={"int_value": 20},
             )
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights/funnel/",
+                f"/v1/projects/{self.team.id}/insights/funnel/",
                 {
                     "breakdown_type": "insightsql",
                     "breakdown": "person.properties.fish",
@@ -3910,7 +3911,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
                 properties={"$browser": "Chrome"},
             )
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights/funnel/",
+                f"/v1/projects/{self.team.id}/insights/funnel/",
                 {
                     "insight": "FUNNELS",
                     "entity_type": "events",
@@ -3975,7 +3976,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             )
         with freeze_time("2012-01-16T04:01:38.200Z"):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights/funnel/",
+                f"/v1/projects/{self.team.id}/insights/funnel/",
                 {
                     "insight": "FUNNELS",
                     "entity_type": "events",
@@ -4038,7 +4039,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             )
         with freeze_time("2012-01-16T04:01:38.200Z"):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights/funnel/",
+                f"/v1/projects/{self.team.id}/insights/funnel/",
                 {
                     "insight": "FUNNELS",
                     "entity_type": "events",
@@ -4103,13 +4104,13 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         # fresh response
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/{insight.id}/?refresh=true")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/{insight.id}/?refresh=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["result"][0]["data"], [0, 0, 0, 0, 0, 0, 0, 0])
         self.assertFalse(response.json()["is_cached"])
 
         # cached response
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/{insight.id}/?refresh=false&use_cache=true")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/{insight.id}/?refresh=false&use_cache=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["result"][0]["data"], [0, 0, 0, 0, 0, 0, 0, 0])
         self.assertTrue(response.json()["is_cached"])
@@ -4137,7 +4138,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights",
+            f"/v1/projects/{self.team.id}/insights",
             data={
                 "short_id": insight.short_id,
             },
@@ -4148,7 +4149,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertIsNone(response["results"][0]["insightsql"])
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights",
+            f"/v1/projects/{self.team.id}/insights",
             data={"short_id": insight.short_id, "refresh": "true"},
         ).json()
 
@@ -4173,7 +4174,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights",
+            f"/v1/projects/{self.team.id}/insights",
             data={
                 "short_id": insight.short_id,
             },
@@ -4184,7 +4185,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertIsNone(response["results"][0]["types"])
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights",
+            f"/v1/projects/{self.team.id}/insights",
             data={"short_id": insight.short_id, "refresh": "true"},
         ).json()
 
@@ -4239,7 +4240,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             request_data["from_dashboard"] = str(dashboard.pk)
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight.pk}",
+            f"/v1/projects/{self.team.id}/insights/{insight.pk}",
             data=request_data,
         ).json()
 
@@ -4284,7 +4285,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             request_data["from_dashboard"] = str(dashboard.pk)
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight.pk}",
+            f"/v1/projects/{self.team.id}/insights/{insight.pk}",
             data=request_data,
         ).json()
 
@@ -4316,7 +4317,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         dashboard_filters = {"properties": [person_filter]}
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight.pk}",
+            f"/v1/projects/{self.team.id}/insights/{insight.pk}",
             data={
                 "from_dashboard": str(dashboard.pk),
                 "filters_override": json.dumps(dashboard_filters),
@@ -4358,7 +4359,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         }
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight.pk}",
+            f"/v1/projects/{self.team.id}/insights/{insight.pk}",
             data={"from_dashboard": str(dashboard.pk), "filters_override": json.dumps(dashboard_filters)},
         ).json()
 
@@ -4408,7 +4409,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         }
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight.pk}",
+            f"/v1/projects/{self.team.id}/insights/{insight.pk}",
             data={"from_dashboard": str(dashboard.pk), "filters_override": json.dumps(dashboard_filters)},
         ).json()
 
@@ -4446,7 +4447,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         }
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight.pk}",
+            f"/v1/projects/{self.team.id}/insights/{insight.pk}",
             data={"from_dashboard": str(dashboard.pk), "filters_override": json.dumps(dashboard_filters)},
         ).json()
 
@@ -4469,7 +4470,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         country_filter = {"key": "$country", "type": "event", "operator": "exact", "value": ["US"]}
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight.pk}",
+            f"/v1/projects/{self.team.id}/insights/{insight.pk}",
             data={
                 "from_dashboard": str(dashboard.pk),
                 "filters_override": json.dumps(
@@ -4525,7 +4526,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self.client.force_login(viewer)
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight.pk}",
+            f"/v1/projects/{self.team.id}/insights/{insight.pk}",
             data={"from_dashboard": str(dashboard.pk)},
         )
 
@@ -4587,7 +4588,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         }
 
         some_org_response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight.pk}",
+            f"/v1/projects/{self.team.id}/insights/{insight.pk}",
             data={
                 **base_query_params,
                 "variables_override": json.dumps(
@@ -4603,7 +4604,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         ).json()
 
         another_org_response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight.pk}",
+            f"/v1/projects/{self.team.id}/insights/{insight.pk}",
             data={
                 **base_query_params,
                 "variables_override": json.dumps(
@@ -4647,7 +4648,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         # Verify we can access visible insights
         self.client.force_login(user2)
-        response = self.client.get(f"/api/projects/{self.team.pk}/insights/")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/insights/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         insight_ids = [insight["id"] for insight in response.json()["results"]]
         self.assertIn(visible_insight.id, insight_ids)
@@ -4655,7 +4656,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         # Verify we can access all insights as creator
         self.client.force_login(self.user)
-        response = self.client.get(f"/api/projects/{self.team.pk}/insights/")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/insights/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(visible_insight.id, [insight["id"] for insight in response.json()["results"]])
         self.assertIn(hidden_insight.id, [insight["id"] for insight in response.json()["results"]])
@@ -4678,15 +4679,15 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         self.client.force_login(user2)
 
-        retrieve_response = self.client.get(f"/api/projects/{self.team.pk}/insights/{insight.id}/")
+        retrieve_response = self.client.get(f"/v1/projects/{self.team.pk}/insights/{insight.id}/")
         self.assertEqual(retrieve_response.status_code, status.HTTP_403_FORBIDDEN)
 
-        activity_response = self.client.get(f"/api/projects/{self.team.pk}/insights/{insight.id}/activity/")
+        activity_response = self.client.get(f"/v1/projects/{self.team.pk}/insights/{insight.id}/activity/")
         self.assertEqual(activity_response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_create_insight_in_specific_folder(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights/",
+            f"/v1/projects/{self.team.id}/insights/",
             {
                 "name": "My test insight in folder",
                 "filters": {"events": [{"id": "$pageview"}]},
@@ -4730,7 +4731,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
             },
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/{insight.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/{insight.id}")
         self.assertEqual(response.status_code, 200)
 
         response_data = response.json()
@@ -4744,7 +4745,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         variable = InsightVariable.objects.create(team=self.team, code_name="test_var", name="Test Variable")
 
         # # Get the insight via the API
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/{insight.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/{insight.id}")
         self.assertEqual(response.status_code, 200)
 
         # # Verify both variables are properly included in the response
@@ -4765,9 +4766,8 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         Test that when listing insights with short_id parameter, organization admins can see all insights
         regardless of access controls, but regular users are still filtered by access controls.
         """
-        from insights.models.organization import OrganizationMembership
-
         from insights.models.ee_models import AccessControl
+        from insights.models.organization import OrganizationMembership
 
         self.organization.available_product_features = [
             {"key": AvailableFeature.ACCESS_CONTROL, "name": AvailableFeature.ACCESS_CONTROL},
@@ -4804,7 +4804,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
         # Test 1: Regular user should not see blocked insight in regular list
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         insight_ids = [insight["id"] for insight in results]
@@ -4812,13 +4812,13 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertNotIn(blocked_insight.id, insight_ids)
 
         # Test 2: Regular user should not see blocked insight even with short_id
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?short_id={blocked_insight_short_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?short_id={blocked_insight_short_id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(len(results), 0)  # Should be filtered out
 
         # Test 3: Regular user should see accessible insight with short_id
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?short_id={accessible_insight_short_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?short_id={accessible_insight_short_id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(len(results), 1)
@@ -4829,7 +4829,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self.organization_membership.save()
 
         # Admin should see only accessible insight in regular list
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         insight_ids = [insight["id"] for insight in results]
@@ -4837,7 +4837,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertNotIn(blocked_insight.id, insight_ids)
 
         # Admin should see blocked insight with short_id (include_all_if_admin=True)
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?short_id={blocked_insight_short_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?short_id={blocked_insight_short_id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(len(results), 1)
@@ -4845,7 +4845,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertEqual(results[0]["short_id"], blocked_insight_short_id)
 
         # Admin should see accessible insight with short_id
-        response = self.client.get(f"/api/projects/{self.team.id}/insights/?short_id={accessible_insight_short_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights/?short_id={accessible_insight_short_id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(len(results), 1)
@@ -4889,7 +4889,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
 
         # Test that retention query doesn't error when breakdown is applied
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight.id}/?refresh=force_blocking&from_dashboard={dashboard.id}"
+            f"/v1/projects/{self.team.id}/insights/{insight.id}/?refresh=force_blocking&from_dashboard={dashboard.id}"
         )
 
         self.assertEqual(response.status_code, 200)
@@ -5055,7 +5055,7 @@ class TestInsight(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         DashboardTile.objects.create(dashboard=dashboard, insight=insight)
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight.id}/?refresh=force_blocking&from_dashboard={dashboard.id}"
+            f"/v1/projects/{self.team.id}/insights/{insight.id}/?refresh=force_blocking&from_dashboard={dashboard.id}"
         )
 
         self.assertEqual(response.status_code, 200)
@@ -5076,8 +5076,16 @@ class TestInsightErrorHandling(DatastoreTestMixin, APIBaseTest):
     @parameterized.expand(
         [
             ("ExposedCHQueryError", "insights.errors.ExposedCHQueryError", "NO_COMMON_TYPE error from Datastore"),
-            ("ExposedInsightsQLError", "insights.insightsql.errors.ExposedInsightsQLError", "Invalid InsightsQL syntax"),
-            ("ScriptVMException", "common.scriptvm.python.utils.ScriptVMException", "Global variable not found: variables"),
+            (
+                "ExposedInsightsQLError",
+                "insights.insightsql.errors.ExposedInsightsQLError",
+                "Invalid InsightsQL syntax",
+            ),
+            (
+                "ScriptVMException",
+                "common.scriptvm.python.utils.ScriptVMException",
+                "Global variable not found: variables",
+            ),
         ]
     )
     @patch("insights.caching.calculate_results.calculate_for_query_based_insight")
@@ -5105,7 +5113,7 @@ class TestInsightErrorHandling(DatastoreTestMixin, APIBaseTest):
             },
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/insights/{insight.id}/?refresh=blocking")
+        response = self.client.get(f"/v1/environments/{self.team.id}/insights/{insight.id}/?refresh=blocking")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn(error_message, str(response.json()))
@@ -5135,7 +5143,7 @@ class TestInsightErrorHandling(DatastoreTestMixin, APIBaseTest):
         mock_process.side_effect = error_classes[error_type](error_message)
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/insights/trend/",
+            f"/v1/environments/{self.team.id}/insights/trend/",
             data={"events": json.dumps([{"id": "$pageview"}])},
         )
 
@@ -5167,7 +5175,7 @@ class TestInsightErrorHandling(DatastoreTestMixin, APIBaseTest):
         mock_process.side_effect = error_classes[error_type](error_message)
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/insights/funnel/",
+            f"/v1/environments/{self.team.id}/insights/funnel/",
             data={"events": json.dumps([{"id": "$pageview"}, {"id": "$pageleave"}])},
         )
 
@@ -5180,10 +5188,10 @@ class TestInsightBulkDelete(DatastoreTestMixin, APIBaseTest, QueryMatchingTest):
         return Insight.objects.create(team=self.team, name=name, saved=True, created_by=self.user)
 
     def _bulk_delete(self, ids: list[int]) -> Any:
-        return self.client.post(f"/api/environments/{self.team.id}/insights/bulk_delete/", {"ids": ids}, format="json")
+        return self.client.post(f"/v1/environments/{self.team.id}/insights/bulk_delete/", {"ids": ids}, format="json")
 
     def _bulk_restore(self, ids: list[int]) -> Any:
-        return self.client.post(f"/api/environments/{self.team.id}/insights/bulk_restore/", {"ids": ids}, format="json")
+        return self.client.post(f"/v1/environments/{self.team.id}/insights/bulk_restore/", {"ids": ids}, format="json")
 
     def test_bulk_delete_soft_deletes_insights(self) -> None:
         one = self._create_insight("one")

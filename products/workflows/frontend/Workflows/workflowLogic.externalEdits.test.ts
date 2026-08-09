@@ -68,11 +68,11 @@ describe('workflowLogic external edits', () => {
         getCalls = 0
         useMocks({
             get: {
-                '/api/environments/:team_id/hog_flows/:id/': () => {
+                '/v1/environments/:team_id/hog_flows/:id/': () => {
                     getCalls += 1
                     return [200, makeWorkflow()]
                 },
-                '/api/projects/:team_id/insights_function_templates/': { results: [], count: 0 },
+                '/v1/projects/:team_id/insights_function_templates/': { results: [], count: 0 },
             },
         })
         initKeaTests()
@@ -151,8 +151,8 @@ describe('workflowLogic external edits', () => {
         // The server copy has advanced; Keep mine adopts that timestamp so the user's next save wins.
         useMocks({
             get: {
-                '/api/environments/:team_id/hog_flows/:id/': () => [200, makeWorkflow({ updated_at: NEWER })],
-                '/api/projects/:team_id/insights_function_templates/': { results: [], count: 0 },
+                '/v1/environments/:team_id/hog_flows/:id/': () => [200, makeWorkflow({ updated_at: NEWER })],
+                '/v1/projects/:team_id/insights_function_templates/': { results: [], count: 0 },
             },
         })
 
@@ -170,11 +170,11 @@ describe('workflowLogic external edits', () => {
         silenceKeaLoadersErrors() // the 409 save failure is the scenario under test
         useMocks({
             get: {
-                '/api/environments/:team_id/hog_flows/:id/': () => [200, makeWorkflow()],
-                '/api/projects/:team_id/insights_function_templates/': { results: [], count: 0 },
+                '/v1/environments/:team_id/hog_flows/:id/': () => [200, makeWorkflow()],
+                '/v1/projects/:team_id/insights_function_templates/': { results: [], count: 0 },
             },
             patch: {
-                '/api/environments/:team_id/hog_flows/:id/': () => [409, { detail: 'stale_update' }],
+                '/v1/environments/:team_id/hog_flows/:id/': () => [409, { detail: 'stale_update' }],
             },
         })
         logic.actions.setAutoSaveEnabled(false)

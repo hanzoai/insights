@@ -21,11 +21,11 @@ describe('personalAPIKeysLogic', () => {
 
         useMocks({
             get: {
-                '/api/personal_api_keys/': [],
-                '/api/projects/': { results: [], count: 0, next: null, previous: null },
+                '/v1/personal_api_keys/': [],
+                '/v1/projects/': { results: [], count: 0, next: null, previous: null },
             },
             post: {
-                '/api/personal_api_keys/': async ({ request }) => {
+                '/v1/personal_api_keys/': async ({ request }) => {
                     capturedCreatePayload = await request.json()
                     return [
                         200,

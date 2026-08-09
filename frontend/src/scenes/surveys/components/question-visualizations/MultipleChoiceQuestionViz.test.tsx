@@ -46,8 +46,8 @@ describe('MultipleChoiceQuestionViz double-click filtering', () => {
         router.actions.push('/surveys/test-survey')
         useMocks({
             get: {
-                '/api/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
-                '/api/projects/:team/surveys/test-survey/': () => [
+                '/v1/projects/:team/surveys/': () => [200, { count: 0, results: [], next: null, previous: null }],
+                '/v1/projects/:team/surveys/test-survey/': () => [
                     200,
                     {
                         id: 'test-survey',
@@ -62,11 +62,11 @@ describe('MultipleChoiceQuestionViz double-click filtering', () => {
                         created_at: '2026-01-01T00:00:00Z',
                     },
                 ],
-                '/api/projects/:team/surveys/test-survey/archived-response-uuids/': () => [200, []],
-                '/api/projects/:team/surveys/responses_count/': () => [200, {}],
+                '/v1/projects/:team/surveys/test-survey/archived-response-uuids/': () => [200, []],
+                '/v1/projects/:team/surveys/responses_count/': () => [200, {}],
             },
             post: {
-                '/api/environments/:team_id/query/': () => [200, { results: [] }],
+                '/v1/environments/:team_id/query/': () => [200, { results: [] }],
             },
         })
         logic = surveyLogic({ id: 'test-survey' })

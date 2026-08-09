@@ -28,7 +28,7 @@ export async function refreshOAuthTokens(
             // logs, never reported to error tracking.
             let response: Response
             try {
-                response = await safeFetch(`${uiHost}/api/user/toolbar_oauth_refresh/`, {
+                response = await safeFetch(`${uiHost}/v1/user/toolbar_oauth_refresh/`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ refresh_token: currentRefreshToken, client_id: clientId }),

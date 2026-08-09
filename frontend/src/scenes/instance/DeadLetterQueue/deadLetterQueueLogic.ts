@@ -143,7 +143,7 @@ export const deadLetterQueueLogic = kea<deadLetterQueueLogicType>([
                     if (values.filters.after) {
                         params.after = values.filters.after
                     }
-                    return (await api.get(`api/dead_letter_queue?${new URLSearchParams(params).toString()}`)).results
+                    return (await api.get(`v1/dead_letter_queue?${new URLSearchParams(params).toString()}`)).results
                 },
             },
         ],
@@ -163,7 +163,7 @@ export const deadLetterQueueLogic = kea<deadLetterQueueLogicType>([
                 if (values.filters.after) {
                     params.after = values.filters.after
                 }
-                const res = await api.get(`api/dead_letter_queue/${key}?${new URLSearchParams(params).toString()}`)
+                const res = await api.get(`v1/dead_letter_queue/${key}?${new URLSearchParams(params).toString()}`)
                 actions.addRowsToMetric(key, res.subrows.rows)
             }
         },

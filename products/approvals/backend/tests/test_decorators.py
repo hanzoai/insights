@@ -43,7 +43,7 @@ class TestApprovalGateFailsClosed(APIBaseTest):
         request.method = "PATCH"
         request.data = data
         request.user = self.user
-        request.path = f"/api/projects/{self.team.id}/feature_flags/"
+        request.path = f"/v1/projects/{self.team.id}/feature_flags/"
         return request
 
     def _serializer(self, flag: FeatureFlag, data: dict[str, Any], context: dict[str, Any]) -> FeatureFlagSerializer:

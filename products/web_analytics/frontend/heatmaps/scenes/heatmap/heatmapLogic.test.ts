@@ -8,13 +8,13 @@ describe('resolveHeatmapExportUrl', () => {
     it.each([
         [
             'screenshot',
-            '/api/environments/1/heatmap_screenshots/42/content/?width=1400',
+            '/v1/environments/1/heatmap_screenshots/42/content/?width=1400',
             'https://example.com/page',
-            `${origin}/api/environments/1/heatmap_screenshots/42/content/?width=1400`,
+            `${origin}/v1/environments/1/heatmap_screenshots/42/content/?width=1400`,
         ],
         [
             'iframe',
-            '/api/environments/1/heatmap_screenshots/42/content/',
+            '/v1/environments/1/heatmap_screenshots/42/content/',
             'https://example.com/page',
             'https://example.com/page',
         ],

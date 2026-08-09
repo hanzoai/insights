@@ -30,7 +30,7 @@ except ImportError:
 
 class TestSyntheticPlaylists(APIBaseTest):
     def _get_playlists_response(self, query_params: str = "") -> dict:
-        url = f"/api/projects/{self.team.id}/session_recording_playlists{query_params}"
+        url = f"/v1/projects/{self.team.id}/session_recording_playlists{query_params}"
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         return response.json()
@@ -43,7 +43,7 @@ class TestSyntheticPlaylists(APIBaseTest):
         return [p["short_id"] for p in response_data["results"] if p["short_id"].startswith("synthetic-")]
 
     def _get_synthetic_playlist(self, short_id: str) -> dict:
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recording_playlists/{short_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recording_playlists/{short_id}")
         assert response.status_code == status.HTTP_200_OK
         return response.json()
 
@@ -209,7 +209,7 @@ class TestSyntheticPlaylists(APIBaseTest):
         assert playlist["short_id"] == "synthetic-watch-history"
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/session_recording_playlists/synthetic-watch-history",
+            f"/v1/projects/{self.team.id}/session_recording_playlists/synthetic-watch-history",
             {"name": "Modified name", "description": "Modified description"},
         )
 
@@ -220,7 +220,7 @@ class TestSyntheticPlaylists(APIBaseTest):
         assert playlist["short_id"] == "synthetic-watch-history"
 
         response = self.client.delete(
-            f"/api/projects/{self.team.id}/session_recording_playlists/synthetic-watch-history"
+            f"/v1/projects/{self.team.id}/session_recording_playlists/synthetic-watch-history"
         )
 
         assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
@@ -339,13 +339,13 @@ class TestFrustrationSignalsSyntheticPlaylist(APIBaseTest):
             sync_execute(f"TRUNCATE TABLE {EVENTS_JSON_DATA_TABLE}")
 
     def _get_playlists_response(self, query_params: str = "") -> dict:
-        url = f"/api/projects/{self.team.id}/session_recording_playlists{query_params}"
+        url = f"/v1/projects/{self.team.id}/session_recording_playlists{query_params}"
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         return response.json()
 
     def _get_synthetic_playlist(self, short_id: str) -> dict:
-        response = self.client.get(f"/api/projects/{self.team.id}/session_recording_playlists/{short_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/session_recording_playlists/{short_id}")
         assert response.status_code == status.HTTP_200_OK
         return response.json()
 

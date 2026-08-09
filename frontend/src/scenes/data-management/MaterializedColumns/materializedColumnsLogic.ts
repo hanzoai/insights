@@ -172,7 +172,7 @@ export const materializedColumnsLogic = kea<materializedColumnsLogicType>([
                         return []
                     }
                     const response = await api.get(
-                        `api/environments/${values.currentTeam.id}/materialized_column_slots/`
+                        `v1/environments/${values.currentTeam.id}/materialized_column_slots/`
                     )
                     return response.results || []
                 },
@@ -186,7 +186,7 @@ export const materializedColumnsLogic = kea<materializedColumnsLogicType>([
                         return null
                     }
                     return await api.get(
-                        `api/environments/${values.currentTeam.id}/materialized_column_slots/slot_usage/`
+                        `v1/environments/${values.currentTeam.id}/materialized_column_slots/slot_usage/`
                     )
                 },
             },
@@ -199,7 +199,7 @@ export const materializedColumnsLogic = kea<materializedColumnsLogicType>([
                         return []
                     }
                     return await api.get(
-                        `api/environments/${values.currentTeam.id}/materialized_column_slots/available_properties/`
+                        `v1/environments/${values.currentTeam.id}/materialized_column_slots/available_properties/`
                     )
                 },
             },
@@ -212,7 +212,7 @@ export const materializedColumnsLogic = kea<materializedColumnsLogicType>([
                         return []
                     }
                     return await api.get(
-                        `api/environments/${values.currentTeam.id}/materialized_column_slots/auto_materialized/`
+                        `v1/environments/${values.currentTeam.id}/materialized_column_slots/auto_materialized/`
                     )
                 },
             },
@@ -251,7 +251,7 @@ export const materializedColumnsLogic = kea<materializedColumnsLogicType>([
                 if (!values.currentTeam) {
                     return
                 }
-                await api.delete(`api/environments/${values.currentTeam.id}/materialized_column_slots/${slotId}/`)
+                await api.delete(`v1/environments/${values.currentTeam.id}/materialized_column_slots/${slotId}/`)
                 toast.success('Slot deleted successfully')
                 actions.loadSlots()
             } catch (error) {
@@ -265,7 +265,7 @@ export const materializedColumnsLogic = kea<materializedColumnsLogicType>([
                     return
                 }
                 await api.create(
-                    `api/environments/${values.currentTeam.id}/materialized_column_slots/${slotId}/retry_backfill/`,
+                    `v1/environments/${values.currentTeam.id}/materialized_column_slots/${slotId}/retry_backfill/`,
                     {}
                 )
                 toast.success('Slot re-queued — it will be picked up by the next weekly backfill cycle')

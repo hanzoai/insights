@@ -21,7 +21,7 @@ describe('aiObservabilityTraceLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/environments/:team_id/query/': { results: [] },
+                '/v1/environments/:team_id/query/': { results: [] },
             },
         })
         initKeaTests()

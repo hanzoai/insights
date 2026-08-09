@@ -147,7 +147,7 @@ def test_patch_cdc_table_mode_adding_target_triggers_resnapshot(team, user, clie
         mock.patch(_PATCH_TARGETS["trigger_external_data_workflow"]) as mock_trigger,
     ):
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={"cdc_table_mode": new_mode},
             content_type="application/json",
         )
@@ -186,7 +186,7 @@ def test_patch_cdc_table_mode_dropping_target_skips_resnapshot(team, user, clien
         mock.patch(_PATCH_TARGETS["trigger_external_data_workflow"]) as mock_trigger,
     ):
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={"cdc_table_mode": new_mode},
             content_type="application/json",
         )
@@ -217,7 +217,7 @@ def test_patch_cdc_table_mode_idempotent_skips_resnapshot(team, user, client: Ht
         mock.patch(_PATCH_TARGETS["trigger_external_data_workflow"]) as mock_trigger,
     ):
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={"cdc_table_mode": "both"},
             content_type="application/json",
         )
@@ -249,7 +249,7 @@ def test_patch_cdc_table_mode_rejected_when_team_over_billing_limit(team, user, 
         mock.patch(_PATCH_TARGETS["is_any_external_data_schema_paused"], return_value=True),
     ):
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={"cdc_table_mode": "both"},
             content_type="application/json",
         )
@@ -282,7 +282,7 @@ def test_patch_cdc_table_mode_drop_target_allowed_when_team_over_billing_limit(t
         mock.patch(_PATCH_TARGETS["is_any_external_data_schema_paused"], return_value=True),
     ):
         response = client.patch(
-            f"/api/environments/{team.pk}/external_data_schemas/{schema.id}",
+            f"/v1/environments/{team.pk}/external_data_schemas/{schema.id}",
             data={"cdc_table_mode": "consolidated"},
             content_type="application/json",
         )

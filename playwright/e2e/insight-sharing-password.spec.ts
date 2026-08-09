@@ -38,7 +38,7 @@ test('password-protected insight sharing', async ({ page, playwrightSetup }) => 
         },
     }
 
-    const insightResponse = await page.request.post(`/api/projects/${workspace.team_id}/insights/`, {
+    const insightResponse = await page.request.post(`/v1/projects/${workspace.team_id}/insights/`, {
         headers: {
             Authorization: `Bearer ${workspace.personal_api_key}`,
             'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ test('password-protected insight sharing', async ({ page, playwrightSetup }) => 
 
     // Enable sharing with password protection
     const sharingResponse = await page.request.patch(
-        `/api/projects/${workspace.team_id}/insights/${insightData.id}/sharing`,
+        `/v1/projects/${workspace.team_id}/insights/${insightData.id}/sharing`,
         {
             headers: {
                 Authorization: `Bearer ${workspace.personal_api_key}`,
@@ -82,7 +82,7 @@ test('password-protected insight sharing', async ({ page, playwrightSetup }) => 
 
     // Create a password for the shared insight
     const passwordResponse = await page.request.post(
-        `/api/projects/${workspace.team_id}/insights/${insightData.id}/sharing/passwords/`,
+        `/v1/projects/${workspace.team_id}/insights/${insightData.id}/sharing/passwords/`,
         {
             headers: {
                 Authorization: `Bearer ${workspace.personal_api_key}`,

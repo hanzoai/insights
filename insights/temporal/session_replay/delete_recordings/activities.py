@@ -205,7 +205,7 @@ async def delete_recordings(input: DeleteRecordingsInput) -> DeleteRecordingsRes
     if not recording_api_url:
         raise RuntimeError("RECORDING_API_URL is not configured")
 
-    url = f"{recording_api_url}/api/projects/{input.team_id}/recordings/delete"
+    url = f"{recording_api_url}/v1/projects/{input.team_id}/recordings/delete"
 
     headers: dict[str, str] = {}
     if settings.INTERNAL_API_SECRET:

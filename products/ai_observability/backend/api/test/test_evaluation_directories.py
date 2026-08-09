@@ -32,7 +32,7 @@ class TestEvaluationDirectoriesApi(APIBaseTest):
         )
 
     def test_names_are_trimmed_and_unique_ignoring_case(self) -> None:
-        url = f"/api/projects/{self.team.id}/evaluation_directories/"
+        url = f"/v1/projects/{self.team.id}/evaluation_directories/"
 
         created = self.client.post(url, {"name": "  Quality  "}, format="json")
         duplicate = self.client.post(url, {"name": "quality"}, format="json")
@@ -45,7 +45,7 @@ class TestEvaluationDirectoriesApi(APIBaseTest):
     def test_evaluation_can_move_into_a_directory_and_back_to_the_top_level(self) -> None:
         directory = self._create_directory()
         evaluation = self._create_evaluation()
-        url = f"/api/projects/{self.team.id}/evaluations/{evaluation.id}/"
+        url = f"/v1/projects/{self.team.id}/evaluations/{evaluation.id}/"
 
         moved = self.client.patch(url, {"directory_id": str(directory.id)}, format="json")
         moved_to_top_level = self.client.patch(url, {"directory_id": None}, format="json")
@@ -64,7 +64,7 @@ class TestEvaluationDirectoriesApi(APIBaseTest):
         evaluation = self._create_evaluation()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/evaluations/{evaluation.id}/",
+            f"/v1/projects/{self.team.id}/evaluations/{evaluation.id}/",
             {"directory_id": str(other_directory.id)},
             format="json",
         )
@@ -83,8 +83,8 @@ class TestEvaluationDirectoriesApi(APIBaseTest):
         previous_updated_at = active_evaluation.updated_at
         ActivityLog.objects.filter(team_id=self.team.id).delete()
 
-        listed = self.client.get(f"/api/projects/{self.team.id}/evaluation_directories/")
-        response = self.client.delete(f"/api/projects/{self.team.id}/evaluation_directories/{directory.id}/")
+        listed = self.client.get(f"/v1/projects/{self.team.id}/evaluation_directories/")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/evaluation_directories/{directory.id}/")
 
         self.assertEqual(listed.status_code, status.HTTP_200_OK)
         self.assertEqual(listed.json()[0]["evaluation_count"], 1)
@@ -121,7 +121,7 @@ class TestEvaluationDirectoriesApi(APIBaseTest):
         Evaluation.objects.filter(id=directory_evaluation.id).update(directory=directory)
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/evaluations/",
+            f"/v1/projects/{self.team.id}/evaluations/",
             {"directory_id__isnull": "true"},
         )
 
@@ -160,11 +160,11 @@ class TestEvaluationDirectoriesApi(APIBaseTest):
         self.client.force_login(limited_user)
 
         renamed = self.client.patch(
-            f"/api/projects/{self.team.id}/evaluation_directories/{directory.id}/",
+            f"/v1/projects/{self.team.id}/evaluation_directories/{directory.id}/",
             {"name": "Renamed"},
             format="json",
         )
-        deleted = self.client.delete(f"/api/projects/{self.team.id}/evaluation_directories/{directory.id}/")
+        deleted = self.client.delete(f"/v1/projects/{self.team.id}/evaluation_directories/{directory.id}/")
 
         self.assertEqual(renamed.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(deleted.status_code, status.HTTP_403_FORBIDDEN)

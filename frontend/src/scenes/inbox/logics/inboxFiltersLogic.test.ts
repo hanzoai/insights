@@ -117,7 +117,7 @@ describe('inboxFiltersLogic', () => {
             // Filter state persists to localStorage, which jsdom keeps between tests.
             localStorage.clear()
             initKeaTests()
-            useMocks({ get: { '/api/projects/:team_id/signals/reports/available_reviewers/': () => [200, {}] } })
+            useMocks({ get: { '/v1/projects/:team_id/signals/reports/available_reviewers/': () => [200, {}] } })
             ;(insights.capture as jest.Mock).mockClear()
             logic = inboxFiltersLogic()
             logic.mount()
@@ -160,7 +160,7 @@ describe('inboxFiltersLogic', () => {
         beforeEach(() => {
             localStorage.clear()
             initKeaTests()
-            useMocks({ get: { '/api/projects/:team_id/signals/reports/available_reviewers/': () => [200, {}] } })
+            useMocks({ get: { '/v1/projects/:team_id/signals/reports/available_reviewers/': () => [200, {}] } })
             logic = inboxFiltersLogic()
             logic.mount()
         })

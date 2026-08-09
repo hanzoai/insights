@@ -1,4 +1,4 @@
-"""`/api/users/@me/push_tokens/` — register and unregister mobile push tokens.
+"""`/v1/users/@me/push_tokens/` — register and unregister mobile push tokens.
 
 The mobile app uploads its Expo push token after the user grants notification
 permission. The backend fans out push notifications to every stored token
@@ -7,7 +7,7 @@ run finishes or needs the user's input).
 
 This is **device self-registration only**: every request acts on the
 authenticated user, never on someone else. The nested URL prefix is here only
-to match the rest of `/api/users/@me/…`.
+to match the rest of `/v1/users/@me/…`.
 """
 
 from typing import cast
@@ -69,7 +69,7 @@ class UserPushTokenUnregisterRequestSerializer(serializers.Serializer):
 
 @extend_schema(extensions={"x-product": "core"})
 class UserPushTokenViewSet(viewsets.GenericViewSet):
-    """`/api/users/@me/push_tokens/` — manage the authenticated user's push notification tokens."""
+    """`/v1/users/@me/push_tokens/` — manage the authenticated user's push notification tokens."""
 
     scope_object = "user"
     required_scopes: list[str] | None = None

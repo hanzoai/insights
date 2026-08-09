@@ -49,7 +49,7 @@ describe('actionEditorSceneLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/vision/actions/:id/': ({ params }) =>
+                '/v1/projects/:team/vision/actions/:id/': ({ params }) =>
                     params.id === 'al1'
                         ? existingAlert
                         : params.id === 'al2'
@@ -57,13 +57,13 @@ describe('actionEditorSceneLogic', () => {
                           : params.id === 'wh'
                             ? webhookAction
                             : existingAction,
-                '/api/projects/:team/vision/scanners/:id/': ({ params }) =>
+                '/v1/projects/:team/vision/scanners/:id/': ({ params }) =>
                     params.id === 's2'
                         ? { id: 's2', name: 'Digest scanner', scanner_type: 'summarizer' }
                         : { id: 's1', name: 'Checkout scanner', scanner_type: 'monitor' },
             },
             post: {
-                '/api/projects/:team/vision/actions/': () => [201, { ...existingAction, id: 'created' }],
+                '/v1/projects/:team/vision/actions/': () => [201, { ...existingAction, id: 'created' }],
             },
         })
         initKeaTests()
@@ -200,7 +200,7 @@ describe('actionEditorSceneLogic', () => {
     it('surfaces the API error detail when the submit fails', async () => {
         useMocks({
             post: {
-                '/api/projects/:team/vision/actions/': () => [400, { detail: 'nope' }],
+                '/v1/projects/:team/vision/actions/': () => [400, { detail: 'nope' }],
             },
         })
         const errorToast = jest.spyOn(toast, 'error')
