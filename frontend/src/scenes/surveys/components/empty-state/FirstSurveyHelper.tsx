@@ -1,15 +1,14 @@
 import { useActions, useValues } from 'kea'
 
-import * as einsteinPng from '@hanzo/brand/hoggies/png/einstein'
-import { IconBell, IconGraph, IconRocket, IconTarget } from '@hanzo/icons'
 import { Button, Link } from '@hanzo/elements'
+import { IconBell, IconGraph, IconRocket, IconTarget } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { LaunchSurveyButton } from 'scenes/surveys/components/LaunchSurveyButton'
 import { SurveyEditSection, surveyLogic } from 'scenes/surveys/surveyLogic'
 import { surveysLogic } from 'scenes/surveys/surveysLogic'
 
-const MascotEinstein = pngHoggie(einsteinPng)
+const MascotEinstein = pngHoggie()
 
 interface FirstSurveyHelperProps {
     onTabChange?: (tab: string) => void
@@ -119,11 +118,7 @@ export function FirstSurveyHelper({ onTabChange }: FirstSurveyHelperProps): JSX.
                                                 Docs
                                             </Link>
                                         </p>
-                                        <Button
-                                            type="tertiary"
-                                            size="xsmall"
-                                            onClick={() => onTabChange?.('results')}
-                                        >
+                                        <Button type="tertiary" size="xsmall" onClick={() => onTabChange?.('results')}>
                                             View demo
                                         </Button>
                                     </div>

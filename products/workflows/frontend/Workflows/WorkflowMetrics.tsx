@@ -2,9 +2,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useMemo } from 'react'
 
-import * as greekPng from '@hanzo/brand/hoggies/png/greek'
-import { IconLetter } from '@hanzo/icons'
 import { Button, Collapse, Select, SelectOptions, ProfilePicture, Spinner } from '@hanzo/elements'
+import { IconLetter } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { getColorVar } from 'lib/colors'
@@ -25,7 +24,7 @@ import { WorkflowMetricCard } from './WorkflowMetricCard'
 import { WorkflowMetricsSummary } from './WorkflowMetricsSummary'
 import { type EmailMetric, METRIC_COLORS, buildEmailMetricInvocationSearchParams } from './workflowMetricsSummaryLogic'
 
-const MascotGreek = pngHoggie(greekPng)
+const MascotGreek = pngHoggie()
 
 const OVERVIEW_OPTION_VALUE = '__workflow_overview__'
 

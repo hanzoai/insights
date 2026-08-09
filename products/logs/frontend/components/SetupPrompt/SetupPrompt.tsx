@@ -1,10 +1,9 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import * as greekPng from '@hanzo/brand/hoggies/png/greek'
-import { IconGear } from '@hanzo/icons'
 import { Button, Link, Spinner } from '@hanzo/elements'
+import { IconGear } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
@@ -22,7 +21,7 @@ import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-genera
 import { useOpenLogsSettingsPanel } from '../../hooks/useOpenLogsSettingsPanel'
 import { logsIngestionLogic } from './logsIngestionLogic'
 
-const MascotGreek = pngHoggie(greekPng)
+const MascotGreek = pngHoggie()
 
 const FRAMEWORK_LINKS: { name: string; image?: string; docsLink: string }[] = [
     { name: 'Node.js', image: nodejsImage, docsLink: 'https://hanzo.ai/docs/logs/installation/nodejs' },

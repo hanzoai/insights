@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 
-import { Logo as BrandLogo } from '@hanzo/brand/logo'
-import type { LogomarkHandle } from '@hanzo/brand/logo'
+import { Logomark } from 'lib/brand'
+import type { LogomarkHandle } from 'lib/brand'
 
 export interface AnimatedLogomarkProps {
     /** Jump continuously (e.g. during toolbar loading states). */
@@ -11,15 +11,15 @@ export interface AnimatedLogomarkProps {
     className?: string
 }
 
-// The package hop lasts ~airtimeMs (default 400); pace continuous jumps a touch slower so each hop
-// lands with a beat of rest before the next.
+// One hop lasts ~400ms; pace continuous jumps a touch slower so each lands with a beat of rest
+// before the next.
 const JUMP_AIRTIME_MS = 400
 const JUMP_CADENCE_MS = 900
 
 /**
  * Toolbar logomark that jumps while `animate` is true (finishing its in-flight hop before stopping)
- * or exactly once when `animateOnce` is set. Jumps are driven through the package's imperative
- * `ref.current.jump()` on the single mono mark (the render below explains why mono). `animateOnce`
+ * or exactly once when `animateOnce` is set. Jumps are driven through the mark's imperative
+ * `ref.current.jump()`. `animateOnce`
  * ALWAYS calls back, even when the jump is suppressed (no WAAPI / reduced-motion → `jump()` returns
  * `false`), because the toolbar's graceful exit chains logout off it.
  */
@@ -73,14 +73,13 @@ export function AnimatedLogomark({ animate, animateOnce, className }: AnimatedLo
         return () => clearInterval(interval)
     }, [animate, shouldAnimateOnce, jump])
 
-    // `mono` renders a single `currentColor` fill, so the toolbar's own per-theme text color drives
-    // the mark. It also avoids the gradient variant's `fill="url(#…)"` references, which don't resolve
-    // inside the toolbar's shadow DOM on host pages (they'd leave only the head visible).
-    // `overflow: visible` lets the hop escape the svg box (the package adds it only for its own jump
-    // props, not for imperative jumps); the wrapping div carries `.Toolbar__logomark` for sizing.
+    // The mark is a single `currentColor` fill, so the toolbar's own per-theme text color drives it —
+    // and there is no `fill="url(#…)"` to resolve, which would not have worked inside the toolbar's
+    // shadow DOM on host pages. `overflow: visible` lets the hop escape the svg box; the wrapping div
+    // carries `.Toolbar__logomark` for sizing.
     return (
         <div className={className}>
-            <BrandLogo.Logomark ref={markRef} variant="mono" style={{ overflow: 'visible' }} />
+            <Logomark ref={markRef} style={{ overflow: 'visible' }} />
         </div>
     )
 }

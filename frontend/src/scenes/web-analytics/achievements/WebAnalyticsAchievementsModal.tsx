@@ -2,11 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { type ComponentType, type ReactNode } from 'react'
 
-import * as chartPng from '@hanzo/brand/hoggies/png/chart'
-import * as coffeeRunPng from '@hanzo/brand/hoggies/png/coffee-run'
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
-import { IconCheck, IconChevronDown, IconCrown, IconInfo, IconLock, IconPeople, IconPerson } from '@hanzo/icons'
 import { Modal, Tooltip } from '@hanzo/elements'
+import { IconCheck, IconChevronDown, IconCrown, IconInfo, IconLock, IconPeople, IconPerson } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { ExplorerHog, HeartHog, StarHog, WavingHog } from 'lib/components/mascots'
@@ -27,9 +24,9 @@ import { isWebAnalyticsAchievementsEnabled } from './gating'
 import { webAnalyticsAchievementsLogic } from './webAnalyticsAchievementsLogic'
 import { webAnalyticsAchievementsPreferencesLogic } from './webAnalyticsAchievementsPreferencesLogic'
 
-const MascotChart = pngHoggie(chartPng)
-const MascotCoffeeRun = pngHoggie(coffeeRunPng)
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
+const MascotChart = pngHoggie()
+const MascotCoffeeRun = pngHoggie()
+const MascotMagnifyingGlass = pngHoggie()
 
 const RING_TRACK_COLOR = 'var(--border)'
 const TIER_COLORS = [

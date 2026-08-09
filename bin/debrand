@@ -395,31 +395,6 @@ CONTENT_ALLOWLIST: dict[str, str] = {
         "The live smoke asserts the upstream name is ABSENT from the served "
         "page; the assertion must spell the name it forbids."
     ),
-    "frontend/src/layout/ErrorBoundary/ErrorBoundary.tsx": (
-        "Aliases the react wrapper package's own export names; the npm API is "
-        "upstream's to name."
-    ),
-    "frontend/src/lib/components/MarkdownNotebook/NotebookComponentShell.tsx": (
-        "Same wrapper-export alias as ErrorBoundary.tsx."
-    ),
-    "products/visual_review/frontend/scenes/VisualReviewRunScene.tsx": (
-        "Same wrapper-export alias as ErrorBoundary.tsx."
-    ),
-    "frontend/src/scenes/session-recordings/filters/ProductAnalyticsOverLimitBanner.tsx": (
-        "Same wrapper-export alias as ErrorBoundary.tsx."
-    ),
-    "frontend/src/scenes/insights/filters/ActionFilter/ActionFilterRow/SaveAsActionBanner.tsx": (
-        "Same wrapper-export alias as ErrorBoundary.tsx."
-    ),
-    "frontend/src/scenes/notebooks/Nodes/NotebookNodePlaylist.tsx": (
-        "Same wrapper-export alias as ErrorBoundary.tsx."
-    ),
-    "frontend/src/scenes/session-recordings/SessionRecordings.tsx": (
-        "Same wrapper-export alias as ErrorBoundary.tsx."
-    ),
-    "frontend/src/scenes/App.tsx": (
-        "Same wrapper-export alias as ErrorBoundary.tsx."
-    ),
     "frontend/src/scenes/saved-insights/insightTypesMetadata.tsx": (
         "Aliases `IconHogQL` from the icons package, which we take from "
         "upstream under our own scope. The export name is theirs; aliasing it "
@@ -477,7 +452,7 @@ PRESERVE: list[re.Pattern[str]] = [
     # nowhere. Renaming a package we merely depend on has no upside: it cannot
     # make the dependency ours, only unresolvable.
     re.compile(r"\bdrf-exceptions-hog\b"),
-    # The far side of an alias. `@hanzo/brand: npm:@posthog/brand@0.9.1` says
+    # The far side of an alias. `insights-node: npm:posthog-node@5.25.0` says
     # our name for it and whose package it actually is; rewriting the second
     # half would point the alias back at itself. Same for cargo's `package =`
     # and for a version pinned in the release-age exclusions.
@@ -1249,6 +1224,93 @@ def check_hog(root: str) -> int:
     return 1 if (leaked or paths) else 0
 
 
+# --- upstream packages --------------------------------------------------
+#
+# A manifest naming `@posthog/x` or `posthog-x` installs upstream's code under
+# upstream's name: it lands in the lockfile, in node_modules paths, and in any
+# stack trace a customer is shown. Reporting that as PENDING was right while the
+# list was long and the answer per entry unknown; now that the answer is known
+# for most of them, an unlisted one is a regression rather than a backlog item,
+# so the default flips to refusal.
+#
+# Keyed by package, not by file. A file-level exemption would excuse every
+# future dependency added to that file, which is the opposite of the point --
+# each upstream package we still take has to be named here and say why.
+UPSTREAM_DEPS = {
+    "@posthog/hogql-parser": (
+        "The WebAssembly build of the query parser. The source is already ours "
+        "(`common/insightsql_parser`, renamed grammar and all); only the "
+        "published artefact is still upstream's, and building it needs "
+        "emscripten. Retires when that package is published from our tree."
+    ),
+    "@posthog/mcp": (
+        "Analytics SDK for MCP servers. `services/mcp` already asks for a Hanzo "
+        "package instead; the override here is what drags it back upstream."
+    ),
+    "@posthog/siphash": (
+        "BSD-2-Clause, 57 kB, its own upstream repository -- forkable as-is, "
+        "and small enough that it is only waiting on somewhere to put it."
+    ),
+    "posthog-node": (
+        "The server SDK. `@hanzo/insights-node` is published and on the same "
+        "major line, so this is a repoint awaiting a verified server test."
+    ),
+    "posthog-rs": (
+        "The Rust capture client, renamed to `insights-rs` by Cargo's `package` "
+        "key -- the same aliasing npm was doing, found by this check. Nothing "
+        "is published under our name on crates.io yet, so the rename is all "
+        "there is; two versions are in use (0.15 in `cli`, 0.21 in `rust`)."
+    ),
+    "posthog-symbol-data": (
+        "Reads the symbol-set format the error-tracking CLI uploads, renamed to "
+        "`insights-symbol-data` the same way. It encodes a wire format we share "
+        "with upstream, so forking it means owning that format."
+    ),
+}
+
+# `@posthog/core` and `@posthog/types` arrive only as dependencies of the
+# packages above, so they are not decisions of ours; they leave when their
+# parents do.
+UPSTREAM_RE = re.compile(r"@posthog/[a-z0-9][a-z0-9.-]*|(?<![\w-])posthog-[a-z0-9][a-z0-9.-]*")
+
+
+def upstream_deps(root: str) -> dict[str, list[str]]:
+    """Upstream package names named by a manifest, mapped to the manifests."""
+    out: dict[str, list[str]] = {}
+    for rel in tracked_files(root):
+        if os.path.basename(rel) not in MANIFESTS:
+            continue
+        try:
+            text = open(os.path.join(root, rel), encoding="utf-8", errors="ignore").read()
+        except OSError:
+            continue
+        for name in sorted(set(UPSTREAM_RE.findall(text))):
+            out.setdefault(name, []).append(rel)
+    return out
+
+
+def check_upstream(root: str) -> int:
+    """Refuse a manifest that names an upstream package we have not justified."""
+    found = upstream_deps(root)
+    unlisted = {k: v for k, v in found.items() if k not in UPSTREAM_DEPS}
+    if unlisted:
+        print(f"FAIL: {len(unlisted)} upstream packages are named by a manifest and not justified")
+        print("    Fork it under our own name, or record here why we still take it from upstream.")
+        for name, files in sorted(unlisted.items()):
+            print(f"    {name}  ({', '.join(sorted(set(files)))})")
+    # The justifications are the record of outstanding work, so a stale one has
+    # to surface: once a package is gone, its entry has to go too or the list
+    # slowly stops describing the tree.
+    stale = sorted(set(UPSTREAM_DEPS) - set(found))
+    if stale:
+        print(f"FAIL: {len(stale)} justified upstream packages are no longer used (drop the entry)")
+        for name in stale:
+            print(f"    {name}")
+    if found and not unlisted and not stale:
+        print(f"upstream: {len(found)} packages still taken from upstream, each justified")
+    return 1 if (unlisted or stale) else 0
+
+
 def check_license(root: str) -> int:
     """The licence must still carry the notice MIT obliges us to pass on.
 
@@ -1538,6 +1600,7 @@ def check(root: str) -> int:
     bad += check_mangled(root)
     bad += check_marks(root)
     bad += check_hog(root)
+    bad += check_upstream(root)
     paths = [p for p in tracked_files(root) if "posthog" in p.lower()]
     if paths:
         bad += 1

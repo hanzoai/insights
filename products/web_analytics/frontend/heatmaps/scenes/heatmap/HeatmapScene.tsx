@@ -1,9 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
-import * as directorPng from '@hanzo/brand/hoggies/png/director'
-import { IconBrowser, IconDownload } from '@hanzo/icons'
 import { Tag, Spinner } from '@hanzo/elements'
+import { IconBrowser, IconDownload } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
@@ -26,7 +25,7 @@ import { FilterPanel } from '../../components/FilterPanel'
 import { HeatmapHeader } from '../../components/HeatmapHeader'
 import { heatmapLogic } from './heatmapLogic'
 
-const MascotDirector = pngHoggie(directorPng)
+const MascotDirector = pngHoggie()
 
 export const scene: SceneExport<{ id: string }> = {
     component: HeatmapScene,

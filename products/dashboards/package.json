@@ -5,10 +5,10 @@
     },
     "dependencies": {
         "fast-equals": "catalog:",
+        "insights-js": "catalog:",
         "kea": "catalog:",
         "kea-loaders": "catalog:",
-        "kea-router": "catalog:",
-        "insights-js": "catalog:"
+        "kea-router": "catalog:"
     },
     "devDependencies": {
         "@storybook/react": "catalog:",
@@ -19,7 +19,6 @@
         "kea-test-utils": "catalog:"
     },
     "peerDependencies": {
-        "@hanzo/brand": "catalog:",
         "@hanzo/icons": "catalog:",
         "@storybook/react": "*",
         "@testing-library/jest-dom": "*",

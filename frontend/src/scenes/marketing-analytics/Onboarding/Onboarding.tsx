@@ -1,9 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import * as moneyPng from '@hanzo/brand/hoggies/png/money'
-import { IconArrowRight } from '@hanzo/icons'
 import { Button, Card, Link } from '@hanzo/elements'
+import { IconArrowRight } from '@hanzo/icons'
 
 import { pngHoggie } from 'lib/brand/hoggies'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
@@ -21,7 +20,7 @@ import { AddSourceStep } from './AddSourceStep'
 import { MarketingOnboardingStep, marketingOnboardingLogic } from './marketingOnboardingLogic'
 import { MarketingWizardStepper } from './MarketingWizardStepper'
 
-const MascotMoney = pngHoggie(moneyPng)
+const MascotMoney = pngHoggie()
 
 interface OnboardingProps {
     completeOnboarding: () => void

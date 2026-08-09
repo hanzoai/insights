@@ -69,4 +69,4 @@ export function IconAlignRight(): JSX.Element {
 
 // The product-tour editor preview mimics what insights-js renders in tours; scss supplies the mono
 // `color` and a 14px height. Preview may diverge from real tours until insights-js adopts the new mark.
-export const InsightsLogo = (): JSX.Element => <Logo variant="mono" />
+export const InsightsLogo = (): JSX.Element => <Logo />
