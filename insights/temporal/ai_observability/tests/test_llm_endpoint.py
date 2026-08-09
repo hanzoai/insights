@@ -10,7 +10,7 @@ from django.test import override_settings
 from insights.temporal.ai_observability.llm_endpoint import build_langchain_chat_client
 
 GATEWAY_URL = "https://gateway.example/v1"
-GATEWAY_KEY = "phs_project_secret"
+GATEWAY_KEY = "sk-project_secret"
 
 
 class TestBuildOpenAIChatClient:

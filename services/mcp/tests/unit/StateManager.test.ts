@@ -84,7 +84,7 @@ describe('StateManager', () => {
     describe('getApiKey', () => {
         function oauthApi(clientName: string | null): ApiClient {
             return {
-                config: { apiToken: 'phx_test' },
+                config: { apiToken: 'sk-test' },
                 apiKeys: () => ({
                     current: async () => ({ success: false, error: { message: 'not a personal key' } }),
                 }),

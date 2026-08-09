@@ -18,7 +18,7 @@ from insights.temporal.ingestion_acceptance_test.test_cases_discovery import Tes
 def config() -> Config:
     return Config(
         api_host="https://test.hanzo.ai",
-        project_api_key="phc_test_key",
+        project_api_key="pk-test_key",
         team_id=12345,
     )
 

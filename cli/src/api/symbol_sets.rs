@@ -609,7 +609,7 @@ mod tests {
 
         crate::invocation_context::INVOCATION_CONTEXT.get_or_init(|| {
             let config = crate::invocation_context::InvocationConfig {
-                api_key: "phx_test".to_string(),
+                api_key: "sk-test".to_string(),
                 host: "not a valid url".to_string(),
                 env_id: "1".to_string(),
                 skip_ssl: false,

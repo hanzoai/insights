@@ -97,7 +97,7 @@ def reproject_team_gateway_credentials_task(team_id: int) -> None:
 @shared_task(ignore_result=True, queue=CeleryQueue.DEFAULT.value)
 @skip_team_scope_audit
 def drain_gateway_credential_last_used_task() -> None:
-    """Stamp last_used_at for phs_ keys from the gateway's coalesced Valkey hash,
+    """Stamp last_used_at for sk- keys from the gateway's coalesced Valkey hash,
     since gateway traffic never hits the Django auth path that would stamp it."""
     updated = drain_gateway_credential_last_used()
     if updated:

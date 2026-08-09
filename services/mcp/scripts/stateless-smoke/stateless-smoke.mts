@@ -3,7 +3,7 @@
 // pinned so the SDK refuses to fall back to the legacy `initialize` handshake:
 // every request must carry `_meta` protocol identity and succeed statelessly.
 //
-// Usage: INSIGHTS_PERSONAL_API_KEY=phx_... MCP_URL=http://localhost:8787/mcp \
+// Usage: INSIGHTS_PERSONAL_API_KEY=sk-... MCP_URL=http://localhost:8787/mcp \
 //        ../../node_modules/.bin/tsx stateless-smoke.mts
 import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client'
 

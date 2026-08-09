@@ -49,9 +49,9 @@ def _forge_hs256(secret: str, claims: dict) -> str:
     return f"{signing_input}.{signature}"
 
 
-# Realistic length (>= 32 bytes) — matches a real phs_ secret and avoids PyJWT's short-key warning.
-CURRENT_SECRET = "phs_current_secret_0123456789abcdef0123"
-BACKUP_SECRET = "phs_backup_secret_0123456789abcdef01234"
+# Realistic length (>= 32 bytes) — matches a real sk- secret and avoids PyJWT's short-key warning.
+CURRENT_SECRET = "sk-current_secret_0123456789abcdef0123"
+BACKUP_SECRET = "sk-backup_secret_0123456789abcdef01234"
 DISTINCT_ID = "user-1"
 APP_ID = "my-firebase-project"
 
@@ -81,7 +81,7 @@ class TestPushIdentityTokens(SimpleTestCase):
         assert verify_push_identity_token(token, self._team(), DISTINCT_ID, APP_ID) is False
 
     def test_rejects_a_token_signed_with_a_different_secret(self):
-        token = sign_push_identity_token("phs_attacker_secret_0123456789abcdef012", DISTINCT_ID, APP_ID)
+        token = sign_push_identity_token("sk-attacker_secret_0123456789abcdef012", DISTINCT_ID, APP_ID)
         assert verify_push_identity_token(token, self._team(), DISTINCT_ID, APP_ID) is False
 
     def test_rejects_an_expired_token(self):

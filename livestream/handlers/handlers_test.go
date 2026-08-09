@@ -162,7 +162,7 @@ func createJWTToken(audience string, claims jwt.MapClaims) string {
 
 func TestStatsHandler_ReadsFromRedis(t *testing.T) {
 	viper.Set("jwt.secret", "test-secret-for-stats")
-	apiToken := "phx_test_token"
+	apiToken := "sk-test_token"
 
 	mr := miniredis.RunT(t)
 	client, err := rueidis.NewClient(rueidis.ClientOption{
@@ -211,7 +211,7 @@ func TestStatsHandler_ReadsFromRedis(t *testing.T) {
 
 func TestStatsHandler_FallsBackToLocal(t *testing.T) {
 	viper.Set("jwt.secret", "test-secret-for-stats")
-	apiToken := "phx_test_token"
+	apiToken := "sk-test_token"
 
 	stats := events.NewStatsKeeper()
 	stats.GetStoreForToken(apiToken).Add("user1", events.NoSpaceType{})

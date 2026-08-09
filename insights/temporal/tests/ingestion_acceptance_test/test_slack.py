@@ -11,7 +11,7 @@ from insights.temporal.ingestion_acceptance_test.slack import send_slack_notific
 def config() -> Config:
     return Config(
         api_host="https://test.hanzo.ai",
-        project_api_key="phc_test_key",
+        project_api_key="pk-test_key",
         team_id=12345,
         slack_webhook_url="https://hooks.slack.com/services/T00/B00/XXX",
     )
@@ -174,7 +174,7 @@ class TestSendSlackNotification:
     def test_does_nothing_when_no_webhook_url(self, mock_post: MagicMock, failing_result: TestSuiteResult) -> None:
         config_no_webhook = Config(
             api_host="https://test.hanzo.ai",
-            project_api_key="phc_test_key",
+            project_api_key="pk-test_key",
             team_id=12345,
             slack_webhook_url=None,
         )
@@ -218,13 +218,13 @@ class TestSendSlackTimeoutNotification:
         assert "test.hanzo.ai" in context_text
         assert "12345" in context_text
         assert "3600s" in context_text
-        assert "phc_test_k..." in context_text
+        assert "pk-test_k..." in context_text
 
     @patch("insights.temporal.ingestion_acceptance_test.slack.requests.post")
     def test_does_nothing_when_no_webhook_url(self, mock_post: MagicMock) -> None:
         config_no_webhook = Config(
             api_host="https://test.hanzo.ai",
-            project_api_key="phc_test_key",
+            project_api_key="pk-test_key",
             team_id=12345,
             slack_webhook_url=None,
         )

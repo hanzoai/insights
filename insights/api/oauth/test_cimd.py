@@ -666,7 +666,7 @@ class TestCIMDVerificationToken(APIBaseTest):
 
     @patch("insights.api.oauth.cimd.requests.Session.get")
     def test_invalid_verification_token_leaves_app_unlinked(self, mock_get, _url_mock):
-        metadata = _make_metadata(insights_verification_token="phvt_totally_made_up")
+        metadata = _make_metadata(insights_verification_token="vt-totally_made_up")
         mock_get.return_value = _mock_response(metadata, headers={})
 
         app = fetch_and_upsert_cimd_application(VALID_CIMD_URL)
@@ -981,7 +981,7 @@ class TestCIMDComInsightsNamespace(APIBaseTest):
         )
         metadata = _make_metadata(
             insights_verification_token=plaintext,
-            com_insights={"verification_token": "phvt_does_not_exist"},
+            com_insights={"verification_token": "vt-does_not_exist"},
         )
         mock_get.return_value = _mock_response(metadata, headers={})
         app = fetch_and_upsert_cimd_application(VALID_CIMD_URL)
@@ -996,7 +996,7 @@ class TestCIMDComInsightsNamespace(APIBaseTest):
             organization=self.organization, label="Nested partner", created_by=self.user
         )
         metadata = _make_metadata(
-            insights_verification_token="phvt_fake_top_level",
+            insights_verification_token="vt-fake_top_level",
             com_insights={"verification_token": plaintext_nested},
         )
         mock_get.return_value = _mock_response(metadata, headers={})

@@ -149,7 +149,7 @@ mod tests {
         // Pasting a personal API key into an exporter is the misconfiguration that used to be
         // answered 200 forever while every record was dropped downstream.
         let (status, _) = authorizer()
-            .authorize_token("phx_personal_api_key", Signal::Logs)
+            .authorize_token("sk-personal_api_key", Signal::Logs)
             .expect_err("a personal API key should not be accepted");
 
         assert_eq!(status, StatusCode::UNAUTHORIZED);
@@ -170,7 +170,7 @@ mod tests {
     #[test]
     fn a_well_formed_token_is_accepted() {
         assert!(authorizer()
-            .authorize_token("phc_well_formed", Signal::Logs)
+            .authorize_token("pk-well_formed", Signal::Logs)
             .is_ok());
     }
 
@@ -186,21 +186,21 @@ mod tests {
         let cases = [
             TokenSourceCase {
                 name: "bearer header",
-                auth_header: Some("Bearer phc_header"),
+                auth_header: Some("Bearer pk-header"),
                 query_token: None,
-                expected: Some("phc_header"),
+                expected: Some("pk-header"),
             },
             TokenSourceCase {
                 name: "header wins over query param",
-                auth_header: Some("Bearer phc_header"),
-                query_token: Some("phc_query"),
-                expected: Some("phc_header"),
+                auth_header: Some("Bearer pk-header"),
+                query_token: Some("pk-query"),
+                expected: Some("pk-header"),
             },
             TokenSourceCase {
                 name: "query param fallback",
                 auth_header: None,
-                query_token: Some("phc_query"),
-                expected: Some("phc_query"),
+                query_token: Some("pk-query"),
+                expected: Some("pk-query"),
             },
             TokenSourceCase {
                 name: "nothing provided",

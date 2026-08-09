@@ -3,7 +3,7 @@
 ``git clone`` (and therefore Claude Code's ``/plugin marketplace add`` / Codex's ``codex plugin
 marketplace add``) only speaks HTTP Basic auth via git credential helpers — it never sends a
 Bearer header. Personal API Key auth normally reads a Bearer header / body / query param, so this
-authenticator pulls the ``phx_`` token out of the Basic credential and otherwise reuses the whole
+authenticator pulls the ``sk-`` token out of the Basic credential and otherwise reuses the whole
 standard Personal API Key flow.
 
 Because it's a real Personal API Key, the credential is tied to the user: the standard permission
@@ -24,6 +24,7 @@ from django.http import HttpRequest
 from rest_framework.request import Request
 
 from insights.auth import PersonalAPIKeyAuthentication
+from insights.models.utils import KeyKind, key_kind
 
 
 class MarketplaceGitBasicAuthentication(PersonalAPIKeyAuthentication):
@@ -54,8 +55,8 @@ class MarketplaceGitBasicAuthentication(PersonalAPIKeyAuthentication):
         username, _, password = decoded.partition(":")
         # Prefer the password field (the credential-helper convention), fall back to username.
         token = password or username
-        # Only treat phx_-shaped values as a candidate, so arbitrary Basic creds aren't hashed/looked up.
-        if token and token.startswith("phx_"):
+        # Only a secret-marked value is a candidate, so arbitrary Basic creds aren't hashed/looked up.
+        if key_kind(token) is KeyKind.SECRET:
             return token
         return None
 

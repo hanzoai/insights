@@ -30,7 +30,7 @@ def _mock_anthropic_client() -> MagicMock:
 
 
 @pytest.mark.asyncio
-@override_settings(AI_GATEWAY_URL="https://ai-gateway.example/v1", AI_GATEWAY_API_KEY="phs_test")
+@override_settings(AI_GATEWAY_URL="https://ai-gateway.example/v1", AI_GATEWAY_API_KEY="sk-test")
 async def test_gateway_mode_omits_legacy_stage_header():
     client = _mock_anthropic_client()
     with patch(f"{MODULE_PATH}.build_async_anthropic_client", return_value=client):
@@ -67,7 +67,7 @@ async def test_fallback_mode_sends_legacy_stage_header():
 
 
 @pytest.mark.asyncio
-@override_settings(AI_GATEWAY_URL="https://ai-gateway.example/v1", AI_GATEWAY_API_KEY="phs_test")
+@override_settings(AI_GATEWAY_URL="https://ai-gateway.example/v1", AI_GATEWAY_API_KEY="sk-test")
 async def test_without_ai_product_stays_on_python_gateway_even_with_env_set():
     client = _mock_anthropic_client()
     with (

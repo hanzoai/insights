@@ -142,8 +142,8 @@ class TestToolbarOAuthRefresh(APIBaseTest):
     def test_refresh_success(self, mock_post):
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = {
-            "access_token": "pha_new",
-            "refresh_token": "phr_new",
+            "access_token": "at-new",
+            "refresh_token": "rt-new",
             "token_type": "Bearer",
             "expires_in": 3600,
             "scope": "openid",
@@ -151,19 +151,19 @@ class TestToolbarOAuthRefresh(APIBaseTest):
 
         response = self.client.post(
             "/v1/user/toolbar_oauth_refresh/",
-            data=json.dumps({"refresh_token": "phr_old", "client_id": "test_client_id"}),
+            data=json.dumps({"refresh_token": "rt-old", "client_id": "test_client_id"}),
             content_type="application/json",
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["access_token"] == "pha_new"
-        assert data["refresh_token"] == "phr_new"
+        assert data["access_token"] == "at-new"
+        assert data["refresh_token"] == "rt-new"
         assert data["expires_in"] == 3600
 
     @parameterized.expand(
         [
             ("missing_refresh_token", {"client_id": "test_client_id"}),
-            ("missing_client_id", {"refresh_token": "phr_old"}),
+            ("missing_client_id", {"refresh_token": "rt-old"}),
             ("missing_both", {}),
         ]
     )
@@ -195,7 +195,7 @@ class TestToolbarOAuthRefresh(APIBaseTest):
 
         response = self.client.post(
             "/v1/user/toolbar_oauth_refresh/",
-            data=json.dumps({"refresh_token": "phr_expired", "client_id": "test_client_id"}),
+            data=json.dumps({"refresh_token": "rt-expired", "client_id": "test_client_id"}),
             content_type="application/json",
         )
         assert response.status_code == 400
@@ -209,7 +209,7 @@ class TestToolbarOAuthRefresh(APIBaseTest):
 
         response = self.client.post(
             "/v1/user/toolbar_oauth_refresh/",
-            data=json.dumps({"refresh_token": "phr_old", "client_id": "test_client_id"}),
+            data=json.dumps({"refresh_token": "rt-old", "client_id": "test_client_id"}),
             content_type="application/json",
         )
         assert response.status_code == 502
@@ -225,7 +225,7 @@ class TestToolbarOAuthRefresh(APIBaseTest):
 
         response = self.client.post(
             "/v1/user/toolbar_oauth_refresh/",
-            data=json.dumps({"refresh_token": "phr_old", "client_id": "test_client_id"}),
+            data=json.dumps({"refresh_token": "rt-old", "client_id": "test_client_id"}),
             content_type="application/json",
         )
         assert response.status_code == 502
@@ -235,7 +235,7 @@ class TestToolbarOAuthRefresh(APIBaseTest):
         self.client.logout()
         response = self.client.post(
             "/v1/user/toolbar_oauth_refresh/",
-            data=json.dumps({"refresh_token": "phr_old", "client_id": "test_client_id"}),
+            data=json.dumps({"refresh_token": "rt-old", "client_id": "test_client_id"}),
             content_type="application/json",
         )
         # Should get 400 (bad client_id) or similar, NOT 401/403
@@ -251,7 +251,7 @@ class TestToolbarOAuthRefresh(APIBaseTest):
 
         response = self.client.post(
             "/v1/user/toolbar_oauth_refresh/",
-            data=json.dumps({"refresh_token": "phr_old", "client_id": "test_client_id"}),
+            data=json.dumps({"refresh_token": "rt-old", "client_id": "test_client_id"}),
             content_type="application/json",
         )
         assert response.status_code == 500
@@ -269,13 +269,13 @@ class TestToolbarOAuthRefresh(APIBaseTest):
         for _ in range(30):
             self.client.post(
                 "/v1/user/toolbar_oauth_refresh/",
-                data=json.dumps({"refresh_token": "phr_old", "client_id": "test_client_id"}),
+                data=json.dumps({"refresh_token": "rt-old", "client_id": "test_client_id"}),
                 content_type="application/json",
             )
 
         response = self.client.post(
             "/v1/user/toolbar_oauth_refresh/",
-            data=json.dumps({"refresh_token": "phr_old", "client_id": "test_client_id"}),
+            data=json.dumps({"refresh_token": "rt-old", "client_id": "test_client_id"}),
             content_type="application/json",
         )
         assert response.status_code == 429
