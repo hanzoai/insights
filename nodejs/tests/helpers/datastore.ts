@@ -1,3 +1,8 @@
+import {
+    ClickHouseClient as DatastoreClient,
+    type ExecResult as DatastoreExecResult,
+    createClient as createDatastoreClient,
+} from '@datastore/client'
 import { performance } from 'perf_hooks'
 import { Readable } from 'stream'
 
@@ -35,20 +40,20 @@ function extractKafkaTopicList(engineFull: string): string[] {
 }
 
 export class Datastore {
-    private client: DatastoreNativeClient
+    private client: DatastoreClient
 
-    constructor(client: DatastoreNativeClient) {
+    constructor(client: DatastoreClient) {
         this.client = client
     }
 
-    static createClient(): DatastoreNativeClient {
+    static createClient(): DatastoreClient {
         // NOTE: We never query CH in production so we just load these from the env directly
         const DATASTORE_HOST = process.env.DATASTORE_HOST ?? 'localhost'
         const DATASTORE_DATABASE = process.env.DATASTORE_DATABASE ?? (isTestEnv() ? 'insights_test' : 'default')
         const DATASTORE_USER = process.env.DATASTORE_USER ?? 'default'
         const DATASTORE_PASSWORD = process.env.DATASTORE_PASSWORD ?? null
 
-        const datastore = createDatastoreNativeClient({
+        const datastore = createDatastoreClient({
             // We prefer to run queries on the offline cluster.
             url: `http://${DATASTORE_HOST}:8123`,
             username: DATASTORE_USER,
