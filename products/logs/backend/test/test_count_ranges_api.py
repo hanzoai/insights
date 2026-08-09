@@ -36,7 +36,7 @@ class TestCountRangesApi(DatastoreTestMixin, APIBaseTest):
 
     def _ranges(self, query_params, expected_status=status.HTTP_200_OK):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/logs/count-ranges",
+            f"/v1/projects/{self.team.id}/logs/count-ranges",
             data={"query": query_params},
         )
         self.assertEqual(response.status_code, expected_status)
@@ -98,7 +98,7 @@ class TestCountRangesApi(DatastoreTestMixin, APIBaseTest):
         bucket_sum = sum(b["count"] for b in ranges_response["ranges"])
 
         count_response = self.client.post(
-            f"/api/projects/{self.team.id}/logs/count",
+            f"/v1/projects/{self.team.id}/logs/count",
             data={"query": params},
         )
         self.assertEqual(count_response.status_code, status.HTTP_200_OK)

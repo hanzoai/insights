@@ -32,7 +32,7 @@ class TestIntervieweeContextBulkCreate(_FeatureFlagEnabledMixin):
         return UserInterviewTopic.objects.create(**defaults)
 
     def _bulk_url(self, topic_id: str) -> str:
-        return f"/api/environments/{self.team.id}/user_interview_topics/{topic_id}/interviewees/bulk/"
+        return f"/v1/environments/{self.team.id}/user_interview_topics/{topic_id}/interviewees/bulk/"
 
     def _item(self, identifier: str, context: str = "ctx") -> dict[str, str]:
         return {"interviewee_identifier": identifier, "agent_context": context}

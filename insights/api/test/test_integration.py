@@ -31,6 +31,7 @@ from insights.api.github_callback.team_services import (
 from insights.api.github_callback.types import FlowKind, GitHubAuthorizeState
 from insights.api.integration import IntegrationSerializer, IntegrationViewSet
 from insights.constants import AvailableFeature
+from insights.models.ee_models import AccessControl
 from insights.models.integration import (
     ERROR_TOKEN_REFRESH_FAILED,
     GITHUB_REPOSITORY_REFRESH_COOLDOWN_SECONDS,
@@ -57,8 +58,6 @@ from products.batch_exports.backend.models import BatchExport, BatchExportDestin
 from products.cdp.backend.models import InsightsFunction
 from products.cdp.backend.models.insights_function_template import InsightsFunctionTemplate
 from products.workflows.backend.models import InsightsFlow
-
-from insights.models.ee_models import AccessControl
 
 
 class TestSlackIntegration:
@@ -499,7 +498,7 @@ class TestDatabricksIntegration:
         client.force_login(self.user)
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "databricks",
                 "config": {
@@ -560,7 +559,7 @@ class TestDatabricksIntegration:
         client.force_login(self.user)
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "databricks",
                 "config": invalid_config,
@@ -592,7 +591,7 @@ class TestDatabricksIntegration:
         client.force_login(self.user)
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "databricks",
                 "config": {
@@ -623,7 +622,7 @@ class TestAwsS3Integration:
         client.force_login(self.user)
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "aws-s3",
                 "config": {
@@ -662,7 +661,7 @@ class TestAwsS3Integration:
         client.force_login(self.user)
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "aws-s3",
                 "config": {
@@ -685,10 +684,10 @@ class TestAwsS3Integration:
             "config": {"name": "prod-aws", "aws_access_key_id": "AKIAEXAMPLE", "aws_secret_access_key": "secret"},
         }
 
-        first = client.post(f"/api/environments/{self.team.pk}/integrations", payload, content_type="application/json")
+        first = client.post(f"/v1/environments/{self.team.pk}/integrations", payload, content_type="application/json")
         assert first.status_code == status.HTTP_201_CREATED, first.json()
 
-        second = client.post(f"/api/environments/{self.team.pk}/integrations", payload, content_type="application/json")
+        second = client.post(f"/v1/environments/{self.team.pk}/integrations", payload, content_type="application/json")
         assert second.status_code == status.HTTP_400_BAD_REQUEST
         assert "An integration named 'prod-aws' already exists" in second.json()["detail"]
         assert Integration.objects.filter(team=self.team, integration_id="prod-aws").count() == 1
@@ -719,7 +718,7 @@ class TestAwsS3Integration:
         client.force_login(self.user)
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {"kind": "aws-s3", "config": invalid_config},
             content_type="application/json",
         )
@@ -742,7 +741,7 @@ class TestAwsS3RoleBasedIntegration:
 
         role = "arn:aws:iam::123456789012:role/my-role"
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "aws-s3",
                 "config": {
@@ -776,12 +775,12 @@ class TestAwsS3RoleBasedIntegration:
         }
 
         first = client.post(
-            f"/api/environments/{another_team.pk}/integrations", payload, content_type="application/json"
+            f"/v1/environments/{another_team.pk}/integrations", payload, content_type="application/json"
         )
         assert first.status_code == status.HTTP_201_CREATED, first.json()
 
         client.force_login(self.user)
-        second = client.post(f"/api/environments/{self.team.pk}/integrations", payload, content_type="application/json")
+        second = client.post(f"/v1/environments/{self.team.pk}/integrations", payload, content_type="application/json")
         assert second.status_code == status.HTTP_400_BAD_REQUEST
         assert "Cannot create AWS S3 integration: Invalid role" in second.json()["detail"]
 
@@ -792,10 +791,10 @@ class TestAwsS3RoleBasedIntegration:
             "config": {"name": "prod-aws", "aws_role_arn": "something"},
         }
 
-        first = client.post(f"/api/environments/{self.team.pk}/integrations", payload, content_type="application/json")
+        first = client.post(f"/v1/environments/{self.team.pk}/integrations", payload, content_type="application/json")
         assert first.status_code == status.HTTP_201_CREATED, first.json()
 
-        second = client.post(f"/api/environments/{self.team.pk}/integrations", payload, content_type="application/json")
+        second = client.post(f"/v1/environments/{self.team.pk}/integrations", payload, content_type="application/json")
         assert second.status_code == status.HTTP_400_BAD_REQUEST
         assert "An integration named 'prod-aws' already exists" in second.json()["detail"]
         assert Integration.objects.filter(team=self.team, integration_id="prod-aws").count() == 1
@@ -814,7 +813,7 @@ class TestS3CompatibleIntegration:
         client.force_login(self.user)
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "s3-compatible",
                 "config": {
@@ -852,10 +851,10 @@ class TestS3CompatibleIntegration:
             },
         }
 
-        first = client.post(f"/api/environments/{self.team.pk}/integrations", payload, content_type="application/json")
+        first = client.post(f"/v1/environments/{self.team.pk}/integrations", payload, content_type="application/json")
         assert first.status_code == status.HTTP_201_CREATED, first.json()
 
-        second = client.post(f"/api/environments/{self.team.pk}/integrations", payload, content_type="application/json")
+        second = client.post(f"/v1/environments/{self.team.pk}/integrations", payload, content_type="application/json")
         assert second.status_code == status.HTTP_400_BAD_REQUEST
         assert "An integration named 'my-r2' already exists" in second.json()["detail"]
         assert Integration.objects.filter(team=self.team, integration_id="my-r2").count() == 1
@@ -866,7 +865,7 @@ class TestS3CompatibleIntegration:
         client.force_login(self.user)
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "s3-compatible",
                 "config": {
@@ -900,7 +899,7 @@ class TestS3CompatibleIntegration:
         client.force_login(self.user)
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {"kind": "s3-compatible", "config": invalid_config},
             content_type="application/json",
         )
@@ -922,7 +921,7 @@ class TestSnowflakeIntegration:
         client.force_login(self.user)
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "snowflake",
                 "config": {
@@ -958,7 +957,7 @@ class TestSnowflakeIntegration:
         client.force_login(self.user)
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "snowflake",
                 "config": {
@@ -999,10 +998,10 @@ class TestSnowflakeIntegration:
             },
         }
 
-        first = client.post(f"/api/environments/{self.team.pk}/integrations", payload, content_type="application/json")
+        first = client.post(f"/v1/environments/{self.team.pk}/integrations", payload, content_type="application/json")
         assert first.status_code == status.HTTP_201_CREATED, first.json()
 
-        second = client.post(f"/api/environments/{self.team.pk}/integrations", payload, content_type="application/json")
+        second = client.post(f"/v1/environments/{self.team.pk}/integrations", payload, content_type="application/json")
         assert second.status_code == status.HTTP_400_BAD_REQUEST
         assert "An integration named 'prod-snowflake' already exists" in second.json()["detail"]
         assert Integration.objects.filter(team=self.team, integration_id="prod-snowflake").count() == 1
@@ -1011,7 +1010,7 @@ class TestSnowflakeIntegration:
         client.force_login(self.user)
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "snowflake",
                 "config": {
@@ -1058,7 +1057,7 @@ class TestSnowflakeIntegration:
         client.force_login(self.user)
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {"kind": "snowflake", "config": invalid_config},
             content_type="application/json",
         )
@@ -1098,7 +1097,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/",
+            f"/v1/environments/{self.team.pk}/integrations/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1115,7 +1114,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/",
+            f"/v1/environments/{self.team.pk}/integrations/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1136,7 +1135,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{self.github_integration.id}/",
+            f"/v1/environments/{self.team.pk}/integrations/{self.github_integration.id}/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1153,7 +1152,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{self.twilio_integration.id}/",
+            f"/v1/environments/{self.team.pk}/integrations/{self.twilio_integration.id}/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1187,7 +1186,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{slack_integration.id}/",
+            f"/v1/environments/{self.team.pk}/integrations/{slack_integration.id}/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1219,7 +1218,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = getattr(client, method)(
-            f"/api/environments/{self.team.pk}/integrations/{self.twilio_integration.id}/{url_suffix}",
+            f"/v1/environments/{self.team.pk}/integrations/{self.twilio_integration.id}/{url_suffix}",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1245,7 +1244,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/",
+            f"/v1/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1271,7 +1270,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/?limit=100&offset=100",
+            f"/v1/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/?limit=100&offset=100",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1295,7 +1294,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/",
+            f"/v1/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1318,7 +1317,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/?limit=10&offset=50",
+            f"/v1/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/?limit=10&offset=50",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1342,7 +1341,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/?search=insights&limit=1&offset=1",
+            f"/v1/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/?search=insights&limit=1&offset=1",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1391,7 +1390,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_teams/{query_string}",
+            f"/v1/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_teams/{query_string}",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1414,7 +1413,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_teams/",
+            f"/v1/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_teams/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1444,7 +1443,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{jira_integration.id}/jira_projects/",
+            f"/v1/environments/{self.team.pk}/integrations/{jira_integration.id}/jira_projects/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1473,7 +1472,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{linear_integration.id}/linear_teams/",
+            f"/v1/environments/{self.team.pk}/integrations/{linear_integration.id}/linear_teams/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1498,7 +1497,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/refresh/",
+            f"/v1/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/refresh/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1529,7 +1528,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/refresh/",
+            f"/v1/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/refresh/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1550,7 +1549,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/refresh/",
+            f"/v1/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/refresh/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1579,7 +1578,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/",
+            f"/v1/environments/{self.team.pk}/integrations/{self.github_integration.id}/github_repos/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1653,7 +1652,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{target_integration.id}/channels/",
+            f"/v1/environments/{self.team.pk}/integrations/{target_integration.id}/channels/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1722,7 +1721,7 @@ class TestIntegrationAPIKeyAccess:
             scopes=["integration:read"],
         )
 
-        base_url = f"/api/environments/{self.team.pk}/integrations/{slack_integration.id}/channels/"
+        base_url = f"/v1/environments/{self.team.pk}/integrations/{slack_integration.id}/channels/"
 
         response = client.get(
             f"{base_url}?search=eng&limit=10",
@@ -1823,7 +1822,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{slack_integration.id}/channels/{query_string}",
+            f"/v1/environments/{self.team.pk}/integrations/{slack_integration.id}/channels/{query_string}",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
         assert response.status_code == status.HTTP_200_OK
@@ -1911,7 +1910,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{slack_integration.id}/channels/?search={quote(search)}",
+            f"/v1/environments/{self.team.pk}/integrations/{slack_integration.id}/channels/?search={quote(search)}",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
         assert response.status_code == status.HTTP_200_OK
@@ -1937,7 +1936,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{slack_integration.id}/channels/",
+            f"/v1/environments/{self.team.pk}/integrations/{slack_integration.id}/channels/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -1991,7 +1990,7 @@ class TestIntegrationAPIKeyAccess:
         # Don't re-raise the transient case's unhandled error; assert on the 500 response instead.
         client.raise_request_exception = False
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{slack_integration.id}/channels/",
+            f"/v1/environments/{self.team.pk}/integrations/{slack_integration.id}/channels/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -2013,7 +2012,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations/",
+            f"/v1/environments/{self.team.pk}/integrations/",
             {"kind": "github", "config": {"installation_id": "99999"}},
             content_type="application/json",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
@@ -2032,7 +2031,7 @@ class TestIntegrationAPIKeyAccess:
         )
 
         response = client.delete(
-            f"/api/environments/{self.team.pk}/integrations/{self.github_integration.id}/",
+            f"/v1/environments/{self.team.pk}/integrations/{self.github_integration.id}/",
             HTTP_AUTHORIZATION=f"Bearer {key_value}",
         )
 
@@ -2042,7 +2041,7 @@ class TestIntegrationAPIKeyAccess:
     def test_session_auth_shows_all_integrations(self, client: HttpClient):
         client.force_login(self.user)
 
-        response = client.get(f"/api/environments/{self.team.pk}/integrations/")
+        response = client.get(f"/v1/environments/{self.team.pk}/integrations/")
 
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
@@ -2054,7 +2053,7 @@ class TestIntegrationAPIKeyAccess:
     def test_list_integrations_filtered_by_kind(self, client: HttpClient):
         client.force_login(self.user)
 
-        response = client.get(f"/api/environments/{self.team.pk}/integrations/?kind=twilio")
+        response = client.get(f"/v1/environments/{self.team.pk}/integrations/?kind=twilio")
 
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
@@ -2096,7 +2095,7 @@ class TestGitHubIntegrationStateValidation:
         client.force_login(self.user)
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations/",
+            f"/v1/environments/{self.team.pk}/integrations/",
             {"kind": "github", "config": {"installation_id": "12345", "code": "some-code"}},
             content_type="application/json",
         )
@@ -2110,7 +2109,7 @@ class TestGitHubIntegrationStateValidation:
         client.force_login(self.user)
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations/",
+            f"/v1/environments/{self.team.pk}/integrations/",
             {"kind": "github", "config": {"installation_id": "12345", "state": "some-state"}},
             content_type="application/json",
         )
@@ -2133,7 +2132,7 @@ class TestGitHubIntegrationStateValidation:
         )
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations/",
+            f"/v1/environments/{self.team.pk}/integrations/",
             {"kind": "github", "config": self._github_config(state="wrong-token")},
             content_type="application/json",
         )
@@ -2148,7 +2147,7 @@ class TestGitHubIntegrationStateValidation:
         # No token in cache = expired
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations/",
+            f"/v1/environments/{self.team.pk}/integrations/",
             {"kind": "github", "config": self._github_config(state="some-token")},
             content_type="application/json",
         )
@@ -2159,12 +2158,10 @@ class TestGitHubIntegrationStateValidation:
 
     def test_github_prepare_callback_stores_authorize_state(self, client: HttpClient):
         client.force_login(self.user)
-        next_path = (
-            f"/account-connected/github-integration?provider=github&project_id={self.team.pk}&connect_from=insights_code"
-        )
+        next_path = f"/account-connected/github-integration?provider=github&project_id={self.team.pk}&connect_from=insights_code"
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations/github/prepare_callback/",
+            f"/v1/environments/{self.team.pk}/integrations/github/prepare_callback/",
             {"next": next_path},
             content_type="application/json",
         )
@@ -2182,7 +2179,7 @@ class TestGitHubIntegrationStateValidation:
         client.force_login(self.user)
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/authorize/",
+            f"/v1/environments/{self.team.pk}/integrations/authorize/",
             {"kind": "github", "next": "https://evil.com"},
         )
 
@@ -2229,7 +2226,7 @@ class TestGitHubIntegrationStateValidation:
         mock_from_install.return_value = mock_integration
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations/",
+            f"/v1/environments/{self.team.pk}/integrations/",
             {"kind": "github", "config": self._github_config(state=state_token)},
             content_type="application/json",
         )
@@ -2287,7 +2284,7 @@ class TestGitHubIntegrationStateValidation:
         )
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations/",
+            f"/v1/environments/{self.team.pk}/integrations/",
             {"kind": "github", "config": self._github_config(state=state_token)},
             content_type="application/json",
         )
@@ -2340,7 +2337,7 @@ class TestGitHubIntegrationStateValidation:
 
         # First request succeeds
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations/",
+            f"/v1/environments/{self.team.pk}/integrations/",
             {"kind": "github", "config": self._github_config(state=state_token)},
             content_type="application/json",
         )
@@ -2348,7 +2345,7 @@ class TestGitHubIntegrationStateValidation:
 
         # Second request with same token fails
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations/",
+            f"/v1/environments/{self.team.pk}/integrations/",
             {"kind": "github", "config": self._github_config(state=state_token)},
             content_type="application/json",
         )
@@ -2373,7 +2370,7 @@ class TestGitHubIntegrationStateValidation:
         )
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations/",
+            f"/v1/environments/{self.team.pk}/integrations/",
             {"kind": "github", "config": self._github_config(state="victim-token")},
             content_type="application/json",
         )
@@ -2402,7 +2399,7 @@ class TestGitHubIntegrationStateValidation:
         mock_from_code.return_value = None
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations/",
+            f"/v1/environments/{self.team.pk}/integrations/",
             {"kind": "github", "config": self._github_config(state=state_token)},
             content_type="application/json",
         )
@@ -2481,7 +2478,7 @@ class TestGitHubIntegrationStateValidation:
         )
 
         client.post(
-            f"/api/environments/{self.team.pk}/integrations/",
+            f"/v1/environments/{self.team.pk}/integrations/",
             {
                 "kind": "github",
                 "config": {
@@ -2638,9 +2635,7 @@ class TestGitHubTeamIntegrationComplete:
         self, mock_user_integration, mock_from_install, mock_from_code, mock_verify, client: HttpClient
     ):
         client.force_login(self.user)
-        next_path = (
-            f"/account-connected/github-integration?provider=github&project_id={self.team.pk}&connect_from=insights_code"
-        )
+        next_path = f"/account-connected/github-integration?provider=github&project_id={self.team.pk}&connect_from=insights_code"
         state_token = "valid-token"
         store_unified_authorize_state(
             GitHubAuthorizeState(
@@ -2997,9 +2992,7 @@ class TestGitHubTeamIntegrationComplete:
     ):
         client.force_login(self.user)
         mock_refresh.return_value = self._team_github_integration()
-        next_path = (
-            f"/account-connected/github-integration?provider=github&project_id={self.team.pk}&connect_from=insights_code"
-        )
+        next_path = f"/account-connected/github-integration?provider=github&project_id={self.team.pk}&connect_from=insights_code"
         store_unified_authorize_state(
             GitHubAuthorizeState(
                 token="prepare-token",
@@ -3477,7 +3470,7 @@ class TestStripeIntegration:
         MockStripeIntegration.return_value = mock_instance
 
         client.force_login(self.user)
-        response = client.delete(f"/api/environments/{self.team.pk}/integrations/{integration.id}/")
+        response = client.delete(f"/v1/environments/{self.team.pk}/integrations/{integration.id}/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         MockStripeIntegration.assert_called_once()
@@ -3492,7 +3485,7 @@ class TestStripeIntegration:
         MockStripeIntegration.return_value = mock_instance
 
         client.force_login(self.user)
-        response = client.delete(f"/api/environments/{self.team.pk}/integrations/{integration.id}/")
+        response = client.delete(f"/v1/environments/{self.team.pk}/integrations/{integration.id}/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not Integration.objects.filter(id=integration.id).exists()
@@ -3508,7 +3501,7 @@ class TestStripeIntegration:
 
         client.force_login(self.user)
         with patch("insights.api.integration.StripeIntegration") as MockStripeIntegration:
-            response = client.delete(f"/api/environments/{self.team.pk}/integrations/{integration.id}/")
+            response = client.delete(f"/v1/environments/{self.team.pk}/integrations/{integration.id}/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         MockStripeIntegration.assert_not_called()
@@ -3546,7 +3539,7 @@ class TestStripeIntegration:
 
         client.force_login(self.user)
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {"kind": "stripe", "config": {"code": "oauth_code_123"}},
             content_type="application/json",
         )
@@ -3568,7 +3561,7 @@ class TestStripeIntegration:
 
         client.force_login(self.user)
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {"kind": "stripe", "config": {"code": "oauth_code_123"}},
             content_type="application/json",
         )
@@ -3587,7 +3580,7 @@ class TestStripeIntegration:
 
         client.force_login(self.user)
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {"kind": "stripe", "config": {"state": "next=/foo&token=abc123", "code": "oauth_code_123"}},
             content_type="application/json",
         )
@@ -3614,7 +3607,7 @@ class TestStripeIntegration:
 
         client.force_login(self.user)
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "stripe",
                 "config": {"state": "next=/foo&token=abc123", "code": "oauth_code_999"},
@@ -3657,7 +3650,7 @@ class TestStripeIntegration:
 
         client.force_login(self.user)
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {"kind": "stripe", "config": config},
             content_type="application/json",
         )
@@ -3673,7 +3666,7 @@ class TestStripeIntegration:
         forged = self._make_install_signature(state="", user_id="usr_abc", account_id="acct_123", secret="wrong_secret")
         client.force_login(self.user)
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "stripe",
                 "config": {
@@ -3702,7 +3695,7 @@ class TestStripeIntegration:
         sig = self._make_install_signature(state="", user_id="usr_xyz", account_id="acct_999")
         client.force_login(self.user)
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "stripe",
                 "config": {
@@ -3734,7 +3727,7 @@ class TestStripeIntegration:
         sig = self._make_install_signature(state="", user_id="usr_abc", account_id="acct_123")
         client.force_login(self.user)
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "stripe",
                 "config": {
@@ -3760,7 +3753,7 @@ class TestStripeIntegration:
         sig = self._make_install_signature(state="", user_id="usr_abc", account_id="acct_123")
         client.force_login(self.user)
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "stripe",
                 "config": {
@@ -3812,7 +3805,7 @@ class TestOauthIntegrationRevokeOnDisconnect:
         integration = self._create_salesforce_integration()
 
         client.force_login(self.user)
-        response = client.delete(f"/api/environments/{self.team.pk}/integrations/{integration.id}/")
+        response = client.delete(f"/v1/environments/{self.team.pk}/integrations/{integration.id}/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not Integration.objects.filter(id=integration.id).exists()
@@ -3832,7 +3825,7 @@ class TestOauthIntegrationRevokeOnDisconnect:
         )
 
         client.force_login(self.user)
-        response = client.delete(f"/api/environments/{self.team.pk}/integrations/{integration.id}/")
+        response = client.delete(f"/v1/environments/{self.team.pk}/integrations/{integration.id}/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not Integration.objects.filter(id=integration.id).exists()
@@ -3849,7 +3842,7 @@ class TestOauthIntegrationRevokeOnDisconnect:
 
         raising = self._create_salesforce_integration()
         mock_post.side_effect = Exception("Salesforce is down")
-        response = client.delete(f"/api/environments/{self.team.pk}/integrations/{raising.id}/")
+        response = client.delete(f"/v1/environments/{self.team.pk}/integrations/{raising.id}/")
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not Integration.objects.filter(id=raising.id).exists()
 
@@ -3860,7 +3853,7 @@ class TestOauthIntegrationRevokeOnDisconnect:
             "400 Client Error", response=rejecting_response
         )
         mock_post.return_value = rejecting_response
-        response = client.delete(f"/api/environments/{self.team.pk}/integrations/{rejected.id}/")
+        response = client.delete(f"/v1/environments/{self.team.pk}/integrations/{rejected.id}/")
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not Integration.objects.filter(id=rejected.id).exists()
 
@@ -3869,7 +3862,7 @@ class TestOauthIntegrationRevokeOnDisconnect:
         integration = self._create_salesforce_integration(sensitive_config={})
 
         client.force_login(self.user)
-        response = client.delete(f"/api/environments/{self.team.pk}/integrations/{integration.id}/")
+        response = client.delete(f"/v1/environments/{self.team.pk}/integrations/{integration.id}/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not Integration.objects.filter(id=integration.id).exists()
@@ -3886,7 +3879,7 @@ class TestOauthIntegrationRevokeOnDisconnect:
         )
 
         client.force_login(self.user)
-        response = client.delete(f"/api/environments/{self.team.pk}/integrations/{integration.id}/")
+        response = client.delete(f"/v1/environments/{self.team.pk}/integrations/{integration.id}/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not Integration.objects.filter(id=integration.id).exists()
@@ -4225,7 +4218,7 @@ class TestGitHubBranches:
         client.force_login(self.user)
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{self.integration.pk}/github_branches/",
+            f"/v1/environments/{self.team.pk}/integrations/{self.integration.pk}/github_branches/",
             {"repo": "org/repo", "search": "feature", "limit": "10", "offset": "50"},
         )
 
@@ -4247,7 +4240,7 @@ class TestGitHubBranches:
         client.force_login(self.user)
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{self.integration.pk}/github_branches/",
+            f"/v1/environments/{self.team.pk}/integrations/{self.integration.pk}/github_branches/",
             {"repo": "org/repo"},
         )
 
@@ -4261,7 +4254,7 @@ class TestGitHubBranches:
         client.force_login(self.user)
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{self.integration.pk}/github_branches/",
+            f"/v1/environments/{self.team.pk}/integrations/{self.integration.pk}/github_branches/",
             {"repo": "org/repo", "offset": "100"},
         )
 
@@ -4274,7 +4267,7 @@ class TestGitHubBranches:
         client.force_login(self.user)
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{self.integration.pk}/github_branches/",
+            f"/v1/environments/{self.team.pk}/integrations/{self.integration.pk}/github_branches/",
             {"repo": "org/repo"},
         )
 
@@ -4288,7 +4281,7 @@ class TestGitHubBranches:
         client.force_login(self.user)
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{self.integration.pk}/github_branches/",
+            f"/v1/environments/{self.team.pk}/integrations/{self.integration.pk}/github_branches/",
             {"repo": "org/repo", "limit": "1001"},
         )
 
@@ -4336,7 +4329,7 @@ class TestAnthropicIntegration:
 
         client.force_login(self.user)
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "anthropic",
                 "config": {"api_key": "sk-ant-test", "workspace_label": "production"},
@@ -4366,7 +4359,7 @@ class TestAnthropicIntegration:
 
         client.force_login(self.user)
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {"kind": "anthropic", "config": {"api_key": "  sk-ant-test  "}},
             content_type="application/json",
         )
@@ -4381,7 +4374,7 @@ class TestAnthropicIntegration:
 
         client.force_login(self.user)
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {"kind": "anthropic", "config": {"api_key": "sk-ant-test"}},
             content_type="application/json",
         )
@@ -4397,7 +4390,7 @@ class TestAnthropicIntegration:
 
         client.force_login(self.user)
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {"kind": "anthropic", "config": {"api_key": "sk-ant-first", "workspace_label": "production"}},
             content_type="application/json",
         )
@@ -4405,7 +4398,7 @@ class TestAnthropicIntegration:
         first_id = response.json()["id"]
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {"kind": "anthropic", "config": {"api_key": "sk-ant-second", "workspace_label": "production"}},
             content_type="application/json",
         )
@@ -4422,14 +4415,14 @@ class TestAnthropicIntegration:
 
         client.force_login(self.user)
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {"kind": "anthropic", "config": {"api_key": "sk-ant-first", "workspace_label": "production"}},
             content_type="application/json",
         )
         first_id = response.json()["id"]
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "anthropic",
                 "config": {"api_key": "sk-ant-second", "workspace_label": "production", "force": True},
@@ -4465,7 +4458,7 @@ class TestAnthropicIntegration:
     ):
         client.force_login(self.user)
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {"kind": "anthropic", "config": config},
             content_type="application/json",
         )
@@ -4508,7 +4501,7 @@ class TestAnthropicIntegration:
 
         client.force_login(self.user)
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {"kind": "anthropic", "config": {"api_key": "sk-ant-bad"}},
             content_type="application/json",
         )
@@ -4545,7 +4538,7 @@ class TestAnthropicIntegration:
         client.force_login(self.user)
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{integration.id}/anthropic_managed_agents/"
+            f"/v1/environments/{self.team.pk}/integrations/{integration.id}/anthropic_managed_agents/"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -4572,7 +4565,7 @@ class TestAnthropicIntegration:
         integration = self._make_integration()
         client.force_login(self.user)
 
-        url = f"/api/environments/{self.team.pk}/integrations/{integration.id}/anthropic_managed_agents/"
+        url = f"/v1/environments/{self.team.pk}/integrations/{integration.id}/anthropic_managed_agents/"
         first = client.get(url)
         second = client.get(url)
 
@@ -4595,7 +4588,7 @@ class TestAnthropicIntegration:
         client.force_login(self.user)
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{integration.id}/anthropic_managed_agents/"
+            f"/v1/environments/{self.team.pk}/integrations/{integration.id}/anthropic_managed_agents/"
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -4617,7 +4610,7 @@ class TestAnthropicIntegration:
         client.force_login(self.user)
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{slack_integration.id}/anthropic_managed_agents/"
+            f"/v1/environments/{self.team.pk}/integrations/{slack_integration.id}/anthropic_managed_agents/"
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -4636,7 +4629,7 @@ class TestAnthropicIntegration:
         client.force_login(self.user)
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{integration.id}/anthropic_managed_agent_environments/"
+            f"/v1/environments/{self.team.pk}/integrations/{integration.id}/anthropic_managed_agent_environments/"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -4657,7 +4650,7 @@ class TestAnthropicIntegration:
         client.force_login(self.user)
 
         response = client.get(
-            f"/api/environments/{self.team.pk}/integrations/{integration.id}/anthropic_managed_agent_vaults/"
+            f"/v1/environments/{self.team.pk}/integrations/{integration.id}/anthropic_managed_agent_vaults/"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -4679,7 +4672,7 @@ class TestSlackInsightsCodeKindDeprecated:
         client.force_login(self.user)
 
         response = client.post(
-            f"/api/environments/{self.team.pk}/integrations/",
+            f"/v1/environments/{self.team.pk}/integrations/",
             {"kind": "slack-insights-code", "config": {}},
             content_type="application/json",
         )
@@ -4733,7 +4726,7 @@ class TestGitHubIntegrationUninstall:
         )
 
         client.force_login(self.user)
-        response = client.delete(f"/api/environments/{self.team.pk}/integrations/{integration.id}/")
+        response = client.delete(f"/v1/environments/{self.team.pk}/integrations/{integration.id}/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         mock_uninstall.assert_called_once_with("12345")
@@ -4753,7 +4746,7 @@ class TestGitHubIntegrationUninstall:
         )
 
         client.force_login(self.user)
-        response = client.delete(f"/api/environments/{self.team.pk}/integrations/{integration.id}/")
+        response = client.delete(f"/v1/environments/{self.team.pk}/integrations/{integration.id}/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         mock_uninstall.assert_not_called()
@@ -4769,7 +4762,7 @@ class TestGitHubIntegrationUninstall:
         integration = self._create_github_integration("12345")
 
         client.force_login(self.user)
-        response = client.delete(f"/api/environments/{self.team.pk}/integrations/{integration.id}/")
+        response = client.delete(f"/v1/environments/{self.team.pk}/integrations/{integration.id}/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not Integration.objects.filter(id=integration.id).exists()
@@ -4783,7 +4776,7 @@ class TestGitHubIntegrationUninstall:
         mock_count.return_value = 2
 
         client.force_login(self.user)
-        response = client.delete(f"/api/environments/{self.team.pk}/integrations/{integration.id}/")
+        response = client.delete(f"/v1/environments/{self.team.pk}/integrations/{integration.id}/")
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "2 in-progress background agent runs" in response.json()["detail"]
@@ -4791,7 +4784,7 @@ class TestGitHubIntegrationUninstall:
         mock_count.assert_called_once_with(team_id=self.team.pk, integration_id=integration.id)
 
         mock_count.return_value = 0
-        response = client.delete(f"/api/environments/{self.team.pk}/integrations/{integration.id}/")
+        response = client.delete(f"/v1/environments/{self.team.pk}/integrations/{integration.id}/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not Integration.objects.filter(id=integration.id).exists()
@@ -4846,7 +4839,7 @@ class TestIntegrationDeletionWorkflowGuard:
 
     def _delete(self, client: HttpClient):
         client.force_login(self.user)
-        return client.delete(f"/api/environments/{self.team.pk}/integrations/{self.integration.id}/")
+        return client.delete(f"/v1/environments/{self.team.pk}/integrations/{self.integration.id}/")
 
     def test_destroy_blocked_when_active_workflow_references_integration(self, client: HttpClient):
         self._create_flow()
@@ -4996,7 +4989,7 @@ class TestIntegrationDeletionInsightsFunctionGuard:
 
     def _delete(self, client: HttpClient):
         client.force_login(self.user)
-        return client.delete(f"/api/environments/{self.team.pk}/integrations/{self.integration.id}/")
+        return client.delete(f"/v1/environments/{self.team.pk}/integrations/{self.integration.id}/")
 
     @pytest.mark.parametrize("value_form", ["bare_id", "dict_value"])
     def test_destroy_blocked_when_enabled_function_references_integration(self, value_form: str, client: HttpClient):
@@ -5090,7 +5083,7 @@ class TestIntegrationRequestAccessAPI(APIBaseTest):
         self.organization_membership.save()
 
     def _url(self) -> str:
-        return f"/api/projects/{self.team.id}/integrations/request_access/"
+        return f"/v1/projects/{self.team.id}/integrations/request_access/"
 
     @patch("insights.api.integration.report_user_action")
     @patch("insights.api.integration.send_integration_access_request")
@@ -5173,7 +5166,7 @@ class TestPushIdentityVerificationAPI(APIBaseTest):
         mock_from_sa.return_value = credentials
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "firebase",
                 "config": {
@@ -5199,7 +5192,7 @@ class TestIntegrationMembershipPermissions(APIBaseTest):
     @patch("insights.models.integration.AwsS3Integration.validate_credentials", return_value="123456789012")
     def test_member_can_create_integration(self, _mock_validate):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "aws-s3",
                 "config": {"name": "prod-aws", "aws_access_key_id": "AKIAEXAMPLE", "aws_secret_access_key": "secret"},
@@ -5213,7 +5206,7 @@ class TestIntegrationMembershipPermissions(APIBaseTest):
     def test_member_cannot_delete_integration(self):
         integration = Integration.objects.create(team=self.team, kind="slack", integration_id="T123", config={})
 
-        response = self.client.delete(f"/api/environments/{self.team.pk}/integrations/{integration.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.pk}/integrations/{integration.id}/")
 
         assert response.status_code == status.HTTP_403_FORBIDDEN, response.content
         assert Integration.objects.filter(id=integration.id).exists()
@@ -5237,7 +5230,7 @@ class TestIntegrationMembershipPermissions(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "apns",
                 "config": {
@@ -5268,7 +5261,7 @@ class TestIntegrationMembershipPermissions(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/integrations",
+            f"/v1/environments/{self.team.pk}/integrations",
             {
                 "kind": "google-cloud-service-account",
                 "config": {
@@ -5298,7 +5291,7 @@ class TestInsightsConnectAuthorize:
         )
 
     def _authorize(self, client: HttpClient, **params):
-        return client.get(f"/api/environments/{self.team.pk}/integrations/authorize/", {"kind": "insights", **params})
+        return client.get(f"/v1/environments/{self.team.pk}/integrations/authorize/", {"kind": "insights", **params})
 
     def test_rejects_unknown_region(self, client: HttpClient):
         client.force_login(self.user)
@@ -5373,7 +5366,7 @@ class TestInsightsConnectionListScoping:
         )
 
     def _list_ids(self, client: HttpClient) -> set[int]:
-        response = client.get(f"/api/environments/{self.team.pk}/integrations/")
+        response = client.get(f"/v1/environments/{self.team.pk}/integrations/")
         assert response.status_code == status.HTTP_200_OK
         return {r["id"] for r in response.json()["results"]}
 

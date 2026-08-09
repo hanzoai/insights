@@ -9,7 +9,7 @@ jest.mock('lib/api', () => ({
     default: {
         getResponse: (...args: any[]) => getResponse(...args),
         exports: {
-            determineExportUrl: jest.fn((id: number) => `/api/environments/1/exports/${id}/content?download=true`),
+            determineExportUrl: jest.fn((id: number) => `/v1/environments/1/exports/${id}/content?download=true`),
         },
     },
 }))
@@ -40,7 +40,7 @@ describe('downloadExportedAsset', () => {
         // The click must fire synchronously with no await before it (no preflight fetch), or Safari
         // drops the download once the user gesture expires.
         expect(getResponse).not.toHaveBeenCalled()
-        expect((fakeAnchor as any).href).toBe('/api/environments/1/exports/123/content?download=true')
+        expect((fakeAnchor as any).href).toBe('/v1/environments/1/exports/123/content?download=true')
         expect((fakeAnchor as any).click).toHaveBeenCalled()
         expect(appendSpy).toHaveBeenCalledWith(fakeAnchor)
 

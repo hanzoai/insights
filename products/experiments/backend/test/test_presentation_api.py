@@ -133,7 +133,7 @@ class _HoistFlagConfigClientMixin:
 class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     # List experiments
     def test_can_list_experiments(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/experiments/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/experiments/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @parameterized.expand(
@@ -166,11 +166,11 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
             metrics_secondary=metrics_secondary,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/experiments/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/experiments/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @parameterized.expand(
@@ -185,7 +185,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     )
     def test_can_filter_experiments_by_status(self, status_filter: str, expected_status: str) -> None:
         self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Draft experiment",
                 "feature_flag_key": "draft-filter-flag",
@@ -193,7 +193,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
             },
         )
         self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Running experiment",
                 "feature_flag_key": "running-filter-flag",
@@ -202,7 +202,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
             },
         )
         self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Stopped experiment",
                 "feature_flag_key": "stopped-filter-flag",
@@ -214,7 +214,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # A running experiment with the freeze marker on its flag groups: must show up only under
         # exposure_frozen — and its presence proves the running filter excludes frozen experiments.
         self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Frozen experiment",
                 "feature_flag_key": "frozen-filter-flag",
@@ -235,7 +235,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # paused takes precedence, so it must show up under paused — not under exposure_frozen,
         # where it would misreport a flag that serves no one as still holding variants.
         self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Paused frozen experiment",
                 "feature_flag_key": "paused-frozen-filter-flag",
@@ -254,7 +254,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         paused_frozen_flag.active = False
         paused_frozen_flag.save()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/experiments/?status={status_filter}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/experiments/?status={status_filter}")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
@@ -266,7 +266,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # stamped, not just some): running, not exposure_frozen. Guards the list query against regressing
         # to a "some group is stamped" JSONB-containment match.
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Reopened experiment",
                 "feature_flag_key": "reopened-filter-flag",
@@ -294,7 +294,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         assert experiment_id in running_ids
 
     def _status_filter_results(self, status_filter: str) -> list[dict[str, Any]]:
-        response = self.client.get(f"/api/projects/{self.team.id}/experiments/?status={status_filter}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/experiments/?status={status_filter}")
         assert response.status_code == status.HTTP_200_OK
         return response.json()["results"]
 
@@ -327,7 +327,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         purchase_experiment = self._create_experiment_with_metric_event("Purchase", "purchase-flag", "purchase")
         self._create_experiment_with_metric_event("Signup", "signup-flag", "signup")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/experiments/?event=purchase")
+        response = self.client.get(f"/v1/projects/{self.team.id}/experiments/?event=purchase")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
@@ -359,7 +359,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
             ],
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/experiments/?event=checkout")
+        response = self.client.get(f"/v1/projects/{self.team.id}/experiments/?event=checkout")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
@@ -378,7 +378,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         )
         ExperimentToSavedMetric.objects.create(experiment=experiment, saved_metric=saved_metric)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/experiments/?event=saved_event")
+        response = self.client.get(f"/v1/projects/{self.team.id}/experiments/?event=saved_event")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["count"], 1)
@@ -386,7 +386,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_getting_experiments_is_not_nplus1(self) -> None:
         self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             data={
                 "name": "Test Experiment",
                 "feature_flag_key": f"flag_0",
@@ -398,7 +398,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         ).json()
 
         self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             data={
                 "name": "Test Experiment",
                 "feature_flag_key": f"exp_flag_000",
@@ -412,12 +412,12 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         ).json()
 
         with self.assertNumQueries(FuzzyInt(13, 17)):
-            response = self.client.get(f"/api/projects/{self.team.id}/experiments")
+            response = self.client.get(f"/v1/projects/{self.team.id}/experiments")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         for i in range(1, 5):
             self.client.post(
-                f"/api/projects/{self.team.id}/experiments/",
+                f"/v1/projects/{self.team.id}/experiments/",
                 data={
                     "name": "Test Experiment",
                     "feature_flag_key": f"flag_{i}",
@@ -429,7 +429,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
             ).json()
 
         with self.assertNumQueries(FuzzyInt(13, 17)):
-            response = self.client.get(f"/api/projects/{self.team.id}/experiments")
+            response = self.client.get(f"/v1/projects/{self.team.id}/experiments")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def _create_fully_populated_experiment(self, index: int) -> Experiment:
@@ -478,7 +478,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         self._create_fully_populated_experiment(0)
 
         with CaptureQueriesContext(connection) as single_row:
-            response = self.client.get(f"/api/projects/{self.team.id}/experiments")
+            response = self.client.get(f"/v1/projects/{self.team.id}/experiments")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.json()["count"], 1)
 
@@ -486,7 +486,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
             self._create_fully_populated_experiment(i)
 
         with CaptureQueriesContext(connection) as five_rows:
-            response = self.client.get(f"/api/projects/{self.team.id}/experiments")
+            response = self.client.get(f"/v1/projects/{self.team.id}/experiments")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.json()["count"], 5)
 
@@ -527,7 +527,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         self._create_experiment_with_action_metrics(0)
 
         with CaptureQueriesContext(connection) as single_row:
-            response = self.client.get(f"/api/projects/{self.team.id}/experiments")
+            response = self.client.get(f"/v1/projects/{self.team.id}/experiments")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.json()["count"], 1)
 
@@ -535,7 +535,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
             self._create_experiment_with_action_metrics(i)
 
         with CaptureQueriesContext(connection) as five_rows:
-            response = self.client.get(f"/api/projects/{self.team.id}/experiments")
+            response = self.client.get(f"/v1/projects/{self.team.id}/experiments")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.json()["count"], 5)
 
@@ -550,7 +550,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         self._create_experiment_with_action_metrics(0)
 
         with CaptureQueriesContext(connection) as ctx:
-            response = self.client.get(f"/api/projects/{self.team.id}/experiments")
+            response = self.client.get(f"/v1/projects/{self.team.id}/experiments")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         experiment_selects = [
@@ -598,7 +598,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         )
         ExperimentToSavedMetric.objects.create(experiment=legacy_via_saved, saved_metric=legacy_saved_metric)
 
-        results = self.client.get(f"/api/projects/{self.team.id}/experiments").json()["results"]
+        results = self.client.get(f"/v1/projects/{self.team.id}/experiments").json()["results"]
         by_id = {r["id"]: r for r in results}
 
         self.assertFalse(by_id[non_legacy.id]["is_legacy"])
@@ -609,7 +609,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment, _ = self._create_experiment_with_action_metrics(0)
         Experiment.objects.filter(pk=experiment.pk).update(metrics=[{"kind": "ExperimentTrendsQuery"}])
 
-        response = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.json()["is_legacy"])
 
@@ -640,7 +640,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
             return flag_enabled if flag_key == EXPERIMENT_EXPOSURE_EVENT_FLAG else False
 
         with patch("hanzo_insights.feature_enabled", side_effect=fake_feature_enabled):
-            response = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment.id}")
+            response = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment.id}")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["resolved_exposure_event"], expected_event)
@@ -680,7 +680,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         action.name = "Renamed action"
         action.save()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         result = response.json()
 
@@ -696,7 +696,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         list_result = next(
             r
-            for r in self.client.get(f"/api/projects/{self.team.id}/experiments").json()["results"]
+            for r in self.client.get(f"/v1/projects/{self.team.id}/experiments").json()["results"]
             if r["id"] == experiment.id
         )
         for omitted in ["metrics", "metrics_secondary", "saved_metrics"]:
@@ -705,14 +705,14 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         for kept in ["name", "status", "feature_flag", "parameters"]:
             self.assertIn(kept, list_result)
 
-        detail_result = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment.id}").json()
+        detail_result = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment.id}").json()
         for present in ["metrics", "metrics_secondary", "saved_metrics"]:
             self.assertIn(present, detail_result)
 
     def test_creating_updating_basic_experiment(self):
         ff_key = "a-b-tests"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -749,7 +749,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Now update
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{id}",
+            f"/v1/projects/{self.team.id}/experiments/{id}",
             {"description": "Bazinga", "end_date": end_date},
         )
 
@@ -765,7 +765,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_creating_experiment_reports_user_action(self, mock_report_user_action, _mock_on_commit):
         ff_key = "tracked-experiment"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Tracked Experiment",
                 "description": "",
@@ -827,7 +827,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
             parameters["ensure_experience_continuity"] = params_value
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": f"Test Experiment {_name}",
                 "description": "",
@@ -849,7 +849,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_creating_experiment_with_rollout_percentage(self):
         ff_key = "test-rollout-flag"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment with Rollout",
                 "description": "",
@@ -871,7 +871,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_creating_experiment_without_rollout_percentage_defaults_to_100(self):
         ff_key = "test-default-rollout-flag"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment Default Rollout",
                 "description": "",
@@ -893,7 +893,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_updating_experiment_preserves_release_conditions(self):
         ff_key = "test-update-rollout-flag"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment Update Rollout",
                 "description": "",
@@ -915,7 +915,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         self.assertEqual(created_ff.filters["groups"][0]["rollout_percentage"], 80)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {
                 "parameters": {
                     "feature_flag_variants": [
@@ -933,7 +933,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_updating_experiment_applies_rollout_percentage_to_feature_flag(self):
         ff_key = "test-rollout-flag"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment Rollout",
                 "description": "",
@@ -952,7 +952,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = response.json()["id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {
                 "parameters": {
                     "feature_flag_variants": [
@@ -972,7 +972,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_creating_updating_web_experiment(self):
         ff_key = "a-b-tests"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "type": "web",
@@ -1012,7 +1012,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Now update
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{id}",
+            f"/v1/projects/{self.team.id}/experiments/{id}",
             {"description": "Bazinga", "end_date": end_date},
         )
 
@@ -1033,7 +1033,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "feature_flag_key": "holdout-idor-test",
@@ -1046,7 +1046,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_transferring_holdout_to_another_group(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_holdouts/",
+            f"/v1/projects/{self.team.id}/experiment_holdouts/",
             data={
                 "name": "Test Experiment holdout",
                 "filters": [
@@ -1071,7 +1071,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # Generate draft experiment to be part of holdout
         ff_key = "a-b-tests"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -1106,7 +1106,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # new holdout, and update experiment
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_holdouts/",
+            f"/v1/projects/{self.team.id}/experiment_holdouts/",
             data={
                 "name": "Test Experiment holdout 2",
                 "filters": [
@@ -1122,7 +1122,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         holdout_2_id = response.json()["id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{exp_id}",
+            f"/v1/projects/{self.team.id}/experiments/{exp_id}",
             {"holdout_id": holdout_2_id},
         )
 
@@ -1139,7 +1139,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # update parameters
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{exp_id}",
+            f"/v1/projects/{self.team.id}/experiments/{exp_id}",
             {
                 "parameters": {
                     "feature_flag_variants": [
@@ -1182,7 +1182,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # remove holdouts
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{exp_id}",
+            f"/v1/projects/{self.team.id}/experiments/{exp_id}",
             {"holdout_id": None},
         )
 
@@ -1196,7 +1196,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # try adding invalid holdout
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{exp_id}",
+            f"/v1/projects/{self.team.id}/experiments/{exp_id}",
             {"holdout_id": 123456},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -1204,20 +1204,20 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # add back holdout
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{exp_id}",
+            f"/v1/projects/{self.team.id}/experiments/{exp_id}",
             {"holdout_id": holdout_2_id},
         )
 
         # launch experiment and try updating holdouts again
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{exp_id}",
+            f"/v1/projects/{self.team.id}/experiments/{exp_id}",
             {"start_date": "2021-12-01T10:23"},
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{exp_id}",
+            f"/v1/projects/{self.team.id}/experiments/{exp_id}",
             {"holdout_id": holdout_id},
         )
 
@@ -1232,7 +1232,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_saved_metrics(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_saved_metrics/",
+            f"/v1/projects/{self.team.id}/experiment_saved_metrics/",
             {
                 "name": "Test Experiment saved metric",
                 "description": "Test description",
@@ -1264,7 +1264,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # Generate experiment to have saved metric
         ff_key = "a-b-tests"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -1308,7 +1308,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Now try updating experiment with new saved metric
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_saved_metrics/",
+            f"/v1/projects/{self.team.id}/experiment_saved_metrics/",
             {
                 "name": "Test Experiment saved metric 2",
                 "description": "Test description 2",
@@ -1325,7 +1325,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         self.assertEqual(response.json()["name"], "Test Experiment saved metric 2")
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{exp_id}",
+            f"/v1/projects/{self.team.id}/experiments/{exp_id}",
             {
                 "saved_metrics_ids": [
                     {"id": saved_metric_id, "metadata": {"type": "secondary"}},
@@ -1344,14 +1344,14 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         self.assertEqual(sorted([saved_metrics[0].id, saved_metrics[1].id]), [saved_metric_id, saved_metric_2_id])
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{exp_id}",
+            f"/v1/projects/{self.team.id}/experiments/{exp_id}",
             {"saved_metrics_ids": []},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Experiment.objects.get(pk=exp_id).saved_metrics.count(), 0)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{exp_id}",
+            f"/v1/projects/{self.team.id}/experiments/{exp_id}",
             {
                 "saved_metrics_ids": [
                     {"id": saved_metric_id, "metadata": {"type": "secondary"}},
@@ -1360,14 +1360,14 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{exp_id}",
+            f"/v1/projects/{self.team.id}/experiments/{exp_id}",
             {"saved_metrics_ids": None},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Experiment.objects.get(pk=exp_id).saved_metrics.count(), 0)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{exp_id}",
+            f"/v1/projects/{self.team.id}/experiments/{exp_id}",
             {
                 "saved_metrics_ids": [
                     {"id": saved_metric_id, "metadata": {"type": "secondary"}},
@@ -1380,7 +1380,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # not updating saved metrics shouldn't change anything
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{exp_id}",
+            f"/v1/projects/{self.team.id}/experiments/{exp_id}",
             {
                 "name": "Test Experiment 2",
             },
@@ -1390,7 +1390,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         self.assertEqual(Experiment.objects.get(pk=exp_id).saved_metrics.count(), 1)
 
         # now delete saved metric
-        response = self.client.delete(f"/api/projects/{self.team.id}/experiment_saved_metrics/{saved_metric_id}")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/experiment_saved_metrics/{saved_metric_id}")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         # make sure experiment in question was updated as well
@@ -1398,7 +1398,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_validate_saved_metrics_payload(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_saved_metrics/",
+            f"/v1/projects/{self.team.id}/experiment_saved_metrics/",
             {
                 "name": "Test Experiment saved metric",
                 "description": "Test description",
@@ -1431,7 +1431,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
             },
         }
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 **exp_data,
                 "saved_metrics_ids": [{"id": saved_metric_id, "metadata": {"xxx": "secondary"}}],
@@ -1446,7 +1446,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 **exp_data,
                 "saved_metrics_ids": [{"saved_metric": saved_metric_id}],
@@ -1458,7 +1458,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         self.assertEqual(response.json()["detail"], "Saved metric must have an id")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 **exp_data,
                 "saved_metrics_ids": [{"id": 12345678}],
@@ -1470,7 +1470,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         self.assertEqual(response.json()["detail"], "Saved metric does not exist or does not belong to this project")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 **exp_data,
                 "saved_metrics_ids": {"id": saved_metric_id},
@@ -1482,7 +1482,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         self.assertEqual(response.json()["detail"], 'Expected a list of items but got type "dict".')
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 **exp_data,
                 "saved_metrics_ids": [[saved_metric_id]],
@@ -1494,7 +1494,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         self.assertEqual(response.json()["detail"], "Saved metric must be an object")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 **exp_data,
                 "saved_metrics_ids": [{"id": saved_metric_id, "metadata": "secondary"}],
@@ -1601,7 +1601,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
             saved_metric_serializer.is_valid(raise_exception=True)
             saved_metric_serializer.save()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment.id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.json()["metrics"][0]["funnels_query"]["dateRange"]["date_from"], "2025-02-01T00:00:00Z"
@@ -1644,7 +1644,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         )
         ff_key = "a-b-tests"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -1668,7 +1668,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Now update
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{id}",
+            f"/v1/projects/{self.team.id}/experiments/{id}",
             {"filters": {"properties": [{"key": "id", "value": cohort.pk, "type": "cohort"}]}},
         )
 
@@ -1683,7 +1683,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # Draft experiment
         ff_key = "a-b-tests"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": None,  # invalid
                 "description": "",
@@ -1715,7 +1715,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Bad metrics experiment",
                 "feature_flag_key": "bad-metrics-flag",
@@ -1731,7 +1731,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_rejects_metrics_with_dict_properties_on_update(self):
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Good experiment",
                 "feature_flag_key": "update-metrics-flag",
@@ -1759,7 +1759,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         }
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {"metrics": [dict_properties_metric]},
             format="json",
         )
@@ -1770,7 +1770,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_rejects_metrics_with_invalid_kind(self):
         """Regression test: invalid metric kinds should be rejected, not silently skipped."""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Invalid kind experiment",
                 "feature_flag_key": "invalid-kind-flag",
@@ -1786,7 +1786,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_accepts_metrics_with_array_properties(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": "Good metrics experiment",
@@ -1822,7 +1822,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Test 1: End date same as start date
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -1838,7 +1838,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Test 2: End date before start date
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -1854,7 +1854,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Test 3: Valid dates
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -1872,7 +1872,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # Test 4: Update with invalid dates
         experiment_id = response.json()["id"]
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {
                 "start_date": "2024-02-15T00:00:00Z",
                 "end_date": "2024-02-14T00:00:00Z",
@@ -1883,7 +1883,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Test 5: Only start date provided (should be valid)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -1900,7 +1900,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Test 6: Only end date provided (should be valid)
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -1919,7 +1919,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # Draft experiment
         ff_key = "a-b-tests"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -1935,7 +1935,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Now update
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{id}",
+            f"/v1/projects/{self.team.id}/experiments/{id}",
             {
                 "description": "Bazinga",
                 "filters": {},
@@ -1952,7 +1952,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # Draft experiment
         ff_key = "a-b-tests"
         self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -1972,7 +1972,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # Draft experiment
         ff_key = "a-b-tests"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -1992,7 +1992,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Now update
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{id}",
+            f"/v1/projects/{self.team.id}/experiments/{id}",
             {
                 "description": "Bazinga",
                 "filters": {
@@ -2008,7 +2008,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Now launch experiment
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{id}",
+            f"/v1/projects/{self.team.id}/experiments/{id}",
             {"start_date": "2021-12-01T10:23"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -2021,7 +2021,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # Draft experiment
         ff_key = "a-b-tests"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -2039,7 +2039,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         self.assertFalse(created_ff.active)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{id}",
+            f"/v1/projects/{self.team.id}/experiments/{id}",
             {"description": "Bazinga", "start_date": "2021-12-01T10:23"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -2050,7 +2050,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # Draft experiment
         ff_key = "a-b-tests-with-flag-payloads"
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -2070,7 +2070,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Update parameters on experiment
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{id}",
+            f"/v1/projects/{self.team.id}/experiments/{id}",
             {
                 "description": "Update parameters",
                 "parameters": {
@@ -2102,7 +2102,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_create_multivariate_experiment_can_update_variants_in_draft(self):
         ff_key = "a-b-test"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -2156,7 +2156,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         self.assertTrue(experiment.is_draft)
         # Now try updating FF
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{id}",
+            f"/v1/projects/{self.team.id}/experiments/{id}",
             {
                 "description": "Bazinga",
                 "parameters": {
@@ -2196,7 +2196,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_create_multivariate_experiment(self):
         ff_key = "a-b-test"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -2252,7 +2252,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         def _patch_flag_variants(variants: list, extra: dict | None = None) -> Any:
             return self.client.patch(
-                f"/api/projects/{self.team.id}/experiments/{id}",
+                f"/v1/projects/{self.team.id}/experiments/{id}",
                 {
                     "description": "Bazinga",
                     "update_feature_flag_params": True,
@@ -2301,7 +2301,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Non-flag parameter keys update independently of the flag.
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{id}",
+            f"/v1/projects/{self.team.id}/experiments/{id}",
             {"description": "Bazinga", "parameters": {"recommended_sample_size": 1500}},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -2314,7 +2314,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         """
         ff_key = "ff-config-from-flag"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Source of truth",
                 "feature_flag_key": ff_key,
@@ -2362,7 +2362,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         ]
 
         # Detail endpoint (ExperimentSerializer)
-        detail_parameters = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment_id}").json()[
+        detail_parameters = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment_id}").json()[
             "parameters"
         ]
         self.assertEqual(detail_parameters["feature_flag_variants"], expected_variants)
@@ -2370,7 +2370,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         self.assertEqual(detail_parameters["aggregation_group_type_index"], 1)
 
         # List endpoint (ExperimentBasicSerializer shares the same projection)
-        results = self.client.get(f"/api/projects/{self.team.id}/experiments/").json()["results"]
+        results = self.client.get(f"/v1/projects/{self.team.id}/experiments/").json()["results"]
         list_parameters = next(e["parameters"] for e in results if e["id"] == experiment_id)
         self.assertEqual(list_parameters["feature_flag_variants"], expected_variants)
         self.assertEqual(list_parameters["aggregation_group_type_index"], 1)
@@ -2379,7 +2379,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_non_dict_parameters_column_does_not_break_reads(self, _name, stored_parameters):
         ff_key = f"ff-bad-parameters-{_name}"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {"name": "Legacy blob", "feature_flag_key": ff_key},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -2388,11 +2388,11 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # Legacy rows can hold a non-dict here; .update() bypasses the serializer, as those writes did.
         Experiment.objects.filter(id=experiment_id).update(parameters=stored_parameters)
 
-        detail = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment_id}")
+        detail = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment_id}")
         self.assertEqual(detail.status_code, status.HTTP_200_OK)
         self.assertEqual([v["key"] for v in detail.json()["parameters"]["feature_flag_variants"]], ["control", "test"])
 
-        listed = self.client.get(f"/api/projects/{self.team.id}/experiments/")
+        listed = self.client.get(f"/v1/projects/{self.team.id}/experiments/")
         self.assertEqual(listed.status_code, status.HTTP_200_OK)
         parameters = next(e["parameters"] for e in listed.json()["results"] if e["id"] == experiment_id)
         self.assertEqual([v["key"] for v in parameters["feature_flag_variants"]], ["control", "test"])
@@ -2403,7 +2403,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         """
         ff_key = "ff-config-not-stored"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "No mirror",
                 "feature_flag_key": ff_key,
@@ -2431,7 +2431,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # A draft update that re-sends the full parameters blob also strips the flag config and
         # keeps the non-flag keys.
         self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {
                 "parameters": {
                     "feature_flag_variants": [
@@ -2449,7 +2449,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_create_experiment_with_feature_flag_config_object(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "FF object create",
                 "feature_flag_key": "ff-object-create",
@@ -2481,7 +2481,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_update_draft_experiment_with_feature_flag_config_object(self):
         create = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "FF object update",
                 "feature_flag_key": "ff-object-update",
@@ -2498,7 +2498,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = create.json()["id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {
                 "feature_flag": {
                     "filters": {
@@ -2523,7 +2523,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_echoed_feature_flag_object_is_ignored_on_round_trip(self):
         create = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "FF echo",
                 "feature_flag_key": "ff-echo",
@@ -2545,12 +2545,10 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # Read-modify-write client: the frontend spreads the whole GET response into the save,
         # including the serialized read-only flag (which carries `id`). That echo carries no write
         # intent and must be ignored rather than reapplied.
-        echoed_flag = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment_id}").json()[
-            "feature_flag"
-        ]
+        echoed_flag = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment_id}").json()["feature_flag"]
         self.assertIn("id", echoed_flag)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {"description": "unrelated edit", "feature_flag": echoed_flag},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -2559,7 +2557,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # A genuine edit through a config-only object (no `id`) is applied.
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {
                 "feature_flag": {
                     "filters": {
@@ -2579,7 +2577,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_partial_feature_flag_object_preserves_omitted_flag_config(self):
         create = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "FF partial",
                 "feature_flag_key": "ff-partial",
@@ -2601,7 +2599,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # A rollout-only config object must not reset the flag's variants to defaults or clear
         # its aggregation group type — omitted config keeps the flag's current state.
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {"feature_flag": {"filters": {"groups": [{"properties": [], "rollout_percentage": 30}]}}},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -2636,7 +2634,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     )
     def test_invalid_feature_flag_object_returns_400(self, _name, feature_flag_input):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {"name": "FF invalid", "feature_flag_key": "ff-invalid", "feature_flag": feature_flag_input},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.json())
@@ -2645,7 +2643,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_feature_flag_object_normalizes_control_variant_key(self):
         # Same normalization as the legacy parameters path — LLM/MCP payloads often send 'Control'.
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "FF control case",
                 "feature_flag_key": "ff-control-case",
@@ -2667,7 +2665,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_feature_flag_object_on_running_experiment_requires_opt_in(self):
         create = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "FF running",
                 "feature_flag_key": "ff-running",
@@ -2696,14 +2694,14 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         }
 
         # Without the opt-in the service would sync nothing — reject loudly instead.
-        response = self.client.patch(f"/api/projects/{self.team.id}/experiments/{experiment_id}", new_variants_input)
+        response = self.client.patch(f"/v1/projects/{self.team.id}/experiments/{experiment_id}", new_variants_input)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("update_feature_flag_params", str(response.json()))
         flag = FeatureFlag.objects.get(key="ff-running", team_id=self.team.id)
         self.assertEqual([v["rollout_percentage"] for v in flag.variants], [50, 50])
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {**new_variants_input, "update_feature_flag_params": True},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -2712,7 +2710,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_feature_flag_object_payloads_and_continuity_live_on_the_flag(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "FF payloads",
                 "feature_flag_key": "ff-payloads",
@@ -2742,7 +2740,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # A draft update through the object syncs payloads to the flag too.
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {"feature_flag": {"filters": {"payloads": {"test": '"v2"'}}}},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -2752,7 +2750,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_duplicate_experiment_carries_flag_payloads_and_continuity(self):
         create = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "FF clone source",
                 "feature_flag_key": "ff-clone-src",
@@ -2775,7 +2773,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # The stored column carries no flag config, so the duplicate's new flag must inherit
         # payloads and continuity from the source flag, not lose them.
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{create.json()['id']}/duplicate",
+            f"/v1/projects/{self.team.id}/experiments/{create.json()['id']}/duplicate",
             {"feature_flag_key": "ff-clone-dst"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
@@ -2785,7 +2783,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_stale_persisted_flag_config_is_not_echoed_back_onto_the_flag(self):
         create = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "FF stale echo",
                 "feature_flag_key": "ff-stale-echo",
@@ -2820,14 +2818,14 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Reads must project the flag's live config so a read-modify-write client echoes live
         # values — not the stale column — into its next save.
-        get_parameters = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment_id}").json()[
+        get_parameters = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment_id}").json()[
             "parameters"
         ]
         self.assertEqual(get_parameters["feature_flag_payloads"], {"test": '"live"'})
         self.assertTrue(get_parameters["ensure_experience_continuity"])
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {"name": "FF stale echo renamed", "parameters": get_parameters},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -2838,7 +2836,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_partial_feature_flag_object_ignores_stale_column_config(self):
         create = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "FF stale column",
                 "feature_flag_key": "ff-stale-column",
@@ -2866,7 +2864,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {"feature_flag": {"filters": {"payloads": {"test": '"v1"'}}}},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -2878,7 +2876,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_feature_flag_object_with_null_id_is_write_intent(self):
         # Typed clients may serialize an optional id as null; only a non-null id marks an echo.
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "FF null id",
                 "feature_flag_key": "ff-null-id",
@@ -2917,7 +2915,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         )
         # The service links an existing flag as-is, so explicit config would be silently dropped.
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "FF preexisting",
                 "feature_flag_key": "ff-preexisting",
@@ -2938,7 +2936,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_config_free_feature_flag_stub_is_ignored(self):
         create = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "FF stub",
                 "feature_flag_key": "ff-stub",
@@ -2956,7 +2954,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # An object with no config keys carries no write intent — clients that include such stubs
         # in write bodies must keep working, even on running experiments.
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{create.json()['id']}",
+            f"/v1/projects/{self.team.id}/experiments/{create.json()['id']}",
             {"name": "FF stub renamed", "feature_flag": {"key": "ff-stub", "active": True}},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -2964,7 +2962,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_duplicate_experiment_with_null_flag_continuity_stays_off(self):
         create = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "FF null continuity",
                 "feature_flag_key": "ff-null-continuity",
@@ -2985,7 +2983,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         self.team.save()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{create.json()['id']}/duplicate",
+            f"/v1/projects/{self.team.id}/experiments/{create.json()['id']}/duplicate",
             {"feature_flag_key": "ff-null-continuity-copy"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
@@ -2995,7 +2993,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_experiment_response_includes_feature_flag(self):
         """Test that experiment responses include the feature_flag field correctly serialized."""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Feature Flag Test",
                 "feature_flag_key": "test-flag-serialization",
@@ -3020,7 +3018,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Also test GET to ensure serialization works for retrieval too
         experiment_id = response_data["id"]
-        get_response = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment_id}")
+        get_response = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment_id}")
         self.assertEqual(get_response.status_code, status.HTTP_200_OK)
 
         get_data = get_response.json()
@@ -3032,7 +3030,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # No 'control' variant is required; the baseline defaults to the first variant downstream.
         ff_key = "a-b-test"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -3079,7 +3077,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # since intent is unambiguous and the runtime treats `control` as a reserved key.
         ff_key = f"case-insensitive-{control_key.lower()}-{control_key}"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": f"Capitalized control {control_key}",
                 "description": "",
@@ -3111,7 +3109,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # in the 201 response, which the assertion below would catch.
         ff_key = "control-and-capital-control"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Both controls",
                 "description": "",
@@ -3135,7 +3133,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_creating_updating_experiment_with_group_aggregation(self):
         ff_key = "a-b-tests"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -3170,7 +3168,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Now update group type index on filter
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{id}",
+            f"/v1/projects/{self.team.id}/experiments/{id}",
             {
                 "description": "Bazinga",
                 "filters": {
@@ -3199,7 +3197,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Now remove group type index
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{id}",
+            f"/v1/projects/{self.team.id}/experiments/{id}",
             {
                 "description": "Bazinga",
                 "filters": {
@@ -3229,7 +3227,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_creating_experiment_with_group_aggregation_parameter(self):
         ff_key = "a-b-tests"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -3265,7 +3263,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Now update group type index on filter
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{id}",
+            f"/v1/projects/{self.team.id}/experiments/{id}",
             {
                 "description": "Bazinga",
                 "filters": {
@@ -3295,7 +3293,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_used_in_experiment_is_populated_correctly_for_feature_flag_list(self) -> None:
         ff_key = "a-b-test"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -3339,7 +3337,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # add another random feature flag
         self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             data={
                 "name": f"flag",
                 "key": f"flag_0",
@@ -3351,7 +3349,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # TODO: Make sure permission bool doesn't cause n + 1
         # +1 query for survey internal flag IDs lookup
         with self.assertNumQueries(22):
-            response = self.client.get(f"/api/projects/{self.team.id}/feature_flags")
+            response = self.client.get(f"/v1/projects/{self.team.id}/feature_flags")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             result = response.json()
 
@@ -3371,7 +3369,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         ff_key = "a-b-test"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -3420,7 +3418,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # launch experiment
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{id}",
+            f"/v1/projects/{self.team.id}/experiments/{id}",
             {
                 "start_date": "2021-12-01T10:23",
             },
@@ -3479,7 +3477,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
             "aggregation_group_type_index": None,
         }
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{id}",
+            f"/v1/projects/{self.team.id}/experiments/{id}",
             {
                 "description": "Bazinga",
                 "feature_flag": {
@@ -3506,7 +3504,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_create_draft_experiment_with_filters(self) -> None:
         ff_key = "a-b-tests"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -3531,7 +3529,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_create_launched_experiment_with_filters(self) -> None:
         ff_key = "a-b-tests"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -3556,7 +3554,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_create_draft_experiment_without_filters(self) -> None:
         ff_key = "a-b-tests"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -3578,7 +3576,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         config.save()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Team Default Matured",
                 "feature_flag_key": "team-default-matured",
@@ -3595,7 +3593,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         config.save()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Override Matured",
                 "feature_flag_key": "override-matured",
@@ -3626,7 +3624,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Beta experiment",
                 "feature_flag_key": feature_flag.key,
@@ -3653,7 +3651,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Single variant experiment",
                 "feature_flag_key": feature_flag.key,
@@ -3669,7 +3667,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_create_experiment_with_parameters_insufficient_variants(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Single variant experiment",
                 "feature_flag_key": "single-variant-key",
@@ -3704,7 +3702,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Beta experiment",
                 "feature_flag_key": feature_flag.key,
@@ -3733,7 +3731,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Create first experiment with this feature flag
         first_experiment_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "First experiment",
                 "feature_flag_key": feature_flag.key,
@@ -3746,7 +3744,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Create second experiment with the same feature flag - this would have previously failed
         second_experiment_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Second experiment",
                 "feature_flag_key": feature_flag.key,
@@ -3773,7 +3771,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_feature_flag_and_experiment_sync(self):
         # Create an experiment with control and test variants
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "My test experiment",
@@ -3810,7 +3808,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Change the rollout percentages and groups of the feature flag
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{feature_flag_id}",
+            f"/v1/projects/{self.team.id}/feature_flags/{feature_flag_id}",
             {
                 "filters": {
                     "groups": [
@@ -3831,7 +3829,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # The flag is the source of truth; the experiment API projects variants and aggregation
         # group type from it (no `parameters` mirror is persisted).
-        parameters = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment_id}").json()["parameters"]
+        parameters = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment_id}").json()["parameters"]
         self.assertEqual(
             parameters["feature_flag_variants"],
             [
@@ -3843,7 +3841,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Update the experiment with an unrelated change
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {"name": "Updated Test Experiment"},
         )
 
@@ -3863,7 +3861,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Test removing aggregation_group_type_index
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{feature_flag_id}",
+            f"/v1/projects/{self.team.id}/feature_flags/{feature_flag_id}",
             {
                 "filters": {
                     "groups": [
@@ -3882,7 +3880,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         )
 
         # With no aggregation_group_type_index on the flag, it is absent from the projection too.
-        parameters = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment_id}").json()["parameters"]
+        parameters = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment_id}").json()["parameters"]
         self.assertNotIn("aggregation_group_type_index", parameters)
 
     def test_update_experiment_exposure_config_valid(self):
@@ -3901,7 +3899,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment.id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment.id}",
             {
                 "exposure_criteria": {
                     "filterTestAccounts": True,
@@ -3943,7 +3941,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment.id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment.id}",
             {
                 "exposure_criteria": {
                     "filterTestAccounts": True,
@@ -3964,13 +3962,13 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment = Experiment.objects.create(team=self.team, name="Repo field", feature_flag=feature_flag)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment.id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment.id}",
             {"repository": "not-a-repo"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment.id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment.id}",
             {"repository": "Acme/Web"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
@@ -3978,7 +3976,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_create_experiment_with_repository(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Repo on create",
                 "feature_flag_key": "repo-on-create-flag",
@@ -4009,7 +4007,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
             feature_flag=feature_flag,
         )
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment.id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment.id}",
             {
                 "exposure_criteria": {
                     "filterTestAccounts": False,
@@ -4029,7 +4027,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_create_experiment_in_specific_folder(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Folder Test Experiment",
                 "description": "This experiment goes in a custom folder",
@@ -4073,7 +4071,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         """Test that list endpoint doesn't return soft-deleted experiments"""
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "feature_flag_key": "test-flag",
@@ -4086,7 +4084,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = response.json()["id"]
 
         response2 = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Active Experiment",
                 "feature_flag_key": "active-flag",
@@ -4100,12 +4098,12 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Soft delete the first experiment
         self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {"deleted": True},
             format="json",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/experiments/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/experiments/")
         experiment_ids = [exp["id"] for exp in response.json()["results"]]
 
         # Should only contain the active experiment
@@ -4116,7 +4114,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         """Test that detail endpoint returns 404 for soft-deleted experiments"""
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "feature_flag_key": "test-flag",
@@ -4130,18 +4128,18 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Soft delete the experiment
         self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {"deleted": True},
             format="json",
         )
 
         # Try to get the deleted experiment
-        response = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment_id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment_id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_restore_allows_payload_with_additional_fields(self):
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Restorable Experiment",
                 "feature_flag_key": "restore-flag",
@@ -4154,14 +4152,14 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment = create_response.json()
 
         self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment['id']}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment['id']}/",
             {"deleted": True},
             format="json",
         )
 
         restore_payload = {"deleted": False, "name": experiment["name"]}
         restore_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment['id']}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment['id']}/",
             restore_payload,
             format="json",
         )
@@ -4177,7 +4175,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     )
     def test_restore_with_flag_state(self, _name, delete_flag, expected_status):
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Restore Flag State Test",
                 "feature_flag_key": f"restore-flag-state-{_name}",
@@ -4191,20 +4189,20 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         feature_flag_id = experiment["feature_flag"]["id"]
 
         self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment['id']}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment['id']}/",
             {"deleted": True},
             format="json",
         )
 
         if delete_flag:
             self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{feature_flag_id}/",
+                f"/v1/projects/{self.team.id}/feature_flags/{feature_flag_id}/",
                 {"deleted": True},
                 format="json",
             )
 
         restore_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment['id']}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment['id']}/",
             {"deleted": False, "name": experiment["name"]},
             format="json",
         )
@@ -4219,7 +4217,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         ff_key = "a-b-tests"
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "feature_flag_key": ff_key,
@@ -4234,7 +4232,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Create original experiment
         original_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": "Original Experiment",
@@ -4273,7 +4271,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Duplicate the experiment
         duplicate_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{original_experiment['id']}/duplicate/",
+            f"/v1/projects/{self.team.id}/experiments/{original_experiment['id']}/duplicate/",
             {},
         )
 
@@ -4327,7 +4325,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Create original experiment
         original_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Conflict Test",
                 "feature_flag_key": ff_key,
@@ -4340,7 +4338,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Create first duplicate
         first_duplicate_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{original_experiment['id']}/duplicate/",
+            f"/v1/projects/{self.team.id}/experiments/{original_experiment['id']}/duplicate/",
             {},
         )
 
@@ -4350,7 +4348,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Create second duplicate to test name conflict resolution
         second_duplicate_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{original_experiment['id']}/duplicate/",
+            f"/v1/projects/{self.team.id}/experiments/{original_experiment['id']}/duplicate/",
             {},
         )
 
@@ -4363,7 +4361,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # Create original experiment
         original_ff_key = "original-flag"
         original_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": "Original Experiment",
@@ -4416,7 +4414,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Duplicate the experiment with a custom feature flag
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{original_experiment['id']}/duplicate",
+            f"/v1/projects/{self.team.id}/experiments/{original_experiment['id']}/duplicate",
             {"feature_flag_key": new_flag.key},
         )
 
@@ -4465,7 +4463,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         """Test that duplicating with an existing feature flag uses that flag's variants, not the original's"""
         # Create original experiment with specific variants
         original_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Original Experiment",
                 "feature_flag_key": "original-flag",
@@ -4498,7 +4496,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Duplicate the experiment using the new feature flag
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{original_experiment['id']}/duplicate",
+            f"/v1/projects/{self.team.id}/experiments/{original_experiment['id']}/duplicate",
             {"feature_flag_key": new_flag.key},
         )
 
@@ -4513,7 +4511,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_duplicate_experiment_rejects_blank_feature_flag_key(self) -> None:
         original_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Original Experiment",
                 "feature_flag_key": "original-flag",
@@ -4523,7 +4521,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         original_experiment = original_response.json()
 
         duplicate_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{original_experiment['id']}/duplicate/",
+            f"/v1/projects/{self.team.id}/experiments/{original_experiment['id']}/duplicate/",
             {"feature_flag_key": ""},
         )
 
@@ -4554,7 +4552,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         )
 
         original_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {"name": "Original Experiment", "feature_flag_key": f"{expected_mode}-analytics-flag"},
         )
         self.assertEqual(original_response.status_code, status.HTTP_201_CREATED)
@@ -4562,11 +4560,11 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         mock_report_user_action.reset_mock()
 
         if target_team:
-            url = f"/api/projects/{self.team.id}/experiments/{original_id}/copy_to_project/"
+            url = f"/v1/projects/{self.team.id}/experiments/{original_id}/copy_to_project/"
             body: dict = {"target_team_id": target_team.id}
             expected_team = target_team
         else:
-            url = f"/api/projects/{self.team.id}/experiments/{original_id}/duplicate/"
+            url = f"/v1/projects/{self.team.id}/experiments/{original_id}/duplicate/"
             body = {}
             expected_team = self.team
 
@@ -4602,7 +4600,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         target_team = Team.objects.create(organization=self.organization, name="Target Team")
 
         original_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Original Experiment",
                 "description": "Original description",
@@ -4637,7 +4635,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         original_experiment = original_response.json()
 
         copy_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{original_experiment['id']}/copy_to_project/",
+            f"/v1/projects/{self.team.id}/experiments/{original_experiment['id']}/copy_to_project/",
             {"target_team_id": target_team.id},
         )
         self.assertEqual(copy_response.status_code, status.HTTP_201_CREATED)
@@ -4674,7 +4672,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         target_team = Team.objects.create(organization=self.organization, name="Target Team")
 
         original_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Flag Test Experiment",
                 "feature_flag_key": "disabled-flag-test",
@@ -4684,7 +4682,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         original_experiment = original_response.json()
 
         copy_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{original_experiment['id']}/copy_to_project/",
+            f"/v1/projects/{self.team.id}/experiments/{original_experiment['id']}/copy_to_project/",
             {"target_team_id": target_team.id},
         )
         self.assertEqual(copy_response.status_code, status.HTTP_201_CREATED)
@@ -4713,7 +4711,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         )
 
         original_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Reuse Flag Experiment",
                 "feature_flag_key": "existing-flag",
@@ -4723,7 +4721,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         original_experiment = original_response.json()
 
         copy_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{original_experiment['id']}/copy_to_project/",
+            f"/v1/projects/{self.team.id}/experiments/{original_experiment['id']}/copy_to_project/",
             {"target_team_id": target_team.id},
         )
         self.assertEqual(copy_response.status_code, status.HTTP_201_CREATED)
@@ -4742,7 +4740,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         )
 
         saved_metric_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_saved_metrics/",
+            f"/v1/projects/{self.team.id}/experiment_saved_metrics/",
             {
                 "name": "Saved Metric",
                 "query": {
@@ -4757,7 +4755,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         saved_metric_id = saved_metric_response.json()["id"]
 
         original_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Full Experiment",
                 "feature_flag_key": "saved-metric-test",
@@ -4782,7 +4780,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         self.assertTrue(len(original_experiment["saved_metrics"]) > 0)
 
         copy_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{original_experiment['id']}/copy_to_project/",
+            f"/v1/projects/{self.team.id}/experiments/{original_experiment['id']}/copy_to_project/",
             {"target_team_id": target_team.id},
         )
         self.assertEqual(copy_response.status_code, status.HTTP_201_CREATED)
@@ -4797,7 +4795,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         other_team = Team.objects.create(organization=other_org, name="Other Team")
 
         original_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Auth Test Experiment",
                 "feature_flag_key": "auth-test-flag",
@@ -4807,7 +4805,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         original_experiment = original_response.json()
 
         copy_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{original_experiment['id']}/copy_to_project/",
+            f"/v1/projects/{self.team.id}/experiments/{original_experiment['id']}/copy_to_project/",
             {"target_team_id": other_team.id},
         )
         self.assertIn(copy_response.status_code, [status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND])
@@ -4821,7 +4819,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         )
 
         original_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Environment selection experiment",
                 "feature_flag_key": "environment-selection-flag",
@@ -4831,7 +4829,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         original_experiment = original_response.json()
 
         copy_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{original_experiment['id']}/copy_to_project/",
+            f"/v1/projects/{self.team.id}/experiments/{original_experiment['id']}/copy_to_project/",
             {"target_team_id": secondary_target_team.id},
         )
         self.assertEqual(copy_response.status_code, status.HTTP_201_CREATED)
@@ -4841,7 +4839,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_copy_experiment_to_project_missing_target(self) -> None:
         original_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Missing Target Experiment",
                 "feature_flag_key": "missing-target-flag",
@@ -4851,7 +4849,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         original_experiment = original_response.json()
 
         copy_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{original_experiment['id']}/copy_to_project/",
+            f"/v1/projects/{self.team.id}/experiments/{original_experiment['id']}/copy_to_project/",
             {},
         )
         self.assertEqual(copy_response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -4894,7 +4892,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         }
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": "Fingerprint Test Experiment",
@@ -4957,7 +4955,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         }
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{exp_id}",
+            f"/v1/projects/{self.team.id}/experiments/{exp_id}",
             {
                 "allow_unknown_events": True,
                 "metrics": [updated_funnel_metric, updated_mean_metric, updated_ratio_metric],
@@ -4990,7 +4988,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_creating_draft_experiment_sets_status_draft(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Status Draft Test",
                 "feature_flag_key": "status-draft-flag",
@@ -5005,7 +5003,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_launching_experiment_sets_status_running(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Status Running Test",
                 "feature_flag_key": "status-running-flag",
@@ -5021,7 +5019,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_ending_experiment_sets_status_stopped(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Status Stopped Test",
                 "feature_flag_key": "status-stopped-flag",
@@ -5032,7 +5030,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = response.json()["id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {"end_date": "2021-12-10T00:00"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -5040,7 +5038,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_update_draft_to_running_sets_status(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Draft to Running",
                 "feature_flag_key": "draft-to-running-flag",
@@ -5051,7 +5049,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         self.assertEqual(response.json()["status"], "draft")
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {"start_date": "2021-12-01T10:23"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -5059,7 +5057,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_duplicating_running_experiment_sets_status_draft(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Running Experiment",
                 "feature_flag_key": "running-dup-flag",
@@ -5071,7 +5069,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = response.json()["id"]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/duplicate/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/duplicate/",
             {"feature_flag_key": "running-dup-flag-copy"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -5079,7 +5077,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_duplicating_stopped_experiment_sets_status_draft(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Stopped Experiment",
                 "feature_flag_key": "stopped-dup-flag",
@@ -5090,12 +5088,12 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = response.json()["id"]
 
         self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {"end_date": "2021-12-10T00:00"},
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/duplicate/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/duplicate/",
             {"feature_flag_key": "stopped-dup-flag-copy"},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -5108,7 +5106,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_launch_experiment_endpoint(self):
         # Create a draft experiment with metrics
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": "Launch Endpoint Test",
@@ -5133,7 +5131,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Launch the experiment
         launch_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/launch/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/launch/",
         )
         self.assertEqual(launch_response.status_code, status.HTTP_200_OK)
 
@@ -5147,7 +5145,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_launch_experiment_endpoint_already_running(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": "Already Running Endpoint",
@@ -5167,13 +5165,13 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = response.json()["id"]
 
         launch_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/launch/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/launch/",
         )
         self.assertEqual(launch_response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_launch_experiment_endpoint_without_metrics(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "No Metrics Endpoint",
                 "feature_flag_key": "no-metrics-endpoint",
@@ -5184,14 +5182,14 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = response.json()["id"]
 
         launch_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/launch/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/launch/",
         )
         self.assertEqual(launch_response.status_code, status.HTTP_200_OK)
         self.assertEqual(launch_response.json()["status"], "running")
 
     def test_launch_experiment_endpoint_with_list_body(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "List Body Endpoint",
                 "feature_flag_key": "list-body-endpoint-flag",
@@ -5204,7 +5202,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # The endpoint declares no request body, so a JSON array must not reach the flag serializer
         # as a non-dict `request.data`.
         launch_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/launch/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/launch/",
             [],
             format="json",
         )
@@ -5216,7 +5214,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_archive_experiment_endpoint(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": "Archive Endpoint Test",
@@ -5238,14 +5236,14 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         self.assertFalse(response.json()["archived"])
 
         archive_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/archive/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/archive/",
         )
         self.assertEqual(archive_response.status_code, status.HTTP_200_OK)
         self.assertTrue(archive_response.json()["archived"])
 
     def test_archive_experiment_endpoint_disables_feature_flag(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": "Archive And Disable Flag",
@@ -5267,7 +5265,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         feature_flag_id = response.json()["feature_flag"]["id"]
 
         archive_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/archive/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/archive/",
             {"disable_feature_flag": True},
             format="json",
         )
@@ -5284,7 +5282,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_archive_endpoint_disable_requires_feature_flag_write_scope(self):
         def _make_experiment(name: str, key: str) -> tuple[int, int]:
             resp = self.client.post(
-                f"/api/projects/{self.team.id}/experiments/",
+                f"/v1/projects/{self.team.id}/experiments/",
                 {
                     "allow_unknown_events": True,
                     "name": name,
@@ -5318,7 +5316,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # experiment:write alone can't disable the linked flag — that needs feature_flag:write.
         token = _pat(["experiment:write"])
         resp = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{exp_deny}/archive/",
+            f"/v1/projects/{self.team.id}/experiments/{exp_deny}/archive/",
             {"disable_feature_flag": True},
             format="json",
             headers={"authorization": f"Bearer {token}"},
@@ -5327,7 +5325,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # experiment:write alone still archives when not disabling the flag.
         resp = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{exp_no_disable}/archive/",
+            f"/v1/projects/{self.team.id}/experiments/{exp_no_disable}/archive/",
             {"disable_feature_flag": False},
             format="json",
             headers={"authorization": f"Bearer {token}"},
@@ -5337,7 +5335,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # With feature_flag:write, disabling the linked flag is allowed.
         token = _pat(["experiment:write", "feature_flag:write"])
         resp = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{exp_allow}/archive/",
+            f"/v1/projects/{self.team.id}/experiments/{exp_allow}/archive/",
             {"disable_feature_flag": True},
             format="json",
             headers={"authorization": f"Bearer {token}"},
@@ -5404,7 +5402,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_archive_experiment_endpoint_not_ended(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": "Archive Running Endpoint",
@@ -5424,13 +5422,13 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = response.json()["id"]
 
         archive_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/archive/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/archive/",
         )
         self.assertEqual(archive_response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_unarchive_experiment_endpoint(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": "Unarchive Endpoint Test",
@@ -5452,21 +5450,21 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Archive first
         archive_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/archive/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/archive/",
         )
         self.assertEqual(archive_response.status_code, status.HTTP_200_OK)
         self.assertTrue(archive_response.json()["archived"])
 
         # Unarchive
         unarchive_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/unarchive/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/unarchive/",
         )
         self.assertEqual(unarchive_response.status_code, status.HTTP_200_OK)
         self.assertFalse(unarchive_response.json()["archived"])
 
     def test_unarchive_experiment_endpoint_not_archived(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": "Unarchive Not Archived",
@@ -5487,14 +5485,14 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = response.json()["id"]
 
         unarchive_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/unarchive/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/unarchive/",
         )
         self.assertEqual(unarchive_response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def _create_running_experiment(self, name: str = "Running Test", flag_key: str = "running-flag") -> dict:
         """Helper: create an experiment and launch it via the API."""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": name,
                 "feature_flag_key": flag_key,
@@ -5513,7 +5511,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = response.json()["id"]
 
         launch_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/launch/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/launch/",
         )
         self.assertEqual(launch_response.status_code, status.HTTP_200_OK)
         return launch_response.json()
@@ -5527,7 +5525,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         self.assertTrue(flag.active)
 
         pause_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/pause/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/pause/",
         )
         self.assertEqual(pause_response.status_code, status.HTTP_200_OK)
         self.assertEqual(pause_response.json()["status"], "paused")
@@ -5543,14 +5541,14 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # Pause first
         pause_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/pause/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/pause/",
         )
         self.assertEqual(pause_response.status_code, status.HTTP_200_OK)
         self.assertEqual(pause_response.json()["status"], "paused")
 
         # Resume
         resume_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/resume/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/resume/",
         )
         self.assertEqual(resume_response.status_code, status.HTTP_200_OK)
         self.assertEqual(resume_response.json()["status"], "running")
@@ -5563,10 +5561,10 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         data = self._create_running_experiment(name="Double Pause", flag_key="double-pause-flag")
         experiment_id = data["id"]
 
-        self.client.post(f"/api/projects/{self.team.id}/experiments/{experiment_id}/pause/")
+        self.client.post(f"/v1/projects/{self.team.id}/experiments/{experiment_id}/pause/")
 
         second_pause = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/pause/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/pause/",
         )
         self.assertEqual(second_pause.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -5575,13 +5573,13 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = data["id"]
 
         resume_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/resume/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/resume/",
         )
         self.assertEqual(resume_response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_pause_draft_experiment_returns_400(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Pause Draft",
                 "feature_flag_key": "pause-draft-flag",
@@ -5592,13 +5590,13 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = response.json()["id"]
 
         pause_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/pause/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/pause/",
         )
         self.assertEqual(pause_response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_pause_ended_experiment_returns_400(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Pause Ended",
                 "feature_flag_key": "pause-ended-flag",
@@ -5611,7 +5609,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = response.json()["id"]
 
         pause_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/pause/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/pause/",
         )
         self.assertEqual(pause_response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -5632,7 +5630,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = data["id"]
 
         freeze_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/freeze_exposure/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/freeze_exposure/",
         )
         self.assertEqual(freeze_response.status_code, status.HTTP_200_OK)
         body = freeze_response.json()
@@ -5643,7 +5641,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         self.assertTrue(body["feature_flag"]["active"])
 
         # A frozen-but-still-running experiment also serializes as exposure_frozen on GET.
-        get_response = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment_id}/")
+        get_response = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment_id}/")
         self.assertEqual(get_response.status_code, status.HTTP_200_OK)
         self.assertEqual(get_response.json()["status"], "exposure_frozen")
 
@@ -5663,10 +5661,10 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         data = self._create_running_experiment(name="Double Freeze", flag_key="double-freeze-flag")
         experiment_id = data["id"]
 
-        self.client.post(f"/api/projects/{self.team.id}/experiments/{experiment_id}/freeze_exposure/")
+        self.client.post(f"/v1/projects/{self.team.id}/experiments/{experiment_id}/freeze_exposure/")
 
         second_freeze = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/freeze_exposure/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/freeze_exposure/",
         )
         self.assertEqual(second_freeze.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -5685,24 +5683,24 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_unfreeze_exposure_endpoint(self, mock_fetch: MagicMock, mock_insert: MagicMock) -> None:
         data = self._create_running_experiment(name="Unfreeze Endpoint", flag_key="unfreeze-endpoint-flag")
         experiment_id = data["id"]
-        freeze_response = self.client.post(f"/api/projects/{self.team.id}/experiments/{experiment_id}/freeze_exposure/")
+        freeze_response = self.client.post(f"/v1/projects/{self.team.id}/experiments/{experiment_id}/freeze_exposure/")
         self.assertEqual(freeze_response.status_code, status.HTTP_200_OK)
 
         unfreeze_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/unfreeze_exposure/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/unfreeze_exposure/",
         )
         self.assertEqual(unfreeze_response.status_code, status.HTTP_200_OK)
         self.assertEqual(unfreeze_response.json()["status"], "running")
 
         # Not frozen anymore — a second unfreeze is rejected.
         second_unfreeze = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/unfreeze_exposure/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/unfreeze_exposure/",
         )
         self.assertEqual(second_unfreeze.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_freeze_exposure_draft_returns_400(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {"name": "Freeze Draft", "feature_flag_key": "freeze-draft-flag"},
             format="json",
         )
@@ -5710,7 +5708,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = response.json()["id"]
 
         freeze_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/freeze_exposure/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/freeze_exposure/",
         )
         self.assertEqual(freeze_response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -5719,7 +5717,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = data["id"]
 
         end_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/end/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/end/",
             {"conclusion": "won", "conclusion_comment": "Test variant won"},
             format="json",
         )
@@ -5736,7 +5734,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = data["id"]
 
         end_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/end/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/end/",
             {"conclusion": "amazing"},
             format="json",
         )
@@ -5744,7 +5742,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_end_experiment_draft_returns_400(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "End Draft",
                 "feature_flag_key": "end-draft-endpoint-flag",
@@ -5755,7 +5753,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = response.json()["id"]
 
         end_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/end/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/end/",
             format="json",
         )
         self.assertEqual(end_response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -5776,7 +5774,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # experiment:write alone can't open a cleanup PR; opening one starts a task, which needs task:write.
         token = _pat(["experiment:write"])
         resp = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{exp_deny}/end/",
+            f"/v1/projects/{self.team.id}/experiments/{exp_deny}/end/",
             {"conclusion": "won", "open_cleanup_pr": True},
             format="json",
             headers={"authorization": f"Bearer {token}"},
@@ -5785,7 +5783,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # experiment:write alone still ends the experiment when not opening a PR.
         resp = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{exp_no_opt}/end/",
+            f"/v1/projects/{self.team.id}/experiments/{exp_no_opt}/end/",
             {"conclusion": "won", "open_cleanup_pr": False},
             format="json",
             headers={"authorization": f"Bearer {token}"},
@@ -5795,7 +5793,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # With task:write, opting in is allowed.
         token = _pat(["experiment:write", "task:write"])
         resp = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{exp_allow}/end/",
+            f"/v1/projects/{self.team.id}/experiments/{exp_allow}/end/",
             {"conclusion": "won", "open_cleanup_pr": True},
             format="json",
             headers={"authorization": f"Bearer {token}"},
@@ -5811,14 +5809,14 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         # Session auth carries no scopes, and opening a cleanup PR is no longer gated on the
         # Desktop waitlist, so both actions succeed ("end first, ship later" flow).
         resp = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{exp_ship}/end/",
+            f"/v1/projects/{self.team.id}/experiments/{exp_ship}/end/",
             {"conclusion": "won", "open_cleanup_pr": True},
             format="json",
         )
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
 
         resp = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{exp_ship}/ship_variant/",
+            f"/v1/projects/{self.team.id}/experiments/{exp_ship}/ship_variant/",
             {"variant_key": "test", "conclusion": "won", "open_cleanup_pr": True},
             format="json",
         )
@@ -5828,7 +5826,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         exp_id = self._create_running_experiment(name="Cleanup Status", flag_key="cleanup-status-flag")["id"]
 
         # No cleanup task opened yet.
-        resp = self.client.get(f"/api/projects/{self.team.id}/experiments/{exp_id}/flag_cleanup_task/")
+        resp = self.client.get(f"/v1/projects/{self.team.id}/experiments/{exp_id}/flag_cleanup_task/")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
         task_id = uuid4()
@@ -5850,7 +5848,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
                 return_value=True,
             ) as mock_task_visible,
         ):
-            resp = self.client.get(f"/api/projects/{self.team.id}/experiments/{exp_id}/flag_cleanup_task/")
+            resp = self.client.get(f"/v1/projects/{self.team.id}/experiments/{exp_id}/flag_cleanup_task/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
         self.assertEqual(
             resp.json(),
@@ -5869,7 +5867,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
             "products.experiments.backend.presentation.views.tasks_facade.get_latest_run_by_task",
             return_value={str(task_id): run},
         ):
-            resp = self.client.get(f"/api/projects/{self.team.id}/experiments/{exp_id}/flag_cleanup_task/")
+            resp = self.client.get(f"/v1/projects/{self.team.id}/experiments/{exp_id}/flag_cleanup_task/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
         self.assertFalse(resp.json()["can_view_task"])
 
@@ -5881,7 +5879,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
             "products.experiments.backend.presentation.views.tasks_facade.get_latest_run_by_task",
             return_value={str(task_id): run},
         ):
-            resp = self.client.get(f"/api/projects/{self.team.id}/experiments/{exp_id}/flag_cleanup_task/")
+            resp = self.client.get(f"/v1/projects/{self.team.id}/experiments/{exp_id}/flag_cleanup_task/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
         self.assertIsNone(resp.json()["pr_url"])
 
@@ -5896,7 +5894,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
             "products.experiments.backend.presentation.views.tasks_facade.get_latest_run_by_task",
             return_value={str(task_id): run},
         ):
-            resp = self.client.get(f"/api/projects/{self.team.id}/experiments/{exp_id}/flag_cleanup_task/")
+            resp = self.client.get(f"/v1/projects/{self.team.id}/experiments/{exp_id}/flag_cleanup_task/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
         self.assertEqual(resp.json()["run_status"], "queued")
         self.assertFalse(resp.json()["is_terminal"])
@@ -5907,7 +5905,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
             "products.experiments.backend.presentation.views.tasks_facade.get_latest_run_by_task",
             return_value={},
         ):
-            resp = self.client.get(f"/api/projects/{self.team.id}/experiments/{exp_id}/flag_cleanup_task/")
+            resp = self.client.get(f"/v1/projects/{self.team.id}/experiments/{exp_id}/flag_cleanup_task/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
         self.assertEqual(resp.json()["run_status"], "queued")
         self.assertFalse(resp.json()["is_terminal"])
@@ -5991,7 +5989,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
                 list_all_cached_repositories=lambda max_repos: cached_repos
             )
 
-        resp = self.client.get(f"/api/projects/{self.team.id}/experiments/{exp_id}/flag_cleanup_target/")
+        resp = self.client.get(f"/v1/projects/{self.team.id}/experiments/{exp_id}/flag_cleanup_target/")
 
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
         self.assertEqual(resp.json(), expected_body)
@@ -6011,7 +6009,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         exp_id = self._create_running_experiment(name="End With Repo", flag_key="end-with-repo-flag")["id"]
 
         resp = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{exp_id}/end/",
+            f"/v1/projects/{self.team.id}/experiments/{exp_id}/end/",
             {"conclusion": "won", "open_cleanup_pr": open_cleanup_pr, "repository": repository},
             format="json",
         )
@@ -6034,7 +6032,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         with self.captureOnCommitCallbacks(execute=True):
             resp = self.client.post(
-                f"/api/projects/{self.team.id}/experiments/{exp_id}/end/",
+                f"/v1/projects/{self.team.id}/experiments/{exp_id}/end/",
                 {"conclusion": "won", "open_cleanup_pr": True, "repository": "ACME/Web"},
                 format="json",
             )
@@ -6071,14 +6069,14 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         )
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
         self.organization_membership.save()
-        resp = self.client.post(f"/api/projects/{self.team.id}/experiments/{exp_member}/end/", body, format="json")
+        resp = self.client.post(f"/v1/projects/{self.team.id}/experiments/{exp_member}/end/", body, format="json")
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN, resp.content)
         self.assertIsNone(get_or_create_team_extension(self.team, TeamExperimentsConfig).flag_cleanup_repository)
 
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
         with self.captureOnCommitCallbacks(execute=True):
-            resp = self.client.post(f"/api/projects/{self.team.id}/experiments/{exp_admin}/end/", body, format="json")
+            resp = self.client.post(f"/v1/projects/{self.team.id}/experiments/{exp_admin}/end/", body, format="json")
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
         self.assertEqual(
             get_or_create_team_extension(self.team, TeamExperimentsConfig).flag_cleanup_repository, "acme/web"
@@ -6090,7 +6088,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         original_groups = data["feature_flag"]["filters"].get("groups", [])
 
         ship_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/ship_variant/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/ship_variant/",
             {"variant_key": "test", "conclusion": "won", "conclusion_comment": "Test won"},
             format="json",
         )
@@ -6116,7 +6114,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = data["id"]
 
         ship_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/ship_variant/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/ship_variant/",
             {"variant_key": "test", "release_to_everyone": True, "conclusion": "won"},
             format="json",
         )
@@ -6138,14 +6136,14 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
         # End the experiment first
         self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/end/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/end/",
             {"conclusion": "inconclusive"},
             format="json",
         )
 
         # Ship a variant on the already-ended experiment
         ship_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/ship_variant/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/ship_variant/",
             {"variant_key": "test", "conclusion": "won"},
             format="json",
         )
@@ -6165,7 +6163,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = data["id"]
 
         ship_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/ship_variant/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/ship_variant/",
             {"variant_key": "nonexistent"},
             format="json",
         )
@@ -6176,7 +6174,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = data["id"]
 
         ship_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/ship_variant/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/ship_variant/",
             {},
             format="json",
         )
@@ -6184,7 +6182,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_ship_variant_draft_returns_400(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Ship Draft",
                 "feature_flag_key": "ship-draft-endpoint-flag",
@@ -6195,7 +6193,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = response.json()["id"]
 
         ship_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/ship_variant/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/ship_variant/",
             {"variant_key": "test"},
             format="json",
         )
@@ -6208,7 +6206,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = data["id"]
 
         ship_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/ship_variant/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/ship_variant/",
             {"variant_key": "test", "conclusion": "amazing"},
             format="json",
         )
@@ -6220,7 +6218,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_create_with_nonexistent_action_returns_400(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Bad Action Experiment",
                 "feature_flag_key": "bad-action-api-flag",
@@ -6239,7 +6237,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_create_with_unknown_event_returns_400(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Unknown Event Experiment",
                 "feature_flag_key": "unknown-event-api-flag",
@@ -6259,7 +6257,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_create_with_known_event_succeeds(self):
         EventDefinition.objects.create(team=self.team, name="$pageview")
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Known Event Experiment",
                 "feature_flag_key": "known-event-api-flag",
@@ -6278,7 +6276,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
     def test_update_with_unknown_event_returns_400(self):
         EventDefinition.objects.create(team=self.team, name="$pageview")
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Update Event Error Experiment",
                 "feature_flag_key": "update-event-error-api-flag",
@@ -6296,7 +6294,7 @@ class TestExperimentCRUD(_HoistFlagConfigClientMixin, APIBaseTest):
         experiment_id = create_response.json()["id"]
 
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {
                 "metrics": [
                     {
@@ -6342,7 +6340,7 @@ class TestExperimentParametersFlagConfigCompatibility(APIBaseTest):
     )
     def test_create_copies_deprecated_flag_config_to_flag(self, name: str, parameters: dict, check) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {"name": f"copy {name}", "feature_flag_key": f"copy-{name}", "parameters": parameters},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
@@ -6355,7 +6353,7 @@ class TestExperimentParametersFlagConfigCompatibility(APIBaseTest):
         self, key: str = "echo-source", start_date: str | None = None, variants: list[dict] | None = None
     ) -> int:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": key,
                 "feature_flag_key": key,
@@ -6381,12 +6379,12 @@ class TestExperimentParametersFlagConfigCompatibility(APIBaseTest):
         # A read-modify-write client spreads the GET response's `parameters` (which carries the
         # projected flag config, split_percent and all) straight back into the save. That unchanged
         # echo must be stripped and tolerated, not resynced — else every UI save breaks.
-        echoed_parameters = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment_id}").json()[
+        echoed_parameters = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment_id}").json()[
             "parameters"
         ]
         self.assertIn("feature_flag_variants", echoed_parameters)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {"description": "unrelated edit", "parameters": echoed_parameters},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -6413,13 +6411,13 @@ class TestExperimentParametersFlagConfigCompatibility(APIBaseTest):
         self, name: str, override: dict, check
     ) -> None:
         experiment_id = self._create_via_flag_object()
-        echoed_parameters = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment_id}").json()[
+        echoed_parameters = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment_id}").json()[
             "parameters"
         ]
         # A genuine change through the deprecated surface on a draft is copied into the feature_flag
         # object and applied to the linked flag, not silently dropped.
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {"parameters": {**echoed_parameters, **override}},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -6428,7 +6426,7 @@ class TestExperimentParametersFlagConfigCompatibility(APIBaseTest):
 
     def test_running_update_requires_opt_in_for_differing_parameters_flag_config(self) -> None:
         experiment_id = self._create_via_flag_object(key="running-echo-source", start_date="2021-12-01T10:23")
-        echoed_parameters = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment_id}").json()[
+        echoed_parameters = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment_id}").json()[
             "parameters"
         ]
         differing = {
@@ -6441,7 +6439,7 @@ class TestExperimentParametersFlagConfigCompatibility(APIBaseTest):
         # Routing through the feature_flag path means the deprecated surface can't bypass the
         # running-experiment guard: a differing change without the opt-in is rejected, not applied.
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {"parameters": differing},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.json())
@@ -6451,7 +6449,7 @@ class TestExperimentParametersFlagConfigCompatibility(APIBaseTest):
 
         # With the opt-in the change applies.
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {"parameters": differing, "update_feature_flag_params": True},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -6475,13 +6473,13 @@ class TestExperimentParametersFlagConfigCompatibility(APIBaseTest):
                 {"key": "test", "name": "Test", "rollout_percentage": 70},
             ],
         )
-        echoed_parameters = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment_id}").json()[
+        echoed_parameters = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment_id}").json()[
             "parameters"
         ]
         # A PATCH that carries no genuine flag-config change must never resync the linked flag: its
         # non-default variants must survive, not reset to DEFAULT_VARIANTS (50/50).
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {"parameters": build_parameters(echoed_parameters)},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -6499,12 +6497,12 @@ class TestExperimentParametersFlagConfigCompatibility(APIBaseTest):
         # Normalize `parameters` to {} first, so the second PATCH's stripped flag config produces no row
         # diff at all: the deprecated flag write is then the ONLY reason to report.
         self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {"parameters": {"rollout_percentage": 40}},
         )
         mock_report_user_action.reset_mock()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {"parameters": {"rollout_percentage": 25}},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -6516,13 +6514,13 @@ class TestExperimentParametersFlagConfigCompatibility(APIBaseTest):
     @patch("products.experiments.backend.experiment_service.report_user_action")
     def test_update_event_records_projection_echo_as_unchanged(self, mock_report_user_action: MagicMock) -> None:
         experiment_id = self._create_via_flag_object(key="upd-echo")
-        echoed = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment_id}").json()["parameters"]
+        echoed = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment_id}").json()["parameters"]
         self.assertIn("feature_flag_variants", echoed)
         mock_report_user_action.reset_mock()
         # A faithful GET-to-PATCH echo lists the projected keys (the reader proxy) but must not count
         # as a flag-config write, else the deprecation bake window never closes.
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {"description": "unrelated edit", "parameters": echoed},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -6535,7 +6533,7 @@ class TestExperimentParametersFlagConfigCompatibility(APIBaseTest):
         experiment_id = self._create_via_flag_object(key="upd-clean")
         mock_report_user_action.reset_mock()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}",
             {
                 "description": "clean flag write",
                 "feature_flag": {
@@ -6560,7 +6558,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
     def _generate_experiment(self, start_date="2024-01-01T10:23", extra_parameters=None):
         ff_key = "a-b-test"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "description": "",
@@ -6664,7 +6662,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # now call to make cohort
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{created_experiment}/create_exposure_cohort_for_experiment/",
+            f"/v1/projects/{self.team.id}/experiments/{created_experiment}/create_exposure_cohort_for_experiment/",
             {},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -6675,10 +6673,10 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         cohort_id = cohort["id"]
 
         while cohort["is_calculating"]:
-            response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort_id}")
+            response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort_id}")
             cohort = response.json()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort_id}/persons/?cohort={cohort_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort_id}/persons/?cohort={cohort_id}")
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(["person1", "person2"], sorted([res["name"] for res in response.json()["results"]]))
 
@@ -6784,7 +6782,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # now call to make cohort
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{created_experiment}/create_exposure_cohort_for_experiment/",
+            f"/v1/projects/{self.team.id}/experiments/{created_experiment}/create_exposure_cohort_for_experiment/",
             {},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -6860,10 +6858,10 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         cohort_id = cohort["id"]
 
         while cohort["is_calculating"]:
-            response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort_id}")
+            response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort_id}")
             cohort = response.json()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort_id}/persons/?cohort={cohort_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort_id}/persons/?cohort={cohort_id}")
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(["person1", "person2"], sorted([res["name"] for res in response.json()["results"]]))
 
@@ -7021,7 +7019,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # now call to make cohort
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{created_experiment}/create_exposure_cohort_for_experiment/",
+            f"/v1/projects/{self.team.id}/experiments/{created_experiment}/create_exposure_cohort_for_experiment/",
             {},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -7065,10 +7063,10 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         cohort_id = cohort["id"]
 
         while cohort["is_calculating"]:
-            response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort_id}")
+            response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort_id}")
             cohort = response.json()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/cohorts/{cohort_id}/persons/?cohort={cohort_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/cohorts/{cohort_id}/persons/?cohort={cohort_id}")
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(["1", "person1"], sorted([res["name"] for res in response.json()["results"]]))
 
@@ -7098,7 +7096,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # now call to make cohort
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{created_experiment}/create_exposure_cohort_for_experiment/",
+            f"/v1/projects/{self.team.id}/experiments/{created_experiment}/create_exposure_cohort_for_experiment/",
             {},
         )
 
@@ -7112,7 +7110,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # now call to make cohort
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{created_experiment}/create_exposure_cohort_for_experiment/",
+            f"/v1/projects/{self.team.id}/experiments/{created_experiment}/create_exposure_cohort_for_experiment/",
             {},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -7124,14 +7122,14 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         created_experiment = response.json()["id"]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{created_experiment}/create_exposure_cohort_for_experiment/",
+            f"/v1/projects/{self.team.id}/experiments/{created_experiment}/create_exposure_cohort_for_experiment/",
             {},
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # now call to make cohort again
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/{created_experiment}/create_exposure_cohort_for_experiment/",
+            f"/v1/projects/{self.team.id}/experiments/{created_experiment}/create_exposure_cohort_for_experiment/",
             {},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -7141,7 +7139,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         """Test that stats_config can be passed from frontend and is preserved"""
         ff_key = "stats-config-test"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Stats Config Test Experiment",
                 "description": "",
@@ -7170,7 +7168,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         config.save()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "feature_flag_key": "test-confidence-level",
@@ -7194,7 +7192,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         # Create experiment with first user (self.user)
         ff_key = "activity-logging-test"
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Activity Logging Test Experiment",
                 "description": "Testing activity logging fix",
@@ -7218,7 +7216,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         # Switch to second user and update the experiment
         self.client.force_login(second_user)
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {
                 "description": "Updated description by second user",
             },
@@ -7237,7 +7235,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
     def test_activity_endpoint_returns_only_this_experiments_changes(self):
         saved_metric_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_saved_metrics/",
+            f"/v1/projects/{self.team.id}/experiment_saved_metrics/",
             {
                 "name": "Activity saved metric",
                 "query": {
@@ -7250,7 +7248,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         self.assertEqual(saved_metric_response.status_code, status.HTTP_201_CREATED)
         saved_metric_id = saved_metric_response.json()["id"]
         holdout_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_holdouts/",
+            f"/v1/projects/{self.team.id}/experiment_holdouts/",
             data={
                 "name": "Activity holdout",
                 "filters": [{"properties": [], "rollout_percentage": 20, "variant": "holdout"}],
@@ -7261,7 +7259,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         holdout_id = holdout_response.json()["id"]
 
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Experiment with children",
                 "feature_flag_key": "activity-endpoint-one",
@@ -7271,21 +7269,19 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         )
         self.assertEqual(create_response.status_code, status.HTTP_201_CREATED)
         experiment_id = create_response.json()["id"]
-        self.client.patch(f"/api/projects/{self.team.id}/experiments/{experiment_id}/", {"description": "Updated"})
+        self.client.patch(f"/v1/projects/{self.team.id}/experiments/{experiment_id}/", {"description": "Updated"})
+        self.client.patch(f"/v1/projects/{self.team.id}/experiment_holdouts/{holdout_id}/", {"name": "Renamed holdout"})
         self.client.patch(
-            f"/api/projects/{self.team.id}/experiment_holdouts/{holdout_id}/", {"name": "Renamed holdout"}
-        )
-        self.client.patch(
-            f"/api/projects/{self.team.id}/experiment_saved_metrics/{saved_metric_id}/", {"name": "Renamed metric"}
+            f"/v1/projects/{self.team.id}/experiment_saved_metrics/{saved_metric_id}/", {"name": "Renamed metric"}
         )
 
         other_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {"name": "Unrelated experiment", "feature_flag_key": "activity-endpoint-two"},
         )
         other_experiment_id = other_response.json()["id"]
         self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{other_experiment_id}/", {"description": "Unrelated update"}
+            f"/v1/projects/{self.team.id}/experiments/{other_experiment_id}/", {"description": "Unrelated update"}
         )
         # An unrelated shared metric whose pk collides with the experiment's id
         ActivityLog.objects.create(
@@ -7297,7 +7293,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
             detail={"type": "shared_metric", "name": "Colliding metric"},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/experiments/{experiment_id}/activity?limit=50")
+        response = self.client.get(f"/v1/projects/{self.team.id}/experiments/{experiment_id}/activity?limit=50")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
 
@@ -7335,7 +7331,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         )
 
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment.id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment.id}/",
             {
                 "description": "Updated through the main experiments endpoint",
                 "parameters": None,
@@ -7364,7 +7360,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Create experiment saved metric with first user (self.user)
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_saved_metrics/",
+            f"/v1/projects/{self.team.id}/experiment_saved_metrics/",
             {
                 "name": "Activity Logging Test Metric",
                 "description": "Testing saved metric activity logging fix",
@@ -7391,7 +7387,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         # Switch to second user and update the metric
         self.client.force_login(second_user)
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiment_saved_metrics/{metric_id}/",
+            f"/v1/projects/{self.team.id}/experiment_saved_metrics/{metric_id}/",
             {
                 "description": "Updated description by second user",
             },
@@ -7414,7 +7410,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         """Test that changes to ExperimentToSavedMetric metadata are logged under Experiment scope."""
         # Create a saved metric
         saved_metric_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_saved_metrics/",
+            f"/v1/projects/{self.team.id}/experiment_saved_metrics/",
             {
                 "name": "Activity Test Metric",
                 "description": "Testing metadata activity logging",
@@ -7431,7 +7427,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Create experiment with saved metric including metadata
         experiment_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Metadata Activity Test",
                 "feature_flag_key": "metadata-activity-test",
@@ -7456,7 +7452,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Update the metadata (add a breakdown)
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {
                 "saved_metrics_ids": [
                     {"id": saved_metric_id, "metadata": {"type": "primary", "breakdowns": [{"property": "country"}]}}
@@ -7495,7 +7491,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         """
         # Create a saved metric
         saved_metric_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_saved_metrics/",
+            f"/v1/projects/{self.team.id}/experiment_saved_metrics/",
             {
                 "name": "Ordering Test Metric",
                 "query": {
@@ -7512,7 +7508,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Create experiment without saved metrics
         experiment_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Ordering Activity Test",
                 "feature_flag_key": "ordering-activity-test",
@@ -7527,7 +7523,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Add a saved metric to the experiment
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {"saved_metrics_ids": [{"id": saved_metric_id, "metadata": {"type": "secondary"}}]},
             format="json",
         )
@@ -7568,7 +7564,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Remove the saved metric
         remove_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {"saved_metrics_ids": []},
             format="json",
         )
@@ -7595,7 +7591,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         """A standalone reorder (no add/remove) must produce an activity log entry."""
         # Seed the experiment with two inline metrics so there is something to reorder
         experiment_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": "Reorder Activity Test",
@@ -7624,7 +7620,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         logs_before_reorder = ActivityLog.objects.filter(item_id=str(experiment_id), scope="Experiment").count()
 
         reorder_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {"primary_metrics_ordered_uuids": ["reorder-uuid-b", "reorder-uuid-a"]},
             format="json",
         )
@@ -7652,7 +7648,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         """If the user supplies ordering alongside an add/remove, the reorder must still be logged."""
         # Create a saved metric the experiment can later adopt
         saved_metric_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_saved_metrics/",
+            f"/v1/projects/{self.team.id}/experiment_saved_metrics/",
             {
                 "name": "Combined PATCH Saved Metric",
                 "query": {
@@ -7669,7 +7665,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Start with one inline primary metric so we have an existing ordering to permute
         experiment_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": "Combined PATCH Activity Test",
@@ -7693,7 +7689,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Same PATCH: adds the saved metric AND explicitly reorders so the saved metric goes first.
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {
                 "saved_metrics_ids": [{"id": saved_metric_id, "metadata": {"type": "primary"}}],
                 "primary_metrics_ordered_uuids": ["combined-saved-uuid", "combined-inline-uuid"],
@@ -7754,7 +7750,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         saved_metric_ids: list[int] = []
         for index, uuid in enumerate(saved_metric_uuids):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/experiment_saved_metrics/",
+                f"/v1/projects/{self.team.id}/experiment_saved_metrics/",
                 {
                     "name": f"Bulk Remove Metric {index + 1}",
                     "query": {
@@ -7770,7 +7766,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
             saved_metric_ids.append(response.json()["id"])
 
         experiment_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": f"Bulk Remove Activity Test ({metric_type})",
@@ -7791,7 +7787,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         # clear the ordering array, and clear saved_metrics_ids in the same PATCH.
         inline_metrics_field = "metrics" if metric_type == "primary" else "metrics_secondary"
         remove_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {
                 inline_metrics_field: [],
                 ordering_field: [],
@@ -7834,7 +7830,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Create a saved metric in team A (self.team)
         saved_metric_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_saved_metrics/",
+            f"/v1/projects/{self.team.id}/experiment_saved_metrics/",
             {
                 "name": "Team A Metric",
                 "description": "This metric belongs to Team A",
@@ -7851,7 +7847,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Create an experiment in team B
         experiment_response = self.client.post(
-            f"/api/projects/{team_b.id}/experiments/",
+            f"/v1/projects/{team_b.id}/experiments/",
             {
                 "name": "Team B Experiment",
                 "feature_flag_key": "team-b-flag",
@@ -7865,7 +7861,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         # Try to add Team A's saved metric to Team B's experiment
         # This should fail with validation error
         update_response = self.client.patch(
-            f"/api/projects/{team_b.id}/experiments/{team_b_experiment_id}/",
+            f"/v1/projects/{team_b.id}/experiments/{team_b_experiment_id}/",
             {
                 "saved_metrics_ids": [{"id": team_a_metric_id, "metadata": {"type": "primary"}}],
             },
@@ -7878,7 +7874,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
     def test_update_auto_syncs_ordering_when_inline_metric_added_with_empty_ordering(self):
         """Test that adding a metric with an empty ordering array auto-populates the ordering"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "feature_flag_key": "test-ordering-validation",
@@ -7892,7 +7888,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         # Add a metric with an empty ordering array - backend should auto-populate
         metric_uuid = "test-metric-uuid-123"
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {
                 "allow_unknown_events": True,
                 "metrics": [
@@ -7916,7 +7912,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         """Test that adding a saved metric with empty ordering auto-populates the ordering"""
         saved_metric_uuid = "saved-metric-uuid-456"
         saved_metric_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_saved_metrics/",
+            f"/v1/projects/{self.team.id}/experiment_saved_metrics/",
             {
                 "name": "Test Saved Metric",
                 "query": {
@@ -7932,7 +7928,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         saved_metric_id = saved_metric_response.json()["id"]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "feature_flag_key": "test-saved-metric-ordering",
@@ -7945,7 +7941,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Add a saved metric with empty ordering - backend should auto-populate
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {
                 "saved_metrics_ids": [{"id": saved_metric_id, "metadata": {"type": "primary"}}],
                 "primary_metrics_ordered_uuids": [],
@@ -7961,7 +7957,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         """Test that updating an experiment succeeds when ordering arrays contain all metric UUIDs"""
         saved_metric_uuid = "saved-metric-uuid-789"
         saved_metric_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_saved_metrics/",
+            f"/v1/projects/{self.team.id}/experiment_saved_metrics/",
             {
                 "name": "Test Saved Metric",
                 "query": {
@@ -7977,7 +7973,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         saved_metric_id = saved_metric_response.json()["id"]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "feature_flag_key": "test-correct-ordering",
@@ -7990,7 +7986,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         inline_metric_uuid = "inline-metric-uuid-abc"
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {
                 "allow_unknown_events": True,
                 "metrics": [
@@ -8013,7 +8009,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         """Test that creating an experiment with metrics and empty ordering auto-populates the ordering"""
         metric_uuid = "create-metric-uuid-123"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": "Test Experiment",
@@ -8039,7 +8035,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
     def test_update_auto_syncs_ordering_when_inline_metric_added_without_ordering(self):
         """Test that adding a metric without sending ordering at all auto-populates the ordering"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "feature_flag_key": "test-ordering-auto-sync",
@@ -8053,7 +8049,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         # Add a metric WITHOUT sending ordering - backend should auto-populate
         metric_uuid = "auto-sync-metric-uuid-123"
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {
                 "allow_unknown_events": True,
                 "metrics": [
@@ -8079,7 +8075,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Create experiment with two metrics
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": "Test Experiment",
@@ -8108,7 +8104,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Remove one metric - backend should auto-remove from ordering
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {
                 "allow_unknown_events": True,
                 "metrics": [
@@ -8132,7 +8128,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
     def test_update_auto_syncs_secondary_metrics_ordering(self):
         """Test that adding a secondary metric auto-populates the secondary ordering array"""
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "feature_flag_key": "test-secondary-sync",
@@ -8146,7 +8142,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         # Add a secondary metric without ordering
         metric_uuid = "secondary-metric-uuid-123"
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {
                 "allow_unknown_events": True,
                 "metrics_secondary": [
@@ -8171,7 +8167,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Create experiment with a metric
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": "Test Experiment",
@@ -8195,7 +8191,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Update only the name - ordering should remain unchanged
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {
                 "name": "Updated Experiment Name",
             },
@@ -8213,7 +8209,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Create experiment with two metrics in specific order
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": "Test Experiment",
@@ -8242,7 +8238,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Add a third metric - existing order should be preserved, new one appended
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {
                 "allow_unknown_events": True,
                 "metrics": [
@@ -8278,7 +8274,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         """Test that adding a saved metric without sending ordering auto-populates the ordering"""
         saved_metric_uuid = "saved-metric-no-ordering-uuid"
         saved_metric_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_saved_metrics/",
+            f"/v1/projects/{self.team.id}/experiment_saved_metrics/",
             {
                 "name": "Test Saved Metric",
                 "query": {
@@ -8294,7 +8290,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         saved_metric_id = saved_metric_response.json()["id"]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "feature_flag_key": "test-saved-metric-no-ordering",
@@ -8307,7 +8303,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Add a saved metric WITHOUT sending ordering - backend should auto-populate
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {
                 "saved_metrics_ids": [{"id": saved_metric_id, "metadata": {"type": "primary"}}],
             },
@@ -8325,7 +8321,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Create two saved metrics
         saved_metric_response_1 = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_saved_metrics/",
+            f"/v1/projects/{self.team.id}/experiment_saved_metrics/",
             {
                 "name": "Saved Metric 1",
                 "query": {
@@ -8340,7 +8336,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         saved_metric_id_1 = saved_metric_response_1.json()["id"]
 
         saved_metric_response_2 = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_saved_metrics/",
+            f"/v1/projects/{self.team.id}/experiment_saved_metrics/",
             {
                 "name": "Saved Metric 2",
                 "query": {
@@ -8356,7 +8352,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Create experiment with both saved metrics
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "feature_flag_key": "test-remove-saved-metric",
@@ -8374,7 +8370,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Remove one saved metric - backend should auto-remove from ordering
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {
                 "saved_metrics_ids": [{"id": saved_metric_id_1, "metadata": {"type": "primary"}}],
             },
@@ -8391,7 +8387,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         """Test that adding a secondary saved metric auto-populates the secondary ordering array"""
         saved_metric_uuid = "secondary-saved-metric-uuid"
         saved_metric_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_saved_metrics/",
+            f"/v1/projects/{self.team.id}/experiment_saved_metrics/",
             {
                 "name": "Secondary Saved Metric",
                 "query": {
@@ -8407,7 +8403,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         saved_metric_id = saved_metric_response.json()["id"]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "feature_flag_key": "test-secondary-saved-metric",
@@ -8420,7 +8416,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Add a secondary saved metric without ordering
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {
                 "saved_metrics_ids": [{"id": saved_metric_id, "metadata": {"type": "secondary"}}],
             },
@@ -8435,7 +8431,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         """Test that creating an experiment with metrics but no ordering auto-populates the ordering"""
         metric_uuid = "create-no-ordering-uuid"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": "Test Experiment",
@@ -8461,7 +8457,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         """Test that creating an experiment with secondary metrics auto-populates secondary ordering"""
         metric_uuid = "create-secondary-uuid"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": "Test Experiment",
@@ -8487,7 +8483,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         """Test that creating an experiment with saved metrics auto-populates ordering"""
         saved_metric_uuid = "create-saved-metric-uuid"
         saved_metric_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_saved_metrics/",
+            f"/v1/projects/{self.team.id}/experiment_saved_metrics/",
             {
                 "name": "Test Saved Metric",
                 "query": {
@@ -8504,7 +8500,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Create experiment with saved metric but no ordering
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Test Experiment",
                 "feature_flag_key": "test-create-saved-metric",
@@ -8524,7 +8520,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
         saved_metric_uuid = "create-mixed-saved-uuid"
 
         saved_metric_response = self.client.post(
-            f"/api/projects/{self.team.id}/experiment_saved_metrics/",
+            f"/v1/projects/{self.team.id}/experiment_saved_metrics/",
             {
                 "name": "Test Saved Metric",
                 "query": {
@@ -8540,7 +8536,7 @@ class TestExperimentAuxiliaryEndpoints(_HoistFlagConfigClientMixin, DatastoreTes
 
         # Create experiment with both inline and saved metrics, no ordering
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "allow_unknown_events": True,
                 "name": "Test Experiment",
@@ -8630,7 +8626,7 @@ class TestExperimentRunningTimeCalculation(_HoistFlagConfigClientMixin, APIBaseT
             "filters": {"events": [{"order": 0, "id": "$pageview"}], "properties": []},
             **overrides,
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/experiments/", payload)
+        response = self.client.post(f"/v1/projects/{self.team.id}/experiments/", payload)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
         return response.json()
 
@@ -8683,7 +8679,7 @@ class TestExperimentRunningTimeCalculation(_HoistFlagConfigClientMixin, APIBaseT
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{created['id']}/",
+            f"/v1/projects/{self.team.id}/experiments/{created['id']}/",
             {"running_time_calculation": {"minimum_detectable_effect": 10, "recommended_running_time": 7}},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -8710,7 +8706,7 @@ class TestExperimentRunningTimeCalculation(_HoistFlagConfigClientMixin, APIBaseT
         self.assertEqual(len(flag.filters["multivariate"]["variants"]), 3)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{created['id']}/",
+            f"/v1/projects/{self.team.id}/experiments/{created['id']}/",
             {"running_time_calculation": {"minimum_detectable_effect": 15}},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -8724,7 +8720,7 @@ class TestExperimentRunningTimeCalculation(_HoistFlagConfigClientMixin, APIBaseT
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{created['id']}/",
+            f"/v1/projects/{self.team.id}/experiments/{created['id']}/",
             {"parameters": {"minimum_detectable_effect": 30, "recommended_sample_size": 1000}},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -8737,7 +8733,7 @@ class TestExperimentRunningTimeCalculation(_HoistFlagConfigClientMixin, APIBaseT
         created = self._create_experiment()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{created['id']}/",
+            f"/v1/projects/{self.team.id}/experiments/{created['id']}/",
             {
                 "parameters": {"minimum_detectable_effect": 99},
                 "running_time_calculation": {"minimum_detectable_effect": 11},
@@ -8761,7 +8757,7 @@ class TestExperimentRunningTimeCalculation(_HoistFlagConfigClientMixin, APIBaseT
     )
     def test_invalid_running_time_calculation_rejected(self, _name: str, value: dict):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Invalid running time",
                 "feature_flag_key": "invalid-running-time-flag",
@@ -8785,7 +8781,7 @@ class TestExperimentExcludedVariants(_HoistFlagConfigClientMixin, APIBaseTest):
             "filters": {"events": [{"order": 0, "id": "$pageview"}], "properties": []},
             **overrides,
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/experiments/", payload)
+        response = self.client.post(f"/v1/projects/{self.team.id}/experiments/", payload)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.json())
         return response.json()
 
@@ -8809,7 +8805,7 @@ class TestExperimentExcludedVariants(_HoistFlagConfigClientMixin, APIBaseTest):
         created = self._create_experiment(parameters={"feature_flag_variants": self.THREE_VARIANTS})
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{created['id']}/",
+            f"/v1/projects/{self.team.id}/experiments/{created['id']}/",
             {"excluded_variants": ["test-2"]},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -8827,7 +8823,7 @@ class TestExperimentExcludedVariants(_HoistFlagConfigClientMixin, APIBaseTest):
         self.assertEqual(len(flag.filters["multivariate"]["variants"]), 3)
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{created['id']}/",
+            f"/v1/projects/{self.team.id}/experiments/{created['id']}/",
             {"excluded_variants": ["test-2"]},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -8846,7 +8842,7 @@ class TestExperimentExcludedVariants(_HoistFlagConfigClientMixin, APIBaseTest):
         created = self._create_experiment(parameters={"feature_flag_variants": self.THREE_VARIANTS})
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{created['id']}/",
+            f"/v1/projects/{self.team.id}/experiments/{created['id']}/",
             {"excluded_variants": excluded_variants},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.json())
@@ -8859,7 +8855,7 @@ class TestExperimentExcludedVariants(_HoistFlagConfigClientMixin, APIBaseTest):
     )
     def test_invalid_excluded_variants_rejected(self, _name: str, value):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": "Invalid excluded variants",
                 "feature_flag_key": "invalid-excluded-variants-flag",
@@ -8872,7 +8868,7 @@ class TestExperimentExcludedVariants(_HoistFlagConfigClientMixin, APIBaseTest):
 class TestCalculateRunningTimeEndpoint(APIBaseTest):
     def _calculate(self, payload: dict[str, Any]):
         return self.client.post(
-            f"/api/projects/{self.team.id}/experiments/calculate_running_time/",
+            f"/v1/projects/{self.team.id}/experiments/calculate_running_time/",
             payload,
             format="json",
         )
@@ -9052,7 +9048,7 @@ class TestExperimentConcurrency(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def _create_experiment(self, key: str, metrics: list | None = None, metrics_secondary: list | None = None) -> dict:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {
                 "name": f"Concurrency {key}",
                 "feature_flag_key": key,
@@ -9072,7 +9068,7 @@ class TestExperimentConcurrency(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def _patch(self, experiment_id: int, payload: dict) -> Any:
         return self.client.patch(
-            f"/api/projects/{self.team.id}/experiments/{experiment_id}/",
+            f"/v1/projects/{self.team.id}/experiments/{experiment_id}/",
             {"allow_unknown_events": True, **payload},
         )
 
@@ -9266,7 +9262,7 @@ class TestExperimentConcurrency(_HoistFlagConfigClientMixin, APIBaseTest):
         # tab must apply instead of 409ing. Also exercises the datetime base: the client echoes
         # the ISO string it read while the row holds a datetime.
         created = self._create_experiment("autosave-race", metrics=[self._metric("base")])
-        launch = self.client.post(f"/api/projects/{self.team.id}/experiments/{created['id']}/launch/")
+        launch = self.client.post(f"/v1/projects/{self.team.id}/experiments/{created['id']}/launch/")
         self.assertEqual(launch.status_code, status.HTTP_200_OK, launch.json())
         snapshot = launch.json()
 
@@ -9520,7 +9516,7 @@ class TestExperimentConcurrency(_HoistFlagConfigClientMixin, APIBaseTest):
 
     def test_launch_fingerprint_churn_is_not_a_phantom_metric_conflict(self) -> None:
         snapshot = self._create_experiment("launch-churn", metrics=[self._metric("base")])
-        launch = self.client.post(f"/api/projects/{self.team.id}/experiments/{snapshot['id']}/launch/")
+        launch = self.client.post(f"/v1/projects/{self.team.id}/experiments/{snapshot['id']}/launch/")
         self.assertEqual(launch.status_code, status.HTTP_200_OK, launch.json())
 
         # The launch rewrote every metric fingerprint; that server-side churn must not read
@@ -9543,7 +9539,7 @@ class TestExperimentConcurrency(_HoistFlagConfigClientMixin, APIBaseTest):
         # A concurrent launch changes start_date, but a metric-only PATCH omits it,
         # so the stale addition merges and the launch survives.
         snapshot = self._create_experiment("launch-merge", metrics=[self._metric("base")])
-        launch = self.client.post(f"/api/projects/{self.team.id}/experiments/{snapshot['id']}/launch/")
+        launch = self.client.post(f"/v1/projects/{self.team.id}/experiments/{snapshot['id']}/launch/")
         self.assertEqual(launch.status_code, status.HTTP_200_OK)
 
         stale_edit = self._patch(

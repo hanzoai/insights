@@ -38,15 +38,15 @@ const meta: Meta = {
                     cloud: true,
                     realm: 'cloud',
                 },
-                '/api/billing/': {
+                '/v1/billing/': {
                     ...billingJson,
                 },
             },
             post: {
-                '/api/projects/:team_id/subscriptions/': () => [201, { id: 123 }],
+                '/v1/projects/:team_id/subscriptions/': () => [201, { id: 123 }],
             },
             patch: {
-                '/api/environments/:team_id/add_product_intent/': {},
+                '/v1/environments/:team_id/add_product_intent/': {},
             },
         }),
     ],
@@ -61,7 +61,7 @@ function StepForRole({ role }: { role: UserRole | null }): JSX.Element {
 
     useStorybookMocks({
         get: {
-            '/api/users/@me/': () => [200, { ...MOCK_DEFAULT_USER, role_at_organization: role }],
+            '/v1/users/@me/': () => [200, { ...MOCK_DEFAULT_USER, role_at_organization: role }],
         },
     })
 

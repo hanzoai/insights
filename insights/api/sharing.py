@@ -30,8 +30,8 @@ from insights.api.services.query import process_query_dict
 from insights.api.shared import TeamPublicSerializer
 from insights.api.sharing_publish_gate import blocked_access_for_publisher
 from insights.auth import SharingAccessTokenAuthentication, SharingPasswordProtectedAuthentication
-from insights.datastore.client.async_task_chain import task_chain_context
 from insights.constants import AvailableFeature
+from insights.datastore.client.async_task_chain import task_chain_context
 from insights.exceptions_capture import capture_exception
 from insights.helpers.impersonation import is_impersonated
 from insights.insightsql_queries.query_runner import ExecutionMode, shared_insights_execution_mode
@@ -813,7 +813,7 @@ def _compute_inline_query_results_for_shared_notebook(
 
 
 def _collect_cohorts_for_sharing(insights: list[Insight], team: Team) -> list[dict[str, Any]]:
-    # Shared viewers can't hit /api/cohorts/, so inline id+name for any referenced cohort.
+    # Shared viewers can't hit /v1/cohorts/, so inline id+name for any referenced cohort.
     cohort_ids: set[int] = set()
     for insight in insights:
         cohort_ids.update(InsightVisitor._extract_cohort_ids(insight.filters, insight.query))
@@ -1386,7 +1386,7 @@ class SharingViewerPageViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSe
                 }
             )
             # Inline cohorts referenced by any saved insights embedded in the notebook so the
-            # shared viewer doesn't need to hit /api/cohorts/ (which it can't authenticate against).
+            # shared viewer doesn't need to hit /v1/cohorts/ (which it can't authenticate against).
             exported_data.update({"cohorts": _collect_cohorts_for_sharing(referenced_insights, resource.team)})
         else:
             raise NotFound("No resource found")

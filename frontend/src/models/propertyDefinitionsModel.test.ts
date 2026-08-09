@@ -67,7 +67,7 @@ describe('the property definitions model', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/projects/:team_id/property_definitions/': ({ request }) => {
+                '/v1/projects/:team_id/property_definitions/': ({ request }) => {
                     const url = new URL(request.url)
                     const propertiesToFind = (url.searchParams.get('properties') || '').split(',')
                     if (propertiesToFind[0] === 'network error') {
@@ -450,7 +450,7 @@ describe('the property definitions model', () => {
         ])('handles %s without crashing and stores correct values', async (_label, apiResponse, expectedValues) => {
             useMocks({
                 get: {
-                    '/api/event/values/': () => [200, apiResponse],
+                    '/v1/event/values/': () => [200, apiResponse],
                 },
             })
 
@@ -470,7 +470,7 @@ describe('the property definitions model', () => {
         it('handles API errors by setting error state and stopping loading', async () => {
             useMocks({
                 get: {
-                    '/api/event/values/': () => [503, { detail: 'Service Unavailable' }],
+                    '/v1/event/values/': () => [503, { detail: 'Service Unavailable' }],
                 },
             })
 
@@ -497,7 +497,7 @@ describe('the property definitions model', () => {
 
             useMocks({
                 get: {
-                    '/api/log_entry/values': () => {
+                    '/v1/log_entry/values': () => {
                         networkCalled = true
                         return [200, { results: [], refreshing: false }]
                     },
@@ -526,7 +526,7 @@ describe('the property definitions model', () => {
 
             useMocks({
                 get: {
-                    '/api/log_entry/values': () => {
+                    '/v1/log_entry/values': () => {
                         networkCalled = true
                         return [200, { results: [], refreshing: false }]
                     },
@@ -552,7 +552,7 @@ describe('the property definitions model', () => {
 
             useMocks({
                 get: {
-                    '/api/event/values': ({ request }) => {
+                    '/v1/event/values': ({ request }) => {
                         capturedUrl = request.url
                         return [200, { results: [], refreshing: false }]
                     },
@@ -577,7 +577,7 @@ describe('the property definitions model', () => {
 
             useMocks({
                 get: {
-                    '/api/event/values': ({ request }) => {
+                    '/v1/event/values': ({ request }) => {
                         capturedUrl = request.url
                         return [200, { results: [], refreshing: false }]
                     },
@@ -616,7 +616,7 @@ describe('the property definitions model', () => {
 
             useMocks({
                 get: {
-                    '/api/event/values': ({ request }) => {
+                    '/v1/event/values': ({ request }) => {
                         capturedUrls.push(request.url)
                         return [200, { results: [], refreshing: capturedUrls.length === 1 }]
                     },

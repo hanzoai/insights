@@ -11,7 +11,7 @@
  * * `events` - Events
  * * `persons` - Persons
  * * `sessions` - Sessions
- * * `insightsql` - Hogql
+ * * `insightsql` - Insightsql
  */
 export type ModelEnumApi = (typeof ModelEnumApi)[keyof typeof ModelEnumApi]
 
@@ -19,7 +19,7 @@ export const ModelEnumApi = {
     Events: 'events',
     Persons: 'persons',
     Sessions: 'sessions',
-    Hogql: 'insightsql',
+    Insightsql: 'insightsql',
 } as const
 
 export type BlankEnumApi = (typeof BlankEnumApi)[keyof typeof BlankEnumApi]
@@ -530,7 +530,7 @@ export interface BatchExportApi {
      * * `events` - Events
      * * `persons` - Persons
      * * `sessions` - Sessions
-     * * `insightsql` - Hogql */
+     * * `insightsql` - Insightsql */
     model?: ModelEnumApi | BlankEnumApi | null
     /** Destination configuration (type, config, and optional integration). */
     destination: BatchExportDestinationApi
@@ -1337,7 +1337,7 @@ export interface BatchExportRequestApi {
      * * `events` - Events
      * * `persons` - Persons
      * * `sessions` - Sessions
-     * * `insightsql` - Hogql */
+     * * `insightsql` - Insightsql */
     model?: ModelEnumApi
     /** Destination configuration. Required integration_id is enforced per destination type. */
     destination: BatchExportDestinationRequestApi
@@ -1498,7 +1498,7 @@ export interface PatchedBatchExportRequestApi {
      * * `events` - Events
      * * `persons` - Persons
      * * `sessions` - Sessions
-     * * `insightsql` - Hogql */
+     * * `insightsql` - Insightsql */
     model?: ModelEnumApi
     /** Destination configuration. Required integration_id is enforced per destination type. */
     destination?: BatchExportDestinationRequestApi
@@ -1649,7 +1649,7 @@ export type FileDownloadInsightsQLRequestApiModel =
     (typeof FileDownloadInsightsQLRequestApiModel)[keyof typeof FileDownloadInsightsQLRequestApiModel]
 
 export const FileDownloadInsightsQLRequestApiModel = {
-    Hogql: 'insightsql',
+    Insightsql: 'insightsql',
 } as const
 
 /**
@@ -1743,7 +1743,7 @@ export const FileDownloadBatchExportOnDemandModelEnumApi = {
     Events: 'events',
     Persons: 'persons',
     Sessions: 'sessions',
-    Hogql: 'insightsql',
+    Insightsql: 'insightsql',
 } as const
 
 /**
@@ -1799,7 +1799,7 @@ export type FileDownloadInsightsQLRequestModelEnumApi =
     (typeof FileDownloadInsightsQLRequestModelEnumApi)[keyof typeof FileDownloadInsightsQLRequestModelEnumApi]
 
 export const FileDownloadInsightsQLRequestModelEnumApi = {
-    Hogql: 'insightsql',
+    Insightsql: 'insightsql',
 } as const
 
 /**

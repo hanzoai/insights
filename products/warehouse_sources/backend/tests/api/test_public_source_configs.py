@@ -5,7 +5,7 @@ from rest_framework import status
 
 class TestPublicSourceConfigs(APIBaseTest):
     def test_list_returns_source_configs(self):
-        response = self.client.get("/api/public_source_configs/")
+        response = self.client.get("/v1/public_source_configs/")
         assert response.status_code == status.HTTP_200_OK
 
         data = response.json()
@@ -21,10 +21,10 @@ class TestPublicSourceConfigs(APIBaseTest):
     def test_matches_wizard_response(self):
         """Public endpoint returns the same data as the authenticated /wizard endpoint, plus the
         docs-only `tables` catalog the wizard deliberately omits to keep its payload small."""
-        response = self.client.get("/api/public_source_configs/")
+        response = self.client.get("/v1/public_source_configs/")
         assert response.status_code == status.HTTP_200_OK
 
-        wizard_response = self.client.get("/api/environments/@current/external_data_sources/wizard/")
+        wizard_response = self.client.get("/v1/environments/@current/external_data_sources/wizard/")
         assert wizard_response.status_code == status.HTTP_200_OK
 
         wizard_data = wizard_response.json()
@@ -38,7 +38,7 @@ class TestPublicSourceConfigs(APIBaseTest):
 
     def test_accessible_without_authentication(self):
         self.client.logout()
-        response = self.client.get("/api/public_source_configs/")
+        response = self.client.get("/v1/public_source_configs/")
         assert response.status_code == status.HTTP_200_OK
 
         data = response.json()
@@ -46,7 +46,7 @@ class TestPublicSourceConfigs(APIBaseTest):
         assert len(data) > 0
 
     def test_every_config_has_tables_array(self):
-        response = self.client.get("/api/public_source_configs/")
+        response = self.client.get("/v1/public_source_configs/")
         data = response.json()
 
         for source_type, config in data.items():
@@ -55,7 +55,7 @@ class TestPublicSourceConfigs(APIBaseTest):
 
     def test_fixed_schema_source_lists_tables(self):
         """Fixed-schema API sources (e.g. Stripe) expose their documented table catalog."""
-        response = self.client.get("/api/public_source_configs/")
+        response = self.client.get("/v1/public_source_configs/")
         stripe = response.json()["Stripe"]
 
         tables = stripe["tables"]
@@ -77,12 +77,12 @@ class TestPublicSourceConfigs(APIBaseTest):
 
     def test_sql_source_returns_no_tables(self):
         """SQL sources have user-defined schemas, so the catalog is empty (renders a generic note)."""
-        response = self.client.get("/api/public_source_configs/")
+        response = self.client.get("/v1/public_source_configs/")
         assert response.json()["Postgres"]["tables"] == []
 
     def test_every_config_exposes_version_fields(self):
         """The external version-update automation consumes these exact field names."""
-        response = self.client.get("/api/public_source_configs/")
+        response = self.client.get("/v1/public_source_configs/")
         data = response.json()
 
         for source_type, config in data.items():
@@ -102,6 +102,6 @@ class TestPublicSourceConfigs(APIBaseTest):
         ~140 sources set `lists_tables_without_credentials`; if the mechanism regresses this
         collapses toward zero. The loose threshold tolerates sources being added or removed.
         """
-        response = self.client.get("/api/public_source_configs/")
+        response = self.client.get("/v1/public_source_configs/")
         with_tables = [name for name, config in response.json().items() if config["tables"]]
         assert len(with_tables) >= 100, f"only {len(with_tables)} sources list tables"

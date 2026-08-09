@@ -180,7 +180,7 @@ export const llmPersonsLazyLoaderLogic = kea<llmPersonsLazyLoaderLogicType>([
                 try {
                     // nosemgrep: prefer-codegen-api
                     const response = await api.create<BatchByDistinctIdsResponse>(
-                        `api/environments/${teamId}/persons/batch_by_distinct_ids/`,
+                        `v1/environments/${teamId}/persons/batch_by_distinct_ids/`,
                         { distinct_ids: batch }
                     )
 

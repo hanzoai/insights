@@ -545,7 +545,7 @@ export const accessControlLogic = kea<accessControlLogicType>([
             ): string => {
                 // TODO: This is far from perfect... but it's a start
                 if (resource === 'project') {
-                    return `api/projects/${currentProjectId}/access_controls`
+                    return `v1/projects/${currentProjectId}/access_controls`
                 }
                 // Resources whose API route doesn't match the naive `${resource}s` pluralization
                 const resourceToRoute: Partial<Record<APIScopeObject, string>> = {
@@ -556,7 +556,7 @@ export const accessControlLogic = kea<accessControlLogicType>([
                     replay_scanner: 'vision/scanners',
                 }
                 const route = resourceToRoute[resource] ?? `${resource}s`
-                return `api/projects/${currentProjectId}/${route}/${resource_id}/access_controls`
+                return `v1/projects/${currentProjectId}/${route}/${resource_id}/access_controls`
             },
         ],
 

@@ -38,8 +38,8 @@ describe('Playlist', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/session_recordings': { results: [], has_next: false },
-                '/api/environments/:team_id/session_recordings/properties': { results: [] },
+                '/v1/environments/:team_id/session_recordings': { results: [], has_next: false },
+                '/v1/environments/:team_id/session_recordings/properties': { results: [] },
             },
         })
         initKeaTests()

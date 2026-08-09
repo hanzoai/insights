@@ -17,10 +17,10 @@ describe('ActionFilterGroup - Combining and Splitting Events', () => {
         ;(libUtils as any).uuid = jest.fn().mockReturnValue('test-uuid')
         useMocks({
             get: {
-                '/api/projects/:team/actions/': {
+                '/v1/projects/:team/actions/': {
                     results: [],
                 },
-                '/api/projects/:team/event_definitions/': {
+                '/v1/projects/:team/event_definitions/': {
                     results: [],
                 },
             },

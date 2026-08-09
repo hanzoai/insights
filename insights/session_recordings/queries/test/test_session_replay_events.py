@@ -514,7 +514,7 @@ class TestGetLatestSessionEventProperties(DatastoreTestMixin, APIBaseTest):
         assert get_latest_session_event_properties(session_id, self.team) is None
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/session_recordings/{session_id}/capture_diagnostics"
+            f"/v1/environments/{self.team.id}/session_recordings/{session_id}/capture_diagnostics"
         )
         assert response.status_code == 200
         assert response.json()["properties"] is None
@@ -525,7 +525,7 @@ class TestGetLatestSessionEventProperties(DatastoreTestMixin, APIBaseTest):
         self._seed_event(session_id, session_start, "endpoint")
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/session_recordings/{session_id}/capture_diagnostics"
+            f"/v1/environments/{self.team.id}/session_recordings/{session_id}/capture_diagnostics"
         )
 
         assert response.status_code == 200

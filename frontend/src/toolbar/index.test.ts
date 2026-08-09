@@ -59,7 +59,7 @@ describe('Toolbar flag loading', () => {
 
         // Verify fetch was called with correct URL
         expect(mockFetch).toHaveBeenCalledWith(
-            'http://localhost:8010/api/user/get_toolbar_preloaded_flags?key=test-key-123',
+            'http://localhost:8010/v1/user/get_toolbar_preloaded_flags?key=test-key-123',
             {
                 credentials: 'include',
             }

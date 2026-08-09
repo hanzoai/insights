@@ -111,7 +111,11 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<PluginsServerConf
             return { insightsFunction }
         }
 
-        if (insightsFunction?.type === 'warehouse_source_webhook' && insightsFunction.enabled && !insightsFunction.deleted) {
+        if (
+            insightsFunction?.type === 'warehouse_source_webhook' &&
+            insightsFunction.enabled &&
+            !insightsFunction.deleted
+        ) {
             const templateId = insightsFunction.template_id ?? 'template-warehouse-source-default'
             const template = await this.insightsFunctionTemplateManager.getInsightsFunctionTemplate(templateId)
             if (template) {
@@ -137,7 +141,10 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<PluginsServerConf
         return null
     }
 
-    private buildRequestGlobals(insightsFunction: InsightsFunctionType, req: ModifiedRequest): InsightsFunctionInvocationGlobals {
+    private buildRequestGlobals(
+        insightsFunction: InsightsFunctionType,
+        req: ModifiedRequest
+    ): InsightsFunctionInvocationGlobals {
         const body: Record<string, any> = req.body
 
         const ipValue = getFirstHeaderValue(req.headers['x-forwarded-for']) || req.socket.remoteAddress || req.ip
@@ -272,7 +279,8 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<PluginsServerConf
                 // For workflows, the captured event is only used as trigger data and not to actually capture the event
                 // Remove the execution count property to allow workflow actions to capture events without
                 // triggering the infinite loop protection.
-                const { $insights_function_execution_count, ...cleanProperties } = capturedInsightsEvent.properties || {}
+                const { $insights_function_execution_count, ...cleanProperties } =
+                    capturedInsightsEvent.properties || {}
 
                 // Invoke the hogflow
                 const triggerGlobals: InsightsFunctionInvocationGlobals = {

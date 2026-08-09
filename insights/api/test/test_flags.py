@@ -79,8 +79,8 @@ class TestEvaluate:
 
         url = post.call_args[0][0]
         assert url == f"{HANZO_API_URL}/v1/flags"
-        # Never /api/, and never a second version.
-        assert "/api/" not in url
+        # Never /v1/, and never a second version.
+        assert "/v1/" not in url
         assert "/v2/" not in url
         assert post.call_args[1]["headers"]["Authorization"] == "Bearer tok"
         # A hung gateway must not hold a request open behind the app's own wait.

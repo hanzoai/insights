@@ -22,7 +22,7 @@ def _pending_keys(body: dict) -> set[tuple[str, int]]:
 
 class TestAchievementsAPI(APIBaseTest):
     def _url(self, action: str) -> str:
-        return f"/api/projects/{self.team.id}/web_analytics_achievements/{action}/"
+        return f"/v1/projects/{self.team.id}/web_analytics_achievements/{action}/"
 
     @patch(f"{_VIEWSET}.recompute_web_analytics_achievements_sync")
     @patch(f"{_VIEWSET}.enqueue_recompute_web_analytics_achievements_debounced")
@@ -229,7 +229,7 @@ class TestAchievementsAPI(APIBaseTest):
         other_team = Team.objects.create(organization=self.organization, name="Other project")
         self.client.post(self._url("preferences"), {"achievements_opt_out": True})
 
-        other_url = f"/api/projects/{other_team.id}/web_analytics_achievements/preferences/"
+        other_url = f"/v1/projects/{other_team.id}/web_analytics_achievements/preferences/"
         self.assertFalse(self.client.get(other_url).json()["achievements_opt_out"])
         self.assertEqual(
             WebAnalyticsUserConfig.objects.for_team(self.team.id).filter(user=self.user).count(),

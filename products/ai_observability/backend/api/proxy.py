@@ -2,8 +2,8 @@
 ViewSet for AI observability proxy
 
 Endpoints:
-- GET /api/llm_proxy/models
-- POST /api/llm_proxy/completion
+- GET /v1/llm_proxy/models
+- POST /v1/llm_proxy/completion
 """
 
 import json

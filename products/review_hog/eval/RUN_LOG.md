@@ -131,7 +131,7 @@ Purpose: record every end-to-end `run_review` so we can tell whether a prompt/co
 - **What landed (Phases 1–4):** non-blocking `start_review_pr_workflow` + per-run `publish` flag (retired
   `PUBLISH_REVIEW_ENABLED`) + `--publish` on `run_review`; PAT → **GitHub App installation token** for fetch + publish
   (worker no longer needs `GITHUB_TOKEN`); fork rejection (`PRMetadata.is_fork`, non-retryable, pre-report);
-  `head_sha`-pinned publish; shared-secret endpoint `POST /api/review_hog/trigger`; `.github/workflows/review-script.yml`.
+  `head_sha`-pinned publish; shared-secret endpoint `POST /v1/review_hog/trigger`; `.github/workflows/review-script.yml`.
 - **Adversarial review** (4-dimension finder → per-finding skeptic verify): 11 raw → **7 confirmed → 4 distinct**, all
   **fixed**: (A) re-trigger/`synchronize` raised `WorkflowAlreadyStartedError` → unhandled **500 / red CI check** →
   fixed with `id_conflict_policy=USE_EXISTING`; (B) `_installation_token` marked transient GitHub failures

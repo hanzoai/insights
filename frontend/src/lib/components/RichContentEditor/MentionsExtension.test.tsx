@@ -67,7 +67,7 @@ describe('Mentions', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/organizations/:organization_id/members/': { results: mockMembers },
+                '/v1/organizations/:organization_id/members/': { results: mockMembers },
             },
         })
         initKeaTests()

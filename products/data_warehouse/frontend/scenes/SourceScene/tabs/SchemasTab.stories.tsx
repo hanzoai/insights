@@ -22,7 +22,7 @@ const meta: Meta<SchemasTabProps> = {
     render: (props) => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/external_data_sources/:id': () => {
+                '/v1/environments/:team_id/external_data_sources/:id': () => {
                     return [200, externalDataSourceResponseMock]
                 },
             },
@@ -56,7 +56,7 @@ export const MultiSchema: Story = {
     render: (props) => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/external_data_sources/:id': () => {
+                '/v1/environments/:team_id/external_data_sources/:id': () => {
                     return [200, multiSchemaSourceMock]
                 },
             },

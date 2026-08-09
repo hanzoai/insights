@@ -78,16 +78,16 @@ describe('cohortEditLogic', () => {
         window.localStorage.clear()
         useMocks({
             get: {
-                '/api/projects/:team_id/cohorts/': toPaginatedResponse([mockCohort]),
-                '/api/projects/:team_id/cohorts/:id/': mockCohort,
-                '/api/projects/:team_id/cohorts/:id/used_in/': mockUsedInResponse,
+                '/v1/projects/:team_id/cohorts/': toPaginatedResponse([mockCohort]),
+                '/v1/projects/:team_id/cohorts/:id/': mockCohort,
+                '/v1/projects/:team_id/cohorts/:id/used_in/': mockUsedInResponse,
             },
             post: {
-                '/api/projects/:team_id/cohorts/': mockCohort,
-                '/api/projects/:team_id/cohorts/:id/': mockCohort,
+                '/v1/projects/:team_id/cohorts/': mockCohort,
+                '/v1/projects/:team_id/cohorts/:id/': mockCohort,
             },
             patch: {
-                '/api/projects/:team_id/cohorts/:id/': mockCohort,
+                '/v1/projects/:team_id/cohorts/:id/': mockCohort,
             },
         })
         initKeaTests()
@@ -112,7 +112,7 @@ describe('cohortEditLogic', () => {
         it('swallows used-in 404s without reporting them', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/cohorts/:id/used_in/': () => [404, { detail: 'Not found.' }],
+                    '/v1/projects/:team_id/cohorts/:id/used_in/': () => [404, { detail: 'Not found.' }],
                 },
             })
             await initCohortLogic({ id: 1 })
@@ -126,7 +126,7 @@ describe('cohortEditLogic', () => {
         it('reports non-404 used-in failures', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/cohorts/:id/used_in/': () => [500, { detail: 'Server error' }],
+                    '/v1/projects/:team_id/cohorts/:id/used_in/': () => [500, { detail: 'Server error' }],
                 },
             })
             await initCohortLogic({ id: 1 })
@@ -144,7 +144,7 @@ describe('cohortEditLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/projects/:team_id/cohorts/:id/used_in/': () => [500, { detail: 'Server error' }],
+                    '/v1/projects/:team_id/cohorts/:id/used_in/': () => [500, { detail: 'Server error' }],
                 },
             })
             await expectLogic(logic, () => {
@@ -1166,7 +1166,7 @@ describe('cohortEditLogic', () => {
                 logic.actions.duplicateCohort(true)
             }).toFinishAllListeners()
 
-            expect(api.create).toHaveBeenCalledWith('api/cohort', {
+            expect(api.create).toHaveBeenCalledWith('v1/cohort', {
                 is_static: true,
                 name: 'Static Cohort (static copy)',
                 query: {
@@ -1200,7 +1200,7 @@ describe('cohortEditLogic', () => {
                 logic.actions.duplicateCohort(true)
             }).toFinishAllListeners()
 
-            expect(api.create).toHaveBeenCalledWith('api/cohort', {
+            expect(api.create).toHaveBeenCalledWith('v1/cohort', {
                 is_static: true,
                 name: 'Dynamic Cohort (static copy)',
                 query: {

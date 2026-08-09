@@ -37,8 +37,8 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/saved/hm_gen/': generatingSaved,
-                '/api/projects/:team_id/heatmap_screenshots/:id/content/': () => [202, generatingSaved],
+                '/v1/projects/:team_id/saved/hm_gen/': generatingSaved,
+                '/v1/projects/:team_id/heatmap_screenshots/:id/content/': () => [202, generatingSaved],
             },
         }),
     ],
@@ -85,8 +85,8 @@ export const IframeExample: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/saved/hm_iframe/': () => [200, makeIframeSaved()],
-                '/api/projects/:team_id/heatmaps/': () => [
+                '/v1/projects/:team_id/saved/hm_iframe/': () => [200, makeIframeSaved()],
+                '/v1/projects/:team_id/heatmaps/': () => [
                     200,
                     {
                         results: [

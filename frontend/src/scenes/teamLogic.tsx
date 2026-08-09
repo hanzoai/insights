@@ -351,7 +351,7 @@ export const teamLogic = kea<teamLogicType>([
                     }
 
                     try {
-                        return await api.get('api/environments/@current')
+                        return await api.get('v1/environments/@current')
                     } catch {
                         return values.currentTeam
                     }
@@ -371,10 +371,10 @@ export const teamLogic = kea<teamLogicType>([
 
                     let patchedTeam: TeamType | TeamPublicType
                     if (Object.keys(payload).length === 1 && payload.name && values.currentTeam.project_id) {
-                        // Renames go through /api/projects, which mirrors the name onto the passthrough
-                        // team server-side. /api/environments is deprecated, don't add calls to it
+                        // Renames go through /v1/projects, which mirrors the name onto the passthrough
+                        // team server-side. /v1/environments is deprecated, don't add calls to it
                         const patchedProject = await api.update<ProjectType>(
-                            `api/projects/${values.currentTeam.project_id}`,
+                            `v1/projects/${values.currentTeam.project_id}`,
                             { name: payload.name }
                         )
                         breakpoint()
@@ -382,7 +382,7 @@ export const teamLogic = kea<teamLogicType>([
                         actions.loadCurrentProjectSuccess(patchedProject)
                         patchedTeam = { ...values.currentTeam, name: patchedProject.name }
                     } else {
-                        patchedTeam = await api.update(`api/environments/${values.currentTeam.id}`, payload)
+                        patchedTeam = await api.update(`v1/environments/${values.currentTeam.id}`, payload)
                         breakpoint()
                     }
 
@@ -456,15 +456,15 @@ export const teamLogic = kea<teamLogicType>([
                             'Environment could not be created, because the parent project has not been loaded yet!'
                         )
                     }
-                    return await api.create(`api/projects/${values.currentProject.id}/environments/`, { name, is_demo })
+                    return await api.create(`v1/projects/${values.currentProject.id}/environments/`, { name, is_demo })
                 },
                 // Project API Token
-                resetToken: async () => await api.update(`api/environments/${values.currentTeamId}/reset_token`, {}),
+                resetToken: async () => await api.update(`v1/environments/${values.currentTeamId}/reset_token`, {}),
                 // Feature Flags Secure API Token
                 rotateSecretToken: async () =>
-                    await api.update(`api/environments/${values.currentTeamId}/rotate_secret_token`, {}),
+                    await api.update(`v1/environments/${values.currentTeamId}/rotate_secret_token`, {}),
                 deleteSecretTokenBackup: async () =>
-                    await api.update(`api/environments/${values.currentTeamId}/delete_secret_token_backup`, {}),
+                    await api.update(`v1/environments/${values.currentTeamId}/delete_secret_token_backup`, {}),
                 /**
                  * If adding a product intent that also represents regular product usage, see explainer in insights.models.product_intent.product_intent.py.
                  * Also, we refresh the list of custom products to show the possible new entry in the sidebar after we've added the intent.
@@ -483,7 +483,7 @@ export const teamLogic = kea<teamLogicType>([
                 },
                 recordProductIntentOnboardingComplete: async ({ product_type }: { product_type: ProductKey }) => {
                     const result = await api.update(
-                        `api/environments/${values.currentTeamId}/complete_product_onboarding`,
+                        `v1/environments/${values.currentTeamId}/complete_product_onboarding`,
                         {
                             product_type,
                         }
@@ -631,7 +631,7 @@ export const teamLogic = kea<teamLogicType>([
         },
         deleteTeam: async ({ team }) => {
             try {
-                await api.delete(`api/environments/${team.id}`)
+                await api.delete(`v1/environments/${team.id}`)
                 location.reload()
                 actions.deleteTeamSuccess()
             } catch {

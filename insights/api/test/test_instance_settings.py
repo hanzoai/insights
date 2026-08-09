@@ -123,7 +123,7 @@ class TestInstanceSettings(APIBaseTest):
         self.user.save(update_fields=["current_organization", "current_team"])
 
     def test_list_instance_settings(self):
-        response = self.client.get(f"/api/instance_settings/")
+        response = self.client.get(f"/v1/instance_settings/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         json_response = response.json()
 
@@ -139,7 +139,7 @@ class TestInstanceSettings(APIBaseTest):
                 self.assertEqual(item["value"], "")
 
     def test_can_retrieve_setting(self):
-        response = self.client.get(f"/api/instance_settings/AUTO_START_ASYNC_MIGRATIONS")
+        response = self.client.get(f"/v1/instance_settings/AUTO_START_ASYNC_MIGRATIONS")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         json_response = response.json()
 
@@ -153,7 +153,7 @@ class TestInstanceSettings(APIBaseTest):
         self.assertEqual(json_response["editable"], True)
 
     def test_retrieve_secret_setting(self):
-        response = self.client.get(f"/api/instance_settings/EMAIL_HOST_PASSWORD")
+        response = self.client.get(f"/v1/instance_settings/EMAIL_HOST_PASSWORD")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         json_response = response.json()
 
@@ -164,7 +164,7 @@ class TestInstanceSettings(APIBaseTest):
 
         # When a value is set, the value is never exposed again
         with override_instance_config("EMAIL_HOST_PASSWORD", "this_is_a_secret_sssshhh"):
-            response = self.client.get(f"/api/instance_settings/EMAIL_HOST_PASSWORD")
+            response = self.client.get(f"/v1/instance_settings/EMAIL_HOST_PASSWORD")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         json_response = response.json()
 
@@ -176,14 +176,14 @@ class TestInstanceSettings(APIBaseTest):
         self.user.is_staff = False
         self.user.save()
 
-        response = self.client.get(f"/api/instance_settings/")
+        response = self.client.get(f"/v1/instance_settings/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.json(),
             self.permission_denied_response("You are not a staff user, contact your instance admin."),
         )
 
-        response = self.client.get(f"/api/instance_settings/AUTO_START_ASYNC_MIGRATIONS")
+        response = self.client.get(f"/v1/instance_settings/AUTO_START_ASYNC_MIGRATIONS")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.json(),
@@ -191,11 +191,11 @@ class TestInstanceSettings(APIBaseTest):
         )
 
     def test_update_setting(self):
-        response = self.client.get(f"/api/instance_settings/AUTO_START_ASYNC_MIGRATIONS")
+        response = self.client.get(f"/v1/instance_settings/AUTO_START_ASYNC_MIGRATIONS")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["value"], False)
 
-        response = self.client.patch(f"/api/instance_settings/AUTO_START_ASYNC_MIGRATIONS", {"value": True})
+        response = self.client.patch(f"/v1/instance_settings/AUTO_START_ASYNC_MIGRATIONS", {"value": True})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["value"], True)
 
@@ -206,7 +206,7 @@ class TestInstanceSettings(APIBaseTest):
         set_instance_setting("EMAIL_HOST", "localhost")
         with self.settings(SITE_URL="http://localhost:8000", CELERY_TASK_ALWAYS_EAGER=True):
             response = self.client.patch(
-                f"/api/instance_settings/EMAIL_DEFAULT_FROM",
+                f"/v1/instance_settings/EMAIL_DEFAULT_FROM",
                 {"value": "hellohello@hanzo.ai"},
             )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -223,7 +223,7 @@ class TestInstanceSettings(APIBaseTest):
 
     def test_update_integer_setting(self):
         response = self.client.patch(
-            f"/api/instance_settings/ASYNC_MIGRATIONS_ROLLBACK_TIMEOUT",
+            f"/v1/instance_settings/ASYNC_MIGRATIONS_ROLLBACK_TIMEOUT",
             {"value": 48343943943},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -240,7 +240,7 @@ class TestInstanceSettings(APIBaseTest):
         for name, input_value, expected in valid_cases:
             with self.subTest(name):
                 response = self.client.patch(
-                    "/api/instance_settings/DATASTORE_KILL_SWITCH_LIGHT_TEAMS",
+                    "/v1/instance_settings/DATASTORE_KILL_SWITCH_LIGHT_TEAMS",
                     {"value": input_value},
                     content_type="application/json",
                 )
@@ -254,14 +254,14 @@ class TestInstanceSettings(APIBaseTest):
         for name, input_value in invalid_cases:
             with self.subTest(name):
                 response = self.client.patch(
-                    "/api/instance_settings/DATASTORE_KILL_SWITCH_LIGHT_TEAMS",
+                    "/v1/instance_settings/DATASTORE_KILL_SWITCH_LIGHT_TEAMS",
                     {"value": input_value},
                     content_type="application/json",
                 )
                 self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_cant_update_setting_that_is_not_overridable(self):
-        response = self.client.patch(f"/api/instance_settings/MATERIALIZED_COLUMNS_ENABLED", {"value": False})
+        response = self.client.patch(f"/v1/instance_settings/MATERIALIZED_COLUMNS_ENABLED", {"value": False})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json(),
@@ -278,7 +278,7 @@ class TestInstanceSettings(APIBaseTest):
         self.user.is_staff = False
         self.user.save()
 
-        response = self.client.get(f"/api/instance_settings/AUTO_START_ASYNC_MIGRATIONS", {"value": True})
+        response = self.client.get(f"/v1/instance_settings/AUTO_START_ASYNC_MIGRATIONS", {"value": True})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.json(),
@@ -305,7 +305,7 @@ class TestInstanceSettings(APIBaseTest):
         set_instance_setting(key, before)
         initial_count = self._instance_setting_logs().count()
 
-        response = self.client.patch(f"/api/instance_settings/{key}", {"value": after})
+        response = self.client.patch(f"/v1/instance_settings/{key}", {"value": after})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         logs = self._instance_setting_logs()
@@ -349,7 +349,7 @@ class TestInstanceSettings(APIBaseTest):
         set_instance_setting("EMAIL_HOST_PASSWORD", before)
         initial_count = self._instance_setting_logs().count()
 
-        response = self.client.patch(f"/api/instance_settings/EMAIL_HOST_PASSWORD", {"value": after})
+        response = self.client.patch(f"/v1/instance_settings/EMAIL_HOST_PASSWORD", {"value": after})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         logs = self._instance_setting_logs()
@@ -378,7 +378,7 @@ class TestInstanceSettings(APIBaseTest):
         set_instance_setting(key, before_value)
         initial_count = self._instance_setting_logs().count()
 
-        response = self.client.patch(f"/api/instance_settings/{key}", {"value": after_value})
+        response = self.client.patch(f"/v1/instance_settings/{key}", {"value": after_value})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
         logs = self._instance_setting_logs()
@@ -401,7 +401,7 @@ class TestInstanceSettings(APIBaseTest):
         # refactor of get_instance_setting drops the masking for one (or all) keys.
         cleartext = f"cleartext-for-{key}"
         with override_instance_config(key, cleartext):
-            response = self.client.get(f"/api/instance_settings/{key}")
+            response = self.client.get(f"/v1/instance_settings/{key}")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         json_response = response.json()
 
@@ -421,7 +421,7 @@ class TestInstanceSettings(APIBaseTest):
         set_instance_setting(key, value)
         initial_count = self._instance_setting_logs().count()
 
-        response = self.client.patch(f"/api/instance_settings/{key}", {"value": value})
+        response = self.client.patch(f"/v1/instance_settings/{key}", {"value": value})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertEqual(self._instance_setting_logs().count(), initial_count)
@@ -429,14 +429,14 @@ class TestInstanceSettings(APIBaseTest):
     def test_failed_update_does_not_log(self):
         initial_count = self._instance_setting_logs().count()
 
-        response = self.client.patch(f"/api/instance_settings/MATERIALIZED_COLUMNS_ENABLED", {"value": False})
+        response = self.client.patch(f"/v1/instance_settings/MATERIALIZED_COLUMNS_ENABLED", {"value": False})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         self.assertEqual(self._instance_setting_logs().count(), initial_count)
 
     @patch("insights.api.instance_settings.is_impersonated", return_value=True)
     def test_update_logs_impersonation(self, _mock_is_impersonated):
-        response = self.client.patch(f"/api/instance_settings/AUTO_START_ASYNC_MIGRATIONS", {"value": True})
+        response = self.client.patch(f"/v1/instance_settings/AUTO_START_ASYNC_MIGRATIONS", {"value": True})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         log = self._instance_setting_logs().order_by("-created_at").first()
@@ -450,7 +450,7 @@ class TestInstanceSettings(APIBaseTest):
         self._clear_user_org()
         initial_count = self._instance_setting_logs().count()
 
-        response = self.client.patch(f"/api/instance_settings/AUTO_START_ASYNC_MIGRATIONS", {"value": True})
+        response = self.client.patch(f"/v1/instance_settings/AUTO_START_ASYNC_MIGRATIONS", {"value": True})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         logs = self._instance_setting_logs()
@@ -465,7 +465,7 @@ class TestInstanceSettings(APIBaseTest):
         self.user.organization_memberships.all().delete()
         initial_count = self._instance_setting_logs().count()
 
-        response = self.client.patch(f"/api/instance_settings/AUTO_START_ASYNC_MIGRATIONS", {"value": True})
+        response = self.client.patch(f"/v1/instance_settings/AUTO_START_ASYNC_MIGRATIONS", {"value": True})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # The setting itself must still be persisted; only the audit row is skipped.

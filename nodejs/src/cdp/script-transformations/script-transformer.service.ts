@@ -1,7 +1,7 @@
 import { Counter, Gauge } from 'prom-client'
 
-import { HogTransformationResult, HogTransformer } from '~/common/script-transformations/script-transformer.interface'
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
+import { HogTransformationResult, HogTransformer } from '~/common/script-transformations/script-transformer.interface'
 import { instrumentFn } from '~/common/tracing/tracing-utils'
 import { PostgresRouter } from '~/common/utils/db/postgres'
 import { GeoIPService, GeoIp } from '~/common/utils/geoip'
@@ -12,15 +12,18 @@ import { PluginEvent } from '~/plugin-scaffold'
 import { CyclotronJobInvocationResult, InsightsFunctionInvocationGlobals, InsightsFunctionType } from '../../cdp/types'
 import { isLegacyPluginInsightsFunction } from '../../cdp/utils'
 import type { CommonConfig } from '../../common/config'
+import { LegacyPluginExecutorService } from '../services/legacy-plugin-executor.service'
+import { IntegrationManagerService } from '../services/managers/integration-manager.service'
+import { InsightsFunctionManagerService } from '../services/managers/script-function-manager.service'
+import {
+    InsightsFunctionMonitoringService,
+    MonitoringOutput,
+} from '../services/monitoring/script-function-monitoring.service'
 import { HogExecutorService } from '../services/script-executor.service'
 import { HogInputsService } from '../services/script-inputs.service'
-import { LegacyPluginExecutorService } from '../services/legacy-plugin-executor.service'
-import { InsightsFunctionManagerService } from '../services/managers/script-function-manager.service'
-import { IntegrationManagerService } from '../services/managers/integration-manager.service'
-import { InsightsFunctionMonitoringService, MonitoringOutput } from '../services/monitoring/script-function-monitoring.service'
 import { EncryptedFields } from '../utils/encryption-utils'
-import { convertToInsightsFunctionFilterGlobal, filterFunctionInstrumented } from '../utils/script-function-filtering'
 import { createInvocation } from '../utils/invocation-utils'
+import { convertToInsightsFunctionFilterGlobal, filterFunctionInstrumented } from '../utils/script-function-filtering'
 import { RustVmExecutor } from './rust-vm-executor'
 import { getTransformationFunctions } from './transformation-functions'
 
@@ -132,7 +135,9 @@ export class HogTransformerService implements HogTransformer {
     private async transformEventAndProduceMessagesImpl(event: PluginEvent): Promise<TransformationResult> {
         hogTransformationAttempts.inc({ type: 'with_messages' })
 
-        const teamInsightsFunctions = await this.insightsFunctionManager.getInsightsFunctionsForTeam(event.team_id, ['transformation'])
+        const teamInsightsFunctions = await this.insightsFunctionManager.getInsightsFunctionsForTeam(event.team_id, [
+            'transformation',
+        ])
 
         const transformationResult = await this.transformEvent(event, teamInsightsFunctions)
 
@@ -326,7 +331,10 @@ export class HogTransformerService implements HogTransformer {
         }
     }
 
-    public transformEvent(event: PluginEvent, teamInsightsFunctions: InsightsFunctionType[]): Promise<TransformationResult> {
+    public transformEvent(
+        event: PluginEvent,
+        teamInsightsFunctions: InsightsFunctionType[]
+    ): Promise<TransformationResult> {
         // Sanitize transform event properties
         if (event.properties) {
             for (const key of ['$transformations_failed', '$transformations_skipped', '$transformations_succeeded']) {
@@ -336,7 +344,9 @@ export class HogTransformerService implements HogTransformer {
             }
         }
 
-        return instrumentFn(`hogTransformer.transformEvent`, () => this.transformEventImpl(event, teamInsightsFunctions))
+        return instrumentFn(`hogTransformer.transformEvent`, () =>
+            this.transformEventImpl(event, teamInsightsFunctions)
+        )
     }
 
     private async executeInsightsFunction(

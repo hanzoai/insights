@@ -134,8 +134,8 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/llm_skills/': toPaginatedResponse([SKILL_LIST_ENTRY]),
-                '/api/projects/:team_id/llm_skills/resolve/name/:name/': RESOLVE_RESPONSE,
+                '/v1/projects/:team_id/llm_skills/': toPaginatedResponse([SKILL_LIST_ENTRY]),
+                '/v1/projects/:team_id/llm_skills/resolve/name/:name/': RESOLVE_RESPONSE,
             },
         }),
     ],

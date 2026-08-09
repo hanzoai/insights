@@ -122,7 +122,8 @@ const Component = ({
         }
         const footerHeight = footerRef.current?.offsetHeight ?? 0
         const desiredHeight = output.scrollHeight + footerHeight + 8
-        const currentHeight = typeof attributes.height === 'number' ? attributes.height : DEFAULT_INSIGHTSQL_SQL_NODE_HEIGHT
+        const currentHeight =
+            typeof attributes.height === 'number' ? attributes.height : DEFAULT_INSIGHTSQL_SQL_NODE_HEIGHT
         const lastExecutionCodeHash = lastExecutionCodeHashRef.current
         const executionChanged = executionCodeHash !== lastExecutionCodeHash
 
@@ -284,7 +285,7 @@ const Settings = ({
     updateAttributes,
 }: NotebookNodeAttributeProperties<NotebookNodeInsightsQLAttributes>): JSX.Element => {
     const nodeLogic = useMountedLogic(notebookNodeLogic)
-    const { runHogqlSqlNodeWithMode } = useActions(nodeLogic)
+    const { runInsightsqlSqlNodeWithMode } = useActions(nodeLogic)
     const { insightsqlSqlRunLoading, insightsqlSqlRunQueued } = useValues(nodeLogic)
 
     return (
@@ -293,7 +294,7 @@ const Settings = ({
             updateAttributes={updateAttributes}
             tabIdSuffix="insightsql"
             onRunQuery={() => {
-                void runHogqlSqlNodeWithMode({ mode: 'auto' })
+                void runInsightsqlSqlNodeWithMode({ mode: 'auto' })
             }}
             runQueryLoading={insightsqlSqlRunLoading || insightsqlSqlRunQueued}
             runQueryTooltip="Run SQL (InsightsQL) query"

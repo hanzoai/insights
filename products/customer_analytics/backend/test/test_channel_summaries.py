@@ -183,7 +183,7 @@ class TestAccountSummariesEndpoint(APIBaseTest):
     def setUp(self):
         super().setUp()
         self.account = create_account(team_id=self.team.id, name="Acme Corp")
-        self.endpoint = f"/api/environments/{self.team.id}/accounts/{self.account.id}/summaries/"
+        self.endpoint = f"/v1/environments/{self.team.id}/accounts/{self.account.id}/summaries/"
 
     def _create_summary(self, period_start: datetime, cadence: str = "daily") -> AccountChannelSummary:
         return AccountChannelSummary.objects.unscoped().create(
@@ -218,12 +218,12 @@ class TestAccountSummariesEndpoint(APIBaseTest):
         other_team = Team.objects.create(organization=self.organization)
         other_account = create_account(team_id=other_team.id)
 
-        response = self.client.get(f"/api/environments/{self.team.id}/accounts/{other_account.id}/summaries/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/accounts/{other_account.id}/summaries/")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_cadence_set_and_cleared_through_account_update(self):
-        detail = f"/api/environments/{self.team.id}/accounts/{self.account.id}/"
+        detail = f"/v1/environments/{self.team.id}/accounts/{self.account.id}/"
 
         response = self.client.patch(detail, {"slack_summary_cadence": "weekly"}, format="json")
         assert response.status_code == status.HTTP_200_OK, response.json()
@@ -243,7 +243,7 @@ class TestAccountSummariesEndpoint(APIBaseTest):
 
     def test_invalid_cadence_is_rejected(self):
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/accounts/{self.account.id}/",
+            f"/v1/environments/{self.team.id}/accounts/{self.account.id}/",
             {"slack_summary_cadence": "yearly"},
             format="json",
         )

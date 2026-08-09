@@ -220,7 +220,7 @@ reference and worked query examples.
    hard-coded `GUARANTEED_TEAM_IDS = [2]`, so the daily schedule covers only Insights's own
    project and enabling the flag elsewhere still produces nothing until that changes.
 7. **Serve** -> DRF viewsets at
-   `/api/projects/{id}/mcp_analytics/{sessions,intent_clusters,feedback,missing_capabilities}`
+   `/v1/projects/{id}/mcp_analytics/{sessions,intent_clusters,feedback,missing_capabilities}`
    (router in `backend/presentation/urls.py`) plus custom actions
    (`sessions/{id}/tool_calls`, `sessions/{id}/generate_intent`, `sessions/intent_digest`,
    `sessions/activity_overview`, `intent_clusters/recompute`). Parallel surface: step 4's

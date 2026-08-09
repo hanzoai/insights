@@ -26,14 +26,14 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/batch_exports/': batchExports,
-                [`/api/environments/:team_id/batch_exports/${EXISTING_EXPORT.id}/`]: EXISTING_EXPORT,
-                '/api/environments/:team_id/batch_exports/test/': { steps: [] },
-                [`/api/environments/:team_id/batch_exports/${EXISTING_EXPORT.id}/runs/`]: { results: [] },
-                [`/api/environments/:team_id/batch_exports/${EXISTING_EXPORT.id}/backfills/`]: { results: [] },
+                '/v1/environments/:team_id/batch_exports/': batchExports,
+                [`/v1/environments/:team_id/batch_exports/${EXISTING_EXPORT.id}/`]: EXISTING_EXPORT,
+                '/v1/environments/:team_id/batch_exports/test/': { steps: [] },
+                [`/v1/environments/:team_id/batch_exports/${EXISTING_EXPORT.id}/runs/`]: { results: [] },
+                [`/v1/environments/:team_id/batch_exports/${EXISTING_EXPORT.id}/backfills/`]: { results: [] },
                 // Integration-backed destinations (Databricks, AzureBlob, BigQuery) render IntegrationChoice.
-                '/api/environments/:team_id/integrations': { results: [] },
-                '/api/projects/:team_id/integrations': { results: [] },
+                '/v1/environments/:team_id/integrations': { results: [] },
+                '/v1/projects/:team_id/integrations': { results: [] },
             },
         }),
     ],
@@ -163,11 +163,11 @@ export const BackfillsWithEstimates: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/batch_exports/': batchExports,
-                [`/api/environments/:team_id/batch_exports/${EXISTING_EXPORT.id}/`]: EXISTING_EXPORT,
-                '/api/environments/:team_id/batch_exports/test/': { steps: [] },
-                [`/api/environments/:team_id/batch_exports/${EXISTING_EXPORT.id}/runs/`]: { results: [] },
-                [`/api/environments/:team_id/batch_exports/${EXISTING_EXPORT.id}/backfills/`]: {
+                '/v1/environments/:team_id/batch_exports/': batchExports,
+                [`/v1/environments/:team_id/batch_exports/${EXISTING_EXPORT.id}/`]: EXISTING_EXPORT,
+                '/v1/environments/:team_id/batch_exports/test/': { steps: [] },
+                [`/v1/environments/:team_id/batch_exports/${EXISTING_EXPORT.id}/runs/`]: { results: [] },
+                [`/v1/environments/:team_id/batch_exports/${EXISTING_EXPORT.id}/backfills/`]: {
                     results: MOCK_BACKFILLS,
                     next: null,
                 },
@@ -236,14 +236,14 @@ export const RunsWithData: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/batch_exports/': batchExports,
-                [`/api/environments/:team_id/batch_exports/${EXISTING_EXPORT.id}/`]: EXISTING_EXPORT,
-                '/api/environments/:team_id/batch_exports/test/': { steps: [] },
-                [`/api/environments/:team_id/batch_exports/${EXISTING_EXPORT.id}/runs/`]: {
+                '/v1/environments/:team_id/batch_exports/': batchExports,
+                [`/v1/environments/:team_id/batch_exports/${EXISTING_EXPORT.id}/`]: EXISTING_EXPORT,
+                '/v1/environments/:team_id/batch_exports/test/': { steps: [] },
+                [`/v1/environments/:team_id/batch_exports/${EXISTING_EXPORT.id}/runs/`]: {
                     results: MOCK_RUNS,
                     next: null,
                 },
-                [`/api/environments/:team_id/batch_exports/${EXISTING_EXPORT.id}/backfills/`]: { results: [] },
+                [`/v1/environments/:team_id/batch_exports/${EXISTING_EXPORT.id}/backfills/`]: { results: [] },
             },
         }),
     ],
@@ -292,7 +292,7 @@ export const Logs: Story = {
     decorators: [
         mswDecorator({
             post: {
-                '/api/environments/:team_id/query/InsightsQLQuery/': MOCK_LOG_RESULTS,
+                '/v1/environments/:team_id/query/InsightsQLQuery/': MOCK_LOG_RESULTS,
             },
         }),
     ],
@@ -400,7 +400,7 @@ export const HistoryWithActivity: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/users/@me': () => [
+                '/v1/users/@me': () => [
                     200,
                     {
                         email: 'test@hanzo.ai',
@@ -411,7 +411,7 @@ export const HistoryWithActivity: Story = {
                         },
                     },
                 ],
-                '/api/projects/:team_id/activity_log/': MOCK_ACTIVITY_LOGS,
+                '/v1/projects/:team_id/activity_log/': MOCK_ACTIVITY_LOGS,
             },
         }),
     ],
@@ -424,7 +424,7 @@ export const HistoryEmpty: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/users/@me': () => [
+                '/v1/users/@me': () => [
                     200,
                     {
                         email: 'test@hanzo.ai',
@@ -435,7 +435,7 @@ export const HistoryEmpty: Story = {
                         },
                     },
                 ],
-                '/api/projects/:team_id/activity_log/': { results: [], total_count: 0 },
+                '/v1/projects/:team_id/activity_log/': { results: [], total_count: 0 },
             },
         }),
     ],

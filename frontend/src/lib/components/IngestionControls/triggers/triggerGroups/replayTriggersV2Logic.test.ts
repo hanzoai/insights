@@ -13,7 +13,7 @@ describe('replayTriggersV2Logic', () => {
     beforeEach(() => {
         useMocks({
             patch: {
-                'api/environments/:id': async ({ request }) => [
+                'v1/environments/:id': async ({ request }) => [
                     200,
                     { id: 1, ...((await request.json()) as Record<string, any>) },
                 ],

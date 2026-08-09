@@ -4,7 +4,7 @@ Derive the event and property taxonomy from the warehouse.
 Upstream populated `insights_eventdefinition` and `insights_propertydefinition`
 as a side effect of ingestion. Analytics ingest is native now and writes events
 straight to the warehouse, so nothing has written these tables since -- live
-`/api/projects/1/events/` returns rows while `/api/projects/1/event_definitions/`
+`/v1/projects/1/events/` returns rows while `/v1/projects/1/event_definitions/`
 returns count 0. That empties Data Management, and with it the taxonomy behind
 every autocomplete, property picker and filter used to build an insight.
 
@@ -29,6 +29,7 @@ from celery import shared_task
 from insights.datastore.client import sync_execute
 from insights.datastore.client.connection import Workload
 from insights.models import Team
+
 from products.event_definitions.backend.models.event_definition import EventDefinition
 from products.event_definitions.backend.models.property_definition import PropertyDefinition
 

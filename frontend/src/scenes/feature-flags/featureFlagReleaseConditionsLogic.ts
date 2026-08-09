@@ -811,7 +811,7 @@ export const featureFlagReleaseConditionsLogic = kea<featureFlagReleaseCondition
 
             try {
                 const response: UserBlastRadiusType = await api.create(
-                    `api/projects/${values.currentProjectId}/feature_flags/user_blast_radius`,
+                    `v1/projects/${values.currentProjectId}/feature_flags/user_blast_radius`,
                     {
                         condition: { properties },
                         group_type_index: groupTypeIndex,

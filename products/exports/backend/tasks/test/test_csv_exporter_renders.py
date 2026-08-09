@@ -41,7 +41,7 @@ def test_csv_rendering(
     asset = ExportedAsset(
         team=team,
         export_format=ExportedAsset.ExportFormat.CSV,
-        export_context={"path": "/api/literally/anything"},
+        export_context={"path": "/v1/literally/anything"},
     )
     export_context = cast(dict[str, Any], asset.export_context)
     if fixture["response"].get("columns"):

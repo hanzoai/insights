@@ -25,6 +25,7 @@ import structlog
 from opentelemetry import trace
 
 from insights.api.capture import capture_internal
+from insights.git import get_git_commit_short
 from insights.auth import AUTH_BRAND_COOKIE, apply_auth_brand_cookie, normalize_auth_brand
 from insights.cloud_utils import is_cloud
 from insights.email import is_email_available
@@ -223,6 +224,9 @@ def preflight_check(request: HttpRequest) -> JsonResponse:
         "object_storage": in_cloud or _traced("preflight.is_object_storage_available", is_object_storage_available),
         "public_egress_ip_addresses": settings.PUBLIC_EGRESS_IP_ADDRESSES,
         "wizard_cloud_run_available": bool(settings.WIZARD_CLOUD_RUN_OAUTH_CLIENT_ID),
+        # Which commit is serving. Deploy verification asks this; it used to sign in to read
+        # instance_status instead, which is a session for a fact that is not private.
+        "git_sha": get_git_commit_short() or None,
     }
     auth_brand = normalize_auth_brand(request.COOKIES.get(AUTH_BRAND_COOKIE))
     if auth_brand:

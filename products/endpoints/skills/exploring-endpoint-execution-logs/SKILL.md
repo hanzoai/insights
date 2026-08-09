@@ -73,7 +73,7 @@ Each run gets a distinct `instance_id`, so logs group one-per-execution in the v
 ## Workflow
 
 1. Identify the endpoint by name. If given a URL, parse it from
-   `/api/projects/{team_id}/endpoints/{name}/run`.
+   `/v1/projects/{team_id}/endpoints/{name}/run`.
 2. Start broad: `endpoint-logs` for the endpoint with a recent time range. Skim levels and tokens.
 3. Narrow to the symptom:
    - Failures → `level=ERROR`; read the `error=` token and `path=` to see where it broke.

@@ -20,7 +20,7 @@ import { ProductEmptyStateStory, productEmptyStateStory } from './storybookHelpe
 function mcpSignalMocks(hasInitialize: boolean): Mocks {
     return {
         post: {
-            '/api/environments/:team_id/query/:kind': [
+            '/v1/environments/:team_id/query/:kind': [
                 200,
                 { results: [[hasInitialize, 0, 0, '1970-01-01T00:00:00Z']] },
             ],

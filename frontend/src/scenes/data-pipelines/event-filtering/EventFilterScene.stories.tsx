@@ -26,7 +26,7 @@ const meta: Meta<typeof App> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/event_filter/': () => [204, null],
+                '/v1/environments/:team_id/event_filter/': () => [204, null],
             },
         }),
     ],
@@ -121,10 +121,10 @@ function withFilter(overrides: Record<string, unknown> = {}): () => JSX.Element 
     return () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/event_filter/': { ...SIMPLE_FILTER, ...overrides },
+                '/v1/environments/:team_id/event_filter/': { ...SIMPLE_FILTER, ...overrides },
             },
             post: {
-                '/api/environments/:team_id/query/:kind/': metricsHandler(
+                '/v1/environments/:team_id/query/:kind/': metricsHandler(
                     EMPTY_TIMESERIES_RESULTS,
                     EMPTY_TOTALS_RESULTS
                 ),
@@ -140,10 +140,10 @@ function withFilterAndMetrics(overrides: Record<string, unknown> = {}): () => JS
         const { timeSeries, totals } = metricsForMode(mode)
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/event_filter/': { ...SIMPLE_FILTER, ...overrides },
+                '/v1/environments/:team_id/event_filter/': { ...SIMPLE_FILTER, ...overrides },
             },
             post: {
-                '/api/environments/:team_id/query/:kind/': metricsHandler(timeSeries, totals),
+                '/v1/environments/:team_id/query/:kind/': metricsHandler(timeSeries, totals),
             },
         })
         return <App />
@@ -725,7 +725,7 @@ Expected to show:
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/event_filter/': {
+                '/v1/environments/:team_id/event_filter/': {
                     ...SIMPLE_FILTER,
                     filter_tree: {
                         type: 'or',
@@ -738,7 +738,7 @@ Expected to show:
                 },
             },
             post: {
-                '/api/environments/:team_id/query/:kind/': metricsHandler(
+                '/v1/environments/:team_id/query/:kind/': metricsHandler(
                     EMPTY_TIMESERIES_RESULTS,
                     EMPTY_TOTALS_RESULTS
                 ),
@@ -880,10 +880,10 @@ export const BuildFilterFromScratch: Story = {
         // build the tree without racing the API load.
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/event_filter/': () => [204, null],
+                '/v1/environments/:team_id/event_filter/': () => [204, null],
             },
             post: {
-                '/api/environments/:team_id/query/:kind/': metricsHandler(
+                '/v1/environments/:team_id/query/:kind/': metricsHandler(
                     EMPTY_TIMESERIES_RESULTS,
                     EMPTY_TOTALS_RESULTS
                 ),

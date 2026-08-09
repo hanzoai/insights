@@ -87,7 +87,7 @@ test.describe('Workflows conditional branch property filter category dropdown', 
         page,
     }) => {
         test.setTimeout(90 * 1000)
-        const me = await page.request.get('/api/users/@me/')
+        const me = await page.request.get('/v1/users/@me/')
         expect(me.ok()).toBe(true)
         const meData = await me.json()
         const teamId: number = meData.team.id
@@ -97,7 +97,7 @@ test.describe('Workflows conditional branch property filter category dropdown', 
         if (!csrfToken) {
             throw new Error('CSRF cookie missing')
         }
-        const response = await page.request.post(`/api/environments/${teamId}/hog_flows/`, {
+        const response = await page.request.post(`/v1/environments/${teamId}/hog_flows/`, {
             data: workflowPayload,
             headers: { 'X-CSRFToken': decodeURIComponent(csrfToken) },
         })

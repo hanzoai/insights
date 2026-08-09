@@ -561,7 +561,7 @@ export const marketingAnalyticsSettingsLogic = kea<marketingAnalyticsSettingsLog
             testMapping: async ({ tableId, sourceMap }) => {
                 try {
                     const response = await api.create(
-                        `api/environments/${values.currentTeamId}/marketing_analytics/test_mapping/`,
+                        `v1/environments/${values.currentTeamId}/marketing_analytics/test_mapping/`,
                         { table_id: tableId, source_map: sourceMap }
                     )
                     if (response.success) {

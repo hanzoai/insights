@@ -78,7 +78,7 @@ class PresenceAPITestCase(TestCase):
         self.addCleanup(self.flag_patcher.stop)
 
     def _presence_url(self) -> str:
-        return f"/api/projects/{self.team.id}/tasks/{self.task.id}/presence/"
+        return f"/v1/projects/{self.team.id}/tasks/{self.task.id}/presence/"
 
     def _all_presence(self):
         # Assertions run outside the DRF team-scope context, so go through
@@ -161,7 +161,7 @@ class PresenceAPITestCase(TestCase):
             description="d",
             origin_product=Task.OriginProduct.USER_CREATED,
         )
-        url = f"/api/projects/{self.team.id}/tasks/{their_task.id}/presence/"
+        url = f"/v1/projects/{self.team.id}/tasks/{their_task.id}/presence/"
         response = self.client.post(url, {"device_id": str(self.push_token.id)}, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 

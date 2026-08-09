@@ -11,7 +11,7 @@ import { mswDecorator } from '~/mocks/browser'
 const queryDecorator = (hasData: boolean): ReturnType<typeof mswDecorator> =>
     mswDecorator({
         post: {
-            'api/environments/:team_id/query/': async ({ request }) => {
+            'v1/environments/:team_id/query/': async ({ request }) => {
                 const body = (await request.json()) as { query?: { query?: string } }
                 const insightsql = String(body?.query?.query ?? '')
                 if (insightsql.includes('GROUP BY model')) {

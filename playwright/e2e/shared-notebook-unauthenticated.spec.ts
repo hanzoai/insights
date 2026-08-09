@@ -38,7 +38,7 @@ async function createSharedNotebook(
         ],
     }
 
-    const notebookResponse = await page.request.post(`/api/projects/${workspace.team_id}/notebooks/`, {
+    const notebookResponse = await page.request.post(`/v1/projects/${workspace.team_id}/notebooks/`, {
         headers: authHeaders,
         data: { title: notebookTitle, content: notebookContent },
     })
@@ -47,7 +47,7 @@ async function createSharedNotebook(
     expect(notebookData.short_id).toBeTruthy()
 
     const sharingResponse = await page.request.patch(
-        `/api/projects/${workspace.team_id}/notebooks/${notebookData.short_id}/sharing/`,
+        `/v1/projects/${workspace.team_id}/notebooks/${notebookData.short_id}/sharing/`,
         {
             headers: authHeaders,
             data: { enabled: true },

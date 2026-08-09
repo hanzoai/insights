@@ -1018,7 +1018,7 @@ export const PropertyFilterTypeEnumApi = {
     LogEntry: 'log_entry',
     Behavioral: 'behavioral',
     Session: 'session',
-    Hogql: 'insightsql',
+    Insightsql: 'insightsql',
     DataWarehouse: 'data_warehouse',
     DataWarehousePersonProperty: 'data_warehouse_person_property',
     ErrorTrackingIssue: 'error_tracking_issue',

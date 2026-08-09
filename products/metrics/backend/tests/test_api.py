@@ -37,7 +37,7 @@ class TestMetricsValuesApi(APIBaseTest):
         ]
     )
     def test_invalid_limit_is_rejected_with_400(self, _name: str, limit: str) -> None:
-        response = self.client.get(f"/api/projects/{self.team.id}/metrics/values/", {"limit": limit})
+        response = self.client.get(f"/v1/projects/{self.team.id}/metrics/values/", {"limit": limit})
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["attr"] == "limit"
 
@@ -54,7 +54,7 @@ class TestMetricsFeatureFlagGate(APIBaseTest):
             patch("hanzo_insights.feature_enabled", return_value=flag_enabled),
             patch("products.metrics.backend.presentation.api.team_has_metrics", return_value=True),
         ):
-            response = self.client.get(f"/api/projects/{self.team.id}/metrics/has_metrics/")
+            response = self.client.get(f"/v1/projects/{self.team.id}/metrics/has_metrics/")
 
         assert response.status_code == expected_status
 
@@ -69,9 +69,7 @@ class TestMetricsAccessControl(APIBaseTest):
         self.organization.save()
 
         self.viewer_user = User.objects.create_and_join(self.organization, "metrics-viewer@hanzo.ai", "testtest")
-        self.no_access_user = User.objects.create_and_join(
-            self.organization, "metrics-no-access@hanzo.ai", "testtest"
-        )
+        self.no_access_user = User.objects.create_and_join(self.organization, "metrics-no-access@hanzo.ai", "testtest")
 
     def _create_access_control(self, user: User, access_level: AccessControlLevelResource) -> None:
         membership = OrganizationMembership.objects.get(user=user, organization=self.organization)
@@ -99,7 +97,7 @@ class TestMetricsAccessControl(APIBaseTest):
         with patch(
             "products.metrics.backend.presentation.api.team_has_metrics", return_value=True
         ) as team_has_metrics_mock:
-            response = self.client.get(f"/api/projects/{self.team.id}/metrics/has_metrics/")
+            response = self.client.get(f"/v1/projects/{self.team.id}/metrics/has_metrics/")
 
         assert response.status_code == expected_status
         assert team_has_metrics_mock.call_count == (1 if expected_status == status.HTTP_200_OK else 0)
@@ -119,7 +117,7 @@ class TestMetricsAccessControl(APIBaseTest):
     ) -> None:
         self._create_access_control(self.no_access_user, "none")
         self.client.force_login(self.no_access_user)
-        url = f"/api/projects/{self.team.id}/metrics/{action}/"
+        url = f"/v1/projects/{self.team.id}/metrics/{action}/"
 
         if method == "GET":
             response = self.client.get(url, payload)

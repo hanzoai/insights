@@ -19,14 +19,14 @@ describe('bulkScanLogic', () => {
         observeSpy = jest.fn(() => [202, { workflow_id: 'wf-test' }])
         useMocks({
             get: {
-                '/api/projects/:team/vision/scanners/': {
+                '/v1/projects/:team/vision/scanners/': {
                     results: [{ id: 'scanner-1', name: 'Rage detector' }],
                     count: 1,
                     next: null,
                 },
             },
             post: {
-                '/api/projects/:team/vision/scanners/:id/observe/': observeSpy,
+                '/v1/projects/:team/vision/scanners/:id/observe/': observeSpy,
             },
         })
         initKeaTests()

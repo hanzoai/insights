@@ -21,7 +21,7 @@ class TestProductTour(APIBaseTest):
     @patch("products.product_tours.backend.api.product_tour.report_user_action")
     def test_can_create_product_tour(self, mock_report):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Onboarding tour",
                 "description": "Welcome new users to the app",
@@ -66,7 +66,7 @@ class TestProductTour(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/product_tours/")
         response_data = response.json()
         assert response.status_code == status.HTTP_200_OK
         assert len(response_data["results"]) == 2
@@ -81,7 +81,7 @@ class TestProductTour(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour.id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour.id}/",
             data={"name": "Updated name"},
             format="json",
         )
@@ -103,7 +103,7 @@ class TestProductTour(APIBaseTest):
         )
         tour_id = str(tour.id)
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/product_tours/{tour.id}/")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/product_tours/{tour.id}/")
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
         assert not ProductTour.all_objects.filter(id=tour_id).exists()
@@ -115,7 +115,7 @@ class TestProductTour(APIBaseTest):
 
     def test_announcement_cannot_have_multiple_steps(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Invalid announcement",
                 "content": {
@@ -133,7 +133,7 @@ class TestProductTour(APIBaseTest):
 
     def test_announcement_with_single_step_is_valid(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Valid announcement",
                 "content": {
@@ -149,7 +149,7 @@ class TestProductTour(APIBaseTest):
 
     def test_regular_tour_can_have_multiple_steps(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Multi-step tour",
                 "content": {
@@ -166,7 +166,7 @@ class TestProductTour(APIBaseTest):
 
     def test_update_to_announcement_with_multiple_steps_fails(self):
         tour = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Tour",
                 "content": {"steps": [{"id": "1", "type": "modal"}, {"id": "2", "type": "modal"}]},
@@ -175,7 +175,7 @@ class TestProductTour(APIBaseTest):
         ).json()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour['id']}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour['id']}/",
             data={"content": {"type": "announcement", "steps": tour["content"]["steps"]}},
             format="json",
         )
@@ -191,7 +191,7 @@ class TestProductTour(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour.id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour.id}/",
             data={"start_date": timezone.now().isoformat()},
             format="json",
         )
@@ -214,7 +214,7 @@ class TestProductTour(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour.id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour.id}/",
             data={"end_date": timezone.now().isoformat()},
             format="json",
         )
@@ -229,7 +229,7 @@ class TestProductTour(APIBaseTest):
     @patch("products.product_tours.backend.api.product_tour.report_user_action")
     def test_creation_context_from_toolbar(self, mock_report):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Toolbar tour",
                 "content": {"steps": []},
@@ -286,7 +286,7 @@ class TestProductTour(APIBaseTest):
         for name in tour_names:
             ProductTour.objects.create(team=self.team, name=name, content={"steps": []})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/", {"search": search})
+        response = self.client.get(f"/v1/projects/{self.team.id}/product_tours/", {"search": search})
         assert response.status_code == status.HTTP_200_OK
         result_names = [r["name"] for r in response.json()["results"]]
 
@@ -305,7 +305,7 @@ class TestProductTour(APIBaseTest):
         )
         ProductTour.objects.create(team=self.team, name="Unrelated", content={"steps": []})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/?search=revenue")
+        response = self.client.get(f"/v1/projects/{self.team.id}/product_tours/?search=revenue")
         assert response.status_code == status.HTTP_200_OK
         result_ids = [r["id"] for r in response.json()["results"]]
 
@@ -322,7 +322,7 @@ class TestProductTour(APIBaseTest):
         a = ProductTour.objects.create(team=self.team, name="Alpha", content={"steps": []})
         b = ProductTour.objects.create(team=self.team, name="Beta", content={"steps": []})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/", {"search": search})
+        response = self.client.get(f"/v1/projects/{self.team.id}/product_tours/", {"search": search})
         assert response.status_code == status.HTTP_200_OK
         result_ids = {r["id"] for r in response.json()["results"]}
 
@@ -337,12 +337,12 @@ class TestProductTour(APIBaseTest):
     def test_list_filter_by_search_pathological_input_does_not_500(self, _name, search):
         ProductTour.objects.create(team=self.team, name="Tour overview", content={"steps": []})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/", {"search": search})
+        response = self.client.get(f"/v1/projects/{self.team.id}/product_tours/", {"search": search})
         assert response.status_code == status.HTTP_200_OK
 
     def test_list_filter_by_search_nul_bytes_do_not_500(self):
         ProductTour.objects.create(team=self.team, name="Alpha", content={"steps": []})
-        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/", {"search": "\x00\x00\x00"})
+        response = self.client.get(f"/v1/projects/{self.team.id}/product_tours/", {"search": "\x00\x00\x00"})
         assert response.status_code == status.HTTP_200_OK
 
     @parameterized.expand(
@@ -353,7 +353,7 @@ class TestProductTour(APIBaseTest):
         ]
     )
     def test_list_filter_by_search_enforces_length_cap(self, _name, length, expected_status):
-        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/", {"search": "a" * length})
+        response = self.client.get(f"/v1/projects/{self.team.id}/product_tours/", {"search": "a" * length})
         assert response.status_code == expected_status
 
         if expected_status == status.HTTP_400_BAD_REQUEST:
@@ -372,7 +372,7 @@ class TestProductTour(APIBaseTest):
         matching = ProductTour.objects.create(team=self.team, name=tour_name, content={"steps": []})
         ProductTour.objects.create(team=self.team, name="Totally unrelated", content={"steps": []})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/", {"search": search})
+        response = self.client.get(f"/v1/projects/{self.team.id}/product_tours/", {"search": search})
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
 
@@ -386,7 +386,7 @@ class TestProductTour(APIBaseTest):
         for name in ("onboarding tour", "tour for onboarding", "onbarding flow", "Engineering tour"):
             ProductTour.objects.create(team=self.team, name=name, content={"steps": []})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/?search=onboarding")
+        response = self.client.get(f"/v1/projects/{self.team.id}/product_tours/?search=onboarding")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
 
@@ -399,7 +399,7 @@ class TestProductTour(APIBaseTest):
     def test_list_filter_by_search_match_type_absent_without_search(self):
         ProductTour.objects.create(team=self.team, name="Alpha", content={"steps": []})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/product_tours/")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
 
@@ -468,7 +468,7 @@ class TestProductTourLinkedSurveys(APIBaseTest):
 
         # Create a tour with a survey step
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Tour with survey",
                 "content": {
@@ -497,7 +497,7 @@ class TestProductTourLinkedSurveys(APIBaseTest):
 
         # Launch the tour
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour_id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour_id}/",
             data={"start_date": now.isoformat()},
             format="json",
         )
@@ -513,7 +513,7 @@ class TestProductTourLinkedSurveys(APIBaseTest):
 
         # Create and launch a tour with a survey step
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Tour with survey",
                 "start_date": now.isoformat(),
@@ -544,7 +544,7 @@ class TestProductTourLinkedSurveys(APIBaseTest):
         # End the tour
         end_time = timezone.now()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour_id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour_id}/",
             data={"end_date": end_time.isoformat()},
             format="json",
         )
@@ -560,7 +560,7 @@ class TestProductTourLinkedSurveys(APIBaseTest):
 
         # Create and launch a tour with a survey step
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Tour to delete",
                 "start_date": now.isoformat(),
@@ -590,7 +590,7 @@ class TestProductTourLinkedSurveys(APIBaseTest):
         assert survey.end_date is None
 
         # Delete the tour
-        response = self.client.delete(f"/api/projects/{self.team.id}/product_tours/{tour_id}/")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/product_tours/{tour_id}/")
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
         # Survey should now be ended
@@ -601,7 +601,7 @@ class TestProductTourLinkedSurveys(APIBaseTest):
 class TestProductTourInternalTargetingFlag(APIBaseTest):
     def test_flag_created_when_auto_launch_enabled_on_create(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Auto launch tour",
                 "content": {"steps": []},
@@ -616,7 +616,7 @@ class TestProductTourInternalTargetingFlag(APIBaseTest):
 
     def test_flag_activated_when_tour_launched(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Tour to launch",
                 "content": {"steps": []},
@@ -631,7 +631,7 @@ class TestProductTourInternalTargetingFlag(APIBaseTest):
 
         # Launch the tour
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour_id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour_id}/",
             data={"start_date": timezone.now().isoformat()},
             format="json",
         )
@@ -645,7 +645,7 @@ class TestProductTourInternalTargetingFlag(APIBaseTest):
     def test_flag_deactivated_when_auto_launch_disabled(self):
         now = timezone.now()
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Running tour",
                 "content": {"steps": []},
@@ -662,7 +662,7 @@ class TestProductTourInternalTargetingFlag(APIBaseTest):
 
         # Disable auto_launch
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour_id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour_id}/",
             data={"auto_launch": False},
             format="json",
         )
@@ -675,7 +675,7 @@ class TestProductTourInternalTargetingFlag(APIBaseTest):
         """Regression test: when auto_launch is toggled off then back on, flag should reactivate."""
         now = timezone.now()
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Toggle tour",
                 "content": {"steps": []},
@@ -692,7 +692,7 @@ class TestProductTourInternalTargetingFlag(APIBaseTest):
 
         # Disable auto_launch
         self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour_id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour_id}/",
             data={"auto_launch": False},
             format="json",
         )
@@ -700,7 +700,7 @@ class TestProductTourInternalTargetingFlag(APIBaseTest):
 
         # Re-enable auto_launch - flag should reactivate
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour_id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour_id}/",
             data={"auto_launch": True},
             format="json",
         )
@@ -727,7 +727,7 @@ class TestProductTourInternalTargetingFlag(APIBaseTest):
             content["displayFrequency"] = display_frequency
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Display frequency test",
                 "content": content,
@@ -761,7 +761,7 @@ class TestProductTourInternalTargetingFlag(APIBaseTest):
         self, initial_frequency, new_frequency, expected_key_substrings
     ):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Frequency change test",
                 "content": {"displayFrequency": initial_frequency, "steps": []},
@@ -775,7 +775,7 @@ class TestProductTourInternalTargetingFlag(APIBaseTest):
 
         # Update displayFrequency
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour_id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour_id}/",
             data={"content": {"displayFrequency": new_frequency, "steps": []}},
             format="json",
         )
@@ -799,7 +799,7 @@ class TestProductTourInternalTargetingFlag(APIBaseTest):
             ]
         }
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Round trip",
                 "content": {
@@ -859,7 +859,7 @@ class TestProductTourInternalTargetingFlag(APIBaseTest):
         assert flag.active
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour.id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour.id}/",
             data={"targeting_flag_filters": user_filters},
             format="json",
         )
@@ -881,7 +881,7 @@ class TestProductTourInternalTargetingFlag(APIBaseTest):
 
         # Create an auto-launching tour with no policy in place, so its internal targeting flag is active.
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Approval gated tour",
                 "content": {
@@ -910,7 +910,7 @@ class TestProductTourInternalTargetingFlag(APIBaseTest):
         )
 
         patch_response = self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour.id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour.id}/",
             data={"auto_launch": False},
             format="json",
         )
@@ -969,7 +969,7 @@ class TestProductTourStepNormalization(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/product_tours/{tour.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/product_tours/{tour.id}/")
         assert response.status_code == status.HTTP_200_OK
 
         step = response.json()["content"]["steps"][0]
@@ -1000,7 +1000,7 @@ class TestProductTourStepNormalization(APIBaseTest):
         self, _name, submitted_step, expected_useManualSelector, expect_useManualSelector_absent
     ):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Write normalization test",
                 "content": {"steps": [submitted_step]},
@@ -1024,7 +1024,7 @@ class TestProductTourLinkedFlagValidation(APIBaseTest):
         other_flag = FeatureFlag.objects.create(team=other_team, key="other-flag", created_by=self.user)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={"name": "Tour", "content": {"steps": []}, "linked_flag_id": other_flag.id},
             format="json",
         )
@@ -1049,7 +1049,7 @@ class TestProductTourLinkedFlagValidation(APIBaseTest):
         flag = FeatureFlag.objects.create(team=self.team, key="flag", created_by=self.user, filters=filters)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Tour",
                 "linked_flag_id": flag.id,
@@ -1064,7 +1064,7 @@ class TestProductTourLinkedFlagValidation(APIBaseTest):
 
     def test_linked_flag_variant_requires_linked_flag_id(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={"name": "Tour", "content": {"steps": [], "conditions": {"linkedFlagVariant": "v"}}},
             format="json",
         )
@@ -1084,7 +1084,7 @@ class TestProductTourLaunchValidation(APIBaseTest):
 
     def _launch(self, tour_id):
         return self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour_id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour_id}/",
             data={"start_date": timezone.now().isoformat()},
             format="json",
         )
@@ -1151,7 +1151,7 @@ class TestProductTourLaunchValidation(APIBaseTest):
     )
     def test_create_launched_with_element_targeting(self, _description, step, expected_status, error_substring):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Tour",
                 "content": {"steps": [step]},
@@ -1181,7 +1181,7 @@ class TestProductTourLaunchValidation(APIBaseTest):
         tour = self._create_tour([{"elementTargeting": "auto"}])
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour.id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour.id}/",
             data={"name": "Updated name"},
             format="json",
         )
@@ -1194,7 +1194,7 @@ class TestProductTourLaunchValidation(APIBaseTest):
         tour.save(update_fields=["start_date"])
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour.id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour.id}/",
             data={"name": "Updated name", "start_date": timezone.now().isoformat()},
             format="json",
         )
@@ -1228,7 +1228,7 @@ class TestProductTourLaunchValidation(APIBaseTest):
         # PATCH with content (preserving linkedFlagVariant) but without linked_flag_id —
         # mimics the toolbar save flow
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour.id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour.id}/",
             data={"content": {"steps": [], "conditions": {"linkedFlagVariant": "any"}}},
             format="json",
         )
@@ -1252,7 +1252,7 @@ class TestProductTourLaunchValidation(APIBaseTest):
 
         # Explicitly clearing linked_flag_id while content still references a variant
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour.id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour.id}/",
             data={
                 "linked_flag_id": None,
                 "content": {"steps": [], "conditions": {"linkedFlagVariant": "any"}},
@@ -1292,7 +1292,7 @@ class TestProductTourAPISerializerTourType(APIBaseTest):
 class TestProductTourWaitPeriodTargetingFlag(APIBaseTest):
     def _create_tour_with_wait_period(self, types: list[str], days: int = 7) -> dict:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Wait period tour",
                 "content": {
@@ -1348,7 +1348,7 @@ class TestProductTourWaitPeriodTargetingFlag(APIBaseTest):
 
     def test_no_wait_period_creates_single_group(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "No wait period",
                 "content": {"steps": []},
@@ -1362,7 +1362,7 @@ class TestProductTourWaitPeriodTargetingFlag(APIBaseTest):
 
     def test_wait_period_combined_with_user_targeting(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Wait + targeting",
                 "content": {
@@ -1393,7 +1393,7 @@ class TestProductTourWaitPeriodTargetingFlag(APIBaseTest):
 
     def test_adding_wait_period_on_update_refreshes_flag(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Add wait later",
                 "content": {"steps": []},
@@ -1405,7 +1405,7 @@ class TestProductTourWaitPeriodTargetingFlag(APIBaseTest):
         assert len(self._get_flag_groups(tour_id)) == 1
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour_id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour_id}/",
             data={
                 "content": {
                     "steps": [],
@@ -1424,7 +1424,7 @@ class TestProductTourWaitPeriodTargetingFlag(APIBaseTest):
         assert len(self._get_flag_groups(tour_id)) == 4
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour_id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour_id}/",
             data={"content": {"steps": [], "conditions": {}}},
             format="json",
         )
@@ -1434,7 +1434,7 @@ class TestProductTourWaitPeriodTargetingFlag(APIBaseTest):
 
     def test_wait_period_preserves_user_targeting_on_refresh(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/product_tours/",
+            f"/v1/projects/{self.team.id}/product_tours/",
             data={
                 "name": "Preserve targeting",
                 "content": {
@@ -1457,7 +1457,7 @@ class TestProductTourWaitPeriodTargetingFlag(APIBaseTest):
 
         # Change displayFrequency without re-providing targeting_flag_filters
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/product_tours/{tour_id}/",
+            f"/v1/projects/{self.team.id}/product_tours/{tour_id}/",
             data={
                 "content": {
                     "steps": [],

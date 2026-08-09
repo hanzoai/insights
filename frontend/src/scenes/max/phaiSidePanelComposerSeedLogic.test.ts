@@ -31,16 +31,16 @@ describe('phaiSidePanelComposerSeedLogic', () => {
         runCount = 0
         useMocks({
             get: {
-                '/api/projects/:team/tasks/': { results: [], count: 0 },
-                '/api/projects/:team/tasks/repositories/': { repositories: [] },
-                '/api/environments/:team/integrations/': { results: [] },
+                '/v1/projects/:team/tasks/': { results: [], count: 0 },
+                '/v1/projects/:team/tasks/repositories/': { repositories: [] },
+                '/v1/environments/:team/integrations/': { results: [] },
             },
             post: {
-                '/api/projects/:team/tasks/': async ({ request }) => {
+                '/v1/projects/:team/tasks/': async ({ request }) => {
                     createCount++
                     return [200, { id: 'new-task', ...((await request.json()) as Record<string, any>) }]
                 },
-                '/api/projects/:team/tasks/:id/run/': () => {
+                '/v1/projects/:team/tasks/:id/run/': () => {
                     runCount++
                     return [200, { id: 'new-task' }]
                 },
@@ -62,7 +62,7 @@ describe('phaiSidePanelComposerSeedLogic', () => {
             get: {
                 // The org bootstrapped via app context below gets re-fetched on organizationLogic mount —
                 // keep the API in agreement so a late load can't flip the consent value mid-test.
-                '/api/organizations/@current/': () => [
+                '/v1/organizations/@current/': () => [
                     200,
                     { ...MOCK_DEFAULT_ORGANIZATION, is_ai_data_processing_approved: false },
                 ],

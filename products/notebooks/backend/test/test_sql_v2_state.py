@@ -144,7 +144,7 @@ class TestNotebookCellState(APIBaseTest):
         )
         self._run(notebook, "s", "select 1", NotebookNodeRun.Status.DONE)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/notebooks/{notebook.short_id}/sql_v2/state/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/notebooks/{notebook.short_id}/sql_v2/state/")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert data["notebook_id"] == notebook.short_id

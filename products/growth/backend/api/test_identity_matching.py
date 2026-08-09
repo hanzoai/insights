@@ -132,7 +132,7 @@ class TestIdentityMatchingLinksAPI(APIBaseTest):
 
     def test_lists_latest_run_for_own_team_only(self) -> None:
         self._seed()
-        response = self.client.get(f"/api/projects/{self.team.pk}/identity_matching_links/")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/identity_matching_links/")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert data["count"] == 3
@@ -147,13 +147,13 @@ class TestIdentityMatchingLinksAPI(APIBaseTest):
 
     def test_specific_run_selectable_via_job_id(self) -> None:
         self._seed()
-        response = self.client.get(f"/api/projects/{self.team.pk}/identity_matching_links/", {"job_id": RUN_B})
+        response = self.client.get(f"/v1/projects/{self.team.pk}/identity_matching_links/", {"job_id": RUN_B})
         assert response.status_code == status.HTTP_200_OK
         assert {row["orphan_distinct_id"] for row in response.json()["results"]} == {"phone-old"}
 
     def test_other_team_rows_are_not_reachable_via_job_id(self) -> None:
         self._seed()
-        response = self.client.get(f"/api/projects/{self.team.pk}/identity_matching_links/", {"job_id": RUN_OTHER_TEAM})
+        response = self.client.get(f"/v1/projects/{self.team.pk}/identity_matching_links/", {"job_id": RUN_OTHER_TEAM})
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {"results": [], "count": 0}
 
@@ -169,28 +169,28 @@ class TestIdentityMatchingLinksAPI(APIBaseTest):
     )
     def test_list_filters(self, params: dict[str, Any], expected_orphans: set[str]) -> None:
         self._seed()
-        response = self.client.get(f"/api/projects/{self.team.pk}/identity_matching_links/", params)
+        response = self.client.get(f"/v1/projects/{self.team.pk}/identity_matching_links/", params)
         assert response.status_code == status.HTTP_200_OK
         assert {row["orphan_distinct_id"] for row in response.json()["results"]} == expected_orphans
 
     def test_invalid_filter_is_rejected(self) -> None:
-        response = self.client.get(f"/api/projects/{self.team.pk}/identity_matching_links/", {"tier": "huge"})
+        response = self.client.get(f"/v1/projects/{self.team.pk}/identity_matching_links/", {"tier": "huge"})
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_non_staff_user_is_denied(self) -> None:
         self.user.is_staff = False
         self.user.save()
-        response = self.client.get(f"/api/projects/{self.team.pk}/identity_matching_links/")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/identity_matching_links/")
         assert response.status_code == status.HTTP_403_FORBIDDEN
-        runs_response = self.client.get(f"/api/projects/{self.team.pk}/identity_matching_links/runs/")
+        runs_response = self.client.get(f"/v1/projects/{self.team.pk}/identity_matching_links/runs/")
         assert runs_response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_empty_when_no_runs_exist(self) -> None:
         # No objects written for this team: both endpoints glob an empty prefix and degrade cleanly.
-        response = self.client.get(f"/api/projects/{self.team.pk}/identity_matching_links/")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/identity_matching_links/")
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {"results": [], "count": 0}
-        runs_response = self.client.get(f"/api/projects/{self.team.pk}/identity_matching_links/runs/")
+        runs_response = self.client.get(f"/v1/projects/{self.team.pk}/identity_matching_links/runs/")
         assert runs_response.status_code == status.HTTP_200_OK
         assert runs_response.json() == {"results": []}
 
@@ -200,13 +200,13 @@ class TestIdentityMatchingLinksAPI(APIBaseTest):
         # equal means the env is missing, so the endpoint should fail loudly instead of reading the
         # wrong bucket. Force equality so the assertion holds regardless of the CI environment.
         with override_settings(CLOUD_DEPLOYMENT="US", IDENTITY_MATCHING_S3_BUCKET="b", OBJECT_STORAGE_BUCKET="b"):
-            response = self.client.get(f"/api/projects/{self.team.pk}/identity_matching_links/{suffix}")
+            response = self.client.get(f"/v1/projects/{self.team.pk}/identity_matching_links/{suffix}")
         assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
         assert "IDENTITY_MATCHING_S3_BUCKET" in response.json()["detail"]
 
     def test_runs_lists_link_counts_per_model(self) -> None:
         self._seed()
-        response = self.client.get(f"/api/projects/{self.team.pk}/identity_matching_links/runs/")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/identity_matching_links/runs/")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
         assert [run["job_id"] for run in results] == [RUN_A, RUN_B]
@@ -244,7 +244,7 @@ class TestIdentityMatchingLinksAPI(APIBaseTest):
         # An orphan with no person profile must resolve to null, not error.
         self._insert_link(self.team.pk, RUN_A, "ghost-2", "anna@x.com", score=4.0, tier="medium")
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/identity_matching_links/")
+        response = self.client.get(f"/v1/projects/{self.team.pk}/identity_matching_links/")
         assert response.status_code == status.HTTP_200_OK
         by_orphan = {row["orphan_distinct_id"]: row for row in response.json()["results"]}
 

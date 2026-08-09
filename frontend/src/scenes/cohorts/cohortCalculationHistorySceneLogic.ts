@@ -138,7 +138,7 @@ export const cohortCalculationHistorySceneLogic = kea<cohortCalculationHistorySc
                     try {
                         const offset = (values.page - 1) * values.limit
                         const response = await api.get(
-                            `api/cohort/${props.cohortId}/calculation_history/?limit=${values.limit}&offset=${offset}`
+                            `v1/cohort/${props.cohortId}/calculation_history/?limit=${values.limit}&offset=${offset}`
                         )
                         return response
                     } catch (error: any) {

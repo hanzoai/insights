@@ -9,15 +9,15 @@
         "wasm",
         "webassembly"
     ],
-    "homepage": "https://github.com/PostHog/posthog/tree/master/common/hogql_parser",
+    "homepage": "https://github.com/hanzoai/insights/tree/main/common/insightsql_parser",
     "bugs": {
-        "url": "https://github.com/PostHog/posthog/issues"
+        "url": "https://github.com/hanzoai/insights/issues"
     },
     "license": "MIT",
     "author": "Insights Inc.",
     "repository": {
         "type": "git",
-        "url": "https://github.com/PostHog/posthog.git",
+        "url": "https://github.com/hanzoai/insights.git",
         "directory": "common/insightsql_parser"
     },
     "files": [

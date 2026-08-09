@@ -699,7 +699,7 @@ export const sceneLogic = kea<sceneLogicType>([
             if (isSharedView()) {
                 return
             }
-            api.update('api/user_home_settings/@me/', {
+            api.update('v1/user_home_settings/@me/', {
                 homepage: tab ? tabToPersistableSnapshot(tab) : null,
             }).catch((error) => {
                 console.error('Failed to persist homepage', error)

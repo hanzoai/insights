@@ -24,7 +24,7 @@ class TestOrganizationIntegrationViewSet(APIBaseTest):
         )
 
     def test_list_organization_integrations_success(self):
-        url = f"/api/organizations/{self.organization.id}/integrations/"
+        url = f"/v1/organizations/{self.organization.id}/integrations/"
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -47,7 +47,7 @@ class TestOrganizationIntegrationViewSet(APIBaseTest):
             created_by=self.user,
         )
 
-        url = f"/api/organizations/{self.organization.id}/integrations/"
+        url = f"/v1/organizations/{self.organization.id}/integrations/"
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -65,7 +65,7 @@ class TestOrganizationIntegrationViewSet(APIBaseTest):
             created_by=self.user,
         )
 
-        url = f"/api/organizations/{self.organization.id}/integrations/"
+        url = f"/v1/organizations/{self.organization.id}/integrations/"
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -75,13 +75,13 @@ class TestOrganizationIntegrationViewSet(APIBaseTest):
     def test_list_organization_integrations_unauthorized(self):
         self.client.logout()
 
-        url = f"/api/organizations/{self.organization.id}/integrations/"
+        url = f"/v1/organizations/{self.organization.id}/integrations/"
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_retrieve_organization_integration_success(self):
-        url = f"/api/organizations/{self.organization.id}/integrations/{self.integration_vercel.id}/"
+        url = f"/v1/organizations/{self.organization.id}/integrations/{self.integration_vercel.id}/"
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -90,7 +90,7 @@ class TestOrganizationIntegrationViewSet(APIBaseTest):
         self.assertEqual(response.json()["integration_id"], "test-vercel-id")
 
     def test_retrieve_organization_integration_not_found(self):
-        url = f"/api/organizations/{self.organization.id}/integrations/00000000-0000-0000-0000-000000000000/"
+        url = f"/v1/organizations/{self.organization.id}/integrations/00000000-0000-0000-0000-000000000000/"
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -98,7 +98,7 @@ class TestOrganizationIntegrationViewSet(APIBaseTest):
     def test_retrieve_organization_integration_unauthorized(self):
         self.client.logout()
 
-        url = f"/api/organizations/{self.organization.id}/integrations/{self.integration_vercel.id}/"
+        url = f"/v1/organizations/{self.organization.id}/integrations/{self.integration_vercel.id}/"
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -107,7 +107,7 @@ class TestOrganizationIntegrationViewSet(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
 
-        url = f"/api/organizations/{self.organization.id}/integrations/{self.integration_vercel.id}/"
+        url = f"/v1/organizations/{self.organization.id}/integrations/{self.integration_vercel.id}/"
         response = self.client.delete(url)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -124,7 +124,7 @@ class TestOrganizationIntegrationViewSet(APIBaseTest):
             config={"type": "connectable"},
         )
 
-        url = f"/api/organizations/{self.organization.id}/integrations/{self.integration_vercel.id}/"
+        url = f"/v1/organizations/{self.organization.id}/integrations/{self.integration_vercel.id}/"
         response = self.client.delete(url)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -134,7 +134,7 @@ class TestOrganizationIntegrationViewSet(APIBaseTest):
     def test_delete_organization_integration_unauthorized(self):
         self.client.logout()
 
-        url = f"/api/organizations/{self.organization.id}/integrations/{self.integration_vercel.id}/"
+        url = f"/v1/organizations/{self.organization.id}/integrations/{self.integration_vercel.id}/"
         response = self.client.delete(url)
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -144,7 +144,7 @@ class TestOrganizationIntegrationViewSet(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
         self.organization_membership.save()
 
-        url = f"/api/organizations/{self.organization.id}/integrations/{self.integration_vercel.id}/"
+        url = f"/v1/organizations/{self.organization.id}/integrations/{self.integration_vercel.id}/"
         response = self.client.delete(url)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -154,7 +154,7 @@ class TestOrganizationIntegrationViewSet(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
 
-        url = f"/api/organizations/{self.organization.id}/integrations/"
+        url = f"/v1/organizations/{self.organization.id}/integrations/"
         data = {
             "kind": "vercel",
             "integration_id": "new-integration",
@@ -168,7 +168,7 @@ class TestOrganizationIntegrationViewSet(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
 
-        url = f"/api/organizations/{self.organization.id}/integrations/{self.integration_vercel.id}/"
+        url = f"/v1/organizations/{self.organization.id}/integrations/{self.integration_vercel.id}/"
         data = {"config": {"updated": True}}
         response = self.client.patch(url, data)
 

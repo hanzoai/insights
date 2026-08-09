@@ -54,7 +54,7 @@ describe('Workflows', { concurrent: false }, () => {
             try {
                 await context.api.request({
                     method: 'DELETE',
-                    path: `/api/projects/${encodeURIComponent(String(projectId))}/hog_flows/${encodeURIComponent(id)}/`,
+                    path: `/v1/projects/${encodeURIComponent(String(projectId))}/hog_flows/${encodeURIComponent(id)}/`,
                 })
             } catch {
                 // Best effort — workflow may already be gone
@@ -336,7 +336,7 @@ describe('Workflows', { concurrent: false }, () => {
 
         it('should reject a batch audience that references a behavioral cohort', async () => {
             const projectId = await context.stateManager.getProjectId()
-            const cohortPath = `/api/projects/${encodeURIComponent(String(projectId))}/cohorts/`
+            const cohortPath = `/v1/projects/${encodeURIComponent(String(projectId))}/cohorts/`
             const cohort = await context.api.request<{ id: number }>({
                 method: 'POST',
                 path: cohortPath,

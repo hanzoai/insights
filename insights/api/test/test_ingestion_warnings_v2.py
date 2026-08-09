@@ -73,7 +73,7 @@ class TestIngestionWarningsV2API(DatastoreTestMixin, APIBaseTest):
         )
 
     def _list(self, **params) -> tuple[int, list]:
-        response = self.client.get(f"/api/projects/{self.team.pk}/ingestion_warnings_v2/", params)
+        response = self.client.get(f"/v1/projects/{self.team.pk}/ingestion_warnings_v2/", params)
         return response.status_code, response.json()
 
     def test_groups_warnings_by_type_with_counts_samples_and_sparkline(self):

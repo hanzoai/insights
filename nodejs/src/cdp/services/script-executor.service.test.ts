@@ -635,7 +635,7 @@ describe('Script Executor', () => {
 
             expect(result.invocation.queueParameters).toEqual({
                 type: 'fetch',
-                url: `${hub.SITE_URL}/api/conversations/external/ticket/test-ticket-123`,
+                url: `${hub.SITE_URL}/v1/conversations/external/ticket/test-ticket-123`,
                 method: 'GET',
                 headers: { Authorization: 'Bearer test-secret-token' },
             })
@@ -655,7 +655,7 @@ describe('Script Executor', () => {
 
             expect(result.invocation.queueParameters).toEqual({
                 type: 'fetch',
-                url: `${hub.SITE_URL}/api/conversations/external/ticket/test-ticket-456`,
+                url: `${hub.SITE_URL}/v1/conversations/external/ticket/test-ticket-456`,
                 method: 'PATCH',
                 body: JSON.stringify({ status: 'resolved', priority: 'high' }),
                 headers: {
@@ -736,7 +736,7 @@ describe('Script Executor', () => {
 
             expect(result.invocation.queueParameters).toEqual({
                 type: 'fetch',
-                url: `${hub.SITE_URL}/api/customer_analytics/external/account?external_id=acme%20corp%2F1`,
+                url: `${hub.SITE_URL}/v1/customer_analytics/external/account?external_id=acme%20corp%2F1`,
                 method: 'GET',
                 headers: { Authorization: 'Bearer test-secret-token' },
             })
@@ -822,7 +822,7 @@ describe('Script Executor', () => {
 
             expect(result.invocation.queueParameters).toEqual({
                 type: 'fetch',
-                url: `${hub.SITE_URL}/api/customer_analytics/external/account`,
+                url: `${hub.SITE_URL}/v1/customer_analytics/external/account`,
                 method: 'PATCH',
                 body: JSON.stringify({ external_id: 'acme-1', tags: ['enterprise'], tags_mode: 'add' }),
                 headers: {

@@ -44,7 +44,7 @@ class TestSpanCountErrorHandling(APIBaseTest):
             side_effect=CHQueryErrorTooManyBytes("too many bytes"),
         ):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/tracing/spans/count/",
+                f"/v1/projects/{self.team.id}/tracing/spans/count/",
                 {"query": {"dateRange": {"date_from": "-30d"}}},
                 format="json",
             )
@@ -55,7 +55,7 @@ class TestSpanCountErrorHandling(APIBaseTest):
         # A compareFilter that fails validation must 400, not be swallowed into a 200 with
         # compare: null — otherwise a requested comparison silently disappears.
         response = self.client.post(
-            f"/api/projects/{self.team.id}/tracing/spans/aggregate/",
+            f"/v1/projects/{self.team.id}/tracing/spans/aggregate/",
             {"query": {"compareFilter": {"compare": True, "not_a_real_field": 1}}},
             format="json",
         )

@@ -75,7 +75,7 @@ class LoopsAPITestCase(TestCase):
         return mock
 
     def _loops_url(self) -> str:
-        return f"/api/projects/{self.team.id}/loops/"
+        return f"/v1/projects/{self.team.id}/loops/"
 
     def _loop_url(self, loop_id: str | UUID) -> str:
         return f"{self._loops_url()}{loop_id}/"

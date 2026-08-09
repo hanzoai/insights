@@ -16,7 +16,7 @@ VALID_FILTER_GROUP = {"type": "AND", "values": [{"type": "AND", "values": []}]}
 class TestLogsRetentionRulesAPI(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.base_url = f"/api/projects/{self.team.pk}/logs/retention_rules/"
+        self.base_url = f"/v1/projects/{self.team.pk}/logs/retention_rules/"
         self._ff_patcher = patch("hanzo_insights.feature_enabled", return_value=True)
         self._ff_patcher.start()
         self.addCleanup(self._ff_patcher.stop)
@@ -153,7 +153,7 @@ class TestLogsRetentionRulesAPI(APIBaseTest):
 class TestLogsRetentionRuleSuggestName(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.url = f"/api/projects/{self.team.pk}/logs/retention_rules/suggest_name/"
+        self.url = f"/v1/projects/{self.team.pk}/logs/retention_rules/suggest_name/"
         self._ff_patcher = patch("hanzo_insights.feature_enabled", return_value=True)
         self._ff_patcher.start()
         self.addCleanup(self._ff_patcher.stop)

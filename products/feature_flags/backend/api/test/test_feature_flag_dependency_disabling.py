@@ -56,7 +56,7 @@ class TestFeatureFlagDependencyDisabling(APIBaseTest):
 
         # Try to disable base flag
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{base_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{base_flag.id}/",
             {"active": False},
             format="json",
         )
@@ -72,7 +72,7 @@ class TestFeatureFlagDependencyDisabling(APIBaseTest):
 
         # Should be able to disable it
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag.id}/",
             {"active": False},
             format="json",
         )
@@ -93,7 +93,7 @@ class TestFeatureFlagDependencyDisabling(APIBaseTest):
 
         # Should be able to disable base flag
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{base_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{base_flag.id}/",
             {"active": False},
             format="json",
         )
@@ -112,7 +112,7 @@ class TestFeatureFlagDependencyDisabling(APIBaseTest):
 
         # Should be able to disable base flag
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{base_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{base_flag.id}/",
             {"active": False},
             format="json",
         )
@@ -131,7 +131,7 @@ class TestFeatureFlagDependencyDisabling(APIBaseTest):
 
         # Try to disable base flag
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{base_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{base_flag.id}/",
             {"active": False},
             format="json",
         )
@@ -155,7 +155,7 @@ class TestFeatureFlagDependencyDisabling(APIBaseTest):
 
         # Try to disable flag B (middle of chain)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag_b.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag_b.id}/",
             {"active": False},
             format="json",
         )
@@ -165,7 +165,7 @@ class TestFeatureFlagDependencyDisabling(APIBaseTest):
 
         # Try to disable flag A (start of chain)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag_a.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag_a.id}/",
             {"active": False},
             format="json",
         )
@@ -175,7 +175,7 @@ class TestFeatureFlagDependencyDisabling(APIBaseTest):
 
         # Should be able to disable flag C (end of chain)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{flag_c.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{flag_c.id}/",
             {"active": False},
             format="json",
         )
@@ -212,7 +212,7 @@ class TestFeatureFlagDependencyDisabling(APIBaseTest):
 
         # Try to disable base flag
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{base_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{base_flag.id}/",
             {"active": False},
             format="json",
         )
@@ -252,7 +252,7 @@ class TestFeatureFlagDependencyDisabling(APIBaseTest):
 
         # Should be able to disable base flag (other team's dependency shouldn't matter)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{base_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{base_flag.id}/",
             {"active": False},
             format="json",
         )
@@ -269,7 +269,7 @@ class TestFeatureFlagDependencyDisabling(APIBaseTest):
 
         # Should be able to enable base flag (no check on enabling)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{base_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{base_flag.id}/",
             {"active": True},
             format="json",
         )
@@ -290,7 +290,7 @@ class TestFeatureFlagDependencyDisabling(APIBaseTest):
 
         # Should be able to "disable" already disabled flag (no-op)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{base_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{base_flag.id}/",
             {"active": False},
             format="json",
         )
@@ -307,7 +307,7 @@ class TestFeatureFlagDependencyDisabling(APIBaseTest):
 
         # Disable the base flag (should work since dependent is inactive)
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{base_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{base_flag.id}/",
             {"active": False},
             format="json",
         )
@@ -319,7 +319,7 @@ class TestFeatureFlagDependencyDisabling(APIBaseTest):
 
         # Should NOT be able to enable dependent flag when its dependency is disabled
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{dependent_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{dependent_flag.id}/",
             {"active": True},
             format="json",
         )
@@ -376,7 +376,7 @@ class TestFeatureFlagDependencyDisabling(APIBaseTest):
 
         # Try to enable dependent flag
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{dependent_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{dependent_flag.id}/",
             {"active": True},
             format="json",
         )
@@ -397,7 +397,7 @@ class TestFeatureFlagDependencyDisabling(APIBaseTest):
 
         # Try to create a new flag that depends on the disabled flag
         response = self.client.post(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             {
                 "name": "New Flag",
                 "key": "new_flag",
@@ -433,7 +433,7 @@ class TestFeatureFlagDependencyDisabling(APIBaseTest):
 
         # Try to update the active flag to depend on the disabled flag
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/feature_flags/{active_flag.id}/",
+            f"/v1/projects/{self.team.id}/feature_flags/{active_flag.id}/",
             {
                 "filters": {
                     "groups": [

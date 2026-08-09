@@ -109,78 +109,80 @@ class TestInsightsFunctionTemplates(DatastoreTestMixin, APIBaseTest, QueryMatchi
         )
 
     def test_list_function_templates(self):
-        response = self.client.get("/api/projects/@current/insights_function_templates/")
+        response = self.client.get("/v1/projects/@current/insights_function_templates/")
 
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert len(response.json()["results"]) > 5
         assert EXPECTED_FIRST_RESULT == response.json()["results"][0]
 
     def test_deprecated_templates_are_not_included(self):
-        response = self.client.get("/api/projects/@current/insights_function_templates/")
+        response = self.client.get("/v1/projects/@current/insights_function_templates/")
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert "template-deprecated" not in [template["id"] for template in response.json()["results"]]
 
     def test_filter_function_templates(self):
-        response1 = self.client.get("/api/projects/@current/insights_function_templates/?type=notfound")
+        response1 = self.client.get("/v1/projects/@current/insights_function_templates/?type=notfound")
         assert response1.status_code == status.HTTP_200_OK, response1.json()
         assert len(response1.json()["results"]) == 0
 
-        response2 = self.client.get("/api/projects/@current/insights_function_templates/?type=destination")
-        response3 = self.client.get("/api/projects/@current/insights_function_templates/")
+        response2 = self.client.get("/v1/projects/@current/insights_function_templates/?type=destination")
+        response3 = self.client.get("/v1/projects/@current/insights_function_templates/")
 
         assert response2.json()["results"] == response3.json()["results"]
         assert len(response2.json()["results"]) > 5
 
-        response4 = self.client.get("/api/projects/@current/insights_function_templates/?type=site_destination")
+        response4 = self.client.get("/v1/projects/@current/insights_function_templates/?type=site_destination")
         assert len(response4.json()["results"]) > 0
 
-        response5 = self.client.get("/api/projects/@current/insights_function_templates/?types=site_destination,destination")
+        response5 = self.client.get(
+            "/v1/projects/@current/insights_function_templates/?types=site_destination,destination"
+        )
         assert len(response5.json()["results"]) > 0
 
     def test_list_with_template_id_filter(self):
-        response = self.client.get("/api/projects/@current/insights_function_templates/?template_id=template-webhook")
+        response = self.client.get("/v1/projects/@current/insights_function_templates/?template_id=template-webhook")
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert len(response.json()["results"]) == 1
         assert response.json()["results"][0]["id"] == "template-webhook"
 
-        response = self.client.get("/api/projects/@current/insights_function_templates/?template_id=template-slack")
+        response = self.client.get("/v1/projects/@current/insights_function_templates/?template_id=template-slack")
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert len(response.json()["results"]) == 1
         assert response.json()["results"][0]["id"] == "template-slack"
 
-        response = self.client.get("/api/projects/@current/insights_function_templates/?template_id=nonexistent")
+        response = self.client.get("/v1/projects/@current/insights_function_templates/?template_id=nonexistent")
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert len(response.json()["results"]) == 0
 
     def test_list_with_template_id_filter_excludes_deprecated(self):
         response = self.client.get(
-            f"/api/projects/@current/insights_function_templates/?template_id={self.deprecated_template.template_id}"
+            f"/v1/projects/@current/insights_function_templates/?template_id={self.deprecated_template.template_id}"
         )
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert len(response.json()["results"]) == 0
 
     def test_retrieve_function_template(self):
-        response = self.client.get("/api/projects/@current/insights_function_templates/template-slack")
+        response = self.client.get("/v1/projects/@current/insights_function_templates/template-slack")
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json()["id"] == "template-slack"
         assert response.json()["type"] == "destination"
 
     def test_retrieve_function_template_with_other_type(self):
-        response = self.client.get("/api/projects/@current/insights_function_templates/template-site-destination")
+        response = self.client.get("/v1/projects/@current/insights_function_templates/template-site-destination")
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json()["id"] == "template-site-destination"
         assert response.json()["type"] == "site_destination"
 
     def test_public_list_function_templates(self):
         self.client.logout()
-        response = self.client.get("/api/public_insights_function_templates/")
+        response = self.client.get("/v1/public_insights_function_templates/")
 
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert len(response.json()["results"]) > 5
 
     def test_hidden_templates_are_hidden(self):
         self.client.logout()
-        response = self.client.get("/api/public_insights_function_templates/")
+        response = self.client.get("/v1/public_insights_function_templates/")
 
         assert response.status_code == status.HTTP_200_OK, response.json()
         for template_item in response.json()["results"]:
@@ -189,7 +191,7 @@ class TestInsightsFunctionTemplates(DatastoreTestMixin, APIBaseTest, QueryMatchi
     def test_get_specific_deprecated_template_from_db(self):
         """Test retrieving a specific template from the database via API"""
         # Test getting a specific template via API endpoint
-        response = self.client.get(f"/api/projects/@current/insights_function_templates/template-deprecated")
+        response = self.client.get(f"/v1/projects/@current/insights_function_templates/template-deprecated")
 
         assert response.status_code == status.HTTP_200_OK, response.json()
         # Verify it has the expected name
@@ -200,7 +202,7 @@ class TestInsightsFunctionTemplates(DatastoreTestMixin, APIBaseTest, QueryMatchi
         from insights.cdp.templates.insights_function_template import InsightsFunctionTemplateDC
 
         # Initial sha of the template
-        initial_response = self.client.get("/api/projects/@current/insights_function_templates/template-slack")
+        initial_response = self.client.get("/v1/projects/@current/insights_function_templates/template-slack")
         assert initial_response.status_code == status.HTTP_200_OK
         assert initial_response.json()["name"] == template_slack.name
 
@@ -222,7 +224,7 @@ class TestInsightsFunctionTemplates(DatastoreTestMixin, APIBaseTest, QueryMatchi
         sync_template_to_db(modified_template)
 
         # Get the template again and check it was updated
-        updated_response = self.client.get("/api/projects/@current/insights_function_templates/template-slack")
+        updated_response = self.client.get("/v1/projects/@current/insights_function_templates/template-slack")
         assert updated_response.status_code == status.HTTP_200_OK
         assert updated_response.json()["name"] == "Updated Slack"
         assert updated_response.json()["description"] == "This template was updated"
@@ -245,7 +247,7 @@ class TestInsightsFunctionTemplates(DatastoreTestMixin, APIBaseTest, QueryMatchi
             enabled=True,
         )
 
-        response = self.client.get("/api/public_insights_function_templates/")
+        response = self.client.get("/v1/public_insights_function_templates/")
         assert response.status_code == status.HTTP_200_OK, response.json()
 
         results = response.json()["results"]
@@ -269,7 +271,7 @@ class TestInsightsFunctionTemplates(DatastoreTestMixin, APIBaseTest, QueryMatchi
         }
 
         response = getattr(self.client, method)(
-            "/api/projects/@current/insights_function_templates/template-slack",
+            "/v1/projects/@current/insights_function_templates/template-slack",
             data=payload,
         )
 
@@ -279,7 +281,7 @@ class TestInsightsFunctionTemplates(DatastoreTestMixin, APIBaseTest, QueryMatchi
             status.HTTP_405_METHOD_NOT_ALLOWED,
         }, response.json()
 
-        unchanged_template = self.client.get("/api/projects/@current/insights_function_templates/template-slack")
+        unchanged_template = self.client.get("/v1/projects/@current/insights_function_templates/template-slack")
 
         assert unchanged_template.json()["code"] != 'return "scary_code"'
 
@@ -299,10 +301,10 @@ class TestInsightsFunctionTemplates(DatastoreTestMixin, APIBaseTest, QueryMatchi
         )
         self.client.logout()
 
-        list_response = self.client.get(f"/api/projects/{self.team.id}/insights_function_templates/")
+        list_response = self.client.get(f"/v1/projects/{self.team.id}/insights_function_templates/")
         assert list_response.status_code in (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN)
 
-        retrieve_response = self.client.get(f"/api/projects/{self.team.id}/insights_function_templates/template-hidden")
+        retrieve_response = self.client.get(f"/v1/projects/{self.team.id}/insights_function_templates/template-hidden")
         assert retrieve_response.status_code in (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN)
 
     def test_hidden_templates_included_in_project_list(self):
@@ -324,7 +326,7 @@ class TestInsightsFunctionTemplates(DatastoreTestMixin, APIBaseTest, QueryMatchi
             free=True,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_function_templates/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_function_templates/")
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert "template-hidden" in [template["id"] for template in response.json()["results"]]
 
@@ -343,7 +345,7 @@ class TestInsightsFunctionTemplates(DatastoreTestMixin, APIBaseTest, QueryMatchi
             free=True,
         )
 
-        response = self.client.get("/api/public_insights_function_templates/")
+        response = self.client.get("/v1/public_insights_function_templates/")
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert "template-hidden" not in [template["id"] for template in response.json()["results"]]
 
@@ -358,7 +360,7 @@ class TestInsightsFunctionTemplates(DatastoreTestMixin, APIBaseTest, QueryMatchi
         )
         self.client.logout()
         return self.client.get(
-            f"/api/projects/{self.team.id}{suffix}",
+            f"/v1/projects/{self.team.id}{suffix}",
             headers={"authorization": f"Bearer {key_value}"},
         )
 
@@ -381,10 +383,14 @@ class TestInsightsFunctionTemplates(DatastoreTestMixin, APIBaseTest, QueryMatchi
         assert response.status_code == status.HTTP_403_FORBIDDEN, response.json()
 
     def test_project_route_allows_key_scoped_to_this_project(self):
-        response = self._get_with_pak("/insights_function_templates/", ["insights_function:read"], scoped_teams=[self.team.id])
+        response = self._get_with_pak(
+            "/insights_function_templates/", ["insights_function:read"], scoped_teams=[self.team.id]
+        )
         assert response.status_code == status.HTTP_200_OK, response.json()
 
     def test_project_route_rejects_key_scoped_to_another_project(self):
         other_team = self.create_team_with_organization(self.organization)
-        response = self._get_with_pak("/insights_function_templates/", ["insights_function:read"], scoped_teams=[other_team.id])
+        response = self._get_with_pak(
+            "/insights_function_templates/", ["insights_function:read"], scoped_teams=[other_team.id]
+        )
         assert response.status_code == status.HTTP_403_FORBIDDEN, response.json()

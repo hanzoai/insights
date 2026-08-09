@@ -42,7 +42,7 @@ class TestQuerySchemaDiscriminators(SimpleTestCase):
             (
                 "insightsql_metadata_source_query",
                 InsightsQLMetadata,
-                {"kind": "InsightsQLMetadata", "language": "hogQL", "query": "select 1", "sourceQuery": _BAD_TAG},
+                {"kind": "InsightsQLMetadata", "language": "insightsQL", "query": "select 1", "sourceQuery": _BAD_TAG},
                 "sourceQuery",
             ),
             ("detector_config_root", DetectorConfig, {"type": "banana"}, None),
@@ -91,7 +91,12 @@ class TestQuerySchemaDiscriminators(SimpleTestCase):
             (
                 "insightsql_metadata_source_query",
                 InsightsQLMetadata,
-                {"kind": "InsightsQLMetadata", "language": "hogQL", "query": "select 1", "sourceQuery": {"select": ["*"]}},
+                {
+                    "kind": "InsightsQLMetadata",
+                    "language": "insightsQL",
+                    "query": "select 1",
+                    "sourceQuery": {"select": ["*"]},
+                },
             ),
             ("detector_config_root", DetectorConfig, {"threshold": 0.9}),
             (
@@ -156,7 +161,7 @@ class TestQuerySchemaDiscriminators(SimpleTestCase):
                 InsightsQLMetadata,
                 {
                     "kind": "InsightsQLMetadata",
-                    "language": "hogQL",
+                    "language": "insightsQL",
                     "query": "select 1",
                     "sourceQuery": {"kind": "EventsQuery", "select": ["*"]},
                 },

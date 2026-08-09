@@ -37,10 +37,10 @@ from social_core.exceptions import AuthCanceled, AuthException, AuthFailed
 from statshog.defaults.django import statsd
 
 from insights.api.shared import UserBasicSerializer
-from insights.datastore.client.execute import datastore_query_counter
-from insights.datastore.query_tagging import QueryCounter, get_query_tag_value, reset_query_tags, tag_queries
 from insights.cloud_utils import is_cloud, is_dev_mode
 from insights.constants import AUTH_BACKEND_KEYS
+from insights.datastore.client.execute import datastore_query_counter
+from insights.datastore.query_tagging import QueryCounter, get_query_tag_value, reset_query_tags, tag_queries
 from insights.event_usage import get_event_source, get_mcp_properties, sanitize_header_value
 from insights.geoip import get_geoip_properties
 from insights.helpers.impersonation import get_original_user_from_session
@@ -52,6 +52,7 @@ from insights.models.activity_logging.utils import (
     activity_storage,
 )
 from insights.models.utils import generate_random_token
+from insights.mount import canonical
 from insights.rbac.user_access_control import UserAccessControl
 from insights.settings import PROJECT_SWITCHING_TOKEN_ALLOWLIST, SITE_URL
 from insights.user_permissions import UserPermissions
@@ -411,7 +412,7 @@ class CHQueries:
         """
         route = resolve(request.path)
         route_id = f"{route.route} ({route.func.__name__})"
-        is_api_request = "api/" in request.path and "capture" not in request.path
+        is_api_request = request.path.startswith("/v1/") and "capture" not in request.path
 
         user = cast(User, request.user)
 
@@ -550,35 +551,56 @@ class ShortCircuitMiddleware:
         return response
 
 
+class ApiRewriteMiddleware:
+    """Serves the older `/api/…` spelling through the `/v1/…` mount.
+
+    Runs first, so the URL resolver and every later middleware see one spelling. An
+    in-process rewrite rather than a redirect: many API clients (httpx, Guzzle, …) don't
+    follow redirects by default, and method, body, query string, and auth all stay on the
+    same request. Comes out when nothing calls `/api/` any more.
+    """
+
+    def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]) -> None:
+        self.get_response = get_response
+
+    def __call__(self, request: HttpRequest) -> HttpResponse:
+        path = canonical(request.path)
+        if path != request.path:
+            request.path = path
+            request.path_info = path
+            request.META["PATH_INFO"] = path
+        return self.get_response(request)
+
+
 ENVIRONMENTS_PREFIX_REQUESTS = Counter(
     "insights_environments_prefix_requests",
-    "Requests to the legacy /api/environments/* prefix, by how the middleware served them: "
-    "`rewritten` to /api/projects, or `env_only` (no projects counterpart, served on the legacy "
-    "route and NOT routed to /api/projects).",
+    "Requests to the legacy /v1/environments/* prefix, by how the middleware served them: "
+    "`rewritten` to /v1/projects, or `env_only` (no projects counterpart, served on the legacy "
+    "route and NOT routed to /v1/projects).",
     ["outcome"],
 )
 
 
 class EnvironmentsRewriteMiddleware:
-    """Serves /api/environments/* through the canonical /api/projects/* viewsets.
+    """Serves /v1/environments/* through the canonical /v1/projects/* viewsets.
 
-    /api/projects/ is a backwards-compatible superset of /api/environments/ (a Project
+    /v1/projects/ is a backwards-compatible superset of /v1/environments/ (a Project
     and its primary Team share the same numeric id, so the id segment — including
     @current — carries over unchanged). The request path is rewritten in place to
-    /api/projects/* and re-routed to the projects viewset, so the client gets a normal
+    /v1/projects/* and re-routed to the projects viewset, so the client gets a normal
     200 on the original URL. This is deliberately NOT a 307/308: many API clients (httpx,
     Guzzle, …) don't follow redirects by default, so a redirect silently breaks them — an
     in-process rewrite is transparent to every client and keeps method, body, query
     string, and auth on the same request.
 
-    Only paths whose rewritten /api/projects/* form resolves to a registered route are
+    Only paths whose rewritten /v1/projects/* form resolves to a registered route are
     rewritten — the few environment-only paths with no projects counterpart pass through
-    untouched. Rewritable /api/environments/* responses carry `Deprecation`, `Sunset`, and
+    untouched. Rewritable /v1/environments/* responses carry `Deprecation`, `Sunset`, and
     `Link` headers announcing the successor path to integrators.
     """
 
-    ENVIRONMENTS_PREFIX = "/api/environments"
-    PROJECTS_PREFIX = "/api/projects"
+    ENVIRONMENTS_PREFIX = "/v1/environments"
+    PROJECTS_PREFIX = "/v1/projects"
 
     def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]) -> None:
         self.get_response = get_response
@@ -590,7 +612,7 @@ class EnvironmentsRewriteMiddleware:
 
         target_path = self.PROJECTS_PREFIX + path[len(self.ENVIRONMENTS_PREFIX) :]
         if not self._projects_route_exists(target_path):
-            # No /api/projects counterpart — served on the legacy route, never routed to projects.
+            # No /v1/projects counterpart — served on the legacy route, never routed to projects.
             ENVIRONMENTS_PREFIX_REQUESTS.labels(outcome="env_only").inc()
             return self.get_response(request)
 
@@ -616,12 +638,12 @@ class EnvironmentsRewriteMiddleware:
     @staticmethod
     def _projects_route_exists(target_path: str) -> bool:
         # urls.py ends with catch-all routes (api_not_found, SPA fallback), so resolve()
-        # matches any path — require the match to be an actual /api/projects route.
+        # matches any path — require the match to be an actual /v1/projects route.
         try:
             match = resolve(target_path)
         except Resolver404:
             return False
-        return match.route.replace("^", "").startswith("api/projects")
+        return match.route.replace("^", "").startswith("v1/projects")
 
     @staticmethod
     def _sunset_http_date() -> Optional[str]:
@@ -1016,14 +1038,14 @@ class AutoLogoutImpersonateMiddleware:
 
         if session_is_expired:
             # TRICKY: We need to handle different cases here:
-            # 1. For /api requests we want to respond with a code that will force the UI to redirect to the logout page (401)
+            # 1. For /v1 requests we want to respond with a code that will force the UI to redirect to the logout page (401)
             # 2. For /admin requests we want to restore the original login and continue to the intended page
             # 3. For any other endpoint we want to restore the original login and redirect to /admin/
 
             if request.path.startswith("/static/"):
                 # Skip static files
                 pass
-            elif request.path.startswith("/api/"):
+            elif request.path.startswith("/v1/"):
                 return HttpResponse(
                     "Impersonation session has expired. Please log in again.",
                     status=401,
@@ -1075,8 +1097,8 @@ class OAuthCoopMiddleware:
         "/oauth/",
         "/connect/vercel/",
         "/login/vercel/",
-        "/api/agentic/authorize",
-        "/api/agentic/oauth/",
+        "/v1/agentic/authorize",
+        "/v1/agentic/oauth/",
     )
 
     def __init__(self, get_response):
@@ -1095,7 +1117,9 @@ class OAuthCoopMiddleware:
             response["Cross-Origin-Opener-Policy"] = "unsafe-none"
         elif request.path == "/login" or request.path == "/login/":
             next_url = request.GET.get("next", "")
-            normalized = posixpath.normpath(next_url) if next_url.startswith("/") else next_url
+            # `next` comes off the query string, so ApiRewriteMiddleware never saw it —
+            # spell it the one way here before matching.
+            normalized = canonical(posixpath.normpath(next_url) if next_url.startswith("/") else next_url)
             if self._matches_oauth_prefix(normalized, self.OAUTH_PATH_PREFIXES):
                 response["Cross-Origin-Opener-Policy"] = "unsafe-none"
         return response
@@ -1332,21 +1356,21 @@ READ_ONLY_IMPERSONATION_ALLOWLISTED_PATHS: list[str | re.Pattern] = [
     # These endpoints use POST but are read-only:
     # /query/[A-Z][A-Za-z]* matches query-kind segments, while the schema-upgrade POST action
     # /query/upgrade/ needs an explicit "|upgrade" branch as that starts with a lowercase letter
-    re.compile(r"^/api/(environments|projects)/([0-9]+|@current)/query(?:/[A-Za-z]+)?/?$"),
-    re.compile(r"^/api/(environments|projects)/([0-9]+|@current)/insights/viewed/?$"),
-    re.compile(r"^/api/(environments|projects)/([0-9]+|@current)/metalytics/?$"),
-    re.compile(r"^/api/(environments|projects)/([0-9]+|@current)/endpoints/[^/]+/run/?$"),
-    re.compile(r"^/api/(environments|projects)/([0-9]+|@current)/endpoints/[^/]+/materialization_preview/?$"),
-    re.compile(r"^/api/(environments|projects)/([0-9]+|@current)/endpoints/last_execution_times/?$"),
-    re.compile(r"^/api/(environments|projects)/([0-9]+|@current)/persons/batch_by_distinct_ids/?$"),
+    re.compile(r"^/v1/(environments|projects)/([0-9]+|@current)/query(?:/[A-Za-z]+)?/?$"),
+    re.compile(r"^/v1/(environments|projects)/([0-9]+|@current)/insights/viewed/?$"),
+    re.compile(r"^/v1/(environments|projects)/([0-9]+|@current)/metalytics/?$"),
+    re.compile(r"^/v1/(environments|projects)/([0-9]+|@current)/endpoints/[^/]+/run/?$"),
+    re.compile(r"^/v1/(environments|projects)/([0-9]+|@current)/endpoints/[^/]+/materialization_preview/?$"),
+    re.compile(r"^/v1/(environments|projects)/([0-9]+|@current)/endpoints/last_execution_times/?$"),
+    re.compile(r"^/v1/(environments|projects)/([0-9]+|@current)/persons/batch_by_distinct_ids/?$"),
     # POST but read-only: loads stack frame records (source context) for error tracking UI
-    re.compile(r"^/api/(environments|projects)/([0-9]+|@current)/error_tracking/stack_frames/batch_get/?$"),
+    re.compile(r"^/v1/(environments|projects)/([0-9]+|@current)/error_tracking/stack_frames/batch_get/?$"),
     # POST but read-only: returns metadata about available incremental fields / columns
     # for a data warehouse schema. Validates external credentials and lists schemas
     # against the customer's source — no Insights-side mutations.
-    re.compile(r"^/api/(environments|projects)/([0-9]+|@current)/external_data_schemas/[^/]+/incremental_fields/?$"),
+    re.compile(r"^/v1/(environments|projects)/([0-9]+|@current)/external_data_schemas/[^/]+/incremental_fields/?$"),
     # POST but read-only: kicks off insight/dashboard/session replay export renders (e.g. MP4)
-    re.compile(r"^/api/(environments|projects)/([0-9]+|@current)/exports/?$"),
+    re.compile(r"^/v1/(environments|projects)/([0-9]+|@current)/exports/?$"),
     # Allow upgrading from read-only to read-write impersonation
     "/admin/impersonation/upgrade/",
     # Logout is POST in Django 5; the frontend submits to `/logout` (no trailing slash),
@@ -1417,12 +1441,12 @@ class ImpersonationReadOnlyMiddleware:
         """
         Allow switching organizations.
 
-        Switching occurs via a PATCH to /api/users/@me/ that only contains `set_current_organization`.
+        Switching occurs via a PATCH to /v1/users/@me/ that only contains `set_current_organization`.
         """
         if request.method != "PATCH":
             return False
 
-        if request.path not in ("/api/users/@me/", "/api/users/@me"):
+        if request.path not in ("/v1/users/@me/", "/v1/users/@me"):
             return False
 
         try:
@@ -1433,8 +1457,8 @@ class ImpersonationReadOnlyMiddleware:
 
 
 IMPERSONATION_BLOCKED_PATHS: list[str] = [
-    "/api/users/",
-    "/api/personal_api_keys/",
+    "/v1/users/",
+    "/v1/personal_api_keys/",
 ]
 
 
@@ -1472,8 +1496,8 @@ class ImpersonationBlockedPathsMiddleware:
         )
 
     def _is_path_blocked(self, path: str) -> bool:
-        # DefaultRouterPlusPlus accepts an optional trailing slash, so /api/personal_api_keys
-        # and /api/personal_api_keys/ both reach the same viewset. Normalize before matching
+        # DefaultRouterPlusPlus accepts an optional trailing slash, so /v1/personal_api_keys
+        # and /v1/personal_api_keys/ both reach the same viewset. Normalize before matching
         # so the slashless form cannot bypass the block list.
         normalized_path = path if path.endswith("/") else f"{path}/"
         return any(normalized_path.startswith(blocked_path) for blocked_path in IMPERSONATION_BLOCKED_PATHS)
@@ -1482,12 +1506,12 @@ class ImpersonationBlockedPathsMiddleware:
         """
         Allow switching organizations.
 
-        Switching occurs via a PATCH to /api/users/@me/ that only contains `set_current_organization`.
+        Switching occurs via a PATCH to /v1/users/@me/ that only contains `set_current_organization`.
         """
         if request.method != "PATCH":
             return False
 
-        if request.path not in ("/api/users/@me/", "/api/users/@me"):
+        if request.path not in ("/v1/users/@me/", "/v1/users/@me"):
             return False
 
         try:

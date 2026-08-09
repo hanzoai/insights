@@ -1,4 +1,5 @@
 import { EventSourceMessage } from '@microsoft/fetch-event-source'
+import insights from 'insights-js'
 import {
     MakeLogicType,
     BuiltLogic,
@@ -18,7 +19,6 @@ import { loaders } from 'kea-loaders'
 import { beforeUnload, router, urlToAction } from 'kea-router'
 import { CombinedLocation } from 'kea-router/lib/utils'
 import { subscriptions } from 'kea-subscriptions'
-import insights from 'insights-js'
 
 import { toast } from '@hanzo/elements'
 
@@ -72,7 +72,7 @@ import type { CommentType, UserType } from '../../../types'
 import {
     buildNotebookDependencyGraph,
     collectDuckSqlNodes,
-    collectHogqlSqlNodes,
+    collectInsightsqlSqlNodes,
     collectNodeIndices,
     collectPythonNodes,
     collectNotebookFrameNodes,
@@ -80,7 +80,7 @@ import {
 } from '../Nodes/notebookNodeContent'
 import type {
     DuckSqlNodeSummary,
-    HogqlSqlNodeSummary,
+    InsightsqlSqlNodeSummary,
     NotebookDependencyGraph,
     PythonNodeSummary,
     NotebookFrameNodeSummary,
@@ -248,7 +248,7 @@ export type NotebookLogicProps = {
     /**
      * Pre-loaded notebook payload for shared/exported views. When set, `loadNotebook`
      * short-circuits and uses this value instead of calling the API — anonymous shared
-     * viewers can't reach `/api/projects/.../notebooks/<short_id>/`.
+     * viewers can't reach `/v1/projects/.../notebooks/<short_id>/`.
      */
     cachedNotebook?: NotebookType
     /**
@@ -307,7 +307,7 @@ export interface notebookLogicValues {
     getSharedCachedInlineQueryResults: (nodeId: string | null | undefined) => AnyResponseType | null
     getSharedCachedInsight: (shortId: string | null | undefined) => InsightModel | null
     insightsqlSqlNodeIndices: Map<string, number>
-    insightsqlSqlNodeSummaries: HogqlSqlNodeSummary[]
+    insightsqlSqlNodeSummaries: InsightsqlSqlNodeSummary[]
     isEditable: boolean
     isLocalOnly: boolean
     isShareModalOpen: boolean
@@ -651,7 +651,7 @@ export interface notebookLogicMeta {
         ) => BuiltLogic<notebookNodeLogicType>[]
         pythonNodeSummaries: (content: JSONContent) => PythonNodeSummary[]
         duckSqlNodeSummaries: (content: JSONContent) => DuckSqlNodeSummary[]
-        insightsqlSqlNodeSummaries: (content: JSONContent) => HogqlSqlNodeSummary[]
+        insightsqlSqlNodeSummaries: (content: JSONContent) => InsightsqlSqlNodeSummary[]
         sqlV2NodeSummaries: (content: JSONContent) => SqlV2NodeSummary[]
         frameNodeSummaries: (content: JSONContent) => NotebookFrameNodeSummary[]
         dependencyGraph: (content: JSONContent) => NotebookDependencyGraph
@@ -1345,7 +1345,7 @@ export const notebookLogic = kea<notebookLogicType>([
 
         pythonNodeSummaries: [(s) => [s.content], (content: JSONContent) => collectPythonNodes(content)],
         duckSqlNodeSummaries: [(s) => [s.content], (content: JSONContent) => collectDuckSqlNodes(content)],
-        insightsqlSqlNodeSummaries: [(s) => [s.content], (content: JSONContent) => collectHogqlSqlNodes(content)],
+        insightsqlSqlNodeSummaries: [(s) => [s.content], (content: JSONContent) => collectInsightsqlSqlNodes(content)],
         sqlV2NodeSummaries: [(s) => [s.content], (content: JSONContent) => collectSqlV2Nodes(content)],
         frameNodeSummaries: [(s) => [s.content], (content: JSONContent) => collectNotebookFrameNodes(content)],
         dependencyGraph: [(s) => [s.content], (content: JSONContent) => buildNotebookDependencyGraph(content)],
@@ -1372,7 +1372,8 @@ export const notebookLogic = kea<notebookLogicType>([
         ],
         insightsqlSqlNodeIndices: [
             (s) => [s.content],
-            (content: JSONContent) => collectNodeIndices(content, (node) => node.type === NotebookNodeType.InsightsQLSQL),
+            (content: JSONContent) =>
+                collectNodeIndices(content, (node) => node.type === NotebookNodeType.InsightsQLSQL),
         ],
 
         isShowingLeftColumn: [(s) => [s.showHistory], (showHistory: boolean) => showHistory],

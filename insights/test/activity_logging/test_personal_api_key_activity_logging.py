@@ -97,7 +97,7 @@ class TestPersonalAPIKeyActivityLogging(ActivityLogTestHelper):
         api_key_id = api_key["id"]
         mask_value = api_key["mask_value"]
 
-        response = self.client.delete(f"/api/personal_api_keys/{api_key_id}/")
+        response = self.client.delete(f"/v1/personal_api_keys/{api_key_id}/")
         self.assertEqual(response.status_code, 204)
 
         delete_logs = ActivityLog.objects.filter(scope="PersonalAPIKey", item_id=str(api_key_id), activity="deleted")
@@ -125,7 +125,7 @@ class TestPersonalAPIKeyActivityLogging(ActivityLogTestHelper):
         api_key = self.create_personal_api_key(label="Rollable API Key")
         api_key_id = api_key["id"]
 
-        response = self.client.post(f"/api/personal_api_keys/{api_key_id}/roll/")
+        response = self.client.post(f"/v1/personal_api_keys/{api_key_id}/roll/")
         self.assertEqual(response.status_code, 200)
 
         update_logs = ActivityLog.objects.filter(scope="PersonalAPIKey", item_id=str(api_key_id), activity="updated")
@@ -227,7 +227,7 @@ class TestPersonalAPIKeyActivityLogging(ActivityLogTestHelper):
         logs = ActivityLog.objects.filter(scope="PersonalAPIKey", item_id=str(api_key_id), activity="created")
         self.assertTrue(len(logs) >= 1)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/activity_log?scope=PersonalAPIKey")
+        response = self.client.get(f"/v1/projects/{self.team.id}/activity_log?scope=PersonalAPIKey")
         self.assertEqual(response.status_code, 200)
 
         data = response.json()
@@ -254,7 +254,7 @@ class TestPersonalAPIKeyActivityLogging(ActivityLogTestHelper):
         logs = ActivityLog.objects.filter(scope="PersonalAPIKey", item_id=str(api_key_id), activity="created")
         self.assertTrue(len(logs) >= 1)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/activity_log?scope=PersonalAPIKey")
+        response = self.client.get(f"/v1/projects/{self.team.id}/activity_log?scope=PersonalAPIKey")
         self.assertEqual(response.status_code, 200)
 
         data = response.json()

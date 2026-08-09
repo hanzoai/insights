@@ -15,6 +15,7 @@ import structlog
 from asgiref.sync import sync_to_async
 from jwt import PyJWTError
 
+from insights.mount import canonical
 from insights.ph_client import ph_scoped_capture
 
 from products.insights_ai.backend.wire_types import is_turn_complete
@@ -35,7 +36,7 @@ from products.tasks.backend.push_dispatcher import notify_task_run_turn_complete
 logger = structlog.get_logger(__name__)
 
 TASK_RUN_EVENT_INGEST_ROUTE = re.compile(
-    r"^/api/projects/(?P<project_id>[^/]+)/tasks/(?P<task_id>[^/]+)/runs/(?P<run_id>[^/]+)/event_stream/?$"
+    r"^/v1/projects/(?P<project_id>[^/]+)/tasks/(?P<task_id>[^/]+)/runs/(?P<run_id>[^/]+)/event_stream/?$"
 )
 HEARTBEAT_THROTTLE_SECONDS = 30
 MAX_EVENT_LINE_BYTES = 1_000_000
@@ -466,7 +467,9 @@ def _get_bearer_token(scope: ASGIMessage) -> str | None:
 
 
 def _match_event_ingest_route(path: str) -> EventIngestRoute | None:
-    route_match = TASK_RUN_EVENT_INGEST_ROUTE.match(path)
+    # This runs as an ASGI wrapper, above Django's middleware, so a sandbox still posting
+    # to /v1/ has not been rewritten yet — spell it the one way with the same function.
+    route_match = TASK_RUN_EVENT_INGEST_ROUTE.match(canonical(path))
     if route_match is None:
         return None
     return EventIngestRoute(
