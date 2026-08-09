@@ -32,7 +32,7 @@ from typing import Any
 
 
 # the obligatory mascot
-HEDGEHOG = r"""
+MASCOT = r"""
          /////////,
        ///////////// .            Insights · Signals
      ///////////////  `.            fleet survey
@@ -129,7 +129,7 @@ def render(config: Any, runs_payload: Any, now: datetime | None, *, art: bool = 
 
     banner: list[str] = []
     if art:
-        banner = [HEDGEHOG.strip("\n"), ""]
+        banner = [MASCOT.strip("\n"), ""]
 
     if not scouts:
         return "\n".join([*banner,
