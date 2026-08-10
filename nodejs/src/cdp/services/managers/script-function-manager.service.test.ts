@@ -145,7 +145,7 @@ describe('InsightsFunctionManager', () => {
 
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            `UPDATE insights_function SET name='Test Script Function team 1 updated', updated_at = NOW() WHERE id = $1`,
+            `UPDATE insights_hogfunction SET name='Test Script Function team 1 updated', updated_at = NOW() WHERE id = $1`,
             [insightsFunctions[0].id],
             'testKey'
         )
@@ -223,7 +223,7 @@ describe('InsightsFunctionManager', () => {
             // Disable a function
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE insights_function SET enabled=false, updated_at = NOW() WHERE id = $1`,
+                `UPDATE insights_hogfunction SET enabled=false, updated_at = NOW() WHERE id = $1`,
                 [insightsFunctions[0].id],
                 'testKey'
             )
@@ -247,7 +247,7 @@ describe('InsightsFunctionManager', () => {
 
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            `UPDATE insights_function SET enabled=false, updated_at = NOW() WHERE id = $1`,
+            `UPDATE insights_hogfunction SET enabled=false, updated_at = NOW() WHERE id = $1`,
             [insightsFunctions[0].id],
             'testKey'
         )
@@ -268,7 +268,7 @@ describe('InsightsFunctionManager', () => {
         // Soft-delete without disabling, as deletion via the django API leaves `enabled` untouched
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            `UPDATE insights_function SET deleted=true, updated_at = NOW() WHERE id = $1`,
+            `UPDATE insights_hogfunction SET deleted=true, updated_at = NOW() WHERE id = $1`,
             [insightsFunctions[0].id],
             'testKey'
         )
@@ -346,7 +346,7 @@ describe('Scriptfunction Manager - Execution Order', () => {
         // Update fn2's to be last
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            `UPDATE insights_function SET execution_order = 3, updated_at = NOW() WHERE id = $1`,
+            `UPDATE insights_hogfunction SET execution_order = 3, updated_at = NOW() WHERE id = $1`,
             [insightsFunctions[1].id],
             'testKey'
         )
@@ -354,7 +354,7 @@ describe('Scriptfunction Manager - Execution Order', () => {
         // therefore fn3's execution order should be 2
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            `UPDATE insights_function SET execution_order = 2, updated_at = NOW() WHERE id = $1`,
+            `UPDATE insights_hogfunction SET execution_order = 2, updated_at = NOW() WHERE id = $1`,
             [insightsFunctions[2].id],
             'testKey'
         )
@@ -371,21 +371,21 @@ describe('Scriptfunction Manager - Execution Order', () => {
         // change fn1 to be last
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            `UPDATE insights_function SET execution_order = 3, updated_at = NOW() WHERE id = $1`,
+            `UPDATE insights_hogfunction SET execution_order = 3, updated_at = NOW() WHERE id = $1`,
             [insightsFunctions[0].id],
             'testKey'
         )
         // change fn3 to be first
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            `UPDATE insights_function SET execution_order = 1, updated_at = NOW() WHERE id = $1`,
+            `UPDATE insights_hogfunction SET execution_order = 1, updated_at = NOW() WHERE id = $1`,
             [insightsFunctions[2].id],
             'testKey'
         )
         // change fn2 to be second
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            `UPDATE insights_function SET execution_order = 2, updated_at = NOW() WHERE id = $1`,
+            `UPDATE insights_hogfunction SET execution_order = 2, updated_at = NOW() WHERE id = $1`,
             [insightsFunctions[1].id],
             'testKey'
         )

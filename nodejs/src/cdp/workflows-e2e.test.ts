@@ -589,7 +589,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
             // Archive the flow while job is waiting
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE insights_flow SET status = 'archived' WHERE id = $1`,
+                `UPDATE insights_hogflow SET status = 'archived' WHERE id = $1`,
                 [flowId],
                 'archiveFlow'
             )
@@ -626,7 +626,7 @@ describe.each(['postgres-v2' as const, 'postgres' as const])('Workflows E2E (%s)
         async function applyLiveEdit(flow: Flow): Promise<void> {
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE insights_flow SET actions = $2, edges = $3, updated_at = NOW() WHERE id = $1`,
+                `UPDATE insights_hogflow SET actions = $2, edges = $3, updated_at = NOW() WHERE id = $1`,
                 [flow.id, JSON.stringify(flow.actions), JSON.stringify(flow.edges)],
                 'liveEditFlow'
             )
@@ -3957,7 +3957,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         // Sabotage: customer deletes the workflow between dispatch and processing.
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            `DELETE FROM insights_flow WHERE id = $1`,
+            `DELETE FROM insights_hogflow WHERE id = $1`,
             [flow.id],
             'delete-flow-for-test'
         )
