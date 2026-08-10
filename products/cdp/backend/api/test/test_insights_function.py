@@ -86,7 +86,7 @@ EXAMPLE_FULL = {
 
 def get_db_field_value(field, model_id):
     cursor = connection.cursor()
-    cursor.execute(f"select {field} from insights_hogfunction where id='{model_id}';")
+    cursor.execute(f"select {field} from insights_function where id='{model_id}';")
     return cursor.fetchone()[0]
 
 

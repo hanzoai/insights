@@ -99,7 +99,7 @@ def _is_draft_only_save(update_fields: Optional[Iterable[str]]) -> bool:
 
 class InsightsFunction(FileSystemSyncMixin, UUIDTModel):
     class Meta:
-        db_table = "insights_hogfunction"
+        db_table = "insights_function"
         indexes = [
             models.Index(fields=["type", "enabled", "team"]),
         ]
