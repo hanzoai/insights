@@ -174,7 +174,7 @@ overrides:
   '@tiptap/extension-text-align': 3.20.6
   '@tiptap/extension-text-style': 3.20.6
   '@tiptap/extension-underline': 3.20.6
-  '@hanzo/icons': npm:@hanzo/insights-icons@0.36.7
+  '@hanzo/icons': npm:@hanzo/insights-icons@0.36.8
   '@hanzo/insightsql-parser': npm:@posthog/hogql-parser@1.3.75
   insights-js: npm:@hanzo/insights@1.358.1
   insights-js-lite: npm:@hanzo/insights-lite@4.2.2
@@ -602,8 +602,8 @@ importers:
         specifier: workspace:*
         version: link:../common/esbuilder
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/insights':
         specifier: 1.358.1
         version: 1.358.1
@@ -2321,8 +2321,8 @@ importers:
   products/actions:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@storybook/react':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.4.6(@testing-library/dom@10.4.0)(@types/react@18.3.27)(prettier@3.8.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@6.0.3)
@@ -2361,8 +2361,8 @@ importers:
   products/ai_gateway:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@storybook/react':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.4.6(@testing-library/dom@10.4.0)(@types/react@18.3.27)(prettier@3.8.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@6.0.3)
@@ -2398,8 +2398,8 @@ importers:
   products/ai_observability:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@storybook/react':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.4.6(@testing-library/dom@10.4.0)(@types/react@18.3.27)(prettier@3.8.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@6.0.3)
@@ -2480,8 +2480,8 @@ importers:
         specifier: '*'
         version: link:../../frontend/@hanzo/elements
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -2545,8 +2545,8 @@ importers:
         specifier: '*'
         version: link:../../frontend/@hanzo/elements
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -2576,8 +2576,8 @@ importers:
   products/cohorts:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -2613,8 +2613,8 @@ importers:
         specifier: '*'
         version: link:../../frontend/@hanzo/elements
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@storybook/react':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.4.6(@testing-library/dom@10.4.0)(@types/react@18.3.27)(prettier@3.8.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@6.0.3)
@@ -2721,8 +2721,8 @@ importers:
         specifier: '*'
         version: 3.2.1(react@18.3.1)
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/quill-charts':
         specifier: workspace:*
         version: link:../../packages/quill/packages/charts
@@ -2775,8 +2775,8 @@ importers:
   products/dashboards:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -2833,8 +2833,8 @@ importers:
   products/data_catalog:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -2867,8 +2867,8 @@ importers:
   products/data_modeling:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -2909,8 +2909,8 @@ importers:
         specifier: '*'
         version: link:../../frontend/@hanzo/elements
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@storybook/react':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.4.6(@testing-library/dom@10.4.0)(@types/react@18.3.27)(prettier@3.8.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@6.0.3)
@@ -2944,8 +2944,8 @@ importers:
   products/early_access_features:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@storybook/react':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.4.6(@testing-library/dom@10.4.0)(@types/react@18.3.27)(prettier@3.8.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@6.0.3)
@@ -2981,8 +2981,8 @@ importers:
   products/endpoints:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/quill-charts':
         specifier: workspace:*
         version: link:../../packages/quill/packages/charts
@@ -3021,8 +3021,8 @@ importers:
   products/engineering_analytics:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/quill-charts':
         specifier: workspace:*
         version: link:../../packages/quill/packages/charts
@@ -3064,8 +3064,8 @@ importers:
         specifier: '*'
         version: 3.2.1(react@18.3.1)
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/quill-charts':
         specifier: workspace:*
         version: link:../../packages/quill/packages/charts
@@ -3148,8 +3148,8 @@ importers:
   products/experiments:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -3181,8 +3181,8 @@ importers:
   products/feature_flags:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -3218,8 +3218,8 @@ importers:
   products/groups:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -3245,8 +3245,8 @@ importers:
   products/growth:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@storybook/react':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.4.6(@testing-library/dom@10.4.0)(@types/react@18.3.27)(prettier@3.8.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@6.0.3)
@@ -3275,8 +3275,8 @@ importers:
   products/insights_ai:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/quill-primitives':
         specifier: workspace:*
         version: link:../../packages/quill/packages/primitives
@@ -3354,8 +3354,8 @@ importers:
         specifier: '*'
         version: link:../../frontend/@hanzo/elements
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@storybook/react':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.4.6(@testing-library/dom@9.3.4)(@types/react@18.3.27)(prettier@3.8.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@6.0.3)
@@ -3390,8 +3390,8 @@ importers:
   products/links:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@storybook/react':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.4.6(@testing-library/dom@10.4.0)(@types/react@18.3.27)(prettier@3.8.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@6.0.3)
@@ -3426,8 +3426,8 @@ importers:
         specifier: '*'
         version: link:../../frontend/@hanzo/elements
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -3474,8 +3474,8 @@ importers:
         specifier: '*'
         version: 3.2.1(react@18.3.1)
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/products-error-tracking':
         specifier: workspace:*
         version: link:../error_tracking
@@ -3565,8 +3565,8 @@ importers:
         specifier: '*'
         version: link:../../frontend/@hanzo/elements
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -3593,8 +3593,8 @@ importers:
   products/mcp_analytics:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/quill-charts':
         specifier: workspace:*
         version: link:../../packages/quill/packages/charts
@@ -3630,8 +3630,8 @@ importers:
   products/mcp_store:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -3663,8 +3663,8 @@ importers:
   products/metrics:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/products-error-tracking':
         specifier: workspace:*
         version: link:../error_tracking
@@ -3703,8 +3703,8 @@ importers:
   products/notebooks:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -3736,8 +3736,8 @@ importers:
   products/persons:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -3765,8 +3765,8 @@ importers:
   products/product_analytics:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/quill-charts':
         specifier: workspace:*
         version: link:../../packages/quill/packages/charts
@@ -3807,8 +3807,8 @@ importers:
   products/pulse:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -3837,8 +3837,8 @@ importers:
   products/replay:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -3867,8 +3867,8 @@ importers:
         specifier: '*'
         version: link:../../frontend/@hanzo/elements
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/quill-charts':
         specifier: workspace:*
         version: link:../../packages/quill/packages/charts
@@ -3913,8 +3913,8 @@ importers:
   products/revenue_analytics:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/quill-charts':
         specifier: workspace:*
         version: link:../../packages/quill/packages/charts
@@ -3946,8 +3946,8 @@ importers:
   products/review:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -3983,8 +3983,8 @@ importers:
   products/session_summaries:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -4006,8 +4006,8 @@ importers:
   products/skills:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -4045,8 +4045,8 @@ importers:
   products/stamp:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/react':
         specifier: npm:@hanzo/insights-react@1.9.2
         version: '@hanzo/insights-react@1.9.2(@hanzo/insights@1.358.1)(@types/react@18.3.27)(react@18.3.1)'
@@ -4082,8 +4082,8 @@ importers:
         specifier: '*'
         version: link:../../frontend/@hanzo/elements
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -4103,8 +4103,8 @@ importers:
   products/subscriptions:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@storybook/react':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.4.6(@testing-library/dom@10.4.0)(@types/react@18.3.27)(prettier@3.8.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@6.0.3)
@@ -4155,8 +4155,8 @@ importers:
   products/surveys:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@types/react':
         specifier: 18.3.27
         version: 18.3.27
@@ -4186,8 +4186,8 @@ importers:
   products/tasks:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@storybook/react':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.4.6(@testing-library/dom@10.4.0)(@types/react@18.3.27)(prettier@3.8.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@6.0.3)
@@ -4225,8 +4225,8 @@ importers:
   products/tracing:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/quill-charts':
         specifier: workspace:*
         version: link:../../packages/quill/packages/charts
@@ -4271,8 +4271,8 @@ importers:
   products/user_interviews:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@storybook/react':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.4.6(@testing-library/dom@10.4.0)(@types/react@18.3.27)(prettier@3.8.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@6.0.3)
@@ -4307,8 +4307,8 @@ importers:
   products/visual_review:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/react':
         specifier: npm:@hanzo/insights-react@1.9.2
         version: '@hanzo/insights-react@1.9.2(@hanzo/insights@1.358.1)(@types/react@18.3.27)(react@18.3.1)'
@@ -4348,8 +4348,8 @@ importers:
         specifier: '*'
         version: link:../../frontend/@hanzo/elements
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@storybook/react':
         specifier: 'catalog:'
         version: 10.4.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@10.4.6(@testing-library/dom@10.4.0)(@types/react@18.3.27)(prettier@3.8.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@6.0.3)
@@ -4419,8 +4419,8 @@ importers:
   products/workflows:
     dependencies:
       '@hanzo/icons':
-        specifier: npm:@hanzo/insights-icons@0.36.7
-        version: '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
+        specifier: npm:@hanzo/insights-icons@0.36.8
+        version: '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)'
       '@hanzo/quill-charts':
         specifier: workspace:*
         version: link:../../packages/quill/packages/charts
@@ -7165,8 +7165,8 @@ packages:
   '@hanzo/insights-core@1.7.1':
     resolution: {integrity: sha512-QRkojcUk509UE4d5kV09jHns4BFt6lmcqbljgjUJKq/HTTKYuvWHGU3G+oldDgkcadnhhPTvtT/daYZftM4Ryg==}
 
-  '@hanzo/insights-icons@0.36.7':
-    resolution: {integrity: sha512-A+T7ouyaRzA+DLNDge9xCxRXhcrLawXbwjOWVV4NzrB/rmu7u65k89BPaq1oEyBd1vDD+VkpAe+U5ABxfa2pyw==}
+  '@hanzo/insights-icons@0.36.8':
+    resolution: {integrity: sha512-Dp9x+wHsNYjvtjzgoiAQg8oY7HjQWTN9WfoZXwyCjjW5/HutJ9x7IhPIuzJVhnE8rSEBzeH+Rcoa/7HXqbt0Xw==}
     peerDependencies:
       react: 18.3.1
       react-dom: 18.3.1
@@ -25816,7 +25816,7 @@ snapshots:
     dependencies:
       cross-spawn: 7.0.6
 
-  '@hanzo/insights-icons@0.36.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@hanzo/insights-icons@0.36.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)

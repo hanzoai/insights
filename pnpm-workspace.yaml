@@ -93,7 +93,7 @@ catalog:
     #
     # Version lines are not shared with upstream -- upstream's ^0.38.0 is their
     # package's line; the fork's is 0.36.x -- so this does not track theirs.
-    '@hanzo/icons': npm:@hanzo/insights-icons@0.36.7
+    '@hanzo/icons': npm:@hanzo/insights-icons@0.36.8
     '@hanzo/react': ^1.9.0
     insights-js: ^1.410.1
     # Build tools
@@ -248,7 +248,7 @@ overrides:
     '@tiptap/extension-text-align': '3.20.6'
     '@tiptap/extension-text-style': '3.20.6'
     '@tiptap/extension-underline': '3.20.6'
-    '@hanzo/icons': 'npm:@hanzo/insights-icons@0.36.7'
+    '@hanzo/icons': 'npm:@hanzo/insights-icons@0.36.8'
     '@hanzo/insightsql-parser': 'npm:@posthog/hogql-parser@1.3.75'
     insights-js: 'npm:@hanzo/insights@1.358.1'
     insights-js-lite: 'npm:@hanzo/insights-lite@4.2.2'
