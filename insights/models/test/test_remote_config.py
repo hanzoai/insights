@@ -247,7 +247,7 @@ class TestRemoteConfig(_RemoteConfigBase):
     def test_site_functions_query_failure_degrades_to_empty_list(self):
         with patch(
             "products.cdp.backend.models.insights_functions.insights_function.InsightsFunction.objects.select_related",
-            side_effect=Exception("column insights_function.version does not exist"),
+            side_effect=Exception("column insights_hogfunction.version does not exist"),
         ):
             result = self.remote_config._build_site_apps_js()
 

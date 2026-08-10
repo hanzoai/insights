@@ -137,7 +137,7 @@ export const insertInsightsFunction = async (
 ): Promise<InsightsFunctionType> => {
     // This is only used for testing so we need to override some values
 
-    const res = await insertRow(postgres, 'insights_function', {
+    const res = await insertRow(postgres, 'insights_hogfunction', {
         ...createInsightsFunction({
             ...insightsFunction,
             team_id: team_id,
@@ -183,7 +183,7 @@ export const insertInsightsFunctionTemplate = async (
         template.bytecode = await compileScript(template.code)
     }
 
-    const res = await insertRow(postgres, 'insights_functiontemplate', {
+    const res = await insertRow(postgres, 'insights_hogfunctiontemplate', {
         id: randomUUID(),
         template_id: template.id,
         sha: 'sha',
