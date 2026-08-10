@@ -248,23 +248,23 @@ export class CdpApi {
 
         // API routes (authentication handled globally by middleware)
         router.post('/api/projects/:team_id/insights_functions/:id/invocations', asyncHandler(this.postFunctionInvocation))
-        router.post('/api/projects/:team_id/hog_flows/:id/invocations', asyncHandler(this.flowInvocation))
+        router.post('/api/projects/:team_id/insights_flows/:id/invocations', asyncHandler(this.flowInvocation))
         router.post(
-            '/api/projects/:team_id/hog_flows/:id/scheduled_invocations',
+            '/api/projects/:team_id/insights_flows/:id/scheduled_invocations',
             asyncHandler(this.flowScheduledInvocation)
         )
         router.post(
-            '/api/projects/:team_id/hog_flows/:id/batch_invocations/:parent_run_id',
+            '/api/projects/:team_id/insights_flows/:id/batch_invocations/:parent_run_id',
             asyncHandler(this.postFlowBatchInvocation)
         )
         router.post(
             '/api/projects/:team_id/insights_functions/:id/rerun',
             asyncHandler(this.postRerunInvocations('insights_function'))
         )
-        router.post('/api/projects/:team_id/hog_flows/:id/rerun', asyncHandler(this.postRerunInvocations('flow')))
-        router.get('/api/projects/:team_id/hog_flows/:id/in_flight_count', asyncHandler(this.getFlowInFlightCount))
+        router.post('/api/projects/:team_id/insights_flows/:id/rerun', asyncHandler(this.postRerunInvocations('flow')))
+        router.get('/api/projects/:team_id/insights_flows/:id/in_flight_count', asyncHandler(this.getFlowInFlightCount))
         router.post(
-            '/api/projects/:team_id/hog_flows/:id/reschedule_parked',
+            '/api/projects/:team_id/insights_flows/:id/reschedule_parked',
             asyncHandler(this.postFlowRescheduleParked)
         )
         router.get('/api/projects/:team_id/insights_functions/:id/status', asyncHandler(this.getFunctionStatus()))
@@ -1035,10 +1035,10 @@ export class CdpApi {
             const claims = token
                 ? (this.rescheduleJwt.verify(token, InsightsJwtAudience.WORKFLOWS_RESCHEDULE_PARKED, {
                       ignoreVerificationErrors: true,
-                  }) as { team_id?: number; hog_flow_id?: string } | undefined)
+                  }) as { team_id?: number; flow_id?: string } | undefined)
                 : undefined
             // The claims pin the token to one team + workflow, so a leaked token can't sweep anything else.
-            if (!claims || claims.team_id !== parseInt(team_id) || claims.hog_flow_id !== id) {
+            if (!claims || claims.team_id !== parseInt(team_id) || claims.flow_id !== id) {
                 return res.status(401).json({ error: 'Unauthorized: Invalid reschedule token' })
             }
 

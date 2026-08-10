@@ -3776,7 +3776,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         const parentRunId = new UUIDT().toString()
 
         const response = await supertest(app)
-            .post(`/api/projects/${team.id}/hog_flows/${flow.id}/batch_invocations/${parentRunId}`)
+            .post(`/api/projects/${team.id}/insights_flows/${flow.id}/batch_invocations/${parentRunId}`)
             .send({
                 filters: { filter_test_accounts: false },
                 max_audience_size: 750,
@@ -3848,7 +3848,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         const parentRunId = new UUIDT().toString()
 
         await supertest(app)
-            .post(`/api/projects/${team.id}/hog_flows/${inserted.id}/batch_invocations/${parentRunId}`)
+            .post(`/api/projects/${team.id}/insights_flows/${inserted.id}/batch_invocations/${parentRunId}`)
             .send({ filters: { filter_test_accounts: false } })
             .expect(400)
 
@@ -3901,7 +3901,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         })
 
         await supertest(app)
-            .post(`/api/projects/${team.id}/hog_flows/${flow.id}/batch_invocations/${parentRunId}`)
+            .post(`/api/projects/${team.id}/insights_flows/${flow.id}/batch_invocations/${parentRunId}`)
             .send({ filters: { filter_test_accounts: false }, max_audience_size: 1000 })
             .expect(200)
 
@@ -3950,7 +3950,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         // before any processing happens (otherwise the consumer would race us
         // and process the job before we delete the workflow).
         await supertest(app)
-            .post(`/api/projects/${team.id}/hog_flows/${flow.id}/batch_invocations/${parentRunId}`)
+            .post(`/api/projects/${team.id}/insights_flows/${flow.id}/batch_invocations/${parentRunId}`)
             .send({ filters: { filter_test_accounts: false }, max_audience_size: 1000 })
             .expect(200)
 
@@ -4018,7 +4018,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         })
 
         await supertest(app)
-            .post(`/api/projects/${team.id}/hog_flows/${flow.id}/batch_invocations/${parentRunId}`)
+            .post(`/api/projects/${team.id}/insights_flows/${flow.id}/batch_invocations/${parentRunId}`)
             .send({ filters: { filter_test_accounts: false }, max_audience_size: 1000 })
             .expect(200)
 
@@ -4060,7 +4060,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         })
 
         await supertest(app)
-            .post(`/api/projects/${team.id}/hog_flows/${flow.id}/batch_invocations/${parentRunId}`)
+            .post(`/api/projects/${team.id}/insights_flows/${flow.id}/batch_invocations/${parentRunId}`)
             .send({ filters: { filter_test_accounts: false }, max_audience_size: 1000 })
             .expect(200)
 
@@ -4325,7 +4325,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
         })
 
         await supertest(app)
-            .post(`/api/projects/${team.id}/hog_flows/${flow.id}/batch_invocations/${parentRunId}`)
+            .post(`/api/projects/${team.id}/insights_flows/${flow.id}/batch_invocations/${parentRunId}`)
             .send({ filters: { filter_test_accounts: false }, max_audience_size: 4 })
             .expect(200)
 
