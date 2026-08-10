@@ -505,7 +505,7 @@ def shrink_to_shape(
 #
 # Shared by `log_corpus_diagnostic.py` (InsightsQL queries from Datastore
 # `system.query_log`) and `script_corpus_diagnostic.py` (Script programs from the
-# Aurora Postgres `insights_hogfunction` table). Metabase access, the
+# Aurora Postgres `insights_function` table). Metabase access, the
 # paginated download, the oracle-vs-candidate parity grind, and the failure
 # report are identical across both — only the SQL and its redaction dialect
 # (Datastore `replaceRegexpAll` vs Postgres `regexp_replace`) differ, and
