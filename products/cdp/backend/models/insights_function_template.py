@@ -59,7 +59,7 @@ class InsightsFunctionTemplate(UUIDTModel):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "insights_hogfunctiontemplate"
+        db_table = "insights_function_template"
         unique_together = ("template_id", "sha")
         indexes = [
             models.Index(fields=["template_id", "sha"]),

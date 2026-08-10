@@ -19,7 +19,7 @@ class InsightsFlowTemplate(UUIDTModel):
     """
 
     class Meta:
-        db_table = "hogflow_templates"
+        db_table = "insights_flow_templates"
         indexes = [
             models.Index(fields=["team"]),
         ]
