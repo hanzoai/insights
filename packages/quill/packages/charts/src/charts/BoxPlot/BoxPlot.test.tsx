@@ -1,7 +1,7 @@
 import { waitFor } from '@testing-library/react'
 
 import type { ChartTheme } from '../../core/types'
-import { renderHogChart, waitForHogChartTooltip } from '../../testing'
+import { renderScriptChart, waitForScriptChartTooltip } from '../../testing'
 import { BoxPlot, type BoxPlotClickData } from './BoxPlot'
 import type { BoxPlotDatum, BoxPlotSeries } from './types'
 
@@ -33,7 +33,7 @@ const TWO_SERIES: BoxPlotSeries[] = [
 
 describe('BoxPlot', () => {
     it('renders the canvas and reports series count via aria-label', () => {
-        const { chart } = renderHogChart(<BoxPlot series={TWO_SERIES} labels={LABELS} theme={THEME} />)
+        const { chart } = renderScriptChart(<BoxPlot series={TWO_SERIES} labels={LABELS} theme={THEME} />)
         expect(chart.seriesCount).toBe(2)
     })
 
@@ -45,7 +45,7 @@ describe('BoxPlot', () => {
                 data: [datum({ min: 0, max: 200 }), datum({ min: 10, max: 220 })],
             },
         ]
-        const { chart } = renderHogChart(<BoxPlot series={series} labels={['Mon', 'Tue']} theme={THEME} />)
+        const { chart } = renderScriptChart(<BoxPlot series={series} labels={['Mon', 'Tue']} theme={THEME} />)
         const ticks = chart.yTicks()
         expect(ticks.length).toBeGreaterThan(0)
         const nums = ticks.map((t) => parseFloat(t.replace(/[^\d.-]/g, '')))
@@ -70,7 +70,7 @@ describe('BoxPlot', () => {
                 ],
             },
         ]
-        const { chart } = renderHogChart(<BoxPlot series={series} labels={['Mon', 'Tue']} theme={THEME} />)
+        const { chart } = renderScriptChart(<BoxPlot series={series} labels={['Mon', 'Tue']} theme={THEME} />)
         const ticks = chart.yTicks()
         const maxTickNumeric = Math.max(
             ...ticks.map((t) => parseFloat(t.replace(/[^\d.-]/g, ''))).filter((n) => Number.isFinite(n))
@@ -79,20 +79,20 @@ describe('BoxPlot', () => {
     })
 
     it('forwards `dataAttr` to the chart wrapper', () => {
-        const { chart } = renderHogChart(
+        const { chart } = renderScriptChart(
             <BoxPlot series={TWO_SERIES} labels={LABELS} theme={THEME} dataAttr="boxplot-instance" />
         )
         expect(chart.element.getAttribute('data-attr')).toBe('boxplot-instance')
     })
 
     it('renders empty state without crashing', () => {
-        const { chart } = renderHogChart(<BoxPlot series={[]} labels={[]} theme={THEME} />)
+        const { chart } = renderScriptChart(<BoxPlot series={[]} labels={[]} theme={THEME} />)
         expect(chart.seriesCount).toBe(0)
     })
 
     it('tolerates null entries in series data', () => {
         const series: BoxPlotSeries[] = [{ key: 'a', label: 'A', data: [datum(), null, datum()] }]
-        const { chart } = renderHogChart(<BoxPlot series={series} labels={LABELS} theme={THEME} />)
+        const { chart } = renderScriptChart(<BoxPlot series={series} labels={LABELS} theme={THEME} />)
         expect(chart.seriesCount).toBe(1)
     })
 
@@ -106,13 +106,13 @@ describe('BoxPlot', () => {
                 visibility: { excluded: true },
             },
         ]
-        const { chart } = renderHogChart(<BoxPlot series={series} labels={LABELS} theme={THEME} />)
+        const { chart } = renderScriptChart(<BoxPlot series={series} labels={LABELS} theme={THEME} />)
         expect(chart.seriesCount).toBe(1)
     })
 
     describe('tooltip context', () => {
         it('exposes the original BoxPlotDatum on each series via meta.datums (six stats reachable)', async () => {
-            const { chart } = renderHogChart(<BoxPlot series={TWO_SERIES} labels={LABELS} theme={THEME} />)
+            const { chart } = renderScriptChart(<BoxPlot series={TWO_SERIES} labels={LABELS} theme={THEME} />)
             chart.hoverAtIndex(1)
             const tooltip = await chart.waitForTooltip()
             const aMeta = tooltip.series.a!.series.meta as { datums: (BoxPlotDatum | null)[] }
@@ -129,7 +129,7 @@ describe('BoxPlot', () => {
         })
 
         it('includes the x-axis label in the tooltip context', async () => {
-            const { chart } = renderHogChart(<BoxPlot series={TWO_SERIES} labels={LABELS} theme={THEME} />)
+            const { chart } = renderScriptChart(<BoxPlot series={TWO_SERIES} labels={LABELS} theme={THEME} />)
             chart.hoverAtIndex(1)
             const tooltip = await chart.waitForTooltip()
             expect(tooltip.label).toBe('Tue')
@@ -149,11 +149,11 @@ describe('BoxPlot', () => {
         ]
 
         it('renders the six stats in the canonical order (Max → p75 → Median → Mean → p25 → Min)', async () => {
-            const { chart } = renderHogChart(<BoxPlot series={SINGLE_SERIES} labels={LABELS} theme={THEME} />, {
+            const { chart } = renderScriptChart(<BoxPlot series={SINGLE_SERIES} labels={LABELS} theme={THEME} />, {
                 nativeTooltip: true,
             })
             chart.hoverAtIndex(0)
-            const tooltipEl = await waitForHogChartTooltip()
+            const tooltipEl = await waitForScriptChartTooltip()
             const rowLabels = Array.from(tooltipEl.querySelectorAll('tr')).map((tr) =>
                 (tr.firstElementChild as HTMLElement).textContent!.trim()
             )
@@ -161,11 +161,11 @@ describe('BoxPlot', () => {
         })
 
         it('renders the values in the canonical row order', async () => {
-            const { chart } = renderHogChart(<BoxPlot series={SINGLE_SERIES} labels={LABELS} theme={THEME} />, {
+            const { chart } = renderScriptChart(<BoxPlot series={SINGLE_SERIES} labels={LABELS} theme={THEME} />, {
                 nativeTooltip: true,
             })
             chart.hoverAtIndex(0)
-            const tooltipEl = await waitForHogChartTooltip()
+            const tooltipEl = await waitForScriptChartTooltip()
             const values = Array.from(tooltipEl.querySelectorAll('tr')).map((tr) =>
                 (tr.lastElementChild as HTMLElement).textContent!.trim()
             )
@@ -173,20 +173,20 @@ describe('BoxPlot', () => {
         })
 
         it('shows the x label in the header', async () => {
-            const { chart } = renderHogChart(<BoxPlot series={SINGLE_SERIES} labels={LABELS} theme={THEME} />, {
+            const { chart } = renderScriptChart(<BoxPlot series={SINGLE_SERIES} labels={LABELS} theme={THEME} />, {
                 nativeTooltip: true,
             })
             chart.hoverAtIndex(0)
-            const tooltipEl = await waitForHogChartTooltip()
+            const tooltipEl = await waitForScriptChartTooltip()
             expect(tooltipEl.textContent).toContain('Mon')
         })
 
         it('renders one stat table per visible series when grouped (multi-series)', async () => {
-            const { chart } = renderHogChart(<BoxPlot series={TWO_SERIES} labels={LABELS} theme={THEME} />, {
+            const { chart } = renderScriptChart(<BoxPlot series={TWO_SERIES} labels={LABELS} theme={THEME} />, {
                 nativeTooltip: true,
             })
             chart.hoverAtIndex(0)
-            const tooltipEl = await waitForHogChartTooltip()
+            const tooltipEl = await waitForScriptChartTooltip()
             // Per-series header labels show in grouped mode.
             expect(tooltipEl.textContent).toContain('A')
             expect(tooltipEl.textContent).toContain('B')
@@ -194,11 +194,11 @@ describe('BoxPlot', () => {
         })
 
         it('hides the per-series label when not grouped (single series)', async () => {
-            const { chart } = renderHogChart(<BoxPlot series={SINGLE_SERIES} labels={LABELS} theme={THEME} />, {
+            const { chart } = renderScriptChart(<BoxPlot series={SINGLE_SERIES} labels={LABELS} theme={THEME} />, {
                 nativeTooltip: true,
             })
             chart.hoverAtIndex(0)
-            const tooltipEl = await waitForHogChartTooltip()
+            const tooltipEl = await waitForScriptChartTooltip()
             const headers = Array.from(tooltipEl.querySelectorAll('.font-semibold')).map((el) => el.textContent)
             // The single "Mon" header is the only font-semibold heading in single-series mode.
             expect(headers).toContain('Mon')
@@ -209,12 +209,12 @@ describe('BoxPlot', () => {
             const userTooltip = jest.fn(
                 (): React.ReactElement => <div data-attr="custom-boxplot-user-tooltip">custom</div>
             )
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <BoxPlot series={SINGLE_SERIES} labels={LABELS} theme={THEME} tooltip={userTooltip} />,
                 { nativeTooltip: true }
             )
             chart.hoverAtIndex(0)
-            const tooltipEl = await waitForHogChartTooltip()
+            const tooltipEl = await waitForScriptChartTooltip()
             expect(tooltipEl.querySelector('[data-attr="custom-boxplot-user-tooltip"]')).not.toBeNull()
             expect(userTooltip).toHaveBeenCalled()
         })
@@ -223,7 +223,7 @@ describe('BoxPlot', () => {
     describe('click', () => {
         it('invokes onBoxClick with the clicked datum and cross-series data', async () => {
             const onBoxClick = jest.fn()
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <BoxPlot series={TWO_SERIES} labels={LABELS} theme={THEME} onBoxClick={onBoxClick} />
             )
             await chart.clickAtIndex(1)
@@ -255,7 +255,7 @@ describe('BoxPlot', () => {
             const tooltip = (): React.ReactNode => {
                 throw new Error('boom')
             }
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <BoxPlot series={TWO_SERIES} labels={LABELS} theme={THEME} tooltip={tooltip} onError={onError} />
             )
             chart.hoverAtIndex(1)
@@ -265,7 +265,7 @@ describe('BoxPlot', () => {
 
     describe('children', () => {
         it('renders custom overlay children', () => {
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <BoxPlot series={TWO_SERIES} labels={LABELS} theme={THEME}>
                     <div data-attr="custom-box-child" />
                 </BoxPlot>

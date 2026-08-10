@@ -25,7 +25,7 @@ import {
 import { TimeSeriesLineChart } from './TimeSeriesLineChart'
 
 const meta: Meta = {
-    title: 'Components/HogCharts/TimeSeriesLineChart',
+    title: 'Components/ScriptCharts/TimeSeriesLineChart',
     parameters: { layout: 'centered' },
 }
 export default meta

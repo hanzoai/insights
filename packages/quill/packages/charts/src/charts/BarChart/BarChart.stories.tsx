@@ -18,7 +18,7 @@ const THREE_SERIES: Series[] = [
     { key: 'tablet', label: 'Tablet', color: '', data: [12, 14, 11, 16, 18, 20, 19] },
 ]
 
-const meta: Meta = { title: 'Components/HogCharts/BarChart', parameters: { layout: 'centered' } }
+const meta: Meta = { title: 'Components/ScriptCharts/BarChart', parameters: { layout: 'centered' } }
 export default meta
 
 type Story = StoryObj<{}>

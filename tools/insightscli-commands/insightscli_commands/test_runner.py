@@ -35,7 +35,7 @@ def _is_test_file(path: str, rs_cfg_test: set[str] | None = None) -> bool:
     """
     name = PurePosixPath(path).name
     if path.endswith(".py"):
-        return name.startswith("test_") or (name.startswith("eval_") and path.startswith("ee/hogai/eval/"))
+        return name.startswith("test_") or (name.startswith("eval_") and path.startswith("ee/scriptai/eval/"))
     if path.endswith((".test.ts", ".test.tsx")):
         return True
     if path.endswith(".spec.ts") and path.startswith("playwright/"):
@@ -520,10 +520,10 @@ def detect_test_type(file_path: str) -> TestRunConfig:
         )
 
     # 2. Python eval tests (special pytest config)
-    if file_only.startswith("ee/hogai/eval/") and ext == ".py":
+    if file_only.startswith("ee/scriptai/eval/") and ext == ".py":
         return TestRunConfig(
             test_type="python-eval",
-            command=["pytest", "-c", "ee/hogai/eval/pytest.ini", "-s", file_path],
+            command=["pytest", "-c", "ee/scriptai/eval/pytest.ini", "-s", file_path],
             description="Python eval test (pytest with eval config)",
             env=_python_env(),
         )

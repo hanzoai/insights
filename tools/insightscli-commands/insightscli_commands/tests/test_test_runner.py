@@ -57,9 +57,9 @@ class TestDetectTestType:
         assert config.command == ["pytest", "-s", "insights/api/test/test_user.py::TestUserAPI::test_retrieve"]
 
     def test_python_eval_uses_special_config(self) -> None:
-        config = detect_test_type("ee/hogai/eval/eval_router.py")
+        config = detect_test_type("ee/scriptai/eval/eval_router.py")
         assert config.test_type == "python-eval"
-        assert config.command == ["pytest", "-c", "ee/hogai/eval/pytest.ini", "-s", "ee/hogai/eval/eval_router.py"]
+        assert config.command == ["pytest", "-c", "ee/scriptai/eval/pytest.ini", "-s", "ee/scriptai/eval/eval_router.py"]
         assert "REDIS_URL" in config.env
 
     # -- Jest tests: these hit real package.json files on disk --
@@ -247,7 +247,7 @@ class TestDetectTestType:
     @parameterized.expand(
         [
             ("insights/api/test", "python", ["pytest", "-s", "insights/api/test"]),
-            ("ee/hogai", "python", ["pytest", "-s", "ee/hogai"]),
+            ("ee/scriptai", "python", ["pytest", "-s", "ee/scriptai"]),
             (
                 "tools/insightscli-commands/insightscli_commands/tests",
                 "python",
@@ -353,10 +353,10 @@ class TestIsTestFile:
     @parameterized.expand(
         [
             ("insights/api/test/test_user.py", True),
-            ("ee/hogai/eval/eval_router.py", True),
-            ("ee/hogai/eval_router.py", False),
+            ("ee/scriptai/eval/eval_router.py", True),
+            ("ee/scriptai/eval_router.py", False),
             ("insights/eval_something.py", False),
-            ("ee/hogai/router.py", False),
+            ("ee/scriptai/router.py", False),
             ("insights/models/team.py", False),
             ("frontend/src/scenes/dashboard/Dashboard.test.tsx", True),
             ("frontend/src/scenes/dashboard/Dashboard.tsx", False),

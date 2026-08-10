@@ -292,7 +292,7 @@ insightsql-parser-parity = [
 required-version = ">=0.10.2"
 add-bounds = "major"
 exclude-newer = "7 days"
-exclude-newer-package = { insightsql-parser = false, insightsql-parser-rs = false, deltalite = false, hanzo_insights = false, pixelhog = false, django = false, modal = false, insights-hogland = false, google-ads = false }
+exclude-newer-package = { insightsql-parser = false, insightsql-parser-rs = false, deltalite = false, hanzo_insights = false, django = false, modal = false, google-ads = false }
 
 [tool.uv.workspace]
 members = ["tools/insightscli", "tools/owners"]

@@ -21,7 +21,7 @@ from typing import Any
 import click
 
 from insightscli import telemetry
-from insightscli.command_types import BinScriptCommand, CompositeCommand, DirectCommand, HogliCommand
+from insightscli.command_types import BinScriptCommand, CompositeCommand, DirectCommand, ScriptliCommand
 from insightscli.hooks import post_command_hooks, telemetry_property_hooks
 from insightscli.lazy_commands import add_commands_dir_to_path, add_repo_root_to_path, resolve_click_command
 from insightscli.manifest import (
@@ -556,7 +556,7 @@ def _register_script_commands() -> None:
                 continue
 
             if insightscli:
-                HogliCommand(cli_name, config).register(cli)
+                ScriptliCommand(cli_name, config).register(cli)
                 continue
 
             if bin_script:

@@ -1,6 +1,6 @@
 import { act } from '@testing-library/react'
 
-import { mockRect, renderHogChart } from '../../testing'
+import { mockRect, renderScriptChart } from '../../testing'
 import { Chart } from '../Chart'
 import type { ChartDrawArgs, ChartScales, ChartTheme, Series } from '../types'
 
@@ -17,7 +17,7 @@ const createScales = (): ChartScales => ({
 })
 
 function renderChart(drawStatic: (args: ChartDrawArgs) => void): HTMLCanvasElement {
-    const { chart } = renderHogChart(
+    const { chart } = renderScriptChart(
         <Chart
             series={SERIES}
             labels={LABELS}

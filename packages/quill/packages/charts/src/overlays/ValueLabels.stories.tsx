@@ -13,7 +13,7 @@ const CONFIG: LineChartConfig = {
 }
 
 const meta: Meta = {
-    title: 'Components/HogCharts/ValueLabels',
+    title: 'Components/ScriptCharts/ValueLabels',
     parameters: { layout: 'centered' },
 }
 export default meta

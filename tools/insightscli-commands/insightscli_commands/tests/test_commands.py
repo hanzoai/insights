@@ -51,13 +51,13 @@ class TestDetectEnvironment:
             monkeypatch.delenv(var, raising=False)
 
     @pytest.mark.parametrize(
-        ("env_vars", "ci", "hogland", "expected"),
+        ("env_vars", "ci", "box", "expected"),
         [
             ({}, False, False, "local"),
             ({}, True, False, "ci"),
             ({"CODER": "true"}, False, False, "devbox"),
             ({"CODER_WORKSPACE_NAME": "raul-devbox"}, False, False, "devbox"),
-            ({}, False, True, "hogland"),
+            ({}, False, True, "box"),
             ({"CODER": "true"}, False, True, "devbox"),
             ({"INSIGHTSCLI_ENVIRONMENT": "sandbox"}, False, False, "sandbox"),
             ({"INSIGHTSCLI_ENVIRONMENT": " Sandbox "}, False, False, "sandbox"),
@@ -69,18 +69,18 @@ class TestDetectEnvironment:
             "ci",
             "coder",
             "coder_workspace",
-            "hogland",
-            "devbox_beats_hogland",
+            "box",
+            "devbox_beats_box",
             "declared",
             "declared_normalized",
             "declared_beats_ci",
             "ci_beats_devbox",
         ],
     )
-    def test_classification(self, monkeypatch, tmp_path, env_vars, ci, hogland, expected) -> None:
+    def test_classification(self, monkeypatch, tmp_path, env_vars, ci, box, expected) -> None:
         if ci:
             monkeypatch.setattr("insightscli_commands.telemetry_props.is_ci", lambda: True)
-        if hogland:
+        if box:
             monkeypatch.setattr("insightscli_commands.telemetry_props._HOGLAND_MARKER", tmp_path)
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)

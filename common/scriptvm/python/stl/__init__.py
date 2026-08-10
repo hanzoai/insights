@@ -10,15 +10,15 @@ from typing import TYPE_CHECKING, Any, Optional
 
 import pytz
 
-from ..objects import is_hog_callable, is_hog_closure, is_hog_error, new_hog_error, to_hog_interval
+from ..objects import is_script_callable, is_script_closure, is_script_error, new_script_error, to_script_interval
 from ..utils import ScriptVMException, _require_string, get_nested_value, like
 from .crypto import md5, sha1, sha1HmacChain, sha256, sha256HmacChain
 from .date import (
     formatDateTime,
     fromUnixTimestamp,
     fromUnixTimestampMilli,
-    is_hog_date,
-    is_hog_datetime,
+    is_script_date,
+    is_script_datetime,
     now,
     toDate,
     toDateTime,
@@ -27,7 +27,7 @@ from .date import (
     toUnixTimestampMilli,
 )
 from .ip import isIPAddressInRange
-from .print import print_hog_string_output
+from .print import print_script_string_output
 
 if TYPE_CHECKING:
     from insights.models import Team
@@ -44,17 +44,17 @@ class STLFunction:
 
 
 def toString(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float):
-    if isinstance(args[0], dict) and is_hog_datetime(args[0]):
+    if isinstance(args[0], dict) and is_script_datetime(args[0]):
         dt = datetime.datetime.fromtimestamp(args[0]["dt"], pytz.timezone(args[0]["zone"] or "UTC"))
         if args[0]["zone"] == "UTC":
             return dt.isoformat("T", "milliseconds").replace("+00:00", "") + "Z"
         return dt.isoformat("T", "milliseconds")
-    elif isinstance(args[0], dict) and is_hog_date(args[0]):
+    elif isinstance(args[0], dict) and is_script_date(args[0]):
         year = args[0]["year"]
         month = args[0]["month"]
         day = args[0]["day"]
         return f"{year}-{month:02d}-{day:02d}"
-    elif isinstance(args[0], dict) and is_hog_error(args[0]):
+    elif isinstance(args[0], dict) and is_script_error(args[0]):
         return (
             f"{args[0]['name']}({toString(args[0]['message'], team, stdout, timeout)}"
             + (f", {toString(args[0]['payload'], team, stdout, timeout)}" if "payload" in args[0] else "")
@@ -72,9 +72,9 @@ def toString(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]
 
 def toInt(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float):
     try:
-        if is_hog_datetime(args[0]):
+        if is_script_datetime(args[0]):
             return int(args[0]["dt"])
-        elif is_hog_date(args[0]):
+        elif is_script_date(args[0]):
             return (
                 datetime.datetime(args[0]["year"], args[0]["month"], args[0]["day"]) - datetime.datetime(1970, 1, 1)
             ).days
@@ -85,9 +85,9 @@ def toInt(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], 
 
 def toFloat(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float):
     try:
-        if is_hog_datetime(args[0]):
+        if is_script_datetime(args[0]):
             return float(args[0]["dt"])
-        elif is_hog_date(args[0]):
+        elif is_script_date(args[0]):
             return float(
                 (
                     datetime.datetime(args[0]["year"], args[0]["month"], args[0]["day"]) - datetime.datetime(1970, 1, 1)
@@ -126,7 +126,7 @@ def sleep(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], 
 
 def print(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float):
     if stdout is not None:
-        value = " ".join(map(print_hog_string_output, args))
+        value = " ".join(map(print_script_string_output, args))
         stdout.append(value)
     return
 
@@ -149,15 +149,15 @@ def jsonStringify(args: list[Any], team: Optional["Team"], stdout: Optional[list
 
     def json_safe(obj):
         if isinstance(obj, dict) or isinstance(obj, list) or isinstance(obj, tuple):
-            if id(obj) in marked and not is_hog_callable(obj) and not is_hog_closure(obj):
+            if id(obj) in marked and not is_script_callable(obj) and not is_script_closure(obj):
                 return None
             else:
                 marked.add(id(obj))
                 try:
                     if isinstance(obj, dict):
-                        if is_hog_callable(obj):
+                        if is_script_callable(obj):
                             return f"fn<{obj['name']}({obj['argCount']})>"
-                        if is_hog_closure(obj):
+                        if is_script_closure(obj):
                             return f"fn<{obj['callable']['name']}({obj['callable']['argCount']})>"
                         return {json_safe(k): json_safe(v) for k, v in obj.items()}
                     elif isinstance(obj, list):
@@ -434,13 +434,13 @@ def _formatDateTime(args: list[Any], team: Optional["Team"], stdout: Optional[li
 def _typeof(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> str:
     if args[0] is None:
         return "null"
-    elif is_hog_datetime(args[0]):
+    elif is_script_datetime(args[0]):
         return "datetime"
-    elif is_hog_date(args[0]):
+    elif is_script_date(args[0]):
         return "date"
-    elif is_hog_error(args[0]):
+    elif is_script_error(args[0]):
         return "error"
-    elif is_hog_callable(args[0]) or is_hog_closure(args[0]):
+    elif is_script_callable(args[0]) or is_script_closure(args[0]):
         return "function"
     elif isinstance(args[0], list):
         return "array"
@@ -461,11 +461,11 @@ def _typeof(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]]
 
 def apply_interval_to_datetime(dt: dict, interval: dict) -> dict:
     # interval["unit"] in {"day", "hour", "minute", "month"}
-    if not (is_hog_date(dt) or is_hog_datetime(dt)):
-        raise ValueError("Expected a HogDate or HogDateTime")
+    if not (is_script_date(dt) or is_script_datetime(dt)):
+        raise ValueError("Expected a ScriptDate or ScriptDateTime")
 
-    zone = dt["zone"] if is_hog_datetime(dt) else "UTC"
-    if is_hog_datetime(dt):
+    zone = dt["zone"] if is_script_datetime(dt) else "UTC"
+    if is_script_datetime(dt):
         base_dt = datetime.datetime.fromtimestamp(dt["dt"], datetime.UTC).replace(tzinfo=None)
         base_dt = pytz.timezone(zone).localize(base_dt)
     else:
@@ -505,16 +505,16 @@ def apply_interval_to_datetime(dt: dict, interval: dict) -> dict:
     else:
         raise ValueError(f"Unknown interval unit {unit}")
 
-    if is_hog_date(dt):
+    if is_script_date(dt):
         return {
-            "__hogDate__": True,
+            "__scriptDate__": True,
             "year": base_dt.year,
             "month": base_dt.month,
             "day": base_dt.day,
         }
     else:
         return {
-            "__hogDateTime__": True,
+            "__scriptDateTime__": True,
             "dt": base_dt.timestamp(),
             "zone": zone,
         }
@@ -540,7 +540,7 @@ def date_add(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]
     else:
         raise ValueError(f"Unsupported interval unit: {unit}")
 
-    interval = to_hog_interval(amount, unit)
+    interval = to_script_interval(amount, unit)
     return apply_interval_to_datetime(dt, interval)
 
 
@@ -552,12 +552,12 @@ def date_diff(args: list[Any], team: Optional["Team"], stdout: Optional[list[str
 
     # Convert start/end to aware datetimes
     def to_dt(obj):
-        if is_hog_datetime(obj):
+        if is_script_datetime(obj):
             z = obj["zone"]
             return pytz.timezone(z).localize(
                 datetime.datetime.fromtimestamp(obj["dt"], datetime.UTC).replace(tzinfo=None)
             )
-        elif is_hog_date(obj):
+        elif is_script_date(obj):
             return pytz.UTC.localize(datetime.datetime(obj["year"], obj["month"], obj["day"]))
         else:
             # try parse string
@@ -592,7 +592,7 @@ def date_trunc(args: list[Any], team: Optional["Team"], stdout: Optional[list[st
     unit = args[0]
     dt = args[1]
 
-    if not is_hog_datetime(dt):
+    if not is_script_datetime(dt):
         raise ValueError("Expected a DateTime for dateTrunc")
 
     zone = dt["zone"]
@@ -615,7 +615,7 @@ def date_trunc(args: list[Any], team: Optional["Team"], stdout: Optional[list[st
         raise ValueError(f"Unsupported unit for dateTrunc: {unit}")
 
     return {
-        "__hogDateTime__": True,
+        "__scriptDateTime__": True,
         "dt": truncated.timestamp(),
         "zone": zone,
     }
@@ -717,12 +717,12 @@ def extract(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]]
     val = args[1]
 
     def to_dt(obj):
-        if is_hog_datetime(obj):
+        if is_script_datetime(obj):
             z = obj["zone"]
             return pytz.timezone(z).localize(
                 datetime.datetime.fromtimestamp(obj["dt"], datetime.UTC).replace(tzinfo=None)
             )
-        elif is_hog_date(obj):
+        elif is_script_date(obj):
             return pytz.UTC.localize(datetime.datetime(obj["year"], obj["month"], obj["day"]))
         else:
             d = datetime.datetime.fromisoformat(obj)
@@ -769,24 +769,24 @@ def substring(args: list[Any], team: Optional["Team"], stdout: Optional[list[str
 
 
 def addDays(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> Any:
-    interval = to_hog_interval(args[1], "day")
+    interval = to_script_interval(args[1], "day")
     return apply_interval_to_datetime(args[0], interval)
 
 
 def toIntervalDay(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> Any:
-    return to_hog_interval(args[0], "day")
+    return to_script_interval(args[0], "day")
 
 
 def toIntervalHour(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> Any:
-    return to_hog_interval(args[0], "hour")
+    return to_script_interval(args[0], "hour")
 
 
 def toIntervalMinute(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> Any:
-    return to_hog_interval(args[0], "minute")
+    return to_script_interval(args[0], "minute")
 
 
 def toIntervalMonth(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> Any:
-    return to_hog_interval(args[0], "month")
+    return to_script_interval(args[0], "month")
 
 
 def toYear(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> Any:
@@ -799,8 +799,8 @@ def toMonth_fn(args: list[Any], team: Optional["Team"], stdout: Optional[list[st
 
 def trunc_to_unit(dt: dict, unit: str, team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> dict:
     # helper for toStartOfDay, etc.
-    if not is_hog_datetime(dt):
-        if is_hog_date(dt):
+    if not is_script_datetime(dt):
+        if is_script_date(dt):
             dt = toDateTime(f"{dt['year']:04d}-{dt['month']:02d}-{dt['day']:02d}")
         else:
             raise ValueError("Expected a Date or DateTime")
@@ -822,8 +822,8 @@ def toStartOfMonth(args: list[Any], team: Optional["Team"], stdout: Optional[lis
 
 def toStartOfWeek(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> Any:
     dt = args[0]
-    if not is_hog_datetime(dt):
-        if is_hog_date(dt):
+    if not is_script_datetime(dt):
+        if is_script_date(dt):
             dt = toDateTime(f"{dt['year']}-{dt['month']:02d}-{dt['day']:02d}")
         else:
             raise ValueError("Expected a Date or DateTime")
@@ -834,7 +834,7 @@ def toStartOfWeek(args: list[Any], team: Optional["Team"], stdout: Optional[list
     start_of_week = base_dt - datetime.timedelta(days=weekday - 1)
     start_of_week = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
     return {
-        "__hogDateTime__": True,
+        "__scriptDateTime__": True,
         "dt": start_of_week.timestamp(),
         "zone": zone,
     }
@@ -849,7 +849,7 @@ def toYYYYMM(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]
 def today(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> Any:
     now_dt = datetime.datetime.now(tz=pytz.UTC)
     return {
-        "__hogDate__": True,
+        "__scriptDate__": True,
         "year": now_dt.year,
         "month": now_dt.month,
         "day": now_dt.day,
@@ -983,7 +983,7 @@ def match(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], 
 STL: dict[str, STLFunction] = {
     "concat": STLFunction(
         fn=lambda args, team, stdout, timeout: "".join(
-            [print_hog_string_output(arg) if arg is not None else "" for arg in args]
+            [print_script_string_output(arg) if arg is not None else "" for arg in args]
         ),
         minArgs=1,
         maxArgs=None,
@@ -1132,25 +1132,25 @@ STL: dict[str, STLFunction] = {
     "toDate": STLFunction(fn=lambda args, team, stdout, timeout: toDate(args[0]), minArgs=1, maxArgs=1),
     "toDateTime": STLFunction(fn=lambda args, team, stdout, timeout: toDateTime(args[0]), minArgs=1, maxArgs=2),
     "formatDateTime": STLFunction(fn=_formatDateTime, minArgs=2, maxArgs=3),
-    "HogError": STLFunction(
-        fn=lambda args, team, stdout, timeout: new_hog_error(args[0], args[1], args[2] if len(args) > 2 else None),
+    "ScriptError": STLFunction(
+        fn=lambda args, team, stdout, timeout: new_script_error(args[0], args[1], args[2] if len(args) > 2 else None),
         minArgs=1,
         maxArgs=3,
     ),
     "Error": STLFunction(
-        fn=lambda args, team, stdout, timeout: new_hog_error(
+        fn=lambda args, team, stdout, timeout: new_script_error(
             "Error", args[0] if len(args) > 0 else None, args[1] if len(args) > 1 else None
         ),
         minArgs=0,
         maxArgs=2,
     ),
     "RetryError": STLFunction(
-        fn=lambda args, team, stdout, timeout: new_hog_error("RetryError", args[0], args[1] if len(args) > 1 else None),
+        fn=lambda args, team, stdout, timeout: new_script_error("RetryError", args[0], args[1] if len(args) > 1 else None),
         minArgs=0,
         maxArgs=2,
     ),
     "NotImplementedError": STLFunction(
-        fn=lambda args, team, stdout, timeout: new_hog_error(
+        fn=lambda args, team, stdout, timeout: new_script_error(
             "NotImplementedError", args[0], args[1] if len(args) > 1 else None
         ),
         minArgs=0,

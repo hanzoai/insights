@@ -182,7 +182,7 @@ def _owner_to_team_handle(owner: str) -> str | None:
     return f"@Insights/{owner}"
 
 
-class _HogliResolver:
+class _ScriptliResolver:
     """insightscli-resolver: the shared insightscli resolver over distributed ownership files.
 
     `OwnersResolver` walks `owners.yaml` / `product.yaml` from the repo root and
@@ -198,7 +198,7 @@ class _HogliResolver:
         return {handle for owner in resolved if (handle := _owner_to_team_handle(owner))}
 
 
-def _build_insightscli_resolver(repo_root: Path, source: OwnershipSource) -> _HogliResolver:
+def _build_insightscli_resolver(repo_root: Path, source: OwnershipSource) -> _ScriptliResolver:
     if str(_OWNERS_PKG) not in sys.path:
         sys.path.insert(0, str(_OWNERS_PKG))
     try:
@@ -212,7 +212,7 @@ def _build_insightscli_resolver(repo_root: Path, source: OwnershipSource) -> _Ho
             "insightscli-resolver source from .stamp/policy.yml"
         ) from exc
     assert source.path is not None  # validated by the loader (insightscli-resolver uses `path`)
-    return _HogliResolver(OwnersResolver(repo_root=repo_root / source.path))
+    return _ScriptliResolver(OwnersResolver(repo_root=repo_root / source.path))
 
 
 @dataclass(frozen=True)
