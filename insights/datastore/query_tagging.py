@@ -291,7 +291,7 @@ def kind_fallback_tags(kind: NodeKind) -> FallbackTags | None:
             NodeKind.INSIGHTS_QL_QUERY
             | NodeKind.INSIGHTS_QL_METADATA
             | NodeKind.INSIGHTS_QL_AUTOCOMPLETE
-            | NodeKind.INSIGHTS_QUERY
+            | NodeKind.SCRIPT_QUERY
             | NodeKind.DATABASE_SCHEMA_QUERY
             | NodeKind.PROPERTY_VALUES_QUERY
             | NodeKind.USAGE_METRICS_QUERY
