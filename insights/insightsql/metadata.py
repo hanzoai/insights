@@ -81,10 +81,10 @@ def get_insightsql_metadata(
             debug=query.debug or False,
             globals=query.globals,
         )
-        if query.language == ScriptLanguage.HOG:
+        if query.language == ScriptLanguage.SCRIPT:
             program = parse_program(query.query)
             create_bytecode(program, supported_functions={"fetch", "insightsCapture"}, args=[], context=context)
-        elif query.language == ScriptLanguage.INSIGHTS_TEMPLATE:
+        elif query.language == ScriptLanguage.SCRIPT_TEMPLATE:
             string = parse_string_template(query.query)
             create_bytecode(string, supported_functions={"fetch", "insightsCapture"}, args=[], context=context)
         elif query.language == ScriptLanguage.INSIGHTS_QL_EXPR:
@@ -154,7 +154,7 @@ def get_insightsql_metadata(
             response.isValid = len(response.errors) == 0
 
     # We add a magic "F'" start prefix to get Antlr into the right parsing mode, subtract it now
-    if query.language == ScriptLanguage.INSIGHTS_TEMPLATE:
+    if query.language == ScriptLanguage.SCRIPT_TEMPLATE:
         for err in response.errors:
             if err.start is not None and err.end is not None and err.start > 0:
                 err.start -= 2
