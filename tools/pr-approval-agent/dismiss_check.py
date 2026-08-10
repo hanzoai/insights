@@ -13,7 +13,7 @@ the environment and prints a single-line `Decision` JSON on stdout:
 
     {"dismiss_approval": bool, "run_review": bool, "reason": "...", "last_approved_sha": "..."}
 
-The two booleans are orthogonal so each downstream workflow job gates on
+The two booleans are ortscriptonal so each downstream workflow job gates on
 exactly the question it owns: the `dismiss` job reads `dismiss_approval`,
 the `review` job reads `run_review`. Decisions are constructed only via
 `Decision.retain`, `Decision.review_only`, `Decision.dismiss_and_review`,

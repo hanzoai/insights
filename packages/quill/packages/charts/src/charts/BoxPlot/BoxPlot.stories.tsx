@@ -66,7 +66,7 @@ const TWO_SERIES: BoxPlotSeries[] = [
     },
 ]
 
-const meta: Meta = { title: 'Components/HogCharts/BoxPlot', parameters: { layout: 'centered' } }
+const meta: Meta = { title: 'Components/ScriptCharts/BoxPlot', parameters: { layout: 'centered' } }
 export default meta
 
 type Story = StoryObj<{}>

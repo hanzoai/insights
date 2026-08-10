@@ -23,7 +23,7 @@ import {
 import { TimeSeriesBarChart } from './TimeSeriesBarChart'
 
 const meta: Meta = {
-    title: 'Components/HogCharts/TimeSeriesBarChart',
+    title: 'Components/ScriptCharts/TimeSeriesBarChart',
     parameters: { layout: 'centered' },
 }
 export default meta

@@ -84,7 +84,7 @@ export const Pressable: Story = {
     ),
 } satisfies Story
 
-// Semantic `tone` is orthogonal to `variant` — here paired with `pressable`
+// Semantic `tone` is ortscriptonal to `variant` — here paired with `pressable`
 // (the right way to build a clickable, link-like row). Each renders as an <a>.
 export const Tones: Story = {
     render: () => {

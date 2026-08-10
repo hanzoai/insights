@@ -7,7 +7,7 @@ import { Stage, useReactiveTheme } from '../story-helpers'
 const LABELS = ['2024-01', '2024-02', '2024-03', '2024-04', '2024-05', '2024-06']
 
 const meta: Meta = {
-    title: 'Components/HogCharts/TrendLineOverlay',
+    title: 'Components/ScriptCharts/TrendLineOverlay',
     parameters: { layout: 'centered' },
 }
 export default meta

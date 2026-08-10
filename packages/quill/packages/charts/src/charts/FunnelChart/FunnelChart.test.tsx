@@ -1,7 +1,7 @@
 import { fireEvent, waitFor } from '@testing-library/react'
 
 import type { ChartTheme, Series } from '../../core/types'
-import { createDefaultTooltipAccessor, renderHogChart } from '../../testing'
+import { createDefaultTooltipAccessor, renderScriptChart } from '../../testing'
 import { dimensions } from '../../testing/jsdom'
 import { funnelFromCounts } from './funnel-data'
 import { FunnelChart, type FunnelStepClickData } from './FunnelChart'
@@ -23,7 +23,7 @@ describe('FunnelChart', () => {
     it('keeps steps with the same display name on separate bands', () => {
         // Bands are keyed by step index; keying by name would collapse both `Pageview`
         // steps into one d3 band slot and the funnel would lose a step.
-        const { chart } = renderHogChart(
+        const { chart } = renderScriptChart(
             <FunnelChart
                 steps={['Pageview', 'Pageview']}
                 series={[{ key: 'all', label: 'All', data: [100, 40] }]}
@@ -34,7 +34,7 @@ describe('FunnelChart', () => {
     })
 
     it('formats the value axis as percentages by default', () => {
-        const { chart } = renderHogChart(<FunnelChart steps={STEPS} series={SERIES} theme={THEME} />)
+        const { chart } = renderScriptChart(<FunnelChart steps={STEPS} series={SERIES} theme={THEME} />)
         const ticks = chart.yTicks()
         expect(ticks.length).toBeGreaterThan(0)
         expect(ticks.every((tick) => tick.endsWith('%'))).toBe(true)
@@ -42,8 +42,8 @@ describe('FunnelChart', () => {
 
     it('tooltip header shows the step name and value is formatted as X.XX%', async () => {
         // nativeTooltip preserves config-level formatters (valueFormatter / labelFormatter);
-        // the default renderHogChart path intercepts the tooltip prop and bypasses them.
-        const { chart } = renderHogChart(<FunnelChart steps={STEPS} series={SERIES} theme={THEME} />, {
+        // the default renderScriptChart path intercepts the tooltip prop and bypasses them.
+        const { chart } = renderScriptChart(<FunnelChart steps={STEPS} series={SERIES} theme={THEME} />, {
             nativeTooltip: true,
         })
         const step = dimensions.plotWidth / STEPS.length
@@ -70,7 +70,7 @@ describe('FunnelChart', () => {
         { area: 'bar fill', clientYOffset: dimensions.plotHeight - 2, converted: true },
     ])('onStepClick maps a click on the $area to converted=$converted', ({ clientYOffset, converted }) => {
         const onStepClick = jest.fn()
-        const { chart } = renderHogChart(
+        const { chart } = renderScriptChart(
             <FunnelChart steps={STEPS} series={SERIES} theme={THEME} onStepClick={onStepClick} />
         )
         const step = dimensions.plotWidth / STEPS.length
@@ -85,7 +85,7 @@ describe('FunnelChart', () => {
     })
 
     it('renders one step-footer cell per step and hides the axis step labels', async () => {
-        const { chart } = renderHogChart(
+        const { chart } = renderScriptChart(
             <FunnelChart
                 steps={STEPS}
                 series={SERIES}
@@ -102,7 +102,7 @@ describe('FunnelChart', () => {
     })
 
     it('floors the chart region height with chartMinHeight so a tall footer cannot collapse the canvas', async () => {
-        renderHogChart(
+        renderScriptChart(
             <FunnelChart
                 steps={STEPS}
                 series={SERIES}

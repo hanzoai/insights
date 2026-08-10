@@ -25,7 +25,7 @@ const STACK: Series[] = [
     { key: 'android', label: 'Android', color: '', data: [4, 6, 7, 11, 10, 14, 12], fill: { opacity: 0.5 } },
 ]
 
-const meta: Meta = { title: 'Components/HogCharts/LineChart', parameters: { layout: 'centered' } }
+const meta: Meta = { title: 'Components/ScriptCharts/LineChart', parameters: { layout: 'centered' } }
 export default meta
 
 type Story = StoryObj<{}>

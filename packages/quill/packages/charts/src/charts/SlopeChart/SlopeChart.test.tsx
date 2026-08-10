@@ -1,7 +1,7 @@
 import { fireEvent } from '@testing-library/react'
 
 import type { ChartTheme, Series, TooltipContext } from '../../core/types'
-import { getHogChart, renderHogChart } from '../../testing'
+import { getScriptChart, renderScriptChart } from '../../testing'
 import { sortSlopeTooltipRows, type SlopeSeriesMeta } from './slope-data'
 import { SlopeChart } from './SlopeChart'
 
@@ -21,14 +21,14 @@ const SERIES: Series<SlopeSeriesMeta>[] = [
 
 describe('SlopeChart', () => {
     it('renders the two columns and hides the value axis by default', () => {
-        const { chart } = renderHogChart(<SlopeChart series={SERIES} labels={LABELS} theme={THEME} />)
+        const { chart } = renderScriptChart(<SlopeChart series={SERIES} labels={LABELS} theme={THEME} />)
         expect(chart.seriesCount).toBe(2)
         expect(chart.xTicks()).toEqual(['Before', 'After'])
         expect(chart.yTicks()).toHaveLength(0)
     })
 
     it('renders empty state without crashing', () => {
-        const { chart } = renderHogChart(<SlopeChart series={[]} labels={LABELS} theme={THEME} />)
+        const { chart } = renderScriptChart(<SlopeChart series={[]} labels={LABELS} theme={THEME} />)
         expect(chart.seriesCount).toBe(0)
         expect(chart.slopeValueLabels()).toHaveLength(0)
     })
@@ -43,7 +43,7 @@ describe('SlopeChart', () => {
                 visibility: { excluded: true },
             },
         ]
-        const { chart } = renderHogChart(
+        const { chart } = renderScriptChart(
             <SlopeChart series={series} labels={LABELS} config={{ legend: { show: true } }} theme={THEME} />
         )
         expect(chart.seriesCount).toBe(2)
@@ -53,7 +53,7 @@ describe('SlopeChart', () => {
 
     describe('value labels', () => {
         it('shows both start and end value labels for every series by default', () => {
-            const { chart } = renderHogChart(<SlopeChart series={SERIES} labels={LABELS} theme={THEME} />)
+            const { chart } = renderScriptChart(<SlopeChart series={SERIES} labels={LABELS} theme={THEME} />)
             const labels = chart.slopeValueLabels()
             expect(
                 labels
@@ -82,7 +82,7 @@ describe('SlopeChart', () => {
                 },
                 { key: 'b', label: 'B', data: [80, 20] },
             ]
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <SlopeChart series={series} labels={LABELS} theme={THEME} config={config} />
             )
             const sideTexts = chart.slopeValueLabels().filter((l) => l.side === side)
@@ -102,7 +102,7 @@ describe('SlopeChart', () => {
                 },
                 { key: 'b', label: 'B', data: [80, 20] },
             ]
-            const { chart } = renderHogChart(<SlopeChart series={series} labels={LABELS} theme={THEME} />)
+            const { chart } = renderScriptChart(<SlopeChart series={series} labels={LABELS} theme={THEME} />)
             const texts = chart.slopeValueLabels().map((l) => l.text)
             expect(texts).toEqual(expect.arrayContaining(['80', '20']))
             expect(texts).not.toContain('10')
@@ -110,7 +110,7 @@ describe('SlopeChart', () => {
         })
 
         it('formats values with a custom valueFormatter', () => {
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <SlopeChart series={SERIES} labels={LABELS} config={{ valueFormatter: (v) => `${v}%` }} theme={THEME} />
             )
             expect(chart.slopeValueLabels().every((l) => l.text.endsWith('%'))).toBe(true)
@@ -120,7 +120,7 @@ describe('SlopeChart', () => {
             // A conditionally built override (`{ top: reserveOrUndefined }`) must not wipe the
             // start-label gutter SlopeChart computed — a plain spread would, clipping the labels.
             const startLabelLeft = (config?: Parameters<typeof SlopeChart>[0]['config']): string => {
-                const { container } = renderHogChart(
+                const { container } = renderScriptChart(
                     <SlopeChart series={SERIES} labels={LABELS} config={config} theme={THEME} />
                 )
                 const label = container.querySelector<HTMLElement>(
@@ -134,12 +134,12 @@ describe('SlopeChart', () => {
 
     describe('series labels', () => {
         it('renders a name label per series by default', () => {
-            const { chart } = renderHogChart(<SlopeChart series={SERIES} labels={LABELS} theme={THEME} />)
+            const { chart } = renderScriptChart(<SlopeChart series={SERIES} labels={LABELS} theme={THEME} />)
             expect(chart.slopeSeriesLabels().sort()).toEqual(['A', 'B'])
         })
 
         it('hides all name labels when showSeriesLabels is false', () => {
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <SlopeChart series={SERIES} labels={LABELS} config={{ showSeriesLabels: false }} theme={THEME} />
             )
             expect(chart.slopeSeriesLabels()).toHaveLength(0)
@@ -151,19 +151,19 @@ describe('SlopeChart', () => {
                 { key: 'big', label: 'Big', data: [0, 100] },
                 { key: 'sml', label: 'Small', data: [98, 100] },
             ]
-            const { chart } = renderHogChart(<SlopeChart series={series} labels={LABELS} theme={THEME} />)
+            const { chart } = renderScriptChart(<SlopeChart series={series} labels={LABELS} theme={THEME} />)
             expect(chart.slopeSeriesLabels()).toEqual(['Big'])
         })
     })
 
     describe('legend', () => {
         it('is hidden unless enabled', () => {
-            const { chart } = renderHogChart(<SlopeChart series={SERIES} labels={LABELS} theme={THEME} />)
+            const { chart } = renderScriptChart(<SlopeChart series={SERIES} labels={LABELS} theme={THEME} />)
             expect(chart.slopeLegendItems()).toHaveLength(0)
         })
 
         it('shows the label and signed change for each series', () => {
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <SlopeChart series={SERIES} labels={LABELS} config={{ legend: { show: true } }} theme={THEME} />
             )
             expect(chart.slopeLegendItems()).toEqual([
@@ -173,7 +173,7 @@ describe('SlopeChart', () => {
         })
 
         it('formats the change with a custom deltaFormatter', () => {
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <SlopeChart
                     series={SERIES}
                     labels={LABELS}
@@ -194,14 +194,14 @@ describe('SlopeChart', () => {
                 { key: 'b', label: 'B', data: [0, 90] },
                 { key: 'c', label: 'C', data: [0, 60] },
             ]
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <SlopeChart series={series} labels={LABELS} config={{ legend: { show: true } }} theme={THEME} />
             )
             expect(chart.slopeLegendItems().map((i) => i.label)).toEqual(['B', 'C', 'A'])
         })
 
         it('toggles a series off and on when its legend row is clicked', () => {
-            const { container, chart } = renderHogChart(
+            const { container, chart } = renderScriptChart(
                 <SlopeChart series={SERIES} labels={LABELS} config={{ legend: { show: true } }} theme={THEME} />
             )
             expect(chart.seriesCount).toBe(2)
@@ -210,16 +210,16 @@ describe('SlopeChart', () => {
                 Array.from(legend.querySelectorAll('button')).find((b) => b.textContent?.startsWith(label))!
 
             fireEvent.click(buttonFor('A'))
-            expect(getHogChart(container).seriesCount).toBe(1)
+            expect(getScriptChart(container).seriesCount).toBe(1)
             // The toggled-off series stays listed (so it can be restored).
             expect(
-                getHogChart(container)
+                getScriptChart(container)
                     .slopeLegendItems()
                     .map((i) => i.label)
             ).toEqual(['A', 'B'])
 
             fireEvent.click(buttonFor('A'))
-            expect(getHogChart(container).seriesCount).toBe(2)
+            expect(getScriptChart(container).seriesCount).toBe(2)
         })
     })
 
@@ -249,7 +249,7 @@ describe('SlopeChart', () => {
                 ] as Series<SlopeSeriesMeta>[],
             ],
         ])('%s: xTicks shows only the two real labels', (_desc, series) => {
-            const { chart } = renderHogChart(<SlopeChart series={series} labels={LABELS} theme={THEME} />)
+            const { chart } = renderScriptChart(<SlopeChart series={series} labels={LABELS} theme={THEME} />)
             expect(chart.xTicks()).toEqual(['Before', 'After'])
         })
 
@@ -288,7 +288,7 @@ describe('SlopeChart', () => {
                 ],
             ],
         ])('%s: value labels read the true start and end values', (_desc, series, expected) => {
-            const { chart } = renderHogChart(<SlopeChart series={series} labels={LABELS} theme={THEME} />)
+            const { chart } = renderScriptChart(<SlopeChart series={series} labels={LABELS} theme={THEME} />)
             const labels = chart.slopeValueLabels().map((l) => ({ side: l.side, text: l.text }))
             for (const e of expected) {
                 expect(labels).toContainEqual(e)
@@ -300,7 +300,7 @@ describe('SlopeChart', () => {
         it('slopes a >2-point series to its first and last point and labels', () => {
             const series: Series<SlopeSeriesMeta>[] = [{ key: 'a', label: 'A', data: [10, 20, 30, 40] }]
             const labels = ['Jan', 'Feb', 'Mar', 'Apr']
-            const { chart } = renderHogChart(<SlopeChart series={series} labels={labels} theme={THEME} />)
+            const { chart } = renderScriptChart(<SlopeChart series={series} labels={labels} theme={THEME} />)
             // Only the two ends are shown — interior points and labels are dropped.
             expect(chart.xTicks()).toEqual(['Jan', 'Apr'])
             const values = chart.slopeValueLabels().map((l) => ({ side: l.side, text: l.text }))
@@ -333,7 +333,7 @@ describe('SlopeChart', () => {
     })
 
     it('forwards dataAttr to the chart wrapper', () => {
-        const { chart } = renderHogChart(
+        const { chart } = renderScriptChart(
             <SlopeChart series={SERIES} labels={LABELS} theme={THEME} dataAttr="slope-instance" />
         )
         expect(chart.element.getAttribute('data-attr')).toBe('slope-instance')

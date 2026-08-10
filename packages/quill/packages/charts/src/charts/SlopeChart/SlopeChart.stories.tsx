@@ -14,7 +14,7 @@ const SERIES: Series<SlopeSeriesMeta>[] = [
     { key: 'latam', label: 'LATAM', color: '', data: [60, 70] },
 ]
 
-const meta: Meta = { title: 'Components/HogCharts/SlopeChart', parameters: { layout: 'centered' } }
+const meta: Meta = { title: 'Components/ScriptCharts/SlopeChart', parameters: { layout: 'centered' } }
 export default meta
 
 type Story = StoryObj<{}>

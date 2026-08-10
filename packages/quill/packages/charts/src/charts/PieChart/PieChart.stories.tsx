@@ -19,7 +19,7 @@ const ONE_BIG_TWO_TINY: Series[] = [
     { key: 'small-2', label: 'Social', color: '', data: [60] },
 ]
 
-const meta: Meta = { title: 'Components/HogCharts/PieChart', parameters: { layout: 'centered' } }
+const meta: Meta = { title: 'Components/ScriptCharts/PieChart', parameters: { layout: 'centered' } }
 export default meta
 
 type Story = StoryObj<{}>
