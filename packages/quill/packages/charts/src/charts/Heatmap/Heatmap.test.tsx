@@ -1,7 +1,7 @@
 import { waitFor } from '@testing-library/react'
 
 import type { ChartTheme } from '../../core/types'
-import { rawDrag, renderHogChart } from '../../testing'
+import { rawDrag, renderScriptChart } from '../../testing'
 import { Heatmap, type HeatmapBrushData } from './Heatmap'
 
 const THEME: ChartTheme = {
@@ -22,14 +22,14 @@ const CELLS = [
 
 describe('Heatmap', () => {
     it('renders one adapter series per row', () => {
-        const { chart } = renderHogChart(<Heatmap xLabels={X_LABELS} yLabels={Y_LABELS} cells={CELLS} theme={THEME} />)
+        const { chart } = renderScriptChart(<Heatmap xLabels={X_LABELS} yLabels={Y_LABELS} cells={CELLS} theme={THEME} />)
         expect(chart.seriesCount).toBe(Y_LABELS.length)
     })
 
     // The categorical y-axis rides the numeric tick machinery (row-center values + a formatter
     // mapping back to labels). If that adapter breaks, ticks render as raw numbers like "0.5".
     it('renders row labels, not row-unit numbers, as y-axis ticks', () => {
-        const { chart } = renderHogChart(<Heatmap xLabels={X_LABELS} yLabels={Y_LABELS} cells={CELLS} theme={THEME} />)
+        const { chart } = renderScriptChart(<Heatmap xLabels={X_LABELS} yLabels={Y_LABELS} cells={CELLS} theme={THEME} />)
         const ticks = chart.yTicks()
         expect(ticks.length).toBeGreaterThan(0)
         for (const tick of ticks) {
@@ -38,7 +38,7 @@ describe('Heatmap', () => {
     })
 
     it('renders column labels as x-axis ticks', () => {
-        const { chart } = renderHogChart(<Heatmap xLabels={X_LABELS} yLabels={Y_LABELS} cells={CELLS} theme={THEME} />)
+        const { chart } = renderScriptChart(<Heatmap xLabels={X_LABELS} yLabels={Y_LABELS} cells={CELLS} theme={THEME} />)
         const ticks = chart.xTicks()
         expect(ticks.length).toBeGreaterThan(0)
         for (const tick of ticks) {
@@ -50,12 +50,12 @@ describe('Heatmap', () => {
         // Columns are keyed by index, not label text; keying by label would collapse the two
         // "10:00" columns onto one x position, dropping a tick and misrouting hover/click.
         const dupLabels = ['10:00', '10:00', '10:02', '10:04']
-        const { chart } = renderHogChart(<Heatmap xLabels={dupLabels} yLabels={Y_LABELS} cells={CELLS} theme={THEME} />)
+        const { chart } = renderScriptChart(<Heatmap xLabels={dupLabels} yLabels={Y_LABELS} cells={CELLS} theme={THEME} />)
         expect(chart.xTicks()).toEqual(dupLabels)
     })
 
     it('tolerates a ragged cells grid without crashing', () => {
-        const { chart } = renderHogChart(
+        const { chart } = renderScriptChart(
             <Heatmap xLabels={X_LABELS} yLabels={Y_LABELS} cells={[[1], [2, 3]]} theme={THEME} />
         )
         expect(chart.seriesCount).toBe(Y_LABELS.length)
@@ -65,7 +65,7 @@ describe('Heatmap', () => {
     describe('onBrush', () => {
         async function brush(from: { x: number; y: number }, to: { x: number; y: number }): Promise<HeatmapBrushData> {
             const onBrush = jest.fn()
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <Heatmap xLabels={X_LABELS} yLabels={Y_LABELS} cells={CELLS} theme={THEME} onBrush={onBrush} />
             )
             // The chart commits scales in a post-render effect; retry the drag until it lands.

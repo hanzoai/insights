@@ -1,4 +1,4 @@
-"""Hogli -- developer CLI framework with YAML-based command definitions.
+"""Scriptli -- developer CLI framework with YAML-based command definitions.
 
 This package contains the standalone framework code for insightscli.
 Developers should only need to interact with this package when working on core functionality.

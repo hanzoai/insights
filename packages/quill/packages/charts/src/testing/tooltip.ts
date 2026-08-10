@@ -5,7 +5,7 @@ import { waitFor } from '@testing-library/react'
  *  wrapper. Kept in sync with overlays/Tooltip.tsx. */
 export const INSIGHTS_CHARTS_TOOLTIP_SELECTOR = '[data-script-charts-tooltip]'
 
-export interface HogChartTooltip {
+export interface ScriptChartTooltip {
     element: HTMLElement
     /** True once the user has clicked to pin the tooltip. Reflects the
      *  `script-charts-tooltip--pinned` class set by overlays/Tooltip.tsx. */
@@ -15,7 +15,7 @@ export interface HogChartTooltip {
 /** Generic tooltip accessor — exposes only the portal element and pinned
  *  state. Consumers with their own tooltip renderer (e.g. an InsightTooltip
  *  with a table layout) should layer their own DOM accessor on top of this. */
-export function createHogChartTooltip(element: HTMLElement): HogChartTooltip {
+export function createScriptChartTooltip(element: HTMLElement): ScriptChartTooltip {
     return {
         element,
         get isPinned(): boolean {
@@ -27,7 +27,7 @@ export function createHogChartTooltip(element: HTMLElement): HogChartTooltip {
 /** Accessor for the built-in `DefaultTooltip` layout, reading its stable `data-attr`
  *  test hooks. Use when a chart renders `DefaultTooltip` (directly or via a custom
  *  `tooltip` render prop that wraps it). */
-export interface DefaultTooltipAccessor extends HogChartTooltip {
+export interface DefaultTooltipAccessor extends ScriptChartTooltip {
     /** Header label — typically the hovered x-axis value. */
     label(): string
     /** Series labels in render order (excludes the total row). */
@@ -50,7 +50,7 @@ export function createDefaultTooltipAccessor(element: HTMLElement): DefaultToolt
     const rowEls = (): HTMLElement[] =>
         Array.from(element.querySelectorAll<HTMLElement>('[data-attr="script-chart-tooltip-row"]'))
 
-    return Object.assign(createHogChartTooltip(element), {
+    return Object.assign(createScriptChartTooltip(element), {
         label(): string {
             return element.querySelector('[data-attr="script-chart-tooltip-label"]')?.textContent?.trim() ?? ''
         },
@@ -72,14 +72,14 @@ export function createDefaultTooltipAccessor(element: HTMLElement): DefaultToolt
 }
 
 /** Currently rendered chart tooltip element, or null if none is mounted. */
-export function getHogChartTooltip(): HTMLElement | null {
+export function getScriptChartTooltip(): HTMLElement | null {
     return document.querySelector(INSIGHTS_CHARTS_TOOLTIP_SELECTOR)
 }
 
 /** Wait until a chart tooltip is present in the document and return it. `beforePoll`, if given,
  *  runs at the start of each poll attempt — used to re-dispatch a triggering event (e.g. a hover)
  *  that the chart may have dropped before it became interactive. */
-export async function waitForHogChartTooltip(timeout = 3000, beforePoll?: () => void): Promise<HTMLElement> {
+export async function waitForScriptChartTooltip(timeout = 3000, beforePoll?: () => void): Promise<HTMLElement> {
     // Flush pending microtasks so React portal commits complete before polling.
     await new Promise((r) => setTimeout(r, 0))
 
@@ -87,7 +87,7 @@ export async function waitForHogChartTooltip(timeout = 3000, beforePoll?: () => 
     await waitFor(
         () => {
             beforePoll?.()
-            const el = getHogChartTooltip()
+            const el = getScriptChartTooltip()
             if (!el) {
                 throw new Error('tooltip not yet rendered')
             }
