@@ -1191,7 +1191,7 @@ annotations: PostgresTable = PostgresTable(
 
 insights_flows: PostgresTable = PostgresTable(
     name="insights_flows",
-    postgres_table_name="insights_flow",
+    postgres_table_name="insights_hogflow",
     access_scope="insights_flow",
     description="Script flows: multi-step automation/messaging workflows; one row per flow, with its graph of actions and edges.",
     fields={
@@ -1216,7 +1216,7 @@ insights_flows: PostgresTable = PostgresTable(
 
 insights_functions: PostgresTable = PostgresTable(
     name="insights_functions",
-    postgres_table_name="insights_function",
+    postgres_table_name="insights_hogfunction",
     access_scope="insights_function",
     description="Script functions: destinations/transformations in the CDP pipeline (written in Script); one row per function.",
     fields={

@@ -101,7 +101,7 @@ def _secret_input_template() -> dict:
 def _raw_encrypted_inputs(model_id) -> Optional[str]:
     # The stored (still-encrypted) column value, to prove secrets aren't persisted in plaintext.
     with connection.cursor() as cursor:
-        cursor.execute("SELECT encrypted_inputs FROM insights_flow WHERE id = %s", [str(model_id)])
+        cursor.execute("SELECT encrypted_inputs FROM insights_hogflow WHERE id = %s", [str(model_id)])
         row = cursor.fetchone()
     return row[0] if row else None
 

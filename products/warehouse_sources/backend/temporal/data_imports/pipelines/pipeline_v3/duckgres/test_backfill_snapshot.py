@@ -38,7 +38,7 @@ class TestDeltaTableUri(SimpleTestCase):
             # under the unqualified table name, but normalized_name keeps the
             # "public_" qualifier. Reading normalized_name pointed the backfill at
             # a prefix with no _delta_log ("No files in log segment").
-            ("schema_qualified", "public.insights_function", "insights_function/", "insights_function"),
+            ("schema_qualified", "public.insights_hogfunction", "insights_hogfunction/", "insights_hogfunction"),
             # Unqualified name: folder and normalized_name already agree.
             (
                 "unqualified",
@@ -60,7 +60,7 @@ class TestDeltaTableUri(SimpleTestCase):
         assert uri == f"s3://test-bucket/dlt/{schema.folder_path()}/{expected_leaf}"
 
     def test_falls_back_to_normalized_name_when_no_table(self) -> None:
-        schema = self._schema("public.insights_function", leaf=None)
+        schema = self._schema("public.insights_hogfunction", leaf=None)
 
         uri = delta_table_uri(schema)
 
@@ -70,7 +70,7 @@ class TestDeltaTableUri(SimpleTestCase):
         # url_pattern is a user-writable field. A leaf crafted with encoded
         # separators (percent-encoded slashes survive split("/") as one segment)
         # must not let the backfill target a prefix outside the schema's folder.
-        schema = self._schema("public.insights_function", leaf="..%2f..%2fteam_2_postgres_secret%2fusers")
+        schema = self._schema("public.insights_hogfunction", leaf="..%2f..%2fteam_2_postgres_secret%2fusers")
 
         uri = delta_table_uri(schema)
 

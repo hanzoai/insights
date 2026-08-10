@@ -88,7 +88,7 @@ describe('FlowManager', () => {
 
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            `UPDATE insights_flow SET name='Test Script Flow team 1 updated', updated_at = NOW() WHERE id = $1`,
+            `UPDATE insights_hogflow SET name='Test Script Flow team 1 updated', updated_at = NOW() WHERE id = $1`,
             [flows[0].id],
             'testKey'
         )
@@ -115,7 +115,7 @@ describe('FlowManager', () => {
                 // Edit WITHOUT dispatching the reload notification - the missed-publish case
                 await hub.postgres.query(
                     PostgresUse.COMMON_WRITE,
-                    `UPDATE insights_flow SET name='Renamed without notification', updated_at = NOW() WHERE id = $1`,
+                    `UPDATE insights_hogflow SET name='Renamed without notification', updated_at = NOW() WHERE id = $1`,
                     [flows[0].id],
                     'testKey'
                 )
@@ -169,7 +169,7 @@ describe('FlowManager', () => {
 
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE insights_flow SET status='archived', updated_at = NOW() WHERE id = $1`,
+                `UPDATE insights_hogflow SET status='archived', updated_at = NOW() WHERE id = $1`,
                 [flows[0].id],
                 'testKey'
             )
@@ -213,7 +213,7 @@ describe('FlowManager', () => {
             // The API stores secret inputs Fernet-encrypted, stripped out of the plaintext `actions`.
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE insights_flow SET encrypted_inputs = $2 WHERE id = $1`,
+                `UPDATE insights_hogflow SET encrypted_inputs = $2 WHERE id = $1`,
                 [
                     flow.id,
                     hub.encryptedFields.encrypt(
@@ -259,7 +259,7 @@ describe('FlowManager', () => {
 
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE insights_flow SET encrypted_inputs = $2 WHERE id = $1`,
+                `UPDATE insights_hogflow SET encrypted_inputs = $2 WHERE id = $1`,
                 [
                     flow.id,
                     hub.encryptedFields.encrypt(
@@ -309,7 +309,7 @@ describe('FlowManager', () => {
             // ...and also in the encrypted column with the current value.
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE insights_flow SET encrypted_inputs = $2 WHERE id = $1`,
+                `UPDATE insights_hogflow SET encrypted_inputs = $2 WHERE id = $1`,
                 [
                     flow.id,
                     hub.encryptedFields.encrypt(JSON.stringify({ send_webhook: { api_key: { value: 'current' } } })),
@@ -338,7 +338,7 @@ describe('FlowManager', () => {
             // Not valid Fernet ciphertext (e.g. key skew / corruption): decrypt throws internally.
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE insights_flow SET encrypted_inputs = $2 WHERE id = $1`,
+                `UPDATE insights_hogflow SET encrypted_inputs = $2 WHERE id = $1`,
                 [flow.id, 'not-a-valid-fernet-token'],
                 'testKey'
             )

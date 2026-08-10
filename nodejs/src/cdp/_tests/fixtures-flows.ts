@@ -10,7 +10,7 @@ import { createScriptExecutionGlobals } from './fixtures'
 export const insertFlow = async (postgres: PostgresRouter, flow: Flow): Promise<Flow> => {
     // This is only used for testing so we need to override some values
 
-    const res = await insertRow(postgres, 'insights_flow', {
+    const res = await insertRow(postgres, 'insights_hogflow', {
         ...flow,
         description: '',
         created_at: new Date().toISOString(),
