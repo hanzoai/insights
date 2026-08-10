@@ -106,7 +106,7 @@ export class FlowScheduleService {
         const startTime = Date.now()
         try {
             const { fetchResponse, fetchError } = await this.internalFetchService.fetch({
-                urlPath: '/v1/internal/hog_flows/process_due_schedules',
+                urlPath: '/v1/internal/insights_flows/process_due_schedules',
                 fetchParams: {
                     method: 'POST',
                 },
