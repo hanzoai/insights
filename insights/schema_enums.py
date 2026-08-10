@@ -363,9 +363,9 @@ class AssistantTool(StrEnum):
     FIX_INSIGHTSQL_QUERY = "fix_insightsql_query"
     ANALYZE_USER_INTERVIEWS = "analyze_user_interviews"
     CREATE_USER_INTERVIEW_TOPIC = "create_user_interview_topic"
-    CREATE_FN_TRANSFORMATION_FUNCTION = "create_script_transformation_function"
-    CREATE_FN_FUNCTION_FILTERS = "create_insights_function_filters"
-    CREATE_FN_FUNCTION_INPUTS = "create_insights_function_inputs"
+    CREATE_SCRIPT_TRANSFORMATION_FUNCTION = "create_script_transformation_function"
+    CREATE_INSIGHTS_FUNCTION_FILTERS = "create_insights_function_filters"
+    CREATE_INSIGHTS_FUNCTION_INPUTS = "create_insights_function_inputs"
     CREATE_MESSAGE_TEMPLATE = "create_message_template"
     FILTER_ERROR_TRACKING_ISSUES = "filter_error_tracking_issues"
     SEARCH_ERROR_TRACKING_ISSUES = "search_error_tracking_issues"
@@ -406,7 +406,7 @@ class AssistantTool(StrEnum):
     FINALIZE_PLAN = "finalize_plan"
     CALL_MCP_SERVER = "call_mcp_server"
     SEARCH_LLM_TRACES = "search_llm_traces"
-    RUN_FN_EVAL_TEST = "run_script_eval_test"
+    RUN_SCRIPT_EVAL_TEST = "run_script_eval_test"
     LIST_LLM_SKILLS = "list_llm_skills"
     GET_LLM_SKILL = "get_llm_skill"
     GET_LLM_SKILL_FILE = "get_llm_skill_file"
@@ -1070,7 +1070,7 @@ class ErrorTrackingOrderBy(StrEnum):
 
 
 class EvaluationRuntime(StrEnum):
-    HOG = "script"
+    SCRIPT = "script"
     LLM_JUDGE = "llm_judge"
     SENTIMENT = "sentiment"
 
@@ -1330,7 +1330,7 @@ class ExternalDataSourceType(StrEnum):
     GRANOLA = "Granola"
     BUILD_BETTER = "BuildBetter"
     CONVEX = "Convex"
-    CLICK_HOUSE = "Datastore"
+    DATASTORE = "Datastore"
     PLAIN = "Plain"
     RESEND = "Resend"
     PG_ANALYZE = "PgAnalyze"
@@ -2541,7 +2541,7 @@ class FileSystemIconType(StrEnum):
     INSIGHT_PATHS = "insight/paths"
     INSIGHT_LIFECYCLE = "insight/lifecycle"
     INSIGHT_STICKINESS = "insight/stickiness"
-    INSIGHT_HOG = "insight/script"
+    INSIGHT_SCRIPT = "insight/script"
     TEAM_ACTIVITY = "team_activity"
     HOME = "home"
     TOOLS = "tools"
@@ -2554,7 +2554,7 @@ class FileSystemIconType(StrEnum):
     TOOLBAR = "toolbar"
     VISUAL_REVIEW = "visual_review"
     CODE_REVIEW = "code_review"
-    Stamp = "stamp"
+    STAMP = "stamp"
     SETTINGS = "settings"
     HEALTH = "health"
     INBOX = "inbox"
@@ -2701,18 +2701,18 @@ class MascotActorColorOption(StrEnum):
 
 class MascotActorSkinOption(StrEnum):
     DEFAULT = "default"
-    SPIDERHOG = "spiderscript"
-    ROBOHOG = "roboscript"
-    HOGZILLA = "scriptzilla"
+    SPIDERSCRIPT = "spiderscript"
+    ROBOSCRIPT = "roboscript"
+    SCRIPTZILLA = "scriptzilla"
     GHOST = "ghost"
 
 
 class ScriptLanguage(StrEnum):
-    HOG = "script"
-    INSIGHTS_JSON = "scriptJson"
+    SCRIPT = "script"
+    SCRIPT_JSON = "scriptJson"
     INSIGHTS_QL = "insightsQL"
     INSIGHTS_QL_EXPR = "insightsQLExpr"
-    INSIGHTS_TEMPLATE = "scriptTemplate"
+    SCRIPT_TEMPLATE = "scriptTemplate"
     LIQUID = "liquid"
 
 
@@ -2785,6 +2785,13 @@ class PropertyGroupsMode(StrEnum):
     ENABLED = "enabled"
     DISABLED = "disabled"
     OPTIMIZED = "optimized"
+
+
+class SessionTableVersion(StrEnum):
+    AUTO = "auto"
+    V1 = "v1"
+    V2 = "v2"
+    V3 = "v3"
 
 
 class SessionsV2JoinMode(StrEnum):
@@ -3174,7 +3181,7 @@ class NodeKind(StrEnum):
     EVENTS_QUERY = "EventsQuery"
     SESSIONS_QUERY = "SessionsQuery"
     PERSONS_NODE = "PersonsNode"
-    INSIGHTS_QUERY = "ScriptQuery"
+    SCRIPT_QUERY = "ScriptQuery"
     INSIGHTS_QL_QUERY = "InsightsQLQuery"
     INSIGHTS_QL_METADATA = "InsightsQLMetadata"
     INSIGHTS_QL_AUTOCOMPLETE = "InsightsQLAutocomplete"
@@ -3470,7 +3477,7 @@ class ProductKey(StrEnum):
     PRODUCT_TOURS = "product_tours"
     PULSE = "pulse"
     REVENUE_ANALYTICS = "revenue_analytics"
-    REVIEW_HOG = "review"
+    REVIEW = "review"
     SESSION_REPLAY = "session_replay"
     REPLAY_VISION = "replay_vision"
     SITE_APPS = "site_apps"
