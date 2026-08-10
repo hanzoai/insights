@@ -70,7 +70,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query=query,
-            language=ScriptLanguage.INSIGHTS_TEMPLATE,
+            language=ScriptLanguage.SCRIPT_TEMPLATE,
             globals={"event": "$pageview"},
             startPosition=start,
             endPosition=end,
@@ -81,7 +81,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query=query,
-            language=ScriptLanguage.INSIGHTS_JSON,
+            language=ScriptLanguage.SCRIPT_JSON,
             globals={"event": "$pageview"},
             startPosition=start,
             endPosition=end,
@@ -94,7 +94,7 @@ class TestAutocomplete(DatastoreTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query=query,
-            language=ScriptLanguage.HOG,
+            language=ScriptLanguage.SCRIPT,
             globals={"event": "$pageview"},
             startPosition=start,
             endPosition=end,

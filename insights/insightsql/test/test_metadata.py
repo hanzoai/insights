@@ -76,7 +76,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
     def _program(self, query: str, globals: Optional[dict] = None) -> InsightsQLMetadataResponse:
         return get_insightsql_metadata(
             query=InsightsQLMetadata(
-                kind="InsightsQLMetadata", language=ScriptLanguage.HOG, query=query, globals=globals, response=None
+                kind="InsightsQLMetadata", language=ScriptLanguage.SCRIPT, query=query, globals=globals, response=None
             ),
             team=self.team,
         )
@@ -84,7 +84,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
     def _template(self, query: str) -> InsightsQLMetadataResponse:
         return get_insightsql_metadata(
             query=InsightsQLMetadata(
-                kind="InsightsQLMetadata", language=ScriptLanguage.INSIGHTS_TEMPLATE, query=query, response=None
+                kind="InsightsQLMetadata", language=ScriptLanguage.SCRIPT_TEMPLATE, query=query, response=None
             ),
             team=self.team,
         )

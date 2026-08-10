@@ -112,7 +112,7 @@ class RunScriptEvalTestArgs(BaseModel):
 
 
 class RunScriptEvalTestTool(MaxTool):
-    name: str = AssistantTool.RUN_FN_EVAL_TEST.value
+    name: str = AssistantTool.RUN_SCRIPT_EVAL_TEST.value
     description: str = TOOL_DESCRIPTION
     args_schema: type[BaseModel] = RunScriptEvalTestArgs
 

@@ -498,7 +498,7 @@ def get_insightsql_autocomplete(
                     root_node = parse_expr(query_to_try, timings=timings)
                     select_ast = cast(ast.SelectQuery, clone_expr(source_query, clear_locations=True))
                     select_ast.select = [root_node]
-            elif query.language == ScriptLanguage.INSIGHTS_TEMPLATE:
+            elif query.language == ScriptLanguage.SCRIPT_TEMPLATE:
                 with timings.measure("parse_template"):
                     root_node = parse_string_template(query_to_try, timings=timings)
             elif query.language == ScriptLanguage.LIQUID:
@@ -506,10 +506,10 @@ def get_insightsql_autocomplete(
                     # Liquid templates are handled similarly to Script templates for autocomplete
                     # We treat them as string templates but with Liquid syntax
                     root_node = parse_string_template(query_to_try, timings=timings)
-            elif query.language == ScriptLanguage.HOG:
+            elif query.language == ScriptLanguage.SCRIPT:
                 with timings.measure("parse_program"):
                     root_node = parse_program(query_to_try, timings=timings)
-            elif query.language == ScriptLanguage.INSIGHTS_JSON:
+            elif query.language == ScriptLanguage.SCRIPT_JSON:
                 query_to_try, query_start, query_end = extract_json_row(query_to_try, query_start, query_end)
                 if query_to_try == "":
                     break
@@ -519,12 +519,12 @@ def get_insightsql_autocomplete(
 
             with timings.measure("find_node"):
                 # to account for the magic F' symbol we append to change antlr's mode
-                extra = 2 if query.language == ScriptLanguage.INSIGHTS_TEMPLATE else 0
+                extra = 2 if query.language == ScriptLanguage.SCRIPT_TEMPLATE else 0
                 find_node = GetNodeAtPositionTraverser(root_node, query_start + extra, query_end + extra)
             node = find_node.node
             parent_node = find_node.parent_node
 
-            if ScriptLanguage.INSIGHTS_TEMPLATE and isinstance(node, ast.Constant):
+            if ScriptLanguage.SCRIPT_TEMPLATE and isinstance(node, ast.Constant):
                 # Do not show suggestions if not inside the {} part in a template string
                 continue
 
@@ -547,7 +547,7 @@ def get_insightsql_autocomplete(
                         if loop_globals != query.globals:
                             break
 
-            if query.language in (ScriptLanguage.HOG, ScriptLanguage.INSIGHTS_TEMPLATE, ScriptLanguage.LIQUID):
+            if query.language in (ScriptLanguage.SCRIPT, ScriptLanguage.SCRIPT_TEMPLATE, ScriptLanguage.LIQUID):
                 # For Script and Liquid, first add all local variables in scope
                 script_vars = gather_script_variables_in_scope(root_node, node)
                 extend_responses(

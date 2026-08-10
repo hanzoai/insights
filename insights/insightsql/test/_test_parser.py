@@ -5535,7 +5535,7 @@ def parser_test_factory(backend: InsightsQLParserBackend):
 
         def test_is_only_consumes_known_tails(self):
             # `IS` is only `IS [NOT] NULL` / `IS [NOT] DISTINCT FROM y` per cpp's grammar; in Script program mode anything else falls back to per-token ExprStatements (e.g. `this is a string` parses as four bare identifier statements).
-            # Caught by `test_metadata.py::test_string_template` parsing `"this is a {event} string"` as `ScriptLanguage.HOG`.
+            # Caught by `test_metadata.py::test_string_template` parsing `"this is a {event} string"` as `ScriptLanguage.SCRIPT`.
             cases = (
                 "this is a string",
                 "this is a {event} string",
