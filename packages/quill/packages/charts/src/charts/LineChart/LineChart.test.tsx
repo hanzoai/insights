@@ -2,7 +2,7 @@ import { fireEvent } from '@testing-library/react'
 
 import type { ChartTheme, Series } from '../../core/types'
 import { ReferenceLine } from '../../overlays/ReferenceLine'
-import { dimensions as testDimensions, getHogChart, rawDrag, renderHogChart } from '../../testing'
+import { dimensions as testDimensions, getScriptChart, rawDrag, renderScriptChart } from '../../testing'
 import { LineChart } from './LineChart'
 
 function legendButtons(container: HTMLElement): HTMLButtonElement[] {
@@ -30,12 +30,12 @@ describe('LineChart', () => {
         ['area mode', [{ key: 'a', label: 'A', data: [10, 20, 30], fill: {} }] as Series[], undefined],
         ['percent stack mode', SERIES, { percentStackView: true }],
     ] as const)('renders without throwing in %s', (_, series, config) => {
-        const { chart } = renderHogChart(<LineChart series={series} labels={LABELS} theme={THEME} config={config} />)
+        const { chart } = renderScriptChart(<LineChart series={series} labels={LABELS} theme={THEME} config={config} />)
         expect(chart.seriesCount).toBeGreaterThan(0)
     })
 
     it('renders empty state without crashing', () => {
-        const { chart } = renderHogChart(<LineChart series={[]} labels={[]} theme={THEME} />)
+        const { chart } = renderScriptChart(<LineChart series={[]} labels={[]} theme={THEME} />)
         expect(chart.seriesCount).toBe(0)
     })
 
@@ -50,19 +50,19 @@ describe('LineChart', () => {
             },
             { key: 'c', label: 'C', data: [3, 6, 9] },
         ]
-        const { chart } = renderHogChart(<LineChart series={series} labels={LABELS} theme={THEME} />)
+        const { chart } = renderScriptChart(<LineChart series={series} labels={LABELS} theme={THEME} />)
         expect(chart.seriesCount).toBe(2)
     })
 
     it('forwards `dataAttr` to the chart wrapper for product-test selection', () => {
-        const { chart } = renderHogChart(
+        const { chart } = renderScriptChart(
             <LineChart series={SERIES} labels={LABELS} theme={THEME} dataAttr="line-chart-instance" />
         )
         expect(chart.element.getAttribute('data-attr')).toBe('line-chart-instance')
     })
 
     it('applies a default percent formatter when consumer omits one in percent stack mode', () => {
-        const { chart } = renderHogChart(
+        const { chart } = renderScriptChart(
             <LineChart series={SERIES} labels={LABELS} theme={THEME} config={{ percentStackView: true }} />
         )
         expect(chart.yTicks().some((t) => /\d+%/.test(t))).toBe(true)
@@ -70,7 +70,7 @@ describe('LineChart', () => {
 
     it('uses custom yTickFormatter when supplied in percent stack mode', () => {
         const formatter = jest.fn((v: number) => `${Math.round(v * 1000) / 10}‰`)
-        const { chart } = renderHogChart(
+        const { chart } = renderScriptChart(
             <LineChart
                 series={SERIES}
                 labels={LABELS}
@@ -90,7 +90,7 @@ describe('LineChart', () => {
                 data: [Number.NaN, Number.NaN, Number.NaN],
             },
         ]
-        const { chart } = renderHogChart(<LineChart series={broken} labels={LABELS} theme={THEME} />)
+        const { chart } = renderScriptChart(<LineChart series={broken} labels={LABELS} theme={THEME} />)
         expect(chart.seriesCount).toBe(1)
     })
 
@@ -99,14 +99,14 @@ describe('LineChart', () => {
             ['hideXAxis', { hideXAxis: true }, 'xTicks'],
             ['hideYAxis', { hideYAxis: true }, 'yTicks'],
         ] as const)('hides ticks when %s is true', (_, config, accessor) => {
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <LineChart series={SERIES} labels={LABELS} theme={THEME} config={config} />
             )
             expect(chart[accessor]()).toHaveLength(0)
         })
 
         it('applies xTickFormatter to x-axis ticks', () => {
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <LineChart
                     series={SERIES}
                     labels={LABELS}
@@ -118,7 +118,7 @@ describe('LineChart', () => {
         })
 
         it('renders custom axis titles', () => {
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <LineChart
                     series={SERIES}
                     labels={LABELS}
@@ -134,7 +134,7 @@ describe('LineChart', () => {
         })
 
         it('includes custom axis titles in the canvas accessible label', () => {
-            const { getByRole } = renderHogChart(
+            const { getByRole } = renderScriptChart(
                 <LineChart
                     series={SERIES}
                     labels={LABELS}
@@ -151,7 +151,7 @@ describe('LineChart', () => {
         })
 
         it('ignores whitespace-only axis titles', () => {
-            const { chart, getByRole } = renderHogChart(
+            const { chart, getByRole } = renderScriptChart(
                 <LineChart
                     series={SERIES}
                     labels={LABELS}
@@ -168,7 +168,7 @@ describe('LineChart', () => {
         it('truncates long axis titles without losing the full label metadata', () => {
             const xAxisLabel = 'Signup date for a very long customer lifecycle analysis '.repeat(30).trim()
             const yAxisLabel = 'Unique users with a very long aggregation description '.repeat(30).trim()
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <LineChart series={SERIES} labels={LABELS} theme={THEME} config={{ xAxisLabel, yAxisLabel }} />
             )
 
@@ -184,7 +184,7 @@ describe('LineChart', () => {
         })
 
         it('hides an axis title when that axis is hidden', () => {
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <LineChart
                     series={SERIES}
                     labels={LABELS}
@@ -210,7 +210,7 @@ describe('LineChart', () => {
                     yAxisId: 'right',
                 },
             ]
-            const { chart } = renderHogChart(<LineChart series={series} labels={LABELS} theme={THEME} />)
+            const { chart } = renderScriptChart(<LineChart series={series} labels={LABELS} theme={THEME} />)
             expect(chart.hasRightAxis).toBe(true)
             expect(chart.yRightTicks().length).toBeGreaterThan(0)
         })
@@ -226,7 +226,7 @@ describe('LineChart', () => {
                     yAxisId: 'y2',
                 },
             ]
-            const { chart } = renderHogChart(<LineChart series={series} labels={LABELS} theme={THEME} />)
+            const { chart } = renderScriptChart(<LineChart series={series} labels={LABELS} theme={THEME} />)
             expect(chart.hasRightAxis).toBe(true)
             const leftValues = chart.yTicks().map((t) => parseFloat(t.replace(/[^0-9.]/g, '')))
             // 30 is the default axis max, 5000 the third axis max — both gutters stack on the left.
@@ -236,7 +236,7 @@ describe('LineChart', () => {
 
         it('renders without crashing in yScaleType log with positive data', () => {
             const series: Series[] = [{ key: 'a', label: 'A', data: [1, 10, 100] }]
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <LineChart series={series} labels={LABELS} theme={THEME} config={{ yScaleType: 'log' }} />
             )
             const ticks = chart.yTicks()
@@ -249,7 +249,7 @@ describe('LineChart', () => {
 
     describe('hover & tooltip', () => {
         it('mounts a tooltip on hover', async () => {
-            const { chart } = renderHogChart(<LineChart series={SERIES} labels={LABELS} theme={THEME} />)
+            const { chart } = renderScriptChart(<LineChart series={SERIES} labels={LABELS} theme={THEME} />)
             chart.hoverAtIndex(1)
             const tooltip = await chart.waitForTooltip()
             expect(tooltip.element.textContent).toContain('Tue')
@@ -257,7 +257,7 @@ describe('LineChart', () => {
 
         it('invokes onPointClick with the clicked column', async () => {
             const onPointClick = jest.fn()
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <LineChart series={SERIES} labels={LABELS} theme={THEME} onPointClick={onPointClick} />
             )
             await chart.clickAtIndex(1)
@@ -271,14 +271,14 @@ describe('LineChart', () => {
         })
 
         it('passes hovered seriesData to the tooltip render prop', async () => {
-            const { chart } = renderHogChart(<LineChart series={SERIES} labels={LABELS} theme={THEME} />)
+            const { chart } = renderScriptChart(<LineChart series={SERIES} labels={LABELS} theme={THEME} />)
             chart.hoverAtIndex(1)
             const tooltip = await chart.waitForTooltip()
             expect(tooltip.seriesData).toHaveLength(SERIES.length)
         })
 
         it('pins the tooltip on click when tooltip.pinnable is true', async () => {
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <LineChart series={SERIES} labels={LABELS} theme={THEME} config={{ tooltip: { pinnable: true } }} />
             )
             await chart.clickAtIndex(1)
@@ -291,7 +291,7 @@ describe('LineChart', () => {
                 { key: 'a', label: 'A', data: [10, 20, 30] },
                 { key: 'b', label: 'B', data: [5, 15, 25], overlay: true },
             ]
-            const { chart } = renderHogChart(<LineChart series={series} labels={LABELS} theme={THEME} />)
+            const { chart } = renderScriptChart(<LineChart series={series} labels={LABELS} theme={THEME} />)
             chart.hoverAtIndex(1)
             const tooltip = await chart.waitForTooltip()
             expect(tooltip.element.textContent).toContain('Tue')
@@ -307,7 +307,7 @@ describe('LineChart', () => {
                     visibility: { tooltip: false },
                 },
             ]
-            const { chart } = renderHogChart(<LineChart series={series} labels={LABELS} theme={THEME} />)
+            const { chart } = renderScriptChart(<LineChart series={series} labels={LABELS} theme={THEME} />)
             chart.hoverAtIndex(1)
             const tooltip = await chart.waitForTooltip()
             expect(tooltip.element.textContent).toContain('A')
@@ -321,7 +321,7 @@ describe('LineChart', () => {
 
         it('fires onDateRangeZoom with the start and end labels of the dragged range', () => {
             const onDateRangeZoom = jest.fn()
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <LineChart series={LONG_SERIES} labels={LONG_LABELS} theme={THEME} onDateRangeZoom={onDateRangeZoom} />
             )
             chart.dragSelection(1, 3)
@@ -336,7 +336,7 @@ describe('LineChart', () => {
 
         it('normalizes a right-to-left drag', () => {
             const onDateRangeZoom = jest.fn()
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <LineChart series={LONG_SERIES} labels={LONG_LABELS} theme={THEME} onDateRangeZoom={onDateRangeZoom} />
             )
             chart.dragSelection(3, 1)
@@ -351,7 +351,7 @@ describe('LineChart', () => {
         it('does not fire onPointClick when a drag completes', () => {
             const onDateRangeZoom = jest.fn()
             const onPointClick = jest.fn()
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <LineChart
                     series={LONG_SERIES}
                     labels={LONG_LABELS}
@@ -368,7 +368,7 @@ describe('LineChart', () => {
         it('still fires onPointClick on a plain click when onDateRangeZoom is set', async () => {
             const onDateRangeZoom = jest.fn()
             const onPointClick = jest.fn()
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <LineChart
                     series={LONG_SERIES}
                     labels={LONG_LABELS}
@@ -383,7 +383,7 @@ describe('LineChart', () => {
         })
 
         it('switches the wrapper cursor to crosshair when onDateRangeZoom is provided', () => {
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <LineChart series={LONG_SERIES} labels={LONG_LABELS} theme={THEME} onDateRangeZoom={jest.fn()} />
             )
             expect(chart.element.classList).toContain('cursor-crosshair')
@@ -392,7 +392,7 @@ describe('LineChart', () => {
         it('a drag that releases outside the wrapper does not swallow the next unrelated click', async () => {
             const onDateRangeZoom = jest.fn()
             const onPointClick = jest.fn()
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <LineChart
                     series={LONG_SERIES}
                     labels={LONG_LABELS}
@@ -419,7 +419,7 @@ describe('LineChart', () => {
         it('click-without-drag still dismisses a pinned tooltip when onDateRangeZoom is set', async () => {
             const onDateRangeZoom = jest.fn()
             const onPointClick = jest.fn()
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <LineChart
                     series={[
                         { key: 'a', label: 'A', data: [10, 20, 30, 40, 50] },
@@ -444,7 +444,7 @@ describe('LineChart', () => {
         it('treats a sub-threshold mousedown+move as a click, not a drag', async () => {
             const onDateRangeZoom = jest.fn()
             const onPointClick = jest.fn()
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <LineChart
                     series={LONG_SERIES}
                     labels={LONG_LABELS}
@@ -467,7 +467,7 @@ describe('LineChart', () => {
 
         it('ignores a non-primary-button drag', () => {
             const onDateRangeZoom = jest.fn()
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <LineChart series={LONG_SERIES} labels={LONG_LABELS} theme={THEME} onDateRangeZoom={onDateRangeZoom} />
             )
             const y = testDimensions.plotTop + testDimensions.plotHeight / 2
@@ -481,7 +481,7 @@ describe('LineChart', () => {
 
         it('does not start a drag from outside the plot area', () => {
             const onDateRangeZoom = jest.fn()
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <LineChart series={LONG_SERIES} labels={LONG_LABELS} theme={THEME} onDateRangeZoom={onDateRangeZoom} />
             )
             const yAbovePlot = testDimensions.plotTop - 5
@@ -495,7 +495,7 @@ describe('LineChart', () => {
 
     describe('children & error boundary', () => {
         it('renders custom overlay children', () => {
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <LineChart series={SERIES} labels={LABELS} theme={THEME}>
                     <div data-attr="custom-child" />
                 </LineChart>
@@ -504,7 +504,7 @@ describe('LineChart', () => {
         })
 
         it('renders a ReferenceLine child via the accessor', () => {
-            const { chart } = renderHogChart(
+            const { chart } = renderScriptChart(
                 <LineChart series={SERIES} labels={LABELS} theme={THEME}>
                     <ReferenceLine value={15} label="Target" />
                 </LineChart>
@@ -523,7 +523,7 @@ describe('LineChart', () => {
             // ChartErrorBoundary surfaces the error to onError; React still logs it.
             const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
             try {
-                const { chart } = renderHogChart(
+                const { chart } = renderScriptChart(
                     <LineChart series={SERIES} labels={LABELS} theme={THEME} tooltip={tooltip} onError={onError} />
                 )
                 chart.hoverAtIndex(1)
@@ -536,35 +536,35 @@ describe('LineChart', () => {
 
     describe('interactive legend', () => {
         it('renders no legend by default', () => {
-            const { container } = renderHogChart(<LineChart series={SERIES} labels={LABELS} theme={THEME} />)
+            const { container } = renderScriptChart(<LineChart series={SERIES} labels={LABELS} theme={THEME} />)
             expect(container.querySelector('[data-attr="script-chart-line-legend"]')).toBeNull()
         })
 
         it('renders a clickable legend item per series when legend.show is set', () => {
-            const { container } = renderHogChart(
+            const { container } = renderScriptChart(
                 <LineChart series={SERIES} labels={LABELS} theme={THEME} config={{ legend: { show: true } }} />
             )
             expect(legendButtons(container).map((b) => b.textContent)).toEqual(['A', 'B'])
         })
 
         it('hides a series on legend click and shows it again on a second click', () => {
-            const { container, chart } = renderHogChart(
+            const { container, chart } = renderScriptChart(
                 <LineChart series={SERIES} labels={LABELS} theme={THEME} config={{ legend: { show: true } }} />
             )
             expect(chart.seriesCount).toBe(2)
 
             fireEvent.click(legendButtons(container)[1])
-            expect(getHogChart(container).seriesCount).toBe(1)
+            expect(getScriptChart(container).seriesCount).toBe(1)
             // The toggled-off row stays in the legend (dimmed) so it can be restored.
             const dimmed = legendButtons(container).filter((b) => b.className.includes('opacity-40'))
             expect(dimmed.map((b) => b.textContent)).toEqual(['B'])
 
             fireEvent.click(legendButtons(container)[1])
-            expect(getHogChart(container).seriesCount).toBe(2)
+            expect(getScriptChart(container).seriesCount).toBe(2)
         })
 
         it('renders a static (non-clickable) legend when interactive is false', () => {
-            const { container } = renderHogChart(
+            const { container } = renderScriptChart(
                 <LineChart
                     series={SERIES}
                     labels={LABELS}

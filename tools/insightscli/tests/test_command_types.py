@@ -416,7 +416,7 @@ class TestPromptStep:
         assert call1 == call2 == (([bin_insightscli, "migrations:run"],), {"env": {}})
 
 
-class TestFindHogliExecutable:
+class TestFindScriptliExecutable:
     """Test _find_insightscli_executable resolves correctly across environments."""
 
     def test_prefers_bin_insightscli_when_present(self, tmp_path: MagicMock, monkeypatch: pytest.MonkeyPatch) -> None:

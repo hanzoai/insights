@@ -3,11 +3,11 @@ import React, { type ReactElement, type ReactNode } from 'react'
 
 import type { TooltipContext } from '../core/types'
 import { DefaultTooltip } from '../overlays/DefaultTooltip'
-import { getHogChart, type HogChart } from './accessor'
+import { getScriptChart, type ScriptChart } from './accessor'
 import { ensureJsdom } from './jsdom'
 import { INSIGHTS_CHARTS_TOOLTIP_SELECTOR } from './tooltip'
 
-export interface RenderHogChartOptions {
+export interface RenderScriptChartOptions {
     /** Skip the tooltip-prop override so the chart renders its own tooltip. Context capture
      *  via `chart.waitForTooltip()` is unavailable in this mode. */
     nativeTooltip?: boolean
@@ -19,10 +19,10 @@ export interface RenderHogChartOptions {
  *  Sets up the jsdom mocks + sync RAF on first call (idempotent), so tests don't need a
  *  beforeEach for those. Also calls `cleanup()` and removes any leftover tooltip portal
  *  before each render — RTL's auto-cleanup doesn't always reach `FloatingPortal` children. */
-export function renderHogChart<Meta = unknown>(
+export function renderScriptChart<Meta = unknown>(
     ui: ReactElement,
-    options: RenderHogChartOptions = {}
-): RenderResult & { chart: HogChart<Meta> } {
+    options: RenderScriptChartOptions = {}
+): RenderResult & { chart: ScriptChart<Meta> } {
     ensureJsdom()
     cleanup()
     document.querySelectorAll(INSIGHTS_CHARTS_TOOLTIP_SELECTOR).forEach((el) => el.remove())
@@ -45,7 +45,7 @@ export function renderHogChart<Meta = unknown>(
     const result = render(toRender)
     return {
         ...result,
-        chart: getHogChart<Meta>(result.container, {
+        chart: getScriptChart<Meta>(result.container, {
             getLastTooltipContext: () => lastTooltipContext,
             totalLabels: props.labels?.length,
         }),

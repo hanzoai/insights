@@ -24,9 +24,9 @@ from insightscli.telemetry import _load_config, _save_config, is_ci
 _INSIGHTS_DEV_CACHE_TTL_SECONDS = 30 * 86400  # 30 days
 
 
-# Created by hogland's guest overlay (script-env-materialise) on every hogbox
+# Created by box's guest overlay (script-env-materialise) on every box
 # boot; the guest exposes no ambient env var, so this path is the marker.
-# Prefer baking INSIGHTSCLI_ENVIRONMENT=hogland into the guest image -- this is the
+# Prefer baking INSIGHTSCLI_ENVIRONMENT=box into the guest image -- this is the
 # fallback until that ships.
 _HOGLAND_MARKER = Path("/var/lib/script")
 
@@ -51,7 +51,7 @@ def _declared(var: str) -> str:
 
 
 def _detect_environment() -> str:
-    """Classify where insightscli is running: ci, devbox, hogland, local, or a self-declared value.
+    """Classify where insightscli is running: ci, devbox, box, local, or a self-declared value.
 
     Environments without an ambient marker (e.g. agent sandboxes) should export
     ``INSIGHTSCLI_ENVIRONMENT`` in their bootstrap to self-declare.
@@ -63,11 +63,11 @@ def _detect_environment() -> str:
     # label can never diverge from the gate (same rationale as the is_ci prop).
     if is_ci():
         return "ci"
-    # Checked before the hogland marker so Coder-on-hogland reads as a devbox.
+    # Checked before the box marker so Coder-on-box reads as a devbox.
     if any(os.environ.get(var) for var in _DEVBOX_ENV_MARKERS):
         return "devbox"
     if _HOGLAND_MARKER.exists():
-        return "hogland"
+        return "box"
     return "local"
 
 
