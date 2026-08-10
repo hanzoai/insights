@@ -208,7 +208,7 @@ describe('SourceWebhooksConsumer', () => {
                 // Deletion via the django API is a soft delete that leaves `enabled` untouched
                 await hub.postgres.query(
                     PostgresUse.COMMON_WRITE,
-                    `UPDATE insights_hogfunction SET deleted=true, updated_at = NOW() WHERE id = $1`,
+                    `UPDATE insights_function SET deleted=true, updated_at = NOW() WHERE id = $1`,
                     [insightsFunction.id],
                     'testKey'
                 )
