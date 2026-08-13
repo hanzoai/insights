@@ -300,7 +300,13 @@ members = ["tools/insightscli", "tools/owners"]
 [tool.uv.sources]
 insightscli = { workspace = true }
 insights-owners = { workspace = true }
-datastore-orm = { git = "https://github.com/hanzo-ds/orm", rev = "56c46e4bc6a424fd68b12df2afbacea4090b2dbb" }
+# github.com/hanzo-ds/orm answers 404 to anyone without a GitHub credential, and the
+# image build carries none — it mounts FORGE_TOKEN, for git.hanzo.ai. So this address
+# could only ever resolve from a warm uv cache, and the first build on a cold one died
+# on "could not read Username for 'https://github.com'". The forge carries the same
+# commit, cloneable without a credential at all. Its three siblings below are still
+# reachable on github.com and stay where they are until they are not.
+datastore-orm = { git = "https://git.hanzo.ai/hanzoai/datastore-orm", rev = "56c46e4bc6a424fd68b12df2afbacea4090b2dbb" }
 datastore-driver = { git = "https://github.com/hanzo-ds/driver", rev = "119df3f" }
 datastore-connect = { git = "https://github.com/hanzo-ds/connect", rev = "ccbd4b5" }
 datastore-pool = { git = "https://github.com/hanzo-ds/pool", rev = "7260d56" }
