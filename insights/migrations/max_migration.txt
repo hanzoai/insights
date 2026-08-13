@@ -1,1 +1,1 @@
-0008_identity_provider_config
+0011_sidebar_paths
