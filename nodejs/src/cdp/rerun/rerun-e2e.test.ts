@@ -62,10 +62,10 @@ interface PersistedRow {
  *
  * Flow under test:
  *   1. Script function runs -> producer writes a 'succeeded' lifecycle row to
- *      Kafka -> MV lands it in `hog_invocation_results`.
+ *      Kafka -> MV lands it in `invocations`.
  *   2. Simulated Django POST: `rerunManager.enqueue({ invocation_ids })`.
  *   3. Real `CdpRerunWorkerConsumer` dequeues the wrapper job, queries the
- *      real `hog_invocation_results`, rehydrates globals (rebuilding inputs),
+ *      real `invocations`, rehydrates globals (rebuilding inputs),
  *      and re-enqueues onto the regular cyclotron queue.
  *   4. The real cyclotron worker picks up the rerun invocation and writes a
  *      second lifecycle row, this time with `is_retry=1` and `attempts > 1`.
@@ -108,10 +108,10 @@ describe('CDP script invocation rerun e2e', () => {
         // Kafka engine consumers keep their connections. Includes KAFKA_FN_INVOCATION_RESULTS,
         // which this test's MV needs but the shared set does not cover.
         await ensureKafkaTopics([...TEST_KAFKA_TOPICS, KAFKA_FN_INVOCATION_RESULTS])
-        await datastore.truncate('hog_invocation_results_data')
+        await datastore.truncate('invocations_data')
         await waitForScriptInvocationResultsMvReady(datastore)
         await resetTestDatabase()
-        await datastore.truncate('hog_invocation_results_data')
+        await datastore.truncate('invocations_data')
 
         hub = await createHub()
         kafkaProducer = await ActualKafkaProducerWrapper.create(hub.KAFKA_CLIENT_RACK)
@@ -242,7 +242,7 @@ describe('CDP script invocation rerun e2e', () => {
         await waitForExpect(async () => {
             const rows = await datastore.query<PersistedRow>(
                 `SELECT invocation_id, status, is_retry, attempts, error_kind, function_kind
-                 FROM hog_invocation_results
+                 FROM invocations
                  WHERE team_id = ${team.id} AND function_id = '${fnFetch.id}' AND status = 'succeeded'`
             )
             expect(rows.length).toBeGreaterThanOrEqual(1)
@@ -250,7 +250,7 @@ describe('CDP script invocation rerun e2e', () => {
 
         const originalRows = await datastore.query<PersistedRow>(
             `SELECT invocation_id, status, is_retry, attempts, error_kind, function_kind, invocation_globals
-             FROM hog_invocation_results
+             FROM invocations
              WHERE team_id = ${team.id} AND function_id = '${fnFetch.id}' AND status = 'succeeded'`
         )
         const originalInvocationId = originalRows[0].invocation_id
@@ -317,7 +317,7 @@ describe('CDP script invocation rerun e2e', () => {
         await waitForExpect(async () => {
             const rows = await datastore.query<PersistedRow>(
                 `SELECT invocation_id, status, is_retry, attempts, error_kind, function_kind
-                 FROM hog_invocation_results
+                 FROM invocations
                  WHERE team_id = ${team.id}
                    AND function_id = '${fnFetch.id}'
                    AND invocation_id = '${originalInvocationId}'
@@ -427,14 +427,14 @@ describe('CDP script invocation rerun e2e', () => {
 
         await waitForExpect(async () => {
             const rows = await datastore.query<PersistedRow>(
-                `SELECT invocation_id, status FROM hog_invocation_results
+                `SELECT invocation_id, status FROM invocations
                  WHERE team_id = ${team.id} AND function_id = '${personPropsFn.id}' AND status = 'succeeded'`
             )
             expect(rows.length).toBeGreaterThanOrEqual(1)
         }, 30_000)
 
         const originalRows = await datastore.query<PersistedRow>(
-            `SELECT invocation_id, status FROM hog_invocation_results
+            `SELECT invocation_id, status FROM invocations
              WHERE team_id = ${team.id} AND function_id = '${personPropsFn.id}' AND status = 'succeeded'`
         )
         const originalInvocationId = originalRows[0].invocation_id
@@ -558,7 +558,7 @@ describe('CDP script invocation rerun e2e', () => {
         await waitForExpect(async () => {
             const rows = await datastore.query<PersistedRow>(
                 `SELECT invocation_id, status, is_retry, function_kind
-                 FROM hog_invocation_results
+                 FROM invocations
                  WHERE team_id = ${team.id} AND function_id = '${flow.id}' AND status = 'succeeded'`
             )
             expect(rows.length).toBeGreaterThanOrEqual(1)
@@ -566,7 +566,7 @@ describe('CDP script invocation rerun e2e', () => {
 
         const originalRows = await datastore.query<PersistedRow>(
             `SELECT invocation_id, status, is_retry, function_kind
-             FROM hog_invocation_results
+             FROM invocations
              WHERE team_id = ${team.id} AND function_id = '${flow.id}' AND status = 'succeeded'`
         )
         expect(originalRows[0].function_kind).toBe('flow')
@@ -604,7 +604,7 @@ describe('CDP script invocation rerun e2e', () => {
         await waitForExpect(async () => {
             const rows = await datastore.query<PersistedRow>(
                 `SELECT invocation_id, status, is_retry, function_kind
-                 FROM hog_invocation_results
+                 FROM invocations
                  WHERE team_id = ${team.id}
                    AND function_id = '${flow.id}'
                    AND invocation_id = '${originalInvocationId}'

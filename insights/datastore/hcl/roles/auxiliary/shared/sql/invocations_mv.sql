@@ -27,4 +27,4 @@ SELECT
   _timestamp,
   _offset,
   _partition
-FROM insights.kafka_hog_invocation_results
+FROM insights.kafka_invocations

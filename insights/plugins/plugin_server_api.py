@@ -234,7 +234,7 @@ def rerun_script_invocations(
       - {"filter": {"window_start": "...", "window_end": "...", "status": [...], ...}}
 
     The Node side (`nodejs/src/cdp/rerun`) reads the matching rows from
-    `hog_invocation_results`, rehydrates the invocation from the stored
+    `invocations`, rehydrates the invocation from the stored
     `invocation_globals`, and re-enqueues onto cyclotron with `is_retry=1`.
     """
     logger.info(

@@ -396,8 +396,8 @@ def _construct_database_root_node(*, include_insights_tables: bool) -> TableNode
                     "session_replay_features": TableNode(
                         name="session_replay_features", table=SessionReplayFeaturesTable()
                     ),
-                    "hog_invocation_results": TableNode(
-                        name="hog_invocation_results", table=ScriptInvocationResultsTable()
+                    "invocations": TableNode(
+                        name="invocations", table=ScriptInvocationResultsTable()
                     ),
                     "metrics": TableNode(name="metrics", table=MetricsTable()),
                     "metric_samples": TableNode(name="metric_samples", table=MetricSamplesTable()),

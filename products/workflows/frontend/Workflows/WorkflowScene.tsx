@@ -77,7 +77,7 @@ export function WorkflowScene(props: WorkflowSceneLogicProps): JSX.Element {
         },
 
         {
-            // Runtime view backed by hog_invocation_results, matching the script function scene.
+            // Runtime view backed by invocations, matching the script function scene.
             // Old /logs deep links (and batchWorkflowJobsLogic) redirect here via workflowSceneLogic.
             label: 'Invocations',
             key: 'invocations',

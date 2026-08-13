@@ -38,7 +38,7 @@ const ActualKafkaProducerWrapper = jest.requireActual('~/common/kafka/producer')
  *
  * Instead of mocking the Datastore client, this test seeds real lifecycle rows
  * through `ScriptInvocationResultsService.queueLifecycleRow` → Kafka → Datastore
- * Kafka MV → `hog_invocation_results`, then runs the paginator against the real
+ * Kafka MV → `invocations`, then runs the paginator against the real
  * data. Only the side effects the paginator emits (the running lifecycle row +
  * the cyclotron re-enqueue) are mocked, so we can assert what got produced.
  *
@@ -137,7 +137,7 @@ describe('RerunPaginatorService integration', () => {
         // waitForExpect polls, so a healthy pipe still completes in seconds.
         await waitForExpect(async () => {
             const got = await datastore.query<{ c: number }>(
-                `SELECT count() AS c FROM hog_invocation_results
+                `SELECT count() AS c FROM invocations
                  WHERE team_id = ${team.id}
                    AND function_id = '${insightsFunction.id}'`
             )
@@ -184,7 +184,7 @@ describe('RerunPaginatorService integration', () => {
         seededCount += 1
         await waitForExpect(async () => {
             const got = await datastore.query<{ c: number }>(
-                `SELECT count() AS c FROM hog_invocation_results
+                `SELECT count() AS c FROM invocations
                  WHERE team_id = ${team.id} AND invocation_id = '${invocationId}'`
             )
             expect(Number(got[0]?.c ?? 0)).toBeGreaterThanOrEqual(1)
@@ -197,13 +197,13 @@ describe('RerunPaginatorService integration', () => {
         // consumers keep their connections. Includes KAFKA_FN_INVOCATION_RESULTS, which this test's
         // MV needs but the shared set does not cover.
         await ensureKafkaTopics([...TEST_KAFKA_TOPICS, KAFKA_FN_INVOCATION_RESULTS])
-        await datastore.truncate('hog_invocation_results_data')
+        await datastore.truncate('invocations_data')
         await waitForScriptInvocationResultsMvReady(datastore)
     })
 
     beforeEach(async () => {
         await resetTestDatabase()
-        await datastore.truncate('hog_invocation_results_data')
+        await datastore.truncate('invocations_data')
         seededCount = 0
 
         hub = await createHub()

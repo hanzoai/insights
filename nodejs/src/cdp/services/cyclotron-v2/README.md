@@ -40,7 +40,7 @@ Responsibilities:
 - **Stalled job recovery** — reset jobs with stale heartbeats back to `available`
 - **Poison pill recovery** — give up on jobs that have been reset too many times
   (`janitor_touch_count`), but never silently: each is recorded as a `failed`,
-  replayable invocation result on `hog_invocation_results` (discoverable in the
+  replayable invocation result on `invocations` (discoverable in the
   Invocations UI, re-runnable by the rerun tooling) _before_ the cyclotron row is
   deleted. Workers reset `janitor_touch_count = 0` on every deliberate release, so
   the budget counts CONSECUTIVE stalls — long-lived waits don't accrue touches for
@@ -62,7 +62,7 @@ since failed jobs often produce more failed jobs on retry, and it would be a
 second recovery path operators have to learn alongside rerun.
 Errors are captured via logs and metrics before the job reaches terminal status,
 and poison-pill give-ups converge on the existing rerun system: they are written
-as `failed` rows on `hog_invocation_results` (the table rerun already reads) and
+as `failed` rows on `invocations` (the table rerun already reads) and
 deleted only once that row is durably enqueued, so a lost invocation is always
 recoverable via the standard rerun tooling rather than a bespoke table.
 

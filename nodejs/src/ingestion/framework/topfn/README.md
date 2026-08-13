@@ -1,6 +1,6 @@
-# TopHog
+# TopFn
 
-TopHog is an in-process metric aggregation system that tracks the top contributors for named metrics across pipeline steps. It accumulates counts and timings keyed by arbitrary dimensions (e.g. `team_id`), keeps only the top N entries per metric, and periodically flushes results to Kafka.
+TopFn is an in-process metric aggregation system that tracks the top contributors for named metrics across pipeline steps. It accumulates counts and timings keyed by arbitrary dimensions (e.g. `team_id`), keeps only the top N entries per metric, and periodically flushes results to Kafka.
 
 This is not a tool for analyzing customer behavior. It is designed for realtime troubleshooting of multi-tenant systems to quickly identify whether a small subset of tenants is overloading the system — e.g. "which teams are producing the most events right now?" or "which teams are causing the slowest processing times?"
 
@@ -36,7 +36,7 @@ You don't need to use all of them. Pick the dimensions that make sense for what 
 
 ### Example
 
-A pipeline that parses messages and processes persons, with TopHog metrics tracking message counts, payload size, and person processing time:
+A pipeline that parses messages and processes persons, with TopFn metrics tracking message counts, payload size, and person processing time:
 
 ```typescript
 interface RawInput {
@@ -106,7 +106,7 @@ return builder
 
 ## Configuration
 
-### TopHog (instance-level)
+### TopFn (instance-level)
 
 | Option            | Type                     | Default  | Description                                             |
 | ----------------- | ------------------------ | -------- | ------------------------------------------------------- |
@@ -139,7 +139,7 @@ Passed to any metric factory to override instance-level defaults for a specific 
 ## Architecture
 
 ```text
-TopHog (registry + Kafka reporter)
+TopFn (registry + Kafka reporter)
 ├── summingTrackers
 │   └── SummingMetricTracker "emitted_events"
 ├── maxTrackers
@@ -148,7 +148,7 @@ TopHog (registry + Kafka reporter)
 │   └── AverageMetricTracker "avg_size"
 └── allTrackers() → iterates all three maps for flush
 
-Pipeline extension (pipelines/extensions/tophog.ts)
+Pipeline extension (pipelines/extensions/topfn.ts)
 ├── count("emitted_events", keyFn)           → increments by 1 before step runs
 ├── countResult("output_count", keyFn)       → increments by 1 after step, on all results
 ├── countOk("ok_count", keyFn)              → increments by 1 after step, on OK results only
@@ -162,10 +162,10 @@ Pipeline extension (pipelines/extensions/tophog.ts)
 ├── averageResult("avg_out", keyFn, valueFn)→ tracks average after step, on all results
 ├── averageOk("avg_ok_out", keyFn, valueFn)→ tracks average after step, on OK results only
 ├── timer("processing_time", keyFn)         → records elapsed ms per step
-└── createTopHogWrapper(registry)            → wraps pipeline steps with metrics
+└── createTopFnWrapper(registry)            → wraps pipeline steps with metrics
 ```
 
-`TopHog` owns the flush interval and Kafka reporting. Trackers are stored in separate maps by type (`summingTrackers`, `maxTrackers`, `averageTrackers`), so the same metric name can exist across different types without collision. `MetricTracker` handles per-metric accumulation, eviction, and top-N selection. The pipeline extension provides factory functions that wire metrics into pipeline steps.
+`TopFn` owns the flush interval and Kafka reporting. Trackers are stored in separate maps by type (`summingTrackers`, `maxTrackers`, `averageTrackers`), so the same metric name can exist across different types without collision. `MetricTracker` handles per-metric accumulation, eviction, and top-N selection. The pipeline extension provides factory functions that wire metrics into pipeline steps.
 
 ## Performance
 
@@ -187,4 +187,4 @@ Each flush sorts entries (O(K log K)) and takes the top N. This runs once per fl
 
 ### Memory
 
-Each metric tracker holds at most `maxKeys` entries in memory. After eviction, it holds at most `maxKeys / 2`. Total memory per TopHog instance is bounded by `numMetrics * maxKeys * avgKeySize`.
+Each metric tracker holds at most `maxKeys` entries in memory. After eviction, it holds at most `maxKeys / 2`. Total memory per TopFn instance is bounded by `numMetrics * maxKeys * avgKeySize`.

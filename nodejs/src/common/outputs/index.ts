@@ -32,7 +32,7 @@ export type LogEntriesOutput = typeof LOG_ENTRIES_OUTPUT
 export const TOPFN_OUTPUT = 'topfn' as const
 export type TopFnOutput = typeof TOPFN_OUTPUT
 
-export const INSIGHTS_INVOCATION_RESULTS_OUTPUT = 'hog_invocation_results' as const
+export const INSIGHTS_INVOCATION_RESULTS_OUTPUT = 'invocations' as const
 export type ScriptInvocationResultsOutput = typeof INSIGHTS_INVOCATION_RESULTS_OUTPUT
 
 export const MESSAGE_ASSETS_OUTPUT = 'message_assets' as const

@@ -176,7 +176,7 @@ def _build_invocation(row: tuple, detail: bool) -> Any:
     return ScriptInvocationResult(**common)
 
 
-def fetch_hog_invocation_results(
+def fetch_invocations(
     team_id: int,
     function_kind: str,
     function_id: str,
@@ -224,7 +224,7 @@ def fetch_hog_invocation_results(
         SELECT {_OUTER_COLUMNS}
         FROM (
             SELECT {_COLLAPSED_AGGREGATES}
-            FROM hog_invocation_results
+            FROM invocations
             WHERE {" AND ".join(where)}
             GROUP BY invocation_id
         )
@@ -255,7 +255,7 @@ def fetch_script_invocation_result(
         FROM (
             SELECT {_COLLAPSED_AGGREGATES},
                    argMax(invocation_globals, version) AS latest_invocation_globals
-            FROM hog_invocation_results
+            FROM invocations
             WHERE team_id = %(team_id)s
               AND function_kind = %(function_kind)s
               AND function_id = %(function_id)s

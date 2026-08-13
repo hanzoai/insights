@@ -265,7 +265,7 @@ export function getDefaultCdpConfig(): CdpConfig {
         INSIGHTS_FUNCTION_MONITORING_LOG_ENTRIES_TOPIC: KAFKA_LOG_ENTRIES,
         INSIGHTS_FUNCTION_MONITORING_LOG_ENTRIES_PRODUCER: WARPSTREAM_INGESTION_PRODUCER,
         INSIGHTS_INVOCATION_RESULTS_TOPIC: KAFKA_FN_INVOCATION_RESULTS,
-        // Cyclotron Warpstream cluster — Datastore consumes hog_invocation_results
+        // Cyclotron Warpstream cluster — Datastore consumes invocations
         // from the warpstream_cyclotron named collection, so the producer must
         // target the same cluster.
         INSIGHTS_INVOCATION_RESULTS_PRODUCER: WARPSTREAM_CYCLOTRON_PRODUCER,
@@ -273,7 +273,7 @@ export function getDefaultCdpConfig(): CdpConfig {
         // Per-team rollout still happens at the call site.
         INSIGHTS_INVOCATION_RESULTS_ENABLED: isDevEnv() ? true : false,
         MESSAGE_ASSETS_TOPIC: KAFKA_MESSAGE_ASSETS,
-        // Same cyclotron Warpstream cluster as hog_invocation_results — Datastore
+        // Same cyclotron Warpstream cluster as invocations — Datastore
         // consumes message_assets from the warpstream_cyclotron named collection.
         MESSAGE_ASSETS_PRODUCER: WARPSTREAM_CYCLOTRON_PRODUCER,
         // Hard cap on rows a single rerun wrapper job will drain. Mirrors the

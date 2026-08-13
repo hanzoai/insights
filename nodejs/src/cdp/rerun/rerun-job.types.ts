@@ -22,7 +22,7 @@ export type RerunFunctionKind = 'insights_function' | 'flow'
 
 /**
  * `function_kind` value we stamp on the wrapper row that the worker writes to
- * `hog_invocation_results` to surface a re-run in the Invocations UI alongside
+ * `invocations` to surface a re-run in the Invocations UI alongside
  * the function's normal invocations. Suffixing avoids overloading the existing
  * kind enum and keeps "is this a wrapper?" a trivial check on the frontend.
  */
@@ -66,7 +66,7 @@ export interface RerunRequest {
 
 /**
  * Max window the user may pass — matches the Datastore TTL on
- * `hog_invocation_results`. Older rows are already gone via part drop.
+ * `invocations`. Older rows are already gone via part drop.
  */
 export const RERUN_MAX_WINDOW_DAYS = 30
 

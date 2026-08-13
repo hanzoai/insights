@@ -39,7 +39,7 @@ from insights.api.script_invocation_results import (
     ScriptInvocationResultSerializer,
     ScriptInvocationResultsRequestSerializer,
     fetch_script_invocation_result,
-    fetch_hog_invocation_results,
+    fetch_invocations,
     tag_invocation_results_query,
 )
 from insights.api.log_entries import LogEntryMixin
@@ -3662,7 +3662,7 @@ class InsightsFlowViewSet(
         if params.get("before"):
             before_date, _, _ = relative_date_parse_with_delta_mapping(params["before"], self.team.timezone_info)
 
-        data = fetch_hog_invocation_results(
+        data = fetch_invocations(
             team_id=self.team_id,
             function_kind=self.function_kind,
             function_id=str(obj.id),

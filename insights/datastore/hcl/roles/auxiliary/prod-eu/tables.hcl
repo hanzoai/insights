@@ -1,5 +1,5 @@
 database "insights" {
-  table "kafka_hog_invocation_results" {
+  table "kafka_invocations" {
     column "team_id" {
       type = "Int64"
     }
@@ -65,8 +65,8 @@ database "insights" {
     }
     engine "kafka" {
       broker_list          = "warpstream_cyclotron"
-      topic_list           = "kafka_topic_list = 'datastore_hog_invocation_results'"
-      group_name           = "kafka_group_name = 'datastore_hog_invocation_results'"
+      topic_list           = "kafka_topic_list = 'datastore_invocations'"
+      group_name           = "kafka_group_name = 'datastore_invocations'"
       format               = "kafka_format = 'JSONEachRow'"
       skip_broken_messages = 100
     }

@@ -275,7 +275,7 @@ following the order below turns it into minutes.
    offset delta ÷ elapsed = events/sec; batch duration ÷ batch size =
    ms/event.
    - **Busy** (high events/sec, normal ms/event): a _volume_ hot key —
-     identify it with tophog ranked by volume, and the lever is overflow
+     identify it with topfn ranked by volume, and the lever is overflow
      routing.
    - **Slow** (low events/sec, high ms/event): _expensive_ per-event work —
      continue below. Nothing will show up in volume rankings; a "no hot key"
@@ -293,8 +293,8 @@ following the order below turns it into minutes.
      Also check p50 vs p99 for the suspect step (`histogram_quantile` on
      `_bucket`): a heavy tail means a minority of poisoned events.
 
-5. **Who.** tophog ranked by **cost, not volume** — see the
-   `querying-tophog` skill. `process_persons_time` summed by
+5. **Who.** topfn ranked by **cost, not volume** — see the
+   `querying-topfn` skill. `process_persons_time` summed by
    `key['team_id'], key['distinct_id']` with an ms-per-event ratio separates
    hot keys from expensive actors; data written after 2026-07-06 can filter
    `key['partition'] = 'N'` directly, and `merge_events_per_distinct_id`

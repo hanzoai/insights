@@ -1,5 +1,5 @@
 database "insights" {
-  table "hog_invocation_results_data" {
+  table "invocations_data" {
     order_by     = ["team_id", "function_kind", "function_id", "invocation_id"]
     partition_by = "toYYYYMMDD(scheduled_at)"
     ttl          = "toDate(scheduled_at) + toIntervalDay(30)"
@@ -102,7 +102,7 @@ database "insights" {
       granularity = 1
     }
     engine "replicated_replacing_merge_tree" {
-      zoo_path       = "/datastore/tables/noshard/insights.hog_invocation_results_data"
+      zoo_path       = "/datastore/tables/noshard/insights.invocations_data"
       replica_name   = "{replica}-{shard}"
       version_column = "version"
     }
@@ -148,7 +148,7 @@ database "insights" {
       format      = "kafka_format = 'JSONEachRow'"
     }
   }
-  table "kafka_hog_invocation_results" {
+  table "kafka_invocations" {
     column "team_id" {
       type = "Int64"
     }
@@ -214,8 +214,8 @@ database "insights" {
     }
     engine "kafka" {
       broker_list          = "warpstream_cyclotron"
-      topic_list           = "kafka_topic_list = 'datastore_hog_invocation_results'"
-      group_name           = "kafka_group_name = 'datastore_hog_invocation_results'"
+      topic_list           = "kafka_topic_list = 'datastore_invocations'"
+      group_name           = "kafka_group_name = 'datastore_invocations'"
       format               = "kafka_format = 'JSONEachRow'"
       skip_broken_messages = 100
     }

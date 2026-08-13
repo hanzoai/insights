@@ -1205,7 +1205,7 @@ database "insights" {
     }
   }
 
-  table "sharded_tophog" {
+  table "sharded_topfn" {
     order_by     = ["pipeline", "lane", "metric", "timestamp", "key"]
     partition_by = "toYYYYMMDD(timestamp)"
     ttl          = "toDate(timestamp) + toIntervalDay(30)"
@@ -1243,7 +1243,7 @@ database "insights" {
       type = "Map(LowCardinality(String), String)"
     }
     engine "replicated_merge_tree" {
-      zoo_path     = "/datastore/tables/ops/{shard}/insights.tophog_new"
+      zoo_path     = "/datastore/tables/ops/{shard}/insights.topfn_new"
       replica_name = "{replica}"
     }
   }
