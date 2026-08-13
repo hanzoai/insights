@@ -10,7 +10,7 @@ const ActualKafkaProducerWrapper: typeof KafkaProducerWrapper =
     jest.requireActual('~/common/kafka/producer').KafkaProducerWrapper
 
 /**
- * Probe hog_invocation_results until a row lands, proving the Datastore Kafka engine's consumer has
+ * Probe invocations until a row lands, proving the Datastore Kafka engine's consumer has
  * attached. Its `auto.offset.reset=latest` drops rows produced before attach, so a seed right after
  * topic (re)creation can lose rows and never satisfy a count poll. Mirrors waitForDatastoreKafkaConsumer.
  */
@@ -52,7 +52,7 @@ export const waitForScriptInvocationResultsMvReady = async (datastore: Datastore
             await producer.flush()
 
             const result = await datastore.query<{ c: number }>(
-                `SELECT count() AS c FROM hog_invocation_results WHERE team_id = ${probeTeamId}`
+                `SELECT count() AS c FROM invocations WHERE team_id = ${probeTeamId}`
             )
             expect(Number(result[0]?.c ?? 0)).toBeGreaterThan(0)
         }, 30_000)

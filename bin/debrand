@@ -130,6 +130,16 @@ CONTENT_RULES: list[tuple[str, str]] = [
     ("HOGLI_", "INSIGHTSCLI_"),
     ("hogli", "insightscli"),
     ("personhog", "personinsights"),
+    # Physical names. Both were carried for a while on the grounds that a
+    # table is a fact rather than a word, which is true right up until the
+    # table is empty -- and both were. `hog_invocation_results` holds function
+    # invocations, so it is `invocations`; the heavy-hitter store counts per
+    # function, so it is `topfn`. Neither is reachable by the bare `\bhog\b`
+    # rule below (`_` and `p` are word characters, so there is no boundary to
+    # match on), which is why each needs saying here.
+    ("hog_invocation_results", "invocations"),
+    ("TopHog", "TopFn"),
+    ("tophog", "topfn"),
     ("PostholgStories", "InsightsStories"),
     ("PosthogStories", "InsightsStories"),
     # Design system.
@@ -248,6 +258,11 @@ PATH_RULES: list[tuple[str, str]] = [
     ("hogflow", "insightsflow"),
     ("PosthogStories", "InsightsStories"),
     ("personhog", "personinsights"),
+    # The two physical names also name directories: the model package that
+    # holds each family's SQL, and the skill that documents querying one.
+    ("hog_invocation_results", "invocations"),
+    ("TopHog", "TopFn"),
+    ("tophog", "topfn"),
     ("HEDGEHOG", "MASCOT"),
     ("Hedgehog", "Mascot"),
     ("HedgeHog", "Mascot"),
@@ -288,8 +303,9 @@ PATH_DIR_RULES: list[tuple[str, str]] = [
 # because `lemon_squeezy` is Lemon Squeezy, a payments vendor whose warehouse
 # source we import, and a rule matching a bare `lemon` would rename someone
 # else's product. `\bhog\b` cannot reach `hedgehog`, `tophog`, `stamp`,
-# `hog_invocation_results` or `hogfunction` -- each of those is either handled
-# above by name or is a physical name we do not own.
+# `hog_invocation_results` or `hogfunction` -- every one of those is named
+# above instead, because a rule that cannot reach a name has not spared it, it
+# has only failed to see it.
 PATH_REGEX = CONTENT_REGEX
 
 # Compose files follow the house convention.
@@ -397,6 +413,11 @@ CONTENT_ALLOWLIST: dict[str, str] = {
     "bin/debrand": (
         "This file. The rules are the upstream names, so it necessarily "
         "spells them out."
+    ),
+    "insights/datastore/migrations/0300_invocations.py": (
+        "Retires `hog_invocation_results` by dropping it. A migration that "
+        "drops a table has to name the table, and this is the one place the "
+        "old spelling still means something -- everywhere else it is a leak."
     ),
     "bin/debrand-selftest": (
         "Tests this file. Its fixtures are an upstream copyright notice that "
@@ -1231,13 +1252,20 @@ def check_marks(root: str) -> int:
 # instead. They are refused rather than rewritten because a rewrite happens once
 # and a refusal happens on every commit.
 #
-# Deliberately NOT the whole of `hog`. `tophog` is seven Datastore tables and a
-# Kafka topic, `stamp` and `review_hog` are two live Django apps with rows in
-# `django_migrations`, `hog_invocation_results` is a table, `hogland` is someone
-# else's service and `@hanzo/brand/hoggies` is a subpath of a package we do not
-# publish. Those are named below as outstanding, never as exempt -- an exemption
-# is a decision someone made, and nobody has made those.
+# Deliberately NOT the whole of `hog`. What is left is what a rename cannot
+# reach: nine rows of `django_migrations` whose `name` column carries the old
+# spelling (`reviewhog_`, `stamphog`, `hogfunction`, `hogflow`, `hedgehog`,
+# `posthog_`) -- a migration's filename is its primary key, and renaming the
+# file orphans the row that says it ran; `hogland` is someone else's service;
+# `@hanzo/brand/hoggies` is a subpath of a package we do not publish; and
+# PostHog in LLM.md is the upstream's name, which is attribution, not branding.
+#
+# `tophog` and `hog_invocation_results` used to be listed here as physical
+# names. Both are renamed -- the tables were empty, which is the only thing
+# that ever made them hard -- and both are refused below.
 RETIRED: tuple[tuple[re.Pattern[str], str], ...] = (
+    (re.compile(r"hog_invocation_results"), "invocations -- the Datastore table family"),
+    (re.compile(r"tophog|TopHog"), "topfn -- the heavy-hitter store, and TopFn in code"),
     (re.compile(r"HOGLI_"), "INSIGHTSCLI_ (the env prefix is the program's own name)"),
     (re.compile(r"\bhoge\b|\bHoge\b"), "scriptc -- the compiler, and .scriptc bytecode"),
     (re.compile(r"\bhog\b|\bHog\b"), "script -- the language, and .script source"),
@@ -1435,9 +1463,6 @@ def check_hog(root: str) -> int:
 # that matches and is NOT listed fails: taking a new dependency from upstream
 # is a choice someone should have to write down, not one that lands quietly.
 OUTSTANDING: dict[str, str] = {
-    "drf-exceptions-hog": "reimplement: 386 LOC, one caller (insights/exceptions.py), and the "
-    "error envelope it builds is already our contract -- declared in frontend/src/types.ts "
-    "and asserted by 50 test files",
     "pixelhog": "fork: 2,720 lines of Rust, a port of mapbox/pixelmatch plus SSIM and "
     "clustering, proven against upstream's canonical fixtures. Reimplementing re-derives "
     "someone else's port; the wheel build is the real cost either way",

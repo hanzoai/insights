@@ -1058,7 +1058,7 @@ export interface ScriptInvocationRerunFilterApi {
  * Rerun invocations of a script function or script flow from their stored payloads.
  */
 export interface ScriptInvocationRerunRequestApi {
-    /** Required. `window_start` / `window_end` pin the query to a small set of date partitions on the `hog_invocation_results` table. Optional `invocation_ids` restricts to specific invocations within that window. */
+    /** Required. `window_start` / `window_end` pin the query to a small set of date partitions on the `invocations` table. Optional `invocation_ids` restricts to specific invocations within that window. */
     filter: ScriptInvocationRerunFilterApi
 }
 

@@ -2187,7 +2187,7 @@ export const InsightsFlowsRerunCreateBody = /* @__PURE__ */ zod
             })
             .describe('Filter shape for the rerun endpoint. `window_start`\/`window_end` are required.')
             .describe(
-                'Required. `window_start` \/ `window_end` pin the query to a small set of date partitions on the `hog_invocation_results` table. Optional `invocation_ids` restricts to specific invocations within that window.'
+                'Required. `window_start` \/ `window_end` pin the query to a small set of date partitions on the `invocations` table. Optional `invocation_ids` restricts to specific invocations within that window.'
             ),
     })
     .describe('Rerun invocations of a script function or script flow from their stored payloads.')
