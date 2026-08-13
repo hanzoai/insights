@@ -28,7 +28,11 @@ setup('sign in through Hanzo IAM', async ({ page }) => {
     await page.waitForURL(/hanzo\.id\//, { timeout: 30_000 })
 
     await page.getByLabel(/email|username/i).fill(USERNAME)
-    await page.getByLabel(/password/i).fill(PASSWORD)
+    // The field, not the reveal button beside it. hanzo.id's sign-in carries a
+    // <button aria-label="Show password">, so getByLabel(/password/i) matches
+    // two elements and strict mode refuses the fill:
+    //   strict mode violation: getByLabel(/password/i) resolved to 2 elements
+    await page.locator('input[type="password"]').fill(PASSWORD)
     await page.getByRole('button', { name: /sign in|log in|continue/i }).click()
 
     // Back on the app with a session, not still on the IdP and not on the error scene.
