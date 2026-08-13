@@ -873,7 +873,6 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
-EXCEPTIONS_HOG = {"EXCEPTION_REPORTING": "insights.exceptions.exception_reporting"}
 
 ####
 # Compression
