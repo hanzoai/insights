@@ -306,7 +306,7 @@ following the order below turns it into minutes.
    volume-ranked view will ever surface.
 
 7. **If `hogTransformEventStep` is implicated** → inspect the suspect team's
-   enabled transformations (Data pipelines UI, or `insights_hogfunction` where
+   enabled transformations (Data pipelines UI, or `insights_function` where
    `type = 'transformation' AND enabled`). Two traps: `app_metrics2` failure
    counts mislead — _destinations_ fail noisily but run in CDP, **off** the
    ingestion path; only `type='transformation'` runs inline and can wedge a

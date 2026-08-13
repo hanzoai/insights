@@ -1555,7 +1555,7 @@ class TestCombinationRisks:
 
         db_op = create_mock_operation(
             migrations.RunSQL,
-            sql='ALTER TABLE "insights_hogfunction" ADD COLUMN "batch_export_id" uuid NULL;',
+            sql='ALTER TABLE "insights_function" ADD COLUMN "batch_export_id" uuid NULL;',
         )
 
         separate_op = create_mock_operation(

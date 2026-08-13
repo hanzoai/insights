@@ -59,7 +59,7 @@ export const manifest: ProductManifest = {
     },
     // No nav entry. Automations is the automation graph — one engine, on Go
     // tasks, at /v1/automations. This product is the upstream one, and it is not
-    // merely redundant: its model reads `db_table = "insights_hogflow"`, a table
+    // merely redundant: its model reads `db_table = "insights_flow"`, a table
     // that does not exist in the database, so listing flows answers 500. Showing
     // an entry that can only fail is worse than showing none, and pointing it at
     // Automations would be a second door onto the same idea.

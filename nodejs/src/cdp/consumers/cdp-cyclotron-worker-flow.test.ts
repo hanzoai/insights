@@ -398,7 +398,7 @@ describe('CdpCyclotronWorkerFlow', () => {
             // Now disable the workflow (simulate user archiving it)
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE insights_hogflow SET status = 'archived' WHERE id = $1`,
+                `UPDATE insights_flow SET status = 'archived' WHERE id = $1`,
                 [flow.id],
                 'disableFlow'
             )
