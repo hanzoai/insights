@@ -41,7 +41,7 @@ async def _run_prompt(
             workflow_id_prefix=workflow_id_prefix,
             # Review-attributed and internal (pipeline plumbing, not a user-facing task); the step
             # lands on $ai_generation as ai_stage for per-stage cost attribution.
-            origin_product=TaskOriginProduct.REVIEW_HOG,
+            origin_product=TaskOriginProduct.REVIEW,
             internal=True,
             ai_stage=step_name or None,
         )
@@ -153,7 +153,7 @@ async def start_sandbox_session(
             step_name=step_name,
             workflow_id_prefix=workflow_id_prefix,
             # Same attribution trio as _run_prompt: Review-origin, internal, step as ai_stage.
-            origin_product=TaskOriginProduct.REVIEW_HOG,
+            origin_product=TaskOriginProduct.REVIEW,
             internal=True,
             ai_stage=step_name or None,
         )

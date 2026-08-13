@@ -52,7 +52,7 @@ class TestRunSandboxReview:
         assert call_kwargs["step_name"] == "split"
         # Spawn attribution: dropping any of these silently reverts Review's sandbox tasks to
         # user-visible "user_created" ones with no per-stage $ai_generation attribution.
-        assert call_kwargs["origin_product"] == TaskOriginProduct.REVIEW_HOG
+        assert call_kwargs["origin_product"] == TaskOriginProduct.REVIEW
         assert call_kwargs["internal"] is True
         assert call_kwargs["ai_stage"] == "split"
 
@@ -136,7 +136,7 @@ class TestRunSandboxReview:
             )
 
         call_kwargs = mock_start.call_args.kwargs
-        assert call_kwargs["origin_product"] == TaskOriginProduct.REVIEW_HOG
+        assert call_kwargs["origin_product"] == TaskOriginProduct.REVIEW
         assert call_kwargs["internal"] is True
         assert call_kwargs["ai_stage"] == "validation-c3"
         assert call_kwargs["workflow_id_prefix"] == "review-pr:1:o/r:7/validate:validation-c3"
