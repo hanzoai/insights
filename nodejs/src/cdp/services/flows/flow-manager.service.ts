@@ -150,7 +150,7 @@ export class FlowManagerService {
         logger.debug('[FlowManager]', 'Fetching team script flows', { teamIds })
         const response = await this.postgres.query<FlowTeamInfo>(
             PostgresUse.COMMON_READ,
-            `SELECT id, team_id, version FROM insights_hogflow WHERE status='active' AND team_id = ANY($1)`,
+            `SELECT id, team_id, version FROM insights_flow WHERE status='active' AND team_id = ANY($1)`,
             [teamIds],
             'fetchAllTeamFlows'
         )
@@ -173,7 +173,7 @@ export class FlowManagerService {
 
         const response = await this.postgres.query<Flow>(
             PostgresUse.COMMON_READ,
-            `SELECT ${INSIGHTS_FLOW_FIELDS.join(', ')} FROM insights_hogflow WHERE id = ANY($1)`,
+            `SELECT ${INSIGHTS_FLOW_FIELDS.join(', ')} FROM insights_flow WHERE id = ANY($1)`,
             [ids],
             'fetchFlows'
         )
