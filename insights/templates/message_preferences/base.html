@@ -145,6 +145,11 @@
 
             .form {
                 display: grid;
+
+                /* A grid track's automatic minimum is min-content, and a category row's
+                   min-content is its 10rem control plus padding — wider than the card on a
+                   phone, so the rows would escape the card and the page would scroll sideways. */
+                grid-template-columns: minmax(0, 1fr);
                 gap: 1.5rem;
             }
 
