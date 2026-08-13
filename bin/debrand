@@ -715,6 +715,12 @@ def prune_manifests(root: str, dry: bool) -> int:
 # reads this same list to decide which residual spellings are legitimate -- one
 # table, so the rewrite and the refusal cannot drift apart.
 PRESERVE_IDENT: list[re.Pattern[str]] = [
+    # Held for the migrations that renamed it, which have to name both sides.
+    # It is no longer a live table: the rename landed, the compatibility view
+    # that stood in for it was dropped, and `to_regclass('insights_hogflow')`
+    # answers NULL. Anything outside a migration that still selected from it
+    # was selecting from nothing -- the whole nodejs flow and function manager
+    # did, which is what this entry was quietly protecting.
     re.compile(r"insights_hogflow[a-z]*"),
     re.compile(r"system\.hog_flows"),
     re.compile(r"\bhog_flow_id\b"),
