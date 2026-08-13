@@ -29,12 +29,8 @@ hanzo_insights.default_client = Insights(  # ty: ignore[invalid-assignment]
 # Override settings that need to come from .env.
 if not getattr(settings, "OPENAI_API_KEY", ""):
     settings.OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
-if not getattr(settings, "LLM_GATEWAY_URL", ""):
-    settings.LLM_GATEWAY_URL = os.environ.get("LLM_GATEWAY_URL", "")
-if not getattr(settings, "LLM_GATEWAY_API_KEY", ""):
-    settings.LLM_GATEWAY_API_KEY = os.environ.get("LLM_GATEWAY_PERSONAL_API_KEY", "") or os.environ.get(
-        "LLM_GATEWAY_API_KEY", ""
-    )
+if not getattr(settings, "AI_GATEWAY_URL", ""):
+    settings.AI_GATEWAY_URL = os.environ.get("AI_GATEWAY_URL", "")
 
 # Team id used by the eval harness when attributing LLM cost via the gateway.
 EVAL_TEAM_ID = int(os.environ.get("SIGNALS_EVAL_TEAM_ID", "1"))
