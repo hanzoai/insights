@@ -18,12 +18,6 @@ from insights.settings.utils import get_from_env
 OPENAI_BASE_URL: str = get_from_env("OPENAI_BASE_URL", "https://api.hanzo.ai/v1")
 OPENAI_API_KEY: str = get_from_env("OPENAI_API_KEY", "")
 
-# `insights/llm/gateway_client.py` composes `{LLM_GATEWAY_URL}/{product}/v1`, so a wrong base here
-# produces plausible URLs that 404 at request time. Empty instead: the client raises "LLM_GATEWAY_URL
-# and an API key must be configured", which says what to do.
-LLM_GATEWAY_URL: str = get_from_env("LLM_GATEWAY_URL", "")
-LLM_GATEWAY_API_KEY: str = get_from_env("LLM_GATEWAY_PERSONAL_API_KEY", "")
-
 ANTHROPIC_API_KEY: str = get_from_env("ANTHROPIC_API_KEY", "")
 GEMINI_API_KEY: str = get_from_env("GEMINI_API_KEY", "")
 INKEEP_API_KEY: str = get_from_env("INKEEP_API_KEY", "")
