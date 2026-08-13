@@ -24,11 +24,11 @@ export const manifest: ProductManifest = {
     treeItemsProducts: [
         {
             path: 'Code review',
-            intents: [ProductKey.REVIEW_HOG],
+            intents: [ProductKey.REVIEW],
             category: ProductItemCategory.UNRELEASED,
             iconType: 'code_review' as FileSystemIconType,
             href: urls.codeReview(),
-            flag: FEATURE_FLAGS.REVIEW_HOG,
+            flag: FEATURE_FLAGS.REVIEW,
             tags: ['alpha'],
             sceneKey: 'CodeReview',
         },

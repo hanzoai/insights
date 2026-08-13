@@ -120,7 +120,7 @@ class TestStripeCustomerMetadataResolution(DatastoreTestMixin, APIBaseTest):
             "billing_details,failure_message,balance_transaction,statement_descriptor,"
             "payment_method_details,calculated_statement_descriptor\n"
             'ch_1,1,1549,charge,,succeeded,1704067200,in_1,"{}",1,usd,cus_no_meta,'
-            '0,0,"{}",0,Payment,,,,,,pi_1,pm_1,1549,0,"{}",,,STREAMHOG,"{}",STREAMHOG\n'
+            '0,0,"{}",0,Payment,,,,,,pi_1,pm_1,1549,0,"{}",,,HEDGEBOX,"{}",HEDGEBOX\n'
         )
         self.charge_csv.close()
 

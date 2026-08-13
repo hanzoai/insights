@@ -2,7 +2,7 @@
 
 Each scenario function returns a dict[str, list[dict]] mapping collection names
 to lists of Stripe-like objects. The `revenue_analytics` scenario mirrors the
-StreamHog generator script's persona model. All scenarios are driven by MockConfig.
+Hedgebox generator script's persona model. All scenarios are driven by MockConfig.
 """
 
 from datetime import UTC, datetime
@@ -61,7 +61,7 @@ def _build_catalog(cfg: MockConfig) -> tuple[list[dict], list[dict], dict[str, s
 
     for tier in cfg.products.tiers:
         p_idx = _next_id("prod")
-        prod = make_product(p_idx, start, name=f"StreamHog {tier.title()}", description=f"StreamHog {tier} plan")
+        prod = make_product(p_idx, start, name=f"Hedgebox {tier.title()}", description=f"Hedgebox {tier} plan")
         products.append(prod)
         product_lookup[tier] = prod["id"]
 

@@ -9050,7 +9050,7 @@ export enum ProductKey {
     PRODUCT_TOURS = 'product_tours',
     PULSE = 'pulse',
     REVENUE_ANALYTICS = 'revenue_analytics',
-    REVIEW_HOG = 'review',
+    REVIEW = 'review',
     SESSION_REPLAY = 'session_replay',
     REPLAY_VISION = 'replay_vision',
     SITE_APPS = 'site_apps',

@@ -365,7 +365,7 @@ Now every sandbox run's workflow id is `{activity's workflow id}:{step}-{task_id
 - **products/tasks:** the previously dead `workflow_id_prefix` on `execute_task_processing_workflow{,_async}` is now threaded through `Task.create_and_run` → `create_task_and_trigger` → `MultiTurnSession.start/start_raw`, and rides `pending_dispatch` so the orphaned-run reconciler rebuilds the same id. Because a prefixed id is not derivable from `(task_id, run_id)`, dispatch persists it in the run's **`state` JSON** (`_record_prefixed_workflow_id`, before `start_workflow`) and `TaskRun.workflow_id` returns persisted-or-derived — keeping every row→workflow lookup working (the agent-heartbeat relay `models.heartbeat_workflow`, follow-up signals, `temporal_ui_url`). In-workflow consumers (`provision_sandbox` Modal tags, `relay_sandbox_events` heartbeat handle) now use `activity.info().workflow_id` instead of re-deriving. Default (non-prefixed) dispatches are byte-identical to before — no state write, derived id.
 - **Review:** `_sandbox_workflow_id_prefix(step)` (activities.py) brands all four sandbox stages (chunking sandbox path, review/blind-spot units, dedup sandbox path, validation sessions) via a `workflow_id_prefix` kwarg on `run_sandbox_review` / `start_sandbox_session` / `deduplicate_issues`. `review_pr_workflow_id` / `review_branch_workflow_id` now **lowercase** (GitHub owner/repo are case-insensitive) so parent, children, and sandbox ids search as one casing. Temporal id constraints checked: `:` and `/` already proven in this cluster's ids; ~130 chars ≪ the 1000-byte server cap.
 - Tests: `products/tasks/backend/tests/test_workflow_id_prefix.py` (property persisted-or-derived; dispatch starts under the id it records, default writes nothing; reconciler rebuilds the prefixed id from `pending_dispatch`) + prefix assertions in `test_review_activity.py` / `test_validate_activity.py` (activity tests now run under `ActivityEnvironment`) + a mixed-case id test in `test_branch_targets.py`.
-- **Follow-up, same day — spawned-task attribution (the Signals pattern, all reused fields):** every Review sandbox spawn now passes `origin_product=TaskOriginProduct.REVIEW_HOG` (new enum member, choices-only tasks migration **0047**, SQL no-op), `internal=True` (`Task.internal` — not exposed to end users), and `ai_stage=step_name` (existing field → run state → stamped on `$ai_generation`, giving per-stage sandbox cost attribution like the one-shot calls already had). Set once in the executor (`_run_prompt` + `start_sandbox_session`), asserted in `test_executor.py`. **No new fields** — review linkage is already carried by the branded `state["workflow_id"]`; threading `signal_report_id` for inbox-triggered reviews is a possible later reuse (needs stage-input plumbing).
+- **Follow-up, same day — spawned-task attribution (the Signals pattern, all reused fields):** every Review sandbox spawn now passes `origin_product=TaskOriginProduct.REVIEW` (new enum member, choices-only tasks migration **0047**, SQL no-op), `internal=True` (`Task.internal` — not exposed to end users), and `ai_stage=step_name` (existing field → run state → stamped on `$ai_generation`, giving per-stage sandbox cost attribution like the one-shot calls already had). Set once in the executor (`_run_prompt` + `start_sandbox_session`), asserted in `test_executor.py`. **No new fields** — review linkage is already carried by the branded `state["workflow_id"]`; threading `signal_report_id` for inbox-triggered reviews is a possible later reuse (needs stage-input plumbing).
 
 ### ✅ BUILT 2026-07-07 — findings cross Temporal stages by reference, not by value (uncommitted)
 
@@ -462,7 +462,7 @@ floor and blind-spots/validator are **exactly-one-active with deactivation block
   `InboxTabKey` after `'archived'` (staff-gated via `INBOX_STAFF_ONLY_TAB_KEYS`, "Alpha" tag from
   `INBOX_TAB_TAG`). Moved out of the Inbox to its own `CodeReview` scene at `/code_review`, registered
   by `products/review/manifest.tsx` with an "Unreleased" nav entry (`ProductItemCategory.UNRELEASED`,
-  `tags: ['alpha']`). Gating is two-layer by design: `FEATURE_FLAGS.REVIEW_HOG` (`review-script`) controls
+  `tags: ['alpha']`). Gating is two-layer by design: `FEATURE_FLAGS.REVIEW` (`review-script`) controls
   **only the menu entry's visibility** (who discovers it); the scene itself stays **staff-only**
   (non-staff get `NotFound`) regardless of the flag. The old inbox tab and `/inbox/code-review` URL are
   gone with no redirect. Body unchanged: hero → pipeline diagram → trigger toggles → urgency slider →
@@ -473,7 +473,7 @@ floor and blind-spots/validator are **exactly-one-active with deactivation block
   `products/review/package.json` as `"catalog:"` entries (kea / kea-loaders / kea-router — the
   `links` / `visual_review` pattern); the 2026-07-02 `ERR_PNPM_TRUST_DOWNGRADE` failure that originally
   forced the code into `frontend/src/scenes/inbox/` no longer reproduces with catalog deps. New schema
-  enum members `FileSystemIconType.code_review` and `ProductKey.REVIEW_HOG` back the nav icon
+  enum members `FileSystemIconType.code_review` and `ProductKey.REVIEW` back the nav icon
   (`IconPullRequest`) and the tree item's `intents`.
 - **`ReviewUserSettings`** (migration 0008; one row per team+user, `db_constraint=False` FKs):
   `review_inbox_prs` (default off; consumed by the Stage-6 inbox trigger since 2026-07-02),
@@ -2506,7 +2506,7 @@ is authoritative server-side, and the deterministic per-PR workflow id + `USE_EX
 - **Always publish — no per-run toggle.** The UI trigger is label-path parity for repos the label can't
   reach; `publish=True` is fixed. Results are additionally viewable in the findings drawer as usual.
 - **Team gate = `settings.REVIEWFN_TEAM_ID` only** (prod team 2; local team 1). The endpoint rejects any
-  other team. No server-side feature-flag check — the scene's `REVIEW_HOG` flag gates discoverability only,
+  other team. No server-side feature-flag check — the scene's `REVIEW` flag gates discoverability only,
   and the hard team check bounds the cost surface for now. Widening beyond the dogfood team is a later,
   deliberate decision.
 - **Requester wins.** The acting user is the requesting Insights user via the existing `acting_user_id`

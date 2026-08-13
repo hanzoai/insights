@@ -120,7 +120,7 @@ using `datasourceUid: "victoriametrics"` and `regex: "<prefix>.*"`.
 | `events_pipeline_*`                                                              | Legacy pipeline step metrics               | `step_name`                                              |
 | `person_*`                                                                       | Person processing (~30 metrics)            | `db_write_mode`, `operation`, `method`                   |
 | `group_*` (non-AWS)                                                              | Group processing                           | `operation`                                              |
-| `personinsights_*`                                                                    | PersonHog gRPC client + service            | `method`, `source`, `client`                             |
+| `personinsights_*`                                                                    | personinsights gRPC client + service            | `method`, `source`, `client`                             |
 | `overflow_redirect_*`                                                            | Stateful overflow routing                  | `type`, `result`, `decision`, `operation`                |
 | `cookieless_*`                                                                   | Cookieless mode                            | —                                                        |
 | `http_request_duration_seconds`                                                  | HTTP health/readiness server               | `method`, `route`, `status_code`                         |
@@ -313,7 +313,7 @@ Profile types: `process_cpu:cpu:nanoseconds:cpu:nanoseconds`,
 | `dbfj5c31spa1ogf`                        | MSK vs Warpstream — Active Produce Topics | Side-by-side produce volume comparison                |
 | `8e93b023-a544-4a3b-8fac-123459d4eb84`   | WarpStream: Datastore Consumer Lag       | CH consumer lag on WarpStream topics (US only)        |
 | `ws-coarse-lag-explore`                  | WarpStream Coarse Lag — Explore           | Agent-reported lag (US only, personal dashboard)      |
-| `personinsights-service`                      | Personhog service                         | PersonHog latency decomposition                       |
+| `personinsights-service`                      | personinsights service                         | personinsights latency decomposition                       |
 | `dbfgkwxs3gw8owd`                        | KMinion Consumer Group Lag                | Consumer lag by group (including CH groups)           |
 | `logs`                                   | Logs (product)                            | Logs ingestion                                        |
 | `vm-datastore-cluster-overview`         | Datastore (cluster overview)             | QPS, memory, disk, replication, parts, merges         |

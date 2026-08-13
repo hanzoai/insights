@@ -1575,7 +1575,7 @@ export const scene: SceneExport = {
  * The "Code review" scene: Review's combined onboarding and settings page. One scrollable
  * guided-configuration page — every control is live from load, no save step. See
  * `reviewSettingsLogic` for the data flow. Staff-only while Review is an internal alpha;
- * the FEATURE_FLAGS.REVIEW_HOG flag only controls the menu entry's visibility.
+ * the FEATURE_FLAGS.REVIEW flag only controls the menu entry's visibility.
  */
 export function CodeReviewScene(): JSX.Element {
     const { user } = useValues(userLogic)
