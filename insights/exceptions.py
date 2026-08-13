@@ -112,7 +112,7 @@ class ExceptionContext(TypedDict):
 def exception_reporting(exception: Exception, context: ExceptionContext) -> Optional[str]:
     """
     Determines which exceptions to report and sends them to error tracking.
-    Used through drf-exceptions-script
+    Used through drf-exceptions-hog
     """
     if not isinstance(exception, APIException):
         tags = get_query_tags().model_dump(exclude_none=True)
@@ -146,19 +146,24 @@ def generate_exception_response(
 
 def exception_handler(exc: Exception, context: ExceptionContext) -> Optional[Response]:
     """
-    Wraps drf-exceptions-script and, on 401, advertises the OAuth protected resource
+    Wraps drf-exceptions-hog and, on 401, advertises the OAuth protected resource
     metadata document via WWW-Authenticate per RFC 9728, so that MCP-style agents
     can bootstrap from a stock 401.
     """
-    # Imported lazily: exceptions_script calls a non-lazy gettext at module import time,
+    # `exceptions_hog` is the DISTRIBUTION's module name (drf-exceptions-hog on PyPI, pinned
+    # in pyproject.toml). It is not ours to rename: renaming the import made every DRF error
+    # path raise ModuleNotFoundError from inside the error handler itself, so each 4xx became
+    # an opaque 500 and the 401 branch below — the RFC 9728 discovery hint — never ran.
+    #
+    # Imported lazily: exceptions_hog calls a non-lazy gettext at module import time,
     # which raises AppRegistryNotReady when insights.exceptions is imported during
     # manage.py bootstrap (before Django apps are loaded).
-    from exceptions_script import exception_handler as _exceptions_script_handler
+    from exceptions_hog import exception_handler as _upstream_handler
 
     # Imported lazily to avoid pulling settings into module import.
     from insights.utils import absolute_uri
 
-    response = _exceptions_script_handler(exc, context)
+    response = _upstream_handler(exc, context)
     if response is not None and response.status_code == status.HTTP_401_UNAUTHORIZED:
         # A view may pin its own challenge (e.g. the skills marketplace git endpoints, which
         # git clients can only satisfy with Basic — they cannot complete a Bearer/OAuth flow).
