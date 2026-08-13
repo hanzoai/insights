@@ -1068,7 +1068,7 @@ class InsightsFunctionViewSet(
         """
         Rerun past invocations of this script function from their stored payloads.
 
-        The CDP worker reads matching rows from the `hog_invocation_results`
+        The CDP worker reads matching rows from the `invocations`
         Datastore table, rehydrates the invocation from the stored
         `invocation_globals`, and re-enqueues onto cyclotron. Each rerun
         run reuses the original `invocation_id` with `is_retry=1` set on the

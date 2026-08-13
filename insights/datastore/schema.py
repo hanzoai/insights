@@ -209,7 +209,7 @@ from insights.models.group.sql import (
     GROUPS_WRITABLE_TABLE_SQL,
     KAFKA_GROUPS_TABLE_SQL,
 )
-from insights.models.hog_invocation_results.sql import (
+from insights.models.invocations.sql import (
     DISTRIBUTED_FN_INVOCATION_RESULTS_TABLE_SQL,
     INSIGHTS_INVOCATION_RESULTS_DATA_TABLE_SQL,
     INSIGHTS_INVOCATION_RESULTS_MV_SQL,

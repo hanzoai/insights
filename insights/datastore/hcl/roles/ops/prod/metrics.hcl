@@ -1,7 +1,7 @@
-# OPS role, prod only — metrics suite + sharded_tophog abstract.
+# OPS role, prod only — metrics suite + sharded_topfn abstract.
 
 database "insights" {
-  table "sharded_tophog_base" {
+  table "sharded_topfn_base" {
     abstract     = true
     order_by     = ["pipeline", "lane", "metric", "timestamp", "key"]
     partition_by = "toYYYYMMDD(timestamp)"

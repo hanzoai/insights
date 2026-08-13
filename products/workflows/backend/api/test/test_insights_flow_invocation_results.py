@@ -10,7 +10,7 @@ from parameterized import parameterized
 from rest_framework import status
 
 from insights.datastore.client.execute import sync_execute
-from insights.models.hog_invocation_results.sql import INSERT_FN_INVOCATION_RESULT_SQL
+from insights.models.invocations.sql import INSERT_FN_INVOCATION_RESULT_SQL
 from insights.models.personal_api_key import PersonalAPIKey
 from insights.models.utils import generate_random_token_personal, hash_key_value
 

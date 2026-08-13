@@ -1,6 +1,6 @@
 from insights.datastore.client.connection import NodeRole
 from insights.datastore.client.migration_tools import run_sql_with_exceptions
-from insights.models.hog_invocation_results.sql import (
+from insights.models.invocations.sql import (
     DISTRIBUTED_FN_INVOCATION_RESULTS_TABLE_SQL,
     INSIGHTS_INVOCATION_RESULTS_DATA_TABLE_SQL,
     INSIGHTS_INVOCATION_RESULTS_MV_SQL,
@@ -30,7 +30,7 @@ operations = [
         node_roles=[NodeRole.AUX],
     ),
     # 4. Distributed read alias on AUX and DATA so both cluster's queries reach
-    #    the data. InsightsQL emits the bare name `hog_invocation_results`; this
+    #    the data. InsightsQL emits the bare name `invocations`; this
     #    alias is what resolves it.
     run_sql_with_exceptions(
         DISTRIBUTED_FN_INVOCATION_RESULTS_TABLE_SQL(),

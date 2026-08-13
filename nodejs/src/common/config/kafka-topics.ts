@@ -58,7 +58,7 @@ export const KAFKA_DATASTORE_AI_EVENTS_JSON = `${prefix}datastore_ai_events_json
 export const KAFKA_LOG_ENTRIES = `${prefix}log_entries${suffix}`
 
 // per-invocation result rows for script functions and script flows
-export const KAFKA_FN_INVOCATION_RESULTS = `${prefix}datastore_hog_invocation_results${suffix}`
+export const KAFKA_FN_INVOCATION_RESULTS = `${prefix}datastore_invocations${suffix}`
 
 // metadata rows for sent message assets (rendered emails stored in object storage)
 export const KAFKA_MESSAGE_ASSETS = `${prefix}datastore_message_assets${suffix}`
