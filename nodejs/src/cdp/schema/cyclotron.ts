@@ -103,7 +103,7 @@ export type CyclotronInputMappingType = z.infer<typeof CyclotronInputMappingSche
 // at fetch time. The cyclotron `cyclotron_jobs.state` blob is plaintext JSON;
 // embedding credential strings on the queue payload would defeat the at-rest
 // encryption that `EncryptedJSONStringField` provides on
-// `insights_hogfunction.encrypted_inputs`.
+// `insights_function.encrypted_inputs`.
 export const CyclotronInvocationQueueParametersFetchAwsSigV4Schema = z.object({
     service: z.string(),
     region: z.string(),

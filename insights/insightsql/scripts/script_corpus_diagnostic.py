@@ -1,7 +1,7 @@
 # ruff: noqa: T201, E402
 """Script-program corpus parser-parity diagnostic.
 
-Pulls real Script program source from the `insights_hogfunction` table on
+Pulls real Script program source from the `insights_function` table on
 Aurora Postgres (the `script` column — destinations, transformations and
 other CDP functions), runs both the oracle and candidate parsers over
 each, and reports where they disagree.
@@ -131,7 +131,7 @@ def _build_corpus_sql(limit: int, offset: int = 0) -> str:
 SELECT
     {_build_redaction_expr()} AS script,
     count(*) AS n_occurrences
-FROM insights_hogfunction hf
+FROM insights_function hf
 JOIN insights_team t          ON t.id = hf.team_id
 JOIN insights_organization o  ON o.id = t.organization_id
 WHERE hf.deleted = false
