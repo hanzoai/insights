@@ -175,7 +175,7 @@ class Task(DeletedMetaFields, models.Model):
         # collided with the conversations support pipeline).
         Desk = "desk", "Desk"
         # Review PR reviewer — its sandbox steps (chunking/review/validation/dedup) spawn one task each.
-        REVIEW_HOG = "review", "Review"
+        REVIEW = "review", "Review"
         IMAGE_BUILDER = "image_builder", "Image Builder"
         # Loop firings: named, cloud-executed agent automations triggered by schedule,
         # GitHub event or API. See products/tasks/docs/LOOPS.md.

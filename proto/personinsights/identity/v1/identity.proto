@@ -68,7 +68,7 @@ message GetOrCreatePersonsByDistinctIdsResponse {
   repeated GetOrCreatePersonResult results = 1;
 }
 
-// PersonHogIdentity owns the identity graph: distinct id resolution and
+// PersonIdentity owns the identity graph: distinct id resolution and
 // get-or-create orchestration across the sync plane (Postgres primary) and
 // the async plane (leader-owned properties). Ingestion calls this service
 // directly; it is not fronted by the router.
@@ -80,7 +80,7 @@ message GetOrCreatePersonsByDistinctIdsResponse {
 // (created = false) and the caller applies properties through the normal
 // UpdatePersonProperties path — the event remains the durable source of the
 // initial properties.
-service PersonHogIdentity {
+service PersonIdentity {
   rpc GetOrCreatePersonByDistinctId(GetOrCreatePersonByDistinctIdRequest) returns (GetOrCreatePersonByDistinctIdResponse);
   rpc GetOrCreatePersonsByDistinctIds(GetOrCreatePersonsByDistinctIdsRequest) returns (GetOrCreatePersonsByDistinctIdsResponse);
 }

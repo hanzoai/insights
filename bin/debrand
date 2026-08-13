@@ -113,6 +113,11 @@ CONTENT_RULES: list[tuple[str, str]] = [
     # brand's: run second, `HEDGEHOG_MODE` becomes `HEDGEINSIGHTS_MODE`, a
     # name nothing defines. Same failure, same remedy, same position.
     ("HEDGEHOG", "MASCOT"),
+    # An enum member, and the same right-edge overlap as HEDGEHOG above: run
+    # after `HOG_`, a sibling named REVIEW_HOG_SOMETHING would come out
+    # REVIEW_INSIGHTS_SOMETHING. The member's value was already `review`; only
+    # the member said otherwise, in three enums that had to agree.
+    ("REVIEW_HOG", "REVIEW"),
     # HOG_ names the script engine's constants. Measured against the shipped
     # tree: every HOG_ name that has a counterpart there is spelled INSIGHTS_
     # (HOG_QL -> INSIGHTS_QL, HOG_FUNCTION_TEMPLATES -> INSIGHTS_FUNCTION_TEMPLATES,
@@ -129,7 +134,24 @@ CONTENT_RULES: list[tuple[str, str]] = [
     # no alias -- an env var read under two names is two names.
     ("HOGLI_", "INSIGHTSCLI_"),
     ("hogli", "insightscli"),
+    # The package is `personinsights`; the types inside it are `Person*`, so
+    # nothing stutters at the call site (`personinsights.PersonService`). Both
+    # halves are measured, not chosen: the shipped descriptor in
+    # personinsights_client/proto/generated says PersonService, and the test
+    # classes say TestFakePersonClient. Only the .proto still disagreed --
+    # which meant the service name the client dials and the one the server
+    # would have served were two different strings.
+    ("PersonHog", "Person"),
+    ("Personhog", "Person"),
+    ("person_hog", "person"),
     ("personhog", "personinsights"),
+    # The Stripe mock's fictional customer. This fork already has one made-up
+    # company -- Hedgebox, in tools/hedgebox-dummy and five hundred fixtures --
+    # and a second one that exists only to carry the mascot is a name we were
+    # keeping for no reason.
+    ("StreamHog", "Hedgebox"),
+    ("STREAMHOG", "HEDGEBOX"),
+    ("streamhog", "hedgebox"),
     # Physical names. Both were carried for a while on the grounds that a
     # table is a fact rather than a word, which is true right up until the
     # table is empty -- and both were. `hog_invocation_results` holds function
@@ -257,6 +279,8 @@ PATH_RULES: list[tuple[str, str]] = [
     ("hogflows", "insightsflows"),
     ("hogflow", "insightsflow"),
     ("PosthogStories", "InsightsStories"),
+    ("PersonHog", "Person"),
+    ("person_hog", "person"),
     ("personhog", "personinsights"),
     # The two physical names also name directories: the model package that
     # holds each family's SQL, and the skill that documents querying one.
@@ -1263,9 +1287,23 @@ def check_marks(root: str) -> int:
 # `tophog` and `hog_invocation_results` used to be listed here as physical
 # names. Both are renamed -- the tables were empty, which is the only thing
 # that ever made them hard -- and both are refused below.
+#
+# Two are outstanding rather than refused, and for opposite reasons.
+# `hogdesk` survives only inside `choices=` lists in already-applied tasks
+# migrations: the member is `Desk = "desk"` and has been since the rename, and
+# all three tables that store it were measured at zero rows, so those lists
+# are a snapshot of a field that no longer looks like that. Rewriting an
+# applied migration to change a string Django compares in Python and never
+# writes to disk buys nothing. `sherlockhog` is a key in the llm-gateway's
+# PRODUCTS map, and the thing it keys is a service in another repository that
+# still calls itself that; renaming our half would classify its traffic as a
+# product that does not exist. Neither is exempt -- both are named here.
 RETIRED: tuple[tuple[re.Pattern[str], str], ...] = (
     (re.compile(r"hog_invocation_results"), "invocations -- the Datastore table family"),
     (re.compile(r"tophog|TopHog"), "topfn -- the heavy-hitter store, and TopFn in code"),
+    (re.compile(r"PersonHog|Personhog|person_hog"), "Person -- the types in the personinsights package"),
+    (re.compile(r"StreamHog|streamhog|STREAMHOG"), "Hedgebox -- this fork has one fictional company"),
+    (re.compile(r"REVIEW_HOG"), "REVIEW -- the enum member; its value was already `review`"),
     (re.compile(r"HOGLI_"), "INSIGHTSCLI_ (the env prefix is the program's own name)"),
     (re.compile(r"\bhoge\b|\bHoge\b"), "scriptc -- the compiler, and .scriptc bytecode"),
     (re.compile(r"\bhog\b|\bHog\b"), "script -- the language, and .script source"),

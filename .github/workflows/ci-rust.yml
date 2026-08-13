@@ -505,7 +505,7 @@ jobs:
     # coordinator failover, and a mid-handoff target kill. Not a required
     # check while it soaks.
     personinsights-gate:
-        name: PersonHog e2e gate
+        name: Person e2e gate
         needs: [changes, affected]
         # Gated on the affected computation: a determinator package-rule
         # marks the harness affected whenever a personinsights service it spawns

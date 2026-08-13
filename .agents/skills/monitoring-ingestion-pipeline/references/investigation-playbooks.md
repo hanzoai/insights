@@ -67,7 +67,7 @@ Diagnose layer by layer, from consumer to output:
      volume-ranked views.
 
 3. **Person store latency** — `person_*` metrics for flush duration and DB write time.
-   `personinsights_latency_seconds` for PersonHog gRPC call latency.
+   `personinsights_latency_seconds` for personinsights gRPC call latency.
    Check `personinsights_requests_total{status="error"}` for gRPC failures.
 
 4. **Kafka production latency** — `ingestion_outputs_latency_seconds` by `topic`.
@@ -96,7 +96,7 @@ Diagnose layer by layer, from consumer to output:
 
 ## 5. "Person processing is slow" — person store diagnosis
 
-1. **PersonHog gRPC health** — `personinsights_requests_total` by `method` and `status`.
+1. **personinsights gRPC health** — `personinsights_requests_total` by `method` and `status`.
    Error rate, latency percentiles via `personinsights_latency_seconds`.
    Connection state: `personinsights_nodejs_grpc_connection_state`.
 2. **Person cache** — `person_cache_*` metrics for hit/miss rates.

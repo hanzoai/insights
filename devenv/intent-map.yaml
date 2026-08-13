@@ -59,7 +59,7 @@ capabilities:
         docker_profiles: []
 
     coordination:
-        description: 'etcd-based coordination for PersonHog and Kafka partition assignment'
+        description: 'etcd-based coordination for personinsights and Kafka partition assignment'
         requires: [core_infra]
         docker_profiles: [etcd]
 
@@ -196,7 +196,7 @@ capabilities:
         docker_profiles: []
 
     personinsights:
-        description: 'PersonHog gRPC service (router + replica + leader) for person data access'
+        description: 'personinsights gRPC service (router + replica + leader) for person data access'
         requires: [core_infra, coordination]
         docker_profiles: []
 
@@ -410,7 +410,7 @@ intents:
         capabilities: [stripe_app]
 
     personinsights:
-        description: 'PersonHog gRPC service for person data access (replaces direct DB queries)'
+        description: 'personinsights gRPC service for person data access (replaces direct DB queries)'
         capabilities: [personinsights]
 
     endpoints:
