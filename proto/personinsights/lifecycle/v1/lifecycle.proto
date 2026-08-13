@@ -39,7 +39,7 @@ message DeletePersonsResponse {
   repeated DeletePersonResult results = 2;
 }
 
-// PersonHogLifecycle runs person-destroying operations (delete now, merge
+// PersonLifecycle runs person-destroying operations (delete now, merge
 // case 3 later) as durable sagas: all saga state lives in the lifecycle_op
 // tables on the persons primary, the service itself stays stateless.
 //
@@ -52,6 +52,6 @@ message DeletePersonsResponse {
 //
 // Co-served on the identity server, but a separate service so callers are
 // insulated from any future split.
-service PersonHogLifecycle {
+service PersonLifecycle {
   rpc DeletePersons(DeletePersonsRequest) returns (DeletePersonsResponse);
 }
