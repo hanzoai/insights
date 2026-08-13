@@ -4,7 +4,7 @@ Rerun endpoint serializers shared by `InsightsFunctionViewSet` and `InsightsFlow
 These define the request/response shape for `POST .../{kind}/{id}/rerun`. The
 view validates input, then proxies through to the Node CDP worker via
 `rerun_script_invocations` in `insights.plugins.plugin_server_api`. The worker
-reads matching rows from Datastore `hog_invocation_results`, rehydrates from
+reads matching rows from Datastore `invocations`, rehydrates from
 the stored `invocation_globals`, and re-enqueues onto cyclotron.
 """
 
@@ -20,7 +20,7 @@ from insights.settings.utils import get_from_env
 # env var from its CDP config — keep both in sync if you tweak the default.
 INSIGHTS_INVOCATION_RERUN_MAX_COUNT = get_from_env("INSIGHTS_INVOCATION_RERUN_MAX_COUNT", default=10000, type_cast=int)
 
-# Matches the Datastore TTL on `hog_invocation_results` (30 days). A rerun
+# Matches the Datastore TTL on `invocations` (30 days). A rerun
 # window any longer would point at partitions that have already been dropped.
 RERUN_MAX_WINDOW_DAYS = 30
 
@@ -75,7 +75,7 @@ class ScriptInvocationRerunFilterSerializer(serializers.Serializer):
             if end - start > timedelta(days=RERUN_MAX_WINDOW_DAYS):
                 raise serializers.ValidationError(
                     f"Rerun window cannot exceed {RERUN_MAX_WINDOW_DAYS} days "
-                    f"(Datastore TTL on hog_invocation_results)."
+                    f"(Datastore TTL on invocations)."
                 )
         return attrs
 
@@ -87,7 +87,7 @@ class ScriptInvocationRerunRequestSerializer(serializers.Serializer):
         required=True,
         help_text=(
             "Required. `window_start` / `window_end` pin the query to a small set of date "
-            "partitions on the `hog_invocation_results` table. Optional `invocation_ids` "
+            "partitions on the `invocations` table. Optional `invocation_ids` "
             "restricts to specific invocations within that window."
         ),
     )

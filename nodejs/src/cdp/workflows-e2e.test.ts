@@ -4389,7 +4389,7 @@ describe('Workflows E2E: batch resolver dispatch via cdp-api', () => {
 
 // Janitor poison-pill recovery (postgres-v2). Exercises the REAL results service
 // + real Kafka produce — the seam the mocked unit tests can't cover: an isolated
-// poison pill is recorded as a failed, replayable result on hog_invocation_results
+// poison pill is recorded as a failed, replayable result on invocations
 // BEFORE its cyclotron row is deleted, and with recovery disabled the janitor
 // reverts to master's legacy path (marks the pill failed, no recovery record).
 describe('Workflows E2E (janitor poison-pill recovery, postgres-v2)', () => {
@@ -4490,7 +4490,7 @@ describe('Workflows E2E (janitor poison-pill recovery, postgres-v2)', () => {
 
         expect(result.poisonedIds).toEqual([id])
 
-        // A failed lifecycle row reached the hog_invocation_results topic so the
+        // A failed lifecycle row reached the invocations topic so the
         // run is discoverable in the Invocations UI and replayable by rerun.
         await waitForExpect(() => {
             const rows = mockProducerObserver.getProducedKafkaMessagesForTopic(KAFKA_FN_INVOCATION_RESULTS)

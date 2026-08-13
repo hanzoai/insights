@@ -59,7 +59,7 @@ role "ai_events" {
 # AUX satellite: auxiliary tables (error tracking, script invocations, message assets,
 # property values, web/marketing preaggregated). roles/auxiliary/shared holds the env-uniform
 # objects; local carries the MSK ingest variant (kafka_error_tracking + its MV, MSK
-# kafka_hog_invocation_results); prod carries the WarpStream variant. prod-us adds the
+# kafka_invocations); prod carries the WarpStream variant. prod-us adds the
 # ingestion_warnings tables. prod goldens are dump-baselined (not live-verifiable here).
 role "aux" {
   env "local-multi"   { layers = ["roles/shared", "roles/auxiliary/shared", "roles/auxiliary/local"] }

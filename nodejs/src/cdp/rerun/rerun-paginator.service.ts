@@ -407,7 +407,7 @@ export class RerunPaginatorService {
         const result = await this.datastore.query({
             query: `/* team_id:${teamId} query_type:invocation_rerun_inflight */
                 SELECT invocation_id
-                FROM hog_invocation_results
+                FROM invocations
                 WHERE team_id = {team_id:Int64}
                   AND function_kind = {function_kind:String}
                   AND function_id = {function_id:String}
@@ -476,7 +476,7 @@ export class RerunPaginatorService {
                     argMax(invocation_globals, version)    AS invocation_globals,
                     argMax(first_scheduled_at, version)    AS first_scheduled_at,
                     max(scheduled_at)                      AS last_scheduled_at
-                FROM hog_invocation_results
+                FROM invocations
                 WHERE team_id = {team_id:Int64}
                   AND function_kind = {function_kind:String}
                   AND function_id = {function_id:String}

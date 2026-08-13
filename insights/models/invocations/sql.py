@@ -13,14 +13,14 @@ INSIGHTS_INVOCATION_RESULTS_TTL_DAYS = 30
 
 # Naming convention mirrors `property_values` — the AUX-resident, non-sharded
 # table family:
-#   * `hog_invocation_results_data` — local replicated table on AUX. Writes flow
+#   * `invocations_data` — local replicated table on AUX. Writes flow
 #     in via the Kafka MV; replay reads happen against the distributed alias.
-#   * `kafka_hog_invocation_results` — single Kafka engine table on AUX backed
+#   * `kafka_invocations` — single Kafka engine table on AUX backed
 #     by the warpstream-cyclotron named collection.
-#   * `hog_invocation_results_mv` — MV on AUX, kafka → data table.
-#   * `hog_invocation_results` — distributed read alias on AUX + DATA. This is
+#   * `invocations_mv` — MV on AUX, kafka → data table.
+#   * `invocations` — distributed read alias on AUX + DATA. This is
 #     the name InsightsQL emits and the name the replay paginator queries.
-INSIGHTS_INVOCATION_RESULTS_TABLE = "hog_invocation_results"
+INSIGHTS_INVOCATION_RESULTS_TABLE = "invocations"
 INSIGHTS_INVOCATION_RESULTS_DATA_TABLE = f"{INSIGHTS_INVOCATION_RESULTS_TABLE}_data"
 KAFKA_FN_INVOCATION_RESULTS_TABLE = f"kafka_{INSIGHTS_INVOCATION_RESULTS_TABLE}"
 INSIGHTS_INVOCATION_RESULTS_MV_TABLE = f"{INSIGHTS_INVOCATION_RESULTS_TABLE}_mv"

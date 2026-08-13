@@ -260,7 +260,7 @@ CREATE TABLE insights.groups (
   is_deleted Bool,
   INDEX is_deleted_idx is_deleted TYPE minmax GRANULARITY 1
 ) ENGINE = ReplicatedReplacingMergeTree('/datastore/tables/noshard/insights.groups', '{replica}-{shard}', _timestamp) ORDER BY (team_id, group_type_index, group_key) SETTINGS index_granularity = 8192;
-CREATE TABLE insights.hog_invocation_results (
+CREATE TABLE insights.invocations (
   team_id Int64,
   function_kind LowCardinality(String),
   function_id String,
@@ -285,7 +285,7 @@ CREATE TABLE insights.hog_invocation_results (
   _timestamp DateTime,
   _offset UInt64,
   _partition UInt64
-) ENGINE = Distributed('aux', 'insights', 'hog_invocation_results_data');
+) ENGINE = Distributed('aux', 'insights', 'invocations_data');
 CREATE TABLE insights.ingestion_warnings_v2_distributed (
   team_id Int64,
   source LowCardinality(String),

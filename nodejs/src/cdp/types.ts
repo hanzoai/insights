@@ -325,7 +325,7 @@ export type CyclotronJobInvocationInsightsFunctionContext = {
     // `rerunAttempts` is incremented when an invocation is rehydrated by the
     // rerun paginator and stays sticky across the entire rerun run. The
     // lifecycle row producer reads this to drive the `attempts` + `is_retry`
-    // columns in `hog_invocation_results`.
+    // columns in `invocations`.
     rerunAttempts?: number
     // ISO timestamp of the *original* cyclotron-scheduled time. Stamped on the
     // first 'running' lifecycle row and carried through both cyclotron fetch
@@ -431,7 +431,7 @@ export type FlowInvocationContext = {
     rerunAttempts?: number
     // Stamped on the first 'running' row and carried verbatim through cyclotron
     // fetch retries and reruns so `first_scheduled_at` survives the
-    // ReplacingMergeTree collapse on the hog_invocation_results table.
+    // ReplacingMergeTree collapse on the invocations table.
     firstScheduledAt?: string
 }
 

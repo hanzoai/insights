@@ -1,21 +1,21 @@
 ---
-name: querying-tophog
+name: querying-topfn
 description: >
-  Query tophog — the ingestion pipeline's heavy-hitter store in Datastore — to
+  Query topfn — the ingestion pipeline's heavy-hitter store in Datastore — to
   identify hot or expensive actors (team_id, distinct_id, session_id,
   partition) during incident triage. Use when investigating ingestion lag, a
   hot or lagging Kafka partition, expensive person processing, merge storms,
   or any "which team or distinct_id is causing this" question. Covers the
-  internal Metabase access path (SSO via insightscli), the tophog schema, and the
+  internal Metabase access path (SSO via insightscli), the topfn schema, and the
   cost-vs-volume query lens. Internal-only: results contain cross-customer
   identifiers.
 ---
 
-# Querying tophog
+# Querying topfn
 
-tophog is the ingestion pipeline's heavy-hitter tracker: workers accumulate
+topfn is the ingestion pipeline's heavy-hitter tracker: workers accumulate
 per-key aggregates (counts, timers) in memory and periodically flush them to
-the `tophog` Datastore table via Kafka (`datastore_tophog` topic). It answers
+the `topfn` Datastore table via Kafka (`datastore_topfn` topic). It answers
 "which actor is responsible" questions that fleet-level Prometheus metrics
 cannot — per-metric label cardinality is unbounded (`distinct_id`,
 `session_id`), so this data lives only in Datastore. Retention is 30 days.
@@ -44,7 +44,7 @@ standing credential. General mechanics live in the
    ```
 
    Pick **"Insights Datastore PROD <REGION> Data Tier"** (the data tier, not
-   the query tier — tophog lives with the events data).
+   the query tier — topfn lives with the events data).
 
 3. Run queries; the cookie is read internally and never enters the transcript:
 
@@ -56,7 +56,7 @@ standing credential. General mechanics live in the
 
 ## Schema
 
-Table `tophog` (Distributed over `sharded_tophog`), ordered by
+Table `topfn` (Distributed over `sharded_topfn`), ordered by
 `(pipeline, lane, metric, timestamp, key)`, partitioned by day:
 
 | Column      | Type                   | Notes                                                                                                |
@@ -90,7 +90,7 @@ evolves. Always start with discovery:
 
 ```sql
 SELECT metric, type, count() AS rows, sum(count) AS observations
-FROM tophog
+FROM topfn
 WHERE timestamp > now() - INTERVAL 1 HOUR
 GROUP BY metric, type
 ORDER BY metric
@@ -113,7 +113,7 @@ Check before relying on them:
 
 ```sql
 SELECT countIf(key['partition'] != '') AS with_partition, count() AS total
-FROM tophog
+FROM topfn
 WHERE timestamp > now() - INTERVAL 1 HOUR AND metric = 'process_persons_time'
 ```
 
@@ -142,7 +142,7 @@ SELECT
     sum(count) AS events,
     round(sum(value) / sum(count), 1) AS ms_per_event,
     arraySort(groupUniqArray(lane)) AS lanes
-FROM tophog
+FROM topfn
 WHERE timestamp > now() - INTERVAL 1 HOUR
   AND metric = 'process_persons_time'
 GROUP BY team_id, distinct_id
@@ -163,7 +163,7 @@ Merge storms (merges are the classic person-processing cost driver):
 ```sql
 SELECT key['team_id'] AS team_id, key['distinct_id'] AS distinct_id,
        key['partition'] AS partition, sum(value) AS merge_events
-FROM tophog
+FROM topfn
 WHERE timestamp > now() - INTERVAL 1 HOUR
   AND metric = 'merge_events_per_distinct_id'
 GROUP BY team_id, distinct_id, partition
@@ -186,7 +186,7 @@ FROM (
                    ELSE sum(value)
                END AS total,
                sum(count) AS obs
-        FROM tophog
+        FROM topfn
         WHERE timestamp > now() - INTERVAL 1 HOUR
           AND pipeline = 'analytics' AND lane = 'main'
         GROUP BY metric, type, key

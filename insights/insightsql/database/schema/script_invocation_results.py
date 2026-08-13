@@ -58,7 +58,7 @@ class ScriptInvocationResultsTable(Table):
     fields: dict[str, FieldOrTable] = INSIGHTS_INVOCATION_RESULTS_FIELDS
 
     def to_printed_datastore(self, context):
-        return "hog_invocation_results"
+        return "invocations"
 
     def to_printed_insightsql(self):
-        return "hog_invocation_results"
+        return "invocations"

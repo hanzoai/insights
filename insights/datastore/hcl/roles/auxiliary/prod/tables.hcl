@@ -1,5 +1,5 @@
 database "insights" {
-  table "hog_invocation_results_data" {
+  table "invocations_data" {
     order_by     = ["team_id", "function_kind", "function_id", "invocation_id"]
     partition_by = "toYYYYMMDD(scheduled_at)"
     ttl          = "toDate(scheduled_at) + toIntervalDay(30)"
@@ -103,7 +103,7 @@ database "insights" {
       granularity = 1
     }
     engine "replicated_replacing_merge_tree" {
-      zoo_path       = "/datastore/tables/noshard/insights.hog_invocation_results_data"
+      zoo_path       = "/datastore/tables/noshard/insights.invocations_data"
       replica_name   = "{replica}-{shard}"
       version_column = "version"
     }

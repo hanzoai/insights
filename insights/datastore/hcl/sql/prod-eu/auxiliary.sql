@@ -1,7 +1,7 @@
 -- AUTO-GENERATED from the declarative HCL by ops/gen-sql.sh — do not edit.
 -- Full CREATE schema for the prod-eu/aux node. Apply to a fresh Datastore to build it.
 
-CREATE TABLE insights.hog_invocation_results_data (
+CREATE TABLE insights.invocations_data (
   team_id Int64,
   function_kind LowCardinality(String),
   function_id String,
@@ -30,7 +30,7 @@ CREATE TABLE insights.hog_invocation_results_data (
   INDEX function_idx function_id TYPE bloom_filter(0.01) GRANULARITY 1,
   INDEX event_uuid_idx event_uuid TYPE bloom_filter(0.01) GRANULARITY 1,
   INDEX is_retry_idx is_retry TYPE set(2) GRANULARITY 1
-) ENGINE = ReplicatedReplacingMergeTree('/datastore/tables/noshard/insights.hog_invocation_results_data', '{replica}-{shard}', version) ORDER BY (team_id, function_kind, function_id, invocation_id) PARTITION BY toYYYYMMDD(scheduled_at) TTL toDate(scheduled_at) + toIntervalDay(30) SETTINGS index_granularity = 1024, storage_policy = 's3_tiered', ttl_only_drop_parts = 1;
+) ENGINE = ReplicatedReplacingMergeTree('/datastore/tables/noshard/insights.invocations_data', '{replica}-{shard}', version) ORDER BY (team_id, function_kind, function_id, invocation_id) PARTITION BY toYYYYMMDD(scheduled_at) TTL toDate(scheduled_at) + toIntervalDay(30) SETTINGS index_granularity = 1024, storage_policy = 's3_tiered', ttl_only_drop_parts = 1;
 CREATE TABLE insights.ingestion_warnings_v2 (
   team_id Int64,
   source LowCardinality(String),
@@ -65,7 +65,7 @@ CREATE TABLE insights.ingestion_warnings_v2_distributed (
   _offset UInt64,
   _partition UInt64
 ) ENGINE = Distributed('aux', 'insights', 'ingestion_warnings_v2');
-CREATE TABLE insights.kafka_hog_invocation_results (
+CREATE TABLE insights.kafka_invocations (
   team_id Int64,
   function_kind LowCardinality(String),
   function_id String,
@@ -87,7 +87,7 @@ CREATE TABLE insights.kafka_hog_invocation_results (
   invocation_globals String,
   version UInt64,
   is_deleted UInt8
-) ENGINE = Kafka() SETTINGS kafka_broker_list = 'warpstream_cyclotron', kafka_format = 'kafka_format = \'JSONEachRow\'', kafka_group_name = 'kafka_group_name = \'datastore_hog_invocation_results\'', kafka_skip_broken_messages = 100, kafka_topic_list = 'kafka_topic_list = \'datastore_hog_invocation_results\'';
+) ENGINE = Kafka() SETTINGS kafka_broker_list = 'warpstream_cyclotron', kafka_format = 'kafka_format = \'JSONEachRow\'', kafka_group_name = 'kafka_group_name = \'datastore_invocations\'', kafka_skip_broken_messages = 100, kafka_topic_list = 'kafka_topic_list = \'datastore_invocations\'';
 CREATE TABLE insights.kafka_ingestion_warnings_v2 (
   team_id Int64,
   source LowCardinality(String),
@@ -768,7 +768,7 @@ CREATE TABLE insights.writable_query_log_archive (
   log_comment JSON(max_dynamic_paths=256, access_method LowCardinality(String), alert_config_id String, api_key_label String, api_key_mask String, batch_export_id String, chargeable Bool, client_query_id String, cohort_id Int64, `dagster.job_name` String, `dagster.run_id` String, `dagster.tags.owner` String, dashboard_id Int64, experiment_feature_flag_key String, experiment_id Int64, feature LowCardinality(String), id String, insight_id Int64, is_impersonated Bool, kind LowCardinality(String), name String, org_id String, person_on_events_mode LowCardinality(String), product LowCardinality(String), query_type LowCardinality(String), request_name String, route_id String, service_name String, session_id String, table_id String, team_id Int64, `temporal.activity_id` String, `temporal.activity_type` String, `temporal.attempt` Int64, `temporal.workflow_id` String, `temporal.workflow_namespace` String, `temporal.workflow_run_id` String, `temporal.workflow_type` String, user_id Int64, warehouse_query Bool, workflow LowCardinality(String), workload LowCardinality(String), SKIP cache_key, SKIP filter, SKIP insightsql_features, SKIP http_referer, SKIP http_request_id, SKIP http_user_agent, SKIP query_settings, SKIP timings, SKIP user_email),
   ProfileEvents Map(String, UInt64)
 ) ENGINE = Distributed('ops', 'insights', 'query_log_archive_buffer');
-CREATE MATERIALIZED VIEW insights.hog_invocation_results_mv TO insights.hog_invocation_results_data (team_id Int64, function_kind LowCardinality(String), function_id String, invocation_id String, parent_run_id String, status LowCardinality(String), attempts UInt8, is_retry UInt8, scheduled_at DateTime64(6, 'UTC'), first_scheduled_at DateTime64(6, 'UTC'), started_at Nullable(DateTime64(6, 'UTC')), finished_at Nullable(DateTime64(6, 'UTC')), duration_ms Nullable(UInt32), error_kind LowCardinality(String), error_message String, event_uuid String, distinct_id String, person_id String, invocation_globals String, version UInt64, is_deleted UInt8, _timestamp Nullable(DateTime), _offset UInt64, _partition UInt64) AS SELECT
+CREATE MATERIALIZED VIEW insights.invocations_mv TO insights.invocations_data (team_id Int64, function_kind LowCardinality(String), function_id String, invocation_id String, parent_run_id String, status LowCardinality(String), attempts UInt8, is_retry UInt8, scheduled_at DateTime64(6, 'UTC'), first_scheduled_at DateTime64(6, 'UTC'), started_at Nullable(DateTime64(6, 'UTC')), finished_at Nullable(DateTime64(6, 'UTC')), duration_ms Nullable(UInt32), error_kind LowCardinality(String), error_message String, event_uuid String, distinct_id String, person_id String, invocation_globals String, version UInt64, is_deleted UInt8, _timestamp Nullable(DateTime), _offset UInt64, _partition UInt64) AS SELECT
   team_id,
   function_kind,
   function_id,
@@ -797,7 +797,7 @@ CREATE MATERIALIZED VIEW insights.hog_invocation_results_mv TO insights.hog_invo
   _timestamp,
   _offset,
   _partition
-FROM insights.kafka_hog_invocation_results;
+FROM insights.kafka_invocations;
 CREATE MATERIALIZED VIEW insights.ingestion_warnings_v2_mv TO insights.ingestion_warnings_v2 (team_id Int64, source LowCardinality(String), type String, details String, timestamp DateTime64(6, 'UTC'), _timestamp Nullable(DateTime), _offset UInt64, _partition UInt64) AS SELECT
   team_id,
   source,
@@ -1022,7 +1022,7 @@ CREATE TABLE insights.experiment_metric_events_preaggregated (
   computed_at DateTime64(6, 'UTC') DEFAULT now(),
   expires_at Date DEFAULT today() + toIntervalDay(7)
 ) ENGINE = Distributed('aux', 'insights', 'sharded_experiment_metric_events_preaggregated', cityHash64(entity_id));
-CREATE TABLE insights.hog_invocation_results (
+CREATE TABLE insights.invocations (
   team_id Int64,
   function_kind LowCardinality(String),
   function_id String,
@@ -1047,7 +1047,7 @@ CREATE TABLE insights.hog_invocation_results (
   _timestamp DateTime,
   _offset UInt64,
   _partition UInt64
-) ENGINE = Distributed('aux', 'insights', 'hog_invocation_results_data');
+) ENGINE = Distributed('aux', 'insights', 'invocations_data');
 CREATE TABLE insights.marketing_conversions_preaggregated (
   team_id Int64,
   job_id UUID,

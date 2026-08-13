@@ -20,7 +20,7 @@ import {
 
 const counterScriptInvocationResultRowsProduced = new Counter({
     name: 'cdp_invocation_result_rows_produced',
-    help: 'Lifecycle rows queued for the hog_invocation_results Datastore table.',
+    help: 'Lifecycle rows queued for the invocations Datastore table.',
     labelNames: ['function_kind', 'status'],
 })
 
@@ -38,7 +38,7 @@ export type ScriptInvocationResultsServiceOutput = ScriptInvocationResultsOutput
 
 /**
  * Lifecycle row produced to Datastore via Kafka. Mirrors the columns on the
- * hog_invocation_results_data table. Two such rows are produced per
+ * invocations_data table. Two such rows are produced per
  * invocation: one when execution starts (`status='running'`) and one when it
  * finishes (`status='succeeded' | 'failed'`). On a rerun, the cycle repeats
  * with the same `invocation_id`, `is_retry=1`, and `attempts` bumped — the
@@ -483,7 +483,7 @@ export class ScriptInvocationResultsService {
      * Queue a lifecycle row for a re-run wrapper job.
      *
      * Conceptually a wrapper is a meta-invocation: one row per re-run rather
-     * than one per rerun invocation. Stamping it on `hog_invocation_results`
+     * than one per rerun invocation. Stamping it on `invocations`
      * (with `function_kind = *_rerun`) means the same Invocations tab is the
      * only debugging surface for both real invocations and the wrappers that
      * spawned them — no separate polling, no separate UI.
