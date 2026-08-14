@@ -307,12 +307,21 @@ with tempfile.TemporaryDirectory() as tmp:
     write("test.sh", "for f in tests/*.iql; do run $f; done\n")
     check("...and the extension that named it after the wrong language", quiet(debrand.check_hog, tmp), 1)
 
-    # The distinction the whole `hogfunction` rule turns on: joined to a word on
-    # its left it is the Postgres table, and renaming that is a schema change no
-    # rename may make. `--check` has to draw the same line the rule does, or the
-    # guard fails a tree the rule is right to leave alone.
+    # This used to assert the opposite, and the reason it flipped is the whole
+    # point of the rule above. Joined to a word on its left it WAS the Postgres
+    # table, and renaming a physical table is a schema change no rename may
+    # make -- so `--check` deliberately let it through.
+    #
+    # Then the schema change was made. `insights_hogfunction` became
+    # `insights_function`, the compatibility views were dropped, and the name
+    # this line protected stopped resolving to anything. The exemption outlived
+    # the fact that justified it, and went on protecting three relations the
+    # database no longer had, while the CDP managers still selected from them.
+    #
+    # An exemption is a claim about the world. When the world moves, the
+    # exemption becomes the bug.
     write("m.py", 'CREATE = "SELECT id FROM insights_hogfunction WHERE team_id = %s"\n')
-    check("a physical table name is not a leak", quiet(debrand.check_hog, tmp), 0)
+    check("a relation the database dropped IS a leak", quiet(debrand.check_hog, tmp), 1)
     write("m.py", 'name="unique_hogfunction_revision_version"\n')
     check("...nor is a constraint built on it", quiet(debrand.check_hog, tmp), 0)
     write("logic.ts", "path(() => ['scenes', 'pipeline', 'hogfunctions'])\n")
