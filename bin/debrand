@@ -1328,7 +1328,7 @@ RETIRED: tuple[tuple[re.Pattern[str], str], ...] = (
     (re.compile(r"PersonHog|Personhog|person_hog"), "Person -- the types in the personinsights package"),
     (re.compile(r"StreamHog|streamhog|STREAMHOG"), "Hedgebox -- this fork has one fictional company"),
     (re.compile(r"REVIEW_HOG"), "REVIEW -- the enum member; its value was already `review`"),
-    (re.compile(r"HOGLI_"), "INSIGHTSCLI_ (the env prefix is the program's own name)"),
+    (re.compile(r"HOGLI\\?_|\bHOGLI\b|\bHogli\b"), "INSIGHTSCLI (the program's own name, and INSIGHTSCLI_ the env prefix)"),
     (re.compile(r"\bhoge\b|\bHoge\b"), "scriptc -- the compiler, and .scriptc bytecode"),
     (re.compile(r"\bhog\b|\bHog\b"), "script -- the language, and .script source"),
     (re.compile(r"[Hh]og[Qq][Ll]|HOGQL"), "InsightsQL"),

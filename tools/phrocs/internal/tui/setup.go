@@ -141,7 +141,7 @@ func (m *Model) startListUnits() tea.Cmd {
 
 	m.setupError = "resolving intents…"
 	return func() tea.Msg {
-		units, err := runHogliListUnits(selected)
+		units, err := runInsightsCliListUnits(selected)
 		return listUnitsMsg{units: units, intents: selected, excluded: excluded, err: err}
 	}
 }
@@ -183,7 +183,7 @@ func (m *Model) startDevApply() tea.Cmd {
 	intents := m.setupIntents
 	m.setupError = "applying config…"
 	return func() tea.Msg {
-		configPath, err := runHogliDevApply(intents, excludeUnits)
+		configPath, err := runInsightsCliDevApply(intents, excludeUnits)
 		if err != nil {
 			return devApplyMsg{err: err}
 		}
@@ -244,9 +244,9 @@ func (m *Model) handleDevApplyMsg(msg devApplyMsg) {
 	*m = updated
 }
 
-// runHogliListUnits resolves intents into autostart unit names via
+// runInsightsCliListUnits resolves intents into autostart unit names via
 // `insightscli dev:list-units`.
-func runHogliListUnits(intents []string) ([]string, error) {
+func runInsightsCliListUnits(intents []string) ([]string, error) {
 	insightscliPath, err := exec.LookPath("insightscli")
 	if err != nil {
 		return nil, fmt.Errorf("insightscli not found in PATH")
@@ -268,9 +268,9 @@ func runHogliListUnits(intents []string) ([]string, error) {
 	return units, nil
 }
 
-// runHogliDevApply invokes `insightscli dev:apply` with the given intents and
+// runInsightsCliDevApply invokes `insightscli dev:apply` with the given intents and
 // optional exclusions, returning the path to the generated config.
-func runHogliDevApply(intents []string, excludes []string) (string, error) {
+func runInsightsCliDevApply(intents []string, excludes []string) (string, error) {
 	insightscliPath, err := exec.LookPath("insightscli")
 	if err != nil {
 		return "", fmt.Errorf("insightscli not found in PATH")
