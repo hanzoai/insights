@@ -1304,6 +1304,24 @@ def check_marks(root: str) -> int:
 # PRODUCTS map, and the thing it keys is a service in another repository that
 # still calls itself that; renaming our half would classify its traffic as a
 # product that does not exist. Neither is exempt -- both are named here.
+# Named once because two rules need the same object: the refusal below, and the
+# one exemption to it in check_hog.
+RENAMED_RELATIONS = re.compile(r"insights_hogfunctiontemplate|insights_hogfunction|insights_hogflow")
+
+# A migration records the schema as it WAS; every other file has to name it as
+# it IS. `0004` renamed these two tables, `0005` renamed the constraints
+# Postgres had auto-named after them, and workflows `0007`/`0016`/`0017` name
+# the flow table in the DDL they ran -- a body that cannot spell
+# `insights_hogfunction` cannot say what it did. An applied migration is not
+# rewritable anyway: Django replays it to rebuild model state, so editing one
+# desyncs the state it reconstructs from the ledger that says it ran.
+#
+# This exempts the relation rule inside migrations and nowhere else, which is
+# the whole point of it. The bug it was written for was the nodejs function,
+# template and flow managers selecting from relations the database had already
+# dropped -- runtime code, where the refusal still bites.
+RECORDED_BY_MIGRATIONS = frozenset({RENAMED_RELATIONS})
+
 RETIRED: tuple[tuple[re.Pattern[str], str], ...] = (
     (re.compile(r"hog_invocation_results"), "invocations -- the Datastore table family"),
     (re.compile(r"tophog|TopHog"), "topfn -- the heavy-hitter store, and TopFn in code"),
@@ -1327,7 +1345,7 @@ RETIRED: tuple[tuple[re.Pattern[str], str], ...] = (
     # which is the outcome this file exists to prevent -- an edit happens once,
     # a refusal happens on every commit.
     (
-        re.compile(r"insights_hogfunctiontemplate|insights_hogfunction|insights_hogflow"),
+        RENAMED_RELATIONS,
         "insights_function_template / insights_function / insights_flow -- the relations, renamed",
     ),
     # The extensions a previous pass invented for the script language, which
@@ -1467,9 +1485,12 @@ def check_hog(root: str) -> int:
     for rel in sorted(set(coarse) - set(CONTENT_ALLOWLIST)):
         if is_licence(rel):
             continue
+        recorded = RECORDED_BY_MIGRATIONS if is_migration(rel) else frozenset()
         with open(os.path.join(root, rel), encoding="utf-8", errors="replace") as fh:
             for n, line in enumerate(fh, 1):
                 for pat, instead in RETIRED:
+                    if pat in recorded:
+                        continue
                     m = pat.search(line)
                     if m:
                         found.setdefault(rel, []).append((n, m.group(0), instead))
