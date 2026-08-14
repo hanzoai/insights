@@ -28,6 +28,21 @@
 # way on 08-01 and it was found on 08-08, two rebases later. Runs first because
 # it needs no install.
 test:
+    - name: one plane
+      # This forge collects workflows from the FIRST entry of WORKFLOW_DIRS that
+      # exists. .hanzo/workflows/ exists, so a file under .github/workflows/ is
+      # not a second lane — it is a file that runs nowhere, and it fails by being
+      # silent: the checks that would go red are the ones no longer running. That
+      # is how 121 of them accumulated here, under a green repo, taking the
+      # semgrep suite with them.
+      #
+      # Nothing runs on github.com, so there is no case for the directory. The
+      # same assertion guards hanzoai/ci as `one-definition`.
+      run: |
+          set -e
+          [ -d .github/workflows ] && {
+            echo "::error::.github/workflows is back — this forge reads .hanzo/workflows, so those files run nowhere and go green by not running"; exit 1; } || true
+          echo "OK: one plane ($(ls .hanzo/workflows | wc -l) workflows, all of them live)"
     - name: fork inventory
       run: python3 scripts/fork-inventory.py
     - name: lint
