@@ -1352,6 +1352,32 @@ RETIRED: tuple[tuple[re.Pattern[str], str], ...] = (
     # named it after the SQL dialect instead. Refused so the language cannot go
     # back to having two names.
     (re.compile(r"\.iqle?(?![A-Za-z0-9])"), ".script and .scriptc"),
+    # The runtime the compiler emits and both VMs define, by name, which makes
+    # the three of them one contract. A name coming back in one engine is not a
+    # typo, it is the compiler emitting a call nothing defines -- and the last
+    # time these disagreed the suite could not say so, because its snapshots
+    # were stale in the same direction. Unbranded because inside the language's
+    # own runtime every value is a Script value, so the infix distinguished
+    # nothing.
+    (
+        re.compile(r"__(?:is|print|to|new)Hog[A-Za-z]*|__hog[A-Za-z]*__"),
+        "__printValue / __isDate / __newDate -- the emitted runtime, unbranded",
+    ),
+    # The STL constructor for an error of an arbitrary type, which is why it
+    # cannot simply be `Error`: that one exists and fixes the type. Two test
+    # programs went on calling the old name for two renames after the STL
+    # stopped defining it.
+    (re.compile(r"\bHogError\b"), "ScriptError -- the STL error constructor"),
+    # The AI agent package. `ee/` is empty, so every one of these is a path
+    # that resolves to nothing -- which is how nineteen semgrep excludes, a
+    # dagster path filter and a whole eval workflow went on naming it.
+    (
+        re.compile(r"\bhogai\b|\bee[./]hogai"),
+        "products.insights_ai -- the module, and products/insights_ai the path",
+    ),
+    # The enum member, in the casing the whole-word rules above cannot see:
+    # they are `hog` and `Hog`, and this is neither.
+    (re.compile(r"\bHOG\b"), "SCRIPT -- the member; its value was already `script`"),
     # The credential marks. `phc_ phx_ phs_ pha_ phr_ phvt_` all opened with the
     # upstream's initials, and they were the one piece of its brand a customer
     # read back to us in every SDK snippet -- unreachable by any word rule,
@@ -1379,6 +1405,33 @@ RETIRED_GREP = "hog|HOG|Hog|[.]iql|ph[a-z][a-z]?_"
 def is_manifest(p: str) -> bool:
     b = os.path.basename(p)
     return b in MANIFESTS or b in SKIP_CONTENT_NAMES
+
+
+# Output, not source. A retired name in one of these says the program that
+# writes it has not been re-run since the rename -- which is a finding, and a
+# useful one, but never an edit to make by hand: a snapshot edited to agree
+# with a rename is exactly how a half-rename passes its own tests. Reported
+# rather than allowlisted, for the same reason manifests are: an exemption
+# would hide it, and these come clean by regenerating.
+GENERATED_NAMES = {".test_durations", "frontend/snapshots.yml"}
+GENERATED_MARKS = ("__snapshots__/", ".ambr", ".snap")
+
+
+def is_generated(p: str) -> bool:
+    return p in GENERATED_NAMES or any(m in p for m in GENERATED_MARKS)
+
+
+# A captured diff and the review comments captured beside it are evidence of
+# what another tree looked like on the day it was reviewed. They are inputs to
+# an eval that scores a reviewer against a known outcome, so rewriting one does
+# not rename anything -- it falsifies the capture and moves the answer the eval
+# grades against. Skipped outright rather than reported, on the same footing as
+# a licence: not ours to rewrite, and not outstanding work.
+CAPTURE_RE = re.compile(r"/eval/experiments/[^/]+/fixtures/")
+
+
+def is_capture(p: str) -> bool:
+    return bool(CAPTURE_RE.search(p))
 
 
 def partition(hits: list[str]) -> tuple[list[str], list[str], list[str]]:
@@ -1483,7 +1536,7 @@ def check_hog(root: str) -> int:
     ).stdout.split()
     found: dict[str, list[tuple[int, str, str]]] = {}
     for rel in sorted(set(coarse) - set(CONTENT_ALLOWLIST)):
-        if is_licence(rel):
+        if is_licence(rel) or is_capture(rel):
             continue
         recorded = RECORDED_BY_MIGRATIONS if is_migration(rel) else frozenset()
         with open(os.path.join(root, rel), encoding="utf-8", errors="replace") as fh:
@@ -1494,11 +1547,12 @@ def check_hog(root: str) -> int:
                     m = pat.search(line)
                     if m:
                         found.setdefault(rel, []).append((n, m.group(0), instead))
-    pending = sorted(r for r in found if is_manifest(r))
+    stale = sorted(r for r in found if is_generated(r))
+    pending = sorted(r for r in found if is_manifest(r) and not is_generated(r))
     leaked = [
         (rel, n, tok, instead)
         for rel, lines in sorted(found.items())
-        if not is_manifest(rel)
+        if not is_manifest(rel) and not is_generated(rel)
         for n, tok, instead in lines
     ]
     # A migration's filename is its identity in `django_migrations`, so it is
@@ -1509,6 +1563,11 @@ def check_hog(root: str) -> int:
         if not is_migration(p) and any(pat.search(p) for pat, _ in RETIRED)
     ]
 
+    if stale:
+        print(f"STALE: {len(stale)} generated files still spell a retired name.")
+        print("    Their sources do not. Regenerate them; never edit one to agree.")
+        for p in stale:
+            print(f"    {p}: {len(found[p])} lines")
     if pending:
         print(f"PENDING: {len(pending)} dependency manifests still name a mascot package.")
         for p in pending:
