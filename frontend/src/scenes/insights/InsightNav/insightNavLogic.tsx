@@ -483,7 +483,7 @@ export const insightNavLogic = kea<insightNavLogicType>([
                 } else if (containsInsightsQLQuery(query)) {
                     return InsightType.SQL
                 } else if (isScriptQuery(query)) {
-                    return InsightType.HOG
+                    return InsightType.SCRIPT
                 } else if (isInsightVizNode(query)) {
                     // Check for Web Analytics queries first before using the mapping
                     if (isWebAnalyticsInsightQuery(query.source)) {
@@ -534,10 +534,10 @@ export const insightNavLogic = kea<insightNavLogicType>([
                     },
                 ]
 
-                if (featureFlags[FEATURE_FLAGS.HOG] || activeView === InsightType.HOG) {
+                if (featureFlags[FEATURE_FLAGS.SCRIPT] || activeView === InsightType.SCRIPT) {
                     tabs.push({
                         label: <>Script ◆</>,
-                        type: InsightType.HOG,
+                        type: InsightType.SCRIPT,
                         dataAttr: 'insight-script-tab',
                     })
                 }

@@ -34,7 +34,7 @@ NOTE: When calling the `create_insights_function_filters` tool, do not provide a
 After the tool completes, do NOT repeat the filter configuration, as the user can see it. Only summarize the changes, comprehensively, but in only one brief sentence.
 """
 
-IDENTITY_MESSAGE_HOG = """Script is Insights's own programming language. You write Script code based on a prompt. You don't help with other knowledge.
+IDENTITY_MESSAGE_SCRIPT = """Script is Insights's own programming language. You write Script code based on a prompt. You don't help with other knowledge.
 
 Here is the Script standard library. Dont use any other functions since they are not supported in Script:
 

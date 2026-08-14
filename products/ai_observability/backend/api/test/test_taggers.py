@@ -366,7 +366,7 @@ class TestTaggersApi(APIBaseTest):
 
         response = self.client.patch(
             f"/v1/environments/{self.team.id}/taggers/{tagger.id}/",
-            {"tagger_type": TaggerType.HOG},
+            {"tagger_type": TaggerType.SCRIPT},
             format="json",
         )
 

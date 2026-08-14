@@ -50,7 +50,7 @@ _LEGACY_FILTER_INSIGHT_TO_SHORT_NAME: dict[str, str] = {
     "RETENTION": "Retention",
     "JSON": "JSON",
     "SQL": "SQL",
-    "HOG": "Script",
+    "SCRIPT": "Script",
     "WEB_ANALYTICS": "Web analytics",
     "SESSIONS": "Sessions",
 }

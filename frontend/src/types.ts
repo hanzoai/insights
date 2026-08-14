@@ -3059,7 +3059,7 @@ export enum InsightType {
     PATHS = 'PATHS',
     JSON = 'JSON',
     SQL = 'SQL',
-    HOG = 'HOG',
+    SCRIPT = 'SCRIPT',
     WEB_ANALYTICS = 'WEB_ANALYTICS',
 }
 

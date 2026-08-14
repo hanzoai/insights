@@ -1140,7 +1140,7 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                 }
             },
             submit: async (data) => {
-                // Check HOG code size immediately before submission
+                // Check Script code size immediately before submission
                 if (data.script) {
                     const scriptSize = new Blob([data.script]).size
                     if (scriptSize > INSIGHTS_CODE_SIZE_LIMIT) {

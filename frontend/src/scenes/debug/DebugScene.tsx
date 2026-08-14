@@ -42,7 +42,7 @@ export function DebugScene(): JSX.Element {
                         >
                             SQL Debug
                         </Button>
-                        {featureFlags[FEATURE_FLAGS.HOG] ? (
+                        {featureFlags[FEATURE_FLAGS.SCRIPT] ? (
                             <Button
                                 size="small"
                                 active={query1 === stringifiedExamples.Scriptgonacci}
