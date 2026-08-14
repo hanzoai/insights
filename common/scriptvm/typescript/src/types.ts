@@ -103,28 +103,28 @@ export interface ThrowFrame {
 }
 
 export interface ScriptDate {
-    __scriptDate__: true
+    __date__: true
     year: number
     month: number
     day: number
 }
 
 export interface ScriptDateTime {
-    __scriptDateTime__: true
+    __dateTime__: true
     /** Timestamp float in seconds */
     dt: number
     zone: string
 }
 
 export interface ScriptError {
-    __scriptError__: true
+    __error__: true
     type: string
     message: string
     payload?: Record<string, any>
 }
 
 export interface ScriptCallable {
-    __scriptCallable__: 'local' | 'stl' | 'async'
+    __callable__: 'local' | 'stl' | 'async'
     name?: string
     argCount: number
     upvalueCount: number
@@ -133,7 +133,7 @@ export interface ScriptCallable {
 }
 
 export interface ScriptUpValue {
-    __scriptUpValue__: true
+    __upValue__: true
     id: number
     location: number
     closed: boolean
@@ -141,13 +141,13 @@ export interface ScriptUpValue {
 }
 
 export interface ScriptClosure {
-    __scriptClosure__: true
+    __closure__: true
     callable: ScriptCallable
     upvalues: number[]
 }
 
 export interface ScriptInterval {
-    __scriptInterval__: true
+    __interval__: true
     value: number
     unit: string
 }

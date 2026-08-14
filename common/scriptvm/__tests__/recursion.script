@@ -8,12 +8,12 @@ let fibonacci := (number) -> {
 
 print(fibonacci(6))
 
-fun hogonacci(number) {
+fun fib(number) {
     if (number < 2) {
         return number;
     } else {
-        return hogonacci(number - 1) + hogonacci(number - 2);
+        return fib(number - 1) + fib(number - 2);
     }
 }
 
-print(hogonacci(6))
+print(fib(6))

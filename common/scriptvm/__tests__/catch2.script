@@ -1,6 +1,6 @@
 try {
     try {
-      throw HogError('FishError', 'You forgot to feed your fish')
+      throw ScriptError('FishError', 'You forgot to feed your fish')
     } catch (e: FoodError) {
       print(f'Problem with your food: {e.message}')
     }
@@ -12,7 +12,7 @@ try {
 
 try {
     try {
-      throw HogError('FunkyError', 'You forgot to feed your fish')
+      throw ScriptError('FunkyError', 'You forgot to feed your fish')
     } catch (e: FoodError) {
       print(f'Problem with your food: {e.message}')
     }
@@ -24,7 +24,7 @@ try {
 
 try {
     try {
-      throw HogError('FishError', 'You forgot to feed your fish')
+      throw ScriptError('FishError', 'You forgot to feed your fish')
     } catch (e: FoodError) {
       print(f'Problem with your food: {e.message}')
     }

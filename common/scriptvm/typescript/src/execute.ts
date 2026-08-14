@@ -269,7 +269,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
             }
         }
         const createdUpValue = {
-            __scriptUpValue__: true,
+            __upValue__: true,
             id: sortedUpValues.length + 1, // used to deduplicate post deserialization
             location: index,
             closed: false,
@@ -599,7 +599,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                 case Operation.TUPLE:
                     temp = next()
                     tempArray = spliceStack2(stack.length - temp, temp)
-                    ;(tempArray as any).__isScriptTuple = true
+                    ;(tempArray as any).__isTuple = true
                     pushStack(tempArray)
                     break
                 case Operation.JUMP:
@@ -868,7 +868,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                     if (temp > MAX_FUNCTION_ARGS_LENGTH) {
                         throw new ScriptVMException('Too many arguments')
                     }
-                    if (closure.callable.__scriptCallable__ === 'local') {
+                    if (closure.callable.__callable__ === 'local') {
                         if (closure.callable.argCount > temp) {
                             for (let i = temp; i < closure.callable.argCount; i++) {
                                 pushStack(null)
@@ -892,7 +892,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                             throw new ScriptVMException(`Call stack exceeded maximum length of ${CALLSTACK_LENGTH}`)
                         }
                         continue // resume the loop without incrementing frame.ip
-                    } else if (closure.callable.__scriptCallable__ === 'stl') {
+                    } else if (closure.callable.__callable__ === 'stl') {
                         if (!closure.callable.name || !Object.hasOwn(STL, closure.callable.name)) {
                             throw new ScriptVMException(`Unsupported function call: ${closure.callable.name}`)
                         }
@@ -919,7 +919,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
                             }
                         }
                         pushStack(stlFn.fn(args, closure.callable.name, options))
-                    } else if (closure.callable.__scriptCallable__ === 'async') {
+                    } else if (closure.callable.__callable__ === 'async') {
                         if (asyncSteps >= maxAsyncSteps) {
                             throw new ScriptVMException(`Exceeded maximum number of async steps: ${maxAsyncSteps}`)
                         }

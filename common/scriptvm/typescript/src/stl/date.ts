@@ -5,7 +5,7 @@ import { ScriptDate, ScriptDateTime } from '../types'
 
 export function toScriptDate(year: number, month: number, day: number): ScriptDate {
     return {
-        __scriptDate__: true,
+        __date__: true,
         year: year,
         month: month,
         day: day,
@@ -23,13 +23,13 @@ export function toScriptDateTime(timestamp: number | ScriptDate, zone?: string):
             { zone: zone || 'UTC' }
         )
         return {
-            __scriptDateTime__: true,
+            __dateTime__: true,
             dt: dateTime.toSeconds(),
             zone: dateTime.zoneName || 'UTC',
         }
     }
     return {
-        __scriptDateTime__: true,
+        __dateTime__: true,
         dt: timestamp,
         zone: zone || 'UTC',
     }
@@ -73,7 +73,7 @@ export function toTimeZone(input: ScriptDateTime, zone: string): ScriptDateTime 
 export function toDate(input: string | number): ScriptDate {
     const dt = typeof input === 'number' ? DateTime.fromSeconds(input) : DateTime.fromISO(input)
     return {
-        __scriptDate__: true,
+        __date__: true,
         year: dt.year,
         month: dt.month,
         day: dt.day,
@@ -83,7 +83,7 @@ export function toDate(input: string | number): ScriptDate {
 export function toDateTime(input: string | number, zone?: string): ScriptDateTime {
     const dt = typeof input === 'number' ? input : DateTime.fromISO(input, { zone: zone || 'UTC' }).toSeconds()
     return {
-        __scriptDateTime__: true,
+        __dateTime__: true,
         dt: dt,
         zone: zone || 'UTC',
     }
