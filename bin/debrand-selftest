@@ -327,6 +327,23 @@ with tempfile.TemporaryDirectory() as tmp:
     write("logic.ts", "path(() => ['scenes', 'pipeline', 'hogfunctions'])\n")
     check("...but a label at a token boundary is", quiet(debrand.check_hog, tmp), 1)
 
+    # The one exemption to the rule above, and the reason it is not a hole. A
+    # migration is the record of a schema change, so the migration that renamed
+    # these relations has to name the side it renamed FROM -- and it cannot be
+    # edited afterwards regardless, because Django replays it to rebuild model
+    # state from the ledger row that says it ran.
+    write(
+        "app/migrations/0004_tables_named_for_the_model.py",
+        'RENAME = "ALTER TABLE insights_hogfunction RENAME TO insights_function"\n',
+    )
+    check("a migration may name the relation it renamed", quiet(debrand.check_hog, tmp), 0)
+
+    # Scoped to that one rule, not to migrations. A blanket exemption would let
+    # every other retired spelling back in through the one kind of file nobody
+    # rereads.
+    write("app/migrations/0005_later.py", 'q = "SELECT 1"  # HogQL\n')
+    check("...while a migration is refused every other spelling", quiet(debrand.check_hog, tmp), 1)
+
     # A migration's filename is its identity in `django_migrations`, frozen for
     # the same reason MIGRATION_RE refuses to rename one.
     write("app/migrations/0002_alter_hogfunction_batch_export.py", "operations = []\n")
