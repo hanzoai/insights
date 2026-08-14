@@ -43,7 +43,7 @@ There is **no single boolean "written by AI" column.** Identify it from `lc_prod
 
 | Signal                                       | Means                                                                                                              |
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `lc_product = 'max_ai'`                      | Insights's Max assistant and its tools (tagged via `tags_context(product=Product.MAX_AI)` throughout `ee/hogai/**`) |
+| `lc_product = 'max_ai'`                      | Insights's Max assistant and its tools (tagged via `tags_context(product=Product.MAX_AI)` throughout `insights/insightsql_queries/ai/**`) |
 | `lc_product = 'mcp'` or `lc_feature = 'mcp'` | Queries issued by external AI agents through the Insights MCP server                                                |
 | `lc_feature = 'insights_ai'`                  | The AI feature tag (also exists; less common in practice)                                                          |
 
@@ -60,7 +60,7 @@ Caveats:
 - Heuristic tell: AI-written InsightsQL often carries explanatory `-- …` comments in `lc_query__query`
   (people rarely comment ad-hoc SQL). Useful as a secondary signal, not authoritative.
 - Source of truth for the tags: the `Product` / `Feature` enums and the product-from-node-kind mapping
-  in `insights/datastore/query_tagging.py`; call sites in `ee/hogai/**` and the MCP server.
+  in `insights/datastore/query_tagging.py`; call sites in `insights/insightsql_queries/ai/**` and the MCP server.
 
 ```sql
 SELECT
