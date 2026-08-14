@@ -198,7 +198,7 @@ def execute_bytecode(
             if upvalue["location"] == index:
                 return upvalue
         created_upvalue = {
-            "__scriptUpValue__": True,
+            "__upValue__": True,
             "location": index,
             "closed": False,
             "value": None,
@@ -589,16 +589,16 @@ def execute_bytecode(
             case Operation.CALL_LOCAL:
                 check_timeout()
                 closure = pop_stack()
-                if not isinstance(closure, dict) or closure.get("__scriptClosure__") is None:
+                if not isinstance(closure, dict) or closure.get("__closure__") is None:
                     raise ScriptVMException(f"Invalid closure: {closure}")
                 callable = closure.get("callable")
-                if not isinstance(callable, dict) or callable.get("__scriptCallable__") is None:
+                if not isinstance(callable, dict) or callable.get("__callable__") is None:
                     raise ScriptVMException(f"Invalid callable: {callable}")
                 args_length = next_token()
                 if args_length > MAX_FUNCTION_ARGS_LENGTH:
                     raise ScriptVMException("Too many arguments")
 
-                if callable.get("__scriptCallable__") == "local":
+                if callable.get("__callable__") == "local":
                     if callable["argCount"] > args_length:
                         # TODO: specify minimum required arguments somehow
                         for _ in range(callable["argCount"] - args_length):
@@ -619,7 +619,7 @@ def execute_bytecode(
                     call_stack.append(frame)
                     continue  # resume the loop without incrementing frame.ip
 
-                elif callable.get("__scriptCallable__") == "stl":
+                elif callable.get("__callable__") == "stl":
                     if callable["name"] not in STL:
                         raise ScriptVMException(f"Unsupported function call: {callable['name']}")
                     check_allowed(callable["name"])
@@ -638,7 +638,7 @@ def execute_bytecode(
                             args = [*args, *([None] * (stl_fn.maxArgs - len(args)))]
                     push_stack(stl_fn.fn(args, team, stdout, remaining_timeout()))
 
-                elif callable.get("__scriptCallable__") == "async":
+                elif callable.get("__callable__") == "async":
                     raise ScriptVMException("Async functions are not supported")
 
                 else:

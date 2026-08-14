@@ -39,17 +39,17 @@ STL_FUNCTIONS: dict[str, list[str | list[str]]] = {
     ],
     "toInt": [
         """function toInt(value) {
-    if (__isScriptDateTime(value)) { return Math.floor(value.dt); }
-    else if (__isScriptDate(value)) { const date = new Date(Date.UTC(value.year, value.month - 1, value.day)); const epoch = new Date(Date.UTC(1970, 0, 1)); const diffInDays = Math.floor((date - epoch) / (1000 * 60 * 60 * 24)); return diffInDays; }
+    if (__isDateTime(value)) { return Math.floor(value.dt); }
+    else if (__isDate(value)) { const date = new Date(Date.UTC(value.year, value.month - 1, value.day)); const epoch = new Date(Date.UTC(1970, 0, 1)); const diffInDays = Math.floor((date - epoch) / (1000 * 60 * 60 * 24)); return diffInDays; }
     return !isNaN(parseInt(value)) ? parseInt(value) : null; }""",
-        ["__isScriptDateTime", "__isScriptDate"],
+        ["__isDateTime", "__isDate"],
     ],
     "toFloat": [
         """function toFloat(value) {
-    if (__isScriptDateTime(value)) { return value.dt; }
-    else if (__isScriptDate(value)) { const date = new Date(Date.UTC(value.year, value.month - 1, value.day)); const epoch = new Date(Date.UTC(1970, 0, 1)); const diffInDays = (date - epoch) / (1000 * 60 * 60 * 24); return diffInDays; }
+    if (__isDateTime(value)) { return value.dt; }
+    else if (__isDate(value)) { const date = new Date(Date.UTC(value.year, value.month - 1, value.day)); const epoch = new Date(Date.UTC(1970, 0, 1)); const diffInDays = (date - epoch) / (1000 * 60 * 60 * 24); return diffInDays; }
     return !isNaN(parseFloat(value)) ? parseFloat(value) : null; }""",
-        ["__isScriptDateTime", "__isScriptDate"],
+        ["__isDateTime", "__isDate"],
     ],
     "ifNull": [
         "function ifNull (value, defaultValue) { return value !== null ? value : defaultValue } ",
@@ -81,7 +81,7 @@ STL_FUNCTIONS: dict[str, list[str | list[str]]] = {
         ["empty"],
     ],
     "tuple": [
-        "function tuple (...args) { const tuple = args.slice(); tuple.__isScriptTuple = true; return tuple; }",
+        "function tuple (...args) { const tuple = args.slice(); tuple.__isTuple = true; return tuple; }",
         [],
     ],
     "lower": [
@@ -97,21 +97,21 @@ STL_FUNCTIONS: dict[str, list[str | list[str]]] = {
         [],
     ],
     "print": [
-        "function print (...args) { console.log(...args.map(__printScriptStringOutput)) }",
-        ["__printScriptStringOutput"],
+        "function print (...args) { console.log(...args.map(__printStringOutput)) }",
+        ["__printStringOutput"],
     ],
     "jsonParse": [
         """function jsonParse (str) {
     function convert(x) {
         if (Array.isArray(x)) { return x.map(convert) }
         else if (typeof x === 'object' && x !== null) {
-            if (x.__scriptDateTime__) { return __toScriptDateTime(x.dt, x.zone)
-            } else if (x.__scriptDate__) { return __toScriptDate(x.year, x.month, x.day)
-            } else if (x.__scriptError__) { return __newScriptError(x.type, x.message, x.payload) }
+            if (x.__dateTime__) { return __newDateTime(x.dt, x.zone)
+            } else if (x.__date__) { return __newDate(x.year, x.month, x.day)
+            } else if (x.__error__) { return __newError(x.type, x.message, x.payload) }
             const obj = {}; for (const key in x) { obj[key] = convert(x[key]) }; return obj }
         return x }
     return convert(JSON.parse(str)) }""",
-        ["__toScriptDateTime", "__toScriptDate", "__newScriptError"],
+        ["__newDateTime", "__newDate", "__newError"],
     ],
     "jsonStringify": [
         """function jsonStringify (value, spacing) {
@@ -127,7 +127,7 @@ STL_FUNCTIONS: dict[str, list[str | list[str]]] = {
                     return obj
                 }
                 if (Array.isArray(x)) { return x.map((v) => convert(v, marked)) }
-                if (__isScriptDateTime(x) || __isScriptDate(x) || __isScriptError(x)) { return x }
+                if (__isDateTime(x) || __isDate(x) || __isError(x)) { return x }
                 if (typeof x === 'function') { return `fn<${x.name || 'lambda'}(${x.length})>` }
                 const obj = {}; for (const key in x) { obj[key] = convert(x[key], marked) }
                 return obj
@@ -142,7 +142,7 @@ STL_FUNCTIONS: dict[str, list[str | list[str]]] = {
     }
     return JSON.stringify(convert(value), (key, val) => typeof val === 'function' ? `fn<${val.name || 'lambda'}(${val.length})>` : val)
 }""",
-        ["__isScriptDateTime", "__isScriptDate", "__isScriptError"],
+        ["__isDateTime", "__isDate", "__isError"],
     ],
     "JSONHas": [
         """function JSONHas (obj, ...path) {
@@ -536,29 +536,29 @@ function isIPAddressInRange(address, prefix) {
         ["__formatDateTime"],
     ],
     "ScriptError": [
-        """function ScriptError (type, message, payload) { return __newScriptError(type, message, payload) }""",
-        ["__newScriptError"],
+        """function ScriptError (type, message, payload) { return __newError(type, message, payload) }""",
+        ["__newError"],
     ],
     "Error": [
-        """function __x_Error (message, payload) { return __newScriptError('Error', message, payload) }""",
-        ["__newScriptError"],
+        """function __x_Error (message, payload) { return __newError('Error', message, payload) }""",
+        ["__newError"],
     ],
     "RetryError": [
-        """function RetryError (message, payload) { return __newScriptError('RetryError', message, payload) }""",
-        ["__newScriptError"],
+        """function RetryError (message, payload) { return __newError('RetryError', message, payload) }""",
+        ["__newError"],
     ],
     "NotImplementedError": [
-        """function NotImplementedError (message, payload) { return __newScriptError('NotImplementedError', message, payload) }""",
-        ["__newScriptError"],
+        """function NotImplementedError (message, payload) { return __newError('NotImplementedError', message, payload) }""",
+        ["__newError"],
     ],
     "typeof": [
         """function __x_typeof (value) {
     if (value === null || value === undefined) { return 'null'
-    } else if (__isScriptDateTime(value)) { return 'datetime'
-    } else if (__isScriptDate(value)) { return 'date'
-    } else if (__isScriptError(value)) { return 'error'
+    } else if (__isDateTime(value)) { return 'datetime'
+    } else if (__isDate(value)) { return 'date'
+    } else if (__isError(value)) { return 'error'
     } else if (typeof value === 'function') { return 'function'
-    } else if (Array.isArray(value)) { if (value.__isScriptTuple) { return 'tuple' } return 'array'
+    } else if (Array.isArray(value)) { if (value.__isTuple) { return 'tuple' } return 'array'
     } else if (typeof value === 'object') { return 'object'
     } else if (typeof value === 'number') { return Number.isInteger(value) ? 'integer' : 'float'
     } else if (typeof value === 'string') { return 'string'
@@ -566,11 +566,11 @@ function isIPAddressInRange(address, prefix) {
     return 'unknown'
 }
 """,
-        ["__isScriptDateTime", "__isScriptDate", "__isScriptError"],
+        ["__isDateTime", "__isDate", "__isError"],
     ],
     "__DateTimeToString": [
         r"""function __DateTimeToString(dt) {
-    if (__isScriptDateTime(dt)) {
+    if (__isDateTime(dt)) {
         const date = new Date(dt.dt * 1000);
         const timeZone = dt.zone || 'UTC';
         const milliseconds = Math.floor(dt.dt * 1000 % 1000);
@@ -614,79 +614,79 @@ function isIPAddressInRange(address, prefix) {
     ],
     "__STLToString": [
         r"""function __STLToString(arg) {
-    if (arg && __isScriptDate(arg)) { return `${arg.year}-${arg.month.toString().padStart(2, '0')}-${arg.day.toString().padStart(2, '0')}`; }
-    else if (arg && __isScriptDateTime(arg)) { return __DateTimeToString(arg); }
-    return __printScriptStringOutput(arg); }""",
-        ["__isScriptDate", "__isScriptDateTime", "__printScriptStringOutput", "__DateTimeToString"],
+    if (arg && __isDate(arg)) { return `${arg.year}-${arg.month.toString().padStart(2, '0')}-${arg.day.toString().padStart(2, '0')}`; }
+    else if (arg && __isDateTime(arg)) { return __DateTimeToString(arg); }
+    return __printStringOutput(arg); }""",
+        ["__isDate", "__isDateTime", "__printStringOutput", "__DateTimeToString"],
     ],
-    "__isScriptDate": [
-        """function __isScriptDate(obj) { return obj && obj.__scriptDate__ === true }""",
+    "__isDate": [
+        """function __isDate(obj) { return obj && obj.__date__ === true }""",
         [],
     ],
-    "__isScriptDateTime": [
-        """function __isScriptDateTime(obj) { return obj && obj.__scriptDateTime__ === true }""",
+    "__isDateTime": [
+        """function __isDateTime(obj) { return obj && obj.__dateTime__ === true }""",
         [],
     ],
-    "__toScriptDate": [
-        """function __toScriptDate(year, month, day) { return { __scriptDate__: true, year: year, month: month, day: day, } }""",
+    "__newDate": [
+        """function __newDate(year, month, day) { return { __date__: true, year: year, month: month, day: day, } }""",
         [],
     ],
-    "__toScriptDateTime": [
-        """function __toScriptDateTime(timestamp, zone) {
-    if (__isScriptDate(timestamp)) {
+    "__newDateTime": [
+        """function __newDateTime(timestamp, zone) {
+    if (__isDate(timestamp)) {
         const date = new Date(Date.UTC(timestamp.year, timestamp.month - 1, timestamp.day));
         const dt = date.getTime() / 1000;
-        return { __scriptDateTime__: true, dt: dt, zone: zone || 'UTC' };
+        return { __dateTime__: true, dt: dt, zone: zone || 'UTC' };
     }
-    return { __scriptDateTime__: true, dt: timestamp, zone: zone || 'UTC' }; }""",
-        ["__isScriptDate"],
+    return { __dateTime__: true, dt: timestamp, zone: zone || 'UTC' }; }""",
+        ["__isDate"],
     ],
     "__now": [
-        """function __now(zone) { return __toScriptDateTime(Date.now() / 1000, zone) }""",
-        ["__toScriptDateTime"],
+        """function __now(zone) { return __newDateTime(Date.now() / 1000, zone) }""",
+        ["__newDateTime"],
     ],
     "__toUnixTimestamp": [
         """function __toUnixTimestamp(input, zone) {
-    if (__isScriptDateTime(input)) { return input.dt; }
-    if (__isScriptDate(input)) { return __toScriptDateTime(input).dt; }
+    if (__isDateTime(input)) { return input.dt; }
+    if (__isDate(input)) { return __newDateTime(input).dt; }
     const date = new Date(input);
     if (isNaN(date.getTime())) { throw new Error('Invalid date input'); }
     return Math.floor(date.getTime() / 1000);}""",
-        ["__isScriptDateTime", "__isScriptDate", "__toScriptDateTime"],
+        ["__isDateTime", "__isDate", "__newDateTime"],
     ],
     "__fromUnixTimestamp": [
-        """function __fromUnixTimestamp(input) { return __toScriptDateTime(input) }""",
-        ["__toScriptDateTime"],
+        """function __fromUnixTimestamp(input) { return __newDateTime(input) }""",
+        ["__newDateTime"],
     ],
     "__toUnixTimestampMilli": [
         """function __toUnixTimestampMilli(input, zone) { return __toUnixTimestamp(input, zone) * 1000 }""",
         ["__toUnixTimestamp"],
     ],
     "__fromUnixTimestampMilli": [
-        """function __fromUnixTimestampMilli(input) { return __toScriptDateTime(input / 1000) }""",
-        ["__toScriptDateTime"],
+        """function __fromUnixTimestampMilli(input) { return __newDateTime(input / 1000) }""",
+        ["__newDateTime"],
     ],
     "__toTimeZone": [
-        """function __toTimeZone(input, zone) { if (!__isScriptDateTime(input)) { throw new Error('Expected a DateTime') }; return { ...input, zone }}""",
-        ["__isScriptDateTime"],
+        """function __toTimeZone(input, zone) { if (!__isDateTime(input)) { throw new Error('Expected a DateTime') }; return { ...input, zone }}""",
+        ["__isDateTime"],
     ],
     "__toDate": [
         """function __toDate(input) { let date;
     if (typeof input === 'number') { date = new Date(input * 1000); } else { date = new Date(input); }
     if (isNaN(date.getTime())) { throw new Error('Invalid date input'); }
-    return { __scriptDate__: true, year: date.getUTCFullYear(), month: date.getUTCMonth() + 1, day: date.getUTCDate() }; }""",
+    return { __date__: true, year: date.getUTCFullYear(), month: date.getUTCMonth() + 1, day: date.getUTCDate() }; }""",
         [],
     ],
     "__toDateTime": [
         """function __toDateTime(input, zone) { let dt;
     if (typeof input === 'number') { dt = input; }
     else { const date = new Date(input); if (isNaN(date.getTime())) { throw new Error('Invalid date input'); } dt = date.getTime() / 1000; }
-    return { __scriptDateTime__: true, dt: dt, zone: zone || 'UTC' }; }""",
+    return { __dateTime__: true, dt: dt, zone: zone || 'UTC' }; }""",
         [],
     ],
     "__formatDateTime": [
         """function __formatDateTime(input, format, zone) {
-    if (!__isScriptDateTime(input)) { throw new Error('Expected a DateTime'); }
+    if (!__isDateTime(input)) { throw new Error('Expected a DateTime'); }
     if (!format) { throw new Error('formatDateTime requires at least 2 arguments'); }
     const timestamp = input.dt * 1000;
     let date = new Date(timestamp);
@@ -835,28 +835,28 @@ function isIPAddressInRange(address, prefix) {
     return result;
 }
 """,
-        ["__isScriptDateTime"],
+        ["__isDateTime"],
     ],
-    "__printScriptStringOutput": [
-        """function __printScriptStringOutput(obj) { if (typeof obj === 'string') { return obj } return __printScriptValue(obj) } """,
-        ["__printScriptValue"],
+    "__printStringOutput": [
+        """function __printStringOutput(obj) { if (typeof obj === 'string') { return obj } return __printValue(obj) } """,
+        ["__printValue"],
     ],
-    "__printScriptValue": [
+    "__printValue": [
         """
-function __printScriptValue(obj, marked = new Set()) {
+function __printValue(obj, marked = new Set()) {
     if (typeof obj === 'object' && obj !== null && obj !== undefined) {
-        if (marked.has(obj) && !__isScriptDateTime(obj) && !__isScriptDate(obj) && !__isScriptError(obj)) { return 'null'; }
+        if (marked.has(obj) && !__isDateTime(obj) && !__isDate(obj) && !__isError(obj)) { return 'null'; }
         marked.add(obj);
         try {
             if (Array.isArray(obj)) {
-                if (obj.__isScriptTuple) { return obj.length < 2 ? `tuple(${obj.map((o) => __printScriptValue(o, marked)).join(', ')})` : `(${obj.map((o) => __printScriptValue(o, marked)).join(', ')})`; }
-                return `[${obj.map((o) => __printScriptValue(o, marked)).join(', ')}]`;
+                if (obj.__isTuple) { return obj.length < 2 ? `tuple(${obj.map((o) => __printValue(o, marked)).join(', ')})` : `(${obj.map((o) => __printValue(o, marked)).join(', ')})`; }
+                return `[${obj.map((o) => __printValue(o, marked)).join(', ')}]`;
             }
-            if (__isScriptDateTime(obj)) { const millis = String(obj.dt); return `DateTime(${millis}${millis.includes('.') ? '' : '.0'}, ${__escapeString(obj.zone)})`; }
-            if (__isScriptDate(obj)) return `Date(${obj.year}, ${obj.month}, ${obj.day})`;
-            if (__isScriptError(obj)) { return `${String(obj.type)}(${__escapeString(obj.message)}${obj.payload ? `, ${__printScriptValue(obj.payload, marked)}` : ''})`; }
-            if (obj instanceof Map) { return `{${Array.from(obj.entries()).map(([key, value]) => `${__printScriptValue(key, marked)}: ${__printScriptValue(value, marked)}`).join(', ')}}`; }
-            return `{${Object.entries(obj).map(([key, value]) => `${__printScriptValue(key, marked)}: ${__printScriptValue(value, marked)}`).join(', ')}}`;
+            if (__isDateTime(obj)) { const millis = String(obj.dt); return `DateTime(${millis}${millis.includes('.') ? '' : '.0'}, ${__escapeString(obj.zone)})`; }
+            if (__isDate(obj)) return `Date(${obj.year}, ${obj.month}, ${obj.day})`;
+            if (__isError(obj)) { return `${String(obj.type)}(${__escapeString(obj.message)}${obj.payload ? `, ${__printValue(obj.payload, marked)}` : ''})`; }
+            if (obj instanceof Map) { return `{${Array.from(obj.entries()).map(([key, value]) => `${__printValue(key, marked)}: ${__printValue(value, marked)}`).join(', ')}}`; }
+            return `{${Object.entries(obj).map(([key, value]) => `${__printValue(key, marked)}: ${__printValue(value, marked)}`).join(', ')}}`;
         } finally {
             marked.delete(obj);
         }
@@ -868,9 +868,9 @@ function __printScriptValue(obj, marked = new Set()) {
 }
 """,
         [
-            "__isScriptDateTime",
-            "__isScriptDate",
-            "__isScriptError",
+            "__isDateTime",
+            "__isDate",
+            "__isError",
             "__escapeString",
             "__escapeIdentifier",
         ],
@@ -895,11 +895,11 @@ function __escapeIdentifier(identifier) {
 """,
         [],
     ],
-    "__newScriptError": [
+    "__newError": [
         """
-function __newScriptError(type, message, payload) {
+function __newError(type, message, payload) {
     let error = new Error(message || 'An error occurred');
-    error.__scriptError__ = true
+    error.__error__ = true
     error.type = type
     error.payload = payload
     return error
@@ -907,8 +907,8 @@ function __newScriptError(type, message, payload) {
 """,
         [],
     ],
-    "__isScriptError": [
-        """function __isScriptError(obj) {return obj && obj.__scriptError__ === true}""",
+    "__isError": [
+        """function __isError(obj) {return obj && obj.__error__ === true}""",
         [],
     ],
     "__getNestedValue": [
@@ -975,27 +975,27 @@ function __setProperty(objectOrArray, key, value) {
         """function __lambda (fn) { return fn }""",
         [],
     ],
-    "__toScriptInterval": [
-        """function __toScriptInterval(value, unit) {
-    return { __scriptInterval__: true, value: value, unit: unit };
+    "__newInterval": [
+        """function __newInterval(value, unit) {
+    return { __interval__: true, value: value, unit: unit };
 }""",
         [],
     ],
-    "__isScriptInterval": [
-        """function __isScriptInterval(obj) { return obj && obj.__scriptInterval__ === true }""",
+    "__isInterval": [
+        """function __isInterval(obj) { return obj && obj.__interval__ === true }""",
         [],
     ],
     "__applyIntervalToDateTime": [
         """function __applyIntervalToDateTime(base, interval) {
     // base can be ScriptDate or ScriptDateTime
-    if (!(__isScriptDate(base) || __isScriptDateTime(base))) {
+    if (!(__isDate(base) || __isDateTime(base))) {
         throw new Error("Expected a ScriptDate or ScriptDateTime");
     }
 
-    let zone = __isScriptDateTime(base) ? (base.zone || 'UTC') : 'UTC';
+    let zone = __isDateTime(base) ? (base.zone || 'UTC') : 'UTC';
 
     function toDate(obj) {
-        if (__isScriptDateTime(obj)) {
+        if (__isDateTime(obj)) {
             return new Date(obj.dt * 1000);
         } else {
             return new Date(Date.UTC(obj.year, obj.month - 1, obj.day));
@@ -1045,13 +1045,13 @@ function __setProperty(objectOrArray, key, value) {
 
     const newDt = new Date(Date.UTC(year, month - 1, day, hours, minutes, seconds, ms));
 
-    if (__isScriptDate(base)) {
-        return __toScriptDate(newDt.getUTCFullYear(), newDt.getUTCMonth() + 1, newDt.getUTCDate());
+    if (__isDate(base)) {
+        return __newDate(newDt.getUTCFullYear(), newDt.getUTCMonth() + 1, newDt.getUTCDate());
     } else {
-        return __toScriptDateTime(newDt.getTime() / 1000, zone);
+        return __newDateTime(newDt.getTime() / 1000, zone);
     }
 }""",
-        ["__isScriptDate", "__isScriptDateTime", "__toScriptDate", "__toScriptDateTime"],
+        ["__isDate", "__isDateTime", "__newDate", "__newDateTime"],
     ],
     "JSONExtract": [
         """function JSONExtract(obj, ...args) {
@@ -1108,10 +1108,10 @@ function __setProperty(objectOrArray, key, value) {
     ],
     "addDays": [
         """function addDays(dateOrDt, days) {
-    const interval = __toScriptInterval(days, 'day');
+    const interval = __newInterval(days, 'day');
     return __applyIntervalToDateTime(dateOrDt, interval);
 }""",
-        ["__toScriptInterval", "__applyIntervalToDateTime"],
+        ["__newInterval", "__applyIntervalToDateTime"],
     ],
     "assumeNotNull": [
         """function assumeNotNull(value) {
@@ -1141,17 +1141,17 @@ function __setProperty(objectOrArray, key, value) {
         unit = 'month';
         amount = amount * 12;
     }
-    const interval = __toScriptInterval(amount, unit);
+    const interval = __newInterval(amount, unit);
     return __applyIntervalToDateTime(datetime, interval);
 }""",
-        ["__toScriptInterval", "__applyIntervalToDateTime"],
+        ["__newInterval", "__applyIntervalToDateTime"],
     ],
     "dateDiff": [
         """function dateDiff(unit, startVal, endVal) {
     function toDateTime(obj) {
-        if (__isScriptDateTime(obj)) {
+        if (__isDateTime(obj)) {
             return new Date(obj.dt * 1000);
-        } else if (__isScriptDate(obj)) {
+        } else if (__isDate(obj)) {
             return new Date(Date.UTC(obj.year, obj.month - 1, obj.day));
         } else {
             return new Date(obj);
@@ -1184,11 +1184,11 @@ function __setProperty(objectOrArray, key, value) {
         throw new Error("Unsupported unit for dateDiff: " + unit);
     }
 }""",
-        ["__isScriptDateTime", "__isScriptDate"],
+        ["__isDateTime", "__isDate"],
     ],
     "dateTrunc": [
         """function dateTrunc(unit, val) {
-    if (!__isScriptDateTime(val)) {
+    if (!__isDateTime(val)) {
         throw new Error('Expected a DateTime for dateTrunc');
     }
     const zone = val.zone || 'UTC';
@@ -1216,9 +1216,9 @@ function __setProperty(objectOrArray, key, value) {
     }
 
     const truncated = new Date(Date.UTC(year, month, day, hour, minute, second, ms));
-    return { __scriptDateTime__: true, dt: truncated.getTime()/1000, zone: zone };
+    return { __dateTime__: true, dt: truncated.getTime()/1000, zone: zone };
 }""",
-        ["__isScriptDateTime"],
+        ["__isDateTime"],
     ],
     "equals": [
         """function equals(a, b) { return a === b }""",
@@ -1227,9 +1227,9 @@ function __setProperty(objectOrArray, key, value) {
     "extract": [
         """function extract(part, val) {
     function toDate(obj) {
-        if (__isScriptDateTime(obj)) {
+        if (__isDateTime(obj)) {
             return new Date(obj.dt * 1000);
-        } else if (__isScriptDate(obj)) {
+        } else if (__isDate(obj)) {
             return new Date(Date.UTC(obj.year, obj.month - 1, obj.day));
         } else {
             return new Date(obj);
@@ -1244,7 +1244,7 @@ function __setProperty(objectOrArray, key, value) {
     else if (part === 'second') return date.getUTCSeconds();
     else throw new Error("Unknown extract part: " + part);
 }""",
-        ["__isScriptDateTime", "__isScriptDate"],
+        ["__isDateTime", "__isDate"],
     ],
     "floor": [
         "function floor(a) { return Math.floor(a) }",
@@ -1264,7 +1264,7 @@ function __setProperty(objectOrArray, key, value) {
     ],
     "in": [
         """function __x_in(val, arr) {
-    if (Array.isArray(arr) || (arr && arr.__isScriptTuple)) {
+    if (Array.isArray(arr) || (arr && arr.__isTuple)) {
         return arr.includes(val);
     }
     return false;
@@ -1354,20 +1354,20 @@ function __setProperty(objectOrArray, key, value) {
         [],
     ],
     "toIntervalDay": [
-        """function toIntervalDay(val) { return __toScriptInterval(val, 'day') }""",
-        ["__toScriptInterval"],
+        """function toIntervalDay(val) { return __newInterval(val, 'day') }""",
+        ["__newInterval"],
     ],
     "toIntervalHour": [
-        """function toIntervalHour(val) { return __toScriptInterval(val, 'hour') }""",
-        ["__toScriptInterval"],
+        """function toIntervalHour(val) { return __newInterval(val, 'hour') }""",
+        ["__newInterval"],
     ],
     "toIntervalMinute": [
-        """function toIntervalMinute(val) { return __toScriptInterval(val, 'minute') }""",
-        ["__toScriptInterval"],
+        """function toIntervalMinute(val) { return __newInterval(val, 'minute') }""",
+        ["__newInterval"],
     ],
     "toIntervalMonth": [
-        """function toIntervalMonth(val) { return __toScriptInterval(val, 'month') }""",
-        ["__toScriptInterval"],
+        """function toIntervalMonth(val) { return __newInterval(val, 'month') }""",
+        ["__newInterval"],
     ],
     "toMonth": [
         "function toMonth(value) { return extract('month', value) }",
@@ -1375,47 +1375,47 @@ function __setProperty(objectOrArray, key, value) {
     ],
     "toStartOfDay": [
         """function toStartOfDay(value) {
-    if (!__isScriptDateTime(value) && !__isScriptDate(value)) {
+    if (!__isDateTime(value) && !__isDate(value)) {
         throw new Error('Expected ScriptDate or ScriptDateTime for toStartOfDay');
     }
-    if (__isScriptDate(value)) {
-        value = __toScriptDateTime(Date.UTC(value.year, value.month-1, value.day)/1000, 'UTC');
+    if (__isDate(value)) {
+        value = __newDateTime(Date.UTC(value.year, value.month-1, value.day)/1000, 'UTC');
     }
     return dateTrunc('day', value);
 }""",
-        ["__isScriptDateTime", "__isScriptDate", "__toScriptDateTime", "dateTrunc"],
+        ["__isDateTime", "__isDate", "__newDateTime", "dateTrunc"],
     ],
     "toStartOfHour": [
         """function toStartOfHour(value) {
-    if (!__isScriptDateTime(value) && !__isScriptDate(value)) {
+    if (!__isDateTime(value) && !__isDate(value)) {
         throw new Error('Expected ScriptDate or ScriptDateTime for toStartOfHour');
     }
-    if (__isScriptDate(value)) {
-        value = __toScriptDateTime(Date.UTC(value.year, value.month-1, value.day)/1000, 'UTC');
+    if (__isDate(value)) {
+        value = __newDateTime(Date.UTC(value.year, value.month-1, value.day)/1000, 'UTC');
     }
     return dateTrunc('hour', value);
 }""",
-        ["__isScriptDateTime", "__isScriptDate", "__toScriptDateTime", "dateTrunc"],
+        ["__isDateTime", "__isDate", "__newDateTime", "dateTrunc"],
     ],
     "toStartOfMonth": [
         """function toStartOfMonth(value) {
-    if (!__isScriptDateTime(value) && !__isScriptDate(value)) {
+    if (!__isDateTime(value) && !__isDate(value)) {
         throw new Error('Expected ScriptDate or ScriptDateTime');
     }
-    if (__isScriptDate(value)) {
-        value = __toScriptDateTime(Date.UTC(value.year, value.month-1, value.day)/1000, 'UTC');
+    if (__isDate(value)) {
+        value = __newDateTime(Date.UTC(value.year, value.month-1, value.day)/1000, 'UTC');
     }
     return dateTrunc('month', value);
 }""",
-        ["__isScriptDateTime", "__isScriptDate", "__toScriptDateTime", "dateTrunc"],
+        ["__isDateTime", "__isDate", "__newDateTime", "dateTrunc"],
     ],
     "toStartOfWeek": [
         """function toStartOfWeek(value) {
-    if (!__isScriptDateTime(value) && !__isScriptDate(value)) {
+    if (!__isDateTime(value) && !__isDate(value)) {
         throw new Error('Expected ScriptDate or ScriptDateTime');
     }
     let d;
-    if (__isScriptDate(value)) {
+    if (__isDate(value)) {
         d = new Date(Date.UTC(value.year, value.month - 1, value.day));
     } else {
         d = new Date(value.dt * 1000);
@@ -1432,9 +1432,9 @@ function __setProperty(objectOrArray, key, value) {
     // Zero out hours, minutes, seconds, ms
     start.setUTCHours(0, 0, 0, 0);
 
-    return { __scriptDateTime__: true, dt: start.getTime() / 1000, zone: (__isScriptDateTime(value) ? value.zone : 'UTC') };
+    return { __dateTime__: true, dt: start.getTime() / 1000, zone: (__isDateTime(value) ? value.zone : 'UTC') };
 }""",
-        ["__isScriptDateTime", "__isScriptDate"],
+        ["__isDateTime", "__isDate"],
     ],
     "toYYYYMM": [
         """function toYYYYMM(value) {
@@ -1451,9 +1451,9 @@ function __setProperty(objectOrArray, key, value) {
     "today": [
         """function today() {
     const now = new Date();
-    return __toScriptDate(now.getUTCFullYear(), now.getUTCMonth()+1, now.getUTCDate());
+    return __newDate(now.getUTCFullYear(), now.getUTCMonth()+1, now.getUTCDate());
 }""",
-        ["__toScriptDate"],
+        ["__newDate"],
     ],
 }
 

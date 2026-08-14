@@ -6,24 +6,24 @@ function sha1HmacChainHex (data, options) { return 'sha1HmacChainHex not impleme
 function sha1HmacChain (data, encoding, options) { return 'sha1HmacChain not implemented' }
 function sha1Hex (data) { return 'sha1Hex not implemented' }
 function sha1 (data, encoding, options) { return 'sha1 not implemented' }
-function print (...args) { console.log(...args.map(__printHogStringOutput)) }
+function print (...args) { console.log(...args.map(__printStringOutput)) }
 function md5Hex(s) {if (s === null || s == undefined) return null; var k=[],i=0;for(;i<64;){k[i]=0|Math.sin(++i%Math.PI)*4294967296}var b,c,d,h=[b=0x67452301,c=0xEFCDAB89,~b,~c],words=[],j=unescape(encodeURI(s))+'',a=j.length;s=(--a/4+2)|15;words[--s]=a*8;for(;~a;){words[a>>2]|=j.charCodeAt(a)<<8*a--}for(i=j=0;i<s;i+=16){a=h;for(;j<64;a=[d=a[3],(b+((d=a[0]+[b&c|~b&d,d&b|~d&c,b^c^d,c^(b|~d)][a=j>>4]+k[j]+~~words[i|[j,5*j+1,3*j+5,7*j][a]&15])<<(a=[7,12,17,22,5,9,14,20,4,11,16,23,6,10,15,21][4*a+j++%4])|d>>>-a)),b,c]){b=a[1]|0;c=a[2]}for(j=4;j;)h[--j]+=a[j]}for(s='';j<32;){s+=((h[j>>3]>>((1^j++)*4))&15).toString(16)}return s}
 function md5 (data, encoding, options) { return 'md5 not implemented' }
-function __printHogStringOutput(obj) { if (typeof obj === 'string') { return obj } return __printHogValue(obj) }
-function __printHogValue(obj, marked = new Set()) {
+function __printStringOutput(obj) { if (typeof obj === 'string') { return obj } return __printValue(obj) }
+function __printValue(obj, marked = new Set()) {
     if (typeof obj === 'object' && obj !== null && obj !== undefined) {
-        if (marked.has(obj) && !__isHogDateTime(obj) && !__isHogDate(obj) && !__isHogError(obj)) { return 'null'; }
+        if (marked.has(obj) && !__isDateTime(obj) && !__isDate(obj) && !__isError(obj)) { return 'null'; }
         marked.add(obj);
         try {
             if (Array.isArray(obj)) {
-                if (obj.__isHogTuple) { return obj.length < 2 ? `tuple(${obj.map((o) => __printHogValue(o, marked)).join(', ')})` : `(${obj.map((o) => __printHogValue(o, marked)).join(', ')})`; }
-                return `[${obj.map((o) => __printHogValue(o, marked)).join(', ')}]`;
+                if (obj.__isTuple) { return obj.length < 2 ? `tuple(${obj.map((o) => __printValue(o, marked)).join(', ')})` : `(${obj.map((o) => __printValue(o, marked)).join(', ')})`; }
+                return `[${obj.map((o) => __printValue(o, marked)).join(', ')}]`;
             }
-            if (__isHogDateTime(obj)) { const millis = String(obj.dt); return `DateTime(${millis}${millis.includes('.') ? '' : '.0'}, ${__escapeString(obj.zone)})`; }
-            if (__isHogDate(obj)) return `Date(${obj.year}, ${obj.month}, ${obj.day})`;
-            if (__isHogError(obj)) { return `${String(obj.type)}(${__escapeString(obj.message)}${obj.payload ? `, ${__printHogValue(obj.payload, marked)}` : ''})`; }
-            if (obj instanceof Map) { return `{${Array.from(obj.entries()).map(([key, value]) => `${__printHogValue(key, marked)}: ${__printHogValue(value, marked)}`).join(', ')}}`; }
-            return `{${Object.entries(obj).map(([key, value]) => `${__printHogValue(key, marked)}: ${__printHogValue(value, marked)}`).join(', ')}}`;
+            if (__isDateTime(obj)) { const millis = String(obj.dt); return `DateTime(${millis}${millis.includes('.') ? '' : '.0'}, ${__escapeString(obj.zone)})`; }
+            if (__isDate(obj)) return `Date(${obj.year}, ${obj.month}, ${obj.day})`;
+            if (__isError(obj)) { return `${String(obj.type)}(${__escapeString(obj.message)}${obj.payload ? `, ${__printValue(obj.payload, marked)}` : ''})`; }
+            if (obj instanceof Map) { return `{${Array.from(obj.entries()).map(([key, value]) => `${__printValue(key, marked)}: ${__printValue(value, marked)}`).join(', ')}}`; }
+            return `{${Object.entries(obj).map(([key, value]) => `${__printValue(key, marked)}: ${__printValue(value, marked)}`).join(', ')}}`;
         } finally {
             marked.delete(obj);
         }
@@ -33,9 +33,9 @@ function __printHogValue(obj, marked = new Set()) {
             if (typeof obj === 'function') return `fn<${__escapeIdentifier(obj.name || 'lambda')}(${obj.length})>`;
     return obj.toString();
 }
-function __isHogError(obj) {return obj && obj.__hogError__ === true}
-function __isHogDateTime(obj) { return obj && obj.__hogDateTime__ === true }
-function __isHogDate(obj) { return obj && obj.__hogDate__ === true }
+function __isError(obj) {return obj && obj.__error__ === true}
+function __isDateTime(obj) { return obj && obj.__dateTime__ === true }
+function __isDate(obj) { return obj && obj.__date__ === true }
 function __escapeString(value) {
     const singlequoteEscapeCharsMap = { '\b': '\\b', '\f': '\\f', '\r': '\\r', '\n': '\\n', '\t': '\\t', '\0': '\\0', '\v': '\\v', '\\': '\\\\', "'": "\\'" }
     return `'${value.split('').map((c) => singlequoteEscapeCharsMap[c] || c).join('')}'`;
