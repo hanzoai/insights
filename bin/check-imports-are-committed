@@ -32,9 +32,9 @@ FIRST_PARTY = ("insights", "products", "common")
 # exits 0 on the same tree this form exits 1 on. Refuse the name, whatever is on
 # disk.
 #
-# Untreated, an `ee` import read as somebody else's package and passed silently:
-# `from ee.hogai...` sat in a module the temporal graph loads eagerly and took
-# down every web pod on 1.52.82.
+# Untreated, an `ee` import reads as somebody else's package and passes
+# silently, so it survives review and fails at import -- and a module the
+# temporal graph loads eagerly fails for every process that loads it.
 REFUSED = "ee"
 
 
