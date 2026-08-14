@@ -84,7 +84,7 @@ END
 
 ## Metric inventory — discover live, don't trust lists
 
-Metrics are defined inline in the ingestion pipelines (grep `topHog(` /
+Metrics are defined inline in the ingestion pipelines (grep `topFn(` /
 `timer(` / `sum(` in `nodejs/src/ingestion/pipelines/analytics/`), so the set
 evolves. Always start with discovery:
 
