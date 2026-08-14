@@ -131,7 +131,6 @@ jobs:
                         # --- ee modules that DAGs import ---
                         - 'ee/billing/**'
                         - 'ee/datastore/**'
-                        - 'ee/hogai/**'
                         # --- Only the products that DAGs actually import from ---
                         - 'products/analytics_platform/backend/**/*.py'
                         - 'products/cohorts/backend/**/*.py'
