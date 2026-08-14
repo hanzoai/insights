@@ -1316,6 +1316,20 @@ RETIRED: tuple[tuple[re.Pattern[str], str], ...] = (
     (re.compile(r"[Hh]og[Qq][Ll]|HOGQL"), "InsightsQL"),
     (re.compile(r"[Hh]og[Vv][Mm]|HOGVM"), "ScriptVM"),
     (re.compile(r"(?<![A-Za-z0-9_])hogfunction"), "insightsfunction"),
+    # The three relations the CDP data plane used to read. The rule above cannot
+    # reach them: its lookbehind excludes a leading `_`, and `\bhog\b` cannot
+    # either, because `_` and `f` are both word characters -- so `hog` never
+    # starts a word here. That gap is not academic. The tables were renamed and
+    # the compatibility views dropped while the nodejs function, template and
+    # flow managers still selected from the old names, and `to_regclass` had
+    # been answering NULL for all three; the templates table holds 79 rows the
+    # manager could no longer read. It was found by hand and fixed by 46 edits,
+    # which is the outcome this file exists to prevent -- an edit happens once,
+    # a refusal happens on every commit.
+    (
+        re.compile(r"insights_hogfunctiontemplate|insights_hogfunction|insights_hogflow"),
+        "insights_function_template / insights_function / insights_flow -- the relations, renamed",
+    ),
     # The extensions a previous pass invented for the script language, which
     # named it after the SQL dialect instead. Refused so the language cannot go
     # back to having two names.
