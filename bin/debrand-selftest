@@ -351,6 +351,46 @@ with tempfile.TemporaryDirectory() as tmp:
     write("app/hogfunction/views.py", "handler = None\n")
     check("...while any other path is refused", quiet(debrand.check_hog, tmp), 1)
 
+    # The emitted runtime. The compiler writes these names and both VMs define
+    # them, so one engine keeping the old spelling is a call into nothing.
+    for ident in ("__printHogValue", "__isHogDateTime", "__newHogError", "__hogDate__"):
+        write("stl.py", f'STL = ["""function {ident}(x) {{ return x }}"""]\n')
+        check(f"...and the emitted runtime spelled {ident}", quiet(debrand.check_hog, tmp), 1)
+    write("stl.py", 'STL = ["""function __printValue(x) { return x }"""]\n')
+    check("...while the unbranded runtime passes", quiet(debrand.check_hog, tmp), 0)
+
+    # The STL constructor two test programs went on calling for two renames
+    # after the STL stopped defining it.
+    write("t.script", "throw HogError('FishError', 'no')\n")
+    check("the retired STL error constructor is refused", quiet(debrand.check_hog, tmp), 1)
+
+    # `ee/` is empty, so every one of these resolves to nothing.
+    write("ci.yml", "    paths:\n      - 'ee/hogai/**'\n")
+    check("a path under the emptied ee/ tree is refused", quiet(debrand.check_hog, tmp), 1)
+    write("mod.py", "from ee.hogai.tools import read_data\n")
+    check("...and the module path with it", quiet(debrand.check_hog, tmp), 1)
+
+    # The casing the whole-word rules cannot see: they are `hog` and `Hog`.
+    write("types.ts", "export enum InsightType {\n    HOG = 'HOG',\n}\n")
+    check("the member in upper case is refused", quiet(debrand.check_hog, tmp), 1)
+
+    # A snapshot is output. A retired name in one says the program that writes
+    # it has not been re-run -- reported, but never fixed by editing the file,
+    # which is how a half-rename passes its own tests.
+    write("app/__tests__/__snapshots__/stl.js", "function __printHogValue(x) { return x }\n")
+    check("a stale snapshot is reported, not failed", quiet(debrand.check_hog, tmp), 0)
+    write("app/stl.js", "function __printHogValue(x) { return x }\n")
+    check("...while the same line in source is a leak", quiet(debrand.check_hog, tmp), 1)
+    write(".test_durations", '{\n    "ee/hogai/test/test_x.py::test_y": 0.1\n}\n')
+    check("...and so is the timing cache", quiet(debrand.check_hog, tmp), 0)
+
+    # A captured diff is evidence of another tree on the day it was reviewed,
+    # and the eval grades a reviewer against it. Rewriting one moves the answer.
+    write("products/review/eval/experiments/topology/fixtures/pr1.diff", "ee/hogai/toolkit.py\n")
+    check("a captured diff is not ours to rewrite", quiet(debrand.check_hog, tmp), 0)
+    write("products/review/backend/reviewer/toolkit.py", "path = 'ee/hogai/toolkit.py'\n")
+    check("...while the same path in that product's source is not", quiet(debrand.check_hog, tmp), 1)
+
     # Third-party package names cannot be renamed by us, so they are reported
     # for a decision rather than exempted -- an exemption is a decision someone
     # made, and nobody has made this one.
