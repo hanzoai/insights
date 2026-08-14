@@ -297,6 +297,12 @@ with tempfile.TemporaryDirectory() as tmp:
         write("vm.ts", f"export const {spelling}_STL = []\n")
         check(f"...and the VM spelled {spelling}", quiet(debrand.check_hog, tmp), 1)
 
+    # Four casings, because the rule was written as two and the tree said a
+    # third: `topHog(` in the docs, while the code had moved to `topFn(`.
+    for spelling in ("tophog", "TopHog", "topHog", "Tophog"):
+        write("m.ts", f"export const store = {spelling}(parseMessage, [])\n")
+        check(f"...and the heavy-hitter store spelled {spelling}", quiet(debrand.check_hog, tmp), 1)
+
     write("run.sh", 'exec bin/hog "$1"\n')
     check("...and the language's bare word", quiet(debrand.check_hog, tmp), 1)
     write("cli.py", 'if not name.endswith(".hoge"):\n    raise ValueError(name)\n')
