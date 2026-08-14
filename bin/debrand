@@ -1324,7 +1324,7 @@ RECORDED_BY_MIGRATIONS = frozenset({RENAMED_RELATIONS})
 
 RETIRED: tuple[tuple[re.Pattern[str], str], ...] = (
     (re.compile(r"hog_invocation_results"), "invocations -- the Datastore table family"),
-    (re.compile(r"tophog|TopHog"), "topfn -- the heavy-hitter store, and TopFn in code"),
+    (re.compile(r"[Tt]op[Hh]og"), "topfn -- the heavy-hitter store, and TopFn in code"),
     (re.compile(r"PersonHog|Personhog|person_hog"), "Person -- the types in the personinsights package"),
     (re.compile(r"StreamHog|streamhog|STREAMHOG"), "Hedgebox -- this fork has one fictional company"),
     (re.compile(r"REVIEW_HOG"), "REVIEW -- the enum member; its value was already `review`"),
