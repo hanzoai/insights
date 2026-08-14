@@ -60,7 +60,7 @@ function processPerson(input: ParsedEvent): Promise<PipelineResult<void>> {
 
 return builder
     .pipe(
-        topHog(parseMessage, [
+        topFn(parseMessage, [
             // Count messages per team
             count('parsed_messages', (input) => ({
                 team_id: String(input.team_id),
@@ -90,7 +90,7 @@ return builder
         ])
     )
     .pipe(
-        topHog(processPerson, [
+        topFn(processPerson, [
             // Time person processing per team + distinct_id
             timer('process_person_time', (input) => ({
                 team_id: String(input.team_id),
