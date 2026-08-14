@@ -482,3 +482,22 @@ jobs:
                   cd playwright
                   ./node_modules/.bin/playwright install --with-deps chromium
                   ./node_modules/.bin/playwright test -c live/live.config.ts
+
+            # The config already asks for a trace and a screenshot on failure
+            # (`trace: retain-on-failure`, `screenshot: only-on-failure`) and
+            # writes a junit file. Nothing collected them, so they were created
+            # and then destroyed with the container, and a failure here could
+            # only ever be read as the line that timed out.
+            #
+            # v3 deliberately: v4 and above error on this runner even when the
+            # job is green.
+            - name: Keep what the failure wrote
+              if: failure()
+              uses: actions/upload-artifact@v3
+              with:
+                  name: playwright-live
+                  path: |
+                      playwright/test-results/
+                      playwright/live-results.xml
+                  retention-days: 14
+                  if-no-files-found: warn
