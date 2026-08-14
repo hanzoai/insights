@@ -124,11 +124,11 @@ export function convertJSToScript(x: any, found?: Map<any, any>): any {
         found.delete(x)
         return obj
     } else if (typeof x === 'object' && x !== null) {
-        if (x.__scriptDateTime__) {
+        if (x.__dateTime__) {
             return toScriptDateTime(x.dt, x.zone)
-        } else if (x.__scriptDate__) {
+        } else if (x.__date__) {
             return toScriptDate(x.year, x.month, x.day)
-        } else if (x.__scriptClosure__ || x.__scriptCallable__) {
+        } else if (x.__closure__ || x.__callable__) {
             return x
         }
         const map = new Map()
@@ -164,7 +164,7 @@ export function convertScriptToJS(x: any, found?: Map<any, any>): any {
         found.delete(x)
         return obj
     } else if (typeof x === 'object' && x !== null) {
-        if (x.__scriptDateTime__ || x.__scriptDate__ || x.__scriptClosure__ || x.__scriptCallable__) {
+        if (x.__dateTime__ || x.__date__ || x.__closure__ || x.__callable__) {
             return x
         }
         const obj: Record<string, any> = {}
