@@ -64,7 +64,7 @@ def _collect_command_help() -> list[tuple[str, str]]:
 def _render(help_text: str, command_help_sections: list[tuple[str, str]]) -> str:
     escaped_help_lines = [_escape_roff(line) for line in help_text.splitlines()]
     lines = [
-        '.TH HOGLI 1 "Auto-generated" "Insights" "User Commands"',
+        '.TH INSIGHTSCLI 1 "Auto-generated" "Insights" "User Commands"',
         ".SH NAME",
         "insightscli \\- Insights developer CLI",
         ".SH SYNOPSIS",
