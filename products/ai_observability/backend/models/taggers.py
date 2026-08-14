@@ -15,7 +15,7 @@ logger = structlog.get_logger(__name__)
 
 class TaggerType(models.TextChoices):
     LLM = "llm", "LLM"
-    HOG = "script", "Script"
+    SCRIPT = "script", "Script"
 
 
 class TagDefinition(BaseModel):
@@ -90,7 +90,7 @@ class ScriptTaggerConfig(BaseModel):
 
 TAGGER_CONFIG_MODELS: dict[str, type[BaseModel]] = {
     TaggerType.LLM.value: LLMTaggerConfig,
-    TaggerType.HOG.value: ScriptTaggerConfig,
+    TaggerType.SCRIPT.value: ScriptTaggerConfig,
 }
 
 
@@ -159,7 +159,7 @@ class Tagger(UUIDTModel):
                 raise ValidationError({"tagger_config": str(e)})
 
         # Compile Script source to bytecode
-        if self.tagger_type == TaggerType.HOG and self.tagger_config.get("source"):
+        if self.tagger_type == TaggerType.SCRIPT and self.tagger_config.get("source"):
             try:
                 # Use "tagger" kind so we don't expose PRODUCT_ASYNC_FUNCTIONS (fetch, insightsCapture, …) —
                 # taggers should only classify, never perform side effects.

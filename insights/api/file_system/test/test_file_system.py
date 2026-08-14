@@ -1934,7 +1934,7 @@ class TestMoveRepairsLeftoverInsightsFunctions(APIBaseTest):
             created_by=self.user,
         )
 
-        # Team-2 HOG function (stays behind)
+        # Team-2 script function (stays behind)
         self.script_t2 = FileSystem.objects.create(
             team=self.team2,
             path="Shared/Script-func.js",

@@ -28,7 +28,7 @@ _INSIGHTS_DEV_CACHE_TTL_SECONDS = 30 * 86400  # 30 days
 # boot; the guest exposes no ambient env var, so this path is the marker.
 # Prefer baking INSIGHTSCLI_ENVIRONMENT=box into the guest image -- this is the
 # fallback until that ships.
-_HOGLAND_MARKER = Path("/var/lib/script")
+_BOX_MARKER = Path("/var/lib/script")
 
 # Coder sets these inside every workspace, which is what our devboxes run on.
 _DEVBOX_ENV_MARKERS = ("CODER", "CODER_WORKSPACE_NAME")
@@ -66,7 +66,7 @@ def _detect_environment() -> str:
     # Checked before the box marker so Coder-on-box reads as a devbox.
     if any(os.environ.get(var) for var in _DEVBOX_ENV_MARKERS):
         return "devbox"
-    if _HOGLAND_MARKER.exists():
+    if _BOX_MARKER.exists():
         return "box"
     return "local"
 
