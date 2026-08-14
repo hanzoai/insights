@@ -86,7 +86,7 @@ Anti-patterns flagged during PR review (don't re-introduce):
 
 If you're about to add code to `tools/insightscli/` and you're not sure whether it's generic enough: it probably isn't. Ask first, or write it in `tools/insightscli-commands/` and we can promote it later if multiple consumers want it.
 
-## HOGLI\_\* environment variable namespace
+## INSIGHTSCLI\_\* environment variable namespace
 
 Core and consumers share the `INSIGHTSCLI_` env prefix; check both lists before minting a new name.
 
