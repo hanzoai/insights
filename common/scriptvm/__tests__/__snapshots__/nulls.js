@@ -1,20 +1,20 @@
-function print (...args) { console.log(...args.map(__printHogStringOutput)) }
+function print (...args) { console.log(...args.map(__printStringOutput)) }
 function match (str, pattern) { return !str || !pattern ? false : new RegExp(pattern).test(str) }
-function __printHogStringOutput(obj) { if (typeof obj === 'string') { return obj } return __printHogValue(obj) }
-function __printHogValue(obj, marked = new Set()) {
+function __printStringOutput(obj) { if (typeof obj === 'string') { return obj } return __printValue(obj) }
+function __printValue(obj, marked = new Set()) {
     if (typeof obj === 'object' && obj !== null && obj !== undefined) {
-        if (marked.has(obj) && !__isHogDateTime(obj) && !__isHogDate(obj) && !__isHogError(obj)) { return 'null'; }
+        if (marked.has(obj) && !__isDateTime(obj) && !__isDate(obj) && !__isError(obj)) { return 'null'; }
         marked.add(obj);
         try {
             if (Array.isArray(obj)) {
-                if (obj.__isHogTuple) { return obj.length < 2 ? `tuple(${obj.map((o) => __printHogValue(o, marked)).join(', ')})` : `(${obj.map((o) => __printHogValue(o, marked)).join(', ')})`; }
-                return `[${obj.map((o) => __printHogValue(o, marked)).join(', ')}]`;
+                if (obj.__isTuple) { return obj.length < 2 ? `tuple(${obj.map((o) => __printValue(o, marked)).join(', ')})` : `(${obj.map((o) => __printValue(o, marked)).join(', ')})`; }
+                return `[${obj.map((o) => __printValue(o, marked)).join(', ')}]`;
             }
-            if (__isHogDateTime(obj)) { const millis = String(obj.dt); return `DateTime(${millis}${millis.includes('.') ? '' : '.0'}, ${__escapeString(obj.zone)})`; }
-            if (__isHogDate(obj)) return `Date(${obj.year}, ${obj.month}, ${obj.day})`;
-            if (__isHogError(obj)) { return `${String(obj.type)}(${__escapeString(obj.message)}${obj.payload ? `, ${__printHogValue(obj.payload, marked)}` : ''})`; }
-            if (obj instanceof Map) { return `{${Array.from(obj.entries()).map(([key, value]) => `${__printHogValue(key, marked)}: ${__printHogValue(value, marked)}`).join(', ')}}`; }
-            return `{${Object.entries(obj).map(([key, value]) => `${__printHogValue(key, marked)}: ${__printHogValue(value, marked)}`).join(', ')}}`;
+            if (__isDateTime(obj)) { const millis = String(obj.dt); return `DateTime(${millis}${millis.includes('.') ? '' : '.0'}, ${__escapeString(obj.zone)})`; }
+            if (__isDate(obj)) return `Date(${obj.year}, ${obj.month}, ${obj.day})`;
+            if (__isError(obj)) { return `${String(obj.type)}(${__escapeString(obj.message)}${obj.payload ? `, ${__printValue(obj.payload, marked)}` : ''})`; }
+            if (obj instanceof Map) { return `{${Array.from(obj.entries()).map(([key, value]) => `${__printValue(key, marked)}: ${__printValue(value, marked)}`).join(', ')}}`; }
+            return `{${Object.entries(obj).map(([key, value]) => `${__printValue(key, marked)}: ${__printValue(value, marked)}`).join(', ')}}`;
         } finally {
             marked.delete(obj);
         }
@@ -24,9 +24,9 @@ function __printHogValue(obj, marked = new Set()) {
             if (typeof obj === 'function') return `fn<${__escapeIdentifier(obj.name || 'lambda')}(${obj.length})>`;
     return obj.toString();
 }
-function __isHogError(obj) {return obj && obj.__hogError__ === true}
-function __isHogDateTime(obj) { return obj && obj.__hogDateTime__ === true }
-function __isHogDate(obj) { return obj && obj.__hogDate__ === true }
+function __isError(obj) {return obj && obj.__error__ === true}
+function __isDateTime(obj) { return obj && obj.__dateTime__ === true }
+function __isDate(obj) { return obj && obj.__date__ === true }
 function __escapeString(value) {
     const singlequoteEscapeCharsMap = { '\b': '\\b', '\f': '\\f', '\r': '\\r', '\n': '\\n', '\t': '\\t', '\0': '\\0', '\v': '\\v', '\\': '\\\\', "'": "\\'" }
     return `'${value.split('').map((c) => singlequoteEscapeCharsMap[c] || c).join('')}'`;

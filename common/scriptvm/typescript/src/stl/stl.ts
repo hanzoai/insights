@@ -36,12 +36,12 @@ function STLToString(args: any[]): string {
 
 // Helper: ScriptInterval
 // function isScriptInterval(obj: any): obj is ScriptInterval {
-//     return obj && obj.__scriptInterval__ === true
+//     return obj && obj.__interval__ === true
 // }
 
 function toScriptInterval(value: number, unit: string): ScriptInterval {
     return {
-        __scriptInterval__: true,
+        __interval__: true,
         value: value,
         unit: unit,
     }
@@ -94,13 +94,13 @@ function applyIntervalToDateTime(base: ScriptDate | ScriptDateTime, interval: Sc
 
     if (isScriptDateTime(base)) {
         return {
-            __scriptDateTime__: true,
+            __dateTime__: true,
             dt: newDt.toSeconds(),
             zone: newDt.zoneName || 'UTC',
         }
     }
     return {
-        __scriptDate__: true,
+        __date__: true,
         year: newDt.year,
         month: newDt.month,
         day: newDt.day,
@@ -182,7 +182,7 @@ function dateTruncFn([unit, val]: any[]): ScriptDateTime {
             throw new Error(`Unsupported unit for dateTrunc: ${unit}`)
     }
     return {
-        __scriptDateTime__: true,
+        __dateTime__: true,
         dt: truncated.toSeconds(),
         zone: truncated.zoneName || 'UTC',
     }
@@ -245,7 +245,7 @@ function ifFn([cond, thenVal, elseVal]: any[]): any {
 }
 
 function inFn([val, arr]: any[]): boolean {
-    return Array.isArray(arr) || (arr && arr.__isScriptTuple) ? arr.includes(val) : false
+    return Array.isArray(arr) || (arr && arr.__isTuple) ? arr.includes(val) : false
 }
 
 function min2Fn([a, b]: any[]): any {
@@ -376,7 +376,7 @@ function toStartOfWeekFn([val]: any[]): ScriptDateTime {
     const weekday = dt.weekday // Monday=1, Sunday=7
     const startOfWeek = dt.minus({ days: weekday - 1 }).startOf('day')
     return {
-        __scriptDateTime__: true,
+        __dateTime__: true,
         dt: startOfWeek.toSeconds(),
         zone: startOfWeek.zoneName || 'UTC',
     }
@@ -391,7 +391,7 @@ function toYYYYMMFn([val]: any[]): number {
 function todayFn(): ScriptDate {
     const now = DateTime.now().setZone('UTC')
     return {
-        __scriptDate__: true,
+        __date__: true,
         year: now.year,
         month: now.month,
         day: now.day,
@@ -401,7 +401,7 @@ function todayFn(): ScriptDate {
 function toDateTimeFromDate(date: ScriptDate): ScriptDateTime {
     const dt = DateTime.fromObject({ year: date.year, month: date.month, day: date.day }, { zone: 'UTC' })
     return {
-        __scriptDateTime__: true,
+        __dateTime__: true,
         dt: dt.toSeconds(),
         zone: 'UTC',
     }
@@ -669,7 +669,7 @@ export const STL: Record<string, STLFunction> = {
     tuple: {
         fn: (args) => {
             const tuple = args.slice()
-            ;(tuple as any).__isScriptTuple = true
+            ;(tuple as any).__isTuple = true
             return tuple
         },
         description: 'Creates a tuple from multiple values',
@@ -725,11 +725,11 @@ export const STL: Record<string, STLFunction> = {
                     return x.map(convert)
                 } else if (typeof x === 'object' && x !== null) {
                     // DateTime and other objects will be sanitized and not converted to a map
-                    if (x.__scriptDateTime__) {
+                    if (x.__dateTime__) {
                         return toScriptDateTime(x.dt, x.zone)
-                    } else if (x.__scriptDate__) {
+                    } else if (x.__date__) {
                         return toScriptDate(x.year, x.month, x.day)
-                    } else if (x.__scriptError__) {
+                    } else if (x.__error__) {
                         return newScriptError(x.type, x.message, x.payload)
                     }
                     // All other objects will
@@ -1461,7 +1461,7 @@ export const STL: Record<string, STLFunction> = {
             } else if (isScriptAST(args[0])) {
                 return 'sql'
             } else if (Array.isArray(args[0])) {
-                if ((args[0] as any).__isScriptTuple) {
+                if ((args[0] as any).__isTuple) {
                     return 'tuple'
                 }
                 return 'array'

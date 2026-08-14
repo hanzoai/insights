@@ -8,7 +8,7 @@ from common.scriptvm.python.objects import is_script_date, is_script_datetime
 
 def to_script_date(year: int, month: int, day: int):
     return {
-        "__scriptDate__": True,
+        "__date__": True,
         "year": year,
         "month": month,
         "day": day,
@@ -21,12 +21,12 @@ def to_script_datetime(timestamp: int | float | dict, zone: Optional[str] = None
             year=timestamp["year"], month=timestamp["month"], day=timestamp["day"], tzinfo=pytz.timezone(zone or "UTC")
         )
         return {
-            "__scriptDateTime__": True,
+            "__dateTime__": True,
             "dt": dt.timestamp(),
             "zone": (dt.tzinfo.tzname(None) if dt.tzinfo else None) or "UTC",
         }
     return {
-        "__scriptDateTime__": True,
+        "__dateTime__": True,
         "dt": timestamp,
         "zone": zone or "UTC",
     }
@@ -80,7 +80,7 @@ def toDate(input):
     else:
         dt = datetime.datetime.fromisoformat(input)
     return {
-        "__scriptDate__": True,
+        "__date__": True,
         "year": dt.year,
         "month": dt.month,
         "day": dt.day,
@@ -93,7 +93,7 @@ def toDateTime(input):
     else:
         dt = datetime.datetime.fromisoformat(input).timestamp()
     return {
-        "__scriptDateTime__": True,
+        "__dateTime__": True,
         "dt": dt,
         "zone": "UTC",
     }

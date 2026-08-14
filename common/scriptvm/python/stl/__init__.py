@@ -507,14 +507,14 @@ def apply_interval_to_datetime(dt: dict, interval: dict) -> dict:
 
     if is_script_date(dt):
         return {
-            "__scriptDate__": True,
+            "__date__": True,
             "year": base_dt.year,
             "month": base_dt.month,
             "day": base_dt.day,
         }
     else:
         return {
-            "__scriptDateTime__": True,
+            "__dateTime__": True,
             "dt": base_dt.timestamp(),
             "zone": zone,
         }
@@ -615,7 +615,7 @@ def date_trunc(args: list[Any], team: Optional["Team"], stdout: Optional[list[st
         raise ValueError(f"Unsupported unit for dateTrunc: {unit}")
 
     return {
-        "__scriptDateTime__": True,
+        "__dateTime__": True,
         "dt": truncated.timestamp(),
         "zone": zone,
     }
@@ -834,7 +834,7 @@ def toStartOfWeek(args: list[Any], team: Optional["Team"], stdout: Optional[list
     start_of_week = base_dt - datetime.timedelta(days=weekday - 1)
     start_of_week = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
     return {
-        "__scriptDateTime__": True,
+        "__dateTime__": True,
         "dt": start_of_week.timestamp(),
         "zone": zone,
     }
@@ -849,7 +849,7 @@ def toYYYYMM(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]
 def today(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> Any:
     now_dt = datetime.datetime.now(tz=pytz.UTC)
     return {
-        "__scriptDate__": True,
+        "__date__": True,
         "year": now_dt.year,
         "month": now_dt.month,
         "day": now_dt.day,

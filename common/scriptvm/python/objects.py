@@ -19,20 +19,20 @@ class ThrowFrame:
 
 
 def is_script_date(obj: Any) -> bool:
-    return isinstance(obj, dict) and "__scriptDate__" in obj and "year" in obj and "month" in obj and "day" in obj
+    return isinstance(obj, dict) and "__date__" in obj and "year" in obj and "month" in obj and "day" in obj
 
 
 def is_script_datetime(obj: Any) -> bool:
-    return isinstance(obj, dict) and "__scriptDateTime__" in obj and "dt" in obj and "zone" in obj
+    return isinstance(obj, dict) and "__dateTime__" in obj and "dt" in obj and "zone" in obj
 
 
 def is_script_error(obj: Any) -> bool:
-    return isinstance(obj, dict) and "__scriptError__" in obj and "type" in obj and "message" in obj
+    return isinstance(obj, dict) and "__error__" in obj and "type" in obj and "message" in obj
 
 
 def new_script_error(type: str, message: Any, payload: Any = None) -> dict:
     return {
-        "__scriptError__": True,
+        "__error__": True,
         "type": type or "Error",
         "message": message or "An error occurred",
         "payload": payload,
@@ -42,7 +42,7 @@ def new_script_error(type: str, message: Any, payload: Any = None) -> dict:
 def is_script_callable(obj: Any) -> bool:
     return (
         isinstance(obj, dict)
-        and "__scriptCallable__" in obj
+        and "__callable__" in obj
         and "argCount" in obj
         and "ip" in obj
         # and "chunk" in obj # TODO: enable after this has been live for some hours
@@ -51,12 +51,12 @@ def is_script_callable(obj: Any) -> bool:
 
 
 def is_script_closure(obj: Any) -> bool:
-    return isinstance(obj, dict) and "__scriptClosure__" in obj and "callable" in obj and "upvalues" in obj
+    return isinstance(obj, dict) and "__closure__" in obj and "callable" in obj and "upvalues" in obj
 
 
 def new_script_closure(callable: dict, upvalues: Optional[list] = None) -> dict:
     return {
-        "__scriptClosure__": True,
+        "__closure__": True,
         "callable": callable,
         "upvalues": upvalues or [],
     }
@@ -64,7 +64,7 @@ def new_script_closure(callable: dict, upvalues: Optional[list] = None) -> dict:
 
 def new_script_callable(type: str, arg_count: int, upvalue_count: int, ip: int, name: str, chunk: str) -> dict:
     return {
-        "__scriptCallable__": type,
+        "__callable__": type,
         "name": name,
         "chunk": chunk,
         "argCount": arg_count,
@@ -76,7 +76,7 @@ def new_script_callable(type: str, arg_count: int, upvalue_count: int, ip: int, 
 def is_script_upvalue(obj: Any) -> bool:
     return (
         isinstance(obj, dict)
-        and "__scriptUpValue__" in obj
+        and "__upValue__" in obj
         and "location" in obj
         and "closed" in obj
         and "value" in obj
@@ -85,12 +85,12 @@ def is_script_upvalue(obj: Any) -> bool:
 
 
 def is_script_interval(obj: Any) -> bool:
-    return isinstance(obj, dict) and obj.get("__scriptInterval__") is True
+    return isinstance(obj, dict) and obj.get("__interval__") is True
 
 
 def to_script_interval(value: int, unit: str):
     return {
-        "__scriptInterval__": True,
+        "__interval__": True,
         "value": value,
         "unit": unit,
     }

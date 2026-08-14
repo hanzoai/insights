@@ -13,7 +13,7 @@ export function delay(ms: number): Promise<void> {
 
 const map = (obj: Record<string, any>): Map<any, any> => new Map(Object.entries(obj))
 const tuple = (array: any[]): any[] => {
-    ;(array as any).__isScriptTuple = true
+    ;(array as any).__isTuple = true
     return array
 }
 
@@ -625,9 +625,9 @@ describe('scriptvm execute', () => {
                         argCount: 0,
                         chunk: 'root',
                         closure: {
-                            __scriptClosure__: true,
+                            __closure__: true,
                             callable: {
-                                __scriptCallable__: 'local',
+                                __callable__: 'local',
                                 name: '',
                                 argCount: 0,
                                 chunk: 'root',
@@ -2049,9 +2049,9 @@ describe('scriptvm execute', () => {
                         argCount: 0,
                         chunk: 'root',
                         closure: {
-                            __scriptClosure__: true,
+                            __closure__: true,
                             callable: {
-                                __scriptCallable__: 'local',
+                                __callable__: 'local',
                                 name: '',
                                 argCount: 0,
                                 chunk: 'root',
@@ -2141,9 +2141,9 @@ describe('scriptvm execute', () => {
                 stack: [
                     2,
                     {
-                        __scriptClosure__: true,
+                        __closure__: true,
                         callable: {
-                            __scriptCallable__: 'local',
+                            __callable__: 'local',
                             name: 'lambda',
                             argCount: 2,
                             upvalueCount: 1,
@@ -2155,7 +2155,7 @@ describe('scriptvm execute', () => {
                 ],
                 upvalues: [
                     {
-                        __scriptUpValue__: true,
+                        __upValue__: true,
                         location: 0,
                         id: 1,
                         closed: false,
@@ -2169,9 +2169,9 @@ describe('scriptvm execute', () => {
                         stackStart: 0,
                         argCount: 0,
                         closure: {
-                            __scriptClosure__: true,
+                            __closure__: true,
                             callable: {
-                                __scriptCallable__: 'local',
+                                __callable__: 'local',
                                 name: '',
                                 argCount: 0,
                                 upvalueCount: 0,
@@ -2287,9 +2287,9 @@ describe('scriptvm execute', () => {
                 bytecodes: { root: { bytecode } },
                 stack: [
                     {
-                        __scriptClosure__: true,
+                        __closure__: true,
                         callable: {
-                            __scriptCallable__: 'local',
+                            __callable__: 'local',
                             name: 'outer',
                             argCount: 0,
                             upvalueCount: 0,
@@ -2299,9 +2299,9 @@ describe('scriptvm execute', () => {
                         upvalues: [],
                     },
                     {
-                        __scriptClosure__: true,
+                        __closure__: true,
                         callable: {
-                            __scriptCallable__: 'local',
+                            __callable__: 'local',
                             name: 'inner',
                             argCount: 0,
                             upvalueCount: 1,
@@ -2313,7 +2313,7 @@ describe('scriptvm execute', () => {
                 ],
                 upvalues: [
                     {
-                        __scriptUpValue__: true,
+                        __upValue__: true,
                         id: 1,
                         location: 1,
                         closed: true,
@@ -2327,9 +2327,9 @@ describe('scriptvm execute', () => {
                         stackStart: 0,
                         argCount: 0,
                         closure: {
-                            __scriptClosure__: true,
+                            __closure__: true,
                             callable: {
-                                __scriptCallable__: 'local',
+                                __callable__: 'local',
                                 name: '',
                                 argCount: 0,
                                 upvalueCount: 0,
@@ -2450,9 +2450,9 @@ describe('scriptvm execute', () => {
                 bytecodes: { root: { bytecode } },
                 stack: [
                     {
-                        __scriptClosure__: true,
+                        __closure__: true,
                         callable: {
-                            __scriptCallable__: 'local',
+                            __callable__: 'local',
                             name: 'outer',
                             argCount: 0,
                             upvalueCount: 0,
@@ -2462,9 +2462,9 @@ describe('scriptvm execute', () => {
                         upvalues: [],
                     },
                     {
-                        __scriptClosure__: true,
+                        __closure__: true,
                         callable: {
-                            __scriptCallable__: 'local',
+                            __callable__: 'local',
                             name: 'inner',
                             argCount: 0,
                             upvalueCount: 1,
@@ -2476,7 +2476,7 @@ describe('scriptvm execute', () => {
                 ],
                 upvalues: [
                     {
-                        __scriptUpValue__: true,
+                        __upValue__: true,
                         id: 1,
                         location: 1,
                         closed: true,
@@ -2490,9 +2490,9 @@ describe('scriptvm execute', () => {
                         stackStart: 0,
                         argCount: 0,
                         closure: {
-                            __scriptClosure__: true,
+                            __closure__: true,
                             callable: {
-                                __scriptCallable__: 'local',
+                                __callable__: 'local',
                                 name: '',
                                 argCount: 0,
                                 upvalueCount: 0,
@@ -2508,9 +2508,9 @@ describe('scriptvm execute', () => {
                         stackStart: 2,
                         argCount: 0,
                         closure: {
-                            __scriptClosure__: true,
+                            __closure__: true,
                             callable: {
-                                __scriptCallable__: 'local',
+                                __callable__: 'local',
                                 name: 'inner',
                                 argCount: 0,
                                 upvalueCount: 1,

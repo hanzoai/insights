@@ -1,8 +1,8 @@
 fun FishError(message) {
-  return HogError('FishError', message)
+  return ScriptError('FishError', message)
 }
 fun FoodError(message) {
-  return HogError('FoodError', message)
+  return ScriptError('FoodError', message)
 }
 
 try {

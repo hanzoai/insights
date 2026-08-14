@@ -62,7 +62,7 @@ export function printScriptValue(obj: any, marked: Set<any> | undefined = undefi
         marked.add(obj)
         try {
             if (Array.isArray(obj)) {
-                if ((obj as any).__isScriptTuple) {
+                if ((obj as any).__isTuple) {
                     if (obj.length < 2) {
                         return `tuple(${obj.map((o) => printScriptValue(o, marked)).join(', ')})`
                     }
