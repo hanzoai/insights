@@ -248,7 +248,7 @@ class Evaluation(ModelActivityMixin, UUIDTModel):
             raise ValidationError({"target_config": str(e)})
 
         # Compile Script source to bytecode
-        if self.evaluation_type == EvaluationType.HOG and self.evaluation_config.get("source"):
+        if self.evaluation_type == EvaluationType.SCRIPT and self.evaluation_config.get("source"):
             try:
                 bytecode = compile_ai_observability_script(self.evaluation_config["source"], "destination")
                 self.evaluation_config["bytecode"] = bytecode

@@ -2266,16 +2266,16 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         assert response.status_code == status.HTTP_200_OK
 
     def test_validates_raw_script_code_size(self):
-        """Test that we validate the raw HOG code size before compiling it."""
-        # Generate a large HOG code string that exceeds the maximum allowed size
+        """Test that we validate the raw Script code size before compiling it."""
+        # Generate a large Script code string that exceeds the maximum allowed size
         large_script_code = "return " + "x" * (MAX_FN_CODE_SIZE_BYTES + 1000)
 
-        # Try to create a function with HOG code exceeding the size limit
+        # Try to create a function with Script code exceeding the size limit
         # No need to mock compile_script as we're checking the string size directly
         response = self.client.post(
             f"/v1/projects/{self.team.id}/insights_functions/",
             data={
-                "name": "Large HOG Code Function",
+                "name": "Large Script Code Function",
                 "type": "transformation",
                 "script": large_script_code,
             },
@@ -2283,16 +2283,16 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         # Verify the creation was rejected with the correct error
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
-        assert "HOG code exceeds maximum size" in response.json()["detail"]
+        assert "Script code exceeds maximum size" in response.json()["detail"]
         assert f"{MAX_FN_CODE_SIZE_BYTES // 1024}KB" in response.json()["detail"]
 
     def test_validates_raw_script_code_size_during_update(self):
-        """Test that we validate the raw HOG code size when updating an existing function."""
+        """Test that we validate the raw Script code size when updating an existing function."""
         # First create a script function with small, valid code
         response = self.client.post(
             f"/v1/projects/{self.team.id}/insights_functions/",
             data={
-                "name": "Valid HOG Code Function",
+                "name": "Valid Script Code Function",
                 "type": "transformation",
                 "script": "return event",
             },
@@ -2301,10 +2301,10 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         assert response.status_code == status.HTTP_201_CREATED, response.json()
         function_id = response.json()["id"]
 
-        # Generate a large HOG code string for the update that exceeds the limit
+        # Generate a large Script code string for the update that exceeds the limit
         large_script_code = "return " + "x" * (MAX_FN_CODE_SIZE_BYTES + 1000)
 
-        # Update the function with large HOG code
+        # Update the function with large Script code
         update_response = self.client.patch(
             f"/v1/projects/{self.team.id}/insights_functions/{function_id}/",
             data={
@@ -2314,7 +2314,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         # Verify the update was rejected with the correct error
         assert update_response.status_code == status.HTTP_400_BAD_REQUEST, update_response.json()
-        assert "HOG code exceeds maximum size" in update_response.json()["detail"]
+        assert "Script code exceeds maximum size" in update_response.json()["detail"]
         assert f"{MAX_FN_CODE_SIZE_BYTES // 1024}KB" in update_response.json()["detail"]
 
     def test_transformation_undeletion_puts_at_end(self, *args):

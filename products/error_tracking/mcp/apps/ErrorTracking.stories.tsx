@@ -55,7 +55,7 @@ const issueWithLinks: ErrorIssueData = {
             integration: { display_name: 'GitHub' },
         },
         {
-            external_url: 'https://linear.app/insights/issue/HOG-678',
+            external_url: 'https://linear.app/insights/issue/INS-678',
             integration: { display_name: 'Linear' },
         },
     ],
