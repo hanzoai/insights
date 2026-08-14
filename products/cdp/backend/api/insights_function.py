@@ -65,7 +65,7 @@ from products.cdp.backend.models.insights_functions.utils import humanize_insigh
 from products.cdp.backend.models.plugin import TranspilerError
 from products.cdp.backend.services.revisions import use_destinations_revisions
 
-# Maximum size of HOG code as a string in bytes (100KB)
+# Maximum size of Script code as a string in bytes (100KB)
 MAX_FN_CODE_SIZE_BYTES = 100 * 1024
 # Maximum number of transformation functions per team
 MAX_TRANSFORMATIONS_PER_TEAM = 20
@@ -603,7 +603,7 @@ class InsightsFunctionSerializer(InsightsFunctionMinimalSerializer):
             if script_code_size > MAX_FN_CODE_SIZE_BYTES:
                 raise serializers.ValidationError(
                     {
-                        "script": f"HOG code exceeds maximum size of {MAX_FN_CODE_SIZE_BYTES // 1024}KB. Please simplify your code or contact support if you need this limit increased."
+                        "script": f"Script code exceeds maximum size of {MAX_FN_CODE_SIZE_BYTES // 1024}KB. Please simplify your code or contact support if you need this limit increased."
                     }
                 )
 

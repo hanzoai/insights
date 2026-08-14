@@ -15,7 +15,7 @@ from products.cdp.backend.prompts import (
     EVENT_PROPERTY_TAXONOMY_MESSAGE,
     EVENT_TAXONOMY_MESSAGE,
     FILTER_TAXONOMY_MESSAGE,
-    IDENTITY_MESSAGE_HOG,
+    IDENTITY_MESSAGE_SCRIPT,
     INPUT_SCHEMA_TYPES_MESSAGE,
     INSIGHTS_EXAMPLE_MESSAGE,
     INSIGHTS_FUNCTION_FILTERS_ASSISTANT_ROOT_SYSTEM_PROMPT,
@@ -65,7 +65,7 @@ class CreateIQLTransformationFunctionTool(MaxTool):
         current_script_code = self.context.get("current_script_code", "")
 
         system_content = (
-            IDENTITY_MESSAGE_HOG
+            IDENTITY_MESSAGE_SCRIPT
             + "\n\n<example_script_code>\n"
             + INSIGHTS_EXAMPLE_MESSAGE
             + "\n</example_script_code>\n\n"

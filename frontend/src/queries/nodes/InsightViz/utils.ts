@@ -144,12 +144,12 @@ export const getDefaultQuery = (
         throw new Error('Web Analytics insights must be created from Web Analytics tiles')
     }
 
-    if ([InsightType.SQL, InsightType.JSON, InsightType.HOG].includes(insightType)) {
+    if ([InsightType.SQL, InsightType.JSON, InsightType.SCRIPT].includes(insightType)) {
         if (insightType === InsightType.JSON) {
             return examples.TotalEventsTable as DataTableNode
         } else if (insightType === InsightType.SQL) {
             return examples.DataVisualization as DataVisualizationNode
-        } else if (insightType === InsightType.HOG) {
+        } else if (insightType === InsightType.SCRIPT) {
             return examples.Scriptgonacci as ScriptQuery
         }
     }

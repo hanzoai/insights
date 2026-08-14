@@ -165,7 +165,7 @@ function useNewInsightCards(): {
         if (
             !metadata.inMenu ||
             insightType === InsightType.JSON ||
-            (!featureFlags[FEATURE_FLAGS.HOG] && insightType === InsightType.HOG)
+            (!featureFlags[FEATURE_FLAGS.SCRIPT] && insightType === InsightType.SCRIPT)
         ) {
             continue
         }
@@ -233,7 +233,7 @@ const SHORT_CARD_DESCRIPTIONS: Record<string, string> = {
     [InsightType.RETENTION]: 'How many users come back later.',
     [InsightType.PATHS]: 'The routes users take through your product.',
     [InsightType.SQL]: 'Query your data with SQL.',
-    [InsightType.HOG]: 'Query your data with Script.',
+    [InsightType.SCRIPT]: 'Query your data with Script.',
     ai: 'Describe an insight and let AI build it.',
 }
 
@@ -269,7 +269,7 @@ function useQuestionSections(): QuestionSection[] {
         {
             title: 'Build your own',
             description: 'Write SQL against your data, or let AI build it.',
-            cards: [byType[InsightType.SQL], byType[InsightType.HOG], ai],
+            cards: [byType[InsightType.SQL], byType[InsightType.SCRIPT], ai],
         },
     ]
     return sections.map((section) => ({

@@ -46,7 +46,7 @@ class TestDetectEnvironment:
         # is_ci is the seam the code consults -- mock it instead of coupling
         # to the framework's internal list of CI env vars.
         monkeypatch.setattr("insightscli_commands.telemetry_props.is_ci", lambda: False)
-        monkeypatch.setattr("insightscli_commands.telemetry_props._HOGLAND_MARKER", tmp_path / "absent")
+        monkeypatch.setattr("insightscli_commands.telemetry_props._BOX_MARKER", tmp_path / "absent")
         for var in ("INSIGHTSCLI_ENVIRONMENT", *_DEVBOX_ENV_MARKERS):
             monkeypatch.delenv(var, raising=False)
 
@@ -81,7 +81,7 @@ class TestDetectEnvironment:
         if ci:
             monkeypatch.setattr("insightscli_commands.telemetry_props.is_ci", lambda: True)
         if box:
-            monkeypatch.setattr("insightscli_commands.telemetry_props._HOGLAND_MARKER", tmp_path)
+            monkeypatch.setattr("insightscli_commands.telemetry_props._BOX_MARKER", tmp_path)
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
         assert _detect_environment() == expected
