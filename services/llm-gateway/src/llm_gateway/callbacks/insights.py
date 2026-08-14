@@ -177,9 +177,8 @@ class InsightsCallback(InstrumentedCallback):
         # mirrors them to the US instance for engineer visibility.
         self._region_url = region_url
         # Optional second capture target. When set, each captured event is
-        # mirrored to this host with the same payload, mirroring the
-        # `ee/hogai/core/runner.py:201-206` pattern that lets EU traffic also
-        # surface on the US dashboard. Set on the EU gateway deployment only.
+        # mirrored to this host with the same payload, so EU traffic also
+        # surfaces on the US dashboard. Set on the EU gateway deployment only.
         self._secondary_api_key = secondary_api_key
         self._secondary_host = secondary_host
 
