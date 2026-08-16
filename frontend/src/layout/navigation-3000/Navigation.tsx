@@ -16,6 +16,7 @@ import { PanelLayout } from '~/layout/panel-layout/PanelLayout'
 import { panelLayoutLogic } from '~/layout/panel-layout/panelLayoutLogic'
 import { ProjectDragAndDropProvider } from '~/layout/panel-layout/ProjectTree/ProjectDragAndDropContext'
 
+import { Help } from '../Help/Help'
 import { navigationLogic } from '../navigation/navigationLogic'
 import { ProjectNotice } from '../navigation/ProjectNotice'
 import { SceneTitlePanelButton } from '../scenes/components/SceneTitleSection'
@@ -245,6 +246,7 @@ export function Navigation({
                     </div>
                 </ProjectDragAndDropProvider>
             </div>
+            <Help />
         </>
     )
 }
