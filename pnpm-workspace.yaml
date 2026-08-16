@@ -66,8 +66,28 @@ trustPolicy: no-downgrade
 # first rule whose NAME matches and hands back only that rule's version list, so
 # a second `semver@...` line below is dead -- listing them separately excludes
 # 5.7.2 and lets 6.3.1 fail, which is exactly how this first went wrong.
+# The @typescript-eslint family is the same shape, checked package by package:
+# 5.62.0 is the last stable 5.x of each (2023-07-10), NOT ONE 5.x release of any
+# of them is attested, and the first attested version of each is 8.42.0, from
+# 2025-09-02. So the comparison is a 2025 release against a 2023 one across the
+# whole package, and there is no attested version on the line to move to.
+#
+# @stripe/ui-extension-tools pins them, so the alternative is a major bump inside
+# somebody else's dependency. Until that lands, no dependency anywhere in this
+# workspace can be added: the resolver reaches services/stripe-app on every
+# install that is not served entirely from the lockfile.
+#
+# One entry per package NAME, per the matcher note above.
 trustPolicyExclude:
     - semver@5.7.2 || 6.3.1
+    - '@typescript-eslint/eslint-plugin@5.62.0'
+    - '@typescript-eslint/parser@5.62.0'
+    - '@typescript-eslint/scope-manager@5.62.0'
+    - '@typescript-eslint/type-utils@5.62.0'
+    - '@typescript-eslint/types@5.62.0'
+    - '@typescript-eslint/typescript-estree@5.62.0'
+    - '@typescript-eslint/utils@5.62.0'
+    - '@typescript-eslint/visitor-keys@5.62.0'
 
 catalog:
     # Kea ecosystem - state management
