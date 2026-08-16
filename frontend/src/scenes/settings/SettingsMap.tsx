@@ -162,6 +162,7 @@ import { ProjectMove } from './project/ProjectMove'
 import { ProjectSecretAPIKeys } from './project/ProjectSecretAPIKeys'
 import { SettingSection } from './types'
 import { AllowImpersonation } from './user/AllowImpersonation'
+import { Density, TextSize } from './user/Appearance'
 import { ConnectedApps } from './user/ConnectedApps'
 import { LoginSessions } from './user/LoginSessions'
 import { MCPHintsSetting } from './user/MCPHintsSetting'
@@ -1945,6 +1946,20 @@ export const SETTINGS_MAP: SettingSection[] = [
                 title: 'Theme',
                 component: <ThemeSwitcher onlyLabel />,
                 keywords: ['dark mode', 'light mode', 'appearance', 'color scheme'],
+            },
+            {
+                id: 'text-size',
+                title: 'Text size',
+                description: 'Applies on this device.',
+                component: <TextSize />,
+                keywords: ['font size', 'type size', 'bigger text', 'zoom', 'accessibility', 'appearance'],
+            },
+            {
+                id: 'density',
+                title: 'Density',
+                description: 'How much space sits between things. Applies on this device.',
+                component: <Density />,
+                keywords: ['spacing', 'compact', 'comfortable', 'padding', 'appearance'],
             },
             {
                 id: 'optout',
