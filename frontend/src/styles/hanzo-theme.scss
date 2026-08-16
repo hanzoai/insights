@@ -17,8 +17,18 @@
     --theme-hue: 0;
     --theme-dark-hue: 0;
     --theme-tint: 0;
-    --primary-dark: oklch(0.985 0 0deg);
-    --primary-light: oklch(0.145 0 0deg);
+
+    // The brand values are the FALLBACK, so a chosen accent answers here without
+    // this file knowing anything about who chose it. --accent is the input and
+    // --primary is not: quill resolves --primary FROM these two, so reading it
+    // back would be a cycle and both would resolve to nothing.
+    --primary-dark: var(--accent, oklch(0.985 0 0deg));
+    --primary-light: var(--accent, oklch(0.145 0 0deg));
+
+    // Tailwind derives every spacing utility from this one name, so restating
+    // it is the whole density axis — padding, gap, margin, and the sizes built
+    // on them. It sits in the mixin so the quill scope answers to it too.
+    --spacing: calc(0.25rem * var(--density, 1));
 }
 
 :root,
@@ -30,4 +40,26 @@
 
 :is([data-quill], [data-quill] *) {
     @include hanzo-tokens;
+}
+
+/*
+ * A person's own reading, from @hanzo/appearance.
+ *
+ * Three knobs, each one multiplier on a whole axis, never a restated ramp. The
+ * package writes them as inline properties on <html>; every rung below follows
+ * on its own, including rungs added later. Accent is wired above, in the knobs
+ * quill already resolves its palette from.
+ *
+ * Type: 181 of this app's font sizes are rem and none read the knob directly,
+ * so scaling the root is what makes them answer at once. @hanzo/design
+ * multiplies its own ramps the same way, so the console and this app move
+ * together on one setting. The 54 px sizes do not follow and have to be
+ * converted to rem to join in.
+ *
+ * Density rides --spacing, declared with the other knobs above. The rem base
+ * means type already moved spacing once, which is why density stays a separate
+ * knob rather than a second helping of the same one.
+ */
+html {
+    font-size: calc(100% * var(--type-scale, 1));
 }
