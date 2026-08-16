@@ -21,7 +21,10 @@
     --primary-light: oklch(0.145 0 0deg);
 }
 
-:root {
+:root,
+// The toolbar renders into a shadow root, where :root matches nothing and
+// :host is the boundary.
+:host {
     @include hanzo-tokens;
 }
 
