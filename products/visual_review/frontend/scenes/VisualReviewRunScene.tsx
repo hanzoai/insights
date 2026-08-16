@@ -74,7 +74,6 @@ function SnapshotThumbnail({
                 background: isSelected ? 'var(--primary-3000-button-bg)' : 'transparent',
                 border: '1.5px solid',
                 borderColor: isSelected ? 'var(--primary-3000-button-border)' : 'var(--border)',
-                boxShadow: isSelected ? '0 3px 0 -1px var(--primary-3000-frame-bg)' : 'none',
             }}
         >
             {showBadge && (
