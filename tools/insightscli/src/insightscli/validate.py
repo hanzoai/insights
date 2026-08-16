@@ -95,8 +95,30 @@ def generate_missing_entries() -> dict[str, dict]:
     return entries
 
 
+def _section_bounds(lines: list[str], section: str) -> tuple[int, int] | None:
+    """Line range of a top-level section's body, as [start, end).
+
+    A section runs from the line after its key to the next top-level key, so an
+    entry appended at `end` lands inside that section rather than the next one.
+    """
+    start = next((i + 1 for i, line in enumerate(lines) if line.rstrip() == f"{section}:"), None)
+    if start is None:
+        return None
+
+    end = len(lines)
+    for i in range(start, len(lines)):
+        stripped = lines[i].strip()
+        if stripped and not lines[i][0].isspace() and not stripped.startswith("#"):
+            end = i
+            break
+
+    while end > start and not lines[end - 1].strip():
+        end -= 1
+    return start, end
+
+
 def auto_update_manifest() -> set[str]:
-    """Automatically add missing entries to manifest.
+    """Automatically add missing entries to the manifest's `tools` section.
 
     Returns set of newly added command names.
     """
@@ -107,27 +129,38 @@ def auto_update_manifest() -> set[str]:
     if not MANIFEST_FILE.exists():
         return set()
 
-    # Load existing manifest to check for duplicates
     with open(MANIFEST_FILE) as f:
         manifest = yaml.safe_load(f) or {}
 
-    existing_tools = manifest.get("tools", {})
-    new_entries = {k: v for k, v in entries.items() if k not in existing_tools}
+    # A command name is taken if any section already declares it. Checking only
+    # `tools` lets an entry that landed elsewhere be written a second time, which
+    # yields a duplicate key rather than an error.
+    taken = {
+        name
+        for section, commands in manifest.items()
+        if section != "metadata" and isinstance(commands, dict)
+        for name in commands
+    }
+    new_entries = {k: v for k, v in entries.items() if k not in taken}
     if not new_entries:
         return set()
 
-    # Append new entries as YAML text to preserve existing file formatting.
+    # Splice new entries as YAML text to preserve existing file formatting.
     # Round-tripping the entire file through yaml.dump() destroys indentation
     # style and line wrapping, causing the whole file to show as modified.
-    content = MANIFEST_FILE.read_text()
-
-    if "tools" not in manifest:
-        content = content.rstrip() + "\ntools:\n"
+    lines = MANIFEST_FILE.read_text().splitlines()
 
     fragment = yaml.dump(new_entries, default_flow_style=False, sort_keys=False, indent=4)
-    # Indent the fragment to sit under the tools: key (4 spaces)
-    indented = "\n".join("    " + line if line.strip() else line for line in fragment.splitlines())
-    content = content.rstrip() + "\n" + indented + "\n"
+    indented = ["    " + line if line.strip() else line for line in fragment.splitlines()]
 
-    MANIFEST_FILE.write_text(content)
+    bounds = _section_bounds(lines, "tools")
+    if bounds is None:
+        while lines and not lines[-1].strip():
+            lines.pop()
+        lines += ["tools:", *indented]
+    else:
+        _, end = bounds
+        lines[end:end] = indented
+
+    MANIFEST_FILE.write_text("\n".join(lines) + "\n")
     return set(new_entries.keys())
