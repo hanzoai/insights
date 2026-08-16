@@ -24,8 +24,7 @@
         }
 
         & .Button,
-        & .Button > .Button__chrome::after,
-        & .Button > .Button__chrome::before {
+        & .Button > .Button__chrome::after {
             border-radius: 0 !important;
         }
 
@@ -43,16 +42,14 @@
 
         &:first-child,
         &:first-child .Button,
-        &:first-child .Button > .Button__chrome::after,
-        &:first-child .Button > .Button__chrome::before {
+        &:first-child .Button > .Button__chrome::after {
             border-top-left-radius: var(--radius) !important;
             border-bottom-left-radius: var(--radius) !important;
         }
 
         &:last-child,
         &:last-child .Button,
-        &:last-child .Button > .Button__chrome::after,
-        &:last-child .Button > .Button__chrome::before {
+        &:last-child .Button > .Button__chrome::after {
             border-top-right-radius: var(--radius) !important;
             border-bottom-right-radius: var(--radius) !important;
         }
