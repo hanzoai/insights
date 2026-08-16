@@ -1022,6 +1022,14 @@ tools:
     ci:preflight:
         click: insightscli_commands.ci_preflight:ci_preflight
         description: Catch deterministic CI failures reachable from your diff before you push (advisory; --fix, --strict)
+    publish:static:
+        bin_script: publish-static
+        description: 'Mirror a built STATIC_ROOT into the shared object origin, so chunks outlive the pod that built them'
+        hidden: true
+    prune:static:
+        bin_script: prune-static
+        description: 'Hold the static origin to its 30-day deploy horizon'
+        hidden: true
 desktop:
     desktop:dev:
         cmd: pnpm --dir products/desktop dev
