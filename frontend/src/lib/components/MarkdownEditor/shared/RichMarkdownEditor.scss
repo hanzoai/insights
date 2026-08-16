@@ -9,7 +9,7 @@
         white-space: pre-wrap;
         background: var(--color-bg-surface-primary);
         border: 1px solid var(--color-border-primary);
-        border-radius: 8px;
+        border-radius: var(--radius);
     }
 
     .RichMarkdownEditor__content {
@@ -110,7 +110,7 @@
             overflow-x: auto;
             background: var(--color-bg-fill-tertiary);
             border: 1px solid var(--color-border-primary);
-            border-radius: 8px;
+            border-radius: var(--radius);
 
             code {
                 padding: 0;
