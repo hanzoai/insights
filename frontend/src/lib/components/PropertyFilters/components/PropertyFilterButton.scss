@@ -10,7 +10,7 @@
     cursor: default;
     background: var(--color-bg-fill-button-tertiary-hover);
     border: 1px solid var(--color-border-primary);
-    border-radius: 99rem;
+    border-radius: var(--radius-full);
     outline: 0;
 
     &[aria-disabled='true']:not(.Button--loading) {
@@ -60,7 +60,7 @@
     // Close button
     .Button {
         margin: 0 -0.5rem 0 -0.125rem;
-        border-radius: 99rem;
+        border-radius: var(--radius-full);
     }
 
     .Button__chrome {
