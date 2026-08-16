@@ -79,15 +79,15 @@
     border-radius: var(--elements-skin-radius);
 }
 
-/* primary → Lemon primary. Button draws its 3D frame on a pseudo-element inset
-   -1px with `0 3px 0 -1px`; on the button itself 0 spread gives the same net edge. */
+/* primary → Lemon primary. Lemon buttons sit flat, so the skin cancels quill's
+   own raised shadow and lift rather than restating them. */
 
 [data-elements-skin] .quill-button--variant-primary,
 .quill-button--variant-primary[data-elements-skin] {
     color: var(--text-3000-light);
     background-color: var(--primary-3000-button-bg);
     border: 1px solid var(--primary-3000-button-border);
-    box-shadow: 0 0.1875rem 0 0 var(--primary-3000-frame-bg);
+    box-shadow: none;
     translate: none;
 }
 
@@ -100,7 +100,7 @@
 [data-elements-skin] .quill-button--variant-primary:not(:disabled, [aria-disabled='true']):active,
 .quill-button--variant-primary[data-elements-skin]:not(:disabled, [aria-disabled='true']):active {
     box-shadow: none;
-    translate: 0 0.1875rem;
+    translate: none;
 }
 
 /* outline → Lemon secondary */
@@ -109,7 +109,7 @@
 .quill-button--variant-outline[data-elements-skin] {
     background-color: transparent;
     border: 1px solid var(--secondary-3000-button-border);
-    box-shadow: 0 0.1875rem 0 0 var(--secondary-3000-frame-bg);
+    box-shadow: none;
 }
 
 [data-elements-skin] .quill-button--variant-outline:not(:disabled, [aria-disabled='true']):hover,
@@ -122,7 +122,7 @@
 [data-elements-skin] .quill-button--variant-outline:not(:disabled, [aria-disabled='true']):active,
 .quill-button--variant-outline[data-elements-skin]:not(:disabled, [aria-disabled='true']):active {
     box-shadow: none;
-    translate: 0 0.1875rem;
+    translate: none;
 }
 
 /* default (ghost) → Lemon tertiary */
