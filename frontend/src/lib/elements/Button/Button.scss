@@ -1,5 +1,6 @@
 @mixin secondary-variables {
     --button-border-color: var(--secondary-3000-button-border);
+    --lemon-button-bg-color: var(--secondary-3000-button-bg);
     --lemon-button-bg-color-active: var(--color-bg-surface-primary);
     --lemon-button-border-color-hover: var(--secondary-3000-button-border-hover);
 }
@@ -99,7 +100,7 @@
         min-height: var(--lemon-button-height);
         padding: var(--lemon-button-padding-vertical) var(--lemon-button-padding-horizontal);
         font-size: var(--lemon-button-font-size);
-        font-weight: 500;
+        font-weight: 400;
         line-height: 1.5rem;
         color: var(--lemon-button-color);
         text-align: left;
