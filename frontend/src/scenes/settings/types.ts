@@ -255,6 +255,8 @@ export type SettingId =
     | 'snippet-v2'
     | 'surveys-default-appearance'
     | 'surveys-interface'
+    | 'density'
+    | 'text-size'
     | 'theme'
     | 'user-delete'
     | 'user-groups'
