@@ -10,6 +10,7 @@
  * etc.) that the primitive components reference by class name.
  */
 @import '../../node_modules/@hanzo/quill/dist/tokens.scoped.css';
+@import 'hanzo-theme';
 @import '../../node_modules/@hanzo/quill/dist/base.scoped.css';
 @import '../../node_modules/@hanzo/quill/dist/primitives.css';
 @import 'quill-bridge';
