@@ -8,7 +8,8 @@ from typing import Any
 import pytest
 from unittest.mock import patch
 
-from insightscli.validate import find_orphan_manifest_entries
+import yaml
+from insightscli.validate import auto_update_manifest, find_orphan_manifest_entries
 
 
 def _make_manifest_stub(scripts_dir: Path, data: dict[str, Any]) -> Any:
@@ -89,3 +90,60 @@ class TestFindOrphanManifestEntries:
         )
         with patch("insightscli.validate.get_manifest", return_value=stub):
             assert find_orphan_manifest_entries() == set()
+
+
+class TestAutoUpdateManifest:
+    MANIFEST = "\n".join(
+        [
+            "tools:",
+            "    existing:",
+            "        bin_script: existing",
+            "",
+            "environment:",
+            "    other:",
+            "        bin_script: other",
+            "",
+        ]
+    )
+
+    def _run(self, tmp_path: Path, manifest_text: str, missing: set[str]) -> tuple[set[str], dict[str, Any]]:
+        manifest_file = tmp_path / "insightscli.yaml"
+        manifest_file.write_text(manifest_text)
+        with (
+            patch("insightscli.validate.MANIFEST_FILE", manifest_file),
+            patch("insightscli.validate.find_missing_manifest_entries", return_value=missing),
+        ):
+            added = auto_update_manifest()
+        return added, yaml.safe_load(manifest_file.read_text())
+
+    def test_new_entry_lands_in_tools_not_the_last_section(self, tmp_path: Path) -> None:
+        added, data = self._run(tmp_path, self.MANIFEST, {"prune-static"})
+
+        assert added == {"prune:static"}
+        assert "prune:static" in data["tools"]
+        assert "prune:static" not in data["environment"]
+
+    def test_second_run_adds_nothing(self, tmp_path: Path) -> None:
+        manifest_file = tmp_path / "insightscli.yaml"
+        manifest_file.write_text(self.MANIFEST)
+        with (
+            patch("insightscli.validate.MANIFEST_FILE", manifest_file),
+            patch("insightscli.validate.find_missing_manifest_entries", return_value={"prune-static"}),
+        ):
+            assert auto_update_manifest() == {"prune:static"}
+            assert auto_update_manifest() == set()
+
+        # A duplicate key would make the second definition silently win.
+        assert manifest_file.read_text().count("prune:static:") == 1
+
+    def test_name_taken_by_another_section_is_not_added(self, tmp_path: Path) -> None:
+        manifest = self.MANIFEST.replace("    other:", "    prune:static:")
+        added, _ = self._run(tmp_path, manifest, {"prune-static"})
+
+        assert added == set()
+
+    def test_tools_section_is_created_when_absent(self, tmp_path: Path) -> None:
+        added, data = self._run(tmp_path, "environment:\n    other:\n        bin_script: other\n", {"prune-static"})
+
+        assert added == {"prune:static"}
+        assert "prune:static" in data["tools"]
