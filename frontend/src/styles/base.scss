@@ -836,11 +836,17 @@
     --link-3000-dark: #fff;
 
     // The primary action is the one high-contrast surface in a black UI, so it
-    // is white. Its label resolves to --text-3000-light (near-black), which only
-    // reads against a near-white ground. The accent stays on links, active and
-    // focus, where it sits under white text instead of over it.
-    --primary-3000-button-bg-dark: #fff;
-    --primary-3000-button-border-dark: #fff;
+    // is near-white. Its label resolves to --text-3000-light (near-black), which
+    // only reads against a near-white ground. The accent stays on links, active
+    // and focus, where it sits under white text instead of over it.
+    //
+    // The value is --primary-dark, the same @hanzo/design primary quill paints
+    // with (hanzo-theme.scss), so a Lemon button and a quill button next to it
+    // are the same white. The literal is the fallback rather than the source:
+    // if that knob is ever renamed this holds the colour instead of resolving
+    // to nothing, which for a background reads as transparent.
+    --primary-3000-button-bg-dark: var(--primary-dark, #fafafa);
+    --primary-3000-button-border-dark: var(--primary-dark, #fafafa);
     --primary-3000-button-border-hover-dark: #e0e0e0;
     --primary-alt-highlight-dark: #232429;
     --secondary-3000-frame-bg-dark: #323232;
