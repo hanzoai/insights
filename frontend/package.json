@@ -63,6 +63,7 @@
         "@dnd-kit/sortable": "^7.0.2",
         "@dnd-kit/utilities": "^3.2.1",
         "@floating-ui/react": "^0.27.19",
+        "@hanzo/appearance": "^0.1.4",
         "@hanzo/docs-onboarding": "workspace:*",
         "@hanzo/esbuilder": "workspace:*",
         "@hanzo/icons": "catalog:",

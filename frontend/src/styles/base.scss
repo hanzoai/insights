@@ -374,10 +374,9 @@
     // Accent colors (accents can be changed to change the brand colors)
     // Used for interactive elements and highlights, inputs, toggles, charts, etc.
     // //////////////////////////////////////////////////////////
-    --color-accent: hsl(
-        var(--color-brand-primary-hue),
-        var(--color-brand-primary-saturation),
-        var(--color-brand-primary-lightness)
+    --color-accent: var(
+        --accent,
+        hsl(var(--color-brand-primary-hue), var(--color-brand-primary-saturation), var(--color-brand-primary-lightness))
     );
     --color-accent-inverted: hsl(
         var(--color-insights-brand-yellow-hue),
@@ -908,10 +907,9 @@
 
     // Accent colors (dark mode)
     // //////////////////////////////////////////////////////////
-    --color-accent: hsl(
-        var(--color-brand-primary-hue),
-        var(--color-brand-primary-saturation),
-        var(--color-brand-primary-lightness)
+    --color-accent: var(
+        --accent,
+        hsl(var(--color-brand-primary-hue), var(--color-brand-primary-saturation), var(--color-brand-primary-lightness))
     );
     --color-accent-inverted: hsl(
         var(--color-insights-brand-orange-hue),
