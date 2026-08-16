@@ -1,39 +1,30 @@
 /*
- * The Hanzo palette, stated once.
+ * Hanzo's palette and radius, from @hanzo/design — the same values
+ * console.hanzo.ai and hanzo.ai render.
  *
- * @hanzo/quill generates its whole colour system from five knobs, and this app
- * shipped the generator's defaults: a violet-tinted dark neutral (hue 264,
- * tint 0.006) under an amber primary (oklch 0.83 0.16 84.71). Hanzo's brand is
- * MONOCHROME — near-black ground, near-white ink, no accent hue — so every
- * surface here read as a different product from console.hanzo.ai and hanzo.ai
- * beside it.
- *
- * The knobs are the intended seam ("override these to shift the palette"), so
- * this is five declarations rather than a restyle. Values come from
- * @hanzo/design, which is what the console and hanzo.ai render:
- *
- *   --radius        0.5rem   (design's `--radius`; quill defaulted to 0.58rem)
- *   ground          #0a0a0a  (design's `--background`) — hue-less, untinted
- *   primary         #fafafa  (design's `--primary`)
- *
- * A hue of 0 with zero tint is what makes the generated ramp neutral: the
- * generator still produces its full scale, it just produces it in grey.
+ * @hanzo/quill builds its entire colour system from five knobs. Hue 0 with
+ * zero tint is what resolves the generated ramp to true neutrals; the primary
+ * is #fafafa on dark and #0a0a0a on light, chroma 0. quill declares the same
+ * knobs directly on every [data-quill] descendant, which inheritance from
+ * :root cannot reach, so the block is applied to that selector as well.
  */
 
-:root {
+@mixin hanzo-tokens {
     --radius: 0.5rem;
-
-    /* No hue, no tint — the ramp resolves to true neutrals in both schemes. */
+    --radius-sm: 0.375rem;
+    --radius-lg: 0.75rem;
+    --radius-full: 9999px;
     --theme-hue: 0;
     --theme-dark-hue: 0;
     --theme-tint: 0;
+    --primary-dark: oklch(0.985 0 0deg);
+    --primary-light: oklch(0.145 0 0deg);
+}
 
-    /*
-     * Monochrome primary. #fafafa and #0a0a0a are @hanzo/design's own
-     * `--primary` for dark and light, written here in the oklch the generator
-     * expects. Chroma is 0 deliberately: an accent hue is the one thing the
-     * brand does not have.
-     */
-    --primary-dark: oklch(0.985 0 0);
-    --primary-light: oklch(0.145 0 0);
+:root {
+    @include hanzo-tokens;
+}
+
+:is([data-quill], [data-quill] *) {
+    @include hanzo-tokens;
 }
