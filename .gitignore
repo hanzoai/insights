@@ -235,4 +235,6 @@ dump.rdb
 
 # Compiled InsightsQL parser: build output, not source
 common/insightsql_parser/build/
+common/insightsql_parser/build_wasm/
+common/insightsql_parser/dist/
 common/insightsql_parser/*.so
