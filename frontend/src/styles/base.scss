@@ -770,11 +770,15 @@
 
     // Deprecated colors
     // Vars
-    --danger-highlight: rgb(38 38 38 / 10%);
-    --danger-lighter: #b0b0b0;
-    --danger-light: #4a4a4a;
-    --danger: #262626;
-    --danger-dark: #171717;
+    // Destructive is the one role that keeps a hue. The palette is monochrome so
+    // that nothing competes for attention, which is exactly why an irreversible
+    // action cannot also be grey: it would carry the same weight as every other
+    // control. Red is @hanzo/design's --destructive, so console reads the same.
+    --danger-highlight: rgb(239 68 68 / 10%);
+    --danger-lighter: #fca5a5;
+    --danger-light: #f87171;
+    --danger: #ef4444;
+    --danger-dark: #b91c1c;
     --warning-highlight: rgb(115 115 115 / 10%);
     --warning: #737373;
     --warning-dark: #525252;
@@ -819,8 +823,10 @@
     --secondary-3000-button-border-light: #ccc;
     --secondary-3000-button-border-hover-light: #aaa;
     --danger-3000-frame-bg-light: #33333380;
-    --danger-3000-button-border-light: #333;
-    --danger-3000-button-border-hover-light: #333;
+    --danger-3000-button-bg-light: #fef2f2;
+    --danger-3000-button-border-light: #ef4444;
+    --danger-3000-button-border-hover-light: #dc2626;
+    --danger-3000-color-light: #b91c1c;
 
     // Flat in both themes — see --shadow-elevation-3000 above.
     --shadow-elevation-3000-light: none;
@@ -860,8 +866,10 @@
     --secondary-3000-button-border-dark: #4a4c52;
     --secondary-3000-button-border-hover-dark: #5e6064;
     --danger-3000-frame-bg-dark: #33333380;
-    --danger-3000-button-border-dark: #666;
-    --danger-3000-button-border-hover-dark: #333;
+    --danger-3000-button-bg-dark: #51101d;
+    --danger-3000-button-border-dark: #71232d;
+    --danger-3000-button-border-hover-dark: #8b3239;
+    --danger-3000-color-dark: #ff9794;
 
     // Light mode
     --text-3000: var(--text-3000-light);
@@ -891,8 +899,10 @@
     --secondary-3000-button-bg: var(--secondary-3000-button-bg-light);
     --secondary-3000-button-border: var(--secondary-3000-button-border-light);
     --secondary-3000-button-border-hover: var(--secondary-3000-button-border-hover-light);
+    --danger-3000-button-bg: var(--danger-3000-button-bg-light);
     --danger-3000-button-border: var(--danger-3000-button-border-light);
     --danger-3000-button-border-hover: var(--danger-3000-button-border-hover-light);
+    --danger-3000-color: var(--danger-3000-color-light);
     --tooltip-bg: #2d2d2d;
 }
 
@@ -1122,8 +1132,10 @@
     --secondary-3000-button-bg: var(--secondary-3000-button-bg-dark);
     --secondary-3000-button-border: var(--secondary-3000-button-border-dark);
     --secondary-3000-button-border-hover: var(--secondary-3000-button-border-hover-dark);
+    --danger-3000-button-bg: var(--danger-3000-button-bg-dark);
     --danger-3000-button-border: var(--danger-3000-button-border-dark);
     --danger-3000-button-border-hover: var(--danger-3000-button-border-hover-dark);
+    --danger-3000-color: var(--danger-3000-color-dark);
     --tooltip-bg: var(--tooltip-bg-dark);
     --data-color-2: #ccc;
     --data-color-3: #666;
