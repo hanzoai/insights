@@ -220,20 +220,15 @@
     &.Button--status-danger,
     &.Button--primary.Button--status-danger,
     &.Button--secondary.Button--status-danger {
-        --lemon-button-color: var(--danger-3000-button-border-hover) !important;
+        --lemon-button-color: var(--danger-3000-color);
         --button-border-color: var(--danger-3000-button-border);
         --lemon-button-border-color-hover: var(--danger-3000-button-border-hover);
         --lemon-button-icon-opacity: 1;
     }
 
     &.Button--primary.Button--status-danger {
-        --lemon-button-bg-color: var(--red-100);
-        --lemon-button-color: var(--text-3000);
-
-        [theme='dark'] & {
-            --lemon-button-bg-color: #312101;
-            --lemon-button-color: var(--red-200);
-        }
+        --lemon-button-bg-color: var(--danger-3000-button-bg);
+        --lemon-button-bg-color-active: var(--danger-3000-button-bg);
     }
 
     &.Button--secondary.Button--status-alt {
