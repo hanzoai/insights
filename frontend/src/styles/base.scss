@@ -847,12 +847,10 @@
     --glass-border-3000-dark: var(--border-3000-dark);
     --link-3000-dark: #fff;
 
-    // The primary action is WHITE — the one high-contrast surface in a black UI.
-    // It was `var(--color-accent)`, a 20%-lightness grey, under a label that
-    // resolves to --text-3000-light (near-black): dark-on-dark, which is why the
-    // Save button read as a muddy slab. White ground + the dark label is the
-    // intended pairing. The accent stays reserved for links/active/focus.
-    --primary-3000-frame-bg-dark: #fff;
+    // The primary action is the one high-contrast surface in a black UI, so it
+    // is white. Its label resolves to --text-3000-light (near-black), which only
+    // reads against a near-white ground. The accent stays on links, active and
+    // focus, where it sits under white text instead of over it.
     --primary-3000-button-bg-dark: #fff;
     --primary-3000-button-border-dark: #fff;
     --primary-3000-button-border-hover-dark: #e0e0e0;
@@ -886,16 +884,13 @@
     --color-bg-light: #fff;
     --color-bg-table: #f9faf7;
     --link: var(--link-3000-light);
-    --primary-3000-frame-bg: var(--primary-3000-frame-bg-light);
     --primary-3000-button-bg: var(--color-white);
     --primary-3000-button-border: var(--primary-3000-button-border-light);
     --primary-3000-button-border-hover: var(--primary-3000-button-border-hover-light);
     --primary-alt-highlight: var(--primary-alt-highlight-light);
-    --secondary-3000-frame-bg: var(--secondary-3000-frame-bg-light);
     --secondary-3000-button-bg: var(--secondary-3000-button-bg-light);
     --secondary-3000-button-border: var(--secondary-3000-button-border-light);
     --secondary-3000-button-border-hover: var(--secondary-3000-button-border-hover-light);
-    --danger-3000-frame-bg: var(--danger-3000-frame-bg-light);
     --danger-3000-button-border: var(--danger-3000-button-border-light);
     --danger-3000-button-border-hover: var(--danger-3000-button-border-hover-light);
     --tooltip-bg: #2d2d2d;
@@ -1120,16 +1115,13 @@
     --brand-key: #fff; // In dark mode the black in Insights's logo is replaced with white for proper contrast
     --link: var(--link-3000-dark);
     --shadow-elevation-3000: var(--shadow-elevation-3000-dark);
-    --primary-3000-frame-bg: var(--primary-3000-frame-bg-dark);
-    --primary-3000-button-bg: var(--color-accent);
+    --primary-3000-button-bg: var(--primary-3000-button-bg-dark);
     --primary-3000-button-border: var(--primary-3000-button-border-dark);
     --primary-3000-button-border-hover: var(--primary-3000-button-border-hover-dark);
     --primary-alt-highlight: var(--primary-alt-highlight-dark);
-    --secondary-3000-frame-bg: var(--secondary-3000-frame-bg-dark);
     --secondary-3000-button-bg: var(--secondary-3000-button-bg-dark);
     --secondary-3000-button-border: var(--secondary-3000-button-border-dark);
     --secondary-3000-button-border-hover: var(--secondary-3000-button-border-hover-dark);
-    --danger-3000-frame-bg: var(--danger-3000-frame-bg-dark);
     --danger-3000-button-border: var(--danger-3000-button-border-dark);
     --danger-3000-button-border-hover: var(--danger-3000-button-border-hover-dark);
     --tooltip-bg: var(--tooltip-bg-dark);
