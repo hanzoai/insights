@@ -369,6 +369,9 @@ def root(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
             "plans_url": "https://hanzo.ai/pricing",
             "docs_url": "https://docs.hanzo.ai",
             "source_url": "https://github.com/hanzoai/insights",
+            # This host is one product of a larger estate and named nothing else
+            # in it, so a visitor who arrived here could only sign in or leave.
+            "hanzo_url": "https://hanzo.ai",
             # The product's public face is a surface like any other, and it was the
             # only one reporting nothing. Same key the app shell uses, from the same
             # function, so the two cannot disagree about where this instance reports.
