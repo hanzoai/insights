@@ -93,6 +93,14 @@ header {
 .bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; height: 100%; }
 .mark { display: flex; align-items: center; gap: .625rem; font-weight: 600; letter-spacing: -.02em; text-decoration: none; }
 .mark svg { width: 1.5rem; height: 1.5rem; fill: currentColor; }
+.nav { display: flex; align-items: center; gap: 1.5rem; }
+.nav a { text-decoration: none; font-size: .875rem; color: var(--ink-dim); }
+.nav a:hover { color: var(--ink); }
+/* The button keeps its own colour, so exclude it from the dimming above. */
+.nav .btn { color: var(--ink); font-size: .8125rem; }
+/* Narrow bars keep the one control a visitor came for; the footer still
+   carries the rest of these on the same page. */
+@media (max-width: 34rem) { .nav a:not(.btn) { display: none; } }
 
 /* ── hero ────────────────────────────────────────────────────────────── */
 .hero { padding: 5rem 0 4rem; }
@@ -132,8 +140,15 @@ footer { border-top: 1px solid var(--edge); padding: 2rem 0 3rem; color: var(--i
 
 <header>
   <div class="wrap bar">
-    <a class="mark" href="/"><svg viewBox="0 0 67 67" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hanzo"><path d="M22.21 67V44.6369H0V67H22.21Z"/><path d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z"/><path d="M22.21 0H0V22.3184H22.21V0Z"/><path d="M66.7198 0H44.5098V22.3184H66.7198V0Z"/><path d="M66.7198 67V44.6369H44.5098V67H66.7198Z"/></svg>Insights</a>
-    <a class="btn btn-ghost" href="{{ login_url }}">Sign in</a>
+    <a class="mark" href="/"><svg viewBox="0 0 67 67" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hanzo"><path d="M22.21 67V44.6369H0V67H22.21Z"/><path d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z"/><path d="M22.21 0H0V22.3184H22.21V0Z"/><path d="M66.7198 0H44.5098V22.3184H66.7198V0Z"/><path d="M66.7198 67V44.6369H44.5098V67H66.7198Z"/></svg>Hanzo Insights</a>
+    {# The bar carried the mark and Sign in alone, so every other way out of this
+       page sat at the bottom of a long scroll. Same destinations the footer
+       already names, from the same context, at the top where a reader is. #}
+    <nav class="nav">
+      <a href="{{ docs_url }}">Docs</a>
+      <a href="{{ plans_url }}">Plans</a>
+      <a class="btn btn-ghost" href="{{ login_url }}">Sign in</a>
+    </nav>
   </div>
 </header>
 
@@ -216,6 +231,7 @@ footer { border-top: 1px solid var(--edge); padding: 2rem 0 3rem; color: var(--i
       <a href="{{ plans_url }}">Plans</a>
       <a href="{{ docs_url }}">Docs</a>
       <a href="{{ source_url }}">Source</a>
+      <a href="{{ hanzo_url }}">Hanzo AI</a>
     </div>
     <div>Hanzo Insights</div>
   </div>
