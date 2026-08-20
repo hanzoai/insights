@@ -73,7 +73,7 @@ export type insightsFunctionIconLogicType = MakeLogicType<
 export const insightsFunctionIconLogic = kea<insightsFunctionIconLogicType>([
     props({} as InsightsFunctionIconLogicProps),
     key((props) => props.logicKey ?? 'default'),
-    path((key) => ['scenes', 'pipeline', 'hogfunctions', 'insightsFunctionIconLogic', key]),
+    path((key) => ['scenes', 'pipeline', 'insightsfunctions', 'insightsFunctionIconLogic', key]),
 
     actions({
         loadPossibleIcons: true,

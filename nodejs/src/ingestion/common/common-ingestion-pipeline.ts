@@ -17,7 +17,7 @@ import { newBatchingPipeline } from '~/ingestion/framework/builders'
 import { ChunkPipelineBuilder, GroupProcessingBuilder } from '~/ingestion/framework/builders/chunk-pipeline-builders'
 import { PipelineBuilder, StartPipelineBuilder } from '~/ingestion/framework/builders/pipeline-builders'
 import { GroupingFunction } from '~/ingestion/framework/concurrently-grouping-chunk-pipeline'
-import { TopHogMetricFactory, TopHogRegistry, createTopHogWrapper } from '~/ingestion/framework/extensions/tophog'
+import { TopFnMetricFactory, TopFnRegistry, createTopFnWrapper } from '~/ingestion/framework/extensions/topfn'
 import { FanInFunction, FanOutFunction, FanOutSubContext } from '~/ingestion/framework/fan-out-fan-in-chunk-pipeline'
 import { KafkaDebugContext, aggregateKafkaDebugContexts } from '~/ingestion/framework/helpers'
 import { PipelineConfig } from '~/ingestion/framework/result-handling-pipeline'
@@ -31,7 +31,7 @@ import {
     createParseHeadersStep,
     createParseKafkaMessageStep,
     createResolveTeamStep,
-    parseMessageTopHogMetrics,
+    parseMessageTopFnMetrics,
 } from './steps/event-preprocessing'
 import { addTeamToContext } from './subpipelines/helpers'
 
@@ -84,12 +84,12 @@ export interface CommonIngestionPipelineConfig<ROut extends string = never> {
     outputs: IngestionOutputs<IngestionWarningsOutput | DlqOutput | ROut>
     promiseScheduler: PromiseScheduler
     /**
-     * TopHog registry for per-tenant metrics. The skeleton itself records
-     * parse timing and message sizes (see `parseMessageTopHogMetrics`);
+     * TopFn registry for per-tenant metrics. The skeleton itself records
+     * parse timing and message sizes (see `parseMessageTopFnMetrics`);
      * pipelines can layer their own metrics via the `parseMessage` /
      * `resolveTeam` factory lists.
      */
-    topHog: TopHogRegistry
+    topFn: TopFnRegistry
     /** Maximum number of batches accepted concurrently. Defaults to the framework default. */
     concurrentBatches?: number
     /**
@@ -288,12 +288,12 @@ export class CommonPreTeamStage<
     ) {}
 
     /** Per-element step; consecutive pipes run in one sequential block.
-     * `options.topHog` records metric factories around the step. */
+     * `options.topFn` records metric factories around the step. */
     pipe<U extends { message: Message; headers: EventHeaders }, R2 extends ROut>(
         step: ProcessingStep<TCurrent, U, R2>,
-        options?: { retry?: RetryOptions; topHog?: TopHogMetricFactory<TCurrent, U>[] }
+        options?: { retry?: RetryOptions; topFn?: TopFnMetricFactory<TCurrent, U>[] }
     ): CommonPreTeamStage<TInput, TContext, ROut, CBatch, U> {
-        const wrapped = options?.topHog?.length ? createTopHogWrapper(this.config.topHog)(step, options.topHog) : step
+        const wrapped = options?.topFn?.length ? createTopFnWrapper(this.config.topFn)(step, options.topFn) : step
         return new CommonPreTeamStage(this.config, this.beforeBatchCallback, this.chain.extend(wrapped, options))
     }
 
@@ -313,18 +313,18 @@ export class CommonPreTeamStage<
     /**
      * Parse the message body; after this, body-dependent steps can be piped.
      *
-     * Parse timing and raw message sizes are always recorded to topHog
-     * (`parseMessageTopHogMetrics`); `options.topHog` appends
+     * Parse timing and raw message sizes are always recorded to topFn
+     * (`parseMessageTopFnMetrics`); `options.topFn` appends
      * pipeline-specific metric factories on top.
      */
     parseMessage(options?: {
-        topHog?: TopHogMetricFactory<TCurrent, TCurrent & { event: IncomingEvent }>[]
+        topFn?: TopFnMetricFactory<TCurrent, TCurrent & { event: IncomingEvent }>[]
     }): CommonPreTeamStage<TInput, TContext, ROut, CBatch, TCurrent & { event: IncomingEvent }> {
-        const topHog = createTopHogWrapper(this.config.topHog)
+        const topFn = createTopFnWrapper(this.config.topFn)
         return this.pipe(
-            topHog(createParseKafkaMessageStep<TCurrent>(), [
-                ...parseMessageTopHogMetrics<TCurrent, TCurrent & { event: IncomingEvent }>(),
-                ...(options?.topHog ?? []),
+            topFn(createParseKafkaMessageStep<TCurrent>(), [
+                ...parseMessageTopFnMetrics<TCurrent, TCurrent & { event: IncomingEvent }>(),
+                ...(options?.topFn ?? []),
             ])
         )
     }
@@ -334,19 +334,19 @@ export class CommonPreTeamStage<
      * open the team-aware scope: every step piped after this runs inside
      * `handleIngestionWarnings`, with warnings routed to the resolved team.
      *
-     * `options.topHog` records metric factories around the team-resolution
+     * `options.topFn` records metric factories around the team-resolution
      * step (e.g. a per-team resolved counter).
      */
     resolveTeam(
         this: CommonPreTeamStage<TInput, TContext, ROut, CBatch, TCurrent & { event: IncomingEvent }>,
         options?: {
-            topHog?: TopHogMetricFactory<TCurrent & { event: IncomingEvent }, TeamResolved<TCurrent>>[]
+            topFn?: TopFnMetricFactory<TCurrent & { event: IncomingEvent }, TeamResolved<TCurrent>>[]
         }
     ): CommonTeamStage<TInput, TContext, ROut, CBatch, TeamResolved<TCurrent>, TeamResolved<TCurrent>> {
         const step = createResolveTeamStep<TCurrent & { event: IncomingEvent }>(this.config.teamManager)
-        const topHog = createTopHogWrapper(this.config.topHog)
-        const metrics = options?.topHog
-        const resolved = this.chain.extend(metrics?.length ? topHog(step, metrics) : step)
+        const topFn = createTopFnWrapper(this.config.topFn)
+        const metrics = options?.topFn
+        const resolved = this.chain.extend(metrics?.length ? topFn(step, metrics) : step)
         return new CommonTeamStage(
             this.config,
             this.beforeBatchCallback,
@@ -384,12 +384,12 @@ export class CommonTeamStage<
     ) {}
 
     /** Per-element step; consecutive pipes run in one sequential block.
-     * `options.topHog` records metric factories around the step. */
+     * `options.topFn` records metric factories around the step. */
     pipe<U, R2 extends ROut>(
         step: ProcessingStep<TCurrent, U, R2>,
-        options?: { retry?: RetryOptions; topHog?: TopHogMetricFactory<TCurrent, U>[] }
+        options?: { retry?: RetryOptions; topFn?: TopFnMetricFactory<TCurrent, U>[] }
     ): CommonTeamStage<TInput, TContext, ROut, CBatch, TPost, U> {
-        const wrapped = options?.topHog?.length ? createTopHogWrapper(this.config.topHog)(step, options.topHog) : step
+        const wrapped = options?.topFn?.length ? createTopFnWrapper(this.config.topFn)(step, options.topFn) : step
         return new CommonTeamStage(
             this.config,
             this.beforeBatchCallback,

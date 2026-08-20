@@ -284,7 +284,7 @@ SELECT
 FROM system.tasks
 WHERE created_at > now() - interval 30 day
   AND deleted = 0
-  AND origin_product IN ('user_created', 'slack', 'insights_ai', 'hogdesk')
+  AND origin_product IN ('user_created', 'slack', 'insights_ai', 'desk')
 GROUP BY origin, repo
 -- Requester spread first: the demand lens requires repetition across people, so one person's
 -- high-volume queue must not displace groups where several people asked for the same thing.
@@ -299,7 +299,7 @@ The system table applies only team scoping and `internal != true`. It does **not
 
 Read task text through the **MCP tools instead**, which enforce the boundary server-side for the token's user:
 
-- `tasks-list` — page newest-first, filtered by `origin_product` to the demand origins (`user_created`, `slack`, `insights_ai`, `hogdesk`). This is the theme-sampling surface.
+- `tasks-list` — page newest-first, filtered by `origin_product` to the demand origins (`user_created`, `slack`, `insights_ai`, `desk`). This is the theme-sampling surface.
 - `tasks-retrieve` — full detail on one task when a theme is worth pursuing, and the source of `created_by.uuid` for reviewer routing.
 
 Two properties of `tasks-list` shape how you call it, and neither is optional:
@@ -331,7 +331,7 @@ WHERE r.created_at > now() - interval 30 day
   -- soft-deleted request retried inside the window reads as current demand.
   AND t.created_at > now() - interval 30 day
   AND t.deleted = 0
-  AND t.origin_product IN ('user_created', 'slack', 'insights_ai', 'hogdesk')
+  AND t.origin_product IN ('user_created', 'slack', 'insights_ai', 'desk')
 GROUP BY task_id, repo, creator, err_prefix
 ORDER BY failed_runs DESC
 LIMIT 30

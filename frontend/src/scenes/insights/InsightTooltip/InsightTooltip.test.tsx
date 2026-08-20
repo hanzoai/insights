@@ -46,7 +46,7 @@ describe('InsightTooltip column layout', () => {
                 order: 0,
                 breakdown_value: '$pageview',
                 label: '$pageview',
-                color: '#1d4aff',
+                color: '#3d3d3d',
                 count: 94,
             },
             {

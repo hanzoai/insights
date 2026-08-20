@@ -47,7 +47,7 @@ def insights_function_id() -> str:
 
 @pytest.fixture()
 def path() -> str:
-    return "/api/projects/{team_id}/insights_functions/{insights_function_id}/batch_export_invocations"
+    return "/v1/projects/{team_id}/insights_functions/{insights_function_id}/batch_export_invocations"
 
 
 class Handler:

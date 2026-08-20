@@ -167,6 +167,7 @@ class ApprovalPolicy(UUIDModel, CreatedMetaFields, UpdatedMetaFields):
 
     bypass_roles = models.ManyToManyField(
         "insights.Role",
+        db_constraint=False,
         blank=True,
         related_name="bypass_policies",
         db_table="insights_approvalpolicy_bypass_roles",  # pinned to pre-move physical M2M table name, do not rename

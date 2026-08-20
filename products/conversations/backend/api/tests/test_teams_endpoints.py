@@ -55,7 +55,7 @@ class TestTeamsEventHandler(BaseTest):
 
     def _post(self, payload: dict[str, Any], **kwargs):
         return self.client.post(
-            "/api/conversations/v1/teams/events",
+            "/v1/conversations/v1/teams/events",
             data=json.dumps(payload),
             content_type="application/json",
             **kwargs,
@@ -93,7 +93,7 @@ class TestTeamsEventHandler(BaseTest):
         mock_validate.return_value = {}
         activity = _make_activity(activity_type="conversationUpdate")
         bot_id = "28:bot-app-id"
-        activity["recipient"] = {"id": bot_id, "name": "SupportHog"}
+        activity["recipient"] = {"id": bot_id, "name": "Support"}
         activity["membersAdded"] = [{"id": bot_id}]
 
         response = self._post(activity)
@@ -110,7 +110,7 @@ class TestTeamsEventHandler(BaseTest):
         """A non-bot member joining must not trigger the welcome card."""
         mock_validate.return_value = {}
         activity = _make_activity(activity_type="conversationUpdate")
-        activity["recipient"] = {"id": "28:bot-app-id", "name": "SupportHog"}
+        activity["recipient"] = {"id": "28:bot-app-id", "name": "Support"}
         activity["membersAdded"] = [{"id": "29:some-other-user"}]
 
         response = self._post(activity)
@@ -186,7 +186,7 @@ class TestTeamsEventHandler(BaseTest):
         mock_validate.return_value = {}
         activity = _make_activity(activity_type="conversationUpdate")
         bot_id = "28:bot-app-id"
-        activity["recipient"] = {"id": bot_id, "name": "SupportHog"}
+        activity["recipient"] = {"id": bot_id, "name": "Support"}
         activity["membersAdded"] = [{"id": bot_id}]
 
         self._post(activity)
@@ -196,7 +196,7 @@ class TestTeamsEventHandler(BaseTest):
 
     @patch("products.conversations.backend.api.teams_events.validate_teams_request")
     def test_get_method_returns_405(self, mock_validate):
-        response = self.client.get("/api/conversations/v1/teams/events")
+        response = self.client.get("/v1/conversations/v1/teams/events")
         assert response.status_code == 405
 
     @patch("products.conversations.backend.api.teams_events.validate_teams_request")
@@ -204,7 +204,7 @@ class TestTeamsEventHandler(BaseTest):
         mock_validate.return_value = {}
 
         response = self.client.post(
-            "/api/conversations/v1/teams/events",
+            "/v1/conversations/v1/teams/events",
             data="{bad",
             content_type="application/json",
         )
@@ -263,7 +263,7 @@ class TestTeamsChannelsEndpoints(APIBaseTest):
         }
         mock_get.return_value = mock_resp
 
-        response = self.client.post("/api/conversations/v1/teams/teams")
+        response = self.client.post("/v1/conversations/v1/teams/teams")
 
         assert response.status_code == 200
         data = response.json()
@@ -284,7 +284,7 @@ class TestTeamsChannelsEndpoints(APIBaseTest):
         mock_get.return_value = mock_resp
 
         response = self.client.post(
-            "/api/conversations/v1/teams/channels",
+            "/v1/conversations/v1/teams/channels",
             data=json.dumps({"team_id": "00000000-0000-0000-0000-000000000001"}),
             content_type="application/json",
         )
@@ -297,7 +297,7 @@ class TestTeamsChannelsEndpoints(APIBaseTest):
     @patch("products.conversations.backend.support_teams.refresh_graph_token", return_value="fresh-token")
     def test_list_channels_requires_team_id(self, _mock_refresh):
         response = self.client.post(
-            "/api/conversations/v1/teams/channels",
+            "/v1/conversations/v1/teams/channels",
             data=json.dumps({}),
             content_type="application/json",
         )
@@ -311,19 +311,19 @@ class TestTeamsChannelsEndpoints(APIBaseTest):
         mock_resp.status_code = 403
         mock_get.return_value = mock_resp
 
-        response = self.client.post("/api/conversations/v1/teams/teams")
+        response = self.client.post("/v1/conversations/v1/teams/teams")
 
         assert response.status_code == 502
 
     def test_list_teams_requires_auth(self):
         self.client.logout()
-        response = self.client.post("/api/conversations/v1/teams/teams")
+        response = self.client.post("/v1/conversations/v1/teams/teams")
         assert response.status_code in (401, 403)
 
     def test_list_channels_requires_auth(self):
         self.client.logout()
         response = self.client.post(
-            "/api/conversations/v1/teams/channels",
+            "/v1/conversations/v1/teams/channels",
             data=json.dumps({"team_id": "x"}),
             content_type="application/json",
         )
@@ -342,7 +342,7 @@ class TestTeamsOAuthEndpoints(APIBaseTest):
     def test_authorize_returns_oauth_url(self, mock_settings):
         mock_settings.return_value = {"SUPPORT_TEAMS_APP_ID": "app-id-123"}
 
-        response = self.client.get("/api/conversations/v1/teams/authorize")
+        response = self.client.get("/v1/conversations/v1/teams/authorize")
 
         assert response.status_code == 200
         data = response.json()
@@ -358,12 +358,12 @@ class TestTeamsOAuthEndpoints(APIBaseTest):
     def test_authorize_not_configured_returns_503(self, mock_settings):
         mock_settings.return_value = {"SUPPORT_TEAMS_APP_ID": ""}
 
-        response = self.client.get("/api/conversations/v1/teams/authorize")
+        response = self.client.get("/v1/conversations/v1/teams/authorize")
 
         assert response.status_code == 503
 
     def test_disconnect_when_not_connected_succeeds(self):
-        response = self.client.post("/api/conversations/v1/teams/disconnect")
+        response = self.client.post("/v1/conversations/v1/teams/disconnect")
         assert response.status_code == 200
 
     def test_disconnect_clears_config(self):
@@ -378,7 +378,7 @@ class TestTeamsOAuthEndpoints(APIBaseTest):
         self.team.conversations_settings = {"teams_enabled": True}
         self.team.save()
 
-        response = self.client.post("/api/conversations/v1/teams/disconnect")
+        response = self.client.post("/v1/conversations/v1/teams/disconnect")
 
         assert response.status_code == 200
         self.team.refresh_from_db()
@@ -386,12 +386,12 @@ class TestTeamsOAuthEndpoints(APIBaseTest):
 
     def test_authorize_requires_auth(self):
         self.client.logout()
-        response = self.client.get("/api/conversations/v1/teams/authorize")
+        response = self.client.get("/v1/conversations/v1/teams/authorize")
         assert response.status_code in (401, 403)
 
     def test_disconnect_requires_auth(self):
         self.client.logout()
-        response = self.client.post("/api/conversations/v1/teams/disconnect")
+        response = self.client.post("/v1/conversations/v1/teams/disconnect")
         assert response.status_code in (401, 403)
 
 
@@ -435,7 +435,7 @@ class TestTeamsSelectChannelMultiChannel(APIBaseTest):
         )
 
         response = self.client.post(
-            "/api/conversations/v1/teams/select-channel",
+            "/v1/conversations/v1/teams/select-channel",
             data=json.dumps(
                 {
                     "action": "add",
@@ -478,7 +478,7 @@ class TestTeamsSelectChannelMultiChannel(APIBaseTest):
         )
 
         response = self.client.post(
-            "/api/conversations/v1/teams/select-channel",
+            "/v1/conversations/v1/teams/select-channel",
             data=json.dumps(
                 {
                     "action": "add",
@@ -516,7 +516,7 @@ class TestTeamsSelectChannelMultiChannel(APIBaseTest):
         )
 
         response = self.client.post(
-            "/api/conversations/v1/teams/select-channel",
+            "/v1/conversations/v1/teams/select-channel",
             data=json.dumps(
                 {
                     "action": "add",
@@ -545,7 +545,7 @@ class TestTeamsSelectChannelMultiChannel(APIBaseTest):
         self.team.save()
 
         response = self.client.post(
-            "/api/conversations/v1/teams/select-channel",
+            "/v1/conversations/v1/teams/select-channel",
             data=json.dumps(
                 {
                     "action": "remove",
@@ -577,7 +577,7 @@ class TestTeamsSelectChannelMultiChannel(APIBaseTest):
         self.team.save()
 
         response = self.client.post(
-            "/api/conversations/v1/teams/select-channel",
+            "/v1/conversations/v1/teams/select-channel",
             data=json.dumps(
                 {
                     "action": "remove",
@@ -606,7 +606,7 @@ class TestTeamsSelectChannelMultiChannel(APIBaseTest):
         self.team.save()
 
         response = self.client.post(
-            "/api/conversations/v1/teams/select-channel",
+            "/v1/conversations/v1/teams/select-channel",
             data=json.dumps(
                 {
                     "action": "remove",
@@ -621,7 +621,7 @@ class TestTeamsSelectChannelMultiChannel(APIBaseTest):
     @patch("products.conversations.backend.support_teams.refresh_graph_token", return_value="fresh-token")
     def test_add_without_team_id_returns_400(self, _mock_refresh):
         response = self.client.post(
-            "/api/conversations/v1/teams/select-channel",
+            "/v1/conversations/v1/teams/select-channel",
             data=json.dumps(
                 {
                     "action": "add",
@@ -645,7 +645,7 @@ class TestTeamsSelectChannelMultiChannel(APIBaseTest):
         )
 
         response = self.client.post(
-            "/api/conversations/v1/teams/select-channel",
+            "/v1/conversations/v1/teams/select-channel",
             data=json.dumps(
                 {
                     "action": "add",
@@ -670,7 +670,7 @@ class TestTeamsSelectChannelMultiChannel(APIBaseTest):
         )
 
         response = self.client.post(
-            "/api/conversations/v1/teams/select-channel",
+            "/v1/conversations/v1/teams/select-channel",
             data=json.dumps(
                 {
                     "action": "add",
@@ -696,7 +696,7 @@ class TestTeamsSelectChannelMultiChannel(APIBaseTest):
         )
 
         response = self.client.post(
-            "/api/conversations/v1/teams/select-channel",
+            "/v1/conversations/v1/teams/select-channel",
             data=json.dumps(
                 {
                     "teams_team_id": team_uuid,

@@ -64,27 +64,27 @@ class TestToolbarEndpointOAuthAuth(APIBaseTest):
         self.oauth_app = _make_oauth_app(self.organization, self.user)
 
         toolbar_scopes = " ".join(settings.TOOLBAR_OAUTH_SCOPES)
-        self.toolbar_token = _make_token(self.user, self.oauth_app, "pha_toolbar_full", scope=toolbar_scopes)
+        self.toolbar_token = _make_token(self.user, self.oauth_app, "at-toolbar_full", scope=toolbar_scopes)
         self.expired_token = _make_token(
-            self.user, self.oauth_app, "pha_toolbar_expired", scope=toolbar_scopes, delta_hours=-1
+            self.user, self.oauth_app, "at-toolbar_expired", scope=toolbar_scopes, delta_hours=-1
         )
 
     # (label, url_template, http_method, scope_object)
     TOOLBAR_ENDPOINTS = [
-        ("actions_list", "/api/projects/{team_id}/actions/", "get", "action"),
-        ("feature_flags_list", "/api/projects/{team_id}/feature_flags/", "get", "feature_flag"),
-        ("feature_flags_my_flags", "/api/projects/{team_id}/feature_flags/my_flags/", "get", "feature_flag"),
+        ("actions_list", "/v1/projects/{team_id}/actions/", "get", "action"),
+        ("feature_flags_list", "/v1/projects/{team_id}/feature_flags/", "get", "feature_flag"),
+        ("feature_flags_my_flags", "/v1/projects/{team_id}/feature_flags/my_flags/", "get", "feature_flag"),
         (
             "feature_flags_evaluation_reasons",
-            "/api/projects/{team_id}/feature_flags/evaluation_reasons/?distinct_id=test",
+            "/v1/projects/{team_id}/feature_flags/evaluation_reasons/?distinct_id=test",
             "get",
             "feature_flag",
         ),
-        ("web_experiments_list", "/api/projects/{team_id}/web_experiments/", "get", "experiment"),
-        ("product_tours_list", "/api/projects/{team_id}/product_tours/", "get", "product_tour"),
-        ("web_vitals_list", "/api/environments/{team_id}/web_vitals/?pathname=/", "get", "query"),
-        ("heatmaps_list", "/api/environments/{team_id}/heatmaps/", "get", "heatmap"),
-        ("elements_stats", "/api/environments/{team_id}/elements/stats/", "get", "element"),
+        ("web_experiments_list", "/v1/projects/{team_id}/web_experiments/", "get", "experiment"),
+        ("product_tours_list", "/v1/projects/{team_id}/product_tours/", "get", "product_tour"),
+        ("web_vitals_list", "/v1/environments/{team_id}/web_vitals/?pathname=/", "get", "query"),
+        ("heatmaps_list", "/v1/environments/{team_id}/heatmaps/", "get", "heatmap"),
+        ("elements_stats", "/v1/environments/{team_id}/elements/stats/", "get", "element"),
     ]
 
     def _url(self, template: str) -> str:
@@ -114,7 +114,7 @@ class TestToolbarEndpointOAuthAuth(APIBaseTest):
         token = _make_token(
             self.user,
             self.oauth_app,
-            f"pha_scoped_{scope_object}",
+            f"at-scoped_{scope_object}",
             scope=f"{scope_object}:read",
         )
         self.client.logout()
@@ -134,7 +134,7 @@ class TestToolbarEndpointOAuthAuth(APIBaseTest):
         token = _make_token(
             self.user,
             self.oauth_app,
-            f"pha_wrong_{_scope}",
+            f"at-wrong_{_scope}",
             scope="some_unrelated_scope:read",
         )
         self.client.logout()
@@ -165,7 +165,7 @@ class TestToolbarEndpointOAuthAuth(APIBaseTest):
         response = self._request(
             method,
             self._url(url_template),
-            HTTP_AUTHORIZATION="Bearer pha_does_not_exist",
+            HTTP_AUTHORIZATION="Bearer at-does_not_exist",
         )
         assert response.status_code == 401
 
@@ -205,7 +205,7 @@ class TestToolbarOAuthBypassesPersonalApiKeyRestriction(APIBaseTest):
 
         self.oauth_app = _make_oauth_app(self.organization, self.user)
         toolbar_scopes = " ".join(settings.TOOLBAR_OAUTH_SCOPES)
-        self.toolbar_token = _make_token(self.user, self.oauth_app, "pha_bypass_test", scope=toolbar_scopes)
+        self.toolbar_token = _make_token(self.user, self.oauth_app, "at-bypass_test", scope=toolbar_scopes)
 
     @parameterized.expand(TestToolbarEndpointOAuthAuth.TOOLBAR_ENDPOINTS)
     def test_member_with_oauth_token_not_blocked_by_personal_api_key_restriction(
@@ -238,7 +238,7 @@ class TestToolbarOAuthBypassesPersonalApiKeyRestriction(APIBaseTest):
 
         self.client.logout()
         response = self.client.get(
-            f"/api/projects/{self.team.id}/feature_flags/",
+            f"/v1/projects/{self.team.id}/feature_flags/",
             HTTP_AUTHORIZATION=f"Bearer {personal_api_key}",
         )
         assert response.status_code == 403, f"Personal API key should still be blocked, got {response.status_code}"
@@ -250,14 +250,14 @@ class TestUploadedMediaOAuthAuth(APIBaseTest):
     def setUp(self):
         super().setUp()
         self.oauth_app = _make_oauth_app(self.organization, self.user)
-        self.write_token = _make_token(self.user, self.oauth_app, "pha_media_write", scope="uploaded_media:write")
-        self.read_token = _make_token(self.user, self.oauth_app, "pha_media_read", scope="uploaded_media:read")
+        self.write_token = _make_token(self.user, self.oauth_app, "at-media_write", scope="uploaded_media:write")
+        self.read_token = _make_token(self.user, self.oauth_app, "at-media_read", scope="uploaded_media:read")
         self.expired_token = _make_token(
-            self.user, self.oauth_app, "pha_media_exp", scope="uploaded_media:write", delta_hours=-1
+            self.user, self.oauth_app, "at-media_exp", scope="uploaded_media:write", delta_hours=-1
         )
 
     def _url(self):
-        return f"/api/projects/{self.team.id}/uploaded_media/"
+        return f"/v1/projects/{self.team.id}/uploaded_media/"
 
     def test_write_token_authenticates_for_upload(self):
         self.client.logout()
@@ -291,23 +291,23 @@ class TestUploadedMediaOAuthAuth(APIBaseTest):
 
 
 class TestMascotConfigOAuthAuth(APIBaseTest):
-    """mascot_config uses /api/users/@me/ path, not team-scoped, so tested separately."""
+    """mascot_config uses /v1/users/@me/ path, not team-scoped, so tested separately."""
 
     def setUp(self):
         super().setUp()
         self.oauth_app = _make_oauth_app(self.organization, self.user)
 
     def _url(self):
-        return f"/api/users/@me/mascot_config/"
+        return f"/v1/users/@me/mascot_config/"
 
     def test_read_token_grants_get_access(self):
-        token = _make_token(self.user, self.oauth_app, "pha_hh_read", scope="user:read")
+        token = _make_token(self.user, self.oauth_app, "at-hh_read", scope="user:read")
         self.client.logout()
         response = self.client.get(self._url(), HTTP_AUTHORIZATION=f"Bearer {token.token}")
         assert response.status_code == 200
 
     def test_read_token_rejected_for_patch(self):
-        token = _make_token(self.user, self.oauth_app, "pha_hh_read_patch", scope="user:read")
+        token = _make_token(self.user, self.oauth_app, "at-hh_read_patch", scope="user:read")
         self.client.logout()
         response = self.client.patch(
             self._url(),
@@ -318,7 +318,7 @@ class TestMascotConfigOAuthAuth(APIBaseTest):
         assert response.status_code == 403
 
     def test_write_token_grants_patch_access(self):
-        token = _make_token(self.user, self.oauth_app, "pha_hh_write", scope="user:write")
+        token = _make_token(self.user, self.oauth_app, "at-hh_write", scope="user:write")
         self.client.logout()
         response = self.client.patch(
             self._url(),
@@ -329,7 +329,7 @@ class TestMascotConfigOAuthAuth(APIBaseTest):
         assert response.status_code == 200
 
     def test_expired_token_is_rejected(self):
-        token = _make_token(self.user, self.oauth_app, "pha_hh_exp", scope="user:read", delta_hours=-1)
+        token = _make_token(self.user, self.oauth_app, "at-hh_exp", scope="user:read", delta_hours=-1)
         self.client.logout()
         response = self.client.get(self._url(), HTTP_AUTHORIZATION=f"Bearer {token.token}")
         assert response.status_code == 401
@@ -383,7 +383,7 @@ class TestToolbarAccessTokenRevocation(APIBaseTest):
         self.token = _make_token(
             self.user,
             self.toolbar_app,
-            "pha_toolbar_revocation",
+            "at-toolbar_revocation",
             scope=" ".join(settings.TOOLBAR_OAUTH_SCOPES),
         )
         self.token.scoped_teams = [self.team.id]
@@ -402,7 +402,7 @@ class TestToolbarAccessTokenRevocation(APIBaseTest):
     def _get(self):
         self.client.logout()
         return self.client.get(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             HTTP_AUTHORIZATION=f"Bearer {self.token.token}",
         )
 
@@ -432,11 +432,11 @@ class TestToolbarAccessTokenRevocation(APIBaseTest):
         toolbar app - it must not affect tokens minted by any other OAuth client."""
         self._deny_toolbar_access()
         other_app = _make_oauth_app(self.organization, self.user, name="Some other app")
-        other_token = _make_token(self.user, other_app, "pha_other_app", scope="action:read")
+        other_token = _make_token(self.user, other_app, "at-other_app", scope="action:read")
 
         self.client.logout()
         response = self.client.get(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             HTTP_AUTHORIZATION=f"Bearer {other_token.token}",
         )
         assert response.status_code not in (401, 403)
@@ -497,7 +497,7 @@ class TestOAuthCorsPreflightMiddleware(APIBaseTest):
 
     def test_preflight_to_unrelated_path_not_intercepted(self):
         response = self.client.options(
-            f"/api/projects/{self.team.id}/actions/",
+            f"/v1/projects/{self.team.id}/actions/",
             HTTP_ORIGIN="https://www.example.com",
             HTTP_ACCESS_CONTROL_REQUEST_METHOD="POST",
             HTTP_ACCESS_CONTROL_REQUEST_HEADERS="content-type,x-app-version",

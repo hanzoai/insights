@@ -16,7 +16,7 @@ import { mirrorCall } from '../utils/mirror-call'
 import { CdpConsumerBase, CdpConsumerBaseDeps } from './cdp-base.consumer'
 
 /**
- * CDP worker that consumes and processes script function / hogflow jobs.
+ * CDP worker that consumes and processes script function / flow jobs.
  * Receives its job queue backend via constructor injection.
  */
 export class CdpCyclotronWorker<
@@ -50,7 +50,7 @@ export class CdpCyclotronWorker<
                 } else if (isSegmentPluginInsightsFunction(item.insightsFunction)) {
                     return this.segmentDestinationExecutorService.execute(item)
                 } else {
-                    return this.hogExecutorAsync.executeWithAsyncFunctions(item)
+                    return this.scriptExecutorAsync.executeWithAsyncFunctions(item)
                 }
             })
         )
@@ -86,13 +86,13 @@ export class CdpCyclotronWorker<
                     return
                 }
 
-                const hogFuncState = item.state as CyclotronJobInvocationInsightsFunction['state']
+                const scriptFuncState = item.state as CyclotronJobInvocationInsightsFunction['state']
 
                 // Guard against malformed invocation state (globals present but missing
                 // project/event). Without this the unguarded derefs below throw an unhandled
                 // rejection that crash-loops the worker on a single poison-pill message,
                 // stalling the whole partition. Drop it instead so the batch can make progress.
-                if (!hogFuncState.globals?.project || !hogFuncState.globals?.event) {
+                if (!scriptFuncState.globals?.project || !scriptFuncState.globals?.event) {
                     logger.error('⚠️', 'Skipping invocation with malformed globals (missing project or event)', {
                         id: item.functionId,
                     })
@@ -106,16 +106,16 @@ export class CdpCyclotronWorker<
                 }
 
                 await Promise.all([
-                    this.groupsManager.addGroupsToGlobals(hogFuncState.globals),
-                    !hogFuncState.globals.person
+                    this.groupsManager.addGroupsToGlobals(scriptFuncState.globals),
+                    !scriptFuncState.globals.person
                         ? this.personsManager
-                              .getCyclotronPerson(item.teamId, hogFuncState.globals.event.distinct_id, 'distinct_id')
+                              .getCyclotronPerson(item.teamId, scriptFuncState.globals.event.distinct_id, 'distinct_id')
                               .then((person) => {
                                   // Stub when the lookup misses (cookieless events don't persist to
                                   // insights_persondistinctid; reruns may race with person deletes).
                                   // Leaving undefined would halt any bytecode dereferencing
                                   // person.properties.* with "Could not execute bytecode".
-                                  hogFuncState.globals.person = person ?? {
+                                  scriptFuncState.globals.person = person ?? {
                                       id: '',
                                       name: '',
                                       url: '',
@@ -127,7 +127,7 @@ export class CdpCyclotronWorker<
 
                 loadedInvocations.push({
                     ...item,
-                    state: hogFuncState,
+                    state: scriptFuncState,
                     insightsFunction,
                 })
             })
@@ -200,13 +200,13 @@ export class CdpCyclotronWorker<
         }
     }
 
-    @instrumented({ key: 'cdpConsumer.backgroundTask.hogWatcherObserve', timeoutMs: 10_000, sendException: false })
+    @instrumented({ key: 'cdpConsumer.backgroundTask.scriptWatcherObserve', timeoutMs: 10_000, sendException: false })
     private async observeResults(invocationResults: CyclotronJobInvocationResult[]): Promise<void> {
         try {
             await Promise.all([
-                this.hogWatcher.observeResults(invocationResults),
+                this.scriptWatcher.observeResults(invocationResults),
                 mirrorCall('script-watcher.observeResults', () =>
-                    this.hogWatcherMirror?.observeResults(invocationResults)
+                    this.scriptWatcherMirror?.observeResults(invocationResults)
                 ),
             ])
         } catch (err: any) {

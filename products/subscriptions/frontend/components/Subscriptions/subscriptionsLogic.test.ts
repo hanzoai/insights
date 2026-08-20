@@ -56,15 +56,15 @@ describe('subscriptionsLogic', () => {
         tileSubscriptions = [fixtureSubscriptionResponse(20)]
         useMocks({
             get: {
-                '/api/environments/:team_id/insights/1': fixtureInsightResponse(1),
-                '/api/environments/:team_id/insights/2': fixtureInsightResponse(2),
-                '/api/environments/:team_id/insights': ({ request }) => {
+                '/v1/environments/:team_id/insights/1': fixtureInsightResponse(1),
+                '/v1/environments/:team_id/insights/2': fixtureInsightResponse(2),
+                '/v1/environments/:team_id/insights': ({ request }) => {
                     const insightShortId = new URL(request.url).searchParams.get('short_id')
                     const res = insightShortId ? [fixtureInsightResponse(parseInt(insightShortId, 10))] : []
                     return [200, { results: res }]
                 },
 
-                '/api/environments/:team_id/subscriptions': ({ request }) => {
+                '/v1/environments/:team_id/subscriptions': ({ request }) => {
                     const url = new URL(request.url)
                     const insightIds = url.searchParams.get('insights')?.split(',') ?? []
                     const dashboardTiles = url.searchParams.get('dashboard_tiles')

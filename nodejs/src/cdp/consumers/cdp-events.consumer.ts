@@ -3,15 +3,15 @@ import { Message } from 'node-rdkafka'
 import { KAFKA_EVENTS_JSON } from '~/common/config/kafka-topics'
 import { KafkaConsumerInterface, createKafkaConsumer } from '~/common/kafka/consumer'
 import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
+import { captureException } from '~/common/utils/insights'
 import { parseJSON } from '~/common/utils/json-parse'
 import { logger } from '~/common/utils/logger'
-import { captureException } from '~/common/utils/insights'
 
 import { convertToInsightsFunctionInvocationGlobals } from '../../cdp/utils'
 import { HealthCheckResult, PluginsServerConfig, RawDatastoreEvent } from '../../types'
-import { InsightsFlowInvocationPipeline } from '../services/script-flow-invocation-pipeline.service'
-import { InsightsFunctionInvocationPipeline } from '../services/script-function-invocation-pipeline.service'
 import { JobQueue } from '../services/job-queue/job-queue.interface'
+import { FlowInvocationPipeline } from '../services/script-flow-invocation-pipeline.service'
+import { InsightsFunctionInvocationPipeline } from '../services/script-function-invocation-pipeline.service'
 import { CyclotronJobInvocation, InsightsFunctionInvocationGlobals, InsightsFunctionTypeType } from '../types'
 import { CdpConsumerBase, CdpConsumerBaseDeps } from './cdp-base.consumer'
 import { counterParseError } from './metrics'
@@ -20,42 +20,42 @@ export class CdpEventsConsumer<
     TConfig extends PluginsServerConfig = PluginsServerConfig,
 > extends CdpConsumerBase<TConfig> {
     protected name = 'CdpEventsConsumer'
-    protected hogTypes: InsightsFunctionTypeType[] = ['destination']
-    protected hogQueue: JobQueue
-    protected hogflowQueue: JobQueue
+    protected scriptTypes: InsightsFunctionTypeType[] = ['destination']
+    protected scriptQueue: JobQueue
+    protected flowQueue: JobQueue
     protected kafkaConsumer: KafkaConsumerInterface
 
     private insightsFunctionPipeline: InsightsFunctionInvocationPipeline
-    private hogFlowPipeline: InsightsFlowInvocationPipeline
+    private flowPipeline: FlowInvocationPipeline
 
     constructor(
         config: TConfig,
         deps: CdpConsumerBaseDeps,
-        jobQueues: { hogQueue: JobQueue; hogflowQueue: JobQueue },
+        jobQueues: { scriptQueue: JobQueue; flowQueue: JobQueue },
         topic: string = KAFKA_EVENTS_JSON,
         groupId: string = 'cdp-processed-events-consumer'
     ) {
         super(config, deps)
-        this.hogQueue = jobQueues.hogQueue
-        this.hogflowQueue = jobQueues.hogflowQueue
+        this.scriptQueue = jobQueues.scriptQueue
+        this.flowQueue = jobQueues.flowQueue
         this.kafkaConsumer = createKafkaConsumer({ groupId, topic })
         this.insightsFunctionPipeline = new InsightsFunctionInvocationPipeline(config, {
             insightsFunctionManager: this.insightsFunctionManager,
-            hogInputsService: this.hogInputsService,
-            hogWatcher: this.hogWatcher,
-            hogWatcherMirror: this.hogWatcherMirror,
-            hogMasker: this.hogMasker,
+            scriptInputsService: this.scriptInputsService,
+            scriptWatcher: this.scriptWatcher,
+            scriptWatcherMirror: this.scriptWatcherMirror,
+            scriptMasker: this.scriptMasker,
             insightsFunctionMonitoringService: this.insightsFunctionMonitoringService,
             quotaLimiting: deps.quotaLimiting,
             redis: this.redis,
             valkeyShadow: this.valkeyShadow,
         })
-        this.hogFlowPipeline = new InsightsFlowInvocationPipeline(config, {
-            hogFlowManager: this.hogFlowManager,
-            hogFlowExecutor: this.hogFlowExecutor,
-            hogWatcher: this.hogWatcher,
-            hogWatcherMirror: this.hogWatcherMirror,
-            hogMasker: this.hogMasker,
+        this.flowPipeline = new FlowInvocationPipeline(config, {
+            flowManager: this.flowManager,
+            flowExecutor: this.flowExecutor,
+            scriptWatcher: this.scriptWatcher,
+            scriptWatcherMirror: this.scriptWatcherMirror,
+            scriptMasker: this.scriptMasker,
             insightsFunctionMonitoringService: this.insightsFunctionMonitoringService,
             quotaLimiting: deps.quotaLimiting,
             redis: this.redis,
@@ -73,20 +73,20 @@ export class CdpEventsConsumer<
         // TODO: Add a helper to script functions to determine if they require groups or not and then only load those
         await this.groupsManager.addGroupsToGlobalsList(invocationGlobals)
 
-        const [hogInvocations, hogflowInvocations] = await Promise.all([
+        const [scriptInvocations, flowInvocations] = await Promise.all([
             this.insightsFunctionPipeline.buildInvocations(invocationGlobals, {
-                hogTypes: this.hogTypes,
+                scriptTypes: this.scriptTypes,
                 filterFn: (fn) => (fn.filters?.source ?? 'events') === 'events',
             }),
             // Source-compatibility lives in the consumer. The events consumer matches event-triggered
             // flows only; other trigger types (data-warehouse-table, batch, schedule, webhook, manual)
             // are dispatched from their respective consumers and never reach the executor from here.
-            this.hogFlowPipeline.buildInvocations(invocationGlobals, {
+            this.flowPipeline.buildInvocations(invocationGlobals, {
                 eligibilityFn: (flow) => flow.trigger.type === 'event',
             }),
         ])
 
-        const invocationsToBeQueued = [...hogInvocations, ...hogflowInvocations]
+        const invocationsToBeQueued = [...scriptInvocations, ...flowInvocations]
 
         // Emit a `running` lifecycle row for each freshly-created invocation.
         // This fires ONCE per invocation_id at creation — not on every dequeue
@@ -102,11 +102,11 @@ export class CdpEventsConsumer<
         return {
             // This is all IO so we can set them off in the background and start processing the next batch
             backgroundTask: Promise.all([
-                instrumentFn({ key: 'cdp.background_task.queue_hog_invocations', sendException: false }, () =>
-                    this.hogQueue.queueInvocations(hogInvocations)
+                instrumentFn({ key: 'cdp.background_task.queue_invocations', sendException: false }, () =>
+                    this.scriptQueue.queueInvocations(scriptInvocations)
                 ),
-                instrumentFn({ key: 'cdp.background_task.queue_hogflow_invocations', sendException: false }, () =>
-                    this.hogflowQueue.queueInvocations(hogflowInvocations)
+                instrumentFn({ key: 'cdp.background_task.queue_flow_invocations', sendException: false }, () =>
+                    this.flowQueue.queueInvocations(flowInvocations)
                 ),
                 instrumentFn({ key: 'cdp.background_task.monitoring_flush', sendException: false }, async () => {
                     try {
@@ -120,7 +120,7 @@ export class CdpEventsConsumer<
                     this.invocationResultsService.invocationResultsRowsService.flush()
                 ),
             ]),
-            invocations: [...hogInvocations, ...hogflowInvocations],
+            invocations: [...scriptInvocations, ...flowInvocations],
         }
     }
 
@@ -131,19 +131,22 @@ export class CdpEventsConsumer<
         await Promise.all(
             messages.map(async (message) => {
                 try {
-                    const clickHouseEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
+                    const datastoreEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
 
-                    const [teamInsightsFunctions, teamInsightsFlows, team] = await Promise.all([
-                        this.insightsFunctionManager.getInsightsFunctionsForTeam(clickHouseEvent.team_id, this.hogTypes),
-                        this.hogFlowManager.getInsightsFlowsForTeam(clickHouseEvent.team_id),
-                        this.deps.teamManager.getTeam(clickHouseEvent.team_id),
+                    const [teamInsightsFunctions, teamFlows, team] = await Promise.all([
+                        this.insightsFunctionManager.getInsightsFunctionsForTeam(
+                            datastoreEvent.team_id,
+                            this.scriptTypes
+                        ),
+                        this.flowManager.getFlowsForTeam(datastoreEvent.team_id),
+                        this.deps.teamManager.getTeam(datastoreEvent.team_id),
                     ])
 
-                    if ((!teamInsightsFunctions.length && !teamInsightsFlows.length) || !team) {
+                    if ((!teamInsightsFunctions.length && !teamFlows.length) || !team) {
                         return
                     }
 
-                    events.push(convertToInsightsFunctionInvocationGlobals(clickHouseEvent, team, this.config.SITE_URL))
+                    events.push(convertToInsightsFunctionInvocationGlobals(datastoreEvent, team, this.config.SITE_URL))
                 } catch (e) {
                     logger.error('Error parsing message', e)
                     counterParseError.labels({ error: e.message }).inc()
@@ -155,11 +158,11 @@ export class CdpEventsConsumer<
     }
 
     protected async startQueueProducers(): Promise<void> {
-        await Promise.all([this.hogQueue.startAsProducer(), this.hogflowQueue.startAsProducer()])
+        await Promise.all([this.scriptQueue.startAsProducer(), this.flowQueue.startAsProducer()])
     }
 
     protected async stopQueueProducers(): Promise<void> {
-        await Promise.all([this.hogQueue.stopProducer(), this.hogflowQueue.stopProducer()])
+        await Promise.all([this.scriptQueue.stopProducer(), this.flowQueue.stopProducer()])
     }
 
     public override async start(): Promise<void> {

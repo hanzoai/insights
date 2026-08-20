@@ -19,7 +19,7 @@ class TestDataWarehouseManagedViewSetAPIBase(APIBaseTest):
 
     def test_enable_managed_viewset(self):
         response = self.client.put(
-            f"/api/environments/{self.team.id}/managed_viewsets/{self.endpoint}/",
+            f"/v1/environments/{self.team.id}/managed_viewsets/{self.endpoint}/",
             {"enabled": True},
         )
 
@@ -39,11 +39,11 @@ class TestDataWarehouseManagedViewSetAPIBase(APIBaseTest):
 
     def test_enable_managed_viewset_idempotent(self):
         response1 = self.client.put(
-            f"/api/environments/{self.team.id}/managed_viewsets/{self.endpoint}/",
+            f"/v1/environments/{self.team.id}/managed_viewsets/{self.endpoint}/",
             {"enabled": True},
         )
         response2 = self.client.put(
-            f"/api/environments/{self.team.id}/managed_viewsets/{self.endpoint}/",
+            f"/v1/environments/{self.team.id}/managed_viewsets/{self.endpoint}/",
             {"enabled": True},
         )
 
@@ -66,7 +66,7 @@ class TestDataWarehouseManagedViewSetAPIBase(APIBaseTest):
         )
 
         response = self.client.put(
-            f"/api/environments/{self.team.id}/managed_viewsets/{self.endpoint}/",
+            f"/v1/environments/{self.team.id}/managed_viewsets/{self.endpoint}/",
             {"enabled": False},
         )
 
@@ -80,7 +80,7 @@ class TestDataWarehouseManagedViewSetAPIBase(APIBaseTest):
 
     def test_disable_already_disabled_viewset(self):
         response = self.client.put(
-            f"/api/environments/{self.team.id}/managed_viewsets/{self.endpoint}/",
+            f"/v1/environments/{self.team.id}/managed_viewsets/{self.endpoint}/",
             {"enabled": False},
         )
 
@@ -111,7 +111,7 @@ class TestDataWarehouseManagedViewSetAPIBase(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/managed_viewsets/{self.endpoint}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/managed_viewsets/{self.endpoint}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -140,7 +140,7 @@ class TestDataWarehouseManagedViewSetAPIBase(APIBaseTest):
             kind=self.kind,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/managed_viewsets/{self.endpoint}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/managed_viewsets/{self.endpoint}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -152,7 +152,7 @@ class TestDataWarehouseManagedViewSetAPIBase(APIBaseTest):
 
     def test_retrieve_managed_viewset_does_not_exist(self):
         """Test retrieving a managed viewset that doesn't exist"""
-        response = self.client.get(f"/api/environments/{self.team.id}/managed_viewsets/{self.endpoint}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/managed_viewsets/{self.endpoint}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -189,7 +189,7 @@ class TestDataWarehouseManagedViewSetAPIBase(APIBaseTest):
             deleted=True,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/managed_viewsets/{self.endpoint}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/managed_viewsets/{self.endpoint}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -232,7 +232,7 @@ class TestDataWarehouseManagedViewSetAPIBaseRevenueAnalytics(TestDataWarehouseMa
 class TestDataWarehouseManagedViewSetAPIInvalid(APIBaseTest):
     def test_enable_invalid_kind(self):
         response = self.client.put(
-            f"/api/environments/{self.team.id}/managed_viewsets/invalid_kind/",
+            f"/v1/environments/{self.team.id}/managed_viewsets/invalid_kind/",
             {"enabled": True},
         )
 
@@ -240,7 +240,7 @@ class TestDataWarehouseManagedViewSetAPIInvalid(APIBaseTest):
 
     def test_retrieve_invalid_kind(self):
         """Test retrieving with an invalid kind returns 400"""
-        response = self.client.get(f"/api/environments/{self.team.id}/managed_viewsets/invalid_kind/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/managed_viewsets/invalid_kind/")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         data = response.json()

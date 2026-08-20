@@ -9,7 +9,7 @@ from insights.personinsights_client.proto.generated.personinsights.types.v1.comm
     GroupKey,
     ReadOptions,
 )
-from insights.personinsights_client.proto.generated.personinsights.service.v1.service_pb2_grpc import PersonHogServiceStub
+from insights.personinsights_client.proto.generated.personinsights.service.v1.service_pb2_grpc import PersonServiceStub
 from insights.personinsights_client.proto.generated.personinsights.types.v1.cohort_pb2 import (
     CheckCohortMembershipRequest,
     CohortMembership,

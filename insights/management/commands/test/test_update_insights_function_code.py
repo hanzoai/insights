@@ -7,7 +7,7 @@ from django.core.management import call_command
 
 from parameterized import parameterized
 
-from insights.cdp.validation import compile_hog as compile_hog_for_check
+from insights.cdp.validation import compile_script as compile_script_for_check
 
 from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
 
@@ -117,16 +117,16 @@ class TestUpdateInsightsFunctionCode(BaseTest):
                 enabled=True,
             )
 
-    @patch("insights.management.commands.update_insights_function_code.compile_hog")
-    def test_update_linkedin_api_version_dry_run(self, mock_compile_hog):
+    @patch("insights.management.commands.update_insights_function_code.compile_script")
+    def test_update_linkedin_api_version_dry_run(self, mock_compile_script):
         """Test dry run mode - should show what would be updated without making changes."""
-        mock_compile_hog.return_value = "compiled_bytecode"
+        mock_compile_script.return_value = "compiled_bytecode"
 
         out = StringIO()
         call_command("update_insights_function_code", replace_key="linked-api-version-update", dry_run=True, stdout=out)
 
         # Should have compiled but not saved anything
-        assert mock_compile_hog.call_count == 1
+        assert mock_compile_script.call_count == 1
 
         # Check that no functions were actually updated
         self.linkedin_function1.refresh_from_db()
@@ -138,16 +138,16 @@ class TestUpdateInsightsFunctionCode(BaseTest):
         self.assertIn("Updated: 1", output)
         self.assertIn("Update completed", output)
 
-    @patch("insights.management.commands.update_insights_function_code.compile_hog")
-    def test_update_linkedin_api_version_actual_update(self, mock_compile_hog):
+    @patch("insights.management.commands.update_insights_function_code.compile_script")
+    def test_update_linkedin_api_version_actual_update(self, mock_compile_script):
         """Test actual update - should update LinkedIn functions with old API version."""
-        mock_compile_hog.return_value = "compiled_bytecode"
+        mock_compile_script.return_value = "compiled_bytecode"
 
         out = StringIO()
         call_command("update_insights_function_code", replace_key="linked-api-version-update", stdout=out)
 
         # Should have compiled and saved the functions that needed updating
-        assert mock_compile_hog.call_count == 1
+        assert mock_compile_script.call_count == 1
 
         # Check that functions were actually updated
         self.linkedin_function1.refresh_from_db()
@@ -163,16 +163,16 @@ class TestUpdateInsightsFunctionCode(BaseTest):
         self.assertIn("Updated: 1", output)
         self.assertIn("Update completed", output)
 
-    @patch("insights.management.commands.update_insights_function_code.compile_hog")
-    def test_update_meta_ads_api_version_actual_update(self, mock_compile_hog):
+    @patch("insights.management.commands.update_insights_function_code.compile_script")
+    def test_update_meta_ads_api_version_actual_update(self, mock_compile_script):
         """Test actual update - should update Meta Ads functions with old API version."""
-        mock_compile_hog.return_value = "compiled_bytecode"
+        mock_compile_script.return_value = "compiled_bytecode"
 
         out = StringIO()
         call_command("update_insights_function_code", replace_key="meta-ads-api-version-update", stdout=out)
 
         # Should have compiled and saved only the function that needed updating
-        assert mock_compile_hog.call_count == 1
+        assert mock_compile_script.call_count == 1
 
         # Check that the function with the old version was updated
         self.meta_ads_function1.refresh_from_db()
@@ -188,9 +188,9 @@ class TestUpdateInsightsFunctionCode(BaseTest):
         self.assertIn("Updated: 1", output)
         self.assertIn("Update completed", output)
 
-    @patch("insights.management.commands.update_insights_function_code.compile_hog")
-    def test_update_google_ads_api_version_bumps_v19_to_v23_and_excludes_v18(self, mock_compile_hog):
-        mock_compile_hog.return_value = "compiled_bytecode"
+    @patch("insights.management.commands.update_insights_function_code.compile_script")
+    def test_update_google_ads_api_version_bumps_v19_to_v23_and_excludes_v18(self, mock_compile_script):
+        mock_compile_script.return_value = "compiled_bytecode"
         base = (
             "let res := fetch(f'https://googleads.googleapis.com/{version}/customers/1:uploadClickConversions', {{}})"
         )
@@ -245,8 +245,8 @@ class TestUpdateInsightsFunctionCode(BaseTest):
         self.assertIn("Found 4 destinations to process", output)
         self.assertIn("Updated: 2", output)
 
-    @patch("insights.management.commands.update_insights_function_code.compile_hog")
-    def test_update_skips_destinations_that_fail_to_compile(self, mock_compile_hog):
+    @patch("insights.management.commands.update_insights_function_code.compile_script")
+    def test_update_skips_destinations_that_fail_to_compile(self, mock_compile_script):
         """A destination with uncompilable script is skipped and logged, not fatal to the whole run."""
         with patch("products.cdp.backend.models.insights_functions.insights_function.reload_insights_functions_on_workers"):
             bad_function = InsightsFunction.objects.create(
@@ -259,12 +259,12 @@ class TestUpdateInsightsFunctionCode(BaseTest):
                 enabled=True,
             )
 
-        def fake_compile(script, hog_type):
+        def fake_compile(script, script_type):
             if "BROKEN" in script:
                 raise Exception("unexpected character '&'")
             return "compiled_bytecode"
 
-        mock_compile_hog.side_effect = fake_compile
+        mock_compile_script.side_effect = fake_compile
 
         out = StringIO()
         call_command("update_insights_function_code", replace_key="meta-ads-api-version-update", stdout=out)
@@ -283,14 +283,14 @@ class TestUpdateInsightsFunctionCode(BaseTest):
         self.assertIn("Failed: 1", output)
         self.assertIn(str(bad_function.id), output)
 
-    @patch("insights.cdp.validation.compile_hog")
-    def test_invalid_replace_key(self, mock_compile_hog):
+    @patch("insights.cdp.validation.compile_script")
+    def test_invalid_replace_key(self, mock_compile_script):
         """Test handling of invalid replace key."""
         out = StringIO()
         call_command("update_insights_function_code", replace_key="invalid-key", stdout=out)
 
         # Should not have compiled anything
-        assert mock_compile_hog.call_count == 0
+        assert mock_compile_script.call_count == 0
 
         output = out.getvalue()
         self.assertIn("Invalid replace key provided: invalid-key", output)
@@ -303,8 +303,8 @@ class TestUpdateInsightsFunctionCode(BaseTest):
         output = out.getvalue()
         self.assertIn("Invalid replace key provided: None", output)
 
-    @patch("insights.cdp.validation.compile_hog")
-    def test_no_matching_functions(self, mock_compile_hog):
+    @patch("insights.cdp.validation.compile_script")
+    def test_no_matching_functions(self, mock_compile_script):
         """Test when no functions match the criteria."""
         # Delete all LinkedIn functions
         InsightsFunction.objects.filter(template_id="template-linkedin-ads").delete()
@@ -313,7 +313,7 @@ class TestUpdateInsightsFunctionCode(BaseTest):
         call_command("update_insights_function_code", replace_key="linked-api-version-update", stdout=out)
 
         # Should not have compiled anything
-        assert mock_compile_hog.call_count == 0
+        assert mock_compile_script.call_count == 0
 
         output = out.getvalue()
         self.assertIn("Found 0 destinations to process", output)
@@ -338,11 +338,11 @@ class TestUpdateInsightsFunctionCode(BaseTest):
             ("one_branch", ONE_BRANCH_STALE),
         ]
     )
-    def test_microsoft_teams_powerplatform_migration(self, _name, stale_hog):
-        function = self._create_teams_function(stale_hog)
+    def test_microsoft_teams_powerplatform_migration(self, _name, stale_script):
+        function = self._create_teams_function(stale_script)
 
         with patch(
-            "insights.management.commands.update_insights_function_code.compile_hog",
+            "insights.management.commands.update_insights_function_code.compile_script",
             return_value="compiled_bytecode",
         ):
             out = StringIO()
@@ -352,21 +352,21 @@ class TestUpdateInsightsFunctionCode(BaseTest):
         assert POWERPLATFORM_BRANCH in function.script
         self.assertIn("Updated: 1", out.getvalue())
         # The migrated source must be valid Script - guards against a typo in the replacement's to_string.
-        compile_hog_for_check(function.script, "destination")
+        compile_script_for_check(function.script, "destination")
 
     def test_microsoft_teams_powerplatform_cu_path_migration(self):
         # A function already deployed with the stale `direct/workflows/` regex, which rejects real
         # Power Platform environment URLs that carry a cluster segment (e.g. `/cu/11`) in the path.
-        buggy_hog = (
+        buggy_script = (
             "if (not match(inputs.webhookUrl, "
             "'^https://[^/]+.environment.api.powerplatform.com(:443)?/powerautomate/automations/direct/workflows/.*')) {\n"
             "    throw Error('Invalid URL. The URL should match ... or Power Platform environment format "
             "(https://<tenant>.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/...)')\n}"
         ) + _SEND_BODY
-        function = self._create_teams_function(buggy_hog)
+        function = self._create_teams_function(buggy_script)
 
         with patch(
-            "insights.management.commands.update_insights_function_code.compile_hog",
+            "insights.management.commands.update_insights_function_code.compile_script",
             return_value="compiled_bytecode",
         ):
             out = StringIO()
@@ -379,7 +379,7 @@ class TestUpdateInsightsFunctionCode(BaseTest):
         assert "automations/direct/workflows/.*'" not in function.script
         assert "automations/direct/workflows/...)'" not in function.script
         self.assertIn("Updated: 1", out.getvalue())
-        compile_hog_for_check(function.script, "destination")
+        compile_script_for_check(function.script, "destination")
 
     def test_microsoft_teams_migration_leaves_functions_without_the_stale_block_untouched(self):
         function = self._create_teams_function(COMMENTED_OUT_STALE)

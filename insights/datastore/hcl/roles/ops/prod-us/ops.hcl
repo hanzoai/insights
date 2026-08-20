@@ -1,4 +1,4 @@
-# OPS prod-us env layer — events distributed proxies, sharded_tophog (tophog_new zoo_path)
+# OPS prod-us env layer — events distributed proxies, sharded_topfn (topfn_new zoo_path)
 #
 # Generated/maintained as the declarative source of truth for the OPS Datastore cluster.
 # Resolve with: hclexp load -layer <base>,<...>
@@ -178,12 +178,12 @@ database "insights" {
       sharding_key    = "sipHash64(distinct_id)"
     }
   }
-  # Shape inherited from sharded_tophog_base (prod layer); prod-us writes to the
-  # tophog_new keeper path.
-  table "sharded_tophog" {
-    extend = "sharded_tophog_base"
+  # Shape inherited from sharded_topfn_base (prod layer); prod-us writes to the
+  # topfn_new keeper path.
+  table "sharded_topfn" {
+    extend = "sharded_topfn_base"
     engine "replicated_merge_tree" {
-      zoo_path     = "/datastore/tables/ops/{shard}/insights.tophog_new"
+      zoo_path     = "/datastore/tables/ops/{shard}/insights.topfn_new"
       replica_name = "{replica}"
     }
   }

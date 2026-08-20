@@ -1,4 +1,4 @@
-# In core ``insights`` so the delivery paths (``ee/tasks``, ``products/exports``) and the
+# In core ``insights`` so the delivery path (``products/exports``) and the
 # ``products.slack_app`` handlers can share the bot's required scopes without crossing tach
 # module boundaries.
 

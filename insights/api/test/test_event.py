@@ -68,10 +68,10 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
         )
         flush_persons_and_events()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/events/?distinct_id=2").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/?distinct_id=2").json()
         assert response["results"][0]["person"] is None
 
-        response = self.client.get(f"/api/projects/{self.team.id}/events/?distinct_id=2&include_person=true").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/?distinct_id=2&include_person=true").json()
         assert response["results"][0]["person"] == {
             "distinct_ids": ["2"],
             "is_identified": True,
@@ -109,7 +109,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
         # into get_restricted_properties_for_team, which lets is_property_access_control_enabled
         # skip its per-call Team+organization lookup.
         with self.assertNumQueries(15):
-            response = self.client.get(f"/api/projects/{self.team.id}/events/?event=event_name").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/events/?event=event_name").json()
             assert response["results"][0]["event"] == "event_name"
 
     @override_settings(PERSON_ON_EVENTS_V2_OVERRIDE=False)
@@ -143,14 +143,14 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
 
         with self.assertNumQueries(expected_queries):
             response = self.client.get(
-                f"/api/projects/{self.team.id}/events/?properties=%s"
+                f"/v1/projects/{self.team.id}/events/?properties=%s"
                 % (json.dumps([{"key": "$browser", "value": "Safari"}]))
             ).json()
         assert response["results"][0]["id"] == event2_uuid
 
         properties = "invalid_json"
 
-        response = self.client.get(f"/api/projects/{self.team.id}/events/?properties={properties}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/?properties={properties}")
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == self.validation_error_response("Properties are unparsable!", "invalid_input")
@@ -177,7 +177,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
                 {"key": "$os", "value": "Windows", "type": "event"},
             ],
         }
-        response = self.client.get(f"/api/projects/{self.team.id}/events/?properties={json.dumps(group)}").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/?properties={json.dumps(group)}").json()
         # Firefox/Windows fails the OR; Safari/Mac fails the os filter — both excluded.
         assert sorted(r["properties"]["$browser"] for r in response["results"]) == ["Chrome", "Safari"]
 
@@ -217,7 +217,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
         with self.settings(USE_PRECALCULATED_CH_COHORT_PEOPLE=True):  # Normally this is False in tests
             with freeze_time("2020-01-04T13:01:01Z"):
                 response = self.client.get(
-                    f"/api/projects/{self.team.id}/events/?properties=%s"
+                    f"/v1/projects/{self.team.id}/events/?properties=%s"
                     % (json.dumps([{"key": "id", "value": cohort1.id, "type": "cohort"}]))
                 ).json()
 
@@ -251,11 +251,11 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
         )
         flush_persons_and_events()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/events/?person_id={person.pk}").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/?person_id={person.pk}").json()
         assert len(response["results"]) == 2
         assert response["results"][0]["elements"] == []
 
-        response = self.client.get(f"/api/projects/{self.team.id}/events/?person_id={person.uuid}").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/?person_id={person.uuid}").json()
         assert len(response["results"]) == 2
 
     def test_filter_by_nonexisting_person(self):
@@ -265,12 +265,12 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
         _create_event(event="random event", team=self.team, distinct_id="real")
         flush_persons_and_events()
 
-        nonexistent_pk = self.client.get(f"/api/projects/{self.team.id}/events/?person_id=5555555555")
+        nonexistent_pk = self.client.get(f"/v1/projects/{self.team.id}/events/?person_id=5555555555")
         assert nonexistent_pk.status_code == 200
         assert len(nonexistent_pk.json()["results"]) == 0
 
         nonexistent_uuid = self.client.get(
-            f"/api/projects/{self.team.id}/events/?person_id=550e8400-e29b-41d4-a716-446655440000"
+            f"/v1/projects/{self.team.id}/events/?person_id=550e8400-e29b-41d4-a716-446655440000"
         )
         assert nonexistent_uuid.status_code == 200
         assert len(nonexistent_uuid.json()["results"]) == 0
@@ -321,24 +321,24 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
         flush_persons_and_events()
 
         # distinct_id
-        response = self.client.get(f"/api/projects/{self.team.id}/events/values/?key=distinct_id&is_column=true").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/values/?key=distinct_id&is_column=true").json()
         assert sorted(x["name"] for x in response["results"]) == sorted(["bla", "ble", "blu"])
 
         # event
-        response = self.client.get(f"/api/projects/{self.team.id}/events/values/?key=event&is_column=true").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/values/?key=event&is_column=true").json()
         assert sorted(x["name"] for x in response["results"]) == sorted(
             ["another random event", "random event 1", "random event 2"]
         )
 
         # person_id
-        response = self.client.get(f"/api/projects/{self.team.id}/events/values/?key=person_id&is_column=true").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/values/?key=person_id&is_column=true").json()
         assert sorted(x["name"] for x in response["results"]) == sorted(
             [str(person3.uuid), str(person2.uuid), str(person1.uuid)]
         )
 
         # Search
         response = self.client.get(
-            f"/api/projects/{self.team.id}/events/values/?key=event&is_column=true&value=another"
+            f"/v1/projects/{self.team.id}/events/values/?key=event&is_column=true&value=another"
         ).json()
         assert response["results"] == [{"name": "another random event"}]
 
@@ -354,7 +354,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
                     "some other prop": "with some text",
                 },
             )
-        response = self.client.get(f"/api/projects/{self.team.id}/events/values/?key=custom_event").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/values/?key=custom_event").json()
         assert sorted(events) == sorted(event["name"] for event in response["results"])
 
     @also_test_with_materialized_columns(["random_prop"])
@@ -440,7 +440,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
                 team=team2,
                 properties={"random_prop": "abcd"},
             )
-            response = self.client.get(f"/api/projects/{self.team.id}/events/values/?key=random_prop").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/events/values/?key=random_prop").json()
 
             keys = [resp["name"].replace(" ", "") for resp in response["results"]]
             assert set(keys) == {
@@ -456,27 +456,27 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
             }
             assert len(response["results"]) == 9
 
-            response = self.client.get(f"/api/projects/{self.team.id}/events/values/?key=random_prop&value=qw").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/events/values/?key=random_prop&value=qw").json()
             assert response["results"][0]["name"] == "qwerty"
 
-            response = self.client.get(f"/api/projects/{self.team.id}/events/values/?key=random_prop&value=QW").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/events/values/?key=random_prop&value=QW").json()
             assert response["results"][0]["name"] == "qwerty"
 
-            response = self.client.get(f"/api/projects/{self.team.id}/events/values/?key=random_prop&value=6").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/events/values/?key=random_prop&value=6").json()
             assert response["results"][0]["name"] == "565"
 
             response = self.client.get(
-                f"/api/projects/{self.team.id}/events/values/?key=random_prop&value=6&event_name=random event"
+                f"/v1/projects/{self.team.id}/events/values/?key=random_prop&value=6&event_name=random event"
             ).json()
             assert response["results"][0]["name"] == "565"
 
             response = self.client.get(
-                f"/api/projects/{self.team.id}/events/values/?key=random_prop&value=6&event_name=foo&event_name=random event"
+                f"/v1/projects/{self.team.id}/events/values/?key=random_prop&value=6&event_name=foo&event_name=random event"
             ).json()
             assert response["results"][0]["name"] == "565"
 
             response = self.client.get(
-                f"/api/projects/{self.team.id}/events/values/?key=random_prop&value=qw&event_name=404_i_dont_exist"
+                f"/v1/projects/{self.team.id}/events/values/?key=random_prop&value=qw&event_name=404_i_dont_exist"
             ).json()
             assert response["results"] == []
 
@@ -496,7 +496,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
         _create_event(distinct_id="u1", event="pageview", team=self.team, properties={"browser": "Chrome"})
         flush_persons_and_events()
 
-        url = f"/api/projects/{self.team.id}/events/values/?key=browser"
+        url = f"/v1/projects/{self.team.id}/events/values/?key=browser"
         if param:
             url += f"&{param}"
 
@@ -534,7 +534,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
             properties={"test_prop": "another_visible"},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/events/values/?key=test_prop").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/values/?key=test_prop").json()
 
         # When property is not hidden, all values should be returned
         keys = [resp["name"] for resp in response["results"]]
@@ -566,13 +566,13 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
 
             # Test single property filter
             response = self.client.get(
-                f"/api/projects/{self.team.id}/events/values/?key=random_prop&properties_filter_prop=value1"
+                f"/v1/projects/{self.team.id}/events/values/?key=random_prop&properties_filter_prop=value1"
             ).json()
             assert {r["name"] for r in response["results"]} == {"asdf", "qwerty"}
 
             # Test array property filter
             response = self.client.get(
-                f"/api/projects/{self.team.id}/events/values/?key=random_prop&properties_filter_prop={json.dumps(['value1', 'value2'])}"
+                f"/v1/projects/{self.team.id}/events/values/?key=random_prop&properties_filter_prop={json.dumps(['value1', 'value2'])}"
             ).json()
             assert {r["name"] for r in response["results"]} == {"asdf", "qwerty", "no match"}
 
@@ -584,7 +584,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
                 properties={"random_prop": "both filters", "filter_prop": "value1", "another_filter": "other1"},
             )
             response = self.client.get(
-                f"/api/projects/{self.team.id}/events/values/?key=random_prop&properties_filter_prop=value1&properties_another_filter=other1"
+                f"/v1/projects/{self.team.id}/events/values/?key=random_prop&properties_filter_prop=value1&properties_another_filter=other1"
             ).json()
             assert len(response["results"]) == 1
             assert response["results"][0]["name"] == "both filters"
@@ -606,25 +606,25 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
 
             # Invalid JSON array - should be treated as a single value
             response = self.client.get(
-                f"/api/projects/{self.team.id}/events/values/?key=random_prop&properties_filter_prop=[value1,value2"
+                f"/v1/projects/{self.team.id}/events/values/?key=random_prop&properties_filter_prop=[value1,value2"
             ).json()
             assert len(response["results"]) == 0  # No matches because "[value1,value2" is treated as a literal string
 
             # Empty value
             response = self.client.get(
-                f"/api/projects/{self.team.id}/events/values/?key=random_prop&properties_filter_prop="
+                f"/v1/projects/{self.team.id}/events/values/?key=random_prop&properties_filter_prop="
             ).json()
             assert len(response["results"]) == 0
 
             # Invalid JSON object - should be treated as a single value
             response = self.client.get(
-                f"/api/projects/{self.team.id}/events/values/?key=random_prop&properties_filter_prop={{invalid:json}}"
+                f"/v1/projects/{self.team.id}/events/values/?key=random_prop&properties_filter_prop={{invalid:json}}"
             ).json()
             assert len(response["results"]) == 0
 
             # Array with mixed types - should convert all values to strings for comparison
             response = self.client.get(
-                f"/api/projects/{self.team.id}/events/values/?key=random_prop&properties_filter_prop={json.dumps(['123', 'true', 'value1'])}"
+                f"/v1/projects/{self.team.id}/events/values/?key=random_prop&properties_filter_prop={json.dumps(['123', 'true', 'value1'])}"
             ).json()
             assert {r["name"] for r in response["results"]} == {"asdf", "qwerty"}
 
@@ -636,7 +636,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
                 properties={"random_prop": "123", "filter_prop": True},
             )
             response = self.client.get(
-                f"/api/projects/{self.team.id}/events/values/?key=random_prop&properties_filter_prop={json.dumps(['TRUE'])}"
+                f"/v1/projects/{self.team.id}/events/values/?key=random_prop&properties_filter_prop={json.dumps(['TRUE'])}"
             ).json()
             assert len(response["results"]) == 1  # Should match because "TRUE".lower() == "true"
             assert response["results"][0]["name"] == "123"  # The value should be preserved as a string
@@ -659,35 +659,35 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
 
         # with relative values
         with freeze_time("2020-01-11T12:03:03.829294Z"):
-            response = self.client.get(f"/api/projects/{self.team.id}/events/?after=4d&before=1d").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/events/?after=4d&before=1d").json()
             assert len(response["results"]) == 2
 
-            response = self.client.get(f"/api/projects/{self.team.id}/events/?after=6d&before=2h").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/events/?after=6d&before=2h").json()
             assert len(response["results"]) == 3
 
-            response = self.client.get(f"/api/projects/{self.team.id}/events/?before=4d").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/events/?before=4d").json()
             assert len(response["results"]) == 1
 
         action = Action.objects.create(team=self.team, steps_json=[{"event": "sign up"}])
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/events/?after=2020-01-09T00:00:00.000Z&action_id=%s" % action.pk
+            f"/v1/projects/{self.team.id}/events/?after=2020-01-09T00:00:00.000Z&action_id=%s" % action.pk
         ).json()
         assert len(response["results"]) == 1
         assert response["results"][0]["id"] == event1_uuid
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/events/?before=2020-01-09T00:00:00.000Z&action_id=%s" % action.pk
+            f"/v1/projects/{self.team.id}/events/?before=2020-01-09T00:00:00.000Z&action_id=%s" % action.pk
         ).json()
         assert len(response["results"]) == 1
         assert response["results"][0]["id"] == event2_uuid
 
         # without action
-        response = self.client.get(f"/api/projects/{self.team.id}/events/?after=2020-01-09T00:00:00.000Z").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/?after=2020-01-09T00:00:00.000Z").json()
         assert len(response["results"]) == 1
         assert response["results"][0]["id"] == event1_uuid
 
-        response = self.client.get(f"/api/projects/{self.team.id}/events/?before=2020-01-09T00:00:00.000Z").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/?before=2020-01-09T00:00:00.000Z").json()
         assert len(response["results"]) == 2
         assert response["results"][0]["id"] == event2_uuid
         assert response["results"][1]["id"] == event3_uuid
@@ -702,14 +702,14 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
                     distinct_id="1",
                     timestamp=timezone.now() - relativedelta(months=11) + relativedelta(days=idx, seconds=idx),
                 )
-            response = self.client.get(f"/api/projects/{self.team.id}/events/?distinct_id=1").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/events/?distinct_id=1").json()
             assert len(response["results"]) == 100
-            assert f"http://testserver/api/projects/{self.team.id}/events/?distinct_id=1&before=" in unquote(
+            assert f"http://testserver/v1/projects/{self.team.id}/events/?distinct_id=1&before=" in unquote(
                 response["next"]
             )
-            response = self.client.get(f"/api/projects/{self.team.id}/events/?distinct_id=1").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/events/?distinct_id=1").json()
             assert len(response["results"]) == 100
-            assert f"http://testserver/api/projects/{self.team.id}/events/?distinct_id=1&before=" in unquote(
+            assert f"http://testserver/v1/projects/{self.team.id}/events/?distinct_id=1&before=" in unquote(
                 response["next"]
             )
 
@@ -728,7 +728,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
             assert len(page2["results"]) == 100
             assert (
                 unquote(page2["next"])
-                == f"http://testserver/api/projects/{self.team.id}/events/?distinct_id=1&before=2020-12-30T12:03:53.829294+00:00"
+                == f"http://testserver/v1/projects/{self.team.id}/events/?distinct_id=1&before=2020-12-30T12:03:53.829294+00:00"
             )
 
             page3 = self.client.get(page2["next"]).json()
@@ -750,7 +750,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
                     distinct_id="1",
                     timestamp=now + relativedelta(days=idx, seconds=-idx),
                 )
-            response = self.client.get(f"/api/projects/{self.team.id}/events/?{params_string}").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/events/?{params_string}").json()
             assert len(response["results"]) == 10
             assert "before=" in unquote(response["next"])
             assert f"after={after}" in unquote(response["next"])
@@ -758,7 +758,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
             params = {"distinct_id": "1", "after": after, "before": before, "limit": 10}
             params_string = urlencode(params)
 
-            response = self.client.get(f"/api/projects/{self.team.id}/events/?{params_string}").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/events/?{params_string}").json()
             assert len(response["results"]) == 10
             assert "before=" in unquote(response["next"])
             assert f"after={after}" in unquote(response["next"])
@@ -793,7 +793,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
             )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/events/?distinct_id=1&limit=10&orderBy={json.dumps(['timestamp'])}"
+            f"/v1/projects/{self.team.id}/events/?distinct_id=1&limit=10&orderBy={json.dumps(['timestamp'])}"
         ).json()
         assert len(response["results"]) == 10
         assert parser.parse(response["results"][0]["timestamp"]) < parser.parse(response["results"][-1]["timestamp"])
@@ -808,7 +808,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
                 timestamp=timezone.now() - relativedelta(months=11) + relativedelta(days=idx, seconds=idx),
             )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/events/?distinct_id=1&limit=10").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/?distinct_id=1&limit=10").json()
         assert len(response["results"]) == 10
         assert parser.parse(response["results"][0]["timestamp"]) > parser.parse(response["results"][-1]["timestamp"])
         assert "before=" in response["next"]
@@ -823,7 +823,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
             )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/events/?distinct_id=1&limit=10&orderBy={json.dumps(['-timestamp'])}"
+            f"/v1/projects/{self.team.id}/events/?distinct_id=1&limit=10&orderBy={json.dumps(['-timestamp'])}"
         ).json()
         assert len(response["results"]) == 10
         assert parser.parse(response["results"][0]["timestamp"]) > parser.parse(response["results"][-1]["timestamp"])
@@ -840,7 +840,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
         )
         flush_persons_and_events()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/events/{event_uuid}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/{event_uuid}/")
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["timestamp"] == "2026-06-30T20:44:19.407000+00:00"
 
@@ -855,7 +855,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
                 timestamp="2026-06-30T20:44:19.407000Z",
             )
             flush_persons_and_events()
-            response = self.client.get(f"/api/projects/{self.team.id}/events/?distinct_id=1").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/events/?distinct_id=1").json()
 
         assert len(response["results"]) == 1
         assert response["results"][0]["timestamp"] == "2026-06-30T20:44:19.407000+00:00"
@@ -863,7 +863,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
     def test_action_no_steps(self):
         action = Action.objects.create(team=self.team)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/events/?action_id=%s" % action.pk)
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/?action_id=%s" % action.pk)
         assert response.status_code == 200
         assert len(response.json()["results"]) == 0
 
@@ -874,7 +874,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
             distinct_id="2",
             properties={"key": "test_val"},
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/events/%s/" % event1_uuid)
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/%s/" % event1_uuid)
         assert response.status_code == 200
         assert response.json()["event"] == "sign up"
         assert response.json()["properties"] == {"key": "test_val"}
@@ -896,7 +896,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
                 properties={"$os": "Windows 95"},
             )
         with freeze_time("2012-01-15T04:01:34.000Z"):
-            response = self.client.get(f"/api/projects/{self.team.id}/events/").json()
+            response = self.client.get(f"/v1/projects/{self.team.id}/events/").json()
         assert len(response["results"]) == 1
 
     def test_get_event_by_id(self):
@@ -909,23 +909,23 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
         event_id = _create_event(team=self.team, event="event", distinct_id="1", timestamp=timezone.now())
         flush_persons_and_events()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/events/{event_id}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/{event_id}")
         assert response.status_code == status.HTTP_200_OK
         response_json = response.json()
         assert response_json["event"] == "event"
         assert response_json["person"] is None
 
-        with_person_response = self.client.get(f"/api/projects/{self.team.id}/events/{event_id}?include_person=true")
+        with_person_response = self.client.get(f"/v1/projects/{self.team.id}/events/{event_id}?include_person=true")
         assert with_person_response.status_code == status.HTTP_200_OK
         with_person_response_json = with_person_response.json()
         assert with_person_response_json["event"] == "event"
         assert with_person_response_json["person"] is not None
 
-        response = self.client.get(f"/api/projects/{self.team.id}/events/123456")
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/123456")
         # EE will inform the user the ID passed is not a valid UUID
         assert response.status_code in [status.HTTP_404_NOT_FOUND, status.HTTP_400_BAD_REQUEST]
 
-        response = self.client.get(f"/api/projects/{self.team.id}/events/im_a_string_not_an_integer")
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/im_a_string_not_an_integer")
         assert response.status_code in [status.HTTP_404_NOT_FOUND, status.HTTP_400_BAD_REQUEST]
 
     def test_limit(self):
@@ -959,10 +959,10 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
             properties={"$ip": "8.8.8.8"},
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/events/?limit=1").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/?limit=1").json()
         assert len(response["results"]) == 1
 
-        response = self.client.get(f"/api/projects/{self.team.id}/events/?limit=2").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/?limit=2").json()
         assert len(response["results"]) == 2
 
     @patch("insights.api.event.EVENT_LIST_MAX_LIMIT", 2)
@@ -971,7 +971,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
         for _i in range(3):
             _create_event(event="$pageview", team=self.team, distinct_id="1", properties={"$ip": "8.8.8.8"})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/events/?limit=50000").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/?limit=50000").json()
         assert len(response["results"]) == 2
 
     @patch("insights.api.event.get_persons_mapped_by_distinct_id")
@@ -979,7 +979,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
         _create_person(team=self.team, distinct_ids=["1"], is_identified=True)
         _create_event(event="$pageview", team=self.team, distinct_id="1", properties={"$ip": "8.8.8.8"})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/events/?distinct_id=1").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/?distinct_id=1").json()
         assert response["results"][0]["person"] is None
         mock_get_persons.assert_not_called()
 
@@ -989,7 +989,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
         _create_event(event="$pageview", team=self.team, distinct_id="1", properties={"$ip": "8.8.8.8"})
         mock_get_persons.return_value = {}
 
-        self.client.get(f"/api/projects/{self.team.id}/events/?distinct_id=1&include_person=true")
+        self.client.get(f"/v1/projects/{self.team.id}/events/?distinct_id=1&include_person=true")
         mock_get_persons.assert_called_once()
 
     def test_get_events_with_specified_token(self):
@@ -1012,14 +1012,14 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
             properties={"key": "test_val"},
         )
 
-        response_team1 = self.client.get(f"/api/projects/{self.team.id}/events/{event1_uuid}/")
+        response_team1 = self.client.get(f"/v1/projects/{self.team.id}/events/{event1_uuid}/")
         response_team1_token = self.client.get(
-            f"/api/projects/{self.team.id}/events/{event1_uuid}/",
+            f"/v1/projects/{self.team.id}/events/{event1_uuid}/",
             data={"token": self.team.api_token},
         )
 
         response_team2_event1 = self.client.get(
-            f"/api/projects/{self.team.id}/events/{event1_uuid}/",
+            f"/v1/projects/{self.team.id}/events/{event1_uuid}/",
             data={"token": user2.team.api_token},
         )
 
@@ -1028,7 +1028,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
         self.client.force_login(user2)
 
         response_team2_event2 = self.client.get(
-            f"/api/projects/{self.team.id}/events/{event2_uuid}/",
+            f"/v1/projects/{self.team.id}/events/{event2_uuid}/",
             data={"token": user2.team.api_token},
         )
 
@@ -1039,7 +1039,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
         assert response_team2_event1.status_code == status.HTTP_403_FORBIDDEN
         assert response_team2_event2.status_code == status.HTTP_200_OK
 
-        response_invalid_token = self.client.get(f"/api/projects/{self.team.id}/events?token=invalid")
+        response_invalid_token = self.client.get(f"/v1/projects/{self.team.id}/events?token=invalid")
         assert response_invalid_token.status_code == 401
 
     @patch("insights.models.event.legacy_events_query._execute_events_list_query")
@@ -1063,7 +1063,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
             ],
             False,
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/events/").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/").json()
         assert len(response["results"]) == 1
         assert patch_execute_query.call_count == 7  # 6 windows + 1 fallback
 
@@ -1084,7 +1084,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
             ],
             False,
         )
-        response = self.client.get(f"/api/projects/{self.team.id}/events/").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/").json()
         assert patch_execute_query.call_count == 1
 
     @patch("insights.models.event.legacy_events_query._execute_events_list_query", wraps=_execute_events_list_query)
@@ -1106,25 +1106,25 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
 
         # No events in 24h window before 2024-01-01T00:02:02Z
         # Tries all 5 windows + fallback = 6 calls
-        response = self.client.get(f"/api/projects/{self.team.id}/events/?before=2024-01-01T00:02:02Z").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/?before=2024-01-01T00:02:02Z").json()
         assert len(response["results"]) == 0
         assert patch_execute_query.call_count == 6
 
         # Event at 01-05T05:05:00 found in 300s window (05:01:02 - 05:06:02)
         # 60s fails, 300s succeeds = 2 calls (cumulative: 8)
-        response = self.client.get(f"/api/projects/{self.team.id}/events/?before=2024-01-05T05:06:02Z&limit=1").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/?before=2024-01-05T05:06:02Z&limit=1").json()
         assert len(response["results"]) == 1
         assert patch_execute_query.call_count == 8
 
         # Events end at 01-09T09:09, all windows too narrow, fallback succeeds
         # 5 windows + fallback = 6 calls (cumulative: 14)
-        response = self.client.get(f"/api/projects/{self.team.id}/events/?before=2024-01-10T09:01:02Z&limit=1").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/?before=2024-01-10T09:01:02Z&limit=1").json()
         assert len(response["results"]) == 1
         assert patch_execute_query.call_count == 14
 
         # No events after 01-09T09:09, all windows fail including fallback
         # 5 windows + fallback = 6 calls (cumulative: 20)
-        response = self.client.get(f"/api/projects/{self.team.id}/events/?before=2024-01-10T10:20:02Z&limit=1").json()
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/?before=2024-01-10T10:20:02Z&limit=1").json()
         assert len(response["results"]) == 0
         assert patch_execute_query.call_count == 20
 
@@ -1139,7 +1139,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/events/?after=2021-01-01&before=2024-01-01T02:02:02Z"
+            f"/v1/projects/{self.team.id}/events/?after=2021-01-01&before=2024-01-01T02:02:02Z"
         ).json()
         assert len(response["results"]) == 1
 
@@ -1154,7 +1154,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
             for _ in range(0, 100)
         ]
         response = self.client.get(
-            f"/api/projects/{self.team.id}/events/?after=2023-01-01T01:01:00Z&before=2024-01-01T02:02:01Z"
+            f"/v1/projects/{self.team.id}/events/?after=2023-01-01T01:01:00Z&before=2024-01-01T02:02:01Z"
         ).json()
         # With progressive window optimization, the 3600s window returns 98 results (>= half_limit)
         # so it's considered successful. Some events at exactly 01:02:00 are cut off by window boundary.
@@ -1162,7 +1162,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
 
         # Test that after parameter is respected even with many results
         response = self.client.get(
-            f"/api/projects/{self.team.id}/events/?after=2024-01-01T01:02:00Z&before=2024-01-01T01:04:01Z"
+            f"/v1/projects/{self.team.id}/events/?after=2024-01-01T01:02:00Z&before=2024-01-01T01:04:01Z"
         ).json()
         assert len(response["results"]) == 99
         assert response["next"] is None
@@ -1189,7 +1189,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/events/?properties=%s"
+            f"/v1/projects/{self.team.id}/events/?properties=%s"
             % (
                 json.dumps(
                     [
@@ -1227,7 +1227,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
             self.team,
         )
         response = self.client.get(
-            f"/api/projects/{self.team.id}/events/?properties=%s"
+            f"/v1/projects/{self.team.id}/events/?properties=%s"
             % (
                 json.dumps(
                     [
@@ -1270,7 +1270,7 @@ class TestEvents(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/events/?properties=%s"
+            f"/v1/projects/{self.team.id}/events/?properties=%s"
             % (
                 json.dumps(
                     [
@@ -1312,7 +1312,7 @@ class TestEventListRestrictedProperties(DatastoreTestMixin, APIBaseTest):
 
     def test_filter_referencing_restricted_property_is_rejected(self):
         response = self.client.get(
-            f"/api/projects/{self.team.id}/events/?properties={json.dumps([{'key': 'secret_prop', 'value': 'x', 'type': 'event'}])}"
+            f"/v1/projects/{self.team.id}/events/?properties={json.dumps([{'key': 'secret_prop', 'value': 'x', 'type': 'event'}])}"
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "restricted property" in response.json()["detail"]
@@ -1325,20 +1325,20 @@ class TestEventListRestrictedProperties(DatastoreTestMixin, APIBaseTest):
                 {"type": "OR", "values": [{"key": "secret_prop", "value": "x", "type": "event"}]},
             ],
         }
-        response = self.client.get(f"/api/projects/{self.team.id}/events/?properties={json.dumps(group)}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/?properties={json.dumps(group)}")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "restricted property" in response.json()["detail"]
 
     def test_order_by_referencing_restricted_property_is_rejected(self):
         response = self.client.get(
-            f"/api/projects/{self.team.id}/events/?orderBy={json.dumps(['properties.secret_prop'])}"
+            f"/v1/projects/{self.team.id}/events/?orderBy={json.dumps(['properties.secret_prop'])}"
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "restricted property" in response.json()["detail"]
 
     def test_unrestricted_property_filter_is_allowed(self):
         response = self.client.get(
-            f"/api/projects/{self.team.id}/events/?properties={json.dumps([{'key': 'public_prop', 'value': 'x', 'type': 'event'}])}"
+            f"/v1/projects/{self.team.id}/events/?properties={json.dumps([{'key': 'public_prop', 'value': 'x', 'type': 'event'}])}"
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -1385,7 +1385,7 @@ class TestEventListTimeWindowOptimization(DatastoreTestMixin, APIBaseTest):
             False,
         )
 
-        self.client.get(f"/api/projects/{self.team.id}/events/")
+        self.client.get(f"/v1/projects/{self.team.id}/events/")
 
         # Should cache the successful window AND result count
         mock_cache.set.assert_called_once()
@@ -1416,7 +1416,7 @@ class TestEventListTimeWindowOptimization(DatastoreTestMixin, APIBaseTest):
             False,
         )
 
-        self.client.get(f"/api/projects/{self.team.id}/events/")
+        self.client.get(f"/v1/projects/{self.team.id}/events/")
 
         # Should only call once since cached window returned enough results
         assert patch_execute_query.call_count == 1
@@ -1458,7 +1458,7 @@ class TestEventListTimeWindowOptimization(DatastoreTestMixin, APIBaseTest):
         )
 
         # Request with limit=6000 (half_limit=3000)
-        self.client.get(f"/api/projects/{self.team.id}/events/?limit=6000")
+        self.client.get(f"/v1/projects/{self.team.id}/events/?limit=6000")
 
         # Cache result_count (2700) < half_limit (3000), so cache should be ignored.
         # Should start from smallest window (60s), not cached 3600s.
@@ -1496,7 +1496,7 @@ class TestEventListTimeWindowOptimization(DatastoreTestMixin, APIBaseTest):
             3600,  # applied_window
         )
 
-        self.client.get(f"/api/projects/{self.team.id}/events/")
+        self.client.get(f"/v1/projects/{self.team.id}/events/")
 
         # Should use cached window (3600) first due to backwards compatibility
         first_call_kwargs = mock_run_page.call_args_list[0][1]
@@ -1528,7 +1528,7 @@ class TestEventListTimeWindowOptimization(DatastoreTestMixin, APIBaseTest):
             False,
         )
 
-        self.client.get(f"/api/projects/{self.team.id}/events/")
+        self.client.get(f"/v1/projects/{self.team.id}/events/")
 
         # Should not cache anything when fallback is used
         mock_cache.set.assert_not_called()
@@ -1553,7 +1553,7 @@ class TestEventListTimeWindowOptimization(DatastoreTestMixin, APIBaseTest):
         )
 
         # 10-minute window
-        self.client.get(f"/api/projects/{self.team.id}/events/?after=2024-01-01T00:00:00Z&before=2024-01-01T00:10:00Z")
+        self.client.get(f"/v1/projects/{self.team.id}/events/?after=2024-01-01T00:00:00Z&before=2024-01-01T00:10:00Z")
 
         # Should try [60, 300] + fallback = 3 calls
         assert patch_execute_query.call_count == 3
@@ -1577,7 +1577,7 @@ class TestEventListTimeWindowOptimization(DatastoreTestMixin, APIBaseTest):
             False,
         )
 
-        self.client.get(f"/api/projects/{self.team.id}/events/?after=2024-01-01T00:00:00Z&before=2024-01-01T00:00:30Z")
+        self.client.get(f"/v1/projects/{self.team.id}/events/?after=2024-01-01T00:00:00Z&before=2024-01-01T00:00:30Z")
 
         # No windows < 30s, so straight to fallback = 1 call
         assert patch_execute_query.call_count == 1
@@ -1604,19 +1604,19 @@ class TestEventListTimeWindowOptimization(DatastoreTestMixin, APIBaseTest):
         )
 
         # Request without filters
-        self.client.get(f"/api/projects/{self.team.id}/events/")
+        self.client.get(f"/v1/projects/{self.team.id}/events/")
         first_cache_key = mock_cache.set.call_args[0][0]
 
         mock_cache.reset_mock()
 
         # Request with event filter
-        self.client.get(f"/api/projects/{self.team.id}/events/?event=test")
+        self.client.get(f"/v1/projects/{self.team.id}/events/?event=test")
         second_cache_key = mock_cache.set.call_args[0][0]
 
         mock_cache.reset_mock()
 
         # Request with distinct_id
-        self.client.get(f"/api/projects/{self.team.id}/events/?distinct_id=1")
+        self.client.get(f"/v1/projects/{self.team.id}/events/?distinct_id=1")
         third_cache_key = mock_cache.set.call_args[0][0]
 
         # All cache keys should be different
@@ -1659,7 +1659,7 @@ class TestEventListTimeWindowOptimization(DatastoreTestMixin, APIBaseTest):
             False,
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/events/?orderBy={json.dumps(['timestamp'])}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/events/?orderBy={json.dumps(['timestamp'])}")
 
         assert patch_execute_query.call_count == 1
         assert len(response.json()["results"]) == num_results

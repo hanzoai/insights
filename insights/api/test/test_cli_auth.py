@@ -27,7 +27,7 @@ class TestCLIAuthDeviceCodeEndpoint(APIBaseTest):
 
     def test_device_code_request_returns_correct_data(self):
         """Test that requesting a device code returns all required fields"""
-        response = self.client.post("/api/cli-auth/device-code/")
+        response = self.client.post("/v1/cli-auth/device-code/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -54,7 +54,7 @@ class TestCLIAuthDeviceCodeEndpoint(APIBaseTest):
 
     def test_device_code_is_stored_in_cache(self):
         """Test that device code and user code are properly stored in cache"""
-        response = self.client.post("/api/cli-auth/device-code/")
+        response = self.client.post("/v1/cli-auth/device-code/")
         data = response.json()
 
         device_code = data["device_code"]
@@ -75,7 +75,7 @@ class TestCLIAuthDeviceCodeEndpoint(APIBaseTest):
     def test_device_code_works_without_authentication(self):
         """Test that device code endpoint works for unauthenticated requests"""
         self.client.logout()
-        response = self.client.post("/api/cli-auth/device-code/")
+        response = self.client.post("/v1/cli-auth/device-code/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
@@ -89,7 +89,7 @@ class TestCLIAuthAuthorizeEndpoint(APIBaseTest):
         cache.clear()
 
         # Create a device code for testing
-        response = self.client.post("/api/cli-auth/device-code/")
+        response = self.client.post("/v1/cli-auth/device-code/")
         self.device_data = response.json()
         self.device_code = self.device_data["device_code"]
         self.user_code = self.device_data["user_code"]
@@ -99,7 +99,7 @@ class TestCLIAuthAuthorizeEndpoint(APIBaseTest):
         initial_key_count = PersonalAPIKey.objects.filter(user=self.user).count()
 
         response = self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": self.user_code, "project_id": self.team.id},
         )
 
@@ -128,7 +128,7 @@ class TestCLIAuthAuthorizeEndpoint(APIBaseTest):
         submitted_scopes = ["user:read", "project:read", "query:read", "insight:write"]
 
         response = self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": self.user_code, "project_id": self.team.id, "scopes": submitted_scopes},
         )
 
@@ -149,7 +149,7 @@ class TestCLIAuthAuthorizeEndpoint(APIBaseTest):
     )
     def test_authorization_rejects_invalid_or_disallowed_scopes(self, _name: str, scope: str):
         response = self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": self.user_code, "project_id": self.team.id, "scopes": [scope]},
         )
 
@@ -165,7 +165,7 @@ class TestCLIAuthAuthorizeEndpoint(APIBaseTest):
     @patch("insights.api.personal_api_key.hanzo_insights.feature_enabled", return_value=True)
     def test_authorization_rejects_llm_gateway_scope(self, feature_enabled):
         response = self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": self.user_code, "project_id": self.team.id, "scopes": ["llm_gateway:read"]},
         )
 
@@ -180,7 +180,7 @@ class TestCLIAuthAuthorizeEndpoint(APIBaseTest):
         self.client.logout()
 
         response = self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": self.user_code, "project_id": self.team.id},
         )
 
@@ -193,7 +193,7 @@ class TestCLIAuthAuthorizeEndpoint(APIBaseTest):
         csrf_client.force_login(self.user)
 
         response = csrf_client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": self.user_code, "project_id": self.team.id},
         )
 
@@ -203,7 +203,7 @@ class TestCLIAuthAuthorizeEndpoint(APIBaseTest):
     def test_authorization_rejects_invalid_user_code(self):
         """Test that authorization fails with invalid user code"""
         response = self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": "XXXX-9999", "project_id": self.team.id},
         )
 
@@ -217,7 +217,7 @@ class TestCLIAuthAuthorizeEndpoint(APIBaseTest):
         # Wait for the code to expire
         with freeze_time(timezone.now() + timedelta(seconds=DEVICE_CODE_EXPIRY_SECONDS + 1)):
             response = self.client.post(
-                "/api/cli-auth/authorize/",
+                "/v1/cli-auth/authorize/",
                 {"user_code": self.user_code, "project_id": self.team.id},
             )
 
@@ -231,7 +231,7 @@ class TestCLIAuthAuthorizeEndpoint(APIBaseTest):
         other_team = Team.objects.create(organization=other_org, name="Other Team")
 
         response = self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": self.user_code, "project_id": other_team.id},
         )
 
@@ -245,7 +245,7 @@ class TestCLIAuthAuthorizeEndpoint(APIBaseTest):
     def test_authorization_rejects_nonexistent_project(self):
         """Test that authorization fails with non-existent project ID"""
         response = self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": self.user_code, "project_id": 99999},
         )
 
@@ -257,7 +257,7 @@ class TestCLIAuthAuthorizeEndpoint(APIBaseTest):
         submitted_scopes = ["error_tracking:write"]
 
         response = self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": self.user_code, "project_id": self.team.id, "scopes": submitted_scopes},
         )
 
@@ -279,12 +279,12 @@ class TestCLIAuthAuthorizeEndpoint(APIBaseTest):
         other_user = User.objects.create_and_join(self.organization, "other@hanzo.ai", "password123")
 
         # Create device code for other user
-        response2 = self.client.post("/api/cli-auth/device-code/")
+        response2 = self.client.post("/v1/cli-auth/device-code/")
         user_code2 = response2.json()["user_code"]
 
         # First user authorizes their code
         response = self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": self.user_code, "project_id": self.team.id},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -294,7 +294,7 @@ class TestCLIAuthAuthorizeEndpoint(APIBaseTest):
 
         # Other user authorizes their code
         response = self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": user_code2, "project_id": self.team.id},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -309,14 +309,14 @@ class TestCLIAuthAuthorizeEndpoint(APIBaseTest):
 
         # First authorization succeeds
         response1 = self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": self.user_code, "project_id": self.team.id},
         )
         self.assertEqual(response1.status_code, status.HTTP_200_OK)
 
         # Second authorization attempt should fail (code already authorized)
         response2 = self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": self.user_code, "project_id": self.team.id},
         )
         self.assertEqual(response2.status_code, status.HTTP_400_BAD_REQUEST)
@@ -337,14 +337,14 @@ class TestCLIAuthPollEndpoint(APIBaseTest):
         cache.clear()
 
         # Create and authorize a device code
-        response = self.client.post("/api/cli-auth/device-code/")
+        response = self.client.post("/v1/cli-auth/device-code/")
         self.device_data = response.json()
         self.device_code = self.device_data["device_code"]
         self.user_code = self.device_data["user_code"]
 
     def test_poll_returns_pending_before_authorization(self):
         """Test that polling returns pending status before user authorizes"""
-        response = self.client.post("/api/cli-auth/poll/", {"device_code": self.device_code})
+        response = self.client.post("/v1/cli-auth/poll/", {"device_code": self.device_code})
 
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         data = response.json()
@@ -356,12 +356,12 @@ class TestCLIAuthPollEndpoint(APIBaseTest):
 
         # Authorize the code
         self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": self.user_code, "project_id": self.team.id, "scopes": submitted_scopes},
         )
 
         # Poll for the result
-        response = self.client.post("/api/cli-auth/poll/", {"device_code": self.device_code})
+        response = self.client.post("/v1/cli-auth/poll/", {"device_code": self.device_code})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -373,12 +373,12 @@ class TestCLIAuthPollEndpoint(APIBaseTest):
 
         # Verify the API key is valid
         api_key = data["personal_api_key"]
-        self.assertTrue(api_key.startswith("phx_"))
+        self.assertTrue(api_key.startswith("sk-"))
 
     def test_poll_returns_expired_for_old_code(self):
         """Test that polling returns expired for old device codes"""
         with freeze_time(timezone.now() + timedelta(seconds=DEVICE_CODE_EXPIRY_SECONDS + 1)):
-            response = self.client.post("/api/cli-auth/poll/", {"device_code": self.device_code})
+            response = self.client.post("/v1/cli-auth/poll/", {"device_code": self.device_code})
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         data = response.json()
@@ -386,7 +386,7 @@ class TestCLIAuthPollEndpoint(APIBaseTest):
 
     def test_poll_returns_expired_for_nonexistent_code(self):
         """Test that polling returns expired for non-existent device codes"""
-        response = self.client.post("/api/cli-auth/poll/", {"device_code": "nonexistent_code"})
+        response = self.client.post("/v1/cli-auth/poll/", {"device_code": "nonexistent_code"})
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         data = response.json()
@@ -396,12 +396,12 @@ class TestCLIAuthPollEndpoint(APIBaseTest):
         """Test that cache is cleaned up after API key is retrieved"""
         # Authorize the code
         self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": self.user_code, "project_id": self.team.id},
         )
 
         # Poll for the result
-        self.client.post("/api/cli-auth/poll/", {"device_code": self.device_code})
+        self.client.post("/v1/cli-auth/poll/", {"device_code": self.device_code})
 
         # Verify cache is cleaned up
         device_cache_key = get_device_cache_key(self.device_code)
@@ -414,30 +414,30 @@ class TestCLIAuthPollEndpoint(APIBaseTest):
         """Test that poll can be called multiple times while pending"""
         # Poll multiple times
         for _ in range(3):
-            response = self.client.post("/api/cli-auth/poll/", {"device_code": self.device_code})
+            response = self.client.post("/v1/cli-auth/poll/", {"device_code": self.device_code})
             self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
             self.assertEqual(response.json()["status"], "pending")
 
     def test_poll_works_without_authentication(self):
         """Test that poll endpoint works for unauthenticated requests"""
         self.client.logout()
-        response = self.client.post("/api/cli-auth/poll/", {"device_code": self.device_code})
+        response = self.client.post("/v1/cli-auth/poll/", {"device_code": self.device_code})
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
     def test_poll_returns_api_key_only_once(self):
         """Test that API key can only be retrieved once"""
         # Authorize the code
         self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": self.user_code, "project_id": self.team.id},
         )
 
         # First poll succeeds
-        response1 = self.client.post("/api/cli-auth/poll/", {"device_code": self.device_code})
+        response1 = self.client.post("/v1/cli-auth/poll/", {"device_code": self.device_code})
         self.assertEqual(response1.status_code, status.HTTP_200_OK)
 
         # Second poll fails (cache cleaned up)
-        response2 = self.client.post("/api/cli-auth/poll/", {"device_code": self.device_code})
+        response2 = self.client.post("/v1/cli-auth/poll/", {"device_code": self.device_code})
         self.assertEqual(response2.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response2.json()["status"], "expired")
 
@@ -454,7 +454,7 @@ class TestCLIAuthEndToEnd(APIBaseTest):
     def test_complete_authentication_flow(self):
         """Test the complete device flow from start to finish"""
         # Step 1: Request device code (CLI)
-        response = self.client.post("/api/cli-auth/device-code/")
+        response = self.client.post("/v1/cli-auth/device-code/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         device_data = response.json()
         device_code = device_data["device_code"]
@@ -462,36 +462,36 @@ class TestCLIAuthEndToEnd(APIBaseTest):
 
         # Step 2: User opens browser and authorizes
         response = self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": user_code, "project_id": self.team.id},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Step 3: CLI polls and gets API key
-        response = self.client.post("/api/cli-auth/poll/", {"device_code": device_code})
+        response = self.client.post("/v1/cli-auth/poll/", {"device_code": device_code})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         api_key = response.json()["personal_api_key"]
 
         # Step 4: Verify the API key works
         self.client.logout()
         response = self.client.get(
-            f"/api/projects/{self.team.pk}/event_definitions/", headers={"authorization": f"Bearer {api_key}"}
+            f"/v1/projects/{self.team.pk}/event_definitions/", headers={"authorization": f"Bearer {api_key}"}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_api_key_has_correct_scopes(self):
         """Test that created API key has only the CLI scopes"""
         # Complete the flow
-        response = self.client.post("/api/cli-auth/device-code/")
+        response = self.client.post("/v1/cli-auth/device-code/")
         device_code = response.json()["device_code"]
         user_code = response.json()["user_code"]
 
         self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": user_code, "project_id": self.team.id},
         )
 
-        response = self.client.post("/api/cli-auth/poll/", {"device_code": device_code})
+        response = self.client.post("/v1/cli-auth/poll/", {"device_code": device_code})
         api_key_value = response.json()["personal_api_key"]
 
         # Get the API key from database
@@ -506,16 +506,16 @@ class TestCLIAuthEndToEnd(APIBaseTest):
     def test_api_key_is_scoped_to_authorized_project(self):
         other_team = Team.objects.create(organization=self.organization, name="Other Team")
 
-        response = self.client.post("/api/cli-auth/device-code/")
+        response = self.client.post("/v1/cli-auth/device-code/")
         device_code = response.json()["device_code"]
         user_code = response.json()["user_code"]
 
         self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": user_code, "project_id": self.team.id},
         )
 
-        response = self.client.post("/api/cli-auth/poll/", {"device_code": device_code})
+        response = self.client.post("/v1/cli-auth/poll/", {"device_code": device_code})
         api_key_value = response.json()["personal_api_key"]
 
         api_key = PersonalAPIKey.objects.get(secure_value=hash_key_value(api_key_value))
@@ -524,12 +524,12 @@ class TestCLIAuthEndToEnd(APIBaseTest):
 
         self.client.logout()
         authorized_response = self.client.get(
-            f"/api/projects/{self.team.pk}/event_definitions/", headers={"authorization": f"Bearer {api_key_value}"}
+            f"/v1/projects/{self.team.pk}/event_definitions/", headers={"authorization": f"Bearer {api_key_value}"}
         )
         self.assertEqual(authorized_response.status_code, status.HTTP_200_OK)
 
         other_project_response = self.client.get(
-            f"/api/projects/{other_team.pk}/event_definitions/", headers={"authorization": f"Bearer {api_key_value}"}
+            f"/v1/projects/{other_team.pk}/event_definitions/", headers={"authorization": f"Bearer {api_key_value}"}
         )
         self.assertEqual(other_project_response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -540,12 +540,12 @@ class TestCLIAuthEndToEnd(APIBaseTest):
         other_team = Team.objects.create(organization=other_org, name="Other Team")
 
         # Complete device code request
-        response = self.client.post("/api/cli-auth/device-code/")
+        response = self.client.post("/v1/cli-auth/device-code/")
         user_code = response.json()["user_code"]
 
         # Try to authorize for the other team
         response = self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": user_code, "project_id": other_team.id},
         )
 
@@ -562,18 +562,18 @@ class TestCLIAuthEndToEnd(APIBaseTest):
         team2 = Team.objects.create(organization=self.organization, name="Team 2")
 
         # Authorize for first team
-        response1 = self.client.post("/api/cli-auth/device-code/")
+        response1 = self.client.post("/v1/cli-auth/device-code/")
         user_code1 = response1.json()["user_code"]
         self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": user_code1, "project_id": self.team.id},
         )
 
         # Authorize for second team
-        response2 = self.client.post("/api/cli-auth/device-code/")
+        response2 = self.client.post("/v1/cli-auth/device-code/")
         user_code2 = response2.json()["user_code"]
         response = self.client.post(
-            "/api/cli-auth/authorize/",
+            "/v1/cli-auth/authorize/",
             {"user_code": user_code2, "project_id": team2.id},
         )
 

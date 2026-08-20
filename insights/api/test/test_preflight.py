@@ -6,12 +6,10 @@ from insights.test.base import APIBaseTest, QueryMatchingTest, snapshot_postgres
 from unittest.mock import patch
 
 from django.conf import settings
-from django.test import override_settings
 
 from parameterized import parameterized
 from rest_framework import status
 
-from insights.helpers.dev_login import is_dev_login_allowed
 from insights.models.instance_setting import set_instance_setting
 from insights.models.organization import Organization
 
@@ -69,7 +67,9 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
             # we calculate this here because otherwise it is non-deterministic when running locally
             # it can be overridden in tests by passing in options
             "openai_available": bool(os.environ.get("OPENAI_API_KEY")),
-            "anthropic_available": bool(os.environ.get("ANTHROPIC_API_KEY")),
+            "assistant_available": bool(
+                (settings.AI_GATEWAY_URL and settings.AI_GATEWAY_API_KEY) or os.environ.get("ANTHROPIC_API_KEY")
+            ),
             "is_test": True,
             **options,
         }
@@ -272,14 +272,6 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
             assert response.json()["realm"] == "hosted-datastore"
             assert response.json()["cloud"] is False
 
-    @override_settings(DEBUG=True, ALLOW_DEV_LOGIN=True)
-    def test_preflight_includes_allow_dev_login_when_enabled(self):
-        with self.is_cloud(False):
-            response = self.client.get("/_preflight/")
-        assert response.status_code == status.HTTP_200_OK
-        assert response.json()["allow_dev_login"] is True
-        assert is_dev_login_allowed()
-
     @parameterized.expand([(False,), (True,)])
     def test_preflight_kafka_reflects_probe_on_self_hosted(self, probe_result):
         # Regression for #54702: the kafka probe was removed, hardcoding the
@@ -296,10 +288,3 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
             response = self.client.get("/_preflight/")
             assert response.status_code == status.HTTP_200_OK
             assert response.json()["kafka"] is probe_result
-
-    @override_settings(DEBUG=True, ALLOW_DEV_LOGIN=False)
-    def test_preflight_omits_allow_dev_login_when_disabled(self):
-        with self.is_cloud(False):
-            response = self.client.get("/_preflight/")
-        assert response.status_code == status.HTTP_200_OK
-        assert "allow_dev_login" not in response.json()

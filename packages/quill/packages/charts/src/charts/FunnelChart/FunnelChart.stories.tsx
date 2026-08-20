@@ -21,7 +21,7 @@ const VARIANT_SERIES: Series[] = [
     { key: 'test', label: 'test', data: [100, 27.9] },
 ]
 
-const meta: Meta = { title: 'Components/HogCharts/FunnelChart', parameters: { layout: 'centered' } }
+const meta: Meta = { title: 'Components/ScriptCharts/FunnelChart', parameters: { layout: 'centered' } }
 export default meta
 
 type Story = StoryObj<{}>

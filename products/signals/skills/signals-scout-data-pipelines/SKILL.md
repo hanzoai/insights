@@ -30,7 +30,7 @@ You author reports directly via the report channel (`scout-emit-report` / `scout
 
 ## Quick close-out: are pipelines even in use?
 
-Read `recent_insights_functions` and `recent_hog_flows` off `scout-project-profile-get`, and count exports with one cheap query:
+Read `recent_insights_functions` and `recent_script_flows` off `scout-project-profile-get`, and count exports with one cheap query:
 
 ```sql
 SELECT countIf(paused = 0) AS active, count() AS total
@@ -53,13 +53,13 @@ Three cheap reads cold-start a run:
 
 - `scout-scratchpad-search` (`text=pipeline`) — durable steering: the watchlist of high-value pipelines and their baselines, `noise:` / `addressed:` / `dedupe:` entries gating re-reports, plus `report:` / `reviewer:` entries pointing at the open report for a pipeline and who owns it.
 - `scout-runs-list` (last 7d) — what prior pipeline runs found and ruled out.
-- `scout-project-profile-get` — `recent_insights_functions` (total, enabled count, 5 most recently modified) and `recent_hog_flows` (total, active count, 5 most recent).
+- `scout-project-profile-get` — `recent_insights_functions` (total, enabled count, 5 most recently modified) and `recent_script_flows` (total, active count, 5 most recent).
 - `inbox-reports-list` (`search`=pipeline name, `ordering=-updated_at`) — the reports already in the inbox. A contradiction on a pipeline you've reported before is an **edit**, not a fresh report; pull the closest matches with `inbox-reports-retrieve` before authoring. Your own report-channel reports persist their backing signals under `source_product=signals_scout`, so don't filter `source_product=cdp` — you'd miss every report you authored.
 
 Then orient on each leg with one fleet-wide read apiece:
 
 1. **Functions state scan** — `cdp-functions-list {"enabled": true, "limit": 100}`, following `next` pages. Every entry carries `status: {state, tokens}` from the script watcher, so one paginated scan gives fleet health without per-function calls. States: 1 healthy, 2 degraded (overflowed), 3 auto-disabled, 11 forcefully degraded, 12 forcefully disabled (11/12 are admin actions). **Footgun:** the `type` filter must be a comma-separated _string_ (`"type": "destination,transformation"`) — a JSON array silently returns zero results. **Footgun:** `status` exists only on the REST tools; `system.insights_functions` has no state column.
-2. **Flows fleet stats** — `workflows-global-stats {"after": "-7d"}`: per-flow succeeded/failed counts, sorted most-failing first, one call. It returns bare `workflow_id`s — cross-reference names and lifecycle status via `system.hog_flows` (`id`, `name`, `status`), and only judge `active` flows.
+2. **Flows fleet stats** — `workflows-global-stats {"after": "-7d"}`: per-flow succeeded/failed counts, sorted most-failing first, one call. It returns bare `workflow_id`s — cross-reference names and lifecycle status via `system.script_flows` (`id`, `name`, `status`), and only judge `active` flows.
 3. **Batch exports roster** — rosters are small, so check every live one:
 
 ```sql
@@ -71,7 +71,7 @@ LIMIT 100
 
 then `batch-export-get {id}` per export for the 10 most recent runs (status, `records_completed`, `records_failed`, `latest_error`, interval bounds).
 
-**SQL footguns** (all three `system` pipeline tables): boolean-ish columns are integers — `countIf(enabled)` errors, write `countIf(enabled = 1)`. `system.insights_functions` and `system.hog_flows` carry huge JSON columns (`inputs_schema`, `filters`, `edges`, `actions`) — never `SELECT *`, name the columns you need. InsightsQL string timestamp literals parse in the _project_ timezone — use `now() - INTERVAL N DAY` for recency windows, never hand-written timestamp strings.
+**SQL footguns** (all three `system` pipeline tables): boolean-ish columns are integers — `countIf(enabled)` errors, write `countIf(enabled = 1)`. `system.insights_functions` and `system.script_flows` carry huge JSON columns (`inputs_schema`, `filters`, `edges`, `actions`) — never `SELECT *`, name the columns you need. InsightsQL string timestamp literals parse in the _project_ timezone — use `now() - INTERVAL N DAY` for recency windows, never hand-written timestamp strings.
 
 Before any per-pipeline deep dive, normalize against the whole fleet: if every destination's failures spiked at once, that's one platform/network finding (or known ingestion trouble), not N per-destination findings.
 
@@ -197,7 +197,7 @@ Direct calls (read-only):
 - `batch-exports-list` / `batch-export-get` — roster and per-export detail; `get` carries `latest_runs` (10 newest: status, records, `latest_error`, interval bounds).
 - `workflows-global-stats` — per-flow succeeded/failed for the whole fleet in one call, most-failing first. Script flows only — it does not cover destinations.
 - `workflows-stats` / `workflows-list-invocations` / `workflows-logs` — one flow's time series, per-recipient outcomes (`error_kind`, `error_message`, `person_id`), and step trace.
-- `execute-sql` against `system.insights_functions`, `system.hog_flows`, `system.batch_exports` — bulk roster reads without pagination (name your columns; no watcher state here; integer booleans).
+- `execute-sql` against `system.insights_functions`, `system.script_flows`, `system.batch_exports` — bulk roster reads without pagination (name your columns; no watcher state here; integer booleans).
 - `advanced-activity-logs-list` (`scopes: ["InsightsFunction"]` / `["InsightsFlow"]` / `["BatchExport"]`) — dating config edits against delivery shifts.
 
 Inbox & reviewer routing:

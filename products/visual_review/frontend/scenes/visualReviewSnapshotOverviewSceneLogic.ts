@@ -491,7 +491,7 @@ export const visualReviewSnapshotOverviewSceneLogic = kea<visualReviewSnapshotOv
         thumbnailBasePath: [
             (s) => [s.currentProjectId, (_, p) => p.repoId],
             (projectId: number | string, repoId): string | null =>
-                projectId ? `/api/projects/${projectId}/visual_review/repos/${repoId}/thumbnails` : null,
+                projectId ? `/v1/projects/${projectId}/visual_review/repos/${repoId}/thumbnails` : null,
         ],
         // Single scene crumb — see runs scene for why we collapse to one.
         breadcrumbs: [

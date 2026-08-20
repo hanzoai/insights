@@ -2,7 +2,6 @@ import uuid
 import datetime
 from enum import Enum
 from typing import Any, Literal, Optional, cast
-from urllib.parse import quote
 
 from django.conf import settings
 from django.db import transaction
@@ -16,13 +15,11 @@ from hanzo_insights import new_context, tag
 from prometheus_client import Counter, Histogram
 
 from insights.caching.login_device_cache import check_and_cache_login_device
-from insights.cloud_utils import is_cloud
 from insights.constants import AUTH_BACKEND_DISPLAY_NAMES, INVITE_DAYS_VALIDITY
 from insights.email import EMAIL_TASK_KWARGS, EmailMessage, get_email_team_and_org_context, is_email_available
 from insights.event_usage import groups
 from insights.geoip import get_geoip_properties
 from insights.helpers.email_utils import sanitize_display_name, sanitize_message_body
-from insights.helpers.two_factor_session import CODE_TTL_SECONDS
 from insights.models import (
     Organization,
     OrganizationInvite,
@@ -399,126 +396,6 @@ def send_member_join(invitee_uuid: str, organization_id: str) -> None:
 
 
 @shared_task(**EMAIL_TASK_KWARGS)
-@skip_team_scope_audit
-def send_provisioning_welcome(user_id: int, token: str, partner_name: str = "", repository: str | None = None) -> None:
-    user = User.objects.get(pk=user_id)
-    message = EmailMessage(
-        use_http=True,
-        campaign_key=f"provisioning-welcome-{user.uuid}-{timezone.now().timestamp()}",
-        subject="Welcome to Insights - set your password",
-        template_name="provisioning_welcome",
-        template_context={
-            "preheader": "Your Insights account is ready. Set your password to log in.",
-            "link": f"/reset/{user.uuid}/{token}",
-            "cloud": is_cloud(),
-            "site_url": settings.SITE_URL,
-            "partner_name": partner_name,
-            "repository": repository or "",
-        },
-    )
-    message.add_user_recipient(user)
-    message.send(send_async=False)
-
-
-@shared_task(**EMAIL_TASK_KWARGS)
-@skip_team_scope_audit
-def send_password_reset(user_id: int, token: str) -> None:
-    user = User.objects.get(pk=user_id)
-    message = EmailMessage(
-        use_http=True,
-        campaign_key=f"password-reset-{user.uuid}-{timezone.now().timestamp()}",
-        subject=f"Reset your Insights password",
-        template_name="password_reset",
-        template_context={
-            "preheader": "Please follow the link inside to reset your password.",
-            "link": f"/reset/{user.uuid}/{token}",
-            "cloud": is_cloud(),
-            "site_url": settings.SITE_URL,
-            "social_providers": list(user.social_auth.values_list("provider", flat=True)),
-            "url": f"{settings.SITE_URL}/reset/{user.uuid}/{token}",
-        },
-    )
-    message.add_user_recipient(user)
-    message.send(send_async=False)
-
-
-@shared_task(**EMAIL_TASK_KWARGS)
-@skip_team_scope_audit
-def send_password_changed_email(user_id: int) -> None:
-    user = User.objects.get(pk=user_id)
-    message = EmailMessage(
-        use_http=True,
-        campaign_key=f"password-changed-{user.uuid}-{timezone.now().timestamp()}",
-        subject="Your password has been changed",
-        template_name="password_changed",
-        template_context={
-            "preheader": "Your password has been changed",
-            "cloud": is_cloud(),
-            "site_url": settings.SITE_URL,
-        },
-    )
-    message.add_user_recipient(user)
-    message.send()
-
-
-@shared_task(**EMAIL_TASK_KWARGS)
-@skip_team_scope_audit
-def send_email_verification(
-    user_id: int, token: str, next_url: str | None = None, target_email: str | None = None
-) -> None:
-    user: User = User.objects.get(pk=user_id)
-    next_query = f"?next={quote(next_url, safe='')}" if next_url else ""
-    message = EmailMessage(
-        use_http=True,
-        campaign_key=f"email-verification-{user.uuid}-{timezone.now().timestamp()}",
-        subject=f"Verify your email address",
-        template_name="email_verification",
-        template_context={
-            "preheader": "Please follow the link inside to verify your account.",
-            "link": f"/verify_email/{user.uuid}/{token}{next_query}",
-            "site_url": settings.SITE_URL,
-            "url": f"{settings.SITE_URL}/verify_email/{user.uuid}/{token}{next_query}",
-        },
-    )
-    # Pin the recipient to the email the token authorizes (the caller-captured `target_email`)
-    # rather than re-reading `pending_email`, which a concurrent email change could have drifted.
-    message.add_user_recipient(user, email_override=target_email if target_email is not None else user.pending_email)
-    message.send(send_async=False)
-    hanzo_insights.capture(
-        distinct_id=str(user.distinct_id),
-        event="verification email sent",
-        groups={"organization": str(user.current_organization.id)},  # type: ignore
-    )
-
-
-@shared_task(**EMAIL_TASK_KWARGS)
-@skip_team_scope_audit
-def send_code_based_verification(user_id: int, code: str) -> None:
-    """Send the 6-digit login verification code."""
-    user: User = User.objects.get(pk=user_id)
-
-    message = EmailMessage(
-        use_http=True,
-        campaign_key=f"code_based_verification_{user.uuid}-{timezone.now().timestamp()}",
-        subject="Your Insights login code",
-        template_name="code_based_verification",
-        template_context={
-            "preheader": "Enter this code to verify your login.",
-            "code": code,
-            "expiration_minutes": CODE_TTL_SECONDS // 60,
-            "site_url": settings.SITE_URL,
-        },
-    )
-    message.add_user_recipient(user)
-    message.send(send_async=False)
-    hanzo_insights.capture(
-        distinct_id=str(user.distinct_id),
-        event="login verification code sent",
-        groups={"organization": str(user.current_organization.id)},  # type: ignore
-    )
-
-
-@shared_task(**EMAIL_TASK_KWARGS)
 def send_fatal_plugin_error(
     plugin_config_id: int,
     plugin_config_updated_at: Optional[str],
@@ -567,7 +444,9 @@ def send_insights_function_disabled(insights_function_id: str) -> None:
     if not memberships_to_email:
         return
 
-    campaign_key: str = f"insights_function_disabled_{insights_function_id}_updated_at_{insights_function.updated_at.timestamp()}"
+    campaign_key: str = (
+        f"insights_function_disabled_{insights_function_id}_updated_at_{insights_function.updated_at.timestamp()}"
+    )
     message = EmailMessage(
         campaign_key=campaign_key,
         subject=f"[Alert] Destination '{insights_function.name}' has been disabled in project '{team}' due to high error rate",
@@ -1151,126 +1030,6 @@ def send_async_migration_errored_email(migration_key: str, time: str, error: str
 
 @shared_task(**EMAIL_TASK_KWARGS)
 @skip_team_scope_audit
-def send_two_factor_auth_enabled_email(user_id: int) -> None:
-    user: User = User.objects.get(pk=user_id)
-    message = EmailMessage(
-        use_http=True,
-        campaign_key=f"2fa_enabled_{user.uuid}-{timezone.now().timestamp()}",
-        template_name="2fa_enabled",
-        subject="You've enabled 2FA protection",
-        template_context={
-            "user_name": user.first_name,
-            "user_email": user.email,
-        },
-    )
-    message.add_user_recipient(user)
-    message.send()
-
-
-@shared_task(**EMAIL_TASK_KWARGS)
-@skip_team_scope_audit
-def send_two_factor_auth_disabled_email(user_id: int) -> None:
-    user: User = User.objects.get(pk=user_id)
-    message = EmailMessage(
-        use_http=True,
-        campaign_key=f"2fa_disabled_{user.uuid}-{timezone.now().timestamp()}",
-        template_name="2fa_disabled",
-        subject="You've disabled 2FA protection",
-        template_context={
-            "user_name": user.first_name,
-            "user_email": user.email,
-        },
-    )
-    message.add_user_recipient(user)
-    message.send()
-
-
-@shared_task(**EMAIL_TASK_KWARGS)
-@skip_team_scope_audit
-def send_passkey_added_email(user_id: int) -> None:
-    user: User = User.objects.get(pk=user_id)
-    message = EmailMessage(
-        use_http=True,
-        campaign_key=f"passkey_added_{user.uuid}-{timezone.now().timestamp()}",
-        template_name="passkey_added",
-        subject="A passkey was added to your account",
-        template_context={
-            "user_name": user.first_name,
-            "user_email": user.email,
-        },
-    )
-    message.add_user_recipient(user)
-    message.send()
-
-
-@shared_task(**EMAIL_TASK_KWARGS)
-@skip_team_scope_audit
-def send_passkey_removed_email(user_id: int) -> None:
-    user: User = User.objects.get(pk=user_id)
-    message = EmailMessage(
-        use_http=True,
-        campaign_key=f"passkey_removed_{user.uuid}-{timezone.now().timestamp()}",
-        template_name="passkey_removed",
-        subject="A passkey was removed from your account",
-        template_context={
-            "user_name": user.first_name,
-            "user_email": user.email,
-        },
-    )
-    message.add_user_recipient(user)
-    message.send()
-
-
-@shared_task(**EMAIL_TASK_KWARGS)
-@skip_team_scope_audit
-def send_two_factor_auth_backup_code_used_email(user_id: int) -> None:
-    user: User = User.objects.get(pk=user_id)
-    message = EmailMessage(
-        use_http=True,
-        campaign_key=f"2fa_backup_code_used_{user.uuid}-{timezone.now().timestamp()}",
-        template_name="2fa_backup_code_used",
-        subject="A backup code was used for your account",
-        template_context={
-            "user_name": user.first_name,
-            "user_email": user.email,
-        },
-    )
-    message.add_user_recipient(user)
-    message.send()
-
-
-@shared_task(**EMAIL_TASK_KWARGS)
-@skip_team_scope_audit
-def send_two_factor_reset_email(user_id: int, token: str) -> None:
-    """Send 2FA reset email to user when an admin initiates a reset."""
-    # Deferred: this constant lives in a DRF viewset module; email.py is eager-imported by
-    # insights/tasks/__init__, so a module-level import drags that machinery onto startup.
-    from insights.api.two_factor_reset import TWO_FACTOR_RESET_TOKEN_TIMEOUT_HOURS  # noqa: PLC0415
-
-    user: User = User.objects.get(pk=user_id)
-
-    reset_link = f"{settings.SITE_URL}/reset_2fa/{user.uuid}/{token}"
-
-    message = EmailMessage(
-        use_http=True,
-        campaign_key=f"2fa_reset_{user.uuid}-{timezone.now().timestamp()}",
-        subject="Reset your two-factor authentication",
-        template_name="2fa_reset",
-        template_context={
-            "preheader": "An administrator has initiated a 2FA reset for your account.",
-            "user_name": user.first_name,
-            "user_email": user.email,
-            "url": reset_link,
-            "expiration_hours": TWO_FACTOR_RESET_TOKEN_TIMEOUT_HOURS,
-            "site_url": settings.SITE_URL,
-        },
-    )
-    message.add_user_recipient(user)
-    message.send(send_async=False)
-
-
-@shared_task(**EMAIL_TASK_KWARGS)
-@skip_team_scope_audit
 def login_from_new_device_notification(
     user_id: int, login_time: datetime.datetime, short_user_agent: str, ip_address: str, backend_name: str
 ) -> None:
@@ -1765,7 +1524,9 @@ def send_team_insights_functions_digest(team_id: int, insights_function_ids: lis
     }
 
     send_insights_functions_digest_email.delay(digest_data)
-    logger.info(f"Scheduled InsightsFunctions digest email for team {team_id} with {len(function_metrics)} failed functions")
+    logger.info(
+        f"Scheduled InsightsFunctions digest email for team {team_id} with {len(function_metrics)} failed functions"
+    )
 
 
 @shared_task(**EMAIL_TASK_KWARGS)

@@ -1,8 +1,6 @@
 import { useValues } from 'kea'
 
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
-
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { SkeletonLog } from 'lib/components/ActivityLog/ActivityLog'
 import { describerFor } from 'lib/components/ActivityLog/activityLogLogic'
 import { humanize } from 'lib/components/ActivityLog/humanizeActivity'
@@ -10,7 +8,7 @@ import { humanize } from 'lib/components/ActivityLog/humanizeActivity'
 import { advancedActivityLogsLogic } from './advancedActivityLogsLogic'
 import { AuditLogTable } from './AuditLogTable'
 
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
+const MascotMagnifyingGlass = pngMascot()
 
 export function AdvancedActivityLogsList(): JSX.Element {
     const { advancedActivityLogs, advancedActivityLogsLoading, pagination, isOrganizationView, teamsById } =

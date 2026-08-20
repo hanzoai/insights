@@ -166,7 +166,7 @@ export const changeRequestsLogic = kea<changeRequestsLogicType>([
                     }
 
                     const response = await api.get(
-                        `api/environments/${values.currentTeamId}/change_requests?${toParams(params)}`
+                        `v1/environments/${values.currentTeamId}/change_requests?${toParams(params)}`
                     )
                     return response.results || []
                 },
@@ -207,7 +207,7 @@ export const changeRequestsLogic = kea<changeRequestsLogicType>([
         approveRequest: async ({ id }) => {
             try {
                 const response = await api.create(
-                    `api/environments/${values.currentTeamId}/change_requests/${id}/approve/`,
+                    `v1/environments/${values.currentTeamId}/change_requests/${id}/approve/`,
                     {}
                 )
 
@@ -231,7 +231,7 @@ export const changeRequestsLogic = kea<changeRequestsLogicType>([
 
         rejectRequest: async ({ id, reason }) => {
             try {
-                await api.create(`api/environments/${values.currentTeamId}/change_requests/${id}/reject/`, { reason })
+                await api.create(`v1/environments/${values.currentTeamId}/change_requests/${id}/reject/`, { reason })
                 toast.success('Change request rejected')
                 actions.loadChangeRequestsSuccess(values.changeRequests.filter((cr) => cr.id !== id))
             } catch (error: any) {
@@ -241,7 +241,7 @@ export const changeRequestsLogic = kea<changeRequestsLogicType>([
 
         cancelRequest: async ({ id, reason }) => {
             try {
-                await api.create(`api/environments/${values.currentTeamId}/change_requests/${id}/cancel/`, { reason })
+                await api.create(`v1/environments/${values.currentTeamId}/change_requests/${id}/cancel/`, { reason })
                 toast.success('Change request canceled')
                 // Optimistically remove the canceled CR so the banner disappears immediately
                 actions.loadChangeRequestsSuccess(values.changeRequests.filter((cr) => cr.id !== id))

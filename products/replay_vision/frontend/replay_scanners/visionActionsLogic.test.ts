@@ -38,7 +38,7 @@ const action = (id: string, enabled = true): VisionActionApi => ({
     delivery_config: [],
     next_run_at: null,
     last_run_at: null,
-    hog_flow_id: null,
+    script_flow_id: null,
     created_at: '2026-01-01T00:00:00Z',
     created_by: null,
     updated_at: '2026-01-01T00:00:00Z',
@@ -50,16 +50,16 @@ describe('visionActionsLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/vision/actions/': { results: [action('a'), action('b')], count: 2 },
+                '/v1/projects/:team/vision/actions/': { results: [action('a'), action('b')], count: 2 },
             },
             post: {
-                '/api/projects/:team/vision/actions/': () => [201, action('new')],
+                '/v1/projects/:team/vision/actions/': () => [201, action('new')],
             },
             patch: {
-                '/api/projects/:team/vision/actions/:id/': () => [200, {}],
+                '/v1/projects/:team/vision/actions/:id/': () => [200, {}],
             },
             delete: {
-                '/api/projects/:team/vision/actions/:id/': () => [204, null],
+                '/v1/projects/:team/vision/actions/:id/': () => [204, null],
             },
         })
         initKeaTests()
@@ -86,7 +86,7 @@ describe('visionActionsLogic', () => {
         const digest = { ...action('digest'), is_scanner_digest: true } as VisionActionApi
         useMocks({
             get: {
-                '/api/projects/:team/vision/actions/': { results: [digest, action('a')], count: 2 },
+                '/v1/projects/:team/vision/actions/': { results: [digest, action('a')], count: 2 },
             },
         })
         logic.actions.loadActions()

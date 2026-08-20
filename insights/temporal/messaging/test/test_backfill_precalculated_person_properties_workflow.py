@@ -484,8 +484,8 @@ class TestActivityRowConsumption:
 
         eval_globals: list[dict] = []
 
-        def eval_stub(combined_bytecode, flts, hog_globals, person_id, detailed_logging=False):
-            eval_globals.append(hog_globals)
+        def eval_stub(combined_bytecode, flts, script_globals, person_id, detailed_logging=False):
+            eval_globals.append(script_globals)
             return {"cond1": True}
 
         produced: list[dict] = []
@@ -743,9 +743,9 @@ class TestEvaluateCombinedFiltersSync:
         else:
             combined = ["_H", 1, Operation.STRING, "test_condition", 29, Operation.DICT, 1]
 
-        hog_globals = {"person": {"properties": {"$browser": "Chrome"}}} if detailed and not expect_warning else {}
+        script_globals = {"person": {"properties": {"$browser": "Chrome"}}} if detailed and not expect_warning else {}
 
-        result = evaluate_combined_filters_sync(combined, hog_globals, "person-123", detailed_logging=detailed)
+        result = evaluate_combined_filters_sync(combined, script_globals, "person-123", detailed_logging=detailed)
 
         assert result == expected_result
 

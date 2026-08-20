@@ -87,7 +87,7 @@ export const ThreadWithMultiQuestionForm: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',
@@ -179,7 +179,7 @@ export const ThreadWithMultiFieldQuestion: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',
@@ -252,7 +252,7 @@ export const ThreadWithSingleQuestionForm: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',
@@ -395,7 +395,7 @@ export const ThreadWithMultiQuestionFormLongContent: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',
@@ -491,7 +491,7 @@ export const ThreadWithMultiQuestionFormNoCustomAnswer: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',
@@ -598,7 +598,7 @@ export const ThreadWithMixedFieldTypeForm: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',
@@ -692,7 +692,7 @@ export const ThreadWithTextAndNumberForm: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',
@@ -768,7 +768,7 @@ export const ThreadWithSliderForm: Story = {
 
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(
                         generateChunk([
                             'event: conversation',

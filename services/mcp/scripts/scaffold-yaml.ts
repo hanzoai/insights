@@ -14,7 +14,7 @@
  * Usage:
  *   pnpm scaffold-yaml --product actions
  *   pnpm scaffold-yaml --product error_tracking --output ../../products/error_tracking/mcp/tools.yaml
- *   pnpm scaffold-yaml --path /api/projects/{project_id}/actions/
+ *   pnpm scaffold-yaml --path /v1/projects/{project_id}/actions/
  *   pnpm scaffold-yaml --sync-all
  */
 import { spawnSync } from 'node:child_process'
@@ -163,8 +163,8 @@ function findOperationsByPath(spec: OpenApiSpec, pathPrefix: string): Discovered
 }
 
 /**
- * Deduplicate operations mounted at both /api/environments/ and /api/projects/.
- * Prefers /api/projects/ paths. Uses the clean base operationId (strips _N suffix).
+ * Deduplicate operations mounted at both /v1/environments/ and /v1/projects/.
+ * Prefers /v1/projects/ paths. Uses the clean base operationId (strips _N suffix).
  */
 function deduplicateOperations(ops: DiscoveredOperation[]): DiscoveredOperation[] {
     const groups = new Map<string, DiscoveredOperation[]>()
@@ -181,8 +181,8 @@ function deduplicateOperations(ops: DiscoveredOperation[]): DiscoveredOperation[
             result.push(group[0]!)
             continue
         }
-        // Prefer /api/projects/ over /api/environments/
-        const preferred = group.find((op) => op.path.startsWith('/api/projects/')) ?? group[0]!
+        // Prefer /v1/projects/ over /v1/environments/
+        const preferred = group.find((op) => op.path.startsWith('/v1/projects/')) ?? group[0]!
         // Use clean base operationId for the tool name
         result.push({ ...preferred, operationId: base })
     }
@@ -254,7 +254,7 @@ function mergeWithExisting(
         if (op) {
             // Keep the author's chosen operation variant if it still exists in
             // OpenAPI — they may have picked a specific _N suffix deliberately
-            // (e.g. _2 for /api/projects/ path). Fall back to the deduped
+            // (e.g. _2 for /v1/projects/ path). Fall back to the deduped
             // operationId when their variant was renumbered or removed.
             const operation = validOperationIds.has(config.operation) ? config.operation : op.operationId
             mergedTools[name] = { ...config, operation }

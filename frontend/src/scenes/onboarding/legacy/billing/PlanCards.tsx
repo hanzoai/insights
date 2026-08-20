@@ -8,7 +8,7 @@ import { IconCheck, IconX } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
 
 import { BillingUpgradeCTA } from 'lib/components/BillingUpgradeCTA'
-import { HeartHog } from 'lib/components/mascots'
+import { HeartScript } from 'lib/components/mascots'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
@@ -50,7 +50,7 @@ type PlanCardProps = {
     planData: PlanData
     product: BillingProductV2Type
     highlight?: boolean
-    hogPosition?: 'top-right' | 'top-left'
+    scriptPosition?: 'top-right' | 'top-left'
 }
 
 // Retention differs per product: analytics is measured in years, session replay in months. Billing
@@ -63,7 +63,7 @@ export function formatDataRetentionFeature(feature?: BillingFeatureType): string
     return `${pluralize(feature.limit, singularUnit)} data retention`
 }
 
-export const PlanCard: React.FC<PlanCardProps> = ({ planData, product, highlight, hogPosition = 'top-right' }) => {
+export const PlanCard: React.FC<PlanCardProps> = ({ planData, product, highlight, scriptPosition = 'top-right' }) => {
     const { billing } = useValues(billingLogic)
     const { featureFlags } = useValues(featureFlagLogic)
     const { billingProductLoading } = useValues(billingProductLogic({ product }))
@@ -104,7 +104,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({ planData, product, highlight
         ...planData.features,
     ]
 
-    const hogPositionClass = hogPosition === 'top-right' ? 'CheekyHogTopRight' : 'CheekyHogTopLeft'
+    const scriptPositionClass = scriptPosition === 'top-right' ? 'CheekyScriptTopRight' : 'CheekyScriptTopLeft'
 
     const cardDisabled = planData.ctaAction === 'billing' && !!billingProductLoading
 
@@ -130,13 +130,13 @@ export const PlanCard: React.FC<PlanCardProps> = ({ planData, product, highlight
     return (
         <div className="relative" onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
             {!cardDisabled && (
-                <HeartHog
+                <HeartScript
                     width="100"
                     height="100"
                     className={clsx(
-                        hogPositionClass,
-                        isHovering === true && `${hogPositionClass}--peek`,
-                        isHovering === false && `${hogPositionClass}--hide`
+                        scriptPositionClass,
+                        isHovering === true && `${scriptPositionClass}--peek`,
+                        isHovering === false && `${scriptPositionClass}--hide`
                     )}
                 />
             )}
@@ -284,7 +284,7 @@ export const PlanCards: React.FC<{ product: BillingProductV2Type }> = ({ product
                             planData={planData}
                             product={product}
                             highlight={planData.plan === Plan.RIDICULOUSLY_CHEAP}
-                            hogPosition={index === 0 ? 'top-left' : 'top-right'}
+                            scriptPosition={index === 0 ? 'top-left' : 'top-right'}
                         />
                     ))}
                 </div>

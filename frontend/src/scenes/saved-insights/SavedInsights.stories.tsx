@@ -26,7 +26,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/insights': toPaginatedResponse(
+                '/v1/environments/:team_id/insights': toPaginatedResponse(
                     insightsJson.results.slice(0, 6).map((result, i) => ({
                         // Keep size of response in check
                         ...result,
@@ -47,7 +47,7 @@ export const EmptyState: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/insights': EMPTY_PAGINATED_RESPONSE,
+                '/v1/environments/:team_id/insights': EMPTY_PAGINATED_RESPONSE,
             },
         }),
     ],
@@ -60,7 +60,7 @@ export const SearchResults: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/environments/:team_id/insights': toPaginatedResponse(
+                '/v1/environments/:team_id/insights': toPaginatedResponse(
                     insightsJson.results.slice(0, 5).map((result, i) => {
                         const exactNames = ['Revenue by region', 'Weekly revenue']
                         const similarNames = ['Reveneu trends', 'Q4 reveue', 'Revanue dashboard']

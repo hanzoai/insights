@@ -25,7 +25,7 @@ import {
     TaggerType,
 } from './types'
 
-export interface HogTestResult {
+export interface ScriptTestResult {
     event_uuid: string
     trace_id?: string | null
     input_preview: string
@@ -94,8 +94,8 @@ export interface llmTaggerLogicValues {
     } // aiObservabilitySharedLogic
     providerKeys: LLMProviderKey[] // llmProviderKeysLogic
     activeTab: string
-    hogTestLoading: boolean
-    hogTestResults: HogTestResult[] | null
+    scriptTestLoading: boolean
+    scriptTestResults: ScriptTestResult[] | null
     isNewTagger: boolean
     isTaggerFormSubmitting: boolean
     isTaggerFormValid: boolean
@@ -134,7 +134,7 @@ export interface llmTaggerLogicActions {
     addTag: () => {
         value: true
     }
-    clearHogTestResults: () => {
+    clearScriptTestResults: () => {
         value: true
     }
     deleteTagger: () => {
@@ -203,11 +203,11 @@ export interface llmTaggerLogicActions {
     submitTaggerFormSuccess: (taggerForm: TaggerForm) => {
         taggerForm: TaggerForm
     }
-    testHogTagger: () => {
+    testScriptTagger: () => {
         value: true
     }
-    testHogTaggerSuccess: (results: HogTestResult[]) => {
-        results: HogTestResult[]
+    testScriptTaggerSuccess: (results: ScriptTestResult[]) => {
+        results: ScriptTestResult[]
     }
     touchTaggerFormField: (key: string) => {
         key: string
@@ -269,9 +269,9 @@ export const llmTaggerLogic = kea<llmTaggerLogicType>([
         setActiveTab: (tab: 'runs' | 'configuration') => ({ tab }),
         loadTagRuns: true,
         loadTagRunsSuccess: (runs: TagRun[]) => ({ runs }),
-        testHogTagger: true,
-        testHogTaggerSuccess: (results: HogTestResult[]) => ({ results }),
-        clearHogTestResults: true,
+        testScriptTagger: true,
+        testScriptTaggerSuccess: (results: ScriptTestResult[]) => ({ results }),
+        clearScriptTestResults: true,
     }),
 
     reducers({
@@ -321,18 +321,18 @@ export const llmTaggerLogic = kea<llmTaggerLogicType>([
                 loadTagRunsSuccess: () => false,
             },
         ],
-        hogTestResults: [
-            null as HogTestResult[] | null,
+        scriptTestResults: [
+            null as ScriptTestResult[] | null,
             {
-                testHogTaggerSuccess: (_, { results }) => results,
-                clearHogTestResults: () => null,
+                testScriptTaggerSuccess: (_, { results }) => results,
+                clearScriptTestResults: () => null,
             },
         ],
-        hogTestLoading: [
+        scriptTestLoading: [
             false,
             {
-                testHogTagger: () => true,
-                testHogTaggerSuccess: () => false,
+                testScriptTagger: () => true,
+                testScriptTaggerSuccess: () => false,
             },
         ],
     }),
@@ -431,11 +431,11 @@ export const llmTaggerLogic = kea<llmTaggerLogicType>([
 
                 if (props.id === 'new') {
                     // nosemgrep: prefer-codegen-api
-                    await api.create('api/environments/@current/taggers/', payload)
+                    await api.create('v1/environments/@current/taggers/', payload)
                     toast.success('Tagger created')
                 } else {
                     // nosemgrep: prefer-codegen-api
-                    await api.update(`api/environments/@current/taggers/${props.id}/`, payload)
+                    await api.update(`v1/environments/@current/taggers/${props.id}/`, payload)
                     toast.success('Tagger updated')
                 }
                 // Reload list before navigating so the new/updated tagger is visible
@@ -446,7 +446,7 @@ export const llmTaggerLogic = kea<llmTaggerLogicType>([
     })),
 
     listeners(({ props, actions, values }) => ({
-        testHogTagger: async () => {
+        testScriptTagger: async () => {
             const config = values.taggerForm.tagger_config
             const source = 'source' in config ? config.source : ''
             if (!source) {
@@ -455,15 +455,15 @@ export const llmTaggerLogic = kea<llmTaggerLogicType>([
             try {
                 const teamId = teamLogic.values.currentTeamId
                 // nosemgrep: prefer-codegen-api
-                const response = await api.create(`/api/environments/${teamId}/taggers/test_hog/`, {
+                const response = await api.create(`/v1/environments/${teamId}/taggers/test_script/`, {
                     source,
                     sample_count: 5,
                     tags: config.tags.filter((t: { name: string }) => t.name.trim()),
                 })
-                actions.testHogTaggerSuccess(response.results || [])
+                actions.testScriptTaggerSuccess(response.results || [])
             } catch (error) {
                 console.error('Script tagger test failed:', error)
-                actions.testHogTaggerSuccess([])
+                actions.testScriptTaggerSuccess([])
             }
         },
         loadTagRuns: async () => {
@@ -529,7 +529,7 @@ export const llmTaggerLogic = kea<llmTaggerLogicType>([
             // the UI is stuck on the skeleton indefinitely on any API error.
             try {
                 // nosemgrep: prefer-codegen-api
-                const tagger = await api.get(`api/environments/@current/taggers/${props.id}/`)
+                const tagger = await api.get(`v1/environments/@current/taggers/${props.id}/`)
                 actions.loadTaggerSuccess(tagger)
                 actions.setTaggerFormValues({
                     name: tagger.name,
@@ -550,7 +550,7 @@ export const llmTaggerLogic = kea<llmTaggerLogicType>([
                 return
             }
             // nosemgrep: prefer-codegen-api
-            await api.update(`api/environments/@current/taggers/${props.id}/`, { deleted: true })
+            await api.update(`v1/environments/@current/taggers/${props.id}/`, { deleted: true })
             toast.success('Tagger deleted')
             router.actions.push(urls.aiObservabilityTags())
         },

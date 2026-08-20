@@ -1,6 +1,6 @@
 import re
 
-from common.scriptvm.python.objects import is_hog_callable, is_hog_closure, is_hog_date, is_hog_datetime, is_hog_error
+from common.scriptvm.python.objects import is_script_callable, is_script_closure, is_script_date, is_script_datetime, is_script_error
 
 # Copied from datastore_driver.util.escape, adapted only from single quotes to backquotes.
 escape_chars_map = {
@@ -34,36 +34,36 @@ def escape_identifier(identifier: str | int) -> str:
     return "`{}`".format("".join(backquote_escape_chars_map.get(c, c) for c in identifier))
 
 
-def print_hog_value(obj, marked: set | None = None):
+def print_script_value(obj, marked: set | None = None):
     if marked is None:
         marked = set()
-    if isinstance(obj, dict) and is_hog_datetime(obj):
+    if isinstance(obj, dict) and is_script_datetime(obj):
         return f"DateTime({float(obj['dt'])}, {escape_string(obj['zone'] or 'UTC')})"
-    if isinstance(obj, dict) and is_hog_date(obj):
+    if isinstance(obj, dict) and is_script_date(obj):
         return f"Date({obj['year']}, {obj['month']}, {obj['day']})"
-    if isinstance(obj, dict) and is_hog_error(obj):
+    if isinstance(obj, dict) and is_script_error(obj):
         return (
-            f"{obj['type']}({print_hog_value(obj['message'])}"
-            + (f", {print_hog_value(obj['payload'])}" if "payload" in obj and obj["payload"] is not None else "")
+            f"{obj['type']}({print_script_value(obj['message'])}"
+            + (f", {print_script_value(obj['payload'])}" if "payload" in obj and obj["payload"] is not None else "")
             + ")"
         )
-    if isinstance(obj, dict) and is_hog_closure(obj):
-        return print_hog_value(obj["callable"], marked)
-    if isinstance(obj, dict) and is_hog_callable(obj):
-        return f"fn<{escape_identifier(obj.get('name', 'lambda'))}({print_hog_value(obj['argCount'])})>"
+    if isinstance(obj, dict) and is_script_closure(obj):
+        return print_script_value(obj["callable"], marked)
+    if isinstance(obj, dict) and is_script_callable(obj):
+        return f"fn<{escape_identifier(obj.get('name', 'lambda'))}({print_script_value(obj['argCount'])})>"
     if isinstance(obj, list) or isinstance(obj, dict) or isinstance(obj, tuple):
         if id(obj) in marked:
             return "null"
         marked.add(id(obj))
         try:
             if isinstance(obj, list):
-                return f"[{', '.join([print_hog_value(o, marked) for o in obj])}]"
+                return f"[{', '.join([print_script_value(o, marked) for o in obj])}]"
             if isinstance(obj, dict):
-                return f"{{{', '.join([f'{print_hog_value(key, marked)}: {print_hog_value(value, marked)}' for key, value in obj.items()])}}}"
+                return f"{{{', '.join([f'{print_script_value(key, marked)}: {print_script_value(value, marked)}' for key, value in obj.items()])}}}"
             if isinstance(obj, tuple):
                 if len(obj) < 2:
-                    return f"tuple({', '.join([print_hog_value(o, marked) for o in obj])})"
-                return f"({', '.join([print_hog_value(o, marked) for o in obj])})"
+                    return f"tuple({', '.join([print_script_value(o, marked) for o in obj])})"
+                return f"({', '.join([print_script_value(o, marked) for o in obj])})"
         finally:
             marked.remove(id(obj))
 
@@ -78,7 +78,7 @@ def print_hog_value(obj, marked: set | None = None):
     return str(obj)
 
 
-def print_hog_string_output(obj):
+def print_script_string_output(obj):
     if isinstance(obj, str):
         return str(obj)
-    return print_hog_value(obj)
+    return print_script_value(obj)

@@ -1,15 +1,15 @@
-import { createHogExecutionGlobals } from '../_tests/fixtures'
+import { createScriptExecutionGlobals } from '../_tests/fixtures'
 import { InsightsFunctionInvocationGlobalsSchema } from './cyclotron'
 
 describe('cyclotron schema', () => {
     describe('InsightsFunctionInvocationGlobalsSchema', () => {
         it('accepts well-formed globals', () => {
-            const globals = createHogExecutionGlobals({})
+            const globals = createScriptExecutionGlobals({})
             expect(InsightsFunctionInvocationGlobalsSchema.safeParse(globals).success).toBe(true)
         })
 
         it.each([['project'], ['event']] as const)('rejects globals missing %s (poison-pill shape)', (field) => {
-            const globals = createHogExecutionGlobals({}) as any
+            const globals = createScriptExecutionGlobals({}) as any
             delete globals[field]
             expect(InsightsFunctionInvocationGlobalsSchema.safeParse(globals).success).toBe(false)
         })
@@ -20,7 +20,7 @@ describe('cyclotron schema', () => {
             { mutation: (g: any) => delete g.event.distinct_id, desc: 'event.distinct_id is missing' },
             { mutation: (g: any) => delete g.event.properties, desc: 'event.properties is missing' },
         ])('rejects when $desc', ({ mutation }) => {
-            const globals = createHogExecutionGlobals({}) as any
+            const globals = createScriptExecutionGlobals({}) as any
             mutation(globals)
             expect(InsightsFunctionInvocationGlobalsSchema.safeParse(globals).success).toBe(false)
         })
@@ -29,7 +29,7 @@ describe('cyclotron schema', () => {
             // The rerun path casts the validated globals to WithInputs and relies on
             // extra fields surviving — a switch to a strict schema would silently
             // strip them and break replay.
-            const globals = { ...createHogExecutionGlobals({}), inputs: { url: 'https://x' }, custom: 1 } as any
+            const globals = { ...createScriptExecutionGlobals({}), inputs: { url: 'https://x' }, custom: 1 } as any
             const parsed = InsightsFunctionInvocationGlobalsSchema.safeParse(globals)
             expect(parsed.success).toBe(true)
             expect((parsed as any).data.inputs).toEqual({ url: 'https://x' })

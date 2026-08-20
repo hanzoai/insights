@@ -9,38 +9,38 @@ import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'
 import { useOpenAi } from '~/scenes/max/useOpenAi'
 import { urls } from '~/scenes/urls'
 
-import type { TestHogResultItemApi } from '../../generated/api.schemas'
-import { INSIGHTS_EVAL_EXAMPLES } from '../hogEvalExamples'
+import type { TestScriptResultItemApi } from '../../generated/api.schemas'
+import { INSIGHTS_EVAL_EXAMPLES } from '../scriptEvalExamples'
 import { llmEvaluationLogic } from '../llmEvaluationLogic'
 import type { EvaluationTarget } from '../types'
 
 const GLOBAL_NAME_CODE_CLASS = 'font-medium text-sm text-primary bg-fill-highlight-100 px-1.5 py-0.5 rounded'
 const PROPERTY_NAME_CODE_CLASS = 'font-medium text-xs text-primary bg-fill-highlight-100 px-1 py-0.5 rounded'
 
-type HogGlobalFieldType = 'string' | 'number' | 'object'
-type HogGlobalDescription = string | Record<EvaluationTarget, string>
+type ScriptGlobalFieldType = 'string' | 'number' | 'object'
+type ScriptGlobalDescription = string | Record<EvaluationTarget, string>
 
-interface HogGlobalFieldDefinition {
+interface ScriptGlobalFieldDefinition {
     name: string
-    type: HogGlobalFieldType
-    description: HogGlobalDescription
+    type: ScriptGlobalFieldType
+    description: ScriptGlobalDescription
 }
 
-interface HogGlobalDefinition {
+interface ScriptGlobalDefinition {
     name: string
     collection: 'array' | 'object'
-    description: HogGlobalDescription
-    fields: readonly HogGlobalFieldDefinition[]
+    description: ScriptGlobalDescription
+    fields: readonly ScriptGlobalFieldDefinition[]
 }
 
-interface MonacoHogGlobalField {
-    type: HogGlobalFieldType
+interface MonacoScriptGlobalField {
+    type: ScriptGlobalFieldType
     description: string
 }
 
-type MonacoHogGlobal = Record<string, MonacoHogGlobalField> | Record<string, MonacoHogGlobalField>[]
+type MonacoScriptGlobal = Record<string, MonacoScriptGlobalField> | Record<string, MonacoScriptGlobalField>[]
 
-const INSIGHTS_EVAL_COMMON_GLOBAL_DEFINITIONS: readonly HogGlobalDefinition[] = [
+const INSIGHTS_EVAL_COMMON_GLOBAL_DEFINITIONS: readonly ScriptGlobalDefinition[] = [
     {
         name: 'evaluation_events',
         collection: 'array',
@@ -122,11 +122,11 @@ const INSIGHTS_EVAL_COMMON_GLOBAL_DEFINITIONS: readonly HogGlobalDefinition[] = 
     },
 ]
 
-function resolveHogGlobalDescription(description: HogGlobalDescription, target: EvaluationTarget): string {
+function resolveScriptGlobalDescription(description: ScriptGlobalDescription, target: EvaluationTarget): string {
     return typeof description === 'string' ? description : description[target]
 }
 
-function buildMonacoHogGlobals(target: EvaluationTarget): Record<string, MonacoHogGlobal> {
+function buildMonacoScriptGlobals(target: EvaluationTarget): Record<string, MonacoScriptGlobal> {
     return Object.fromEntries(
         INSIGHTS_EVAL_COMMON_GLOBAL_DEFINITIONS.map((globalDefinition) => {
             const fields = Object.fromEntries(
@@ -134,20 +134,20 @@ function buildMonacoHogGlobals(target: EvaluationTarget): Record<string, MonacoH
                     field.name,
                     {
                         type: field.type,
-                        description: resolveHogGlobalDescription(field.description, target),
+                        description: resolveScriptGlobalDescription(field.description, target),
                     },
                 ])
-            ) as Record<string, MonacoHogGlobalField>
+            ) as Record<string, MonacoScriptGlobalField>
 
             return [globalDefinition.name, globalDefinition.collection === 'array' ? [fields] : fields]
         })
-    ) as Record<string, MonacoHogGlobal>
+    ) as Record<string, MonacoScriptGlobal>
 }
 
 const INSIGHTS_EVAL_COMMON_GLOBALS_BY_TARGET = {
-    generation: buildMonacoHogGlobals('generation'),
-    trace: buildMonacoHogGlobals('trace'),
-    session: buildMonacoHogGlobals('session'),
+    generation: buildMonacoScriptGlobals('generation'),
+    trace: buildMonacoScriptGlobals('trace'),
+    session: buildMonacoScriptGlobals('session'),
 }
 
 const INSIGHTS_EVAL_GLOBALS_BY_TARGET = {
@@ -183,29 +183,29 @@ const INSIGHTS_EVAL_GLOBALS_BY_TARGET = {
     },
     // No compatibility globals: those exist for Script source saved before `target` and
     // `evaluation_events` landed, and no session-target source predates them. This mirrors
-    // build_session_hog_globals, which builds the shared globals and nothing else.
+    // build_session_script_globals, which builds the shared globals and nothing else.
     session: INSIGHTS_EVAL_COMMON_GLOBALS_BY_TARGET.session,
 }
 
-function HogTestResultsPanel(): JSX.Element | null {
-    const { hogTestResults, hogTestResultsLoading, hogTestMessage } = useValues(llmEvaluationLogic)
-    const { clearHogTestResults } = useActions(llmEvaluationLogic)
+function ScriptTestResultsPanel(): JSX.Element | null {
+    const { scriptTestResults, scriptTestResultsLoading, scriptTestMessage } = useValues(llmEvaluationLogic)
+    const { clearScriptTestResults } = useActions(llmEvaluationLogic)
 
-    if (!hogTestResults && !hogTestResultsLoading) {
+    if (!scriptTestResults && !scriptTestResultsLoading) {
         return null
     }
 
-    const passed = hogTestResults?.filter((r) => r.result === true).length ?? 0
-    const failed = hogTestResults?.filter((r) => r.result === false).length ?? 0
-    const na = hogTestResults?.filter((r) => r.result === null && !r.error).length ?? 0
-    const errors = hogTestResults?.filter((r) => r.error !== null).length ?? 0
+    const passed = scriptTestResults?.filter((r) => r.result === true).length ?? 0
+    const failed = scriptTestResults?.filter((r) => r.result === false).length ?? 0
+    const na = scriptTestResults?.filter((r) => r.result === null && !r.error).length ?? 0
+    const errors = scriptTestResults?.filter((r) => r.error !== null).length ?? 0
 
     return (
         <div className="border rounded p-3 space-y-2">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 text-sm">
                     <span className="font-semibold">Test results</span>
-                    {hogTestResults && (
+                    {scriptTestResults && (
                         <>
                             <Tag type="success" icon={<IconCheck />}>
                                 {passed} passed
@@ -226,12 +226,12 @@ function HogTestResultsPanel(): JSX.Element | null {
                         </>
                     )}
                 </div>
-                <Button type="secondary" size="xsmall" onClick={clearHogTestResults}>
+                <Button type="secondary" size="xsmall" onClick={clearScriptTestResults}>
                     Clear
                 </Button>
             </div>
-            {hogTestMessage && <div className="text-sm text-muted">{hogTestMessage}</div>}
-            <Table<TestHogResultItemApi>
+            {scriptTestMessage && <div className="text-sm text-muted">{scriptTestMessage}</div>}
+            <Table<TestScriptResultItemApi>
                 columns={[
                     {
                         title: 'Result',
@@ -309,8 +309,8 @@ function HogTestResultsPanel(): JSX.Element | null {
                     ),
                     rowExpandable: (row) => !!(row.reasoning || row.error),
                 }}
-                dataSource={hogTestResults ?? []}
-                loading={hogTestResultsLoading}
+                dataSource={scriptTestResults ?? []}
+                loading={scriptTestResultsLoading}
                 rowKey="sample_id"
                 size="small"
             />
@@ -319,8 +319,8 @@ function HogTestResultsPanel(): JSX.Element | null {
 }
 
 export function EvaluationCodeEditor(): JSX.Element {
-    const { evaluation, hogTestResultsLoading } = useValues(llmEvaluationLogic)
-    const { setHogSource, testHogOnSample } = useActions(llmEvaluationLogic)
+    const { evaluation, scriptTestResultsLoading } = useValues(llmEvaluationLogic)
+    const { setScriptSource, testScriptOnSample } = useActions(llmEvaluationLogic)
     const { openAi } = useOpenAi()
 
     if (!evaluation || evaluation.evaluation_type !== 'script') {
@@ -336,7 +336,7 @@ export function EvaluationCodeEditor(): JSX.Element {
                 <CodeEditorResizeable
                     language="script"
                     value={source}
-                    onChange={(v) => setHogSource(v ?? '')}
+                    onChange={(v) => setScriptSource(v ?? '')}
                     globals={INSIGHTS_EVAL_GLOBALS_BY_TARGET[evaluation.target]}
                     minHeight="12rem"
                     maxHeight="60vh"
@@ -364,9 +364,9 @@ export function EvaluationCodeEditor(): JSX.Element {
                             <Button
                                 type="secondary"
                                 size="xsmall"
-                                loading={hogTestResultsLoading}
+                                loading={scriptTestResultsLoading}
                                 disabled={!source.trim()}
-                                onClick={() => testHogOnSample()}
+                                onClick={() => testScriptOnSample()}
                                 data-attr="llma-evaluation-test-script"
                             >
                                 Test on sample
@@ -383,7 +383,7 @@ export function EvaluationCodeEditor(): JSX.Element {
                                         name: evaluation.name,
                                         description: evaluation.description,
                                         evaluation_type: evaluation.evaluation_type,
-                                        hog_source: evaluation.evaluation_config.source,
+                                        script_source: evaluation.evaluation_config.source,
                                     },
                                 })
                             }
@@ -403,7 +403,7 @@ export function EvaluationCodeEditor(): JSX.Element {
                 </div>
             </div>
 
-            <HogTestResultsPanel />
+            <ScriptTestResultsPanel />
 
             <div className="bg-bg-light border rounded p-3">
                 <div className="flex items-center justify-between mb-2">
@@ -421,7 +421,7 @@ export function EvaluationCodeEditor(): JSX.Element {
                             key={example.label}
                             type="secondary"
                             size="xsmall"
-                            onClick={() => setHogSource(example.source)}
+                            onClick={() => setScriptSource(example.source)}
                         >
                             {example.label}
                         </Button>
@@ -436,7 +436,7 @@ export function EvaluationCodeEditor(): JSX.Element {
                             </dt>
                             <dd className="m-0">
                                 <p className="m-0">
-                                    {resolveHogGlobalDescription(globalDefinition.description, evaluation.target)}
+                                    {resolveScriptGlobalDescription(globalDefinition.description, evaluation.target)}
                                 </p>
                                 <dl className="grid grid-cols-[max-content_minmax(0,1fr)] items-baseline gap-x-2 gap-y-1 mt-1.5">
                                     {globalDefinition.fields.map((field) => (
@@ -445,7 +445,7 @@ export function EvaluationCodeEditor(): JSX.Element {
                                                 <code className={PROPERTY_NAME_CODE_CLASS}>{field.name}</code>
                                             </dt>
                                             <dd className="m-0">
-                                                {resolveHogGlobalDescription(field.description, evaluation.target)}
+                                                {resolveScriptGlobalDescription(field.description, evaluation.target)}
                                             </dd>
                                         </Fragment>
                                     ))}

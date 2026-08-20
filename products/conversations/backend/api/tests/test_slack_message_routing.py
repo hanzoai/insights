@@ -25,7 +25,7 @@ from products.conversations.backend.slack import (
     handle_support_message,
     handle_support_reaction,
 )
-from products.conversations.backend.tasks import process_supporthog_interactivity
+from products.conversations.backend.tasks import process_support_interactivity
 from products.customer_analytics.backend.facade import api as customer_analytics
 from products.customer_analytics.backend.test.factories import create_account
 
@@ -1089,7 +1089,7 @@ class TestSlackMemberAlerts(BaseTest):
         mock_report.assert_not_called()
 
 
-class TestSupporthogInteractivity(BaseTest):
+class TestSupportInteractivity(BaseTest):
     def setUp(self):
         super().setUp()
         cache.clear()
@@ -1118,7 +1118,7 @@ class TestSupporthogInteractivity(BaseTest):
         self.team.conversations_settings = {"slack_enabled": False}
         self.team.save()
 
-        process_supporthog_interactivity(
+        process_support_interactivity(
             self._payload(TICKET_CONFIRM_ACTION_OPEN, {"channel": "C_CONFIG", "message_ts": "1700000000.000100"}),
             "T123",
         )
@@ -1129,7 +1129,7 @@ class TestSupporthogInteractivity(BaseTest):
     def test_dismiss_deletes_prompt_acks_and_suppresses(self, mock_get_client):
         mock_get_client.return_value.auth_test.return_value = {"user_id": "U_BOT"}
 
-        process_supporthog_interactivity(
+        process_support_interactivity(
             self._payload(
                 TICKET_CONFIRM_ACTION_DISMISS,
                 {"channel": "C_CONFIG", "message_ts": "1700000000.000100", "classifier": "yes"},
@@ -1181,7 +1181,7 @@ class TestSupporthogInteractivity(BaseTest):
     ):
         mock_create.return_value = create_return
 
-        process_supporthog_interactivity(self._payload(TICKET_CONFIRM_ACTION_OPEN, value), "T123")
+        process_support_interactivity(self._payload(TICKET_CONFIRM_ACTION_OPEN, value), "T123")
 
         assert mock_create.call_count == (1 if expect_create_called else 0)
         client = mock_get_client.return_value
@@ -1205,7 +1205,7 @@ class TestSupporthogInteractivity(BaseTest):
         mock_create.return_value = None
 
         with self.assertRaises(Retry):
-            process_supporthog_interactivity(
+            process_support_interactivity(
                 self._payload(TICKET_CONFIRM_ACTION_OPEN, {"channel": "C_CONFIG", "message_ts": "1700000000.000100"}),
                 "T123",
             )
@@ -1227,7 +1227,7 @@ class TestSupporthogInteractivity(BaseTest):
         mock_get_client.return_value.chat_update.side_effect = RuntimeError("slack down")
 
         with self.assertRaises(Retry):
-            process_supporthog_interactivity(
+            process_support_interactivity(
                 self._payload(TICKET_CONFIRM_ACTION_OPEN, {"channel": "C_CONFIG", "message_ts": "1700000000.000100"}),
                 "T123",
             )
@@ -1250,7 +1250,7 @@ class TestSupporthogInteractivity(BaseTest):
         )
         mock_create.return_value = Mock(ticket_number=7)
 
-        process_supporthog_interactivity(
+        process_support_interactivity(
             self._payload(TICKET_CONFIRM_ACTION_OPEN, {"channel": "C_CONFIG", "message_ts": "1700000000.000100"}),
             "T123",
         )
@@ -1276,8 +1276,8 @@ class TestSupporthogInteractivity(BaseTest):
         else:
             mock_create.return_value = failure
 
-        with patch.object(process_supporthog_interactivity, "retry", side_effect=MaxRetriesExceededError()):
-            process_supporthog_interactivity(
+        with patch.object(process_support_interactivity, "retry", side_effect=MaxRetriesExceededError()):
+            process_support_interactivity(
                 self._payload(TICKET_CONFIRM_ACTION_OPEN, {"channel": "C_CONFIG", "message_ts": "1700000000.000100"}),
                 "T123",
             )

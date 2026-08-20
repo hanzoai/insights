@@ -83,28 +83,28 @@ const successfulPrChecks = {
 
 const detailMocks = mswDecorator({
     get: {
-        '/api/projects/:id/signals/reports/:reportId/artefacts': (req) => [
+        '/v1/projects/:id/signals/reports/:reportId/artefacts': (req) => [
             200,
             mockArtefacts(req.params.reportId as string),
         ],
-        '/api/projects/:id/signals/reports/:reportId/artefacts/:artefactId/diff/': () => [200, mockBranchDiff()],
-        '/api/projects/:id/signals/reports/:reportId/signals': (req) => [
+        '/v1/projects/:id/signals/reports/:reportId/artefacts/:artefactId/diff/': () => [200, mockBranchDiff()],
+        '/v1/projects/:id/signals/reports/:reportId/signals': (req) => [
             200,
             { report: null, signals: mockSignals(req.params.reportId as string, 4) },
         ],
-        '/api/projects/:id/signals/reports/:reportId/pr_checks/': (req) => [
+        '/v1/projects/:id/signals/reports/:reportId/pr_checks/': (req) => [
             200,
             req.params.reportId === pullRequestReports[1].id ? successfulPrChecks : mixedPrChecks,
         ],
-        '/api/projects/:id/signals/reports/:reportId/pr_comments/': () => [200, { comments: [] }],
-        '/api/projects/:id/signals/reports/available_reviewers': () => [200, mockReviewers],
+        '/v1/projects/:id/signals/reports/:reportId/pr_comments/': () => [200, { comments: [] }],
+        '/v1/projects/:id/signals/reports/available_reviewers': () => [200, mockReviewers],
         // Terminal run status so the inline run viewer replays its static log instead of opening SSE.
-        '/api/projects/:id/tasks/:taskId': (req) => [200, mockTask(req.params.taskId as string, 'completed')],
-        '/api/projects/:id/tasks/:taskId/runs/:runId': (req) => [
+        '/v1/projects/:id/tasks/:taskId': (req) => [200, mockTask(req.params.taskId as string, 'completed')],
+        '/v1/projects/:id/tasks/:taskId/runs/:runId': (req) => [
             200,
             mockTaskRun(req.params.taskId as string, req.params.runId as string),
         ],
-        '/api/projects/:id/tasks/:taskId/runs/:runId/logs': () => new HttpResponse(mockRunLog()),
+        '/v1/projects/:id/tasks/:taskId/runs/:runId/logs': () => new HttpResponse(mockRunLog()),
     },
 })
 
@@ -238,8 +238,8 @@ const inlineReviewComments = [
 
 const inlineReviewMocks = mswDecorator({
     get: {
-        '/api/projects/:id/signals/reports/:reportId/pr_comments/': () => [200, { comments: inlineReviewComments }],
-        '/api/users/@me/integrations/': () => [
+        '/v1/projects/:id/signals/reports/:reportId/pr_comments/': () => [200, { comments: inlineReviewComments }],
+        '/v1/users/@me/integrations/': () => [
             200,
             {
                 results: [

@@ -98,7 +98,7 @@ describe('ProjectsGrid', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/organizations/:org/feature_flags/keys/': {
+                '/v1/organizations/:org/feature_flags/keys/': {
                     count: 1,
                     next: null,
                     previous: null,
@@ -113,7 +113,7 @@ describe('ProjectsGrid', () => {
                         },
                     ],
                 },
-                '/api/organizations/:org/feature_flags/:key/': [],
+                '/v1/organizations/:org/feature_flags/:key/': [],
             },
         })
         initKeaTests()

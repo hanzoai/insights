@@ -33,7 +33,7 @@ KAFKA_METRICS_TIME_TO_SEE_DATA = f"{KAFKA_PREFIX}datastore_metrics_time_to_see_d
 KAFKA_PERSON_OVERRIDE = f"{KAFKA_PREFIX}datastore_person_override{SUFFIX}"
 KAFKA_LOG_ENTRIES = f"{KAFKA_PREFIX}log_entries{SUFFIX}"
 KAFKA_LOG_ENTRIES_V2_TEST = f"{KAFKA_PREFIX}log_entries_v2_test{SUFFIX}"
-KAFKA_FN_INVOCATION_RESULTS = f"{KAFKA_PREFIX}datastore_hog_invocation_results{SUFFIX}"
+KAFKA_FN_INVOCATION_RESULTS = f"{KAFKA_PREFIX}datastore_invocations{SUFFIX}"
 KAFKA_MESSAGE_ASSETS = f"{KAFKA_PREFIX}datastore_message_assets{SUFFIX}"
 
 KAFKA_DATASTORE_HEATMAP_EVENTS = f"{KAFKA_PREFIX}datastore_heatmap_events{SUFFIX}"
@@ -72,7 +72,7 @@ KAFKA_DWH_CDP_RAW_TABLE = f"{KAFKA_PREFIX}cdp_data_warehouse_source_table{SUFFIX
 KAFKA_WAREHOUSE_SOURCE_WEBHOOKS = f"{KAFKA_PREFIX}data_warehouse_source_webhooks{SUFFIX}"
 KAFKA_WAREHOUSE_SOURCE_WEBHOOKS_DLQ = f"{KAFKA_PREFIX}data_warehouse_source_webhooks_dlq{SUFFIX}"
 
-KAFKA_DATASTORE_TOPHOG = f"{KAFKA_PREFIX}datastore_tophog{SUFFIX}"
+KAFKA_DATASTORE_TopFn = f"{KAFKA_PREFIX}datastore_topfn{SUFFIX}"
 
 # Distinct ID usage - pre-processed by WarpStream pipeline from datastore_events_json
 KAFKA_DISTINCT_ID_USAGE_EVENTS_JSON = f"{KAFKA_PREFIX}distinct_id_usage_events_json{SUFFIX}"

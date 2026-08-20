@@ -120,16 +120,16 @@ const MOCK_FN_FUNCTION_TEMPLATING_WARNING = {
 
 const commonMocks = {
     get: {
-        [`/api/environments/:team_id/insights_functions/${MOCK_FN_FUNCTION_ID}/`]: MOCK_FN_FUNCTION,
-        [`/api/environments/:team_id/insights_functions/${MOCK_FN_FUNCTION_TEMPLATING_WARNING_ID}/`]:
+        [`/v1/environments/:team_id/insights_functions/${MOCK_FN_FUNCTION_ID}/`]: MOCK_FN_FUNCTION,
+        [`/v1/environments/:team_id/insights_functions/${MOCK_FN_FUNCTION_TEMPLATING_WARNING_ID}/`]:
             MOCK_FN_FUNCTION_TEMPLATING_WARNING,
-        '/api/environments/:team_id/insights_functions/': { count: 1, results: [MOCK_FN_FUNCTION], next: null },
-        [`/api/environments/:team_id/batch_exports/${MOCK_BATCH_EXPORT_ID}/`]: MOCK_BATCH_EXPORT,
-        [`/api/environments/:team_id/batch_exports/${MOCK_BATCH_EXPORT_ID}/runs/`]: { results: [], next: null },
+        '/v1/environments/:team_id/insights_functions/': { count: 1, results: [MOCK_FN_FUNCTION], next: null },
+        [`/v1/environments/:team_id/batch_exports/${MOCK_BATCH_EXPORT_ID}/`]: MOCK_BATCH_EXPORT,
+        [`/v1/environments/:team_id/batch_exports/${MOCK_BATCH_EXPORT_ID}/runs/`]: { results: [], next: null },
     },
     post: {
         // Fallback in case enableBackfills is triggered (e.g. for script functions without batch_export_id)
-        [`/api/environments/:team_id/insights_functions/${MOCK_FN_FUNCTION_ID}/enable_backfills/`]: {
+        [`/v1/environments/:team_id/insights_functions/${MOCK_FN_FUNCTION_ID}/enable_backfills/`]: {
             batch_export_id: MOCK_BATCH_EXPORT_ID,
         },
     },
@@ -149,7 +149,7 @@ const meta: Meta = {
             ...commonMocks,
             get: {
                 ...commonMocks.get,
-                [`/api/environments/:team_id/batch_exports/${MOCK_BATCH_EXPORT_ID}/backfills/`]: {
+                [`/v1/environments/:team_id/batch_exports/${MOCK_BATCH_EXPORT_ID}/backfills/`]: {
                     results: [],
                     next: null,
                 },
@@ -170,7 +170,7 @@ export const BackfillsWithData: Story = {
             ...commonMocks,
             get: {
                 ...commonMocks.get,
-                [`/api/environments/:team_id/batch_exports/${MOCK_BATCH_EXPORT_ID}/backfills/`]: {
+                [`/v1/environments/:team_id/batch_exports/${MOCK_BATCH_EXPORT_ID}/backfills/`]: {
                     results: MOCK_BACKFILLS,
                     next: null,
                 },
@@ -194,11 +194,11 @@ export const RunsWithData: Story = {
             ...commonMocks,
             get: {
                 ...commonMocks.get,
-                [`/api/environments/:team_id/batch_exports/${MOCK_BATCH_EXPORT_ID}/backfills/`]: {
+                [`/v1/environments/:team_id/batch_exports/${MOCK_BATCH_EXPORT_ID}/backfills/`]: {
                     results: [],
                     next: null,
                 },
-                [`/api/environments/:team_id/batch_exports/${MOCK_BATCH_EXPORT_ID}/runs/`]: {
+                [`/v1/environments/:team_id/batch_exports/${MOCK_BATCH_EXPORT_ID}/runs/`]: {
                     results: [
                         {
                             id: 'run-001',

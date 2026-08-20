@@ -151,7 +151,7 @@ class DatastoreSource(SimpleSource[DatastoreSourceConfig], SSHTunnelMixin, Valid
     @property
     def get_source_config(self) -> SourceConfig:
         return SourceConfig(
-            name=SchemaExternalDataSourceType.CLICK_HOUSE,
+            name=SchemaExternalDataSourceType.DATASTORE,
             category=DataWarehouseSourceCategory.DATABASES,
             keywords=["sql"],
             releaseStatus=ReleaseStatus.GA,

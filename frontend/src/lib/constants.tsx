@@ -173,10 +173,9 @@ export const FEATURE_FLAGS = {
     // Eternal feature flags, shouldn't be removed, helpful for debugging/maintenance reasons
     BILLING_FORECASTING_ISSUES: 'billing-forecasting-issues', // owner: #team-billing, see `Billing.tsx`, used to raise a warning when billing is having problems
     COMING_SOON_WAITLIST_SURVEYS: 'coming-soon-waitlist-surveys', // owner: #team-growth, see `FeaturePreviews.tsx`, swaps concept-stage one-click for an email waitlist survey
-    HOG: 'script', // owner: #team-data-tools, see `DebugScene.tsx` and also insights
+    SCRIPT: 'script', // owner: #team-data-tools, see `DebugScene.tsx` and also insights
     NAV_PANEL_CAMPAIGN: 'nav-panel-campaign', // owner: #team-growth, sidebar promotional campaign, payload-driven. See NavPanelAdvertisement.tsx
     QUERY_TIMINGS: 'query-timings', // owner: #team-analytics-platform, usage: see `dataTableLogic.ts`
-    REDIRECT_SIGNUPS_TO_INSTANCE: 'redirect-signups-to-instance', // owner: @raquelmsmith, see `signupLogic.ts`
     SESSION_RESET_ON_LOAD: 'session-reset-on-load', // owner: @benjackwhite, usage: see `loadInsightsJS.tsx`
     SETTINGS_PERSONS_ON_EVENTS_HIDDEN: 'settings-persons-on-events-hidden', // owner: #team-platform-features, see `SettingsMap.tsx`
     SUPPORT_MESSAGE_OVERRIDE: 'support-message-override', // owner: #team-support, see `SidePanelSupport.tsx`
@@ -199,13 +198,12 @@ export const FEATURE_FLAGS = {
     AI_OBSERVABILITY_DAILY_DIGEST_SCOUT: 'ai-observability-daily-digest-scout', // owner: #team-ai-observability, gates the daily digest scout button
     AI_TRAINING: 'ai-training', // owner: @nicowaltz #team-replay #ai-research, gates the AI training opt-out UI and API enforcement
     AUDIT_LOGS_ACCESS: 'audit-logs-access', // owner: #team-platform-features, used to control access to audit logs
-    AUTH_FLOW_VARIANT: 'auth-flow-variant', // owner: @fercgomes #team-growth multivariate=legacy,paper-desk — selects the auth flow experience (login, signup, invited signup, email verification); paper-desk is the new design, legacy is the existing design
     BATCH_EXPORT_EARLIEST_BACKFILL: 'batch-export-earliest-backfill', // owner: #team-batch-exports, allow backfilling from beginning of time
     CONTROL_SUPPORT_LOGIN: 'control_support_login', // owner: #team-security, used to control whether users can opt out of support impersonation
     CUSTOM_CSS_THEMES: 'custom-css-themes', // owner: #team-growth, used to enable custom CSS for teams who want to have fun
     EXPERIMENT_EXPOSURE_EVENT: 'experiment-exposure-event', // owner: #team-experiments, switches new experiments to the dedicated exposure event
     GAME_CENTER: 'game-center', // owner: everybody, this is just internal for now
-    HEDGEFN_SKIN_SPIDERHOG: 'mascot-skin-spiderhog', // owner: #team-web-analytics, used to reward beta users for web analytics
+    HEDGEFN_SKIN_SPIDERSCRIPT: 'mascot-skin-spiderscript', // owner: #team-web-analytics, used to reward beta users for web analytics
     HIGH_FREQUENCY_BATCH_EXPORTS: 'high-frequency-batch-exports', // owner: #team-batch-exports, allow batch exports to be run every 5min/15min
     METALYTICS: 'metalytics', // owner: #team-platform-features, used to allow companies to see (meta) analytics on access to a specific page
     PERSON_PROPERTY_INCIDENT_ANNOTATION_JAN_2026: 'person-property-incident-annotation-jan-2026', // owner: #team-platform-features, shows system annotation for Jan 6-7 2026 person property incident
@@ -346,12 +344,19 @@ export const FEATURE_FLAGS = {
     FLAGGED_FEATURE_INDICATOR: 'flagged-feature-indicator', // owner: @benjackwhite
     GROUP_PROFILE_EXPERIMENT: 'group-profile-experiment', // owner: @arthurdedeus #team-customer-analytics
     HEALTH_ASK_AI: 'health-ask-ai', // owner: @jordanm-insights #team-web-analytics, gates the "Ask Insights AI" buttons on the Health overview
-    INSIGHTS_INVOCATION_RESULTS_RUNS_TAB: 'script-invocation-results-runs-tab', // owner: #team-workflows
-    INSIGHTSQL_WAREHOUSE_ACCESS_CONTROL: 'insightsql-warehouse-access-control', // owner: @a-lider #team-platform-features, gates per-object access control for warehouse tables and views
     IDENTITY_MATCHING: 'identity-matching', // owner: @fercgomes #team-growth, gates new identity matching scene on marketing analytics
     INBOX_SLACK_NOTIFICATIONS: 'inbox-slack-notifications', // owner: #team-self-driving, gates the Slack notifications config card in the inbox
     INSIGHT_DRAG_TO_ZOOM: 'insight-drag-to-zoom', // owner: @sampennington #team-product-analytics, gates x-axis drag-to-zoom on insight charts (trends today, SQL to follow)
     INSIGHT_SUBSCRIBE_PROMINENT_BUTTON: 'insight-subscribe-prominent-button', // owner: @mattp #team-analytics-platform multivariate=control,test
+    INSIGHTS_AI_BILLING_DISPLAY: 'insights-ai-billing-display', // owner: #team-insights-ai
+    INSIGHTS_AI_CHANGELOG: 'insights-ai-changelog', // owner: #team-insights-ai
+    INSIGHTS_AI_CONVERSATION_FEEDBACK_CONFIG: 'insights-ai-conversation-feedback-config', // owner: #team-insights-ai
+    INSIGHTS_AI_CONVERSATION_FEEDBACK_LLMA_SESSIONS: 'insights-ai-conversation-feedback-llma-sessions', // owner: #team-insights-ai
+    INSIGHTS_AI_QUEUE_MESSAGES_SYSTEM: 'insights-ai-queue-messages-system', // owner: #team-insights-ai
+    INSIGHTS_CODE_BILLING: 'insights-code-billing', // owner: #team-insights-code
+    INSIGHTS_CONNECT: 'insights-connect', // owner: @Gilbert09, gates the "connect another Insights project" personal integration
+    INSIGHTS_INVOCATION_RESULTS_RUNS_TAB: 'script-invocation-results-runs-tab', // owner: #team-workflows
+    INSIGHTSQL_WAREHOUSE_ACCESS_CONTROL: 'insightsql-warehouse-access-control', // owner: @a-lider #team-platform-features, gates per-object access control for warehouse tables and views
     JS_SNIPPET_VERSIONING: 'js-snippet-versioning', // owner: #team-client-libraries
     LEGACY_OAUTH_RECONNECT_WARNING: 'legacy-oauth-reconnect-warning', // owner: @jabahamondes #team-web-analytics — kill-switch for the retiring-OAuth-app reconnect banner
     LINKS: 'links', // owner: @marconlp #team-link (team doesn't exist for now, maybe will come back in the future)
@@ -437,13 +442,6 @@ export const FEATURE_FLAGS = {
     PHAI_SANDBOX_MODE: 'phai-sandbox-mode', // owner: #team-insights-ai
     PHAI_TASKS: 'phai-tasks', // owner: #team-array
     PIPELINE_STATUS_PAGE: 'pipeline-status-page', // owner: @clr182 #team-support
-    INSIGHTS_AI_BILLING_DISPLAY: 'insights-ai-billing-display', // owner: #team-insights-ai
-    INSIGHTS_AI_CHANGELOG: 'insights-ai-changelog', // owner: #team-insights-ai
-    INSIGHTS_AI_CONVERSATION_FEEDBACK_CONFIG: 'insights-ai-conversation-feedback-config', // owner: #team-insights-ai
-    INSIGHTS_AI_CONVERSATION_FEEDBACK_LLMA_SESSIONS: 'insights-ai-conversation-feedback-llma-sessions', // owner: #team-insights-ai
-    INSIGHTS_AI_QUEUE_MESSAGES_SYSTEM: 'insights-ai-queue-messages-system', // owner: #team-insights-ai
-    INSIGHTS_CODE_BILLING: 'insights-code-billing', // owner: #team-insights-code
-    INSIGHTS_CONNECT: 'insights-connect', // owner: @Gilbert09, gates the "connect another Insights project" personal integration
     PRODUCT_ANALYTICS_DASHBOARD_COLORS: 'dashboard-colors', // owner: @thmsobrmlr #team-product-analytics
     PRODUCT_ANALYTICS_DASHBOARD_MODAL_SMART_DEFAULTS: 'product-analytics-dashboard-modal-smart-defaults', // owner: @sam #team-product-analytics
     PRODUCT_ANALYTICS_INSIGHT_HORIZONTAL_CONTROLS: 'insight-horizontal-controls', // owner: #team-product-analytics
@@ -487,7 +485,7 @@ export const FEATURE_FLAGS = {
     REPLAY_VISION_ACTIONS: 'replay-vision-actions', // owner: #team-replay
     REVAMPED_PY_NOTEBOOKS: 'revamped-py-notebooks', // owner: #team-data-tools
     REVENUE_FIELDS_IN_POWER_USERS_TABLE: 'revenue-fields-in-power-users-table', // owner: @arthurdedeus #team-customer-analytics
-    REVIEW_HOG: 'review-script', // owner: #team-devex, gates the Code review menu entry
+    REVIEW: 'review-script', // owner: #team-devex, gates the Code review menu entry
     SCENE_MENU_BAR: 'scene-menu-bar', // owner: @adamleithp #team-platform-ux, gates the per-scene MenuBar above SceneTitleSection
     SCHEMA_ENFORCEMENT_REJECT: 'schema-enforcement-reject', // owner: @aspicer, gates the ability to set schema enforcement mode to "reject"
     SCHEMA_MANAGEMENT: 'schema-management', // owner: @aspicer
@@ -618,9 +616,7 @@ export const MOCK_NODE_PROCESS = {
 } as unknown as NodeJS.Process
 
 export const SSO_PROVIDER_NAMES: Record<SSOProvider, string> = {
-    'google-oauth2': 'Google',
-    github: 'GitHub',
-    gitlab: 'GitLab',
+    oidc: 'Hanzo IAM',
     saml: 'Single sign-on (SAML)',
 }
 

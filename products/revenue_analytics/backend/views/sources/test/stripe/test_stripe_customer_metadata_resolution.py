@@ -106,7 +106,7 @@ class TestStripeCustomerMetadataResolution(DatastoreTestMixin, APIBaseTest):
             "subscription_details,webhooks_delivered_at,subtotal_excluding_tax,"
             "total_discount_amounts,pre_payment_credit_notes_amount,post_payment_credit_notes_amount\n"
             'in_1,0,1,"{}",1549,ch_1,"{}",SH-0001,invoice,paid,1704067200,usd,cus_no_meta,'
-            ',,0,"{}",1549,1,"[]",,1549,1704067200,1706745600,1549,,,StreamHog,1,1704067200,'
+            ',,0,"{}",1549,1,"[]",,1549,1704067200,1706745600,1549,,,StreamScript,1,1704067200,'
             'sub_1,1,"{}",Alice,subscription_create,alice@example.com,0,pi_1,US,0,0,,,0,"{}",0,'
             'charge_automatically,"[]","[]",,"{}",none,1549,"{}",1704067200,1549,"[]",0,0\n'
         )
@@ -120,7 +120,7 @@ class TestStripeCustomerMetadataResolution(DatastoreTestMixin, APIBaseTest):
             "billing_details,failure_message,balance_transaction,statement_descriptor,"
             "payment_method_details,calculated_statement_descriptor\n"
             'ch_1,1,1549,charge,,succeeded,1704067200,in_1,"{}",1,usd,cus_no_meta,'
-            '0,0,"{}",0,Payment,,,,,,pi_1,pm_1,1549,0,"{}",,,STREAMHOG,"{}",STREAMHOG\n'
+            '0,0,"{}",0,Payment,,,,,,pi_1,pm_1,1549,0,"{}",,,HEDGEBOX,"{}",HEDGEBOX\n'
         )
         self.charge_csv.close()
 

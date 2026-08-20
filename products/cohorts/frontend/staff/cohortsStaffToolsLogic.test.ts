@@ -32,8 +32,8 @@ describe('cohortsStaffToolsLogic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/cohorts_staff/': { results: [], not_found_cohort_ids: [] },
-                    '/api/cohorts_staff/stuck/': { results: [], total_count: 0 },
+                    '/v1/cohorts_staff/': { results: [], not_found_cohort_ids: [] },
+                    '/v1/cohorts_staff/stuck/': { results: [], total_count: 0 },
                 },
             })
             initKeaTests()
@@ -81,7 +81,7 @@ describe('cohortsStaffToolsLogic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/cohorts_staff/stuck/': { results: [], total_count: 0 },
+                    '/v1/cohorts_staff/stuck/': { results: [], total_count: 0 },
                 },
             })
             initKeaTests()

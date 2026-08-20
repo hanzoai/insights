@@ -19,7 +19,7 @@ from datastore_pool import ChPool
 from insights import settings
 from insights.datastore.client.connection import NodeRole, Workload, _make_ch_pool, default_client
 from insights.settings import DATASTORE_PER_TEAM_SETTINGS
-from insights.settings.data_stores import DATASTORE_CLUSTER, TEST
+from insights.settings.data_stores import DATASTORE_CLUSTER, DATASTORE_HOST, TEST
 
 
 class _LazyDagsterLogger:
@@ -74,11 +74,27 @@ _MULTINODE_HOST_PORT_OVERRIDES: dict[str, tuple[str, int]] = {
 }
 
 
+# A replica that advertises a loopback name is naming itself from the server's
+# own vantage point: `localhost` in `system.clusters` means "this very server",
+# which is exactly right for the DDL the server runs on itself, and exactly
+# wrong for a client that reads the topology and then dials each node. Read
+# from anywhere else — a web pod running a migration — it resolves to the
+# caller instead, and the connection is refused.
+#
+# The name that reaches that server from here is the one we already dial it by,
+# so a loopback replica resolves to DATASTORE_HOST. Single-node deployments
+# advertise loopback for every cluster, which is why every role-routed
+# migration failed there while ordinary queries succeeded.
+_LOOPBACK_HOSTS = frozenset({"localhost", "127.0.0.1", "::1"})
+
+
 def _resolve_connection_target(host_name: str, port: int | None) -> tuple[str, int | None]:
     if settings.MULTINODE_DATASTORE:
         override = _MULTINODE_HOST_PORT_OVERRIDES.get(host_name)
         if override:
             return override
+    if host_name in _LOOPBACK_HOSTS and DATASTORE_HOST not in _LOOPBACK_HOSTS:
+        return (DATASTORE_HOST, port)
     return (host_name, port)
 
 
@@ -575,7 +591,7 @@ def get_cluster(
     )
 
 
-# Masks inline credentials (e.g. dictionary `SOURCE(DATASTORE(... PASSWORD '…'))` or
+# Masks inline credentials (e.g. dictionary `SOURCE(CLICKHOUSE(... PASSWORD '…'))` or
 # `CREATE USER … IDENTIFIED BY '…'`) so they never reach logs. Datastore needs the password in
 # the source SQL for dictionary reloads to authenticate, so we redact at the logging boundary
 # rather than dropping it from the query.

@@ -65,7 +65,7 @@ class TestVisionActionDelivery(APIBaseTest):
 
     @property
     def actions_url(self) -> str:
-        return f"/api/projects/{self.team.id}/vision/actions/"
+        return f"/v1/projects/{self.team.id}/vision/actions/"
 
     def _create_scanner(self, team: Team | None = None) -> ReplayScanner:
         return ReplayScanner.objects.create(

@@ -1,6 +1,5 @@
 # Web app specific settings/middleware/apps setup
 import os
-from datetime import timedelta
 
 import structlog
 from corsheaders.defaults import default_headers
@@ -21,19 +20,6 @@ logger = structlog.get_logger(__name__)
 INSIGHT_DASHBOARDS_OPT_IN_ENFORCED = get_from_env("INSIGHT_DASHBOARDS_OPT_IN_ENFORCED", False, type_cast=str_to_bool)
 
 ####
-# django-axes
-
-# lockout after too many attempts
-AXES_ENABLED = get_from_env("AXES_ENABLED", not TEST, type_cast=str_to_bool)
-AXES_HANDLER = "axes.handlers.cache.AxesCacheHandler"
-AXES_FAILURE_LIMIT = get_from_env("AXES_FAILURE_LIMIT", 30, type_cast=int)
-AXES_COOLOFF_TIME = timedelta(minutes=10)
-AXES_LOCKOUT_CALLABLE = "insights.api.authentication.axes_locked_out"
-AXES_IPWARE_META_PRECEDENCE_ORDER = ["HTTP_X_FORWARDED_FOR", "REMOTE_ADDR"]
-# Keep legacy 403 status code for lockouts (django-axes 6.0+ defaults to 429)
-AXES_HTTP_RESPONSE_CODE = 403
-
-####
 # Application definition
 
 # TODO: Automatically generate these like we do for the frontend
@@ -43,7 +29,7 @@ PRODUCTS_APPS = [
     "products.early_access_features.backend.apps.EarlyAccessFeaturesConfig",
     "products.tasks.backend.apps.TasksConfig",
     "products.canvas.backend.apps.CanvasConfig",
-    "products.stamphog.backend.apps.StamphogConfig",
+    "products.stamp.backend.apps.StampConfig",
     "products.links.backend.apps.LinksConfig",
     "products.revenue_analytics.backend.apps.RevenueAnalyticsConfig",
     "products.user_interviews.backend.apps.UserInterviewsConfig",
@@ -74,7 +60,7 @@ PRODUCTS_APPS = [
     "products.replay_vision.backend.apps.ReplayVisionConfig",
     "products.mcp_store.backend.apps.McpStoreConfig",
     "products.event_definitions.backend.apps.EventDefinitionsConfig",
-    "products.review_hog.backend.apps.ReviewHogConfig",
+    "products.review.backend.apps.ReviewConfig",
     "products.logs.backend.apps.LogsConfig",
     "products.tracing.backend.apps.TracingConfig",
     "products.metrics.backend.apps.MetricsConfig",
@@ -131,7 +117,6 @@ INSTALLED_APPS = [
     "corsheaders",
     "social_django",
     "django_filters",
-    "axes",
     "django_structlog",
     "drf_spectacular",
     *PRODUCTS_APPS,
@@ -140,15 +125,13 @@ INSTALLED_APPS = [
     "django_otp.plugins.otp_totp",
     # 'django_otp.plugins.otp_email',  # <- if you want email capability.
     # See above for automatically generated apps for all of our products
-    "two_factor",
-    # 'two_factor.plugins.phonenumber',  # <- if you want phone number capability.
-    # 'two_factor.plugins.email',  # <- if you want email capability.
-    # 'two_factor.plugins.yubikey',  # <- for yubikey capability.
     "oauth2_provider",
     "django_admin_inline_paginator",
 ]
 
 MIDDLEWARE = [
+    # First, so the resolver and every middleware below see one spelling of the API path.
+    "insights.middleware.ApiRewriteMiddleware",
     "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "insights.gzip_middleware.ScopedGZipMiddleware",
     "insights.middleware.per_request_logging_context_middleware",
@@ -169,7 +152,7 @@ MIDDLEWARE = [
     "insights.middleware.CSPMiddleware",
     "django.middleware.common.CommonMiddleware",
     # Below CorsMiddleware so responses get CORS headers; above auth/CSRF and URL
-    # resolution so the /api/environments → /api/projects rewrite is in place before the
+    # resolution so the /v1/environments → /v1/projects rewrite is in place before the
     # request is routed and authenticated.
     "insights.middleware.EnvironmentsRewriteMiddleware",
     "insights.middleware.CsrfOrKeyViewMiddleware",
@@ -186,7 +169,6 @@ MIDDLEWARE = [
     "insights.session.middleware.SessionRiskMiddleware",
     "insights.middleware.ActivityLoggingMiddleware",
     "insights.middleware.user_logging_context_middleware",
-    "django_otp.middleware.OTPMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "insights.middleware.AutoLogoutImpersonateMiddleware",
     "insights.middleware.ImpersonationReadOnlyMiddleware",
@@ -194,7 +176,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "insights.middleware.ActiveOrganizationMiddleware",
     "insights.middleware.CsvNeverCacheMiddleware",
-    "axes.middleware.AxesMiddleware",
     "insights.middleware.AutoProjectMiddleware",
     "insights.middleware.CHQueries",
     "django_prometheus.middleware.PrometheusAfterMiddleware",
@@ -246,13 +227,14 @@ WSGI_APPLICATION = "insights.wsgi.application"
 # Authentication
 
 AUTHENTICATION_BACKENDS: list[str] = [
-    "axes.backends.AxesStandaloneBackend",
     # Hanzo IAM (hanzo.id) is the single federated login. Upstream's per-vendor
     # OAuth backends are not wired: this deployment has one identity provider,
     # and a second one would be a second place to revoke an account from.
     "social_core.backends.open_id_connect.OpenIdConnectAuth",
-    "django.contrib.auth.backends.ModelBackend",
-    "insights.auth.WebauthnBackend",
+    # Carries Django's permission lookups (`has_perm`/`get_all_permissions`), which
+    # the OIDC backend does not implement, and abstains from authenticating so no
+    # password reaches a session.
+    "insights.auth.Permissions",
 ]
 
 # Hanzo IAM OIDC SSO (social-auth). All five come from the deployment; the
@@ -282,7 +264,7 @@ LOGIN_URL = "/login"
 LOGOUT_URL = "/logout"
 LOGIN_REDIRECT_URL = "/"
 APPEND_SLASH = False
-CORS_URLS_REGEX = r"^(/site_app/|/array/|/static/|/oauth/token/?|/toolbar_oauth/check|/api/(?!early_access_features|surveys|web_experiments).*$)"
+CORS_URLS_REGEX = r"^(/site_app/|/array/|/static/|/oauth/token/?|/toolbar_oauth/check|/v1/(?!early_access_features|surveys|web_experiments).*$)"
 CORS_ALLOW_HEADERS = default_headers + CORS_ALLOWED_TRACING_HEADERS
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
@@ -317,15 +299,6 @@ SOCIAL_AUTH_FIELDS_STORED_IN_SESSION = [
     "organization_name",
     "reauth",
 ]
-SOCIAL_AUTH_GITHUB_SCOPE = ["user:email"]
-SOCIAL_AUTH_GITHUB_KEY: str | None = os.getenv("SOCIAL_AUTH_GITHUB_KEY")
-SOCIAL_AUTH_GITHUB_SECRET: str | None = os.getenv("SOCIAL_AUTH_GITHUB_SECRET")
-
-SOCIAL_AUTH_GITLAB_SCOPE = ["read_user"]
-SOCIAL_AUTH_GITLAB_KEY: str | None = os.getenv("SOCIAL_AUTH_GITLAB_KEY")
-SOCIAL_AUTH_GITLAB_SECRET: str | None = os.getenv("SOCIAL_AUTH_GITLAB_SECRET")
-SOCIAL_AUTH_GITLAB_API_URL: str = os.getenv("SOCIAL_AUTH_GITLAB_API_URL", "https://gitlab.com")
-
 LICENSE_SECRET_KEY = os.getenv("LICENSE_SECRET_KEY", "license-so-secret")
 
 # Cookie age in seconds (default 2 weeks) - these are the standard defaults for Django but having it here to be explicit
@@ -397,22 +370,11 @@ PROJECT_SWITCHING_TOKEN_ALLOWLIST = get_list(os.getenv("PROJECT_SWITCHING_TOKEN_
 
 TWO_FACTOR_REMEMBER_COOKIE_AGE = 60 * 60 * 24 * 30
 
-####
-# Password validation
-# https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
-    {"NAME": "insights.auth.ZxcvbnValidator"},
-]
-
 if TEST:
-    # PBKDF2 is deliberately slow (~150ms per hash), which adds up because every
-    # per-test user creation hashes a password. MD5 keeps the same hasher API with
-    # none of the cost. Never used outside tests.
+    # PBKDF2 is deliberately slow (~150ms per hash), which adds up because the test
+    # factories still pass a password when they build a user. MD5 keeps the same
+    # hasher API with none of the cost. Never used outside tests.
     PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
-
-PASSWORD_RESET_TIMEOUT = 86_400  # 1 day
 
 ####
 # Internationalization
@@ -685,7 +647,7 @@ SPECTACULAR_SETTINGS = {
         # Canvas source diagnostics and marketing-analytics UTM issues share the same
         # error/warning severity pair; pin one shared name for the choice set.
         "DiagnosticSeverityEnum": ["error", "warning"],
-        # ReviewHog findings expose the same priority set on two fields (effective_priority +
+        # Review findings expose the same priority set on two fields (effective_priority +
         # reviewer_priority); pin one shared name for the choice set.
         "ReviewIssuePriorityEnum": ["must_fix", "should_fix", "consider"],
         # Pin the customer_analytics custom-property target so it doesn't auto-collide with the
@@ -911,7 +873,6 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
-EXCEPTIONS_HOG = {"EXCEPTION_REPORTING": "insights.exceptions.exception_reporting"}
 
 ####
 # Compression
@@ -923,7 +884,7 @@ GZIP_POST_RESPONSE_ALLOW_LIST = get_list(
         "GZIP_POST_RESPONSE_ALLOW_LIST",
         ",".join(
             [
-                "^/?api/(environments|projects)/\\d+/query/?$",
+                "^/?v1/(environments|projects)/\\d+/query/?$",
             ]
         ),
     )
@@ -935,35 +896,35 @@ GZIP_RESPONSE_ALLOW_LIST = get_list(
         ",".join(
             [
                 "^/?external_surveys/[^/]+/?$",
-                "^/?api/plugin_config/\\d+/frontend/?$",
-                "^/?api/(environments|projects)/@current/property_definitions/?$",
-                "^/?api/(environments|projects)/\\d+/event_definitions/?$",
-                "^/?api/(environments|projects)/\\d+/insights/(trend|funnel)/?$",
-                "^/?api/(environments|projects)/\\d+/insights/?$",
-                "^/?api/(environments|projects)/\\d+/insights/\\d+/?$",
-                "^/?api/(environments|projects)/\\d+/dashboards/\\d+/?$",
-                "^/?api/(environments|projects)/\\d+/dashboards/?$",
-                "^/?api/(environments|projects)/\\d+/actions/?$",
-                "^/?api/(environments|projects)/\\d+/session_recordings/?$",
-                "^/?api/(environments|projects)/\\d+/session_recordings/.*$",
-                "^/?api/(environments|projects)/\\d+/session_recording_playlists/?$",
-                "^/?api/(environments|projects)/\\d+/session_recording_playlists/.*$",
-                "^/?api/(environments|projects)/\\d+/performance_events/?$",
-                "^/?api/(environments|projects)/\\d+/performance_events/.*$",
-                "^/?api/(environments|projects)/\\d+/exports/\\d+/content/?$",
-                "^/?api/(environments|projects)/\\d+/my_notifications/?$",
-                "^/?api/(environments|projects)/\\d+/uploaded_media/?$",
+                "^/?v1/plugin_config/\\d+/frontend/?$",
+                "^/?v1/(environments|projects)/@current/property_definitions/?$",
+                "^/?v1/(environments|projects)/\\d+/event_definitions/?$",
+                "^/?v1/(environments|projects)/\\d+/insights/(trend|funnel)/?$",
+                "^/?v1/(environments|projects)/\\d+/insights/?$",
+                "^/?v1/(environments|projects)/\\d+/insights/\\d+/?$",
+                "^/?v1/(environments|projects)/\\d+/dashboards/\\d+/?$",
+                "^/?v1/(environments|projects)/\\d+/dashboards/?$",
+                "^/?v1/(environments|projects)/\\d+/actions/?$",
+                "^/?v1/(environments|projects)/\\d+/session_recordings/?$",
+                "^/?v1/(environments|projects)/\\d+/session_recordings/.*$",
+                "^/?v1/(environments|projects)/\\d+/session_recording_playlists/?$",
+                "^/?v1/(environments|projects)/\\d+/session_recording_playlists/.*$",
+                "^/?v1/(environments|projects)/\\d+/performance_events/?$",
+                "^/?v1/(environments|projects)/\\d+/performance_events/.*$",
+                "^/?v1/(environments|projects)/\\d+/exports/\\d+/content/?$",
+                "^/?v1/(environments|projects)/\\d+/my_notifications/?$",
+                "^/?v1/(environments|projects)/\\d+/uploaded_media/?$",
                 "^/uploaded_media/.*$",
-                "^/api/element/stats/?$",
-                "^/api/(environments|projects)/\\d+/cohorts/?$",
-                "^/api/(environments|projects)/\\d+/persons/?$",
-                "^/api/organizations/@current/plugins/?$",
-                "^api/(environments|projects)/@current/feature_flags/my_flags/?$",
-                "^/?api/(environments|projects)/\\d+/query/?$",
+                "^/v1/element/stats/?$",
+                "^/v1/(environments|projects)/\\d+/cohorts/?$",
+                "^/v1/(environments|projects)/\\d+/persons/?$",
+                "^/v1/organizations/@current/plugins/?$",
+                "^v1/(environments|projects)/@current/feature_flags/my_flags/?$",
+                "^/?v1/(environments|projects)/\\d+/query/?$",
                 # Deploy-static source catalog (no user input or secrets reflected): several
                 # hundred KB of JSON that compresses ~7x.
-                "^/?api/(environments|projects)/(\\d+|@current)/external_data_sources/wizard/?$",
-                "^/?api/instance_status/?$",
+                "^/?v1/(environments|projects)/(\\d+|@current)/external_data_sources/wizard/?$",
+                "^/?v1/instance_status/?$",
                 "^/array/.*$",
             ]
         ),
@@ -1048,12 +1009,12 @@ KAFKA_PRODUCE_ACK_TIMEOUT_SECONDS = int(os.getenv("KAFKA_PRODUCE_ACK_TIMEOUT_SEC
 API_QUERIES_ENABLED = get_from_env("API_QUERIES_ENABLED", False, type_cast=str_to_bool)
 
 ####
-# /api/environments deprecation
+# /v1/environments deprecation
 
-# Requests to /api/environments/* are served through the equivalent /api/projects/*
+# Requests to /v1/environments/* are served through the equivalent /v1/projects/*
 # viewset via an in-process path rewrite — see insights.middleware.EnvironmentsRewriteMiddleware.
 # ISO date announced to integrators via the `Sunset` response header (RFC 8594) on
-# /api/environments/* responses. Empty string omits the header.
+# /v1/environments/* responses. Empty string omits the header.
 API_ENVIRONMENTS_SUNSET_DATE = get_from_env("API_ENVIRONMENTS_SUNSET_DATE", "2026-07-31")
 
 # Query service SLO sampling rate. Each QueryRunner.run() call emits two events
@@ -1100,13 +1061,13 @@ INSIGHTS_FUNCTIONS_DAILY_DIGEST_TEAM_IDS = get_list(get_from_env("INSIGHTS_FUNCT
 
 # Maximum audience size for InsightsFlow batch triggers. Default that applies to all teams unless they
 # opt in to the elevated value below. Only used to inform the frontend UI; no backend enforcement.
-HOGFLOW_BATCH_TRIGGER_LIMIT = int(get_from_env("HOGFLOW_BATCH_TRIGGER_LIMIT", 50000))
-# Elevated maximum audience size, returned for teams listed in HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS.
-HOGFLOW_BATCH_TRIGGER_LIMIT_ELEVATED = int(get_from_env("HOGFLOW_BATCH_TRIGGER_LIMIT_ELEVATED", 100000))
+Flow_BATCH_TRIGGER_LIMIT = int(get_from_env("Flow_BATCH_TRIGGER_LIMIT", 50000))
+# Elevated maximum audience size, returned for teams listed in Flow_BATCH_TRIGGER_ELEVATED_TEAM_IDS.
+Flow_BATCH_TRIGGER_LIMIT_ELEVATED = int(get_from_env("Flow_BATCH_TRIGGER_LIMIT_ELEVATED", 100000))
 # Comma-separated list of team IDs that get the elevated batch trigger limit instead of the default.
 # Empty by default — everyone gets the 50k tier. Opt-in via env override for teams needing 100k.
-HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS: set[int] = {
-    int(team_id) for team_id in get_list(get_from_env("HOGFLOW_BATCH_TRIGGER_ELEVATED_TEAM_IDS", ""))
+Flow_BATCH_TRIGGER_ELEVATED_TEAM_IDS: set[int] = {
+    int(team_id) for team_id in get_list(get_from_env("Flow_BATCH_TRIGGER_ELEVATED_TEAM_IDS", ""))
 }
 
 # Comma-separated list of org ids allowed to receive the Error Tracking weekly digest
@@ -1230,10 +1191,9 @@ ELEMENT_STATS_DEFAULT_LIMIT = get_from_env("ELEMENT_STATS_DEFAULT_LIMIT", 50_000
 AI_GATEWAY_INTERNAL_URL = get_from_env("AI_GATEWAY_INTERNAL_URL", "")
 AI_GATEWAY_INTERNAL_TOKEN = get_from_env("AI_GATEWAY_INTERNAL_TOKEN", "")
 
-# AI gateway inference endpoint: OpenAI-compatible URL (include /v1) + phs_ project
+# AI gateway inference endpoint: OpenAI-compatible URL (include /v1) + sk- project
 # secret for routing LLM calls through the gateway. Unset = direct to the provider.
 AI_GATEWAY_URL = get_from_env("AI_GATEWAY_URL", "")
-AI_GATEWAY_API_KEY = get_from_env("AI_GATEWAY_API_KEY", "")
 
 # Sharing configuration settings
 SHARING_TOKEN_GRACE_PERIOD_SECONDS = 60 * 5  # 5 minutes

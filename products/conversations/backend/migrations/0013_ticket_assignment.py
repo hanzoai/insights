@@ -9,6 +9,8 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
+        # insights.Role lives here now; this creates it.
+        ("insights", "0002_managed_tables"),
         ("conversations", "0012_backfill_ticket_message_stats"),
         ("insights", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
@@ -47,6 +49,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
+                        db_constraint=False,
                         to="insights.role",
                     ),
                 ),

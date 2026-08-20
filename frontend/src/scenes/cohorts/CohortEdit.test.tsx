@@ -22,15 +22,15 @@ describe('cohortEditLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team_id/cohorts/': toPaginatedResponse([mockCohort]),
-                '/api/projects/:team_id/cohorts/:id/': mockCohort,
+                '/v1/projects/:team_id/cohorts/': toPaginatedResponse([mockCohort]),
+                '/v1/projects/:team_id/cohorts/:id/': mockCohort,
             },
             post: {
-                '/api/projects/:team_id/cohorts/': mockCohort,
-                '/api/projects/:team_id/cohorts/:id/': mockCohort,
+                '/v1/projects/:team_id/cohorts/': mockCohort,
+                '/v1/projects/:team_id/cohorts/:id/': mockCohort,
             },
             patch: {
-                '/api/projects/:team_id/cohorts/:id/': mockCohort,
+                '/v1/projects/:team_id/cohorts/:id/': mockCohort,
             },
         })
         initKeaTests()
@@ -198,7 +198,7 @@ describe('cohortEditLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/:team_id/cohorts/${cohortId}/`]: {
+                    [`/v1/projects/:team_id/cohorts/${cohortId}/`]: {
                         id: cohortId,
                         name: 'Test Cohort',
                         is_static: false,
@@ -226,7 +226,7 @@ describe('cohortEditLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/:team_id/cohorts/${cohortId}/`]: {
+                    [`/v1/projects/:team_id/cohorts/${cohortId}/`]: {
                         id: cohortId,
                         name: 'Test Cohort',
                         is_static: false,
@@ -254,7 +254,7 @@ describe('cohortEditLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/:team_id/cohorts/${cohortId}/`]: {
+                    [`/v1/projects/:team_id/cohorts/${cohortId}/`]: {
                         id: cohortId,
                         name: 'Test Cohort',
                         is_static: false,
@@ -281,7 +281,7 @@ describe('cohortEditLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/:team_id/cohorts/${cohortId}/`]: {
+                    [`/v1/projects/:team_id/cohorts/${cohortId}/`]: {
                         id: cohortId,
                         name: 'Test Cohort',
                         is_static: false,
@@ -306,7 +306,7 @@ describe('cohortEditLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/:team_id/cohorts/${cohortId}/`]: {
+                    [`/v1/projects/:team_id/cohorts/${cohortId}/`]: {
                         id: cohortId,
                         name: 'Test Cohort',
                         is_static: false,
@@ -322,7 +322,7 @@ describe('cohortEditLogic', () => {
                     },
                 },
                 patch: {
-                    [`/api/projects/:team_id/cohorts/${cohortId}/`]: {
+                    [`/v1/projects/:team_id/cohorts/${cohortId}/`]: {
                         id: cohortId,
                         name: 'Test Cohort',
                         is_static: false,
@@ -365,7 +365,7 @@ describe('cohortEditLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/:team_id/cohorts/${cohortId}/`]: {
+                    [`/v1/projects/:team_id/cohorts/${cohortId}/`]: {
                         id: cohortId,
                         name: 'Test Cohort',
                         is_static: false,
@@ -399,7 +399,7 @@ describe('cohortEditLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/:team_id/cohorts/${cohortId}/`]: {
+                    [`/v1/projects/:team_id/cohorts/${cohortId}/`]: {
                         id: cohortId,
                         name: 'Test Cohort',
                         is_static: false,
@@ -575,7 +575,7 @@ describe('cohortEditLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/:team_id/cohorts/${cohortId}/`]: {
+                    [`/v1/projects/:team_id/cohorts/${cohortId}/`]: {
                         id: cohortId,
                         name: 'Static Cohort',
                         is_static: true,
@@ -621,7 +621,7 @@ describe('cohortEditLogic', () => {
 
             useMocks({
                 get: {
-                    [`/api/projects/:team_id/cohorts/${cohortId}/`]: {
+                    [`/v1/projects/:team_id/cohorts/${cohortId}/`]: {
                         id: cohortId,
                         name: 'Unmapped Criteria Cohort',
                         is_static: false,

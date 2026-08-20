@@ -41,7 +41,7 @@ const _commonActionFields = {
     created_at: z.number().optional(),
     updated_at: z.number().optional(),
     filters: ActionFiltersSchema.optional().nullable(),
-    output_variable: z // The Hogflow-level variable to store the output of this action into
+    output_variable: z // The Flow-level variable to store the output of this action into
         .union([
             z.object({
                 key: z.string(),
@@ -287,7 +287,7 @@ export const InsightsFlowActionSchema = z.discriminatedUnion('type', [
             message_category_type: z.enum(['marketing', 'transactional']).optional(),
             // When false, no open pixel is injected, links are not rewritten, and the send uses the
             // untracked SES configuration set. Absent/true means tracked. Keep in sync with
-            // nodejs/src/cdp/schema/hogflow.ts.
+            // nodejs/src/cdp/schema/flow.ts.
             tracking_enabled: z.boolean().optional(),
             template_uuid: z.string().optional(), // May be used later to specify a specific template version
             template_id: z.literal('template-email'),
@@ -365,7 +365,7 @@ export const isScheduleTrigger = (action: InsightsFlowAction): boolean => {
     return trigger.config.type === 'schedule'
 }
 
-export interface HogflowTestResult {
+export interface FlowTestResult {
     status: 'success' | 'error' | 'skipped'
     logs?: LogEntry[]
     nextActionId: string | null

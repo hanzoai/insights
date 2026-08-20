@@ -62,7 +62,7 @@ exports[`verifiedDomainsLogic values has proper defaults 1`] = `
       "id": "8db3b0c2-a0ab-490a-9037-14f3358a81bc",
       "is_verified": true,
       "jit_provisioning_enabled": true,
-      "sso_enforcement": "google-oauth2",
+      "sso_enforcement": "oidc",
       "verified_at": "2022-01-01T23:59:59",
     },
     {

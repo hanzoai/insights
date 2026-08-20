@@ -36,7 +36,7 @@ _LABEL_PREFIX = "Skill store · team "
 @dataclass(frozen=True)
 class IssuedMarketplaceCredential:
     key: PersonalAPIKey
-    # The raw ``phx_`` token, available only when we just minted or rotated. None when the
+    # The raw ``sk-`` token, available only when we just minted or rotated. None when the
     # existing key was returned untouched (its token is unrecoverable).
     token: str | None
     status: str  # "created" | "rotated" | "exists"
@@ -120,7 +120,7 @@ def marketplace_repo_url(team_id: int) -> str:
     Pinned to ``SITE_URL`` via ``absolute_uri`` (not ``request.get_host()``): the host must not be
     steerable by a request Host header, since the install command below embeds a live token.
     """
-    return absolute_uri(f"/api/projects/{team_id}/llm_skills/marketplace.git")
+    return absolute_uri(f"/v1/projects/{team_id}/llm_skills/marketplace.git")
 
 
 def _credentialed_git_url(team_id: int, token: str | None) -> str:

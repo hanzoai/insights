@@ -53,7 +53,7 @@ describe('funnelBarHorizontalShared', () => {
                 stepIndex: 1,
                 label: 'Signed up',
                 fractionOfBasis: 0.42,
-                color: '#1d4aff',
+                color: '#3d3d3d',
                 fillerColor: '#eee',
             })
             expect(stepData.label).toBe('1')
@@ -61,7 +61,7 @@ describe('funnelBarHorizontalShared', () => {
 
             const [segment, filler] = stepData.series
             expect(segment.label).toBe('Signed up')
-            expect(segment.color).toBe('#1d4aff')
+            expect(segment.color).toBe('#3d3d3d')
             expect(segment.meta).toEqual({ isDropOff: false, breakdownIndex: null })
             expect(filler.key).toBe(FUNNEL_BAR_HORIZONTAL_FILLER_KEY)
         })
@@ -75,7 +75,7 @@ describe('funnelBarHorizontalShared', () => {
                 stepIndex: 0,
                 label: 'Pageview',
                 fractionOfBasis,
-                color: '#1d4aff',
+                color: '#3d3d3d',
                 fillerColor: '#eee',
             })
             expect(stepData.series[0].data).toEqual([expectedSegment])
@@ -84,7 +84,7 @@ describe('funnelBarHorizontalShared', () => {
     })
 
     describe('buildFunnelBars', () => {
-        const COLORS = { color: '#1d4aff', fillerColor: '#eee' }
+        const COLORS = { color: '#3d3d3d', fillerColor: '#eee' }
         const steps = [
             { name: 'Pageview', count: 1000 },
             { name: 'Signed up', count: 400 },

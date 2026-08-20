@@ -130,7 +130,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             post: {
-                '/api/environments/:team_id/query/:kind/': async ({ request }) => {
+                '/v1/environments/:team_id/query/:kind/': async ({ request }) => {
                     const query = ((await request.json()) as any)?.query
                     if (query?.kind === 'InsightsQLQuery' && query?.values?.id === personUUID) {
                         return [200, personQueryResponse]
@@ -149,10 +149,10 @@ export const PersonRecordingTabEmpty: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/session_recordings': () => [200, { results: [] }],
+                '/v1/environments/:team_id/session_recordings': () => [200, { results: [] }],
             },
             post: {
-                '/api/environments/:team_id/query/:kind/': async ({ request }) => {
+                '/v1/environments/:team_id/query/:kind/': async ({ request }) => {
                     const query = ((await request.json()) as any)?.query
                     if (query?.kind === 'InsightsQLQuery' && query?.values?.id === personUUID) {
                         return [200, personQueryResponse]
@@ -172,7 +172,7 @@ export const PersonRecordingTabMultipleAndNotFound: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/session_recordings/': () => [200, { results: threeRecordings }],
+                '/v1/environments/:team_id/session_recordings/': () => [200, { results: threeRecordings }],
             },
         })
 
@@ -186,12 +186,12 @@ export const PersonRecordingTabMultipleAndFound: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/session_recordings/': () => [200, { results: threeRecordings }],
-                '/api/environments/:team_id/session_recordings/:id': () => [
+                '/v1/environments/:team_id/session_recordings/': () => [200, { results: threeRecordings }],
+                '/v1/environments/:team_id/session_recordings/:id': () => [
                     200,
                     { ...recordingMetaJson, id: 'rec-002-banana' },
                 ],
-                '/api/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
                     if (new URL(request.url).searchParams.get('source') === 'blob_v2') {
                         return new HttpResponse(snapshotsAsJSONLines())
                     }
@@ -234,12 +234,12 @@ export const PersonRecordingTabWide: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/session_recordings/': () => [200, { results: threeRecordings }],
-                '/api/environments/:team_id/session_recordings/:id': () => [
+                '/v1/environments/:team_id/session_recordings/': () => [200, { results: threeRecordings }],
+                '/v1/environments/:team_id/session_recordings/:id': () => [
                     200,
                     { ...recordingMetaJson, id: 'rec-001-apple' },
                 ],
-                '/api/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
                     if (new URL(request.url).searchParams.get('source') === 'blob_v2') {
                         return new HttpResponse(snapshotsAsJSONLines())
                     }
@@ -283,12 +283,12 @@ export const PersonRecordingTabNarrow: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/session_recordings/': () => [200, { results: threeRecordings }],
-                '/api/environments/:team_id/session_recordings/:id': () => [
+                '/v1/environments/:team_id/session_recordings/': () => [200, { results: threeRecordings }],
+                '/v1/environments/:team_id/session_recordings/:id': () => [
                     200,
                     { ...recordingMetaJson, id: 'rec-001-apple' },
                 ],
-                '/api/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
                     if (new URL(request.url).searchParams.get('source') === 'blob_v2') {
                         return new HttpResponse(snapshotsAsJSONLines())
                     }
@@ -332,12 +332,12 @@ export const PersonEventsTabWithModal: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/session_recordings/': () => [200, { results: threeRecordings }],
-                '/api/environments/:team_id/session_recordings/:id': () => [
+                '/v1/environments/:team_id/session_recordings/': () => [200, { results: threeRecordings }],
+                '/v1/environments/:team_id/session_recordings/:id': () => [
                     200,
                     { ...recordingMetaJson, id: 'rec-001-apple' },
                 ],
-                '/api/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
                     if (new URL(request.url).searchParams.get('source') === 'blob_v2') {
                         return new HttpResponse(snapshotsAsJSONLines())
                     }

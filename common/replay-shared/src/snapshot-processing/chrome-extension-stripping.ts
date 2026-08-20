@@ -1,7 +1,7 @@
-import { eventWithTime } from 'insights-js/rrweb-types'
-import { fullSnapshotEvent } from 'insights-js/rrweb-types'
-import { EventType } from 'insights-js/rrweb-types'
-import { serializedNodeWithId } from 'insights-js/rrweb-types'
+import { eventWithTime } from '@hanzo/insights-rrweb-types'
+import { fullSnapshotEvent } from '@hanzo/insights-rrweb-types'
+import { EventType } from '@hanzo/insights-rrweb-types'
+import { serializedNodeWithId } from '@hanzo/insights-rrweb-types'
 
 import { RecordingSnapshot } from '../types'
 import { isObject } from '../utils'

@@ -3,7 +3,7 @@ import { v7 as uuidv7 } from 'uuid'
 
 import { parseJSON } from '~/common/utils/json-parse'
 
-import { HogInvocationResultsService } from '../monitoring/script-invocation-results.service'
+import { ScriptInvocationResultsService } from '../monitoring/script-invocation-results.service'
 import { CyclotronV2Janitor, JANITOR_POISON_PILL_ERROR_KIND } from './janitor'
 import { CyclotronV2Manager } from './manager'
 import { CyclotronV2BatchLimit, CyclotronV2DequeuedJob, CyclotronV2JobInit } from './types'
@@ -38,22 +38,22 @@ function createWorker(queueName = QUEUE, overrides?: Record<string, unknown>): C
 }
 
 function createMockResults(ok = true): {
-    service: HogInvocationResultsService
+    service: ScriptInvocationResultsService
     recordTerminalFailureDurably: jest.Mock
 } {
     const recordTerminalFailureDurably = jest.fn().mockResolvedValue(ok)
     return {
-        service: { recordTerminalFailureDurably } as unknown as HogInvocationResultsService,
+        service: { recordTerminalFailureDurably } as unknown as ScriptInvocationResultsService,
         recordTerminalFailureDurably,
     }
 }
 
-// A real HogInvocationResultsService over a fake producer — exercises the actual
+// A real ScriptInvocationResultsService over a fake producer — exercises the actual
 // give-up row build (buildLifecycleRow + serialization), which the mock skips.
 // This is the Postgres-rung guard for the invalid-date RangeError class.
-function createRealResults(): { service: HogInvocationResultsService; produce: jest.Mock } {
+function createRealResults(): { service: ScriptInvocationResultsService; produce: jest.Mock } {
     const produce = jest.fn().mockResolvedValue(undefined)
-    const service = new HogInvocationResultsService({ produce } as any, { INSIGHTS_INVOCATION_RESULTS_ENABLED: true })
+    const service = new ScriptInvocationResultsService({ produce } as any, { INSIGHTS_INVOCATION_RESULTS_ENABLED: true })
     return { service, produce }
 }
 
@@ -62,7 +62,7 @@ function parseProducedResult(produce: jest.Mock): Record<string, any> {
     return parseJSON(value.toString('utf-8'))
 }
 
-function createJanitor(overrides?: Record<string, unknown>, results?: HogInvocationResultsService): CyclotronV2Janitor {
+function createJanitor(overrides?: Record<string, unknown>, results?: ScriptInvocationResultsService): CyclotronV2Janitor {
     return new CyclotronV2Janitor(
         {
             pool: { dbUrl: DB_URL },
@@ -343,7 +343,7 @@ describe('Cyclotron V2', () => {
 
                 expect(result.swept).toBe(2)
                 expect(result.done).toBe(true)
-                // Swept rows (hogflow-queue and email-queue alike — parked waits can sit on any
+                // Swept rows (flow-queue and email-queue alike — parked waits can sit on any
                 // queue) land inside [sweepFloor, sweepUntil]: never sooner than the floor, never
                 // later than their original wake.
                 for (const id of [sweptId, emailQueueId]) {
@@ -814,8 +814,8 @@ describe('Cyclotron V2', () => {
 
                 const result = await job.bulkCreateAndCheckIn({
                     newJobs: [
-                        { teamId: 1, queueName: 'hogflow', parentRunId: parentId },
-                        { teamId: 1, queueName: 'hogflow', parentRunId: parentId },
+                        { teamId: 1, queueName: 'flow', parentRunId: parentId },
+                        { teamId: 1, queueName: 'flow', parentRunId: parentId },
                     ],
                     selfDisposition: { kind: 'reschedule', scheduledAt: future, state: newState },
                 })
@@ -836,7 +836,7 @@ describe('Cyclotron V2', () => {
                     [parentId]
                 )
                 expect(children.rows).toHaveLength(2)
-                expect(children.rows[0].queue_name).toBe('hogflow')
+                expect(children.rows[0].queue_name).toBe('flow')
                 expect(children.rows[0].status).toBe('available')
             })
 
@@ -844,7 +844,7 @@ describe('Cyclotron V2', () => {
                 const { id: parentId, job } = await seedAndDequeue()
 
                 await job.bulkCreateAndCheckIn({
-                    newJobs: [{ teamId: 1, queueName: 'hogflow', parentRunId: parentId }],
+                    newJobs: [{ teamId: 1, queueName: 'flow', parentRunId: parentId }],
                     selfDisposition: { kind: 'ack' },
                 })
 
@@ -907,7 +907,7 @@ describe('Cyclotron V2', () => {
                 // so the failure is pre-TX; verify self-state is untouched.)
                 await expect(
                     job.bulkCreateAndCheckIn({
-                        newJobs: [{ teamId: 'bad-type' as any, queueName: 'hogflow' }],
+                        newJobs: [{ teamId: 'bad-type' as any, queueName: 'flow' }],
                         selfDisposition: { kind: 'reschedule' },
                     })
                 ).rejects.toThrow()
@@ -928,8 +928,8 @@ describe('Cyclotron V2', () => {
                 await expect(
                     job.bulkCreateAndCheckIn({
                         newJobs: [
-                            { id: duplicateId, teamId: 1, queueName: 'hogflow' },
-                            { id: duplicateId, teamId: 1, queueName: 'hogflow' },
+                            { id: duplicateId, teamId: 1, queueName: 'flow' },
+                            { id: duplicateId, teamId: 1, queueName: 'flow' },
                         ],
                         selfDisposition: { kind: 'reschedule' },
                     })
@@ -966,7 +966,7 @@ describe('Cyclotron V2', () => {
 
                 await expect(
                     job.bulkCreateAndCheckIn({
-                        newJobs: [{ teamId: 1, queueName: 'hogflow', parentRunId: parentId }],
+                        newJobs: [{ teamId: 1, queueName: 'flow', parentRunId: parentId }],
                         selfDisposition: { kind: 'reschedule' },
                     })
                 ).rejects.toThrow()
@@ -1392,10 +1392,10 @@ describe('Cyclotron V2', () => {
         describe('Manager: dequeue_seq assignment', () => {
             it('assigns dequeue_seq for email jobs, NULL for other queues', async () => {
                 const [emailId] = await manager.bulkCreateJobs([{ teamId: 7, queueName: EMAIL_QUEUE }])
-                const [hogId] = await manager.bulkCreateJobs([{ teamId: 7, queueName: 'script' }])
+                const [scriptId] = await manager.bulkCreateJobs([{ teamId: 7, queueName: 'script' }])
 
                 expect(await readDequeueSeq(emailId)).not.toBeNull()
-                expect(await readDequeueSeq(hogId)).toBeNull()
+                expect(await readDequeueSeq(scriptId)).toBeNull()
             })
 
             it('uses counter * 16M + team_id as the formula', async () => {
@@ -1717,26 +1717,26 @@ describe('Cyclotron V2', () => {
             })
 
             it('assigns dequeue_seq when a script job is rescheduled into the email queue', async () => {
-                // Hogflow → email re-routing is the most common path into the
+                // Scriptflow → email re-routing is the most common path into the
                 // email queue in production: a workflow step calls
                 // `job.reschedule({ queueName: 'email' })`. Without dequeue_seq
                 // assignment on that path, the row lands with NULL and the
                 // NULLS FIRST sort would drain it ahead of fair-ordered rows
                 // — bypassing the per-team interleave entirely.
                 const teamId = 42
-                const hogJobId = await manager.createJob({ teamId, queueName: 'script' })
+                const scriptJobId = await manager.createJob({ teamId, queueName: 'script' })
 
                 // Dequeue the script job (mimics what the script worker does), then
                 // reschedule it into the email queue (mimics the script → email
                 // routing in script-executor.service.ts).
-                const hogWorker = createWorker('script')
-                const [hogJob] = await dequeueOneBatch(hogWorker)
-                expect(hogJob.id).toBe(hogJobId)
-                await hogJob.reschedule({ queueName: EMAIL_QUEUE })
+                const scriptWorker = createWorker('script')
+                const [scriptJob] = await dequeueOneBatch(scriptWorker)
+                expect(scriptJob.id).toBe(scriptJobId)
+                await scriptJob.reschedule({ queueName: EMAIL_QUEUE })
 
                 // The row should now have a dequeue_seq matching the formula
                 // and the per-team counter should have been bumped to 1.
-                expect(await readDequeueSeq(hogJobId)).toBe(BigInt(16_777_216) + BigInt(teamId))
+                expect(await readDequeueSeq(scriptJobId)).toBe(BigInt(16_777_216) + BigInt(teamId))
                 expect(await readTeamCounter(teamId)).toBe(1n)
             })
 
@@ -1772,7 +1772,7 @@ describe('Cyclotron V2', () => {
                 // Default to a real invocation queue so a poisoned genuine invocation is recorded.
                 // The janitor only records give-ups on invocation queues; anything else is a
                 // wrapper/meta job that's dropped without a record (see WRAPPER drop tests below).
-                queue_name: 'hogflow',
+                queue_name: 'flow',
                 status: 'available',
                 priority: 0,
                 scheduled: new Date(),
@@ -1993,9 +1993,9 @@ describe('Cyclotron V2', () => {
         // record — else the autodrain replays a real flow with fabricated globals.
         // 'some_future_meta_queue' is an unknown, non-invocation queue: it guards the allow-list's
         // fail-safe. Under the old deny-list a queue nobody listed would be RECORDED as a replayable
-        // hog_flow (the autodrain would then replay a phantom flow) — with the allow-list any queue
+        // flow (the autodrain would then replay a phantom flow) — with the allow-list any queue
         // not in CYCLOTRON_INVOCATION_JOB_QUEUES is dropped without a record by default.
-        it.each(['rerun', 'hogflow_batch_resolve', 'some_future_meta_queue'])(
+        it.each(['rerun', 'flow_batch_resolve', 'some_future_meta_queue'])(
             'drops a poisoned %s wrapper without recording it, still records real invocations',
             async (wrapperQueue) => {
                 const staleHeartbeat = new Date(Date.now() - 60_000)
@@ -2026,7 +2026,7 @@ describe('Cyclotron V2', () => {
                 await janitor.stop()
 
                 // The wrapper is dropped with NO replay record — recording it would let
-                // the autodrain rediscover it as a hog_flow and replay a real flow with
+                // the autodrain rediscover it as a flow and replay a real flow with
                 // fabricated globals. Only the genuine invocation is recorded.
                 expect(recordTerminalFailureDurably).toHaveBeenCalledTimes(1)
                 expect(recordTerminalFailureDurably).toHaveBeenCalledWith(
@@ -2144,8 +2144,8 @@ describe('Cyclotron V2', () => {
             expect(stalled.status).toBe('available')
         })
 
-        it.each(['hogflow', 'email'])(
-            'builds and produces a valid failed hog_flow result for a poisoned %s-queue job',
+        it.each(['flow', 'email'])(
+            'builds and produces a valid failed flow result for a poisoned %s-queue job',
             async (queueName) => {
                 // Realistic parked-mid-flow state; the scheduled/created columns come
                 // back from pg as ISO strings — the give-up row build must parse them
@@ -2184,7 +2184,7 @@ describe('Cyclotron V2', () => {
                 expect(produce).toHaveBeenCalledTimes(1)
                 const row = parseProducedResult(produce)
                 expect(row.status).toBe('failed')
-                expect(row.function_kind).toBe('hog_flow')
+                expect(row.function_kind).toBe('flow')
                 expect(row.function_id).toBe(functionId)
                 expect(row.error_kind).toBe(JANITOR_POISON_PILL_ERROR_KIND)
                 // Timestamps must be real ISO microsecond strings, never NaN/"Invalid".

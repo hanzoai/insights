@@ -1,5 +1,6 @@
 import { Monaco } from '@monaco-editor/react'
 import { deepEqual as equal } from 'fast-equals'
+import insights from 'insights-js'
 import {
     MakeLogicType,
     actions,
@@ -19,18 +20,9 @@ import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
 import { type IRange, Uri, editor } from 'monaco-editor'
-import insights from 'insights-js'
 import { Suspense } from 'react'
 
-import {
-    Checkbox,
-    Dialog,
-    Input,
-    SearchableSelect,
-    Spinner,
-    toast,
-    Tooltip,
-} from '@hanzo/elements'
+import { Checkbox, Dialog, Input, SearchableSelect, Spinner, toast, Tooltip } from '@hanzo/elements'
 
 import api, { ApiConfig, ApiError } from 'lib/api'
 import { tryShowMCPHint } from 'lib/components/MCPHint/mcpHintLogic'
@@ -61,7 +53,7 @@ import {
     DataTableNode,
     DataVisualizationNode,
     DatabaseSchemaViewTable,
-    HogLanguage,
+    ScriptLanguage,
     InsightsQLFilters,
     InsightsQLMetadata,
     InsightsQLMetadataResponse,
@@ -1810,7 +1802,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
                     const uri = props.monaco.Uri.parse(tabModelPath(props.tabId))
                     let model = props.monaco.editor.getModel(uri)
                     if (!model) {
-                        model = props.monaco.editor.createModel(query, 'hogQL', uri)
+                        model = props.monaco.editor.createModel(query, 'insightsQL', uri)
                         cache.createdModels = cache.createdModels || []
                         cache.createdModels.push(model)
                         props.editor?.setModel(model)
@@ -1819,7 +1811,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
                             codeEditorLogic({
                                 key: `insightsql-editor-${props.tabId}`,
                                 query: values.sourceQuery?.source.query ?? '',
-                                language: 'hogQL',
+                                language: 'insightsQL',
                             })
                         )
                     }
@@ -2394,11 +2386,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
                     content: (
                         <>
                             <Field name="name">
-                                <Input
-                                    data-attr="insight-name"
-                                    placeholder="Please enter the new name"
-                                    autoFocus
-                                />
+                                <Input data-attr="insight-name" placeholder="Please enter the new name" autoFocus />
                             </Field>
                             <SaveTargetCycler
                                 candidates={candidates}
@@ -3665,7 +3653,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
                 try {
                     const response = await performQuery<InsightsQLMetadata>({
                         kind: NodeKind.InsightsQLMetadata,
-                        language: HogLanguage.hogQL,
+                        language: ScriptLanguage.insightsQL,
                         query: subqueryText,
                     })
                     const errors = response?.errors ?? []

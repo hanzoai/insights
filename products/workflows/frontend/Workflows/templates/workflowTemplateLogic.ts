@@ -265,7 +265,7 @@ export const workflowTemplateLogic = kea<workflowTemplateLogicType>([
                 }
 
                 try {
-                    await api.hogFlowTemplates.createInsightsFlowTemplate({
+                    await api.flowTemplates.createInsightsFlowTemplate({
                         ...workflow,
                         name: formValues.name || workflow.name || '',
                         description: formValues.description || workflow.description || '',
@@ -347,7 +347,7 @@ export const workflowTemplateLogic = kea<workflowTemplateLogicType>([
                 if (props.editTemplateId) {
                     // In edit mode, use workflow values for name/description, but load template for image_url, tags, and scope
                     try {
-                        const template = await api.hogFlowTemplates.getInsightsFlowTemplate(props.editTemplateId)
+                        const template = await api.flowTemplates.getInsightsFlowTemplate(props.editTemplateId)
                         actions.setTemplateFormValues({
                             name: workflow.name,
                             description: workflow.description || '', // Use current workflow description
@@ -380,7 +380,7 @@ export const workflowTemplateLogic = kea<workflowTemplateLogicType>([
                 }
             })
 
-            await api.hogFlowTemplates.updateInsightsFlowTemplate(workflowTemplate.id, workflowTemplate)
+            await api.flowTemplates.updateInsightsFlowTemplate(workflowTemplate.id, workflowTemplate)
             toast.success('Template updated')
 
             // Update the template list in workflowTemplatesLogic

@@ -38,6 +38,9 @@ from insights.models.channel_type.sql import CHANNEL_DEFINITION_DICTIONARY_SQL
 operations = [
     run_sql_with_exceptions(
         CHANNEL_DEFINITION_DICTIONARY_SQL(on_cluster=False),
-        node_roles=[NodeRole.DATA, NodeRole.COORDINATOR],
+        # DATA alone: this topology has no COORDINATOR role — NodeRole is ALL,
+        # DATA, the ingestion tiers, ENDPOINTS and LOGS. 0298 rebuilds this same
+        # dictionary and already spells it this way, so the two now agree.
+        node_roles=[NodeRole.DATA],
     ),
 ]

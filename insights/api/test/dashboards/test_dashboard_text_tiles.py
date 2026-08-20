@@ -203,7 +203,7 @@ class TestDashboardTiles(APIBaseTest, QueryMatchingTest):
         last_tile = dashboard_json["tiles"][-1]
 
         delete_response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             # can send just tile id and deleted flag
             {"tiles": [{"id": last_tile["id"], "deleted": True}]},
         )
@@ -248,7 +248,7 @@ class TestDashboardTiles(APIBaseTest, QueryMatchingTest):
         # Test with exactly 4000 characters (should work)
         valid_text = "a" * 4000
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [{"text": {"body": valid_text}}]},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -256,7 +256,7 @@ class TestDashboardTiles(APIBaseTest, QueryMatchingTest):
         # Test with 4001 characters (should fail)
         invalid_text = "a" * 4001
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [{"text": {"body": invalid_text}}]},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -274,7 +274,7 @@ class TestDashboardTiles(APIBaseTest, QueryMatchingTest):
         invalid_text = "b" * 4001
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [{"id": tile["id"], "text": {**tile["text"], "body": invalid_text}}]},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -319,7 +319,7 @@ class TestDashboardTiles(APIBaseTest, QueryMatchingTest):
         tile["text"]["created_by"] = {"id": other_org_user.id}
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
             {"tiles": [tile]},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

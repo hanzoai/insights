@@ -16,7 +16,7 @@ const CONFIG: LineChartConfig = {
 }
 
 const meta: Meta = {
-    title: 'Components/HogCharts/ReferenceLine',
+    title: 'Components/ScriptCharts/ReferenceLine',
     parameters: { layout: 'centered' },
 }
 export default meta

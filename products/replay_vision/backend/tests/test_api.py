@@ -63,10 +63,10 @@ class _VisionAPITestCase(APIBaseTest):
 
     @property
     def scanners_url(self) -> str:
-        return f"/api/environments/{self.team.id}/vision/scanners/"
+        return f"/v1/environments/{self.team.id}/vision/scanners/"
 
     def observations_url(self, scanner_id: str) -> str:
-        return f"/api/environments/{self.team.id}/vision/scanners/{scanner_id}/observations/"
+        return f"/v1/environments/{self.team.id}/vision/scanners/{scanner_id}/observations/"
 
     def _create_scanner(self, **overrides) -> ReplayScanner:
         defaults = {
@@ -914,7 +914,7 @@ class TestScannerSignalSourceEnablement(_VisionAPITestCase):
 class TestReplayScannerViewSetFeatureFlag(APIBaseTest):
     @property
     def scanners_url(self) -> str:
-        return f"/api/environments/{self.team.id}/vision/scanners/"
+        return f"/v1/environments/{self.team.id}/vision/scanners/"
 
     @patch("products.replay_vision.backend.feature_flag.hanzo_insights.feature_enabled", return_value=False)
     def test_flag_off_returns_404_on_list(self, _flag_mock) -> None:
@@ -1029,7 +1029,7 @@ class TestReplayObservationViewSet(_VisionAPITestCase):
         # page and it falls back to polling. Guard that the negotiated stream stays reachable.
         mock_stream.return_value = iter(["event: observation-complete\ndata: {}\n\n"])
         obs = self._create_observation(status=ObservationStatus.SUCCEEDED, completed_at=timezone.now())
-        url = f"/api/projects/{self.team.id}/vision/observations/{obs.id}/progress/"
+        url = f"/v1/projects/{self.team.id}/vision/observations/{obs.id}/progress/"
         resp = self.client.get(url, HTTP_ACCEPT="text/event-stream")
         # A 406 here would mean content negotiation rejected the SSE Accept header before the view ran.
         self.assertEqual(resp.status_code, 200)
@@ -2045,7 +2045,7 @@ class TestObserveActionFeatureFlag(APIBaseTest):
                 model=ScannerModel.GEMINI_3_6_FLASH,
             )
             resp = self.client.post(
-                f"/api/environments/{self.team.id}/vision/scanners/{scanner.id}/observe/",
+                f"/v1/environments/{self.team.id}/vision/scanners/{scanner.id}/observe/",
                 data={"session_id": "s"},
                 format="json",
             )
@@ -2297,7 +2297,7 @@ class TestRetryActions(_VisionAPITestCase):
             "insights.rbac.user_access_control.UserAccessControl.check_access_level_for_object",
             side_effect=lambda obj, required_level=None, **_: not isinstance(obj, ReplayScanner),
         ):
-            resp = self.client.post(f"/api/environments/{self.team.id}/vision/observations/{observation.id}/retry/")
+            resp = self.client.post(f"/v1/environments/{self.team.id}/vision/observations/{observation.id}/retry/")
         self.assertEqual(resp.status_code, 403, resp.json())
         self.assertTrue(ReplayObservation.objects.filter(id=observation.id).exists())
         start_workflow.assert_not_called()
@@ -2325,7 +2325,7 @@ class TestRetryActions(_VisionAPITestCase):
         mock_async_to_sync.return_value = MagicMock()
         observation = self._create_failed("sess-dock")
 
-        resp = self.client.post(f"/api/environments/{self.team.id}/vision/observations/{observation.id}/retry/")
+        resp = self.client.post(f"/v1/environments/{self.team.id}/vision/observations/{observation.id}/retry/")
         self.assertEqual(resp.status_code, 202, resp.json())
         self.assertFalse(ReplayObservation.objects.filter(id=observation.id).exists())
 
@@ -2338,7 +2338,7 @@ class TestSessionReplayObservationViewSet(_VisionAPITestCase):
 
     @property
     def session_observations_url(self) -> str:
-        return f"/api/environments/{self.team.id}/vision/observations/"
+        return f"/v1/environments/{self.team.id}/vision/observations/"
 
     def _create_observation(self, scanner: ReplayScanner, session_id: str) -> ReplayObservation:
         return ReplayObservation.objects.create(

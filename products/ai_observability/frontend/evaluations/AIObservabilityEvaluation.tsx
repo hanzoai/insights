@@ -117,7 +117,7 @@ export function AIObservabilityEvaluation(): JSX.Element {
             ? combineUrl(urls.aiObservabilityPlayground(), { source_evaluation_id: evaluation.id }).url
             : null
 
-    const isHog = evaluation.evaluation_type === 'script'
+    const isScript = evaluation.evaluation_type === 'script'
     const isSentiment = evaluation.evaluation_type === 'sentiment'
     const isAggregateTarget = evaluation.target === 'trace' || evaluation.target === 'session'
     const isSessionTarget = evaluation.target === 'session'
@@ -187,7 +187,7 @@ export function AIObservabilityEvaluation(): JSX.Element {
               })
             : null
 
-    const configValid = isHog
+    const configValid = isScript
         ? evaluation.evaluation_config.source.trim().length > 0
         : isSentiment
           ? true
@@ -203,7 +203,7 @@ export function AIObservabilityEvaluation(): JSX.Element {
     const saveButtonDisabledReason = !hasName
         ? 'Add a name for this evaluation'
         : !configValid
-          ? isHog
+          ? isScript
               ? 'Add evaluation code before saving'
               : 'Add an evaluation prompt before saving'
           : !hasSelectedJudgeModel
@@ -252,7 +252,7 @@ export function AIObservabilityEvaluation(): JSX.Element {
         push(evaluationBackTarget.path)
     }
 
-    const hogEvaluationMethodOptions: { value: EvaluationType; label: string }[] = [
+    const scriptEvaluationMethodOptions: { value: EvaluationType; label: string }[] = [
         {
             value: 'script',
             label: 'Script code',
@@ -263,7 +263,7 @@ export function AIObservabilityEvaluation(): JSX.Element {
             value: 'llm_judge',
             label: 'LLM as a judge',
         },
-        ...hogEvaluationMethodOptions,
+        ...scriptEvaluationMethodOptions,
         {
             value: 'sentiment',
             label: 'Sentiment analysis',
@@ -476,7 +476,7 @@ export function AIObservabilityEvaluation(): JSX.Element {
                                             <p className="text-muted text-sm -mt-2">
                                                 {isSentiment ? (
                                                     'Classify the sentiment of only the last user message on each matching generation event with a sentiment classifier, not LLM calls.'
-                                                ) : isHog ? (
+                                                ) : isScript ? (
                                                     <>
                                                         Run deterministic{' '}
                                                         <Link to="https://hanzo.ai/docs/script" target="_blank">
@@ -690,7 +690,7 @@ export function AIObservabilityEvaluation(): JSX.Element {
                                                             <span>Allow N/A responses</span>
                                                             <Tooltip
                                                                 title={
-                                                                    isHog
+                                                                    isScript
                                                                         ? 'When enabled, returning null from your Script code means "not applicable" instead of being treated as an error.'
                                                                         : 'Sometimes forcing a True or False is not enough and you want the LLM to decide if the evaluation is applicable or not. Enable this when the evaluation criteria may not apply to all generations.'
                                                                 }
@@ -707,10 +707,10 @@ export function AIObservabilityEvaluation(): JSX.Element {
                                                         />
                                                         <span className="text-muted text-sm">
                                                             {evaluation.output_config.allows_na
-                                                                ? isHog
+                                                                ? isScript
                                                                     ? 'Returning null means "Not Applicable"'
                                                                     : 'Evaluation can return "Not Applicable" when criteria doesn\'t apply'
-                                                                : isHog
+                                                                : isScript
                                                                   ? 'Evaluation must return true or false'
                                                                   : 'Evaluation returns true or false'}
                                                         </span>
@@ -724,9 +724,9 @@ export function AIObservabilityEvaluation(): JSX.Element {
                                     {hasEditableCriteria && (
                                         <div className="bg-bg-light border rounded p-6">
                                             <h3 className="text-lg font-semibold mb-4">
-                                                {isHog ? 'Evaluation code' : 'Evaluation prompt'}
+                                                {isScript ? 'Evaluation code' : 'Evaluation prompt'}
                                             </h3>
-                                            {isHog ? <EvaluationCodeEditor /> : <EvaluationPromptEditor />}
+                                            {isScript ? <EvaluationCodeEditor /> : <EvaluationPromptEditor />}
                                         </div>
                                     )}
 

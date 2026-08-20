@@ -75,7 +75,7 @@ class TestReportCharts(SimpleTestCase):
             # TypeError straight out of the validator, turning a bad write into a 500 instead of a 400.
             ("an_unhashable_kind", {"chart_id": "ok", "title": "t", "query": {"kind": []}}),
             ("a_dict_kind", {"chart_id": "ok", "title": "t", "query": {"kind": {"nested": 1}}}),
-            # Conditional-formatting bytecode runs through `execHog` once per rendered cell, on the
+            # Conditional-formatting bytecode runs through `execScript` once per rendered cell, on the
             # reader's main thread, so a chart carrying it can freeze the tab of whoever opens the
             # report. The whole key is refused wherever it sits, not just at the path known today.
             (
@@ -93,16 +93,16 @@ class TestReportCharts(SimpleTestCase):
                 "bytecode_at_the_top_level",
                 {"chart_id": "ok", "title": "t", "query": {"kind": "InsightVizNode", "bytecode": ["_H", 1]}},
             ),
-            # The renderer posts a node's nested source to the query service, where `HogQuery` runs its
-            # `code` through `execute_hog` — so an allowed outer kind must not smuggle one underneath.
+            # The renderer posts a node's nested source to the query service, where `ScriptQuery` runs its
+            # `code` through `execute_script` — so an allowed outer kind must not smuggle one underneath.
             (
-                "a_nested_hog_query",
+                "a_nested_script_query",
                 {
                     "chart_id": "ok",
                     "title": "t",
                     "query": {
                         "kind": "DataVisualizationNode",
-                        "source": {"kind": "HogQuery", "code": "while (true) {}"},
+                        "source": {"kind": "ScriptQuery", "code": "while (true) {}"},
                     },
                 },
             ),
@@ -227,7 +227,7 @@ class TestReportCharts(SimpleTestCase):
         # and defeat a recursive scan; 10,000 defeat `json.dumps` itself, which the length check has
         # to call before it can measure anything. A RecursionError from either escapes as a 500,
         # since pydantic only folds ValueError into ValidationError.
-        nested: dict = {"kind": "HogQuery", "code": "while (true) {}"}
+        nested: dict = {"kind": "ScriptQuery", "code": "while (true) {}"}
         for _ in range(depth):
             nested = {"source": nested}
 

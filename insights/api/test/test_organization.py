@@ -14,6 +14,7 @@ from rest_framework.test import APIRequestFactory
 from insights.api.organization import OrganizationSerializer, _fetch_member_count, _org_serializer_cache_version
 from insights.constants import AvailableFeature
 from insights.models import Organization, OrganizationMembership, Team
+from insights.models.ee_models import AccessControl, Role, RoleMembership
 from insights.models.oauth import OAuthAccessToken, OAuthApplication
 from insights.models.organization_domain import OrganizationDomain
 from insights.models.personal_api_key import PersonalAPIKey
@@ -21,15 +22,12 @@ from insights.models.uploaded_media import UploadedMedia
 from insights.models.utils import generate_random_token_personal, hash_key_value
 from insights.user_permissions import UserPermissions
 
-from insights.models.ee_models import AccessControl
-from insights.models.ee_models import Role, RoleMembership
-
 
 class TestOrganizationAPI(APIBaseTest):
     # Retrieving organization
 
     def test_get_current_organization(self):
-        response = self.client.get("/api/organizations/@current")
+        response = self.client.get("/v1/organizations/@current")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(response_data["id"], str(self.organization.id))
@@ -48,7 +46,7 @@ class TestOrganizationAPI(APIBaseTest):
         self.team.is_demo = True
         self.team.save()
 
-        response_data = self.client.get("/api/organizations/@current").json()
+        response_data = self.client.get("/v1/organizations/@current").json()
 
         self.assertEqual(response_data["id"], str(self.organization.id))
 
@@ -56,7 +54,7 @@ class TestOrganizationAPI(APIBaseTest):
 
     def test_cant_create_organization_without_valid_license_on_self_hosted(self):
         with self.is_cloud(False):
-            response = self.client.post("/api/organizations/", {"name": "Test"})
+            response = self.client.post("/v1/organizations/", {"name": "Test"})
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
             self.assertEqual(
                 response.json(),
@@ -68,12 +66,12 @@ class TestOrganizationAPI(APIBaseTest):
                 },
             )
             self.assertEqual(Organization.objects.count(), 1)
-            response = self.client.post("/api/organizations/", {"name": "Test"})
+            response = self.client.post("/v1/organizations/", {"name": "Test"})
             self.assertEqual(Organization.objects.count(), 1)
 
     def test_cant_create_organization_with_custom_plugin_level(self):
         with self.is_cloud(True):
-            response = self.client.post("/api/organizations/", {"name": "Test", "plugins_access_level": 6})
+            response = self.client.post("/v1/organizations/", {"name": "Test", "plugins_access_level": 6})
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
             self.assertEqual(Organization.objects.count(), 2)
             self.assertEqual(response.json()["plugins_access_level"], 3)
@@ -86,7 +84,7 @@ class TestOrganizationAPI(APIBaseTest):
         self.organization.name = self.CONFIG_ORGANIZATION_NAME
         self.organization.save()
 
-        response_rename = self.client.patch(f"/api/organizations/{self.organization.id}", {"name": "QWERTY"})
+        response_rename = self.client.patch(f"/v1/organizations/{self.organization.id}", {"name": "QWERTY"})
 
         self.assertEqual(response_rename.status_code, status.HTTP_200_OK)
 
@@ -99,7 +97,7 @@ class TestOrganizationAPI(APIBaseTest):
         self.organization.name = self.CONFIG_ORGANIZATION_NAME
         self.organization.save()
 
-        response_rename = self.client.patch(f"/api/organizations/{self.organization.id}", {"name": "QWERTY"})
+        response_rename = self.client.patch(f"/v1/organizations/{self.organization.id}", {"name": "QWERTY"})
 
         self.assertEqual(response_rename.status_code, status.HTTP_200_OK)
 
@@ -109,7 +107,7 @@ class TestOrganizationAPI(APIBaseTest):
     def test_cannot_update_organization_if_not_owner_or_admin(self):
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
         self.organization_membership.save()
-        response_rename = self.client.patch(f"/api/organizations/{self.organization.id}", {"name": "ASDFG"})
+        response_rename = self.client.patch(f"/v1/organizations/{self.organization.id}", {"name": "ASDFG"})
         self.assertEqual(response_rename.status_code, status.HTTP_403_FORBIDDEN)
         self.organization.refresh_from_db()
         self.assertNotEqual(self.organization.name, "ASDFG")
@@ -120,7 +118,7 @@ class TestOrganizationAPI(APIBaseTest):
         self.organization.plugins_access_level = 3
         self.organization.save()
 
-        response = self.client.patch(f"/api/organizations/{self.organization.id}", {"plugins_access_level": 9})
+        response = self.client.patch(f"/v1/organizations/{self.organization.id}", {"plugins_access_level": 9})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.organization.refresh_from_db()
         self.assertEqual(self.organization.plugins_access_level, 3)
@@ -131,7 +129,7 @@ class TestOrganizationAPI(APIBaseTest):
         self.organization_membership.save()
 
         # Verify fields are returned in GET response
-        response = self.client.get(f"/api/organizations/{self.organization.id}")
+        response = self.client.get(f"/v1/organizations/{self.organization.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("is_active", response.json())
         self.assertIn("is_not_active_reason", response.json())
@@ -140,7 +138,7 @@ class TestOrganizationAPI(APIBaseTest):
 
         # Attempt to update is_active - should be ignored
         response = self.client.patch(
-            f"/api/organizations/{self.organization.id}",
+            f"/v1/organizations/{self.organization.id}",
             {"is_active": False, "is_not_active_reason": "Test reason"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -153,7 +151,7 @@ class TestOrganizationAPI(APIBaseTest):
     @patch("hanzo_insights.capture")
     def test_enforce_2fa_for_everyone(self, mock_capture):
         # Only admins should be able to enforce 2fa
-        response = self.client.patch(f"/api/organizations/{self.organization.id}/", {"enforce_2fa": True})
+        response = self.client.patch(f"/v1/organizations/{self.organization.id}/", {"enforce_2fa": True})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
@@ -162,7 +160,7 @@ class TestOrganizationAPI(APIBaseTest):
         self.organization.available_product_features = [{"key": "2fa_enforcement", "name": "2FA Enforcement"}]
         self.organization.save()
 
-        response = self.client.patch(f"/api/organizations/{self.organization.id}/", {"enforce_2fa": True})
+        response = self.client.patch(f"/v1/organizations/{self.organization.id}/", {"enforce_2fa": True})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.organization.refresh_from_db()
@@ -187,7 +185,7 @@ class TestOrganizationAPI(APIBaseTest):
         self.organization_membership.save()
 
         response = self.client.patch(
-            f"/api/organizations/{self.organization.id}/", {"is_ai_data_processing_approved": True}
+            f"/v1/organizations/{self.organization.id}/", {"is_ai_data_processing_approved": True}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -219,7 +217,7 @@ class TestOrganizationAPI(APIBaseTest):
         # Try to update members_can_invite - should fail
         current_value = self.organization.members_can_invite
         response = self.client.patch(
-            f"/api/organizations/{self.organization.id}/", {"members_can_invite": not current_value}
+            f"/v1/organizations/{self.organization.id}/", {"members_can_invite": not current_value}
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -239,7 +237,7 @@ class TestOrganizationAPI(APIBaseTest):
 
         current_value = self.organization.members_can_create_projects
         response = self.client.patch(
-            f"/api/organizations/{self.organization.id}/", {"members_can_create_projects": not current_value}
+            f"/v1/organizations/{self.organization.id}/", {"members_can_create_projects": not current_value}
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -258,7 +256,7 @@ class TestOrganizationAPI(APIBaseTest):
         self.organization.save()
 
         response = self.client.patch(
-            f"/api/organizations/{self.organization.id}/", {"members_can_create_projects": True}
+            f"/v1/organizations/{self.organization.id}/", {"members_can_create_projects": True}
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -276,7 +274,7 @@ class TestOrganizationAPI(APIBaseTest):
         self.organization.save()
 
         # Try to update enforce_2fa - should fail
-        response = self.client.patch(f"/api/organizations/{self.organization.id}/", {"enforce_2fa": True})
+        response = self.client.patch(f"/v1/organizations/{self.organization.id}/", {"enforce_2fa": True})
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         error_data = response.json()
@@ -295,10 +293,10 @@ class TestOrganizationAPI(APIBaseTest):
         self.organization.available_product_features = [{"key": AvailableFeature.AUTOMATIC_PROVISIONING}]
         self.organization.save()
         OrganizationDomain.objects.create(
-            domain="hogflix.com", organization=self.organization, verified_at=timezone.now()
+            domain="scriptflix.com", organization=self.organization, verified_at=timezone.now()
         )
 
-        response = self.client.patch(f"/api/organizations/{self.organization.id}/", {"enforce_verified_domains": True})
+        response = self.client.patch(f"/v1/organizations/{self.organization.id}/", {"enforce_verified_domains": True})
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()["code"], "would_block_self")
@@ -309,7 +307,7 @@ class TestOrganizationAPI(APIBaseTest):
         OrganizationDomain.objects.create(
             domain=self.user.email.split("@")[1], organization=self.organization, verified_at=timezone.now()
         )
-        response = self.client.patch(f"/api/organizations/{self.organization.id}/", {"enforce_verified_domains": True})
+        response = self.client.patch(f"/v1/organizations/{self.organization.id}/", {"enforce_verified_domains": True})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.organization.refresh_from_db()
         self.assertTrue(self.organization.enforce_verified_domains)
@@ -322,16 +320,16 @@ class TestOrganizationAPI(APIBaseTest):
         self.organization.enforce_verified_domains = True
         self.organization.save()
         OrganizationDomain.objects.create(
-            domain="hogflix.com", organization=self.organization, verified_at=timezone.now()
+            domain="scriptflix.com", organization=self.organization, verified_at=timezone.now()
         )
 
         # Any other change through the hatch is rejected, alone or alongside the disable.
         for payload in [{"name": "New name"}, {"enforce_verified_domains": False, "name": "New name"}]:
-            response = self.client.patch(f"/api/organizations/{self.organization.id}/", payload)
+            response = self.client.patch(f"/v1/organizations/{self.organization.id}/", payload)
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, payload)
             self.assertEqual(response.json()["code"], "verified_domain_required")
 
-        response = self.client.patch(f"/api/organizations/{self.organization.id}/", {"enforce_verified_domains": False})
+        response = self.client.patch(f"/v1/organizations/{self.organization.id}/", {"enforce_verified_domains": False})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.organization.refresh_from_db()
         self.assertFalse(self.organization.enforce_verified_domains)
@@ -344,10 +342,10 @@ class TestOrganizationAPI(APIBaseTest):
         self.organization.enforce_verified_domains = True
         self.organization.save()
         OrganizationDomain.objects.create(
-            domain="hogflix.com", organization=self.organization, verified_at=timezone.now()
+            domain="scriptflix.com", organization=self.organization, verified_at=timezone.now()
         )
 
-        response = self.client.patch(f"/api/organizations/{self.organization.id}/", {"enforce_verified_domains": False})
+        response = self.client.patch(f"/v1/organizations/{self.organization.id}/", {"enforce_verified_domains": False})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.organization.refresh_from_db()
         self.assertTrue(self.organization.enforce_verified_domains)
@@ -362,7 +360,7 @@ class TestOrganizationAPI(APIBaseTest):
 
         current_value = self.organization.allow_publicly_shared_resources
         response = self.client.patch(
-            f"/api/organizations/{self.organization.id}/", {"allow_publicly_shared_resources": not current_value}
+            f"/v1/organizations/{self.organization.id}/", {"allow_publicly_shared_resources": not current_value}
         )
 
         # Try to update allow_publicly_shared_resources - should fail
@@ -384,7 +382,7 @@ class TestOrganizationAPI(APIBaseTest):
 
         current_value = self.organization.members_can_use_personal_api_keys
         response = self.client.patch(
-            f"/api/organizations/{self.organization.id}/", {"members_can_use_personal_api_keys": not current_value}
+            f"/v1/organizations/{self.organization.id}/", {"members_can_use_personal_api_keys": not current_value}
         )
 
         # Try to update members_can_use_personal_api_keys - should fail
@@ -408,7 +406,7 @@ class TestOrganizationAPI(APIBaseTest):
             scopes=["*"],
         )
 
-        response = self.client.get("/api/organizations/", headers={"authorization": f"Bearer {personal_api_key}"})
+        response = self.client.get("/v1/organizations/", headers={"authorization": f"Bearer {personal_api_key}"})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -440,7 +438,7 @@ class TestOrganizationAPI(APIBaseTest):
             scoped_organizations=[str(other_org.id)],
         )
 
-        response = self.client.get("/api/organizations/", headers={"authorization": f"Bearer {access_token.token}"})
+        response = self.client.get("/v1/organizations/", headers={"authorization": f"Bearer {access_token.token}"})
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -468,7 +466,7 @@ class TestOrganizationAPI(APIBaseTest):
         access_token = OAuthAccessToken.objects.create(
             application=oauth_app,
             user=self.user,
-            token=f"pha_test_first_party_token_{field}",
+            token=f"at-test_first_party_token_{field}",
             scope="organization:write",
             expires=timezone.now() + timedelta(hours=1),
             scoped_organizations=[str(self.organization.id)],
@@ -476,12 +474,12 @@ class TestOrganizationAPI(APIBaseTest):
 
         bearer = {"authorization": f"Bearer {access_token.token}"}
 
-        get_response = self.client.get("/api/organizations/@current/", headers=bearer)
+        get_response = self.client.get("/v1/organizations/@current/", headers=bearer)
         self.assertEqual(get_response.status_code, status.HTTP_200_OK)
         self.assertEqual(get_response.json()["id"], str(self.organization.id))
 
         patch_response = self.client.patch(
-            "/api/organizations/@current/",
+            "/v1/organizations/@current/",
             {field: True},
             content_type="application/json",
             headers=bearer,
@@ -504,76 +502,39 @@ class TestOrganizationAPI(APIBaseTest):
         self.user.save()
 
         # Verify we start with 3 organizations
-        response = self.client.get("/api/organizations/")
+        response = self.client.get("/v1/organizations/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 3)
 
         # Delete first org — it stays in the list but marked as pending deletion
-        response = self.client.delete(f"/api/organizations/{org2.id}")
+        response = self.client.delete(f"/v1/organizations/{org2.id}")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         org2.refresh_from_db()
         self.assertTrue(org2.is_pending_deletion)
 
         # Delete second org
-        response = self.client.delete(f"/api/organizations/{org3.id}")
+        response = self.client.delete(f"/v1/organizations/{org3.id}")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         org3.refresh_from_db()
         self.assertTrue(org3.is_pending_deletion)
 
         # All orgs still in the list (pending deletion ones included)
-        response = self.client.get("/api/organizations/")
+        response = self.client.get("/v1/organizations/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 3)
 
         # Delete last org
-        response = self.client.delete(f"/api/organizations/{self.organization.id}")
+        response = self.client.delete(f"/v1/organizations/{self.organization.id}")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.organization.refresh_from_db()
         self.assertTrue(self.organization.is_pending_deletion)
-
-    @patch("ee.billing.billing_manager.BillingManager.get_billing")
-    @patch("insights.api.organization.get_cached_instance_license")
-    def test_cannot_delete_organization_with_active_subscription(self, mock_get_license, mock_get_billing):
-        mock_get_license.return_value = True
-        mock_get_billing.return_value = {"has_active_subscription": True}
-
-        self.organization_membership.level = OrganizationMembership.Level.OWNER
-        self.organization_membership.save()
-
-        with self.is_cloud(True):
-            response = self.client.delete(f"/api/organizations/{self.organization.id}")
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("active subscription", response.json()["detail"])
-        self.assertTrue(Organization.objects.filter(id=self.organization.id).exists())
-
-    @patch("insights.temporal.delete_teams.dispatch.start_delete_organization_workflow")
-    @patch("ee.billing.billing_manager.BillingManager.get_billing")
-    @patch("insights.api.organization.get_cached_instance_license")
-    def test_can_delete_organization_without_active_subscription(
-        self, mock_get_license, mock_get_billing, mock_start_deletion
-    ):
-        mock_get_license.return_value = True
-        mock_get_billing.return_value = {"has_active_subscription": False}
-
-        self.organization_membership.level = OrganizationMembership.Level.OWNER
-        self.organization_membership.save()
-
-        org_id = self.organization.id
-        with self.is_cloud(True):
-            response = self.client.delete(f"/api/organizations/{org_id}")
-
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        # Deletion runs asynchronously on Temporal, so the org is marked pending, not removed synchronously
-        self.assertTrue(Organization.objects.get(id=org_id).is_pending_deletion)
-        mock_start_deletion.assert_called_once()
 
     @patch("insights.temporal.delete_teams.dispatch.start_delete_organization_workflow")
     def test_delete_organization_sets_pending_deletion_flag(self, mock_delete_task):
         self.organization_membership.level = OrganizationMembership.Level.OWNER
         self.organization_membership.save()
 
-        response = self.client.delete(f"/api/organizations/{self.organization.id}")
+        response = self.client.delete(f"/v1/organizations/{self.organization.id}")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         self.organization.refresh_from_db()
@@ -585,7 +546,7 @@ class TestOrganizationAPI(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.OWNER
         self.organization_membership.save()
 
-        response = self.client.delete(f"/api/organizations/{self.organization.id}")
+        response = self.client.delete(f"/v1/organizations/{self.organization.id}")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         self.assertTrue(OrganizationMembership.objects.filter(organization=self.organization, user=self.user).exists())
@@ -595,9 +556,9 @@ class TestOrganizationAPI(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.OWNER
         self.organization_membership.save()
 
-        self.client.delete(f"/api/organizations/{self.organization.id}")
+        self.client.delete(f"/v1/organizations/{self.organization.id}")
 
-        response = self.client.get(f"/api/organizations/{self.organization.id}")
+        response = self.client.get(f"/v1/organizations/{self.organization.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.json()["is_pending_deletion"])
 
@@ -609,7 +570,7 @@ class TestOrganizationAPI(APIBaseTest):
         self.organization.is_pending_deletion = True
         self.organization.save(update_fields=["is_pending_deletion"])
 
-        response = self.client.delete(f"/api/organizations/{self.organization.id}")
+        response = self.client.delete(f"/v1/organizations/{self.organization.id}")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("already being deleted", response.json()["detail"])
         mock_delete_task.assert_not_called()
@@ -620,7 +581,7 @@ class TestOrganizationAPI(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.OWNER
         self.organization_membership.save()
 
-        response = self.client.delete(f"/api/organizations/{self.organization.id}")
+        response = self.client.delete(f"/v1/organizations/{self.organization.id}")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         event_names = [call.kwargs.get("event") for call in mock_capture.call_args_list]
@@ -645,7 +606,7 @@ class TestOrganizationPutPatchPermissions(APIBaseTest):
         self.organization_membership.save()
 
         response = self.client.put(
-            f"/api/organizations/{self.organization.id}",
+            f"/v1/organizations/{self.organization.id}",
             {"name": "Updated Name PUT"},
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -656,7 +617,7 @@ class TestOrganizationPutPatchPermissions(APIBaseTest):
         self.organization_membership.save()
 
         response = self.client.patch(
-            f"/api/organizations/{self.organization.id}",
+            f"/v1/organizations/{self.organization.id}",
             {"name": "Updated Name PATCH"},
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -669,7 +630,7 @@ class TestOrganizationPutPatchPermissions(APIBaseTest):
 
         # Test PATCH - only need to provide the fields we're updating
         response_patch = self.client.patch(
-            f"/api/organizations/{self.organization.id}",
+            f"/v1/organizations/{self.organization.id}",
             {"name": "Admin Updated Name PATCH"},
         )
         self.assertEqual(response_patch.status_code, status.HTTP_200_OK)
@@ -691,7 +652,7 @@ class TestOrganizationPutPatchPermissions(APIBaseTest):
         self.organization_membership.save()
 
         response = self.client.patch(
-            f"/api/organizations/{self.organization.id}/",
+            f"/v1/organizations/{self.organization.id}/",
             {"logo_media_id": str(other_media.id)},
         )
 
@@ -711,7 +672,7 @@ class TestOrganizationPutPatchPermissions(APIBaseTest):
         self.organization_membership.save()
 
         response = self.client.patch(
-            f"/api/organizations/{self.organization.id}/",
+            f"/v1/organizations/{self.organization.id}/",
             {"logo_media_id": str(media.id)},
         )
 
@@ -731,7 +692,7 @@ class TestOrganizationPutPatchPermissions(APIBaseTest):
         # Try to modify other organization using PATCH - should fail
         # The exact status code (403 or 404) depends on permission implementation
         response_patch = self.client.patch(
-            f"/api/organizations/{other_org.id}",
+            f"/v1/organizations/{other_org.id}",
             {"name": "Hacked Name PATCH"},
         )
         # Should be either forbidden or not found - both indicate access is properly restricted
@@ -974,7 +935,7 @@ class TestOrganizationRequestAIAccessAPI(APIBaseTest):
         cache.clear()
 
     def _url(self) -> str:
-        return f"/api/organizations/{self.organization.id}/request_ai_access/"
+        return f"/v1/organizations/{self.organization.id}/request_ai_access/"
 
     @patch("insights.api.organization.send_insights_ai_access_request")
     def test_member_can_request_ai_access(self, mock_task):

@@ -29,7 +29,7 @@ describe('aiConsentLogic', () => {
         localStorage.clear()
         useMocks({
             patch: {
-                '/api/organizations/:id': async ({ request }) => [
+                '/v1/organizations/:id': async ({ request }) => [
                     200,
                     {
                         ...MOCK_DEFAULT_ORGANIZATION,

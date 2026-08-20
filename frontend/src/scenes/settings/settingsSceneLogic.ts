@@ -2,6 +2,7 @@ import { MakeLogicType, connect, kea, listeners, path, selectors } from 'kea'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
+import { removeProjectIdIfPresent } from 'lib/utils/kea-router'
 import { capitalizeFirstLetter } from 'lib/utils/strings'
 import { Scene } from 'scenes/sceneTypes'
 import type { Params } from 'scenes/sceneTypes'
@@ -276,7 +277,18 @@ export const settingsSceneLogic = kea<settingsSceneLogicType>([
         // Replace history for level changes, so the environments<>project redirect doesn't leave dead history entries.
         // Section/setting changes push real history entries so the back button works between settings.
         selectLevel({ level }) {
-            return [urls.settings(level), router.values.searchParams, router.values.hashParams, { replace: true }]
+            // Emitting the URL we are already on re-enters urlToAction, which finds no section
+            // at this level (sections is empty until currentTeam/currentOrganization load) and
+            // calls selectLevel again. selectLevel also nulls selectedSectionId, so the guard
+            // there cannot hold on the next pass, and kea-router does not dedupe same-URL
+            // navigations -- so it spins, writing a session-history entry per iteration. That
+            // history lives in the renderer's navigation state rather than the JS heap, which is
+            // why the tab dies with a flat heap and no exception.
+            const target = urls.settings(level)
+            if (removeProjectIdIfPresent(router.values.location.pathname) === target) {
+                return
+            }
+            return [target, router.values.searchParams, router.values.hashParams, { replace: true }]
         },
         selectSection({ section }) {
             return [urls.settings(section), router.values.searchParams, router.values.hashParams]

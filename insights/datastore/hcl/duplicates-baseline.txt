@@ -13,10 +13,10 @@ insights.events
 insights.events_main
 insights.events_recent
 insights.experiment_metric_events_preaggregated
-insights.hog_invocation_results
-insights.hog_invocation_results_data
+insights.invocations
+insights.invocations_data
 insights.ingestion_warnings_v2_distributed
-insights.kafka_hog_invocation_results
+insights.kafka_invocations
 insights.kafka_logs_avro
 insights.kafka_logs_avro_billing_metrics_mv
 insights.kafka_logs_avro_kafka_metrics_mv
@@ -58,7 +58,7 @@ insights.session_replay_features
 insights.sessions
 insights.sharded_events_recent
 insights.sharded_ingestion_warnings
-insights.sharded_tophog
+insights.sharded_topfn
 insights.trace_attributes
 insights.trace_attributes_distributed
 insights.trace_span_to_attributes

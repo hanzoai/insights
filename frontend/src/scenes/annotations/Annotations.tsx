@@ -1,20 +1,19 @@
 import { useActions, useValues } from 'kea'
 
-import * as reporterPng from '@hanzo/brand/hoggies/png/reporter'
-import { IconPencil } from '@hanzo/icons'
 import { Select, Link } from '@hanzo/elements'
+import { IconPencil } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { TextContent } from 'lib/components/Cards/TextCard/TextCard'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { Shortcut } from 'lib/components/Shortcuts/Shortcut'
 import { keyBinds } from 'lib/components/Shortcuts/shortcuts'
 import { TZLabel } from 'lib/components/TZLabel'
 import { Button } from 'lib/elements/Button'
+import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { Table, TableColumn, TableColumns } from 'lib/elements/Table'
 import { createdAtColumn } from 'lib/elements/Table/columnUtils'
 import { Tag } from 'lib/elements/Tag/Tag'
-import { ProfilePicture } from 'lib/elements/ProfilePicture'
 import { Tooltip } from 'lib/elements/Tooltip'
 import { cn } from 'lib/utils/css-classes'
 import { organizationLogic } from 'scenes/organizationLogic'
@@ -33,7 +32,7 @@ import { AnnotationModal } from './AnnotationModal'
 import { annotationModalLogic, annotationScopeToLevel, annotationScopeToName } from './annotationModalLogic'
 import { annotationScopesMenuOptions, annotationsLogic } from './annotationsLogic'
 
-const MascotReporter = pngHoggie(reporterPng)
+const MascotReporter = pngMascot()
 
 export const scene: SceneExport = {
     component: Annotations,
@@ -198,7 +197,7 @@ export function Annotations(): JSX.Element {
                         docsURL="https://hanzo.ai/docs/data/annotations"
                         action={() => openModalToCreateAnnotation()}
                         isEmpty={shouldShowEmptyState}
-                        customHog={MascotReporter}
+                        customScript={MascotReporter}
                         mcpSurfaceKey="annotations.create"
                     />
                 </div>

@@ -28,7 +28,7 @@ export async function invokeMcpTool(
     const projectId = await context.stateManager.getProjectId()
 
     const method = 'POST'
-    const url = `${context.api.baseUrl}/api/environments/${projectId}/mcp_tools/${toolName}/`
+    const url = `${context.api.baseUrl}/v1/environments/${projectId}/mcp_tools/${toolName}/`
 
     const response = await fetch(url, {
         method,

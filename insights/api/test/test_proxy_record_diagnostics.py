@@ -16,7 +16,7 @@ from insights.temporal.proxy_service.cloudflare import (
 )
 
 
-def _record(domain: str = "e.example.com", target: str = "abc.cf-prod-eu-proxy.europehog.com."):
+def _record(domain: str = "e.example.com", target: str = "abc.cf-prod-eu-proxy.europescript.com."):
     """Build a minimal ProxyRecord-like stub. Avoids hitting the DB.
 
     `target` includes the trailing FQDN dot to match the production data shape:
@@ -64,7 +64,7 @@ class TestCheckCname(TestCase):
     @patch("insights.api.proxy_record_diagnostics.dns.resolver.Resolver")
     def test_pass_when_cname_matches(self, ResolverMock):
         cname = MagicMock()
-        cname.target.to_text.return_value = "abc.cf-prod-eu-proxy.europehog.com."
+        cname.target.to_text.return_value = "abc.cf-prod-eu-proxy.europescript.com."
         ResolverMock.return_value.resolve.return_value = [cname]
 
         result = diagnostics._check_cname(_record())
@@ -276,11 +276,11 @@ class TestCheckCertExpiry(TestCase):
         self.assertEqual(result.remediation.type, expected_type)
 
 
-CF_TARGET = "abc.cf-prod-eu-proxy.europehog.com."
+CF_TARGET = "abc.cf-prod-eu-proxy.europescript.com."
 LEGACY_TARGET = "abc.proxy-us.hanzo.ai."
 
 
-@override_settings(CLOUDFLARE_PROXY_BASE_CNAME="cf-prod-eu-proxy.europehog.com")
+@override_settings(CLOUDFLARE_PROXY_BASE_CNAME="cf-prod-eu-proxy.europescript.com")
 class TestDiagnoseOrchestrator(TestCase):
     """End-to-end orchestrator with all external deps mocked.
 

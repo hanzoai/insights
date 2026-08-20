@@ -95,7 +95,9 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
         })
     }
 
-    private async loadAndBuildInsightsFunctions(teamIds: string[]): Promise<Record<string, PluginConfigInsightsFunction[]>> {
+    private async loadAndBuildInsightsFunctions(
+        teamIds: string[]
+    ): Promise<Record<string, PluginConfigInsightsFunction[]>> {
         const { rows } = await this.deps.postgres.query(
             PostgresUse.COMMON_READ,
             `SELECT
@@ -336,9 +338,9 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
         await Promise.all(
             messages.map(async (message) => {
                 try {
-                    const clickHouseEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
+                    const datastoreEvent = parseJSON(message.value!.toString()) as RawDatastoreEvent
 
-                    const team = await this.deps.teamManager.getTeam(clickHouseEvent.team_id)
+                    const team = await this.deps.teamManager.getTeam(datastoreEvent.team_id)
 
                     if (!team) {
                         return
@@ -350,7 +352,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
                         return
                     }
 
-                    events.push(convertToInsightsFunctionInvocationGlobals(clickHouseEvent, team, this.config.SITE_URL))
+                    events.push(convertToInsightsFunctionInvocationGlobals(datastoreEvent, team, this.config.SITE_URL))
                 } catch (e) {
                     logger.error('Error parsing message', e)
                     counterParseError.labels({ error: e.message }).inc()

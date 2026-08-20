@@ -106,7 +106,7 @@ describe('dashboardSubscribeNudgeLogic', () => {
         dateSpy = jest.spyOn(Date, 'now').mockImplementation(() => now)
         useMocks({
             post: {
-                '/api/projects/:team_id/dashboards/:dashboard_id/subscribe_nudge/': () => {
+                '/v1/projects/:team_id/dashboards/:dashboard_id/subscribe_nudge/': () => {
                     nudgePostCount += 1
                     return nudgePostResponse
                 },
@@ -440,7 +440,7 @@ describe('dashboardSubscribeNudgeLogic', () => {
         async (hasSubscription, expectedCount) => {
             useMocks({
                 get: {
-                    '/api/environments/:team_id/subscriptions': {
+                    '/v1/environments/:team_id/subscriptions': {
                         count: expectedCount,
                         results: hasSubscription ? [{ id: 7 }] : [],
                     },

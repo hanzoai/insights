@@ -21,9 +21,10 @@
         "test": "jest"
     },
     "dependencies": {
+        "@hanzo/insights-rrweb": "0.0.26",
+        "@hanzo/insights-rrweb-types": "0.0.26",
         "@hanzo/replay-shared": "workspace:*",
-        "p-limit": "3.1.0",
-        "insights-js": "catalog:"
+        "p-limit": "3.1.0"
     },
     "devDependencies": {
         "@swc/core": "^1.11.29",

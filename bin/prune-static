@@ -1,0 +1,165 @@
+#!/usr/bin/env python3
+"""Hold the static origin to a deploy horizon.
+
+Retaining old builds is the entire point of the origin -- a browser holding an
+old shell must still be able to fetch that shell's chunks -- so this is not
+cleanup for its own sake. It is what keeps "retained" from quietly meaning
+"forever", which is how an origin becomes unboundedly expensive and nobody
+notices until it is.
+
+THE HORIZON IS 30 DAYS, and the number comes from what has to survive:
+
+  * An open tab. The failure this whole design exists to stop is a shell from
+    build A lazily importing a chunk from build A hours later. That is bounded
+    by how long someone leaves a dashboard open, which is days -- over a holiday
+    weekend, a week. 30 days is an order of magnitude past the longest plausible
+    session, which is the right margin for something whose failure is a blank
+    screen.
+  * A rollback. Any build inside the window can be pinned again and will find
+    its assets where it left them.
+  * Symbolication. A stack trace captured while build N was serving needs build
+    N's source maps to be readable later, not just while N is live.
+
+Shorter would start trading those away for storage that is not scarce. Longer
+would not buy anything measurable -- nothing consults a chunk from two months
+ago -- and "we never decided" is exactly the state worth avoiding.
+
+WHY NOT AN S3 LIFECYCLE RULE. Object age is the wrong signal here, and actively
+inverted: bin/publish-static writes a hashed key ONCE and never rewrites it, so
+a chunk that has survived two hundred builds unchanged has the OLDEST
+LastModified in the bucket precisely because it is the most stable and most
+requested thing in it. Expiring by age would delete the load-bearing assets
+first and leave the churn. So retention reads the per-build manifests instead:
+the union of every build still inside the horizon is, exactly, the set that is
+still referenced.
+"""
+
+from __future__ import annotations
+
+import os
+import sys
+from datetime import UTC, datetime, timedelta
+
+import boto3
+from botocore.config import Config
+
+HORIZON = timedelta(days=30)
+
+# Never delete an object younger than this, whatever the manifests say. A publish
+# takes minutes, so a day puts the in-flight race out of reach by construction.
+GRACE = timedelta(days=1)
+
+# The fewest builds to retain regardless of what the timestamps claim, so a wrong
+# clock cannot collapse retention to a single build.
+FLOOR = 10
+
+# An orphan set this large means a premise is wrong, not that the tree churned.
+CAP = 0.25
+
+
+def pages(s3, bucket: str, prefix: str):
+    for page in s3.get_paginator("list_objects_v2").paginate(Bucket=bucket, Prefix=prefix):
+        yield from page.get("Contents", [])
+
+
+def main() -> int:
+    apply = "--apply" in sys.argv
+
+    endpoint = os.environ["S3_ENDPOINT"]
+    bucket = os.environ.get("S3_BUCKET", "cdn")
+    prefix = os.environ.get("S3_PREFIX", "insights").strip("/")
+
+    s3 = boto3.client(
+        "s3",
+        endpoint_url=endpoint,
+        region_name=os.environ.get("S3_REGION", "us-east-1"),
+        config=Config(s3={"addressing_style": "path"}, max_pool_connections=32,
+                      retries={"max_attempts": 5, "mode": "standard"}),
+    )
+
+    # Sibling of the served prefix, deliberately not inside it -- see the note in
+    # bin/publish-static about a percent-encoded ../ reaching out of static/.
+    manifests = sorted(pages(s3, bucket, f"{prefix}-builds/"),
+                       key=lambda o: o["LastModified"])
+    if not manifests:
+        print("no build manifests -- refusing to prune an origin nothing claims", file=sys.stderr)
+        return 1
+
+    cutoff = datetime.now(UTC) - HORIZON
+    # Two reasons to keep a build, and the second is not redundant. `datetime.now`
+    # is the RUNNER's clock while LastModified is the store's; a runner running
+    # more than a horizon fast makes every manifest look expired at once. Keeping
+    # the newest FLOOR regardless means the worst a bad clock can do is prune down
+    # to the last FLOOR builds instead of down to one. It also lets a repo that
+    # stops shipping for a month keep serving.
+    keep = [m for m in manifests if m["LastModified"] >= cutoff]
+    keep = sorted({m["Key"]: m for m in keep + manifests[-FLOOR:]}.values(),
+                  key=lambda o: o["LastModified"])
+
+    def referenced_by(mans) -> set[str]:
+        out: set[str] = set()
+        for m in mans:
+            body = s3.get_object(Bucket=bucket, Key=m["Key"])["Body"].read().decode()
+            out.update(f"{prefix}/static/{line}" for line in body.splitlines() if line)
+        return out
+
+    referenced = referenced_by(keep)
+    present = {o["Key"] for o in pages(s3, bucket, f"{prefix}/static/")}
+
+    # A publish that finished between the two listings above has its objects in
+    # `present` and its manifest in neither list, so its keys would read as
+    # orphaned -- and the pin moves to exactly that build moments later. Both
+    # forge mirrors publish on every push, so this is not a narrow window. Re-read
+    # the manifests AFTER the object listing and count anything new as referenced.
+    fresh = [m for m in pages(s3, bucket, f"{prefix}-builds/")
+             if m["Key"] not in {k["Key"] for k in manifests}]
+    if fresh:
+        print(f"{len(fresh)} build(s) published while this ran -- counting them as referenced")
+        referenced |= referenced_by(fresh)
+
+    # And the belt to that brace: never delete anything young enough to belong to
+    # a publish still in flight. Age is used ONLY to protect here, never to
+    # condemn -- expiring BY age would delete the most stable chunks first, which
+    # is the whole reason retention reads manifests.
+    young = datetime.now(UTC) - GRACE
+    recent = {o["Key"] for o in pages(s3, bucket, f"{prefix}/static/")
+              if o["LastModified"] >= young}
+    orphans = sorted(present - referenced - recent)
+    kept_keys = {m["Key"] for m in keep}
+    stale = [m["Key"] for m in manifests if m["Key"] not in kept_keys]
+
+    print(f"{len(manifests)} builds on record, {len(keep)} retained "
+          f"({keep[0]['LastModified']:%Y-%m-%d} .. {keep[-1]['LastModified']:%Y-%m-%d})")
+    print(f"{len(present)} objects present, {len(referenced)} still referenced, "
+          f"{len(recent)} too young to touch, {len(orphans)} orphaned, "
+          f"{len(stale)} stale manifests")
+
+    # A correct prune removes a build's worth of churn. Anything approaching the
+    # size of the tree means a premise is wrong -- a truncated manifest, a
+    # half-read list, a prefix that moved -- and deleting on a wrong premise is
+    # not recoverable from here.
+    if present and len(orphans) > len(present) * CAP:
+        print(f"refusing: {len(orphans)} orphans is over {CAP:.0%} of {len(present)} objects "
+              f"-- that is not churn, something is wrong", file=sys.stderr)
+        return 1
+
+    if not apply:
+        print("\ndry run -- pass --apply to delete. First 10 orphans:")
+        for key in orphans[:10]:
+            print("   ", key)
+        return 0
+
+    doomed = orphans + stale
+    failed = 0
+    for i in range(0, len(doomed), 1000):  # DeleteObjects takes at most 1000
+        batch = doomed[i:i + 1000]
+        res = s3.delete_objects(Bucket=bucket, Delete={"Objects": [{"Key": k} for k in batch]})
+        for err in res.get("Errors", []):
+            print(f"delete failed: {err.get('Key')}: {err.get('Message')}", file=sys.stderr)
+            failed += 1
+    print(f"deleted {len(doomed) - failed} of {len(doomed)}")
+    return 1 if failed else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

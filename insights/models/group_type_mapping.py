@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from insights.models.project import Project
     from insights.models.team.team import Team
-    from insights.personinsights_client.client import PersonHogClient
+    from insights.personinsights_client.client import PersonClient
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
@@ -18,7 +18,11 @@ from prometheus_client import Counter
 
 from insights.models.utils import RootTeamMixin
 from insights.personinsights_client import ReadConsistency, consistency_to_read_options
-from insights.personinsights_client.client import personinsights_call, require_personinsights_client
+from insights.personinsights_client.client import (
+    get_personinsights_client,
+    personinsights_call,
+    require_personinsights_client,
+)
 from insights.rbac.decorators import field_access_control
 from insights.storage.hypercache import HyperCacheDependencyUnavailable
 from insights.utils import capture_exception_throttled, get_safe_cache, safe_cache_delete, safe_cache_set
@@ -176,7 +180,7 @@ def invalidate_group_types_cache(project_id: int) -> None:
     safe_cache_delete(f"{GROUP_TYPES_CONFIRMED_EMPTY_CACHE_KEY_PREFIX}{project_id}")
 
 
-def _fetch_group_types_via_personinsights(client: PersonHogClient, project_id: int) -> list[dict[str, Any]]:
+def _fetch_group_types_via_personinsights(client: PersonClient, project_id: int) -> list[dict[str, Any]]:
     from insights.personinsights_client.converters import proto_group_type_mapping_to_dict
     from insights.personinsights_client.proto import GetGroupTypeMappingsByProjectIdRequest
 
@@ -184,6 +188,22 @@ def _fetch_group_types_via_personinsights(client: PersonHogClient, project_id: i
     result = [proto_group_type_mapping_to_dict(m) for m in resp.mappings]
     result.sort(key=lambda d: d["group_type_index"])
     return result
+
+
+def _fetch_group_types_from_db(project_id: int) -> list[dict[str, Any]]:
+    """Read group types from the table that holds them.
+
+    personinsights is an accelerator in front of this table, not the owner of it,
+    and a deployment without that service still has the rows. The proto converter
+    is written to produce "the same dict shape as
+    GroupTypeMapping.objects.values(*GROUP_TYPE_MAPPING_SERIALIZER_FIELDS)", so
+    this is the shape it was matching, read from the source.
+    """
+    return list(
+        GroupTypeMapping.objects.filter(project_id=project_id)
+        .values(*GROUP_TYPE_MAPPING_SERIALIZER_FIELDS)
+        .order_by("group_type_index")
+    )
 
 
 def get_group_types_for_project(project_id: int, *, caller_tag: str | None = None) -> list[dict[str, Any]]:
@@ -196,9 +216,15 @@ def get_group_types_for_project(project_id: int, *, caller_tag: str | None = Non
         return cached
 
     def _fetch() -> list[dict[str, Any]]:
-        # require_personinsights_client() must run inside personinsights_call so a missing client
-        # (RuntimeError) is wrapped as DatabaseError and recovered like any fetch failure.
-        return _fetch_group_types_via_personinsights(require_personinsights_client(), project_id)
+        # No client configured is not a fetch failure — it is a deployment that
+        # does not run personinsights, and the rows are still in Postgres. Treating
+        # it as a failure sent every caller down the stale-cache path, which on a
+        # project with no cached entry raises GroupTypesUnavailable, so
+        # /api/projects/:id/persons/ answered 500 permanently rather than once.
+        client = get_personinsights_client()
+        if client is None:
+            return _fetch_group_types_from_db(project_id)
+        return _fetch_group_types_via_personinsights(client, project_id)
 
     try:
         result = personinsights_call(
@@ -226,7 +252,7 @@ def get_group_types_for_project(project_id: int, *, caller_tag: str | None = Non
     return result
 
 
-def _fetch_group_types_for_team_via_personinsights(client: PersonHogClient, team_id: int) -> list[dict[str, Any]]:
+def _fetch_group_types_for_team_via_personinsights(client: PersonClient, team_id: int) -> list[dict[str, Any]]:
     from insights.personinsights_client.converters import proto_group_type_mapping_to_dict
     from insights.personinsights_client.proto import GetGroupTypeMappingsByTeamIdRequest
 
@@ -262,7 +288,7 @@ def get_group_types_for_team(team_id: int, *, caller_tag: str | None = None) -> 
 
 
 def _fetch_group_types_for_projects_via_personinsights(
-    client: PersonHogClient, project_ids: list[int], *, consistency: ReadConsistency = "eventual"
+    client: PersonClient, project_ids: list[int], *, consistency: ReadConsistency = "eventual"
 ) -> dict[int, list[dict[str, Any]]]:
     from insights.personinsights_client.converters import proto_group_type_mapping_to_dict
     from insights.personinsights_client.proto import GetGroupTypeMappingsByProjectIdsRequest
@@ -407,10 +433,16 @@ def _reconfirm_emptied_projects_against_primary(
     suspect_ids = list(suspects.keys())
 
     try:
-        client = require_personinsights_client()
+        # Inside the lambda, not before it: this is the rule the rest of the file
+        # states — a missing client raises RuntimeError, and only running it within
+        # personinsights_call turns that into the DatabaseError the except below
+        # catches. Called out here it escaped as RuntimeError and took the request
+        # with it, so persons answered 500 on any deployment without the service.
         confirmed = personinsights_call(
             "get_group_types_for_projects_reconfirm",
-            lambda: _fetch_group_types_for_projects_via_personinsights(client, suspect_ids, consistency="strong"),
+            lambda: _fetch_group_types_for_projects_via_personinsights(
+                require_personinsights_client(), suspect_ids, consistency="strong"
+            ),
             caller_tag=f"group_type_mapping/{caller_tag or 'get_group_types_for_projects'}/reconfirm",
             reraise_as=DatabaseError,
         )
@@ -468,7 +500,12 @@ def get_group_types_for_projects(
     """
 
     def _fetch() -> dict[int, list[dict[str, Any]]]:
-        client = require_personinsights_client()
+        # Same reasoning as the single-project path: an absent client means this
+        # deployment does not run personinsights, so read the rows directly rather
+        # than failing the batch into _recover_projects_from_stale_or_fail.
+        client = get_personinsights_client()
+        if client is None:
+            return {pid: _fetch_group_types_from_db(pid) for pid in project_ids}
         result = _fetch_group_types_for_projects_via_personinsights(client, project_ids)
         for pid in project_ids:
             result.setdefault(pid, [])
@@ -670,9 +707,10 @@ def update_group_type_mapping_fields(
     """
     from insights.personinsights_client.proto import UpdateGroupTypeMappingRequest
 
-    client = require_personinsights_client()
-
     def _fn() -> None:
+        # Resolved in here, not above: outside personinsights_call the RuntimeError
+        # from a missing client is never converted and escapes as a 500.
+        client = require_personinsights_client()
         update_mask: list[str] = list(fields.keys())
         kwargs: dict[str, Any] = {
             "project_id": instance.project_id,
@@ -705,10 +743,10 @@ def delete_group_type_mapping(instance: GroupTypeMapping, *, caller_tag: str | N
     """Delete a GroupTypeMapping via personinsights."""
     from insights.personinsights_client.proto import DeleteGroupTypeMappingRequest
 
-    client = require_personinsights_client()
     personinsights_call(
         "delete_group_type_mapping",
-        lambda: client.delete_group_type_mapping(
+        # Inside the lambda: see update_group_type_mapping_fields above.
+        lambda: require_personinsights_client().delete_group_type_mapping(
             DeleteGroupTypeMappingRequest(
                 project_id=instance.project_id,
                 group_type_index=instance.group_type_index,
@@ -728,9 +766,9 @@ def clear_dashboard_from_group_type_mapping(
     """
     from insights.personinsights_client.proto import GetGroupTypeMappingByDashboardIdRequest, UpdateGroupTypeMappingRequest
 
-    client = require_personinsights_client()
-
     def _fn() -> None:
+        # Inside the closure: see update_group_type_mapping_fields above.
+        client = require_personinsights_client()
         resp = client.get_group_type_mapping_by_dashboard_id(
             GetGroupTypeMappingByDashboardIdRequest(team_id=team_id, dashboard_id=dashboard_id)
         )

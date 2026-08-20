@@ -24,8 +24,8 @@ import type {
     InsightsFunctionsMetricsRetrieveParams,
     InsightsFunctionsMetricsTotalsRetrieveParams,
     InsightsFunctionsRevisionsListParams,
-    HogInvocationRerunRequestApi,
-    HogInvocationRerunResponseApi,
+    ScriptInvocationRerunRequestApi,
+    ScriptInvocationRerunResponseApi,
     PaginatedInsightsFunctionMinimalListApi,
     PaginatedInsightsFunctionRevisionBasicListApi,
     PaginatedInsightsFunctionTemplateListApi,
@@ -376,7 +376,7 @@ export const getInsightsFunctionsRerunCreateUrl = (projectId: string, id: string
 /**
  * Rerun past invocations of this script function from their stored payloads.
  *
- * The CDP worker reads matching rows from the `hog_invocation_results`
+ * The CDP worker reads matching rows from the `invocations`
  * Datastore table, rehydrates the invocation from the stored
  * `invocation_globals`, and re-enqueues onto cyclotron. Each rerun
  * run reuses the original `invocation_id` with `is_retry=1` set on the
@@ -396,14 +396,14 @@ export const getInsightsFunctionsRerunCreateUrl = (projectId: string, id: string
 export const insightsFunctionsRerunCreate = async (
     projectId: string,
     id: string,
-    hogInvocationRerunRequestApi: HogInvocationRerunRequestApi,
+    scriptInvocationRerunRequestApi: ScriptInvocationRerunRequestApi,
     options?: RequestInit
-): Promise<HogInvocationRerunResponseApi> => {
-    return apiMutator<HogInvocationRerunResponseApi>(getInsightsFunctionsRerunCreateUrl(projectId, id), {
+): Promise<ScriptInvocationRerunResponseApi> => {
+    return apiMutator<ScriptInvocationRerunResponseApi>(getInsightsFunctionsRerunCreateUrl(projectId, id), {
         ...options,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(hogInvocationRerunRequestApi),
+        body: JSON.stringify(scriptInvocationRerunRequestApi),
     })
 }
 

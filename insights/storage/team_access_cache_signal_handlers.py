@@ -139,7 +139,7 @@ def _update_team_authentication_cache(instance: Team, created: bool):
     calls below return None, skipping invalidation.
     """
     try:
-        # Guard on api_token (the public phc_ token) as a proxy for "fully initialized team".
+        # Guard on api_token (the public pk- token) as a proxy for "fully initialized team".
         # A team without a public token has not completed setup, so its secret tokens
         # are not in use and don't need cache invalidation.
         if created or not instance.api_token:

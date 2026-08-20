@@ -144,7 +144,7 @@ export function SnapshotChangeBadge({ snapshot, size = 'default' }: ChangeBadgeP
     // verbose surface (sidebar) and an icon-only badge in the filmstrip
     // so two side-by-side chips don't crowd the thumbnail.
     const sizeChipTooltip =
-        'Baseline and current screenshots had different dimensions. Pixelhog padded to the larger size before computing the diff, so metrics are still meaningful — they just include the new content area as part of the change.'
+        'Baseline and current screenshots had different dimensions. Pixelscript padded to the larger size before computing the diff, so metrics are still meaningful — they just include the new content area as part of the change.'
     const sizeChip = snapshot.size_mismatch ? (
         <Tooltip title={sizeChipTooltip}>
             <span

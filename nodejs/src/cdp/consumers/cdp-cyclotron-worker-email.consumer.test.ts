@@ -28,7 +28,7 @@ describe('CdpCyclotronWorkerEmail', () => {
         expect(worker['queue']).toBe('email')
     })
 
-    it('should extend CdpCyclotronWorkerInsightsFlow', () => {
+    it('should extend CdpCyclotronWorkerFlow', () => {
         const worker = new CdpCyclotronWorkerEmail(hub, createCdpConsumerDeps(hub), createMockJobQueue())
         expect(worker['name']).toBe('CdpCyclotronWorkerEmail')
     })

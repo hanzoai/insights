@@ -5,7 +5,7 @@ import { Button, Spinner } from '@hanzo/elements'
 
 import { CommandBlock } from 'lib/components/CommandBlock/CommandBlock'
 import { useWizardCommand } from 'scenes/onboarding/shared/useWizardCommand'
-import { WizardHog } from 'scenes/onboarding/shared/wizardHog'
+import { WizardScript } from 'scenes/onboarding/shared/wizardScript'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { mcpAnalyticsOnboardingLogic } from '../mcpAnalyticsOnboardingLogic'
@@ -70,7 +70,7 @@ export function MCPAnalyticsInstallHero(): JSX.Element {
 
             {isCloudOrDev && (
                 <div className="flex items-center gap-6">
-                    <WizardHog className="w-28 h-28 hidden md:block shrink-0" />
+                    <WizardScript className="w-28 h-28 hidden md:block shrink-0" />
                     <div className="flex-1 min-w-0 flex flex-col gap-3">
                         <CommandBlock
                             command={command}

@@ -25,7 +25,7 @@ const UNSUPPORTED_INSIGHT_TYPES = new Set([
     InsightType.PATHS,
     InsightType.STICKINESS,
     InsightType.JSON,
-    InsightType.HOG,
+    InsightType.SCRIPT,
 ])
 
 const UNSUPPORTED_QUERY_KINDS = new Set([NodeKind.FunnelsQuery, NodeKind.PathsQuery, NodeKind.StickinessQuery])

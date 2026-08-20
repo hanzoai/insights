@@ -192,11 +192,364 @@ with tempfile.TemporaryDirectory() as tmp:
     check("a notice deleted rather than renamed is caught too", quiet(debrand.licences_unlaundered, tmp), 0)
     check("...by the invariant that asserts it is there", quiet(debrand.licence_notice_survives, tmp), 1)
 
+# A brand is not only its names. The rename table walked past the upstream
+# wordmark on both OAuth consent screens, on the toolbar error page and on the
+# 2FA template -- drawn as vector paths, so no rule could see it -- and past the
+# logo baked into index.html as a data URI, which printed it into every
+# visitor's browser console. --check was green through all of it.
+with tempfile.TemporaryDirectory() as tmp:
+    subprocess.run(["git", "init", "-q", tmp], check=True)
+
+    def write(rel: str, body: str) -> None:
+        """Put one file in the tree and nothing else.
+
+        Each case has to stand alone: a tree that accumulated the previous
+        case's fixture would report a hit for the wrong reason, and the two
+        negative cases below -- the checksum and the allowlisted mark -- would
+        fail against a guard that is working correctly.
+        """
+        for name in os.listdir(tmp):
+            if name != ".git":
+                subprocess.run(["rm", "-rf", os.path.join(tmp, name)], check=True)
+        path = os.path.join(tmp, rel)
+        os.makedirs(os.path.dirname(path) or tmp, exist_ok=True)
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(body)
+        subprocess.run(["git", "add", "-A"], cwd=tmp, check=True, capture_output=True)
+
+    write("app.css", ".btn { background: #3d3d3d; }\n")
+    check("a tree with no marks passes", quiet(debrand.check_marks, tmp), 0)
+
+    write("app.css", ".btn { background: #1d4aff; }\n")
+    check("a brand hue is refused", quiet(debrand.check_marks, tmp), 1)
+    write("app.css", ".btn { background: #F54E00; }\n")
+    check("...in any case", quiet(debrand.check_marks, tmp), 1)
+    # The spelling the logo actually shipped in: percent-encoded in a data URI,
+    # where `#` is `%23` and no rule matching on `#` would have found it.
+    write("icon.ts", "export const SRC = 'data:image/svg+xml,%3Csvg%20fill%3D%22%23F9BD2B%22%3E'\n")
+    check("...percent-encoded inside a data URI", quiet(debrand.check_marks, tmp), 1)
+    write("app.css", ".btn { background: #1d4aff80; }\n")
+    check("...carrying an alpha channel", quiet(debrand.check_marks, tmp), 1)
+    # Decimal is the same colour wearing a spelling a hex grep cannot see. The
+    # QA evidence annotator held these as PIL tuples and read as clean.
+    write("overlay.py", "HIGHLIGHT_COLOR = (245, 78, 0)\n")
+    check("...spelled in decimal", quiet(debrand.check_marks, tmp), 1)
+    write("overlay.js", "const c = 'rgba(29,74,255,0.3)'\n")
+    check("...and in an rgba() string", quiet(debrand.check_marks, tmp), 1)
+
+    # The mirror image, and the expensive one: lockfiles are full of 64-char
+    # hex, so a bare substring match would fail the tree at random.
+    write("sums.txt", "checksum = \"a91d4affb27c3e5109f54e0042bd8117f9bd2b6690aa41c7d3e8b5290fc61d4a\"\n")
+    check("a checksum that merely contains the run is not a hit", quiet(debrand.check_marks, tmp), 0)
+
+    # Recolouring the wordmark to ink leaves it the upstream wordmark. A hue
+    # check alone would call that fixed, which is why the geometry is refused
+    # in its own right.
+    write("logo.svg", '<svg><path fill="#000" d="M55.383 75.225c-1.2.4-2 1.1-2.4 2.3"/></svg>\n')
+    check("the wordmark's path data is refused even when recoloured", quiet(debrand.check_marks, tmp), 1)
+    write("logo.svg", '<svg><path fill="#000" d="m216.24 107.388 4.3-1.5"/></svg>\n')
+    check("...by either signature", quiet(debrand.check_marks, tmp), 1)
+
+    # Someone else's product mark keeps someone else's colours, and the
+    # allowlist is the one place that exemption may be written down.
+    write("vendor/logo.svg", '<svg><rect fill="#1d4aff"/></svg>\n')
+    saved_allow = debrand.CONTENT_ALLOWLIST
+    try:
+        check("an unlisted file carrying a hue fails", quiet(debrand.check_marks, tmp), 1)
+        debrand.CONTENT_ALLOWLIST = {**saved_allow, "vendor/logo.svg": "someone else's mark"}
+        check("...and an allowlisted one does not", quiet(debrand.check_marks, tmp), 0)
+    finally:
+        debrand.CONTENT_ALLOWLIST = saved_allow
+
+
+print("\nretired spellings")
+
+# The rename runs once, on the way in. Nothing stopped a retired name walking
+# back afterwards, and `--check` stayed green while it did, because it only
+# looked for the company's name and these are the mascot's.
+with tempfile.TemporaryDirectory() as tmp:
+    subprocess.run(["git", "init", "-q", tmp], check=True)
+
+    def write(rel: str, body: str) -> None:
+        for name in os.listdir(tmp):
+            if name != ".git":
+                subprocess.run(["rm", "-rf", os.path.join(tmp, name)], check=True)
+        path = os.path.join(tmp, rel)
+        os.makedirs(os.path.dirname(path) or tmp, exist_ok=True)
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(body)
+        subprocess.run(["git", "add", "-A"], cwd=tmp, check=True, capture_output=True)
+
+    write("cli.py", 'ENV = "INSIGHTSCLI_DEBUG"\nq = "InsightsQL"\n')
+    check("a converged tree passes", quiet(debrand.check_hog, tmp), 0)
+
+    # An env var read under two names is two names, so the old prefix is
+    # refused rather than aliased.
+    write("cli.py", 'if os.environ.get("HOGLI_DEBUG"):\n    pass\n')
+    check("the retired env prefix is refused", quiet(debrand.check_hog, tmp), 1)
+
+    # Every casing, because the table was seven whole-word pairs deep and still
+    # missing four of them.
+    for spelling in ("HOGQL", "HogQL", "Hogql", "hogQL", "hogQl", "HogQl", "hogql"):
+        write("q.ts", f"import {{ parse }} from './{spelling}Parser'\n")
+        check(f"...and the query language spelled {spelling}", quiet(debrand.check_hog, tmp), 1)
+    for spelling in ("HOGVM", "HogVM", "Hogvm", "hogVm", "hogvm"):
+        write("vm.ts", f"export const {spelling}_STL = []\n")
+        check(f"...and the VM spelled {spelling}", quiet(debrand.check_hog, tmp), 1)
+
+    # Four casings, because the rule was written as two and the tree said a
+    # third: `topHog(` in the docs, while the code had moved to `topFn(`.
+    for spelling in ("tophog", "TopHog", "topHog", "Tophog"):
+        write("m.ts", f"export const store = {spelling}(parseMessage, [])\n")
+        check(f"...and the heavy-hitter store spelled {spelling}", quiet(debrand.check_hog, tmp), 1)
+
+    write("run.sh", 'exec bin/hog "$1"\n')
+    check("...and the language's bare word", quiet(debrand.check_hog, tmp), 1)
+    write("cli.py", 'if not name.endswith(".hoge"):\n    raise ValueError(name)\n')
+    check("...and its compiled extension", quiet(debrand.check_hog, tmp), 1)
+
+    # The third name a previous pass invented, which called the script language
+    # after the SQL dialect. Refused so it cannot go back to having two.
+    write("test.sh", "for f in tests/*.iql; do run $f; done\n")
+    check("...and the extension that named it after the wrong language", quiet(debrand.check_hog, tmp), 1)
+
+    # This used to assert the opposite, and the reason it flipped is the whole
+    # point of the rule above. Joined to a word on its left it WAS the Postgres
+    # table, and renaming a physical table is a schema change no rename may
+    # make -- so `--check` deliberately let it through.
+    #
+    # Then the schema change was made. `insights_hogfunction` became
+    # `insights_function`, the compatibility views were dropped, and the name
+    # this line protected stopped resolving to anything. The exemption outlived
+    # the fact that justified it, and went on protecting three relations the
+    # database no longer had, while the CDP managers still selected from them.
+    #
+    # An exemption is a claim about the world. When the world moves, the
+    # exemption becomes the bug.
+    write("m.py", 'CREATE = "SELECT id FROM insights_hogfunction WHERE team_id = %s"\n')
+    check("a relation the database dropped IS a leak", quiet(debrand.check_hog, tmp), 1)
+    write("m.py", 'name="unique_hogfunction_revision_version"\n')
+    check("...nor is a constraint built on it", quiet(debrand.check_hog, tmp), 0)
+    write("logic.ts", "path(() => ['scenes', 'pipeline', 'hogfunctions'])\n")
+    check("...but a label at a token boundary is", quiet(debrand.check_hog, tmp), 1)
+
+    # The one exemption to the rule above, and the reason it is not a hole. A
+    # migration is the record of a schema change, so the migration that renamed
+    # these relations has to name the side it renamed FROM -- and it cannot be
+    # edited afterwards regardless, because Django replays it to rebuild model
+    # state from the ledger row that says it ran.
+    write(
+        "app/migrations/0004_tables_named_for_the_model.py",
+        'RENAME = "ALTER TABLE insights_hogfunction RENAME TO insights_function"\n',
+    )
+    check("a migration may name the relation it renamed", quiet(debrand.check_hog, tmp), 0)
+
+    # Scoped to that one rule, not to migrations. A blanket exemption would let
+    # every other retired spelling back in through the one kind of file nobody
+    # rereads.
+    write("app/migrations/0005_later.py", 'q = "SELECT 1"  # HogQL\n')
+    check("...while a migration is refused every other spelling", quiet(debrand.check_hog, tmp), 1)
+
+    # A migration's filename is its identity in `django_migrations`, frozen for
+    # the same reason MIGRATION_RE refuses to rename one.
+    write("app/migrations/0002_alter_hogfunction_batch_export.py", "operations = []\n")
+    check("a migration filename is frozen, not failed", quiet(debrand.check_hog, tmp), 0)
+    write("app/hogfunction/views.py", "handler = None\n")
+    check("...while any other path is refused", quiet(debrand.check_hog, tmp), 1)
+
+    # The emitted runtime. The compiler writes these names and both VMs define
+    # them, so one engine keeping the old spelling is a call into nothing.
+    for ident in ("__printHogValue", "__isHogDateTime", "__newHogError", "__hogDate__"):
+        write("stl.py", f'STL = ["""function {ident}(x) {{ return x }}"""]\n')
+        check(f"...and the emitted runtime spelled {ident}", quiet(debrand.check_hog, tmp), 1)
+    write("stl.py", 'STL = ["""function __printValue(x) { return x }"""]\n')
+    check("...while the unbranded runtime passes", quiet(debrand.check_hog, tmp), 0)
+
+    # The STL constructor two test programs went on calling for two renames
+    # after the STL stopped defining it.
+    write("t.script", "throw HogError('FishError', 'no')\n")
+    check("the retired STL error constructor is refused", quiet(debrand.check_hog, tmp), 1)
+
+    # `ee/` is empty, so every one of these resolves to nothing.
+    write("ci.yml", "    paths:\n      - 'ee/hogai/**'\n")
+    check("a path under the emptied ee/ tree is refused", quiet(debrand.check_hog, tmp), 1)
+    write("mod.py", "from ee.hogai.tools import read_data\n")
+    check("...and the module path with it", quiet(debrand.check_hog, tmp), 1)
+
+    # The casing the whole-word rules cannot see: they are `hog` and `Hog`.
+    write("types.ts", "export enum InsightType {\n    HOG = 'HOG',\n}\n")
+    check("the member in upper case is refused", quiet(debrand.check_hog, tmp), 1)
+
+    # A snapshot is output. A retired name in one says the program that writes
+    # it has not been re-run -- reported, but never fixed by editing the file,
+    # which is how a half-rename passes its own tests.
+    write("app/__tests__/__snapshots__/stl.js", "function __printHogValue(x) { return x }\n")
+    check("a stale snapshot is reported, not failed", quiet(debrand.check_hog, tmp), 0)
+    write("app/stl.js", "function __printHogValue(x) { return x }\n")
+    check("...while the same line in source is a leak", quiet(debrand.check_hog, tmp), 1)
+    write(".test_durations", '{\n    "ee/hogai/test/test_x.py::test_y": 0.1\n}\n')
+    check("...and so is the timing cache", quiet(debrand.check_hog, tmp), 0)
+
+    # A captured diff is evidence of another tree on the day it was reviewed,
+    # and the eval grades a reviewer against it. Rewriting one moves the answer.
+    write("products/review/eval/experiments/topology/fixtures/pr1.diff", "ee/hogai/toolkit.py\n")
+    check("a captured diff is not ours to rewrite", quiet(debrand.check_hog, tmp), 0)
+    write("products/review/backend/reviewer/toolkit.py", "path = 'ee/hogai/toolkit.py'\n")
+    check("...while the same path in that product's source is not", quiet(debrand.check_hog, tmp), 1)
+
+    # Third-party package names cannot be renamed by us, so they are reported
+    # for a decision rather than exempted -- an exemption is a decision someone
+    # made, and nobody has made this one.
+    write("pyproject.toml", 'dependencies = ["drf-exceptions-hog==0.4.0"]\n')
+    check("a dependency manifest is pending, not failed", quiet(debrand.check_hog, tmp), 0)
+
+    # The credential marks. These were the last of the upstream's brand a
+    # customer read, and no word rule could reach them, because `ph` is not a
+    # word: the constant said `phc_` while every live token said `hi_`, and the
+    # middleware routed on `phc_` and so matched nothing at all. Refused as a
+    # shape, so a seventh cannot be coined to replace the six.
+    for mark in ("phc_", "phx_", "phs_", "pha_", "phr_", "phvt_"):
+        write("sdk.md", f'insights.init("{mark}wYm3f8pDq2Lk")\n')
+        check(f"the retired credential mark {mark} is refused", quiet(debrand.check_hog, tmp), 1)
+    write("sdk.md", 'insights.init("pk-wYm3f8pDq2Lk")\n')
+    check("...while the mark that replaced them passes", quiet(debrand.check_hog, tmp), 0)
+    write("keys.py", 'SECRET = "sk-wYm3f8pDq2Lk"\nACCESS = "at-x"\nREFRESH = "rt-x"\nVERIFY = "vt-x"\n')
+    check("...as do the secret and protocol marks", quiet(debrand.check_hog, tmp), 0)
+
+    # Declined, and each for a reason that is not "it looks close enough": two
+    # open a third-party package name, and one is the analytics client handle.
+    write("Cargo.lock", 'name = "phf_shared"\n')
+    check("a third-party crate is not a credential mark", quiet(debrand.check_hog, tmp), 0)
+    write("q.sql", "SELECT count() FROM php_events\n")
+    check("...nor is a table named after another language", quiet(debrand.check_hog, tmp), 0)
+    write("report.py", "pha_client = get_ph_client()\n")
+    check("...nor is the analytics client handle", quiet(debrand.check_hog, tmp), 0)
+    write("contact.py", "phone_number = row.phone_number_id\nphase_id = row.phase_seconds\n")
+    check("...nor are words that merely start with ph", quiet(debrand.check_hog, tmp), 0)
+
+
+# The two module systems are one defect wearing two syntaxes. TypeScript went
+# unchecked and 190 specifiers named files that had been renamed away, which is
+# the whole CDP consumer graph -- the event worker, not the web boot.
+#
+# Rooted at an empty directory, not at this repo: `ts_file` asks the filesystem
+# whether a specifier names a directory, so against the real tree these cases
+# would answer differently the day someone adds a directory that happens to
+# match, and a test that depends on what else is on disk is not a test.
+with tempfile.TemporaryDirectory() as tmp:
+    check(
+        "a stale TypeScript specifier is repointed at where the file went",
+        debrand.ts_ref_target(
+            "./services/insightsflows/hogflow-utils",
+            "nodejs/src/cdp/cdp-api.ts",
+            {"nodejs/src/cdp/services/insightsflows/insightsflow-utils.ts"},
+            tmp,
+        ),
+        "./services/insightsflows/insightsflow-utils",
+    )
+    check(
+        "...through the alias spelling too",
+        debrand.ts_ref_target(
+            "~/cdp/schema/hogflow",
+            "nodejs/src/cdp/types.ts",
+            {"nodejs/src/cdp/schema/insightsflow.ts"},
+            tmp,
+        ),
+        "~/cdp/schema/insightsflow",
+    )
+    # Renaming a specifier no rule can resolve would be a guess, and a guess
+    # wires the app to the wrong module without saying so.
+    check(
+        "a specifier that resolves is left alone",
+        debrand.ts_ref_target(
+            "./insightsflow-utils",
+            "nodejs/src/cdp/a.ts",
+            {"nodejs/src/cdp/insightsflow-utils.ts"},
+            tmp,
+        ),
+        None,
+    )
+    check(
+        "...and so is one that resolves under neither spelling",
+        debrand.ts_ref_target("./gone", "nodejs/src/cdp/a.ts", set(), tmp),
+        None,
+    )
+
+
+print("\nnames that are not ours to spell")
+
+# A rule that strips our design-system prefix ate a payments vendor whose
+# warehouse source we import, renaming their product to `Squeezy`.
+check("a third-party product keeps its name", debrand.rewrite_text("LemonSqueezy"), "LemonSqueezy")
+check("...while the design-system prefix still comes off", debrand.rewrite_text("LemonButton"), "Button")
+
+# These four are read back by something that was not rebuilt from this
+# checkout: Postgres, the Datastore, and a client on the wire. The `hog_flow`
+# rules would have renamed all four on the next run, which is a data incident
+# and not a refactor.
+for ident in ("insights_hogflow", "system.hog_flows", "hog_flow_id", "/v1/environments/2/hog_flows/"):
+    check(f"{ident} survives the rewrite", debrand.rewrite_text(ident), ident)
+# The line that separates an identity from a label: the module is a label, and
+# renaming it is the file move the rules exist to make.
+check(
+    "...while the module of the same name still moves",
+    debrand.rewrite_text("insights/tasks/hog_flows.py"),
+    "insights/tasks/insights_flows.py",
+)
+
+# The storage engine, one layer down. Our fork is Datastore and every label we
+# chose says so, but these six spellings are read back by a program that was not
+# built from this checkout, and the rules renamed all six until they were held.
+# Each line below broke something specific: a dictionary the server refuses to
+# create, an import of a class the package does not export, an option key the
+# server never sees, a derive macro with nothing to resolve, and an alias
+# pointing at itself.
+for ident in (
+    "SOURCE(CLICKHOUSE(TABLE 't'))",
+    "import { ClickHouseClient as DatastoreClient } from '@datastore/client'",
+    "from datastore_connect.driver.exceptions import ClickHouseError as DatastoreError",
+    "clickhouse_settings: { max_execution_time: 30 }",
+    "use datastore as clickhouse;",
+):
+    check(f"{ident[:44]} survives the rewrite", debrand.rewrite_text(ident), ident)
+check(
+    "an npm alias keeps the scope it resolves to, caret and all",
+    debrand.rewrite_text("'@datastore/client': 'npm:@clickhouse/client@^1.12.0'", "pnpm-workspace.yaml"),
+    "'@datastore/client': 'npm:@clickhouse/client@^1.12.0'",
+)
+# The other side of that line: a name we chose is ours, in every casing. The
+# camelCase one is the spelling a table of whole-word pairs keeps missing.
+check("...while an identifier we named still moves", debrand.rewrite_text("clickHouseTimestampToISO"), "datastoreTimestampToISO")
+check("...and so does a setting we read", debrand.rewrite_text("CLICKHOUSE_HOST"), "DATASTORE_HOST")
+
+
 # Applying the rules to an already-converged tree has to be a no-op, or every
 # rerun produces a diff and convergence never terminates.
 sample = "from insights.insightsql import datastore  # @hanzo/elements, InsightsFunction\n"
 check("content rewriting is idempotent", debrand.rewrite_text(debrand.rewrite_text(sample)), debrand.rewrite_text(sample))
-check("path rewriting is idempotent", debrand.rewrite_path(debrand.rewrite_path("posthog/hogql/clickhouse.py")), debrand.rewrite_path("posthog/hogql/clickhouse.py"))
+
+# One probe per path rule, built from the rule's own pattern rather than written
+# out here. A hand-picked fixture tests one path and has to spell the upstream
+# names to do it -- which is how `posthog/hogql/clickhouse.py` sat in this file,
+# naming both the brand and the engine, exempt because the allowlist exempts
+# files and this file is on it for its licence and import fixtures. Reading the
+# tables instead covers every rule, spells nothing, and cannot fall behind a
+# rule someone adds later.
+path_probes = (
+    [old + "/x.py" for old, _ in debrand.PATH_DIR_RULES]      # matched on prefix
+    + [f"a/{old}/b.py" for old, _ in debrand.PATH_RULES]      # matched anywhere
+    + [f"a/{base}" for base in debrand.PATH_EXACT_RULES]      # matched on basename
+)
+once = [debrand.rewrite_path(p) for p in path_probes]
+check(
+    "path rewriting is idempotent",
+    [debrand.rewrite_path(p) for p in once],
+    once,
+)
+# A probe is built from a rule's own left-hand side, so a probe that comes back
+# unchanged is a rule that no longer fires -- shadowed by an earlier one, or
+# left behind by a rename it was written for.
+check("every path rule fires", [p for p, o in zip(path_probes, once) if p == o], [])
 
 print()
 if failures:

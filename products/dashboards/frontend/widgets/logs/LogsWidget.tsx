@@ -1,8 +1,6 @@
 import { combineUrl } from 'kea-router'
 
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
-
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { getLocalTimeZone } from 'lib/utils/timezones'
 import { urls } from 'scenes/urls'
 
@@ -17,7 +15,7 @@ import type { DashboardWidgetComponentProps } from '../registry'
 import { parseLogsWidgetConfig } from './logsWidgetConfigValidation'
 import { LogsWidgetRow, LogsWidgetRowSkeleton, type LogsWidgetLogLine } from './LogsWidgetRow'
 
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
+const MascotMagnifyingGlass = pngMascot()
 
 export type LogsWidgetResult = {
     results?: LogsWidgetLogLine[]

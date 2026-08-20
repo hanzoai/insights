@@ -34,7 +34,7 @@ class TestCanvasOAuthAccess(APIBaseTest):
         token = OAuthAccessToken.objects.create(
             user=self.user,
             application=app,
-            token=f"pha_{scope.replace(':', '-').replace('*', 'star')}",
+            token=f"at-{scope.replace(':', '-').replace('*', 'star')}",
             scope=scope,
             expires=timezone.now() + timedelta(hours=1),
             scoped_teams=[],
@@ -48,7 +48,7 @@ class TestCanvasOAuthAccess(APIBaseTest):
         token = self._bearer(scope)
         self.client.logout()
         res = self.client.get(
-            f"/api/projects/{self.team.id}/canvases/?channel={channel.id}&limit=200",
+            f"/v1/projects/{self.team.id}/canvases/?channel={channel.id}&limit=200",
             HTTP_AUTHORIZATION=f"Bearer {token}",
         )
         return res.status_code
@@ -73,7 +73,7 @@ class TestCanvasOAuthAccess(APIBaseTest):
         self.client.logout()
         extra: dict[str, Any] = {"HTTP_X_INSIGHTS_TASK_ID": task_header} if task_header else {}
         res = self.client.post(
-            f"/api/projects/{self.team.id}/canvases/",
+            f"/v1/projects/{self.team.id}/canvases/",
             {"channel_id": str(channel.id), "name": "Signups"},
             format="json",
             HTTP_AUTHORIZATION=f"Bearer {token}",

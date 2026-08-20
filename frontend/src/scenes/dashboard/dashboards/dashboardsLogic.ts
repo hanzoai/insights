@@ -257,7 +257,7 @@ export const dashboardsLogic = kea<dashboardsLogicType>([
                         params.append('folder', folder)
                     }
                     const response: PaginatedResponse<DashboardBasicType> = await api.get(
-                        `api/environments/${teamId}/dashboards/?${params.toString()}`
+                        `v1/environments/${teamId}/dashboards/?${params.toString()}`
                     )
                     breakpoint()
                     // Findability signal for the dashboards-list-view experiment (flag: dashboards-list-view ·

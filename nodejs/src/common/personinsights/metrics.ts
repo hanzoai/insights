@@ -41,25 +41,25 @@ export const personinsightsStreamAcquisitionSeconds = new Histogram({
 
 export const personinsightsRequestsTotal = new Counter({
     name: 'personinsights_requests_total',
-    help: 'Total PersonHog group repository requests',
+    help: 'Total PersonFn group repository requests',
     labelNames: ['method', 'source', 'client'] as const,
 })
 
 export const personinsightsErrorsTotal = new Counter({
     name: 'personinsights_errors_total',
-    help: 'Total PersonHog gRPC errors',
+    help: 'Total PersonFn gRPC errors',
     labelNames: ['method', 'client', 'error_type'] as const,
 })
 
 export const personinsightsRetriesTotal = new Counter({
     name: 'personinsights_retries_total',
-    help: 'Total PersonHog gRPC retries before success or exhaustion',
+    help: 'Total PersonFn gRPC retries before success or exhaustion',
     labelNames: ['method', 'client', 'error_type'] as const,
 })
 
 export const personinsightsTerminalErrorsTotal = new Counter({
     name: 'personinsights_terminal_errors_total',
-    help: 'PersonHog gRPC errors after retry exhaustion — the request was not fulfilled',
+    help: 'PersonFn gRPC errors after retry exhaustion — the request was not fulfilled',
     labelNames: ['method', 'client', 'error_type'] as const,
 })
 
@@ -72,7 +72,7 @@ export function grpcErrorType(error: unknown): string {
 
 export const personinsightsLatencySeconds = new Histogram({
     name: 'personinsights_latency_seconds',
-    help: 'PersonHog request latency in seconds',
+    help: 'PersonFn request latency in seconds',
     labelNames: ['method', 'source', 'client'] as const,
     buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5],
 })

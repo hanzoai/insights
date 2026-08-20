@@ -142,7 +142,7 @@ export class IngestionLogsServer implements NodeServer {
 
         const logsTransformer = new LogsTransformerService(insightsFunctionManager, insightsFunctionMonitoring, {
             siteUrl: this.config.SITE_URL,
-            hogTimeoutMs: this.config.LOGS_TRANSFORMATIONS_FN_TIMEOUT_MS,
+            scriptTimeoutMs: this.config.LOGS_TRANSFORMATIONS_FN_TIMEOUT_MS,
             messageBudgetMs: this.config.LOGS_TRANSFORMATIONS_MESSAGE_BUDGET_MS,
             batchBudgetMs: this.config.LOGS_TRANSFORMATIONS_BATCH_BUDGET_MS,
             maxErrorLogsPerFunctionPerMessage: this.config.LOGS_TRANSFORMATIONS_MAX_ERROR_LOGS_PER_FUNCTION,

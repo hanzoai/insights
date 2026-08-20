@@ -177,7 +177,7 @@ class TestMirrorEntries(SimpleTestCase):
 class TestMirrorOtlpDelivery(SimpleTestCase):
     @override_settings(
         TASK_RUN_LOGS_MIRROR_OTLP_URL="https://us.i.hanzo.ai/i/v1/logs",
-        TASK_RUN_LOGS_MIRROR_OTLP_TOKEN="phc_internal",
+        TASK_RUN_LOGS_MIRROR_OTLP_TOKEN="pk-internal",
     )
     def test_posts_one_otlp_batch_with_severity_trace_and_attributes(self):
         entries = [
@@ -192,7 +192,7 @@ class TestMirrorOtlpDelivery(SimpleTestCase):
         assert args[0] == "https://us.i.hanzo.ai/i/v1/logs"
         # The configured internal-project token routes the records — never a key
         # derived from the run's (customer) team.
-        assert kwargs["headers"] == {"Authorization": "Bearer phc_internal"}
+        assert kwargs["headers"] == {"Authorization": "Bearer pk-internal"}
         records = kwargs["json"]["resourceLogs"][0]["scopeLogs"][0]["logRecords"]
         assert [r["severityText"] for r in records] == ["INFO", "ERROR"]
         assert records[0]["body"]["stringValue"] == "[agent_message] hello"
@@ -207,7 +207,7 @@ class TestMirrorOtlpDelivery(SimpleTestCase):
 
     @override_settings(
         TASK_RUN_LOGS_MIRROR_OTLP_URL="https://us.i.hanzo.ai/i/v1/logs",
-        TASK_RUN_LOGS_MIRROR_OTLP_TOKEN="phc_internal",
+        TASK_RUN_LOGS_MIRROR_OTLP_TOKEN="pk-internal",
     )
     def test_protocol_payloads_never_reach_the_otlp_payload(self):
         entry = {
@@ -232,7 +232,7 @@ class TestMirrorOtlpDelivery(SimpleTestCase):
         [
             ("both_unset", None, None),
             ("url_only", "https://us.i.hanzo.ai/i/v1/logs", None),
-            ("token_only", None, "phc_internal"),
+            ("token_only", None, "pk-internal"),
         ]
     )
     def test_no_http_delivery_unless_fully_configured(self, _name, url, token):

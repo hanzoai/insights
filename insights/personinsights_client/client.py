@@ -75,7 +75,7 @@ from insights.personinsights_client.proto import (
     ListCohortMemberIdsResponse,
     ListGroupsRequest,
     ListGroupsResponse,
-    PersonHogServiceStub,
+    PersonServiceStub,
     PersonsByDistinctIdsInTeamResponse,
     PersonsResponse,
     SetPersonDistinctIdVersionFloorRequest,
@@ -157,7 +157,7 @@ class _ChannelStateMonitor:
             pass
 
 
-class PersonHogClient:
+class PersonClient:
     def __init__(
         self,
         addr: str,
@@ -201,7 +201,7 @@ class PersonHogClient:
             MetricsInterceptor(client_name),
         )
         self._state_monitor = _ChannelStateMonitor(channel, client_name)
-        self._stub = PersonHogServiceStub(self._channel)
+        self._stub = PersonServiceStub(self._channel)
         self._timeout = timeout_ms / 1000.0
 
     def close(self) -> None:
@@ -376,11 +376,11 @@ class PersonHogClient:
 
 _T = TypeVar("_T")
 
-_client: Optional[PersonHogClient] = None
+_client: Optional[PersonClient] = None
 _lock = threading.Lock()
 
 
-def get_personinsights_client() -> Optional[PersonHogClient]:
+def get_personinsights_client() -> Optional[PersonClient]:
     global _client
 
     if _client is None:
@@ -388,11 +388,20 @@ def get_personinsights_client() -> Optional[PersonHogClient]:
             if _client is None:
                 addr = getattr(settings, "PERSONFN_ADDR", "")
                 if not addr:
-                    return None
+                    # No address is not a missing dependency — it is a deployment
+                    # that does not run personinsights. The service is a read-through
+                    # accelerator in front of this app's own Postgres, so the rows
+                    # are still there; serve them from the ORM instead of returning
+                    # None and 500ing every caller.
+                    from insights.personinsights_client.local_client import LocalClient  # noqa: PLC0415
+
+                    _client = LocalClient()  # ty: ignore[invalid-assignment]
+                    logger.info("personinsights_local_client_initialized")
+                    return _client
 
                 timeout_ms = getattr(settings, "PERSONFN_TIMEOUT_MS", 5000)
                 client_name = getattr(settings, "OTEL_SERVICE_NAME", None) or "insights-django"
-                _client = PersonHogClient(
+                _client = PersonClient(
                     addr=addr,
                     client_name=client_name,
                     timeout_ms=timeout_ms,
@@ -413,7 +422,7 @@ def get_personinsights_client() -> Optional[PersonHogClient]:
     return _client
 
 
-def require_personinsights_client() -> PersonHogClient:
+def require_personinsights_client() -> PersonClient:
     client = get_personinsights_client()
     if client is None:
         raise RuntimeError("personinsights client not configured")

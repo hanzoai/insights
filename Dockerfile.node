@@ -58,11 +58,24 @@ COPY ./rust ./rust
 COPY ./common/esbuilder/ ./common/esbuilder/
 COPY ./common/plugin_transpiler/ ./common/plugin_transpiler/
 COPY ./common/scriptvm/typescript/ ./common/scriptvm/typescript/
-COPY ./common/plugin-scaffold/ ./common/plugin-scaffold/
-# No common/siphash: pnpm-workspace.yaml resolves `@hanzo/siphash` to the
-# registry package @posthog/siphash@1.1.1, so there is no local directory to
-# copy and never was in this fork.
-COPY ./common/insights-node/ ./common/insights-node/
+# No common/siphash: pnpm-workspace.yaml resolves `@hanzo/siphash` to a registry
+# package (see the override there), so there is no local directory to copy and
+# never was in this fork.
+# No common/insights-node or common/plugin-scaffold. Neither is a workspace
+# package here: insights-node holds two symlinks and nothing else, and
+# plugin-scaffold lost its package.json in the 08-01 rebase, leaving committed
+# dist output nothing resolves to. `~/plugin-scaffold` is nodejs/src/plugin-scaffold.ts,
+# an inlined copy of the deprecated v1.4.4 package, and `insights-node` is the
+# registry alias for posthog-node.
+# nodejs declares `"@hanzo/replay-headless": "workspace:*"` and the session
+# replay rasterizer imports its ./protocol entry, so without these two the
+# install has no local directory to link and tsc reports the module missing —
+# then every type that came through it degrades, which is why one uncopied
+# package produced errors about `active` and `ts_to_s` not existing on
+# InactivityPeriod. replay-headless depends on replay-shared, so both come or
+# neither works.
+COPY ./common/replay-headless/ ./common/replay-headless/
+COPY ./common/replay-shared/ ./common/replay-shared/
 # Only the files this tree actually has. `tsconfig.build.json` and `vendor/` are
 # upstream paths that did not survive the plugin-server -> nodejs rename, and a
 # COPY of a source that is not in the context fails the whole build with
@@ -146,12 +159,6 @@ COPY --from=nodejs-build --chown=insights:insights /code/common/plugin_transpile
 COPY --from=nodejs-build --chown=insights:insights /code/common/scriptvm/typescript/dist /code/common/scriptvm/typescript/dist
 COPY --from=nodejs-build --chown=insights:insights /code/common/scriptvm/typescript/node_modules /code/common/scriptvm/typescript/node_modules
 COPY --from=nodejs-build --chown=insights:insights /code/common/scriptvm/typescript/package.json /code/common/scriptvm/typescript/package.json
-COPY --from=nodejs-build --chown=insights:insights /code/common/insights-node/index.js /code/common/insights-node/index.js
-COPY --from=nodejs-build --chown=insights:insights /code/common/insights-node/node_modules /code/common/insights-node/node_modules
-COPY --from=nodejs-build --chown=insights:insights /code/common/insights-node/index.d.ts /code/common/insights-node/index.d.ts
-COPY --from=nodejs-build --chown=insights:insights /code/common/insights-node/package.json /code/common/insights-node/package.json
-COPY --from=nodejs-build --chown=insights:insights /code/common/plugin-scaffold/dist /code/common/plugin-scaffold/dist
-COPY --from=nodejs-build --chown=insights:insights /code/common/plugin-scaffold/package.json /code/common/plugin-scaffold/package.json
 COPY --from=nodejs-build --chown=insights:insights /code/nodejs/dist /code/nodejs/dist
 COPY --from=nodejs-build --chown=insights:insights /code/node_modules /code/node_modules
 COPY --from=nodejs-build --chown=insights:insights /code/nodejs/node_modules /code/nodejs/node_modules

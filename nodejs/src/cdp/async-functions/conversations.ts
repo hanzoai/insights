@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 
 import { CyclotronInvocationQueueParametersFetchSchema } from '~/cdp/schema/cyclotron'
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { Flow } from '~/cdp/schema/flow'
 
 import { registerAsyncFunction } from '../async-function-registry'
 
@@ -24,7 +24,7 @@ registerAsyncFunction('insightsGetTicket', {
 
         result.invocation.queueParameters = CyclotronInvocationQueueParametersFetchSchema.parse({
             type: 'fetch',
-            url: `${context.siteUrl}/api/conversations/external/ticket/${ticketId}`,
+            url: `${context.siteUrl}/v1/conversations/external/ticket/${ticketId}`,
             method: 'GET',
             headers: { Authorization: `Bearer ${team.secret_api_token}` },
         })
@@ -97,19 +97,19 @@ registerAsyncFunction('insightsUpdateTicket', {
             Authorization: `Bearer ${updateTeam.secret_api_token}`,
         }
 
-        // Present only when running inside a InsightsFlow (spread onto the synthesized invocation);
+        // Present only when running inside a Flow (spread onto the synthesized invocation);
         // forward the workflow id so the ticket activity log can attribute and link to it. Only
         // the id is sent — the display name is resolved from the workflow on the frontend so it
-        // can't be spoofed through this header. Typed as an optional InsightsFlow so a rename of its
+        // can't be spoofed through this header. Typed as an optional Flow so a rename of its
         // id shape breaks compilation here.
-        const hogFlow = (context.invocation as { hogFlow?: InsightsFlow }).hogFlow
-        if (hogFlow?.id) {
-            headers['X-Insights-Script-Flow-Id'] = hogFlow.id
+        const flow = (context.invocation as { flow?: Flow }).flow
+        if (flow?.id) {
+            headers['X-Insights-Script-Flow-Id'] = flow.id
         }
 
         result.invocation.queueParameters = CyclotronInvocationQueueParametersFetchSchema.parse({
             type: 'fetch',
-            url: `${context.siteUrl}/api/conversations/external/ticket/${ticketId}`,
+            url: `${context.siteUrl}/v1/conversations/external/ticket/${ticketId}`,
             method: 'PATCH',
             body: JSON.stringify(updates),
             headers,

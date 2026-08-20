@@ -37,7 +37,7 @@ _QUERY_KIND_TO_SHORT_NAME: dict[str, str] = {
     "WebStatsTableQuery": "Web analytics",
     "WebOverviewQuery": "Web analytics",
     "InsightsQLQuery": "SQL",
-    "HogQuery": "Script",
+    "ScriptQuery": "Script",
 }
 
 # Legacy `filters.insight` string (see InsightType in frontend).
@@ -50,7 +50,7 @@ _LEGACY_FILTER_INSIGHT_TO_SHORT_NAME: dict[str, str] = {
     "RETENTION": "Retention",
     "JSON": "JSON",
     "SQL": "SQL",
-    "HOG": "Script",
+    "SCRIPT": "Script",
     "WEB_ANALYTICS": "Web analytics",
     "SESSIONS": "Sessions",
 }
@@ -137,8 +137,8 @@ def _extract_query_source_kind(query: dict) -> str | None:
 
     if kind == "InsightsQLQuery":
         return "InsightsQLQuery"
-    if kind == "HogQuery":
-        return "HogQuery"
+    if kind == "ScriptQuery":
+        return "ScriptQuery"
 
     if kind in _QUERY_KIND_TO_SHORT_NAME:
         return kind

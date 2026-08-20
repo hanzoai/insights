@@ -19,7 +19,7 @@ class TestOptOuts(APIBaseTest):
         self.category = MessageCategory.objects.create(
             team=self.team, key="newsletter", name="Newsletter", description="Weekly updates"
         )
-        self.base_url = f"/api/environments/{self.team.id}/messaging_preferences"
+        self.base_url = f"/v1/environments/{self.team.id}/messaging_preferences"
 
     def _bulk(self, opt_outs: list[dict[str, Any]], **data):
         return self.client.post(

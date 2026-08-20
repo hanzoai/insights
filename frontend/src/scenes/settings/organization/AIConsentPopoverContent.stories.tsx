@@ -27,7 +27,7 @@ export const NonAdmin: Story = {
     args: {
         onApprove: noop,
         onDismiss: noop,
-        approvalDisabledReason: 'Ask an admin or owner of MockHog to approve this',
+        approvalDisabledReason: 'Ask an admin or owner of MockScript to approve this',
     },
 }
 
@@ -36,6 +36,6 @@ export const LongDisabledReason: Story = {
         onApprove: noop,
         onDismiss: noop,
         approvalDisabledReason:
-            'Only organization owners and admins can approve AI data processing for MockHog. Ask Alice, Bob, or Carol to approve this for your team so you can start using Insights AI features.',
+            'Only organization owners and admins can approve AI data processing for MockScript. Ask Alice, Bob, or Carol to approve this for your team so you can start using Insights AI features.',
     },
 }

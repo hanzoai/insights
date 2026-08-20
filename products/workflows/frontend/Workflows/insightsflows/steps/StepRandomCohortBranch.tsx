@@ -8,7 +8,7 @@ import { Button } from 'lib/elements/Button'
 import { Input } from 'lib/elements/Input'
 import { Label } from 'lib/elements/Label'
 
-import { hogFlowEditorLogic } from '../hogFlowEditorLogic'
+import { flowEditorLogic } from '../flowEditorLogic'
 import { InsightsFlow, InsightsFlowAction } from '../types'
 import { StepSchemaErrors } from './components/StepSchemaErrors'
 import {
@@ -31,8 +31,8 @@ export function StepRandomCohortBranchConfiguration({
     const action = node.data
     const cohorts = action.config.cohorts ?? []
 
-    const { edgesByActionId } = useValues(hogFlowEditorLogic)
-    const { setWorkflowAction, setWorkflowActionEdges } = useActions(hogFlowEditorLogic)
+    const { edgesByActionId } = useValues(flowEditorLogic)
+    const { setWorkflowAction, setWorkflowActionEdges } = useActions(flowEditorLogic)
 
     const nodeEdges = edgesByActionId[action.id] ?? []
 

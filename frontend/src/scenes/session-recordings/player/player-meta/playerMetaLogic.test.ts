@@ -26,12 +26,12 @@ describe('playerMetaLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/session_recordings/:id': recordingMetaJson,
-                '/api/environments/:team_id/session_recordings/:id/snapshots/': () =>
+                '/v1/environments/:team_id/session_recordings/:id': recordingMetaJson,
+                '/v1/environments/:team_id/session_recordings/:id/snapshots/': () =>
                     new HttpResponse(snapshotsAsJSONLines()),
             },
             post: {
-                '/api/environments/:team_id/query/:kind': recordingEventsJson,
+                '/v1/environments/:team_id/query/:kind': recordingEventsJson,
             },
         })
         initKeaTests()

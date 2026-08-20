@@ -22,7 +22,7 @@ const MANY: LegendItem[] = Array.from({ length: 12 }, (_, i) => ({
 }))
 
 const meta: Meta = {
-    title: 'Components/HogCharts/Legend',
+    title: 'Components/ScriptCharts/Legend',
     parameters: { layout: 'centered' },
 }
 export default meta

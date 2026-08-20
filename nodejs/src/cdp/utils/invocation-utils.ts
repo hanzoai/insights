@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 
 import { UUIDT } from '~/common/utils/utils'
 
-import type { HogInputsService } from '../services/script-inputs.service'
+import type { ScriptInputsService } from '../services/script-inputs.service'
 import {
     CyclotronJobInvocation,
     CyclotronJobInvocationInsightsFunction,
@@ -41,7 +41,7 @@ export function createInvocation(
  * resolving each one's inputs. Filter metrics/logs come back alongside for the caller to queue.
  */
 export async function buildInsightsFunctionInvocations(
-    hogInputsService: HogInputsService,
+    scriptInputsService: ScriptInputsService,
     insightsFunctions: InsightsFunctionType[],
     triggerGlobals: InsightsFunctionInvocationGlobals
 ): Promise<{
@@ -87,7 +87,7 @@ export async function buildInsightsFunctionInvocations(
                 },
             }
 
-            const globalsWithInputs = await hogInputsService.buildInputsWithGlobals(
+            const globalsWithInputs = await scriptInputsService.buildInputsWithGlobals(
                 insightsFunction,
                 globalsWithSource,
                 additionalInputs

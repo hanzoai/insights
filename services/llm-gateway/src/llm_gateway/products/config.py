@@ -109,8 +109,8 @@ UNCONDITIONAL_SERVER_CREDENTIAL_PRODUCTS: Final[frozenset[str]] = frozenset(
 # model-registry advertising filter; the registry also derives its advertising from it so the two
 # can't drift. Keys must be lowercase.
 RESTRICTED_MODEL_PRODUCTS: Final[dict[str, frozenset[str]]] = {
-    # Evaluated by ReviewHog; exposed in Insights Code behind the insights-code-deepseek-model flag.
-    BASETEN_DEEPSEEK_PUBLIC_MODEL: frozenset({"insights_code", "review_hog"}),
+    # Evaluated by Review; exposed in Insights Code behind the insights-code-deepseek-model flag.
+    BASETEN_DEEPSEEK_PUBLIC_MODEL: frozenset({"insights_code", "review"}),
 }
 
 PRODUCTS: Final[dict[str, ProductConfig]] = {
@@ -157,7 +157,7 @@ PRODUCTS: Final[dict[str, ProductConfig]] = {
                 "gpt-5.3-codex",
                 "gpt-5.2",
                 "gpt-5-mini",
-                # ReviewHog sandbox runs route here (no review_hog entry in the agent's
+                # Review sandbox runs route here (no review entry in the agent's
                 # origin→product map), so its reviewer-experiment arms must be allowed.
                 "gpt-5.6-sol",
             }
@@ -256,7 +256,7 @@ PRODUCTS: Final[dict[str, ProductConfig]] = {
         credit_bucket=None,
         requires_server_credential=True,
     ),
-    "review_hog": ProductConfig(
+    "review": ProductConfig(
         allowed_application_ids=None,
         # The models the review pipeline pins: sonnet-5 (perspectives + one-shots), opus-4-8
         # (validation), opus-5 (outcome judge), gpt-5.5 / gpt-5.6 sol+luna+terra (Codex reviewers),
@@ -275,7 +275,7 @@ PRODUCTS: Final[dict[str, ProductConfig]] = {
             }
         ),
         allow_api_keys=True,
-        # Deliberately unbilled while ReviewHog is an internal alpha.
+        # Deliberately unbilled while Review is an internal alpha.
         credit_bucket=None,
     ),
     # Server-side security review before a custom sandbox image is built. The Django worker mints a
@@ -339,13 +339,13 @@ PRODUCTS: Final[dict[str, ProductConfig]] = {
         allow_api_keys=True,
         credit_bucket=None,
     ),
-    # Stamphog: the sandboxed PR reviewer (Sonnet, OAuth-only in practice) and the daily merged-PR
+    # Stamp: the sandboxed PR reviewer (Sonnet, OAuth-only in practice) and the daily merged-PR
     # digest summarization (Haiku, server-side via the shared key). Low volume, internal infra.
     # The reviewer runs inside a sandbox over untrusted PR content, so it authenticates with a
     # short-lived server-minted OAuth token under the shared sandbox app — hence the app allowlist.
     # allow_api_keys stays True only for the digest's server-side calls (the shared key never
     # enters a sandbox); it can flip off once the digest mints tokens too.
-    # Deliberately unbilled, same posture as review_hog/conversations: reviews and digests are work
+    # Deliberately unbilled, same posture as review/conversations: reviews and digests are work
     # done by Insights, not customer-billable usage, and the worker attributes spend per customer team
     # via the team_id header — a credit_bucket here would silently charge customer AI credits for it.
     # The trade-off (any personal API key can reach an unbilled route) is shared by every
@@ -353,7 +353,7 @@ PRODUCTS: Final[dict[str, ProductConfig]] = {
     # requires_server_credential closes the OAuth side of that class: reviewer tokens are minted
     # server-side with the internal marker, so a user's own Desktop OAuth token can't ride this route
     # around the insights_code free-tier gate.
-    "stamphog": ProductConfig(
+    "stamp": ProductConfig(
         allowed_application_ids=frozenset({INSIGHTS_CODE_US_APP_ID, INSIGHTS_CODE_EU_APP_ID, INSIGHTS_CODE_DEV_APP_ID}),
         allowed_models=frozenset({"claude-haiku-4-5", "claude-sonnet-5"}),
         allow_api_keys=True,

@@ -60,7 +60,7 @@ class TestTracingAttributeValueSearch(DatastoreTestMixin, APIBaseTest):
 
     def _attributes(self, params: dict) -> list[dict]:
         query_params = {"dateRange": f'{{"date_from": "{DATE_FROM}", "date_to": "{DATE_TO}"}}', **params}
-        res = self.client.get(f"/api/projects/{self.team.id}/tracing/spans/attributes", query_params)
+        res = self.client.get(f"/v1/projects/{self.team.id}/tracing/spans/attributes", query_params)
         self.assertEqual(res.status_code, 200, res.content)
         return res.json()["results"]
 

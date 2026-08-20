@@ -1,33 +1,33 @@
 import { DateTime } from 'luxon'
 
 import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../_tests/examples'
-import { createHogExecutionGlobals, createInsightsFunction } from '../_tests/fixtures'
-import { HogInputsService } from '../services/script-inputs.service'
+import { createScriptExecutionGlobals, createInsightsFunction } from '../_tests/fixtures'
+import { ScriptInputsService } from '../services/script-inputs.service'
 import { buildInsightsFunctionInvocations, cloneInvocation, createInvocation } from './invocation-utils'
 
 describe('Invocation utils', () => {
     describe('buildInsightsFunctionInvocations', () => {
         // Plain templated inputs only: no integration, email or push_subscription schema types, so
         // the service never reaches its integration manager, tokens service or encrypted fields.
-        const hogInputsService = new HogInputsService(undefined as any, undefined as any, undefined as any)
+        const scriptInputsService = new ScriptInputsService(undefined as any, undefined as any, undefined as any)
 
         const pageviewGlobals = () =>
-            createHogExecutionGlobals({
+            createScriptExecutionGlobals({
                 groups: {},
                 event: { event: '$pageview', properties: { $current_url: 'https://hanzo.ai' } } as any,
             })
 
         it('injects the invoked function as the globals source', async () => {
             const fn = createInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
-            const globals = createHogExecutionGlobals({ groups: {} })
+            const globals = createScriptExecutionGlobals({ groups: {} })
             expect(globals.source).toBeUndefined()
 
-            const { invocations } = await buildInsightsFunctionInvocations(hogInputsService, [fn], globals)
+            const { invocations } = await buildInsightsFunctionInvocations(scriptInputsService, [fn], globals)
 
             expect(invocations).toHaveLength(1)
             expect(invocations[0].state.globals.source).toEqual({
@@ -38,20 +38,20 @@ describe('Invocation utils', () => {
 
         it('builds an invocation only when the filters match, counting a filtered metric otherwise', async () => {
             const fn = createInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
             })
 
             const notMatched = await buildInsightsFunctionInvocations(
-                hogInputsService,
+                scriptInputsService,
                 [fn],
-                createHogExecutionGlobals({ groups: {} })
+                createScriptExecutionGlobals({ groups: {} })
             )
             expect(notMatched.invocations).toHaveLength(0)
             expect(notMatched.metrics.map((m) => m.metric_name)).toEqual(['filtered'])
 
-            const matched = await buildInsightsFunctionInvocations(hogInputsService, [fn], pageviewGlobals())
+            const matched = await buildInsightsFunctionInvocations(scriptInputsService, [fn], pageviewGlobals())
             expect(matched.invocations).toHaveLength(1)
             expect(matched.metrics).toHaveLength(0)
         })
@@ -62,7 +62,7 @@ describe('Invocation utils', () => {
         const elementsChainCases = [
             {
                 shape: 'text',
-                filters: FN_FILTERS_EXAMPLES.elements_text_filter,
+                filters: INSIGHTS_FILTERS_EXAMPLES.elements_text_filter,
                 notMatching: 'Not our text',
                 matching: 'Reload',
                 chain: (buttonText: string) =>
@@ -70,7 +70,7 @@ describe('Invocation utils', () => {
             },
             {
                 shape: 'href',
-                filters: FN_FILTERS_EXAMPLES.elements_href_filter,
+                filters: INSIGHTS_FILTERS_EXAMPLES.elements_href_filter,
                 notMatching: '/project/1/not-a-link',
                 matching: '/project/1/activity/explore',
                 chain: (link: string) =>
@@ -78,7 +78,7 @@ describe('Invocation utils', () => {
             },
             {
                 shape: 'tag and id',
-                filters: FN_FILTERS_EXAMPLES.elements_tag_and_id_filter,
+                filters: INSIGHTS_FILTERS_EXAMPLES.elements_tag_and_id_filter,
                 notMatching: 'notfound',
                 matching: 'homelink',
                 chain: (id: string) =>
@@ -90,13 +90,13 @@ describe('Invocation utils', () => {
             'gates invocation building on an elements-chain $shape filter',
             async ({ filters, chain, notMatching, matching }) => {
                 const fn = createInsightsFunction({
-                    ...FN_EXAMPLES.simple_fetch,
-                    ...FN_INPUTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
                     ...filters,
                 })
 
                 const autocaptureGlobals = (elementsChain: string) =>
-                    createHogExecutionGlobals({
+                    createScriptExecutionGlobals({
                         groups: {},
                         event: {
                             uuid: 'uuid',
@@ -110,7 +110,7 @@ describe('Invocation utils', () => {
                     })
 
                 const notMatched = await buildInsightsFunctionInvocations(
-                    hogInputsService,
+                    scriptInputsService,
                     [fn],
                     autocaptureGlobals(chain(notMatching))
                 )
@@ -118,7 +118,7 @@ describe('Invocation utils', () => {
                 expect(notMatched.metrics.map((m) => m.metric_name)).toEqual(['filtered'])
 
                 const matched = await buildInsightsFunctionInvocations(
-                    hogInputsService,
+                    scriptInputsService,
                     [fn],
                     autocaptureGlobals(chain(matching))
                 )
@@ -130,13 +130,13 @@ describe('Invocation utils', () => {
         describe('mappings', () => {
             const mappingFunction = () =>
                 createInsightsFunction({
-                    ...FN_EXAMPLES.simple_fetch,
-                    ...FN_INPUTS_EXAMPLES.simple_fetch,
-                    ...FN_FILTERS_EXAMPLES.no_filters,
+                    ...INSIGHTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                     mappings: [
                         {
                             // Filters for pageview or autocapture, and overrides the url input
-                            ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                            ...INSIGHTS_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                             inputs: {
                                 url: {
                                     order: 0,
@@ -160,15 +160,15 @@ describe('Invocation utils', () => {
                             },
                         },
                         // No filters so should match all events
-                        { ...FN_FILTERS_EXAMPLES.no_filters },
+                        { ...INSIGHTS_FILTERS_EXAMPLES.no_filters },
                         // Broken filters so shouldn't match
-                        { ...FN_FILTERS_EXAMPLES.broken_filters },
+                        { ...INSIGHTS_FILTERS_EXAMPLES.broken_filters },
                     ],
                 })
 
             it('builds one invocation per matching mapping', async () => {
                 const results = await buildInsightsFunctionInvocations(
-                    hogInputsService,
+                    scriptInputsService,
                     [mappingFunction()],
                     pageviewGlobals()
                 )
@@ -184,9 +184,9 @@ describe('Invocation utils', () => {
 
             it('skips mappings whose filters do not match', async () => {
                 const results = await buildInsightsFunctionInvocations(
-                    hogInputsService,
+                    scriptInputsService,
                     [mappingFunction()],
-                    createHogExecutionGlobals({ event: { event: 'test' } as any })
+                    createScriptExecutionGlobals({ event: { event: 'test' } as any })
                 )
 
                 // Only the unfiltered mapping survives
@@ -196,7 +196,7 @@ describe('Invocation utils', () => {
 
             it('resolves each matching mapping against its own inputs', async () => {
                 const { invocations } = await buildInsightsFunctionInvocations(
-                    hogInputsService,
+                    scriptInputsService,
                     [mappingFunction()],
                     pageviewGlobals()
                 )
@@ -212,13 +212,13 @@ describe('Invocation utils', () => {
             // A destination saved with no mappings is silently a no-op rather than an unmapped send.
             it('builds nothing for a function with an empty mappings array', async () => {
                 const fn = createInsightsFunction({
-                    ...FN_EXAMPLES.simple_fetch,
-                    ...FN_INPUTS_EXAMPLES.simple_fetch,
-                    ...FN_FILTERS_EXAMPLES.no_filters,
+                    ...INSIGHTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                    ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                     mappings: [],
                 })
 
-                const results = await buildInsightsFunctionInvocations(hogInputsService, [fn], pageviewGlobals())
+                const results = await buildInsightsFunctionInvocations(scriptInputsService, [fn], pageviewGlobals())
 
                 expect(results.invocations).toHaveLength(0)
                 expect(results.metrics).toHaveLength(0)
@@ -227,19 +227,19 @@ describe('Invocation utils', () => {
 
         it('reports a function whose inputs fail to build without dropping the rest of the batch', async () => {
             const broken = createInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                 inputs_schema: [{ key: 'url', type: 'string', label: 'Webhook URL', required: true }],
                 // Truncated bytecode - resolving this input throws
                 inputs: { url: { order: 0, value: 'https://example.com', bytecode: ['_H', 1, 2] } },
             })
             const healthy = createInsightsFunction({
-                ...FN_EXAMPLES.simple_fetch,
-                ...FN_INPUTS_EXAMPLES.simple_fetch,
-                ...FN_FILTERS_EXAMPLES.no_filters,
+                ...INSIGHTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
+                ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
             })
 
-            const results = await buildInsightsFunctionInvocations(hogInputsService, [broken, healthy], pageviewGlobals())
+            const results = await buildInsightsFunctionInvocations(scriptInputsService, [broken, healthy], pageviewGlobals())
 
             expect(results.invocations.map((i) => i.functionId)).toEqual([healthy.id])
             expect(results.metrics).toMatchObject([
@@ -268,7 +268,7 @@ describe('Invocation utils', () => {
 
         const invocation = createInvocation(
             {
-                ...createHogExecutionGlobals(),
+                ...createScriptExecutionGlobals(),
                 inputs: { foo: 'bar' },
             },
             createInsightsFunction({

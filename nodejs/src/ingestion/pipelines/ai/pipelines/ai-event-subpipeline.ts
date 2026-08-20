@@ -2,7 +2,7 @@ import { AsyncOutput, EVENTS_OUTPUT } from '~/common/outputs'
 import { createImmediateMergeFoldStep } from '~/ingestion/common/persons/person-merge-fold'
 import { createCreateEventStep } from '~/ingestion/common/steps/event-processing/create-event-step'
 import { EmitEventStepOutput, createEmitEventStep } from '~/ingestion/common/steps/event-processing/emit-event-step'
-import { createHogTransformEventStep } from '~/ingestion/common/steps/event-processing/script-transform-event-step'
+import { createScriptTransformEventStep } from '~/ingestion/common/steps/event-processing/script-transform-event-step'
 import { createNormalizeEventStep } from '~/ingestion/common/steps/event-processing/normalize-event-step'
 import { createNormalizeProcessPersonFlagStep } from '~/ingestion/common/steps/event-processing/normalize-process-person-flag-step'
 import { createPrepareEventStep } from '~/ingestion/common/steps/event-processing/prepare-event-step'
@@ -16,7 +16,7 @@ import type {
     AiEventSubpipelineInput,
 } from '~/ingestion/common/subpipelines/ai-subpipeline.contract'
 import { PipelineBuilder, StartPipelineBuilder } from '~/ingestion/framework/builders/pipeline-builders'
-import { sum, sumOk, sumResult, timer } from '~/ingestion/framework/extensions/tophog'
+import { sum, sumOk, sumResult, timer } from '~/ingestion/framework/extensions/topfn'
 import { isDropResult } from '~/ingestion/framework/results'
 
 import { createProcessAiEventStep } from './steps/process-ai-event-step'
@@ -30,13 +30,13 @@ export function createAiEventSubpipeline<TInput extends AiEventSubpipelineInput,
     builder: StartPipelineBuilder<TInput, TContext>,
     config: AiEventSubpipelineConfig
 ): PipelineBuilder<TInput, EmitEventStepOutput, TContext, AsyncOutput> {
-    const { options, outputs, teamManager, groupTypeManager, hogTransformer, topHog } = config
+    const { options, outputs, teamManager, groupTypeManager, scriptTransformer, topFn } = config
 
     return (
         builder
             .pipe(createNormalizeProcessPersonFlagStep())
             .pipe(
-                topHog(createHogTransformEventStep(hogTransformer), [
+                topFn(createScriptTransformEventStep(scriptTransformer), [
                     sumOk(
                         'transformations_run',
                         (output) => ({ team_id: String(output.team.id) }),
@@ -64,7 +64,7 @@ export function createAiEventSubpipeline<TInput extends AiEventSubpipelineInput,
                         (result) => (isDropResult(result) ? 1 : 0)
                     ),
                 ]),
-                { retry: { tries: 5, sleepMs: 100, name: 'hog_transform_event' } }
+                { retry: { tries: 5, sleepMs: 100, name: 'transform_event' } }
             )
             .pipe(createNormalizeEventStep())
             .pipe(createProcessAiEventStep())
@@ -83,7 +83,7 @@ export function createAiEventSubpipeline<TInput extends AiEventSubpipelineInput,
             // dedicated AI pipeline.
             .pipe(createImmediateMergeFoldStep())
             .pipe(
-                topHog(createProcessPersonsStep(options, outputs), [
+                topFn(createProcessPersonsStep(options, outputs), [
                     timer('process_persons_time', (input) => ({
                         team_id: String(input.team.id),
                         distinct_id: input.normalizedEvent.distinct_id,
@@ -98,7 +98,7 @@ export function createAiEventSubpipeline<TInput extends AiEventSubpipelineInput,
             .pipe(createCreateEventStep(EVENTS_OUTPUT))
             .pipe(createSplitAiEventsStep())
             .pipe(
-                topHog(
+                topFn(
                     createEmitEventStep({
                         outputs,
                     }),

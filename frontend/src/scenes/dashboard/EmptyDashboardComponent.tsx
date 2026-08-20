@@ -1,11 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import * as chartPng from '@hanzo/brand/hoggies/png/chart'
-import { IconPlus } from '@hanzo/icons'
 import { Skeleton, Tag } from '@hanzo/elements'
+import { IconPlus } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -27,7 +26,7 @@ import { DASHBOARD_CANNOT_EDIT_MESSAGE } from './DashboardHeader'
 import { dashboardLogic } from './dashboardLogic'
 import { EmptyDashboardAiStarterPrompts } from './emptyDashboardAiStarterPrompts'
 
-const MascotChart = pngHoggie(chartPng)
+const MascotChart = pngMascot()
 
 const DASHBOARD_DOCS_URL = 'https://hanzo.ai/docs/product-analytics/dashboards'
 
@@ -168,8 +167,8 @@ function EmptyDashboardContent({ canEdit }: { canEdit: boolean }): JSX.Element {
             titleOverride="So empty. So much potential."
             description={BASE_TEXT}
             isEmpty={true}
-            customHog={MascotChart}
-            hogLayout="responsive"
+            customScript={MascotChart}
+            scriptLayout="responsive"
             useMainContentContainerQueries={true}
             docsURL={DASHBOARD_DOCS_URL}
             className="mt-2 mb-2 px-4 @min-[40rem]/main-content:px-8 py-4 @min-[48rem]/main-content:py-14"

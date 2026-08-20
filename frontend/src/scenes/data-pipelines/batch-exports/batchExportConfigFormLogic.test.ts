@@ -266,7 +266,7 @@ const HTTP_BATCH_EXPORT = fixture('fixture-http', 'HTTP Export', {
     type: 'HTTP',
     config: {
         url: 'https://us.i.hanzo.ai/batch/',
-        token: 'phc_test',
+        token: 'pk-test',
         exclude_events: [],
         include_events: [],
     },
@@ -346,8 +346,8 @@ describe('batchExportConfigFormLogic', () => {
         const getMocks: Record<string, BatchExportConfiguration> = {}
         const patchMocks: Record<string, (info: MockResolverInfo) => Promise<[number, BatchExportConfiguration]>> = {}
         for (const fx of ALL_BATCH_EXPORTS) {
-            getMocks[`/api/environments/:team_id/batch_exports/${fx.id}`] = fx
-            patchMocks[`/api/environments/:team_id/batch_exports/${fx.id}/`] = async ({ request }) => {
+            getMocks[`/v1/environments/:team_id/batch_exports/${fx.id}`] = fx
+            patchMocks[`/v1/environments/:team_id/batch_exports/${fx.id}/`] = async ({ request }) => {
                 const body = (await request.json()) as Record<string, any>
                 lastPatchBody = body
                 patchBodiesById[fx.id] = body
@@ -357,10 +357,10 @@ describe('batchExportConfigFormLogic', () => {
         useMocks({
             get: {
                 ...getMocks,
-                '/api/environments/:team_id/batch_exports/test': { steps: [] },
+                '/v1/environments/:team_id/batch_exports/test': { steps: [] },
             },
             post: {
-                '/api/environments/:team_id/batch_exports/': async ({ request }) => {
+                '/v1/environments/:team_id/batch_exports/': async ({ request }) => {
                     lastPostBody = (await request.json()) as Record<string, any>
                     return [200, { ...S3_BATCH_EXPORT, id: 'new-export-id' }]
                 },
@@ -950,13 +950,13 @@ describe('batchExportConfigFormLogic', () => {
                 service: 'HTTP' as const,
                 requiredValues: {
                     url: 'https://us.i.hanzo.ai/batch/',
-                    token: 'phc_xxx',
+                    token: 'pk-xxx',
                 },
                 expectedDestination: {
                     type: 'HTTP',
                     config: {
                         url: 'https://us.i.hanzo.ai/batch/',
-                        token: 'phc_xxx',
+                        token: 'pk-xxx',
                     },
                 },
             },

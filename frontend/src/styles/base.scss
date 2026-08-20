@@ -258,6 +258,7 @@
     --color-neutral-cool-700: hsl(0deg 0% 30%);
     --color-neutral-cool-750: hsl(0deg 0% 25%);
     --color-neutral-cool-800: hsl(0deg 0% 20%);
+
     // #212121, the raised step. This is the scene canvas (canvasBackground scenes
     // resolve --scene-layout-background to surface-primary), the popover and the
     // border, so moving it moves the whole raised layer at once -- one value, not
@@ -368,15 +369,14 @@
     --color-brand-secondary-lightness: var(--color-insights-brand-blue-lightness);
 
     // AI
-    --color-ai: oklch(0.67 0 0);
+    --color-ai: oklch(0.67 0 0deg);
 
     // Accent colors (accents can be changed to change the brand colors)
     // Used for interactive elements and highlights, inputs, toggles, charts, etc.
     // //////////////////////////////////////////////////////////
-    --color-accent: hsl(
-        var(--color-brand-primary-hue),
-        var(--color-brand-primary-saturation),
-        var(--color-brand-primary-lightness)
+    --color-accent: var(
+        --accent,
+        hsl(var(--color-brand-primary-hue), var(--color-brand-primary-saturation), var(--color-brand-primary-lightness))
     );
     --color-accent-inverted: hsl(
         var(--color-insights-brand-yellow-hue),
@@ -564,7 +564,7 @@
     // //////////////////////////////////////////////////////////
     --brand-blue: #555;
     --brand-red: #333;
-    --brand-yellow: #888888;
+    --brand-yellow: #888;
     --brand-key: #000;
 
     // Shadows
@@ -572,37 +572,19 @@
     --shadow-elevation-3000: none;
 
     // Non-color vars
-    --radius: 0.625rem; // 10px — controls: buttons, inputs, selects
-    // Non-color vars
-    //
-    // RADIUS IS THE @hanzo/brand v2 REGISTER: card 8 / control 10 / panel 12.
-    // The upstream 6px (0.375rem) is what made this app read blocky next to the
-    // rest of the product — same monochrome palette, same type, squarer corners
-    // on every button, input, card and menu.
-    //
-    // These are the DECLARED brand values, not corners measured off a screenshot:
-    // a design system is only one system if every surface reads the same register.
-    // (This supersedes the hand-measured 9px, which matched no declared token.)
-    //
-    // One token decides each tier. `--button-radius` resolves to `--radius`
-    // (Button.scss), so pointing that at the control radius rounds every
-    // button from here — nothing needs a per-component override.
-    --radius-sm: 0.375rem; // 6px — inner/nested elements, one step down
-    --radius-base: var(--radius); // Increased from Tailwind's default of 0.25rem
-    --radius-lg: 0.75rem; // 12px — panels, modals, popovers
-    --radius-full: 9999px;
+    // Radius lives in hanzo-theme.scss, which states @hanzo/design's scale once.
     --modal-shadow-elevation: 0px 16px 16px -16px rgb(0 0 0 / 35%);
     --opacity-disabled: 0.65;
     --font-medium: 500;
     --font-semibold: 600;
     --font-sans:
-        'Emoji Flags Polyfill', 'RoundHog', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto',
+        'Emoji Flags Polyfill', 'Geist', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto',
         'Helvetica Neue', helvetica, arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
     --font-title:
-        'Emoji Flags Polyfill', 'RoundHog', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto',
+        'Emoji Flags Polyfill', 'Geist', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto',
         'Helvetica Neue', helvetica, arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
     --font-button:
-        'Emoji Flags Polyfill', 'RoundHog', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto',
+        'Emoji Flags Polyfill', 'Geist', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto',
         'Helvetica Neue', helvetica, arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
     --font-mono:
         'Emoji Flags Polyfill', ui-monospace, 'SFMono-Regular', 'SF Mono', 'Menlo', 'Consolas', 'Liberation Mono',
@@ -769,11 +751,15 @@
 
     // Deprecated colors
     // Vars
-    --danger-highlight: rgb(38 38 38 / 10%);
-    --danger-lighter: #b0b0b0;
-    --danger-light: #4a4a4a;
-    --danger: #262626;
-    --danger-dark: #171717;
+    // Destructive is the one role that keeps a hue. The palette is monochrome so
+    // that nothing competes for attention, which is exactly why an irreversible
+    // action cannot also be grey: it would carry the same weight as every other
+    // control. Red is @hanzo/design's --destructive, so console reads the same.
+    --danger-highlight: rgb(239 68 68 / 10%);
+    --danger-lighter: #fca5a5;
+    --danger-light: #f87171;
+    --danger: #ef4444;
+    --danger-dark: #b91c1c;
     --warning-highlight: rgb(115 115 115 / 10%);
     --warning: #737373;
     --warning-dark: #525252;
@@ -796,10 +782,10 @@
     --color-text-secondary-3000-light: rgb(17 17 17 / 70%);
     --muted-3000-light: rgb(17 17 17 / 60%);
     --trace-3000-light: rgb(17 17 17 / 25%);
-    --primary-3000-light: #111111;
+    --primary-3000-light: #111;
     --primary-highlight-light: rgb(17 17 17 / 10%);
     --primary-3000-hover-light: #333;
-    --primary-3000-active-light: #000000;
+    --primary-3000-active-light: #000;
     --secondary-3000-light: rgb(200 200 200 / 60%);
     --secondary-3000-hover-light: #ccc;
     --color-accent-3000-light: #ebebeb;
@@ -811,15 +797,18 @@
     --link-3000-light: #333;
     --primary-3000-frame-bg-light: #333;
     --primary-3000-button-bg-light: #fff;
-    --primary-3000-button-border-light: #888888;
+    --primary-3000-button-border-light: #888;
     --primary-3000-button-border-hover-light: #555;
     --secondary-3000-frame-bg-light: #e0e0e0;
     --secondary-3000-button-bg-light: #f5f5f5;
     --secondary-3000-button-border-light: #ccc;
     --secondary-3000-button-border-hover-light: #aaa;
     --danger-3000-frame-bg-light: #33333380;
-    --danger-3000-button-border-light: #333;
-    --danger-3000-button-border-hover-light: #333;
+    --danger-3000-button-bg-light: #fef2f2;
+    --danger-3000-button-border-light: #ef4444;
+    --danger-3000-button-border-hover-light: #dc2626;
+    --danger-3000-color-light: #b91c1c;
+
     // Flat in both themes — see --shadow-elevation-3000 above.
     --shadow-elevation-3000-light: none;
     --shadow-elevation-3000-dark: none;
@@ -827,7 +816,7 @@
     --color-text-secondary-3000-dark: rgb(255 255 255 / 70%);
     --muted-3000-dark: rgb(255 255 255 / 50%);
     --trace-3000-dark: rgb(255 255 255 / 25%);
-    --primary-3000-dark: #ffffff;
+    --primary-3000-dark: #fff;
     --primary-highlight-dark: rgb(255 255 255 / 10%);
     --primary-3000-hover-dark: #e0e0e0;
     --primary-3000-active-dark: #c0c0c0;
@@ -835,6 +824,7 @@
     --secondary-3000-dark: #1f1f1f;
     --secondary-3000-hover-dark: #5d5d5d;
     --color-accent-3000-dark: #0d0d0d;
+
     // True black ground, per the brand register — panels layer up from it
     // (#0d0d0d raised, #171717 controls) rather than the app sitting on grey.
     --color-bg-3000-dark: #000;
@@ -842,15 +832,20 @@
     --border-bold-3000-dark: #3f4046;
     --glass-bg-3000-dark: #212121e6; // monochrome: was #24262a99, a blue cast
     --glass-border-3000-dark: var(--border-3000-dark);
-    --link-3000-dark: #ffffff;
-    // The primary action is WHITE — the one high-contrast surface in a black UI.
-    // It was `var(--color-accent)`, a 20%-lightness grey, under a label that
-    // resolves to --text-3000-light (near-black): dark-on-dark, which is why the
-    // Save button read as a muddy slab. White ground + the dark label is the
-    // intended pairing. The accent stays reserved for links/active/focus.
-    --primary-3000-frame-bg-dark: #ffffff;
-    --primary-3000-button-bg-dark: #ffffff;
-    --primary-3000-button-border-dark: #ffffff;
+    --link-3000-dark: #fff;
+
+    // The primary action is the one high-contrast surface in a black UI, so it
+    // is near-white. Its label resolves to --text-3000-light (near-black), which
+    // only reads against a near-white ground. The accent stays on links, active
+    // and focus, where it sits under white text instead of over it.
+    //
+    // The value is --primary-dark, the same @hanzo/design primary quill paints
+    // with (hanzo-theme.scss), so a Lemon button and a quill button next to it
+    // are the same white. The literal is the fallback rather than the source:
+    // if that knob is ever renamed this holds the colour instead of resolving
+    // to nothing, which for a background reads as transparent.
+    --primary-3000-button-bg-dark: var(--primary-dark, #fafafa);
+    --primary-3000-button-border-dark: var(--primary-dark, #fafafa);
     --primary-3000-button-border-hover-dark: #e0e0e0;
     --primary-alt-highlight-dark: #232429;
     --secondary-3000-frame-bg-dark: #323232;
@@ -858,8 +853,10 @@
     --secondary-3000-button-border-dark: #4a4c52;
     --secondary-3000-button-border-hover-dark: #5e6064;
     --danger-3000-frame-bg-dark: #33333380;
-    --danger-3000-button-border-dark: #666;
-    --danger-3000-button-border-hover-dark: #333;
+    --danger-3000-button-bg-dark: #51101d;
+    --danger-3000-button-border-dark: #71232d;
+    --danger-3000-button-border-hover-dark: #8b3239;
+    --danger-3000-color-dark: #ff9794;
 
     // Light mode
     --text-3000: var(--text-3000-light);
@@ -882,18 +879,17 @@
     --color-bg-light: #fff;
     --color-bg-table: #f9faf7;
     --link: var(--link-3000-light);
-    --primary-3000-frame-bg: var(--primary-3000-frame-bg-light);
     --primary-3000-button-bg: var(--color-white);
     --primary-3000-button-border: var(--primary-3000-button-border-light);
     --primary-3000-button-border-hover: var(--primary-3000-button-border-hover-light);
     --primary-alt-highlight: var(--primary-alt-highlight-light);
-    --secondary-3000-frame-bg: var(--secondary-3000-frame-bg-light);
     --secondary-3000-button-bg: var(--secondary-3000-button-bg-light);
     --secondary-3000-button-border: var(--secondary-3000-button-border-light);
     --secondary-3000-button-border-hover: var(--secondary-3000-button-border-hover-light);
-    --danger-3000-frame-bg: var(--danger-3000-frame-bg-light);
+    --danger-3000-button-bg: var(--danger-3000-button-bg-light);
     --danger-3000-button-border: var(--danger-3000-button-border-light);
     --danger-3000-button-border-hover: var(--danger-3000-button-border-hover-light);
+    --danger-3000-color: var(--danger-3000-color-light);
     --tooltip-bg: #2d2d2d;
 }
 
@@ -907,14 +903,13 @@
     --color-brand-primary-lightness: var(--color-insights-brand-yellow-lightness);
 
     // AI colors (dark mode)
-    --color-ai: oklch(0.69 0 0);
+    --color-ai: oklch(0.69 0 0deg);
 
     // Accent colors (dark mode)
     // //////////////////////////////////////////////////////////
-    --color-accent: hsl(
-        var(--color-brand-primary-hue),
-        var(--color-brand-primary-saturation),
-        var(--color-brand-primary-lightness)
+    --color-accent: var(
+        --accent,
+        hsl(var(--color-brand-primary-hue), var(--color-brand-primary-saturation), var(--color-brand-primary-lightness))
     );
     --color-accent-inverted: hsl(
         var(--color-insights-brand-orange-hue),
@@ -974,6 +969,7 @@
     // Backgrounds (dark mode)
     // //////////////////////////////////////////////////////////
     --color-bg-primary: #000;
+
     // The RAISED content panel — the one surface the eye reads as "the page".
     // #262626, a step ABOVE the #212121 it sits on, which is itself a step above
     // the black ground. It was pinned straight to neutral-cool-850 (#212121), so
@@ -981,6 +977,7 @@
     // no edge: the ladder existed in the tokens but not on screen.
     --color-bg-surface-primary: #262626;
     --color-bg-surface-secondary: var(--color-neutral-cool-850);
+
     // TRUE BLACK, not the 8% neutral. tertiary is the CHROME layer -- the left nav
     // and the shell behind the tab strip both carry bg-surface-tertiary -- and chrome
     // sits AT the ground, not above it. At 8% it read as a grey slab framing the app,
@@ -1028,6 +1025,7 @@
     --color-bg-fill-button-tertiary-hover-inverse: var(--color-bg-fill-highlight-inverse-75);
     --color-bg-fill-button-tertiary-active: var(--color-bg-fill-highlight-50);
     --color-bg-fill-button-tertiary-active-inverse: var(--color-bg-fill-highlight-inverse-50);
+
     // No fill. The org dropdown and the user chip are the same KIND of control --
     // an identity affordance in the chrome -- and only the org one carried a 10%
     // white wash, so two controls inches apart read as different components.
@@ -1103,6 +1101,7 @@
     --glass-bg-3000: var(--glass-bg-3000-dark);
     --glass-border-3000: var(--glass-border-3000-dark);
     --color-bg-light: var(--color-accent-3000);
+
     // The rows sit ON the panel, so they are the next step UP: #2e2e2e above the
     // panel's #262626, above #212121, above the black ground. It read #232429 —
     // DARKER than the panel it sits on, which inverted the ladder and made the
@@ -1112,18 +1111,17 @@
     --brand-key: #fff; // In dark mode the black in Insights's logo is replaced with white for proper contrast
     --link: var(--link-3000-dark);
     --shadow-elevation-3000: var(--shadow-elevation-3000-dark);
-    --primary-3000-frame-bg: var(--primary-3000-frame-bg-dark);
-    --primary-3000-button-bg: var(--color-accent);
+    --primary-3000-button-bg: var(--primary-3000-button-bg-dark);
     --primary-3000-button-border: var(--primary-3000-button-border-dark);
     --primary-3000-button-border-hover: var(--primary-3000-button-border-hover-dark);
     --primary-alt-highlight: var(--primary-alt-highlight-dark);
-    --secondary-3000-frame-bg: var(--secondary-3000-frame-bg-dark);
     --secondary-3000-button-bg: var(--secondary-3000-button-bg-dark);
     --secondary-3000-button-border: var(--secondary-3000-button-border-dark);
     --secondary-3000-button-border-hover: var(--secondary-3000-button-border-hover-dark);
-    --danger-3000-frame-bg: var(--danger-3000-frame-bg-dark);
+    --danger-3000-button-bg: var(--danger-3000-button-bg-dark);
     --danger-3000-button-border: var(--danger-3000-button-border-dark);
     --danger-3000-button-border-hover: var(--danger-3000-button-border-hover-dark);
+    --danger-3000-color: var(--danger-3000-color-dark);
     --tooltip-bg: var(--tooltip-bg-dark);
     --data-color-2: #ccc;
     --data-color-3: #666;
@@ -1299,7 +1297,7 @@
 
                 &::-webkit-scrollbar-thumb {
                     background: var(--color-bg-fill-scroll-thumb);
-                    border-radius: 8px;
+                    border-radius: var(--radius);
                 }
             }
         }

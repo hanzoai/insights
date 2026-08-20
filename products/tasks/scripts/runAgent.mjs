@@ -31,7 +31,7 @@ export async function runAgent({
         INSIGHTS_AUTH_HEADER: `Bearer ${insightsApiKey}`,
         ANTHROPIC_API_KEY: insightsApiKey,
         ANTHROPIC_AUTH_TOKEN: insightsApiKey,
-        ANTHROPIC_BASE_URL: `${insightsApiUrl}/api/projects/${parseInt(insightsProjectId, 10)}/llm_gateway`,
+        ANTHROPIC_BASE_URL: `${insightsApiUrl}/v1/projects/${parseInt(insightsProjectId, 10)}/llm_gateway`,
     }
 
     Object.assign(process.env, envOverrides)

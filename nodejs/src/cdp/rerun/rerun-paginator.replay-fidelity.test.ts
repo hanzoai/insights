@@ -1,13 +1,13 @@
-import { DatastoreClient } from '@datastore/client'
+import { ClickHouseClient as DatastoreClient } from '@datastore/client'
 import { DateTime } from 'luxon'
 
-import { InsightsFlowManagerService } from '../services/insightsflows/hogflow-manager.service'
+import { FlowManagerService } from '../services/flows/flow-manager.service'
 import { CyclotronJobQueuePostgresV2 } from '../services/job-queue/job-queue-postgres-v2'
 import { JobQueue } from '../services/job-queue/job-queue.interface'
 import { InsightsFunctionManagerService } from '../services/managers/script-function-manager.service'
 import { InsightsFunctionMonitoringService } from '../services/monitoring/script-function-monitoring.service'
-import { HogInvocationResultsService } from '../services/monitoring/script-invocation-results.service'
-import { CyclotronJobInvocationInsightsFlow } from '../types'
+import { ScriptInvocationResultsService } from '../services/monitoring/script-invocation-results.service'
+import { CyclotronJobInvocationFlow } from '../types'
 import { RerunJobState } from './rerun-job.types'
 import { RerunPaginatorService } from './rerun-paginator.service'
 
@@ -17,7 +17,7 @@ import { RerunPaginatorService } from './rerun-paginator.service'
 // would restart from the trigger and re-send emails that already went out. These
 // tests pin the fix: the rehydrated invocation carries `currentAction` forward,
 // so replay resumes after the already-completed actions.
-describe('RerunPaginatorService replay fidelity (hog_flow)', () => {
+describe('RerunPaginatorService replay fidelity (flow)', () => {
     const teamId = 42
     const functionId = 'flow-1'
 
@@ -29,11 +29,11 @@ describe('RerunPaginatorService replay fidelity (hog_flow)', () => {
 
     function buildPaginator(
         datastore: DatastoreClient,
-        hogFlowQueue: jest.Mocked<CyclotronJobQueuePostgresV2>
+        flowQueue: jest.Mocked<CyclotronJobQueuePostgresV2>
     ): RerunPaginatorService {
-        const hogFlowManager = {
-            getInsightsFlow: jest.fn().mockResolvedValue({ id: functionId, team_id: teamId, variables: [] }),
-        } as unknown as jest.Mocked<InsightsFlowManagerService>
+        const flowManager = {
+            getFlow: jest.fn().mockResolvedValue({ id: functionId, team_id: teamId, variables: [] }),
+        } as unknown as jest.Mocked<FlowManagerService>
         const insightsFunctionManager = {
             getInsightsFunction: jest.fn().mockResolvedValue(null),
         } as unknown as jest.Mocked<InsightsFunctionManagerService>
@@ -42,7 +42,7 @@ describe('RerunPaginatorService replay fidelity (hog_flow)', () => {
             queueRerunWrapperRow: jest.fn(),
             flush: jest.fn().mockResolvedValue(undefined),
             dropQueuedRowsFor: jest.fn(),
-        } as unknown as jest.Mocked<HogInvocationResultsService>
+        } as unknown as jest.Mocked<ScriptInvocationResultsService>
         const monitoring = {
             queueLogs: jest.fn(),
             flush: jest.fn().mockResolvedValue(undefined),
@@ -51,16 +51,16 @@ describe('RerunPaginatorService replay fidelity (hog_flow)', () => {
         return new RerunPaginatorService(
             datastore,
             insightsFunctionManager,
-            hogFlowManager,
+            flowManager,
             lifecycle,
-            { insights_function: {} as unknown as JobQueue, hog_flow: hogFlowQueue },
+            { insights_function: {} as unknown as JobQueue, flow: flowQueue },
             monitoring,
             10000
         )
     }
 
     const state: RerunJobState = {
-        function_kind: 'hog_flow',
+        function_kind: 'flow',
         function_id: functionId,
         request: { filter: { window_start: '2026-01-01T00:00:00Z', window_end: '2027-01-01T00:00:00Z' } },
         progress: { queued: 0, skipped: 0, done: false },
@@ -87,17 +87,17 @@ describe('RerunPaginatorService replay fidelity (hog_flow)', () => {
             },
         ]
 
-        const hogFlowQueue = {
+        const flowQueue = {
             queueInvocations: jest.fn().mockResolvedValue(undefined),
         } as unknown as jest.Mocked<CyclotronJobQueuePostgresV2>
 
-        const paginator = buildPaginator(fakeDatastore(rows), hogFlowQueue)
+        const paginator = buildPaginator(fakeDatastore(rows), flowQueue)
         await paginator.processPage(teamId, state, { jobId: 'rerun-1', createdAt: DateTime.now() })
 
-        expect(hogFlowQueue.queueInvocations).toHaveBeenCalledTimes(1)
-        const [enqueued, opts] = hogFlowQueue.queueInvocations.mock.calls[0]
+        expect(flowQueue.queueInvocations).toHaveBeenCalledTimes(1)
+        const [enqueued, opts] = flowQueue.queueInvocations.mock.calls[0]
         expect(opts).toEqual({ overwriteExisting: true })
-        const invocation = enqueued[0] as CyclotronJobInvocationInsightsFlow
+        const invocation = enqueued[0] as CyclotronJobInvocationFlow
         expect(invocation.id).toBe('inv-1')
         // The resume point and per-actor context survive the round-trip.
         expect(invocation.state?.currentAction).toEqual(persistedState.currentAction)
@@ -125,14 +125,14 @@ describe('RerunPaginatorService replay fidelity (hog_flow)', () => {
             },
         ]
 
-        const hogFlowQueue = {
+        const flowQueue = {
             queueInvocations: jest.fn().mockResolvedValue(undefined),
         } as unknown as jest.Mocked<CyclotronJobQueuePostgresV2>
 
-        const paginator = buildPaginator(fakeDatastore(rows), hogFlowQueue)
+        const paginator = buildPaginator(fakeDatastore(rows), flowQueue)
         await paginator.processPage(teamId, state, { jobId: 'rerun-2', createdAt: DateTime.now() })
 
-        const invocation = hogFlowQueue.queueInvocations.mock.calls[0][0][0] as CyclotronJobInvocationInsightsFlow
+        const invocation = flowQueue.queueInvocations.mock.calls[0][0][0] as CyclotronJobInvocationFlow
         expect(invocation.state?.currentAction).toBeUndefined()
     })
 })

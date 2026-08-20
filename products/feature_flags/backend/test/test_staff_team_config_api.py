@@ -10,8 +10,8 @@ from insights.models.team.extensions import get_or_create_team_extension
 from products.feature_flags.backend.api.staff_team_config import MAX_TEAM_IDS_PER_QUERY
 from products.feature_flags.backend.models.team_feature_flags_config import TeamFeatureFlagsConfig
 
-LIST_URL = "/api/feature_flags_staff_team_config/"
-SET_URL = "/api/feature_flags_staff_team_config/set/"
+LIST_URL = "/v1/feature_flags_staff_team_config/"
+SET_URL = "/v1/feature_flags_staff_team_config/set/"
 
 
 def _list_url(team_ids: list[int]) -> str:

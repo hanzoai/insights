@@ -316,7 +316,7 @@ resource "insights_insight" "slo_duration" {
         {
           column = "value"
           settings = {
-            display    = { color = "#1d4aff", label = "", trendLine = false, displayType = "auto", yAxisPosition = "left" }
+            display    = { color = "#3d3d3d", label = "", trendLine = false, displayType = "auto", yAxisPosition = "left" }
             formatting = { style = "number", prefix = "", suffix = "s" }
           }
         }

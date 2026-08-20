@@ -50,13 +50,13 @@ operations = (
             "DROP TABLE IF EXISTS kafka_app_metrics2",
             node_roles=[NodeRole.INGESTION_MEDIUM],
         ),
-        # tophog (INGESTION_MEDIUM)
+        # topfn (INGESTION_MEDIUM)
         run_sql_with_exceptions(
-            "DROP TABLE IF EXISTS tophog_mv",
+            "DROP TABLE IF EXISTS topfn_mv",
             node_roles=[NodeRole.INGESTION_MEDIUM],
         ),
         run_sql_with_exceptions(
-            "DROP TABLE IF EXISTS kafka_tophog",
+            "DROP TABLE IF EXISTS kafka_topfn",
             node_roles=[NodeRole.INGESTION_MEDIUM],
         ),
         # precalculated_events (INGESTION_MEDIUM)

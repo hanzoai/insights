@@ -1,3 +1,4 @@
+import os
 import sys
 import json
 
@@ -10,8 +11,8 @@ modifiers = [arg for arg in sys.argv if arg.startswith("-")]
 args = [arg for arg in sys.argv if arg != "" and not arg.startswith("-")]
 filename = args[1]
 
-if not filename.endswith(".script") and not filename.endswith(".hoge"):
-    raise ValueError("Filename must end with '.script' or '.hoge'")
+if not filename.endswith(".script") and not filename.endswith(".scriptc"):
+    raise ValueError("Filename must end with '.script' or '.scriptc'")
 
 with open(filename) as file:
     code = file.read()
@@ -45,7 +46,7 @@ else:
         if len(args) == 3:
             target = args[2]
         else:
-            target = filename[:-4] + ".hoge"
+            target = os.path.splitext(filename)[0] + ".scriptc"
             if len(args) != 2:
                 raise ValueError("Must specify exactly one filename")
 

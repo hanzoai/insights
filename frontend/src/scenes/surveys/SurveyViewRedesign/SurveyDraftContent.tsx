@@ -1,16 +1,15 @@
 import { useValues } from 'kea'
 
-import * as construction1Png from '@hanzo/brand/hoggies/png/construction-1'
-import { IconCheck, IconRocket } from '@hanzo/icons'
 import { Button } from '@hanzo/elements'
+import { IconCheck, IconRocket } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { LaunchSurveyButton } from 'scenes/surveys/components/LaunchSurveyButton'
 import { surveyLogic } from 'scenes/surveys/surveyLogic'
 
 import { Survey, SurveyType } from '~/types'
 
-const MascotConstruction1 = pngHoggie(construction1Png)
+const MascotConstruction1 = pngMascot()
 
 interface ChecklistItem {
     title: string

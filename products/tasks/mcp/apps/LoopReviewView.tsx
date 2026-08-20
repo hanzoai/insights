@@ -314,7 +314,7 @@ export function LoopReviewView({ data, onCreate, state }: LoopReviewViewProps): 
                         <p className="text-sm text-muted-foreground">Check the details below, then create it.</p>
                     </div>
                     <Button
-                        className="shrink-0 bg-[#f9bd2b] font-semibold text-black hover:opacity-90"
+                        className="shrink-0 bg-foreground font-semibold text-background hover:opacity-90"
                         onClick={create}
                         disabled={createDisabled}
                     >

@@ -74,7 +74,7 @@ export const getStorybookAppContext = (): AppContext => ({
     resource_access_control: {
         action: 'manager',
         feature_flag: 'manager',
-        hog_flow: 'manager',
+        script_flow: 'manager',
         heatmap: 'manager',
         dashboard: 'manager',
         dashboard_template: 'manager',

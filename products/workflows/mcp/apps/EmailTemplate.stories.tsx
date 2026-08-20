@@ -23,11 +23,11 @@ const sampleHtml = `<!DOCTYPE html>
     <table width="100%" cellpadding="0" cellspacing="0" style="padding:24px 0;">
       <tr><td align="center">
         <table width="480" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden;">
-          <tr><td style="background:#1d4aff;padding:24px;color:#fff;font-size:20px;font-weight:600;">Welcome to Hedgebox</td></tr>
+          <tr><td style="background:#2563eb;padding:24px;color:#fff;font-size:20px;font-weight:600;">Welcome to Hedgebox</td></tr>
           <tr><td style="padding:24px;color:#111;font-size:15px;line-height:1.5;">
             <p>Hi {{ person.properties.name }},</p>
             <p>Thanks for signing up. Your files are ready to sync across every device.</p>
-            <p style="margin:24px 0;"><a href="https://hedgebox.net/start" style="background:#1d4aff;color:#fff;padding:12px 20px;border-radius:6px;text-decoration:none;">Get started</a></p>
+            <p style="margin:24px 0;"><a href="https://hedgebox.net/start" style="background:#2563eb;color:#fff;padding:12px 20px;border-radius:6px;text-decoration:none;">Get started</a></p>
             <p style="color:#666;font-size:13px;">— The Hedgebox team</p>
           </td></tr>
         </table>

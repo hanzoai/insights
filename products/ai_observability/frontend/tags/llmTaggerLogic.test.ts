@@ -76,11 +76,11 @@ describe('llmTaggerLogic', () => {
         uuidCounter = 0
         useMocks({
             get: {
-                '/api/environments/:team_id/llm_analytics/provider_keys/': { results: mockProviderKeys },
-                '/api/environments/:team_id/taggers/:id/': mockTagger,
+                '/v1/environments/:team_id/llm_analytics/provider_keys/': { results: mockProviderKeys },
+                '/v1/environments/:team_id/taggers/:id/': mockTagger,
             },
             post: {
-                '/api/environments/:team_id/query/:kind': { results: [] },
+                '/v1/environments/:team_id/query/:kind': { results: [] },
             },
         })
         initKeaTests()
@@ -180,12 +180,12 @@ describe('llmTaggerLogic', () => {
             await expectLogic(logic).toMatchValues({ activeTab: 'configuration' })
         })
 
-        it('hogTestResults starts as null', () => {
-            expect(logic.values.hogTestResults).toBeNull()
+        it('scriptTestResults starts as null', () => {
+            expect(logic.values.scriptTestResults).toBeNull()
         })
 
-        it('clearHogTestResults resets to null', async () => {
-            logic.actions.testHogTaggerSuccess([
+        it('clearScriptTestResults resets to null', async () => {
+            logic.actions.testScriptTaggerSuccess([
                 {
                     event_uuid: 'e1',
                     input_preview: 'hello',
@@ -197,24 +197,24 @@ describe('llmTaggerLogic', () => {
             ])
 
             await expectLogic(logic).toMatchValues({
-                hogTestResults: expect.arrayContaining([expect.objectContaining({ event_uuid: 'e1' })]),
+                scriptTestResults: expect.arrayContaining([expect.objectContaining({ event_uuid: 'e1' })]),
             })
 
-            logic.actions.clearHogTestResults()
+            logic.actions.clearScriptTestResults()
 
-            await expectLogic(logic).toMatchValues({ hogTestResults: null })
+            await expectLogic(logic).toMatchValues({ scriptTestResults: null })
         })
 
-        it('hogTestLoading tracks test lifecycle', async () => {
-            expect(logic.values.hogTestLoading).toBe(false)
+        it('scriptTestLoading tracks test lifecycle', async () => {
+            expect(logic.values.scriptTestLoading).toBe(false)
 
-            logic.actions.testHogTagger()
+            logic.actions.testScriptTagger()
 
-            expect(logic.values.hogTestLoading).toBe(true)
+            expect(logic.values.scriptTestLoading).toBe(true)
 
-            logic.actions.testHogTaggerSuccess([])
+            logic.actions.testScriptTaggerSuccess([])
 
-            await expectLogic(logic).toMatchValues({ hogTestLoading: false })
+            await expectLogic(logic).toMatchValues({ scriptTestLoading: false })
         })
     })
 
@@ -510,7 +510,7 @@ describe('llmTaggerLogic', () => {
             // Now override the query mock and reload
             useMocks({
                 post: {
-                    '/api/environments/:team_id/query/:kind': {
+                    '/v1/environments/:team_id/query/:kind': {
                         results: [
                             [
                                 '2024-01-01T12:00:00Z',
@@ -558,10 +558,10 @@ describe('llmTaggerLogic', () => {
             const capturedQueries: { query: string; values?: unknown }[] = []
             useMocks({
                 get: {
-                    [`/api/environments/:team_id/taggers/${taggerId}/`]: mockTagger,
+                    [`/v1/environments/:team_id/taggers/${taggerId}/`]: mockTagger,
                 },
                 post: {
-                    '/api/environments/:team_id/query/:kind': async ({ request }) => {
+                    '/v1/environments/:team_id/query/:kind': async ({ request }) => {
                         const body = (await request.json()) as { query?: { query?: string; values?: unknown } }
                         if (body.query?.query?.includes('$ai_tagger_id')) {
                             capturedQueries.push({

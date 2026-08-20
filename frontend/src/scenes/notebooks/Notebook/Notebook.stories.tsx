@@ -11,7 +11,7 @@ import { notebookTestTemplate } from './__mocks__/notebook-template-for-snapshot
 
 // a list of test cases to run, showing different types of content in notebooks
 const testCases: Record<string, NotebookType> = {
-    'api/projects/:team_id/notebooks/text-formats': notebookTestTemplate('text-formats', [
+    'v1/projects/:team_id/notebooks/text-formats': notebookTestTemplate('text-formats', [
         {
             type: 'paragraph',
             content: [
@@ -72,7 +72,7 @@ const testCases: Record<string, NotebookType> = {
             ],
         },
     ]),
-    'api/projects/:team_id/notebooks/headings': notebookTestTemplate('headings', [
+    'v1/projects/:team_id/notebooks/headings': notebookTestTemplate('headings', [
         {
             type: 'heading',
             attrs: {
@@ -110,7 +110,7 @@ const testCases: Record<string, NotebookType> = {
             ],
         },
     ]),
-    'api/projects/:team_id/notebooks/numbered-list': notebookTestTemplate('numbered-list', [
+    'v1/projects/:team_id/notebooks/numbered-list': notebookTestTemplate('numbered-list', [
         {
             type: 'orderedList',
             content: [
@@ -145,7 +145,7 @@ const testCases: Record<string, NotebookType> = {
             ],
         },
     ]),
-    'api/projects/:team_id/notebooks/bullet-list': notebookTestTemplate('bullet-list', [
+    'v1/projects/:team_id/notebooks/bullet-list': notebookTestTemplate('bullet-list', [
         {
             type: 'bulletList',
             content: [
@@ -180,7 +180,7 @@ const testCases: Record<string, NotebookType> = {
             ],
         },
     ]),
-    'api/projects/:team_id/notebooks/collapsed-headings': notebookTestTemplate('collapsible-headings', [
+    'v1/projects/:team_id/notebooks/collapsed-headings': notebookTestTemplate('collapsible-headings', [
         {
             type: 'heading',
             attrs: { level: 2, collapsed: true },
@@ -240,7 +240,7 @@ const testCases: Record<string, NotebookType> = {
             ],
         },
     ]),
-    'api/projects/:team_id/notebooks/recordings-playlist': notebookTestTemplate('recordings-playlist', [
+    'v1/projects/:team_id/notebooks/recordings-playlist': notebookTestTemplate('recordings-playlist', [
         {
             type: 'ph-recording-playlist',
             attrs: {
@@ -252,8 +252,8 @@ const testCases: Record<string, NotebookType> = {
             },
         },
     ]),
-    'api/projects/:team_id/notebooks/empty': notebookTestTemplate('empty', []),
-    'api/projects/:team_id/notebooks/flattened-table': notebookTestTemplate('flattened-table', [
+    'v1/projects/:team_id/notebooks/empty': notebookTestTemplate('empty', []),
+    'v1/projects/:team_id/notebooks/flattened-table': notebookTestTemplate('flattened-table', [
         {
             type: 'heading',
             attrs: { level: 1 },
@@ -289,7 +289,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             post: {
-                'api/environments/:team_id/query/InsightsQLQuery': {
+                'v1/environments/:team_id/query/InsightsQLQuery': {
                     datastore:
                         "SELECT nullIf(nullIf(events.`$session_id`, ''), 'null') AS session_id, any(events.properties) AS properties FROM events WHERE and(equals(events.team_id, 1), in(events.event, [%(insightsql_val_0)s, %(insightsql_val_1)s]), ifNull(in(session_id, [%(insightsql_val_2)s]), 0), ifNull(greaterOrEquals(toTimeZone(events.timestamp, %(insightsql_val_3)s), %(insightsql_val_4)s), 0), ifNull(lessOrEquals(toTimeZone(events.timestamp, %(insightsql_val_5)s), %(insightsql_val_6)s), 0)) GROUP BY session_id LIMIT 100 SETTINGS readonly=2, max_execution_time=60, allow_experimental_object_type=True",
                     columns: ['session_id', 'properties'],
@@ -298,7 +298,7 @@ const meta: Meta = {
                     results: [
                         [
                             '018a8a51-a39d-7b18-897f-94054eec5f61',
-                            '{"$os":"Mac OS X","$os_version":"10.15.7","$browser":"Chrome","$device_type":"Desktop","$current_url":"http://localhost:8000/ingestion/platform","$host":"localhost:8000","$pathname":"/ingestion/platform","$browser_version":116,"$browser_language":"en-GB","$screen_height":982,"$screen_width":1512,"$viewport_height":827,"$viewport_width":1498,"$lib":"web","$lib_version":"1.78.2","$insert_id":"249xj40dkv7x9knp","$time":1694537723.201,"distinct_id":"uLI7S0z6rWQIKAjgXhdUBplxPYymuQqxH5QbJKe2wqr","$device_id":"018a8a51-a39c-78f9-a4e4-1183f059f7cc","$user_id":"uLI7S0z6rWQIKAjgXhdUBplxPYymuQqxH5QbJKe2wqr","is_demo_project":false,"$groups":{"project":"018a8a51-9ee3-0000-0369-ff1924dcba89","organization":"018a8a51-988e-0000-d3e6-477c7cc111f1","instance":"http://localhost:8000"},"$autocapture_disabled_server_side":false,"$active_feature_flags":[],"$feature_flag_payloads":{},"realm":"hosted-datastore","email_service_available":false,"slack_service_available":false,"$referrer":"http://localhost:8000/signup","$referring_domain":"localhost:8000","$event_type":"click","$ce_version":1,"token":"phc_awewGgfgakHbaSbprHllKajqoa6iP2nz7OAUou763ie","$session_id":"018a8a51-a39d-7b18-897f-94054eec5f61","$window_id":"018a8a51-a39d-7b18-897f-940673bea28c","$set_once":{"$initial_os":"Mac OS X","$initial_browser":"Chrome","$initial_device_type":"Desktop","$initial_current_url":"http://localhost:8000/ingestion/platform","$initial_pathname":"/ingestion/platform","$initial_browser_version":116,"$initial_referrer":"http://localhost:8000/signup","$initial_referring_domain":"localhost:8000"},"$sent_at":"2023-09-12T16:55:23.743000+00:00","$ip":"127.0.0.1","$group_0":"018a8a51-9ee3-0000-0369-ff1924dcba89","$group_1":"018a8a51-988e-0000-d3e6-477c7cc111f1","$group_2":"http://localhost:8000"}',
+                            '{"$os":"Mac OS X","$os_version":"10.15.7","$browser":"Chrome","$device_type":"Desktop","$current_url":"http://localhost:8000/ingestion/platform","$host":"localhost:8000","$pathname":"/ingestion/platform","$browser_version":116,"$browser_language":"en-GB","$screen_height":982,"$screen_width":1512,"$viewport_height":827,"$viewport_width":1498,"$lib":"web","$lib_version":"1.78.2","$insert_id":"249xj40dkv7x9knp","$time":1694537723.201,"distinct_id":"uLI7S0z6rWQIKAjgXhdUBplxPYymuQqxH5QbJKe2wqr","$device_id":"018a8a51-a39c-78f9-a4e4-1183f059f7cc","$user_id":"uLI7S0z6rWQIKAjgXhdUBplxPYymuQqxH5QbJKe2wqr","is_demo_project":false,"$groups":{"project":"018a8a51-9ee3-0000-0369-ff1924dcba89","organization":"018a8a51-988e-0000-d3e6-477c7cc111f1","instance":"http://localhost:8000"},"$autocapture_disabled_server_side":false,"$active_feature_flags":[],"$feature_flag_payloads":{},"realm":"hosted-datastore","email_service_available":false,"slack_service_available":false,"$referrer":"http://localhost:8000/signup","$referring_domain":"localhost:8000","$event_type":"click","$ce_version":1,"token":"pk-awewGgfgakHbaSbprHllKajqoa6iP2nz7OAUou763ie","$session_id":"018a8a51-a39d-7b18-897f-94054eec5f61","$window_id":"018a8a51-a39d-7b18-897f-940673bea28c","$set_once":{"$initial_os":"Mac OS X","$initial_browser":"Chrome","$initial_device_type":"Desktop","$initial_current_url":"http://localhost:8000/ingestion/platform","$initial_pathname":"/ingestion/platform","$initial_browser_version":116,"$initial_referrer":"http://localhost:8000/signup","$initial_referring_domain":"localhost:8000"},"$sent_at":"2023-09-12T16:55:23.743000+00:00","$ip":"127.0.0.1","$group_0":"018a8a51-9ee3-0000-0369-ff1924dcba89","$group_1":"018a8a51-988e-0000-d3e6-477c7cc111f1","$group_2":"http://localhost:8000"}',
                         ],
                     ],
                     types: [
@@ -308,7 +308,7 @@ const meta: Meta = {
                 },
             },
             get: {
-                'api/projects/:team_id/notebooks': {
+                'v1/projects/:team_id/notebooks': {
                     count: 1,
                     next: null,
                     previous: null,
@@ -357,8 +357,8 @@ const meta: Meta = {
                         },
                     ],
                 },
-                'api/projects/:team_id/notebooks/12345': notebook12345Json,
-                'api/environments/:team_id/session_recordings': {
+                'v1/projects/:team_id/notebooks/12345': notebook12345Json,
+                'v1/environments/:team_id/session_recordings': {
                     results: [
                         {
                             id: '018a8a51-a39d-7b18-897f-94054eec5f61',

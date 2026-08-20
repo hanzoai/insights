@@ -53,7 +53,7 @@ describe('Error Tracking', { concurrent: false }, () => {
         await setActiveProjectAndOrg(context, TEST_PROJECT_ID!, TEST_ORG_ID!)
         const user = await context.api.request<{ id: number }>({
             method: 'GET',
-            path: '/api/users/@me/',
+            path: '/v1/users/@me/',
         })
         currentUserId = user.id
     })
@@ -63,7 +63,7 @@ describe('Error Tracking', { concurrent: false }, () => {
             try {
                 await context.api.request({
                     method: 'DELETE',
-                    path: `/api/environments/${TEST_PROJECT_ID}/error_tracking/assignment_rules/${id}/`,
+                    path: `/v1/environments/${TEST_PROJECT_ID}/error_tracking/assignment_rules/${id}/`,
                 })
             } catch {
                 // best effort — rule may already be deleted
@@ -74,7 +74,7 @@ describe('Error Tracking', { concurrent: false }, () => {
             try {
                 await context.api.request({
                     method: 'DELETE',
-                    path: `/api/environments/${TEST_PROJECT_ID}/error_tracking/grouping_rules/${id}/`,
+                    path: `/v1/environments/${TEST_PROJECT_ID}/error_tracking/grouping_rules/${id}/`,
                 })
             } catch {
                 // best effort — rule may already be deleted
@@ -85,7 +85,7 @@ describe('Error Tracking', { concurrent: false }, () => {
             try {
                 await context.api.request({
                     method: 'DELETE',
-                    path: `/api/environments/${TEST_PROJECT_ID}/error_tracking/suppression_rules/${id}/`,
+                    path: `/v1/environments/${TEST_PROJECT_ID}/error_tracking/suppression_rules/${id}/`,
                 })
             } catch {
                 // best effort — rule may already be deleted
@@ -120,7 +120,7 @@ describe('Error Tracking', { concurrent: false }, () => {
     async function getIssueFingerprints(issueId: string): Promise<string[]> {
         const result = await context.api.request<ErrorTrackingFingerprintListResult>({
             method: 'GET',
-            path: `/api/environments/${TEST_PROJECT_ID}/error_tracking/fingerprints/`,
+            path: `/v1/environments/${TEST_PROJECT_ID}/error_tracking/fingerprints/`,
             query: { issue_id: issueId },
         })
 

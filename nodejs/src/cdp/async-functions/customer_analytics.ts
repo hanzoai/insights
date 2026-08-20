@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 
 import { CyclotronInvocationQueueParametersFetchSchema } from '~/cdp/schema/cyclotron'
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { Flow } from '~/cdp/schema/flow'
 import { captureException } from '~/common/utils/insights'
 import { Team } from '~/types'
 
@@ -39,7 +39,7 @@ registerAsyncFunction('insightsGetAccount', {
 
         result.invocation.queueParameters = CyclotronInvocationQueueParametersFetchSchema.parse({
             type: 'fetch',
-            url: `${context.siteUrl}/api/customer_analytics/external/account?external_id=${encodeURIComponent(externalId)}`,
+            url: `${context.siteUrl}/v1/customer_analytics/external/account?external_id=${encodeURIComponent(externalId)}`,
             method: 'GET',
             headers: { Authorization: `Bearer ${team.secret_api_token}` },
         })
@@ -102,14 +102,14 @@ registerAsyncFunction('insightsUpdateAccount', {
             Authorization: `Bearer ${team.secret_api_token}`,
         }
 
-        const hogFlow = (context.invocation as { hogFlow?: InsightsFlow }).hogFlow
-        if (hogFlow?.id) {
-            headers['X-Insights-Script-Flow-Id'] = hogFlow.id
+        const flow = (context.invocation as { flow?: Flow }).flow
+        if (flow?.id) {
+            headers['X-Insights-Script-Flow-Id'] = flow.id
         }
 
         result.invocation.queueParameters = CyclotronInvocationQueueParametersFetchSchema.parse({
             type: 'fetch',
-            url: `${context.siteUrl}/api/customer_analytics/external/account`,
+            url: `${context.siteUrl}/v1/customer_analytics/external/account`,
             method: 'PATCH',
             body: JSON.stringify({ external_id: externalId, ...updates }),
             headers,
@@ -152,14 +152,14 @@ registerAsyncFunction('insightsSetAccountProperties', {
             Authorization: `Bearer ${team.secret_api_token}`,
         }
 
-        const hogFlow = (context.invocation as { hogFlow?: InsightsFlow }).hogFlow
-        if (hogFlow?.id) {
-            headers['X-Insights-Script-Flow-Id'] = hogFlow.id
+        const flow = (context.invocation as { flow?: Flow }).flow
+        if (flow?.id) {
+            headers['X-Insights-Script-Flow-Id'] = flow.id
         }
 
         result.invocation.queueParameters = CyclotronInvocationQueueParametersFetchSchema.parse({
             type: 'fetch',
-            url: `${context.siteUrl}/api/customer_analytics/external/account/custom_property_values`,
+            url: `${context.siteUrl}/v1/customer_analytics/external/account/custom_property_values`,
             method: 'PATCH',
             body: JSON.stringify({ external_id: externalId, properties }),
             headers,
@@ -201,14 +201,14 @@ registerAsyncFunction('insightsCreateAccount', {
             Authorization: `Bearer ${team.secret_api_token}`,
         }
 
-        const hogFlow = (context.invocation as { hogFlow?: InsightsFlow }).hogFlow
-        if (hogFlow?.id) {
-            headers['X-Insights-Script-Flow-Id'] = hogFlow.id
+        const flow = (context.invocation as { flow?: Flow }).flow
+        if (flow?.id) {
+            headers['X-Insights-Script-Flow-Id'] = flow.id
         }
 
         result.invocation.queueParameters = CyclotronInvocationQueueParametersFetchSchema.parse({
             type: 'fetch',
-            url: `${context.siteUrl}/api/customer_analytics/external/account`,
+            url: `${context.siteUrl}/v1/customer_analytics/external/account`,
             method: 'POST',
             body: JSON.stringify({ external_id: externalId }),
             headers,

@@ -11,7 +11,7 @@ from insights.kafka_client.topics import KAFKA_MESSAGE_ASSETS
 
 MESSAGE_ASSETS_TTL_DAYS = 30
 
-# AUX-resident table family modelled on `hog_invocation_results`. One row per
+# AUX-resident table family modelled on `invocations`. One row per
 # successfully sent email, keyed by (invocation_id, action_id) — a single
 # workflow invocation can fan out to multiple email steps. Rendered HTML lives
 # inline in the `html` column; columnar storage means listing queries don't read it.
@@ -113,7 +113,7 @@ ENGINE = {Distributed(data_table=MESSAGE_ASSETS_DATA_TABLE, cluster=settings.DAT
 
 
 # Backed by the warpstream-cyclotron named collection — same cluster the CDP
-# producer writes to and the same one hog_invocation_results consumes from.
+# producer writes to and the same one invocations consumes from.
 KAFKA_MESSAGE_ASSETS_TABLE_SQL = lambda: (
     f"""
 CREATE TABLE IF NOT EXISTS {KAFKA_MESSAGE_ASSETS_TABLE}

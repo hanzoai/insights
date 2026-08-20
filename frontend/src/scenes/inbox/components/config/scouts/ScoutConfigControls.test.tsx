@@ -32,7 +32,7 @@ const config: SignalScoutConfigApi = {
 describe('ScoutConfigForm', () => {
     useMocks({
         get: {
-            '/api/environments/:team_id/integrations/': () => [200, { results: [] }],
+            '/v1/environments/:team_id/integrations/': () => [200, { results: [] }],
         },
     })
 

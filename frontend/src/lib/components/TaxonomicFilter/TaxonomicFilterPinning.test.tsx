@@ -24,16 +24,16 @@ describe('TaxonomicFilter pinning', () => {
         localStorage.clear()
         useMocks({
             get: {
-                '/api/projects/:team/event_definitions': mockGetEventDefinitions,
-                '/api/projects/:team/property_definitions': mockGetPropertyDefinitions,
-                '/api/projects/:team/actions': { results: [] },
-                '/api/environments/:team/persons/properties': [
+                '/v1/projects/:team/event_definitions': mockGetEventDefinitions,
+                '/v1/projects/:team/property_definitions': mockGetPropertyDefinitions,
+                '/v1/projects/:team/actions': { results: [] },
+                '/v1/environments/:team/persons/properties': [
                     { id: 1, name: 'location', count: 1 },
                     { id: 2, name: 'role', count: 2 },
                 ],
             },
             post: {
-                '/api/environments/:team/query': { results: [] },
+                '/v1/environments/:team/query': { results: [] },
             },
         })
         initKeaTests()

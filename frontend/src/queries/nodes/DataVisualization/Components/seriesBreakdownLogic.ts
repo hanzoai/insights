@@ -10,7 +10,7 @@ import type {
     InsightsQLAutocompleteResponse,
     InsightsQLMetadataResponse,
     InsightsQLQueryResponse,
-    HogQueryResponse,
+    ScriptQueryResponse,
     LogAttributesQueryResponse,
     LogValuesQueryResponse,
     MetricsQueryResponse,
@@ -107,7 +107,7 @@ export interface seriesBreakdownLogicValues {
     chartSettings: ChartSettings; // dataVisualizationLogic
     columns: Column[]; // dataVisualizationLogic
     query: DataVisualizationNode; // dataVisualizationLogic
-    response: ErrorTrackingQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null; // dataVisualizationLogic
+    response: ErrorTrackingQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null; // dataVisualizationLogic
     selectedXAxis: string | null; // dataVisualizationLogic
     selectedYAxis: (SelectedYAxis | null)[] | null; // dataVisualizationLogic
     breakdownColumnValues: string[];
@@ -126,7 +126,7 @@ export interface seriesBreakdownLogicActions {
     }; // dataVisualizationLogic
     addSeriesBreakdown: (columnName: string | null) => {
         columnName: string | null;
-        response: ErrorTrackingQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null;
+        response: ErrorTrackingQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null;
     };
     deleteSeriesBreakdown: () => {};
 }
@@ -137,8 +137,8 @@ export interface seriesBreakdownLogicMeta {
     __keaTypeGenInternalSelectorTypes: {
         selectedSeriesBreakdownColumn: (query: DataVisualizationNode) => string | null | undefined;
         showSeriesBreakdown: (selectedSeriesBreakdownColumn: string | null | undefined) => boolean;
-        breakdownColumnValues: (selectedSeriesBreakdownColumn: string | null | undefined, response: ErrorTrackingQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null, columns: Column[]) => string[];
-        seriesBreakdownData: (selectedSeriesBreakdownColumn: string | null | undefined, breakdownColumnValues: string[], selectedYAxis: (SelectedYAxis | null)[] | null, selectedXAxis: string | null, response: ErrorTrackingQueryResponse | HogQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null, columns: Column[], chartSettings: ChartSettings, getTheme: (themeId: number | string | null | undefined) => DataColorTheme | null) => BreakdownSeriesData<number | null>;
+        breakdownColumnValues: (selectedSeriesBreakdownColumn: string | null | undefined, response: ErrorTrackingQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null, columns: Column[]) => string[];
+        seriesBreakdownData: (selectedSeriesBreakdownColumn: string | null | undefined, breakdownColumnValues: string[], selectedYAxis: (SelectedYAxis | null)[] | null, selectedXAxis: string | null, response: ErrorTrackingQueryResponse | ScriptQueryResponse | InsightsQLAutocompleteResponse | InsightsQLMetadataResponse | InsightsQLQueryResponse<any[]> | LogAttributesQueryResponse | LogValuesQueryResponse | MetricsQueryResponse | Record<string, any> | SessionsQueryResponse | TraceSpansAggregationQueryResponse | TraceSpansAttributeBreakdownQueryResponse | TraceSpansQueryResponse | null, columns: Column[], chartSettings: ChartSettings, getTheme: (themeId: number | string | null | undefined) => DataColorTheme | null) => BreakdownSeriesData<number | null>;
     };
 }
 
@@ -184,7 +184,7 @@ export const seriesBreakdownLogic = kea<seriesBreakdownLogicType>([
                     | import('../../../schema').InsightsQLAutocompleteResponse
                     | import('../../../schema').InsightsQLMetadataResponse
                     | import('../../../schema').InsightsQLQueryResponse<any[]>
-                    | import('../../../schema').HogQueryResponse
+                    | import('../../../schema').ScriptQueryResponse
                     | import('../../../schema').LogAttributesQueryResponse
                     | import('../../../schema').LogValuesQueryResponse
                     | import('../../../schema').MetricsQueryResponse
@@ -232,7 +232,7 @@ export const seriesBreakdownLogic = kea<seriesBreakdownLogicType>([
                     | import('../../../schema').InsightsQLAutocompleteResponse
                     | import('../../../schema').InsightsQLMetadataResponse
                     | import('../../../schema').InsightsQLQueryResponse<any[]>
-                    | import('../../../schema').HogQueryResponse
+                    | import('../../../schema').ScriptQueryResponse
                     | import('../../../schema').LogAttributesQueryResponse
                     | import('../../../schema').LogValuesQueryResponse
                     | import('../../../schema').MetricsQueryResponse

@@ -145,8 +145,8 @@ test.describe('a deployed insights', () => {
         // property DEFINITIONS are empty in this deployment and asserting on them
         // would be asserting a known gap. Ingest writes events to the datastore
         // warehouse through the native path, which never populates Django's
-        // definition tables -- /api/projects/1/events/ returns rows while
-        // /api/projects/1/event_definitions/ returns count 0. Saved insights read
+        // definition tables -- /v1/projects/1/events/ returns rows while
+        // /v1/projects/1/event_definitions/ returns count 0. Saved insights read
         // the same warehouse and do have rows, so this still fails if the read path
         // breaks, without encoding a defect as the expectation.
         await expect
@@ -159,8 +159,8 @@ test.describe('a deployed insights', () => {
 
     test('carries no upstream branding', async ({ page }) => {
         await open(page, '/')
-        // This is a Hanzo product. A visible PostHog string is a debrand miss.
+        // This is a Hanzo product. A visible PostScript string is a debrand miss.
         const body = await page.locator('body').innerText()
-        expect(body).not.toMatch(/PostHog/i)
+        expect(body).not.toMatch(/PostScript/i)
     })
 })

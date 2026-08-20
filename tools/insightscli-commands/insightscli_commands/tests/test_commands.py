@@ -32,9 +32,9 @@ class TestProcessManagerInference:
     )
     def test_infer_process_manager(self, monkeypatch, env_value, argv, expected) -> None:
         if env_value is None:
-            monkeypatch.delenv("HOGLI_PROCESS_MANAGER", raising=False)
+            monkeypatch.delenv("INSIGHTSCLI_PROCESS_MANAGER", raising=False)
         else:
-            monkeypatch.setenv("HOGLI_PROCESS_MANAGER", env_value)
+            monkeypatch.setenv("INSIGHTSCLI_PROCESS_MANAGER", env_value)
         monkeypatch.setattr("sys.argv", argv)
 
         assert _infer_process_manager("start") == expected
@@ -46,22 +46,22 @@ class TestDetectEnvironment:
         # is_ci is the seam the code consults -- mock it instead of coupling
         # to the framework's internal list of CI env vars.
         monkeypatch.setattr("insightscli_commands.telemetry_props.is_ci", lambda: False)
-        monkeypatch.setattr("insightscli_commands.telemetry_props._HOGLAND_MARKER", tmp_path / "absent")
-        for var in ("HOGLI_ENVIRONMENT", *_DEVBOX_ENV_MARKERS):
+        monkeypatch.setattr("insightscli_commands.telemetry_props._BOX_MARKER", tmp_path / "absent")
+        for var in ("INSIGHTSCLI_ENVIRONMENT", *_DEVBOX_ENV_MARKERS):
             monkeypatch.delenv(var, raising=False)
 
     @pytest.mark.parametrize(
-        ("env_vars", "ci", "hogland", "expected"),
+        ("env_vars", "ci", "box", "expected"),
         [
             ({}, False, False, "local"),
             ({}, True, False, "ci"),
             ({"CODER": "true"}, False, False, "devbox"),
             ({"CODER_WORKSPACE_NAME": "raul-devbox"}, False, False, "devbox"),
-            ({}, False, True, "hogland"),
+            ({}, False, True, "box"),
             ({"CODER": "true"}, False, True, "devbox"),
-            ({"HOGLI_ENVIRONMENT": "sandbox"}, False, False, "sandbox"),
-            ({"HOGLI_ENVIRONMENT": " Sandbox "}, False, False, "sandbox"),
-            ({"HOGLI_ENVIRONMENT": "sandbox"}, True, False, "sandbox"),
+            ({"INSIGHTSCLI_ENVIRONMENT": "sandbox"}, False, False, "sandbox"),
+            ({"INSIGHTSCLI_ENVIRONMENT": " Sandbox "}, False, False, "sandbox"),
+            ({"INSIGHTSCLI_ENVIRONMENT": "sandbox"}, True, False, "sandbox"),
             ({"CODER": "true"}, True, False, "ci"),
         ],
         ids=[
@@ -69,19 +69,19 @@ class TestDetectEnvironment:
             "ci",
             "coder",
             "coder_workspace",
-            "hogland",
-            "devbox_beats_hogland",
+            "box",
+            "devbox_beats_box",
             "declared",
             "declared_normalized",
             "declared_beats_ci",
             "ci_beats_devbox",
         ],
     )
-    def test_classification(self, monkeypatch, tmp_path, env_vars, ci, hogland, expected) -> None:
+    def test_classification(self, monkeypatch, tmp_path, env_vars, ci, box, expected) -> None:
         if ci:
             monkeypatch.setattr("insightscli_commands.telemetry_props.is_ci", lambda: True)
-        if hogland:
-            monkeypatch.setattr("insightscli_commands.telemetry_props._HOGLAND_MARKER", tmp_path)
+        if box:
+            monkeypatch.setattr("insightscli_commands.telemetry_props._BOX_MARKER", tmp_path)
         for key, value in env_vars.items():
             monkeypatch.setenv(key, value)
         assert _detect_environment() == expected
@@ -90,7 +90,7 @@ class TestDetectEnvironment:
 class TestDetectAgent:
     @pytest.fixture(autouse=True)
     def _no_ambient_agent(self, monkeypatch):
-        monkeypatch.delenv("HOGLI_AGENT", raising=False)
+        monkeypatch.delenv("INSIGHTSCLI_AGENT", raising=False)
         for var, _ in _AGENT_ENV_MARKERS:
             monkeypatch.delenv(var, raising=False)
 
@@ -102,8 +102,8 @@ class TestDetectAgent:
             ({"CODEX_SANDBOX": "seatbelt"}, "codex"),
             ({"INSIGHTS_CODE_VERSION": "1.2.3"}, "insights-code"),
             ({"INSIGHTS_CODE_VERSION": "1.2.3", "CLAUDECODE": "1"}, "insights-code"),
-            ({"HOGLI_AGENT": " Goose "}, "goose"),
-            ({"HOGLI_AGENT": "goose", "CLAUDECODE": "1"}, "goose"),
+            ({"INSIGHTSCLI_AGENT": " Goose "}, "goose"),
+            ({"INSIGHTSCLI_AGENT": "goose", "CLAUDECODE": "1"}, "goose"),
         ],
         ids=[
             "human",

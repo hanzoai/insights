@@ -28,7 +28,7 @@ class DataWarehouseManagedViewSetViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSe
     def retrieve(self, _request: Request, kind: str, *args, **kwargs) -> Response:
         """
         Get all views associated with a specific managed viewset.
-        GET /api/environments/{team_id}/managed_viewsets/{kind}/
+        GET /v1/environments/{team_id}/managed_viewsets/{kind}/
         """
 
         if kind not in dict(DataWarehouseManagedViewSetKind.choices):
@@ -57,7 +57,7 @@ class DataWarehouseManagedViewSetViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSe
     def update(self, request: Request, kind: str, *args, **kwargs) -> Response:
         """
         Enable or disable a managed viewset by kind.
-        PUT /api/environments/{team_id}/managed_viewsets/{kind}/ with body {"enabled": true/false}
+        PUT /v1/environments/{team_id}/managed_viewsets/{kind}/ with body {"enabled": true/false}
         """
         if kind not in dict(DataWarehouseManagedViewSetKind.choices):
             return Response(

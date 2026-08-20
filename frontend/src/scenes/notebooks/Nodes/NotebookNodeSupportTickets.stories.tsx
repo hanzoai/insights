@@ -153,10 +153,10 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                'api/environments/:team_id/customer_profile_configs/': { count: 0, results: [] },
-                'api/projects/:team_id/notebooks/': notebooksListMock,
-                'api/projects/:team_id/notebooks/st-with-tickets/': makeNotebook('st-with-tickets'),
-                'api/projects/:team_id/notebooks/st-empty/': makeNotebook('st-empty'),
+                'v1/environments/:team_id/customer_profile_configs/': { count: 0, results: [] },
+                'v1/projects/:team_id/notebooks/': notebooksListMock,
+                'v1/projects/:team_id/notebooks/st-with-tickets/': makeNotebook('st-with-tickets'),
+                'v1/projects/:team_id/notebooks/st-empty/': makeNotebook('st-empty'),
             },
         }),
     ],
@@ -185,7 +185,7 @@ export const WithTickets: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                'api/projects/:team_id/conversations/tickets/': ticketsResponse(sampleTickets),
+                'v1/projects/:team_id/conversations/tickets/': ticketsResponse(sampleTickets),
             },
         })
         return <AppWithProfileContext />
@@ -200,7 +200,7 @@ export const Empty: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                'api/projects/:team_id/conversations/tickets/': ticketsResponse([]),
+                'v1/projects/:team_id/conversations/tickets/': ticketsResponse([]),
             },
         })
         return <AppWithProfileContext />

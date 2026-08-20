@@ -26,7 +26,7 @@ class TestEndpointOpenAPISpec(DatastoreTestMixin, APIBaseTest):
             is_active=True,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/basic-endpoint/openapi.json/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/basic-endpoint/openapi.json/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         spec = response.json()
@@ -39,7 +39,7 @@ class TestEndpointOpenAPISpec(DatastoreTestMixin, APIBaseTest):
         self.assertIn("servers", spec)
         self.assertEqual(len(spec["servers"]), 1)
 
-        run_path = f"/api/projects/{self.team.id}/endpoints/basic-endpoint/run"
+        run_path = f"/v1/projects/{self.team.id}/endpoints/basic-endpoint/run"
         self.assertIn(run_path, spec["paths"])
 
         post_op = spec["paths"][run_path]["post"]
@@ -77,7 +77,7 @@ class TestEndpointOpenAPISpec(DatastoreTestMixin, APIBaseTest):
             is_active=True,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/endpoint-with-vars/openapi.json/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/endpoint-with-vars/openapi.json/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         spec = response.json()
@@ -133,7 +133,7 @@ class TestEndpointOpenAPISpec(DatastoreTestMixin, APIBaseTest):
             is_active=True,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/endpoint-required-vars/openapi.json/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/endpoint-required-vars/openapi.json/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         spec = response.json()
 
@@ -175,7 +175,7 @@ class TestEndpointOpenAPISpec(DatastoreTestMixin, APIBaseTest):
             is_active=True,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/endpoint-optional-vars/openapi.json/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/endpoint-optional-vars/openapi.json/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         spec = response.json()
 
@@ -250,7 +250,7 @@ class TestEndpointOpenAPISpec(DatastoreTestMixin, APIBaseTest):
                     is_active=True,
                 )
 
-                response = self.client.get(f"/api/environments/{self.team.id}/endpoints/{ep_name}/openapi.json/")
+                response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/{ep_name}/openapi.json/")
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
                 spec = response.json()
 
@@ -268,7 +268,7 @@ class TestEndpointOpenAPISpec(DatastoreTestMixin, APIBaseTest):
             is_active=True,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/refresh-test/openapi.json/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/refresh-test/openapi.json/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         spec = response.json()
 
@@ -285,7 +285,7 @@ class TestEndpointOpenAPISpec(DatastoreTestMixin, APIBaseTest):
             is_active=True,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/fields-test/openapi.json/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/fields-test/openapi.json/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         spec = response.json()
 
@@ -305,7 +305,7 @@ class TestEndpointOpenAPISpec(DatastoreTestMixin, APIBaseTest):
             is_active=True,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/filter-test-endpoint/openapi.json/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/filter-test-endpoint/openapi.json/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         spec = response.json()
@@ -319,7 +319,7 @@ class TestEndpointOpenAPISpec(DatastoreTestMixin, APIBaseTest):
 
     def test_openapi_spec_not_found(self):
         """Test that requesting spec for non-existent endpoint returns 404."""
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/nonexistent/openapi.json/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/nonexistent/openapi.json/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_openapi_spec_security_scheme(self):
@@ -332,7 +332,7 @@ class TestEndpointOpenAPISpec(DatastoreTestMixin, APIBaseTest):
             is_active=True,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/secure-endpoint/openapi.json/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/secure-endpoint/openapi.json/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         spec = response.json()
@@ -354,7 +354,7 @@ class TestEndpointOpenAPISpec(DatastoreTestMixin, APIBaseTest):
             current_version=3,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/versioned-endpoint/openapi.json/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/versioned-endpoint/openapi.json/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         spec = response.json()
@@ -372,7 +372,7 @@ class TestEndpointOpenAPISpec(DatastoreTestMixin, APIBaseTest):
             is_active=True,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/trends-endpoint/openapi.json/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/trends-endpoint/openapi.json/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         spec = response.json()
@@ -403,7 +403,7 @@ class TestEndpointOpenAPISpec(DatastoreTestMixin, APIBaseTest):
             is_active=True,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/trends-breakdown/openapi.json/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/trends-breakdown/openapi.json/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         spec = response.json()
@@ -426,7 +426,7 @@ class TestEndpointOpenAPISpec(DatastoreTestMixin, APIBaseTest):
             is_active=True,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/simple-insightsql/openapi.json/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/simple-insightsql/openapi.json/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         spec = response.json()
@@ -441,7 +441,7 @@ class TestEndpointOpenAPIRequiredVariables(DatastoreTestMixin, APIBaseTest):
     breakdowns may be omitted."""
 
     def _get(self, name: str) -> dict:
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/{name}/openapi.json/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/endpoints/{name}/openapi.json/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         schemas = response.json()["components"]["schemas"]
         self.assertIn("Variables", schemas, f"Variables schema missing for endpoint '{name}'")
@@ -627,7 +627,7 @@ class TestEndpointOpenAPIRequiredVariables(DatastoreTestMixin, APIBaseTest):
             is_active=True,
         )
         response = self.client.post(
-            f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
+            f"/v1/environments/{self.team.id}/endpoints/{endpoint.name}/run/",
             {"filters_override": {"properties": [{"key": "$browser", "value": "Chrome", "type": "event"}]}},
             format="json",
         )

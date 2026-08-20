@@ -443,7 +443,7 @@ class CompositeCommand(Command):
                 raise
 
 
-class HogliCommand(Command):
+class ScriptliCommand(Command):
     """Command that wraps another insightscli command with optional prompt guard."""
 
     def get_underlying_command(self) -> str:

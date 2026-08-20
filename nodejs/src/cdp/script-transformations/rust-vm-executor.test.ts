@@ -1,7 +1,7 @@
 import { logger } from '~/common/utils/logger'
 
 import { createExampleInvocation } from '../_tests/fixtures'
-import { resetHogvmNodeModuleCacheForTests } from './rust-vm'
+import { resetScriptvmNodeModuleCacheForTests, type ScriptvmNodeModule } from './rust-vm'
 import { RustVmExecutor } from './rust-vm-executor'
 
 jest.mock('@hanzo/scriptvm-node', () => ({
@@ -9,9 +9,9 @@ jest.mock('@hanzo/scriptvm-node', () => ({
     executeSync: jest.fn(),
 }))
 
-const mockHogvmNode = jest.mocked(jest.requireMock<typeof import('@hanzo/scriptvm-node')>('@hanzo/scriptvm-node'))
+const mockScriptvmNode = jest.mocked(jest.requireMock<ScriptvmNodeModule>('@hanzo/scriptvm-node'))
 
-const rustResult = (overrides: Partial<ReturnType<typeof mockHogvmNode.executeSync>> = {}) => ({
+const rustResult = (overrides: Partial<ReturnType<typeof mockScriptvmNode.executeSync>> = {}) => ({
     result: { properties: { a: 1 } },
     durationUs: 1500,
     logs: [],
@@ -24,17 +24,17 @@ describe('RustVmExecutor', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
-        resetHogvmNodeModuleCacheForTests()
+        resetScriptvmNodeModuleCacheForTests()
         executor = new RustVmExecutor({ mmdbPath: '/dev/null' })
     })
 
     it('executes the invocation bytecode against its globals and returns a finished result', () => {
         const invocation = createExampleInvocation({ bytecode: ['_H', 1, 38] })
-        mockHogvmNode.executeSync.mockReturnValue(rustResult())
+        mockScriptvmNode.executeSync.mockReturnValue(rustResult())
 
         const result = executor.execute(invocation, [])
 
-        expect(mockHogvmNode.executeSync).toHaveBeenCalledWith(['_H', 1, 38], invocation.state.globals, {
+        expect(mockScriptvmNode.executeSync).toHaveBeenCalledWith(['_H', 1, 38], invocation.state.globals, {
             maxSteps: 1_000_000,
         })
         expect(result).not.toBeNull()
@@ -46,7 +46,7 @@ describe('RustVmExecutor', () => {
     })
 
     it('a null program result leaves execResult unset so the transformer drops the event', () => {
-        mockHogvmNode.executeSync.mockReturnValue(rustResult({ result: null }))
+        mockScriptvmNode.executeSync.mockReturnValue(rustResult({ result: null }))
 
         const result = executor.execute(createExampleInvocation(), [])
 
@@ -55,7 +55,7 @@ describe('RustVmExecutor', () => {
     })
 
     it('surfaces print() output as info logs with sensitive values redacted, plus a truncation warning', () => {
-        mockHogvmNode.executeSync.mockReturnValue(
+        mockScriptvmNode.executeSync.mockReturnValue(
             rustResult({ logs: ['token is secret-token', 'plain'], logsTruncated: true })
         )
 
@@ -70,7 +70,7 @@ describe('RustVmExecutor', () => {
     })
 
     it("redacts each invocation's logs with its own sensitive values, not another invocation's", () => {
-        mockHogvmNode.executeSync.mockReturnValue(rustResult({ logs: ['token is secret-a and secret-b'] }))
+        mockScriptvmNode.executeSync.mockReturnValue(rustResult({ logs: ['token is secret-a and secret-b'] }))
 
         const first = executor.execute(createExampleInvocation(), ['secret-a'])
         const second = executor.execute(createExampleInvocation(), ['secret-b'])
@@ -80,7 +80,7 @@ describe('RustVmExecutor', () => {
     })
 
     it('a rust execution error becomes the result error with an error log, without falling back', () => {
-        mockHogvmNode.executeSync.mockReturnValue(rustResult({ result: undefined, error: 'Division by zero' }))
+        mockScriptvmNode.executeSync.mockReturnValue(rustResult({ result: undefined, error: 'Division by zero' }))
 
         const result = executor.execute(createExampleInvocation(), [])
 
@@ -97,14 +97,14 @@ describe('RustVmExecutor', () => {
         ['function missing from the rust vm', 'Unknown function sendEmail'],
         ['global chain the rust vm cannot resolve', 'Unknown Global ["inputs", "foo"]'],
     ])('falls back to the node vm on %s', (_name, error) => {
-        mockHogvmNode.executeSync.mockReturnValue(rustResult({ result: undefined, error }))
+        mockScriptvmNode.executeSync.mockReturnValue(rustResult({ result: undefined, error }))
 
         expect(executor.execute(createExampleInvocation(), [])).toBeNull()
     })
 
     it('falls back to the node vm when the ffi boundary throws instead of returning an error', () => {
         // e.g. globals containing NaN/Infinity, which serde_json can't represent.
-        mockHogvmNode.executeSync.mockImplementation(() => {
+        mockScriptvmNode.executeSync.mockImplementation(() => {
             throw new Error('Failed to convert js number to serde_json::Number')
         })
 
@@ -114,7 +114,7 @@ describe('RustVmExecutor', () => {
     it('redacts sensitive values from fallback logs', () => {
         // Marshalling errors and panic messages can embed values from the invocation globals.
         const warnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => {})
-        mockHogvmNode.executeSync.mockImplementation(() => {
+        mockScriptvmNode.executeSync.mockImplementation(() => {
             throw new Error('failed to convert value "secret-token" at inputs')
         })
 
@@ -127,11 +127,11 @@ describe('RustVmExecutor', () => {
     })
 
     it('falls back to the node vm when the native addon is unavailable', () => {
-        mockHogvmNode.init.mockImplementation(() => {
+        mockScriptvmNode.init.mockImplementation(() => {
             throw new Error('addon not built')
         })
 
         expect(executor.execute(createExampleInvocation(), [])).toBeNull()
-        expect(mockHogvmNode.executeSync).not.toHaveBeenCalled()
+        expect(mockScriptvmNode.executeSync).not.toHaveBeenCalled()
     })
 })

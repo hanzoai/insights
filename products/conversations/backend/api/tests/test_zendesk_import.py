@@ -20,7 +20,7 @@ class TestZendeskImportAPI(APIBaseTest):
         self.client.force_login(self.user)
 
     def test_status_returns_404_when_no_job(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/conversations/zendesk_imports/status/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/conversations/zendesk_imports/status/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     @patch(
@@ -34,7 +34,7 @@ class TestZendeskImportAPI(APIBaseTest):
     )
     def test_start_import_creates_job(self, _mock_start, _mock_validate):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/conversations/zendesk_imports/",
+            f"/v1/projects/{self.team.id}/conversations/zendesk_imports/",
             {
                 "subdomain": "acme",
                 "email_address": "agent@example.com",
@@ -62,7 +62,7 @@ class TestZendeskImportAPI(APIBaseTest):
             job_inputs={"subdomain": "acme", "email_address": "a@b.com", "api_token": "x"},
         )
         response = self.client.post(
-            f"/api/projects/{self.team.id}/conversations/zendesk_imports/",
+            f"/v1/projects/{self.team.id}/conversations/zendesk_imports/",
             {
                 "subdomain": "acme",
                 "email_address": "agent@example.com",
@@ -79,14 +79,14 @@ class TestZendeskImportAPI(APIBaseTest):
         self.organization_membership.save()
 
         post = self.client.post(
-            f"/api/projects/{self.team.id}/conversations/zendesk_imports/",
+            f"/v1/projects/{self.team.id}/conversations/zendesk_imports/",
             {"subdomain": "acme", "email_address": "agent@example.com", "api_token": generate_random_token_secret()},
             format="json",
         )
         self.assertEqual(post.status_code, status.HTTP_403_FORBIDDEN)
         self.assertFalse(ZendeskImportJob.objects.unscoped().filter(team_id=self.team.id).exists())
 
-        get = self.client.get(f"/api/projects/{self.team.id}/conversations/zendesk_imports/status/")
+        get = self.client.get(f"/v1/projects/{self.team.id}/conversations/zendesk_imports/status/")
         self.assertEqual(get.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_admin_cannot_target_project_in_another_organization(self):
@@ -96,7 +96,7 @@ class TestZendeskImportAPI(APIBaseTest):
         other_team = Team.objects.create(organization=other_org, name="other", conversations_enabled=True)
 
         response = self.client.post(
-            f"/api/projects/{other_team.id}/conversations/zendesk_imports/",
+            f"/v1/projects/{other_team.id}/conversations/zendesk_imports/",
             {"subdomain": "acme", "email_address": "agent@example.com", "api_token": generate_random_token_secret()},
             format="json",
         )

@@ -7,18 +7,18 @@ import path from 'path'
 import { parseJSON } from '~/common/utils/json-parse'
 import { UUIDT } from '~/common/utils/utils'
 
-import { HogBytecode } from '../types'
+import { ScriptBytecode } from '../types'
 import { Semaphore } from '../utils/sempahore'
 
 const ROOT_DIR = path.join(__dirname, '..', '..', '..', '..')
 const CACHE_FILE = path.join(__dirname, '.tmp/cache.json')
 
-let CACHE: Record<string, HogBytecode> | null = null
+let CACHE: Record<string, ScriptBytecode> | null = null
 const CONCURRENT_WORKERS = 10
 
 const semaphore = new Semaphore(CONCURRENT_WORKERS)
 
-export async function compileHog(script: string): Promise<HogBytecode> {
+export async function compileScript(script: string): Promise<ScriptBytecode> {
     return semaphore.run(async () => {
         if (CACHE === null) {
             mkdirSync(path.dirname(CACHE_FILE), { recursive: true })
@@ -36,17 +36,17 @@ export async function compileHog(script: string): Promise<HogBytecode> {
             return CACHE[script]
         }
 
-        // We invoke the ./bin/script from the root of the directory like bin/hoge <file.script> [output.hoge]
+        // We invoke the ./bin/script from the root of the directory like bin/scriptc <file.script> [output.scriptc]
         // We need to write and read from a temp file
         const uuid = new UUIDT().toString()
         const tempFile = path.join(tmpdir(), `script-${uuid}.script`)
         await writeFile(tempFile, script)
 
-        const outputFile = path.join(tmpdir(), `script-${uuid}.hoge`)
+        const outputFile = path.join(tmpdir(), `script-${uuid}.scriptc`)
         try {
             await new Promise((resolve, reject) => {
                 exec(
-                    `cd ${ROOT_DIR} && ./bin/hoge ${tempFile} ${outputFile}`,
+                    `cd ${ROOT_DIR} && ./bin/scriptc ${tempFile} ${outputFile}`,
                     {
                         env: {
                             ...process.env,

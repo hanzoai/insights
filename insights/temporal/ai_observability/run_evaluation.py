@@ -16,7 +16,7 @@ from insights.temporal.ai_observability.evaluation_errors import (
     terminal_user_error_result_from_application_error,
 )
 from insights.temporal.ai_observability.evaluation_event_io import extract_event_io, extract_event_tools
-from insights.temporal.ai_observability.evaluation_hog import execute_hog_eval_activity, run_hog_eval
+from insights.temporal.ai_observability.evaluation_script import execute_script_eval_activity, run_script_eval
 from insights.temporal.ai_observability.evaluation_llm_judge import (
     DEFAULT_JUDGE_MODEL,
     LLM_JUDGE_RETRY_POLICY,
@@ -67,7 +67,7 @@ __all__ = [
     "disable_evaluation_activity",
     "emit_evaluation_event_activity",
     "emit_internal_telemetry_activity",
-    "execute_hog_eval_activity",
+    "execute_script_eval_activity",
     "execute_llm_judge_activity",
     "execute_sentiment_eval_activity",
     "extract_event_io",
@@ -76,7 +76,7 @@ __all__ = [
     "get_output_type_config",
     "handle_llm_judge_activity_error",
     "handle_terminal_user_error_result",
-    "run_hog_eval",
+    "run_script_eval",
     "send_evaluation_disabled_email_activity",
     "update_key_state_activity",
 ]
@@ -262,7 +262,7 @@ class RunEvaluationWorkflow(InsightsWorkflow):
 
         if evaluation_type == "script":
             result = await temporalio.workflow.execute_activity(
-                execute_hog_eval_activity,
+                execute_script_eval_activity,
                 args=[evaluation, inputs.event_data],
                 schedule_to_close_timeout=timedelta(seconds=30),
                 retry_policy=RetryPolicy(maximum_attempts=1),

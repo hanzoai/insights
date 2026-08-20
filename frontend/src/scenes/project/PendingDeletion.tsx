@@ -6,7 +6,7 @@ import { Button, Card } from '@hanzo/elements'
 import { newAccountMenuLogic } from 'lib/components/Account/newAccountMenuLogic'
 import { OrgSwitcher } from 'lib/components/Account/OrgSwitcher'
 import { ProjectSwitcher } from 'lib/components/Account/ProjectSwitcher'
-import { HogWelder } from 'lib/components/mascots'
+import { ScriptWelder } from 'lib/components/mascots'
 import { Popover } from 'lib/elements/Popover/Popover'
 import { SupportModalButton } from 'scenes/authentication/shared/SupportModalButton'
 import { projectLogic } from 'scenes/projectLogic'
@@ -30,7 +30,7 @@ export function ProjectPendingDeletion(): JSX.Element {
         <div className="max-w-[600px] mx-auto px-2 py-8">
             <Card>
                 <div className="flex flex-col gap-4 items-center text-center">
-                    <HogWelder className="h-80" />
+                    <ScriptWelder className="h-80" />
                     <h3>
                         Disassembling {currentProject?.name ? `"${currentProject.name}"` : 'this project'} at the
                         circuit level

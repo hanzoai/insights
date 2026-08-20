@@ -33,7 +33,7 @@ var (
 	selectionDark     = sharedpalette.SelectionDark
 	selectionLight    = sharedpalette.SelectionLight
 	brandYellow       = sharedpalette.BrandYellow
-	brandBlue         = sharedpalette.BrandBlue
+	brandGray         = sharedpalette.BrandGray
 	brandRed          = sharedpalette.BrandRed
 	brandBlack        = sharedpalette.BrandBlack
 )
@@ -62,7 +62,7 @@ var (
 	stripesStyle = lipgloss.NewStyle().
 			PaddingLeft(1).
 			Render(
-			lipgloss.NewStyle().Background(brandBlue).Render(" ") +
+			lipgloss.NewStyle().Background(brandGray).Render(" ") +
 				lipgloss.NewStyle().Background(brandRed).Render(" ") +
 				lipgloss.NewStyle().Background(brandYellow).Render(" ") +
 				lipgloss.NewStyle().Background(brandBlack).Render(" "),

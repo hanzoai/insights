@@ -179,7 +179,7 @@ function loadKnownSchemaTypes(spec: OpenApiSpec): Set<string> {
 
 /**
  * Find an operation by operationId. When the same endpoint exists at both
- * /api/environments/ and /api/projects/, prefers /api/projects/.
+ * /v1/environments/ and /v1/projects/, prefers /v1/projects/.
  * Prefers an exact operationId match, then falls back to matching _N deduplicated
  * variants (e.g. issues_list matches issues_list_2) for backward compatibility.
  */
@@ -201,7 +201,7 @@ function findOperation(spec: OpenApiSpec, operationId: string): ResolvedOperatio
             }
 
             if (op.operationId === operationId) {
-                if (urlPath.startsWith('/api/projects/')) {
+                if (urlPath.startsWith('/v1/projects/')) {
                     return resolved
                 }
                 if (!exactFallback) {
@@ -214,7 +214,7 @@ function findOperation(spec: OpenApiSpec, operationId: string): ResolvedOperatio
             if (opBase !== base) {
                 continue
             }
-            if (urlPath.startsWith('/api/projects/')) {
+            if (urlPath.startsWith('/v1/projects/')) {
                 if (!baseProject) {
                     baseProject = resolved
                 }
@@ -833,7 +833,7 @@ function composeToolSchema(
 // Code generation helpers
 // ------------------------------------------------------------------
 
-/** Extract path parameter names from a URL pattern (e.g., {id} from /api/projects/{project_id}/actions/{id}/) */
+/** Extract path parameter names from a URL pattern (e.g., {id} from /v1/projects/{project_id}/actions/{id}/) */
 function extractPathParams(urlPattern: string): string[] {
     const autoResolved = new Set(['project_id', 'organization_id'])
     const matches = urlPattern.match(/\{(\w+)\}/g) ?? []

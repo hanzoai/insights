@@ -12,13 +12,13 @@ from products.cdp.backend.models.insights_functions.insights_function_revision i
 FLAG_PATH = "products.cdp.backend.api.insights_function.use_destinations_revisions"
 RELOAD_PATH = "products.cdp.backend.models.insights_functions.insights_function.reload_insights_functions_on_workers"
 
-LIVE_HOG = "fetch(inputs.url);"
-EDITED_HOG = "fetch(inputs.url, {'method': 'PUT'});"
+LIVE_SCRIPT = "fetch(inputs.url);"
+EDITED_SCRIPT = "fetch(inputs.url, {'method': 'PUT'});"
 
 BASE_FUNCTION = {
     "name": "Webhook",
     "type": "destination",
-    "script": LIVE_HOG,
+    "script": LIVE_SCRIPT,
     "enabled": True,
     "inputs_schema": [
         {"key": "url", "type": "string", "label": "Webhook URL", "required": True},
@@ -36,7 +36,7 @@ class DraftTestCase(APIBaseTest):
         self.addCleanup(flag.stop)
 
     def _url(self, function_id: str = "", suffix: str = "") -> str:
-        base = f"/api/projects/{self.team.id}/insights_functions/"
+        base = f"/v1/projects/{self.team.id}/insights_functions/"
         return f"{base}{function_id}{suffix}" if function_id else base
 
     def _create(self, **overrides) -> str:
@@ -78,13 +78,13 @@ class TestInsightsFunctionDrafts(DraftTestCase):
         function_id = self._create()
 
         with patch(RELOAD_PATH) as mock_reload:
-            response = self._stage(function_id, {"script": EDITED_HOG})
+            response = self._stage(function_id, {"script": EDITED_SCRIPT})
 
-        assert response["draft"]["script"] == EDITED_HOG
+        assert response["draft"]["script"] == EDITED_SCRIPT
         assert response["draft_updated_at"] is not None
         # The whole point: workers keep running the config a human last approved.
         mock_reload.assert_not_called()
-        assert InsightsFunction.objects.get(id=function_id).script == LIVE_HOG
+        assert InsightsFunction.objects.get(id=function_id).script == LIVE_SCRIPT
 
     @parameterized.expand(
         [
@@ -103,14 +103,14 @@ class TestInsightsFunctionDrafts(DraftTestCase):
 
         with patch(FLAG_PATH, return_value=flag_on):
             response = (
-                self._agent_patch(function_id, {"script": EDITED_HOG})
+                self._agent_patch(function_id, {"script": EDITED_SCRIPT})
                 if from_agent
-                else self.client.patch(self._url(function_id), {"script": EDITED_HOG})
+                else self.client.patch(self._url(function_id), {"script": EDITED_SCRIPT})
             )
 
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json()["draft"] is None
-        assert InsightsFunction.objects.get(id=function_id).script == EDITED_HOG
+        assert InsightsFunction.objects.get(id=function_id).script == EDITED_SCRIPT
 
     def test_agent_metadata_in_a_config_edit_still_applies_live(self):
         function_id = self._create()
@@ -125,24 +125,24 @@ class TestInsightsFunctionDrafts(DraftTestCase):
 
     def test_metadata_in_a_draft_edit_does_not_revert_a_concurrent_live_edit(self):
         function_id = self._create()
-        concurrent_hog = "fetch(inputs.url, {'method': 'DELETE'});"
+        concurrent_script = "fetch(inputs.url, {'method': 'DELETE'});"
 
         def live_edit_lands_after_initial_fetch(_team):
             # Stand in for a builder edit committing between the request's initial unlocked fetch
             # and its write: the flag check runs after get_object() and before the transaction.
-            InsightsFunction.objects.filter(id=function_id).update(script=concurrent_hog)
+            InsightsFunction.objects.filter(id=function_id).update(script=concurrent_script)
             return True
 
         with patch(FLAG_PATH, side_effect=live_edit_lands_after_initial_fetch):
-            response = self._agent_patch(function_id, {"name": "Renamed", "script": EDITED_HOG})
+            response = self._agent_patch(function_id, {"name": "Renamed", "script": EDITED_SCRIPT})
 
         assert response.status_code == status.HTTP_200_OK, response.json()
         function = InsightsFunction.objects.get(id=function_id)
         assert function.name == "Renamed"
         # The metadata save must not write the request-start config back over the concurrent edit.
-        assert function.script == concurrent_hog
+        assert function.script == concurrent_script
         assert function.draft is not None
-        assert function.draft["script"] == EDITED_HOG
+        assert function.draft["script"] == EDITED_SCRIPT
 
     def test_metadata_only_agent_edit_stages_nothing(self):
         function_id = self._create()
@@ -159,32 +159,32 @@ class TestInsightsFunctionDrafts(DraftTestCase):
         function_id = self._create()
         self._stage(function_id, {"inputs": {"url": {"value": "https://example.com/staged"}}})
 
-        draft = self._stage(function_id, {"script": EDITED_HOG})["draft"]
+        draft = self._stage(function_id, {"script": EDITED_SCRIPT})["draft"]
 
         assert draft["inputs"]["url"]["value"] == "https://example.com/staged"
-        assert draft["script"] == EDITED_HOG
+        assert draft["script"] == EDITED_SCRIPT
 
     def test_publish_preview_reports_changed_fields_without_applying(self):
         function_id = self._create()
-        self._stage(function_id, {"script": EDITED_HOG})
+        self._stage(function_id, {"script": EDITED_SCRIPT})
 
         preview = self._preview_publish(function_id)
 
         assert preview["published"] is False
         assert preview["changed_fields"] == ["script"]
         assert preview["confirm_token"]
-        assert InsightsFunction.objects.get(id=function_id).script == LIVE_HOG
+        assert InsightsFunction.objects.get(id=function_id).script == LIVE_SCRIPT
 
     def test_publish_applies_the_draft_and_bumps_the_version(self):
         function_id = self._create()
-        self._stage(function_id, {"script": EDITED_HOG})
+        self._stage(function_id, {"script": EDITED_SCRIPT})
 
         response = self._publish(function_id)
 
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json()["published"] is True
         function = InsightsFunction.objects.get(id=function_id)
-        assert function.script == EDITED_HOG
+        assert function.script == EDITED_SCRIPT
         assert function.draft is None
         assert function.draft_updated_at is None
         assert function.version == 2
@@ -201,12 +201,12 @@ class TestInsightsFunctionDrafts(DraftTestCase):
     def test_publish_is_rejected(self, name: str, payload: dict, expected: int):
         function_id = self._create()
         if name != "nothing_staged":
-            self._stage(function_id, {"script": EDITED_HOG})
+            self._stage(function_id, {"script": EDITED_SCRIPT})
 
         response = self.client.post(self._url(function_id, "/publish"), payload)
 
         assert response.status_code == expected, response.json()
-        assert InsightsFunction.objects.get(id=function_id).script == LIVE_HOG
+        assert InsightsFunction.objects.get(id=function_id).script == LIVE_SCRIPT
 
     @parameterized.expand(
         [
@@ -218,7 +218,7 @@ class TestInsightsFunctionDrafts(DraftTestCase):
     )
     def test_publish_with_a_token_from_before_the_latest_edit_conflicts(self, _name: str, edit_draft: bool):
         function_id = self._create()
-        self._stage(function_id, {"script": EDITED_HOG})
+        self._stage(function_id, {"script": EDITED_SCRIPT})
         stale_token = self._preview_publish(function_id)["confirm_token"]
         if edit_draft:
             self._stage(function_id, {"script": "fetch(inputs.url, {'method': 'PATCH'});"})
@@ -228,22 +228,22 @@ class TestInsightsFunctionDrafts(DraftTestCase):
         response = self.client.post(self._url(function_id, "/publish"), {"confirm": True, "confirm_token": stale_token})
 
         assert response.status_code == status.HTTP_409_CONFLICT, response.json()
-        assert InsightsFunction.objects.get(id=function_id).script == LIVE_HOG
+        assert InsightsFunction.objects.get(id=function_id).script == LIVE_SCRIPT
 
     def test_publishing_a_disabled_function_skips_the_confirm_token(self):
         function_id = self._create()
-        self._stage(function_id, {"script": EDITED_HOG})
+        self._stage(function_id, {"script": EDITED_SCRIPT})
         self._live_edit(function_id, {"enabled": False})
 
         # Nothing is running, so there is no traffic to misroute and no receipt to insist on.
         response = self.client.post(self._url(function_id, "/publish"), {"confirm": True})
 
         assert response.status_code == status.HTTP_200_OK, response.json()
-        assert InsightsFunction.objects.get(id=function_id).script == EDITED_HOG
+        assert InsightsFunction.objects.get(id=function_id).script == EDITED_SCRIPT
 
     def test_enabling_with_a_draft_open_is_refused(self):
         function_id = self._create()
-        self._stage(function_id, {"script": EDITED_HOG})
+        self._stage(function_id, {"script": EDITED_SCRIPT})
         self._live_edit(function_id, {"enabled": False})
 
         response = self.client.patch(self._url(function_id), {"enabled": True})
@@ -253,7 +253,7 @@ class TestInsightsFunctionDrafts(DraftTestCase):
 
     def test_discard_draft_clears_the_draft_and_is_idempotent(self):
         function_id = self._create()
-        self._stage(function_id, {"script": EDITED_HOG})
+        self._stage(function_id, {"script": EDITED_SCRIPT})
 
         first = self.client.post(self._url(function_id, "/discard_draft"))
         second = self.client.post(self._url(function_id, "/discard_draft"))
@@ -263,10 +263,12 @@ class TestInsightsFunctionDrafts(DraftTestCase):
         function = InsightsFunction.objects.get(id=function_id)
         assert function.draft is None
         assert function.draft_encrypted_inputs is None
-        assert function.script == LIVE_HOG
+        assert function.script == LIVE_SCRIPT
         # The no-op second discard must not add audit noise.
         assert (
-            ActivityLog.objects.filter(scope="InsightsFunction", item_id=function_id, activity="draft_discarded").count()
+            ActivityLog.objects.filter(
+                scope="InsightsFunction", item_id=function_id, activity="draft_discarded"
+            ).count()
             == 1
         )
 
@@ -310,7 +312,7 @@ class TestInsightsFunctionDrafts(DraftTestCase):
 
     def test_enabling_with_a_draft_open_is_refused_for_coercible_booleans(self):
         function_id = self._create()
-        self._stage(function_id, {"script": EDITED_HOG})
+        self._stage(function_id, {"script": EDITED_SCRIPT})
         self._live_edit(function_id, {"enabled": False})
 
         # BooleanField coerces "true" to True, so the refusal must fire on the validated value, not
@@ -330,7 +332,7 @@ class TestInsightsFunctionDrafts(DraftTestCase):
     )
     def test_stale_base_updated_at_is_a_conflict(self, _name: str, agent_edit: bool):
         function_id = self._create()
-        self._stage(function_id, {"script": EDITED_HOG})
+        self._stage(function_id, {"script": EDITED_SCRIPT})
 
         payload = {"script": "fetch(inputs.url, {'method': 'PATCH'});", "base_updated_at": "2020-01-01T00:00:00Z"}
         response = (
@@ -343,7 +345,7 @@ class TestInsightsFunctionDrafts(DraftTestCase):
 
     def test_current_base_updated_at_is_accepted(self):
         function_id = self._create()
-        staged = self._stage(function_id, {"script": EDITED_HOG})
+        staged = self._stage(function_id, {"script": EDITED_SCRIPT})
 
         response = self._agent_patch(
             function_id,
@@ -353,7 +355,7 @@ class TestInsightsFunctionDrafts(DraftTestCase):
         assert response.status_code == status.HTTP_200_OK, response.json()
 
     def _test_invoke(self, function_id: str, payload: dict):
-        with patch("products.cdp.backend.api.insights_function.create_hog_invocation_test") as mock_invoke:
+        with patch("products.cdp.backend.api.insights_function.create_script_invocation_test") as mock_invoke:
             mock_invoke.return_value.status_code = 200
             mock_invoke.return_value.json.return_value = {"status": "success", "logs": []}
             response = self.client.post(self._url(function_id, "/invocations"), payload)
@@ -363,20 +365,20 @@ class TestInsightsFunctionDrafts(DraftTestCase):
         function_id = self._create()
         self._stage(
             function_id,
-            {"script": EDITED_HOG, "inputs": {"url": {"value": "https://example.com/live"}, "token": {"value": "new"}}},
+            {"script": EDITED_SCRIPT, "inputs": {"url": {"value": "https://example.com/live"}, "token": {"value": "new"}}},
         )
 
         response, mock_invoke = self._test_invoke(function_id, {"use_draft": True})
 
         assert response.status_code == status.HTTP_200_OK, response.json()
         configuration = mock_invoke.call_args.kwargs["payload"]["configuration"]
-        assert configuration["script"] == EDITED_HOG
+        assert configuration["script"] == EDITED_SCRIPT
         # The staged secret is what gets exercised, not the live one it will replace.
         assert configuration["inputs"]["token"]["value"] == "new"
 
     def test_invocations_use_draft_recovers_unstaged_secrets_from_live(self):
         function_id = self._create()
-        self._stage(function_id, {"script": EDITED_HOG})
+        self._stage(function_id, {"script": EDITED_SCRIPT})
 
         response, mock_invoke = self._test_invoke(function_id, {"use_draft": True})
 
@@ -414,14 +416,14 @@ class TestInsightsFunctionRevisions(DraftTestCase):
     def test_first_live_config_change_also_snapshots_the_outgoing_config(self):
         function_id = self._create()
 
-        self._live_edit(function_id, {"script": EDITED_HOG})
+        self._live_edit(function_id, {"script": EDITED_SCRIPT})
 
         revisions = list(self._revisions(function_id).order_by("version"))
         assert [revision.version for revision in revisions] == [1, 2]
         # Rollback to the state before the revision system saw this function must be possible.
-        assert revisions[0].content["script"] == LIVE_HOG
+        assert revisions[0].content["script"] == LIVE_SCRIPT
         assert revisions[0].created_by is None
-        assert revisions[1].content["script"] == EDITED_HOG
+        assert revisions[1].content["script"] == EDITED_SCRIPT
         assert revisions[1].created_by == self.user
 
     @parameterized.expand(
@@ -429,8 +431,8 @@ class TestInsightsFunctionRevisions(DraftTestCase):
             # `to_internal_value` re-injects inputs/filters and the serializer recompiles bytecode on
             # every save, so an unchanged config must still compare equal and stay unversioned.
             ("metadata_only", {"name": "Renamed"}, True),
-            ("config_resent_unchanged", {"script": LIVE_HOG, "name": "Renamed"}, True),
-            ("flag_off", {"script": EDITED_HOG}, False),
+            ("config_resent_unchanged", {"script": LIVE_SCRIPT, "name": "Renamed"}, True),
+            ("flag_off", {"script": EDITED_SCRIPT}, False),
         ]
     )
     def test_no_revision_is_written(self, _name: str, payload: dict, flag_on: bool):
@@ -456,7 +458,7 @@ class TestInsightsFunctionRevisions(DraftTestCase):
 
     def test_revisions_list_is_newest_first_and_omits_config(self):
         function_id = self._create()
-        self._live_edit(function_id, {"script": EDITED_HOG})
+        self._live_edit(function_id, {"script": EDITED_SCRIPT})
 
         response = self.client.get(self._url(function_id, "/revisions"))
 
@@ -467,12 +469,12 @@ class TestInsightsFunctionRevisions(DraftTestCase):
 
     def test_revision_detail_returns_config_without_secret_values(self):
         function_id = self._create()
-        self._live_edit(function_id, {"script": EDITED_HOG})
+        self._live_edit(function_id, {"script": EDITED_SCRIPT})
 
         response = self.client.get(self._url(function_id, "/revisions/1"))
 
         assert response.status_code == status.HTTP_200_OK, response.json()
-        assert response.json()["content"]["script"] == LIVE_HOG
+        assert response.json()["content"]["script"] == LIVE_SCRIPT
         assert "token" not in response.json()["content"]["inputs"]
 
     def test_unknown_revision_is_a_404(self):
@@ -484,19 +486,19 @@ class TestInsightsFunctionRevisions(DraftTestCase):
 
     def test_restore_stages_the_old_config_without_touching_the_live_one(self):
         function_id = self._create()
-        self._live_edit(function_id, {"script": EDITED_HOG})
+        self._live_edit(function_id, {"script": EDITED_SCRIPT})
 
         response = self.client.post(self._url(function_id, "/revisions/1/restore"))
 
         assert response.status_code == status.HTTP_200_OK, response.json()
         function = InsightsFunction.objects.get(id=function_id)
         assert function.draft is not None
-        assert function.draft["script"] == LIVE_HOG
-        assert function.script == EDITED_HOG
+        assert function.draft["script"] == LIVE_SCRIPT
+        assert function.script == EDITED_SCRIPT
 
     def test_restore_over_an_open_draft_needs_overwrite(self):
         function_id = self._create()
-        self._live_edit(function_id, {"script": EDITED_HOG})
+        self._live_edit(function_id, {"script": EDITED_SCRIPT})
         self._stage(function_id, {"script": "fetch(inputs.url, {'method': 'PATCH'});"})
 
         conflict = self.client.post(self._url(function_id, "/revisions/1/restore"))
@@ -506,7 +508,7 @@ class TestInsightsFunctionRevisions(DraftTestCase):
         assert forced.status_code == status.HTTP_200_OK, forced.json()
         restored_draft = InsightsFunction.objects.get(id=function_id).draft
         assert restored_draft is not None
-        assert restored_draft["script"] == LIVE_HOG
+        assert restored_draft["script"] == LIVE_SCRIPT
 
     @parameterized.expand(
         [

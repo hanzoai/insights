@@ -1,5 +1,10 @@
 # Insights Development Guide
 
+> **Read [LLM.md](LLM.md) too.** This file is the development guide; LLM.md is the accumulated
+> operational record — the traps, the measurements, and the reasons behind decisions that are
+> expensive to rediscover. Both are loaded via `CLAUDE.md`.
+
+
 ## Codebase Structure
 
 - Key entry points: `insights/api/__init__.py` (API URL routing skeleton; products register their own routes in `products/<name>/backend/routes.py` via `register_routes(routers)`), `insights/settings/web.py` (Django settings, INSTALLED_APPS), `products/` (product apps)
@@ -259,7 +264,7 @@ ALWAYS invoke the matching skill **before** writing or reviewing code in these a
 - `/sending-notifications` — adding notification support
 - `/writing-skills` — creating or updating skills in `.agents/skills/`
 - `/writing-evals` — adding or changing eval suites, cases, scorers, or seeders under `products/insights_ai/evals/` or `products/*/evals/`, touching the harness in `products/insights_ai/eval_harness/`, or running those evals
-- [`ee/hogai/eval/AGENTS.md`](ee/hogai/eval/AGENTS.md) — writing eval cases or fixture data by hand anywhere (not a skill, and not covered by `/writing-evals`): where that data may come from, and why anonymizing a real conversation does not make it publishable
+- [`products/insights_ai/evals/AGENTS.md`](products/insights_ai/evals/AGENTS.md) — writing eval cases or fixture data by hand anywhere (not a skill, and not covered by `/writing-evals`): where that data may come from, and why anonymizing a real conversation does not make it publishable
 - `/authoring-ci-workflows` — adding or editing any `.github/workflows` workflow, composite action, or reusable workflow
 - `/reviewing-personinsights-protocol` — any personinsights coordination-protocol change (leases, fencing, handoffs, supervisors, budgets, warming, changelog semantics), and any request for an exhaustive review of personinsights code
 - `/gating-production-deploys` — any workflow that builds and pushes a production image or dispatches a deploy

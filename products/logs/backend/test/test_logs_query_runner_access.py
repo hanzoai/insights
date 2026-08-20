@@ -80,7 +80,7 @@ class TestLogsQueryRunnerAccess(APIBaseTest):
 class TestLogsQueryBlockedOnGenericEndpoint(APIBaseTest):
     def test_generic_query_endpoint_rejects_logs_query(self):
         response = self.client.post(
-            f"/api/projects/{self.team.pk}/query/",
+            f"/v1/projects/{self.team.pk}/query/",
             data={
                 "query": {
                     "kind": "LogsQuery",

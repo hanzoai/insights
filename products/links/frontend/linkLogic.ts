@@ -16,7 +16,7 @@ import { Breadcrumb, ProjectTreeRef } from '~/types'
 
 import { linksLogic } from './linksLogic'
 
-export type AvailableDomain = 'phog.gg' | 'postho.gg' | 'script.gg' | 'custom'
+export type AvailableDomain = 'pscript.gg' | 'postho.gg' | 'script.gg' | 'custom'
 export type DomainDefinition = {
     label: string
     value: AvailableDomain
@@ -25,13 +25,13 @@ export type DomainDefinition = {
 }
 
 export const AVAILABLE_DOMAINS: DomainDefinition[] = [
-    { label: 'phog.gg', value: 'phog.gg' },
+    { label: 'pscript.gg', value: 'pscript.gg' },
     { label: 'postho.gg', value: 'postho.gg', soon: true },
     { label: 'script.gg', value: 'script.gg', soon: true },
     { label: 'Custom (BYOD)', value: 'custom', soon: true, paid: true },
 ]
 
-export const DEFAULT_SHORT_LINK_DOMAIN = 'phog.gg'
+export const DEFAULT_SHORT_LINK_DOMAIN = 'pscript.gg'
 export const NEW_LINK: Partial<LinkType> = {
     id: 'new',
     short_link_domain: DEFAULT_SHORT_LINK_DOMAIN,

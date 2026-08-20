@@ -228,7 +228,7 @@ class TestIdJagTokenEndpoint(APIBaseTest):
         # that aren't emails. Issuance was already keyed off the `email`
         # claim, but the resource-side authenticator was keying off the
         # userSub half of `sub` — which 401'd every request. Drive the whole
-        # flow end-to-end here: real /oauth/token → real /api/users/@me/.
+        # flow end-to-end here: real /oauth/token → real /v1/users/@me/.
         assertion = _make_id_jag(
             sub="auth0|opaque-id-abc123",
             scope="user:read",
@@ -238,7 +238,7 @@ class TestIdJagTokenEndpoint(APIBaseTest):
         self.assertEqual(issue_resp.status_code, status.HTTP_200_OK, issue_resp.content)
         access_token = issue_resp.json()["access_token"]
 
-        api_resp = self.client.get("/api/users/@me/", HTTP_AUTHORIZATION=f"Bearer {access_token}")
+        api_resp = self.client.get("/v1/users/@me/", HTTP_AUTHORIZATION=f"Bearer {access_token}")
         self.assertEqual(api_resp.status_code, status.HTTP_200_OK, api_resp.content)
         self.assertEqual(api_resp.json()["email"], "user@example.com")
 
@@ -625,7 +625,7 @@ class TestIdJagTokenEndpoint(APIBaseTest):
         self.assertEqual(issue_resp.status_code, status.HTTP_200_OK, issue_resp.content)
         access_token = issue_resp.json()["access_token"]
 
-        api_resp = self.client.get("/api/users/@me/", HTTP_AUTHORIZATION=f"Bearer {access_token}")
+        api_resp = self.client.get("/v1/users/@me/", HTTP_AUTHORIZATION=f"Bearer {access_token}")
         self.assertEqual(api_resp.status_code, status.HTTP_200_OK, api_resp.content)
         self.assertEqual(api_resp.json()["email"], "user@example.com")
 
@@ -829,7 +829,7 @@ class TestIDJagAccessTokenAuthentication(APIBaseTest):
         )
 
     def _call_authenticated(self, token: str) -> Any:
-        return self.client.get("/api/users/@me/", HTTP_AUTHORIZATION=f"Bearer {token}")
+        return self.client.get("/v1/users/@me/", HTTP_AUTHORIZATION=f"Bearer {token}")
 
     def test_valid_token_authenticates_user(self) -> None:
         token = self._mint_access_token(scope="user:read")
@@ -849,7 +849,7 @@ class TestIDJagAccessTokenAuthentication(APIBaseTest):
         self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_scope_claim_drives_permission(self) -> None:
-        # `user:read` is the scope needed for /api/users/@me/.
+        # `user:read` is the scope needed for /v1/users/@me/.
         ok = self._mint_access_token(scope="user:read")
         self.assertEqual(self._call_authenticated(ok).status_code, status.HTTP_200_OK)
 
@@ -982,13 +982,16 @@ class TestIDJagAccessTokenAuthentication(APIBaseTest):
         req.headers = {"authorization": f"Bearer {non_id_jag}"}
         self.assertIsNone(auth.authenticate(req))
 
-    def test_personal_api_key_prefix_passes_through(self) -> None:
+    def test_key_marks_pass_through(self) -> None:
         auth = IDJagAccessTokenAuthentication()
         from unittest.mock import Mock
 
-        for prefix in ("phx_abc", "pha_abc", "phs_abc"):
+        from insights.models.utils import KEY_MARKS
+
+        # Every mark belongs to a key backend, so none of them is an ID-JAG token.
+        for mark in KEY_MARKS.values():
             req = Mock()
-            req.headers = {"authorization": f"Bearer {prefix}"}
+            req.headers = {"authorization": f"Bearer {mark}abc"}
             self.assertIsNone(auth.authenticate(req))
 
     def test_no_authorization_header_passes_through(self) -> None:
@@ -1001,7 +1004,7 @@ class TestIDJagAccessTokenAuthentication(APIBaseTest):
 
     def test_routing_mixin_endpoint_authenticates_before_jwt_authentication(self) -> None:
         """Regression test: viewsets that inherit the routing mixin (e.g.
-        `/api/projects/@current/`) get a default authenticator chain that
+        `/v1/projects/@current/`) get a default authenticator chain that
         includes `JwtAuthentication` ahead of other token-based backends.
 
         `JwtAuthentication.decode_jwt` hard-codes HS256 + the JWT signing key and raises
@@ -1011,10 +1014,10 @@ class TestIDJagAccessTokenAuthentication(APIBaseTest):
         valid ID-JAG tokens get a 401 on every routing-mixin-based endpoint
         and never reach the resource server's scope check.
 
-        Hitting `/api/projects/@current/` with a `project:read` ID-JAG token
+        Hitting `/v1/projects/@current/` with a `project:read` ID-JAG token
         must return 200 — not 401.
         """
         token = self._mint_access_token(scope="project:read")
-        resp = self.client.get(f"/api/projects/@current/", HTTP_AUTHORIZATION=f"Bearer {token}")
+        resp = self.client.get(f"/v1/projects/@current/", HTTP_AUTHORIZATION=f"Bearer {token}")
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
         self.assertEqual(resp.json()["id"], self.team.id)

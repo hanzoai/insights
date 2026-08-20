@@ -260,7 +260,7 @@ CREATE TABLE insights.groups (
   is_deleted Bool,
   INDEX is_deleted_idx is_deleted TYPE minmax GRANULARITY 1
 ) ENGINE = ReplicatedReplacingMergeTree('/datastore/tables/noshard/insights.groups', '{replica}-{shard}', _timestamp) ORDER BY (team_id, group_type_index, group_key) SETTINGS index_granularity = 8192;
-CREATE TABLE insights.hog_invocation_results (
+CREATE TABLE insights.invocations (
   team_id Int64,
   function_kind LowCardinality(String),
   function_id String,
@@ -285,7 +285,7 @@ CREATE TABLE insights.hog_invocation_results (
   _timestamp DateTime,
   _offset UInt64,
   _partition UInt64
-) ENGINE = Distributed('aux', 'insights', 'hog_invocation_results_data');
+) ENGINE = Distributed('aux', 'insights', 'invocations_data');
 CREATE TABLE insights.ingestion_warnings_v2_distributed (
   team_id Int64,
   source LowCardinality(String),
@@ -1663,7 +1663,7 @@ CREATE TABLE insights.sharded_sessions (
   pageview_count SimpleAggregateFunction(sum, Int64),
   autocapture_count SimpleAggregateFunction(sum, Int64)
 ) ENGINE = ReplicatedAggregatingMergeTree('/datastore/tables/{shard}/insights.sessions', '{replica}') ORDER BY (toStartOfDay(min_timestamp), team_id, session_id) PARTITION BY toYYYYMM(min_timestamp) SETTINGS index_granularity = 512;
-CREATE TABLE insights.sharded_tophog (
+CREATE TABLE insights.sharded_topfn (
   timestamp DateTime64(6, 'UTC'),
   metric LowCardinality(String),
   type LowCardinality(String) DEFAULT 'sum',
@@ -1673,8 +1673,8 @@ CREATE TABLE insights.sharded_tophog (
   pipeline LowCardinality(String),
   lane LowCardinality(String),
   labels Map(LowCardinality(String), String)
-) ENGINE = ReplicatedMergeTree('/datastore/tables/{shard}/insights.tophog', '{replica}') ORDER BY (pipeline, lane, metric, timestamp, key) PARTITION BY toYYYYMMDD(timestamp) TTL toDate(timestamp) + toIntervalDay(30) SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1;
-CREATE TABLE insights.tophog (
+) ENGINE = ReplicatedMergeTree('/datastore/tables/{shard}/insights.topfn', '{replica}') ORDER BY (pipeline, lane, metric, timestamp, key) PARTITION BY toYYYYMMDD(timestamp) TTL toDate(timestamp) + toIntervalDay(30) SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1;
+CREATE TABLE insights.topfn (
   timestamp DateTime64(6, 'UTC'),
   metric LowCardinality(String),
   type LowCardinality(String) DEFAULT 'sum',
@@ -1684,7 +1684,7 @@ CREATE TABLE insights.tophog (
   pipeline LowCardinality(String),
   lane LowCardinality(String),
   labels Map(LowCardinality(String), String)
-) ENGINE = Distributed('insights', 'insights', 'sharded_tophog', cityHash64(toString(key)));
+) ENGINE = Distributed('insights', 'insights', 'sharded_topfn', cityHash64(toString(key)));
 CREATE TABLE insights.usage_report_events_preagg (
   date Date,
   team_id Int64,
@@ -2859,12 +2859,12 @@ AND
 AND
   ((pd._timestamp < {interval_end: DateTime64}) OR (p._timestamp < {interval_end: DateTime64}))
 ORDER BY _inserted_at ASC;
-CREATE OR REPLACE DICTIONARY insights.channel_definition_dict (`domain` String, `kind` String, `domain_type` Nullable(String), `type_if_paid` Nullable(String), `type_if_organic` Nullable(String)) PRIMARY KEY domain, kind SOURCE(DATASTORE(USER 'default' TABLE 'channel_definition')) LAYOUT(COMPLEX_KEY_HASHED()) LIFETIME(MIN 3000 MAX 3600);
-CREATE OR REPLACE DICTIONARY insights.exchange_rate_dict (`currency` String, `start_date` Date, `end_date` Nullable(Date), `rate` Decimal64(10)) PRIMARY KEY currency SOURCE(DATASTORE(USER 'default' QUERY 'SELECT currency, date AS start_date, leadInFrame(date::Nullable(Date), 1, NULL::Nullable(Date)) OVER w AS end_date, argMax(rate, version) AS rate FROM `insights`.`exchange_rate` GROUP BY date, currency WINDOW w AS ( PARTITION BY currency ORDER BY date ASC ROWS BETWEEN 1 FOLLOWING AND 1 FOLLOWING )')) LAYOUT(COMPLEX_KEY_RANGE_HASHED(RANGE_LOOKUP_STRATEGY 'max')) LIFETIME(MIN 3000 MAX 3600) RANGE(MIN start_date MAX end_date);
-CREATE OR REPLACE DICTIONARY insights.person_distinct_id_overrides_dict (`team_id` Int64, `distinct_id` String, `person_id` UUID) PRIMARY KEY team_id, distinct_id SOURCE(DATASTORE(USER 'default' QUERY 'SELECT team_id, distinct_id, argMax(person_id, version) AS person_id FROM insights.person_distinct_id_overrides GROUP BY team_id, distinct_id')) LAYOUT(COMPLEX_KEY_HASHED()) LIFETIME(MIN 3600 MAX 18000);
-CREATE OR REPLACE DICTIONARY insights.person_overrides_dict (`team_id` INT, `old_person_id` UUID, `override_person_id` UUID) PRIMARY KEY team_id, old_person_id SOURCE(DATASTORE(USER 'default' QUERY '\nSELECT\n    team_id,\n    old_person_id,\n    argMax(override_person_id, version)\nFROM\n    `insights`.`person_overrides` AS overrides\nGROUP BY\n    team_id,\n    old_person_id\n')) LAYOUT(COMPLEX_KEY_HASHED(PREALLOCATE 1)) LIFETIME(MIN 5 MAX 10);
-CREATE OR REPLACE DICTIONARY insights.web_bot_definition_dict (`regexp` String, `name` String, `category` String, `traffic_type` String, `operator` String) PRIMARY KEY regexp SOURCE(DATASTORE(USER 'default' DB 'insights' TABLE 'web_bot_definition')) LAYOUT(REGEXP_TREE()) LIFETIME(MIN 3000 MAX 3600);
-CREATE OR REPLACE DICTIONARY insights.web_pre_aggregated_teams_dict (`team_id` UInt64) PRIMARY KEY team_id SOURCE(DATASTORE(USER 'default' QUERY 'SELECT     team_id FROM     `insights`.`web_pre_aggregated_teams` FINAL WHERE version > 0')) LAYOUT(HASHED()) LIFETIME(MIN 3000 MAX 3600);
+CREATE OR REPLACE DICTIONARY insights.channel_definition_dict (`domain` String, `kind` String, `domain_type` Nullable(String), `type_if_paid` Nullable(String), `type_if_organic` Nullable(String)) PRIMARY KEY domain, kind SOURCE(CLICKHOUSE(USER 'default' TABLE 'channel_definition')) LAYOUT(COMPLEX_KEY_HASHED()) LIFETIME(MIN 3000 MAX 3600);
+CREATE OR REPLACE DICTIONARY insights.exchange_rate_dict (`currency` String, `start_date` Date, `end_date` Nullable(Date), `rate` Decimal64(10)) PRIMARY KEY currency SOURCE(CLICKHOUSE(USER 'default' QUERY 'SELECT currency, date AS start_date, leadInFrame(date::Nullable(Date), 1, NULL::Nullable(Date)) OVER w AS end_date, argMax(rate, version) AS rate FROM `insights`.`exchange_rate` GROUP BY date, currency WINDOW w AS ( PARTITION BY currency ORDER BY date ASC ROWS BETWEEN 1 FOLLOWING AND 1 FOLLOWING )')) LAYOUT(COMPLEX_KEY_RANGE_HASHED(RANGE_LOOKUP_STRATEGY 'max')) LIFETIME(MIN 3000 MAX 3600) RANGE(MIN start_date MAX end_date);
+CREATE OR REPLACE DICTIONARY insights.person_distinct_id_overrides_dict (`team_id` Int64, `distinct_id` String, `person_id` UUID) PRIMARY KEY team_id, distinct_id SOURCE(CLICKHOUSE(USER 'default' QUERY 'SELECT team_id, distinct_id, argMax(person_id, version) AS person_id FROM insights.person_distinct_id_overrides GROUP BY team_id, distinct_id')) LAYOUT(COMPLEX_KEY_HASHED()) LIFETIME(MIN 3600 MAX 18000);
+CREATE OR REPLACE DICTIONARY insights.person_overrides_dict (`team_id` INT, `old_person_id` UUID, `override_person_id` UUID) PRIMARY KEY team_id, old_person_id SOURCE(CLICKHOUSE(USER 'default' QUERY '\nSELECT\n    team_id,\n    old_person_id,\n    argMax(override_person_id, version)\nFROM\n    `insights`.`person_overrides` AS overrides\nGROUP BY\n    team_id,\n    old_person_id\n')) LAYOUT(COMPLEX_KEY_HASHED(PREALLOCATE 1)) LIFETIME(MIN 5 MAX 10);
+CREATE OR REPLACE DICTIONARY insights.web_bot_definition_dict (`regexp` String, `name` String, `category` String, `traffic_type` String, `operator` String) PRIMARY KEY regexp SOURCE(CLICKHOUSE(USER 'default' DB 'insights' TABLE 'web_bot_definition')) LAYOUT(REGEXP_TREE()) LIFETIME(MIN 3000 MAX 3600);
+CREATE OR REPLACE DICTIONARY insights.web_pre_aggregated_teams_dict (`team_id` UInt64) PRIMARY KEY team_id SOURCE(CLICKHOUSE(USER 'default' QUERY 'SELECT     team_id FROM     `insights`.`web_pre_aggregated_teams` FINAL WHERE version > 0')) LAYOUT(HASHED()) LIFETIME(MIN 3000 MAX 3600);
 CREATE TABLE insights.app_metrics (
   team_id Int64,
   timestamp DateTime64(6, 'UTC'),

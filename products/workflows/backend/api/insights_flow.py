@@ -33,13 +33,13 @@ from insights.schema import ProductKey
 
 from insights.api.app_metrics2 import AppMetricsMixin, fetch_app_metric_totals_by_source
 from insights.api.documentation import _FallbackSerializer
-from insights.api.hog_invocation_rerun import HogInvocationRerunRequestSerializer, HogInvocationRerunResponseSerializer
-from insights.api.hog_invocation_results import (
-    HogInvocationResultDetailSerializer,
-    HogInvocationResultSerializer,
-    HogInvocationResultsRequestSerializer,
-    fetch_hog_invocation_result,
-    fetch_hog_invocation_results,
+from insights.api.script_invocation_rerun import ScriptInvocationRerunRequestSerializer, ScriptInvocationRerunResponseSerializer
+from insights.api.script_invocation_results import (
+    ScriptInvocationResultDetailSerializer,
+    ScriptInvocationResultSerializer,
+    ScriptInvocationResultsRequestSerializer,
+    fetch_script_invocation_result,
+    fetch_invocations,
     tag_invocation_results_query,
 )
 from insights.api.log_entries import LogEntryMixin
@@ -62,7 +62,7 @@ from insights.plugins.plugin_server_api import (
     create_insights_flow_invocation_test,
     create_insights_flow_scheduled_invocation,
     get_insights_flow_in_flight_count,
-    rerun_hog_invocations,
+    rerun_script_invocations,
 )
 from insights.rbac.access_control_api_mixin import AccessControlViewSetMixin
 from insights.rbac.user_access_control import UserAccessControl, UserAccessControlSerializerMixin
@@ -129,7 +129,7 @@ from products.workflows.backend.services.timing_reschedule import (
 )
 from products.workflows.backend.services.wait_clock_conditions import find_clock_function
 from products.workflows.backend.tasks.insights_flows import reschedule_insights_flow_timing
-from products.workflows.backend.utils.batch_trigger_limit import get_hogflow_batch_trigger_limit
+from products.workflows.backend.utils.batch_trigger_limit import get_flow_batch_trigger_limit
 from products.workflows.backend.utils.rrule_utils import compute_next_occurrences, validate_rrule
 
 logger = structlog.get_logger(__name__)
@@ -1746,7 +1746,7 @@ class InsightsFlowMinimalSerializer(UserAccessControlSerializerMixin, serializer
         # `actions`/`draft` come back from super() by reference (JSONField doesn't copy), so masking in
         # place would rewrite the live model instance. Deepcopy first to keep serialization side-effect
         # free. The template cache lives on the context so a list render dedupes lookups across flows.
-        template_cache: TemplateCache = self.context.setdefault("_hogflow_template_cache", {})
+        template_cache: TemplateCache = self.context.setdefault("_flow_template_cache", {})
         if isinstance(data.get("actions"), list):
             data["actions"] = mask_secret_action_inputs(deepcopy(data["actions"]), live_secrets, template_cache)
         # `trigger` is a separately-serialized field derived from the trigger action. Mask it from the
@@ -2561,7 +2561,7 @@ class DraftExistsError(exceptions.APIException):
 # and it signs the exact draft it previewed — so a valid token proves the caller saw the impact
 # summary for the draft being published. Short max-age keeps the previewed counts fresh.
 PUBLISH_CONFIRM_TOKEN_MAX_AGE = timedelta(minutes=15)
-_PUBLISH_CONFIRM_SALT = "hogflow-publish"
+_PUBLISH_CONFIRM_SALT = "flow-publish"
 
 
 def _publish_confirm_value(insights_flow: InsightsFlow) -> str:
@@ -2577,7 +2577,7 @@ def mint_publish_confirm_token(insights_flow: InsightsFlow) -> str:
 # this token, and it signs the exact audience filters it sized - so a valid token proves the
 # caller saw the recipient count for the filters being dispatched. Short max-age keeps it fresh.
 AUDIENCE_CONFIRM_TOKEN_MAX_AGE = timedelta(minutes=15)
-_AUDIENCE_CONFIRM_SALT = "hogflow-batch-audience"
+_AUDIENCE_CONFIRM_SALT = "flow-batch-audience"
 
 
 def _audience_confirm_value(
@@ -2766,8 +2766,8 @@ class InsightsFlowViewSet(
         return request.headers.get("x-insights-client") == "mcp"
 
     @extend_schema(
-        request=HogInvocationRerunRequestSerializer,
-        responses={200: HogInvocationRerunResponseSerializer, 400: HogInvocationRerunResponseSerializer},
+        request=ScriptInvocationRerunRequestSerializer,
+        responses={200: ScriptInvocationRerunResponseSerializer, 400: ScriptInvocationRerunResponseSerializer},
     )
     @action(detail=True, methods=["POST"])
     def rerun(self, request: Request, *args, **kwargs) -> Response:
@@ -2784,7 +2784,7 @@ class InsightsFlowViewSet(
         """
         insights_flow = self.get_object()
 
-        serializer = HogInvocationRerunRequestSerializer(data=request.data)
+        serializer = ScriptInvocationRerunRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         # `serializer.data` runs `to_representation`, which converts the
@@ -2792,7 +2792,7 @@ class InsightsFlowViewSet(
         # ISO-8601 strings — `requests.post(json=...)` can't serialize raw
         # `datetime` objects, so passing `validated_data` would 500 every
         # filter-mode rerun before the request even left Django.
-        res = rerun_hog_invocations(
+        res = rerun_script_invocations(
             team_id=self.team_id,
             function_kind="insights_flow",
             function_id=str(insights_flow.id),
@@ -3603,7 +3603,7 @@ class InsightsFlowViewSet(
                     {
                         "affected": get_account_audience_count(self.team, filters),
                         "total": get_account_audience_count(self.team, {"audience_type": "accounts"}),
-                        "limit": get_hogflow_batch_trigger_limit(self.team_id),
+                        "limit": get_flow_batch_trigger_limit(self.team_id),
                         "dedupe_key": None,
                         "confirm_token": mint_audience_confirm_token(self.team_id, filters, None, None),
                     }
@@ -3632,7 +3632,7 @@ class InsightsFlowViewSet(
                 {
                     "affected": blast_radius.affected,
                     "total": blast_radius.total,
-                    "limit": get_hogflow_batch_trigger_limit(self.team_id),
+                    "limit": get_flow_batch_trigger_limit(self.team_id),
                     "dedupe_key": applied_dedupe_key,
                     "confirm_token": mint_audience_confirm_token(
                         self.team_id, filters, group_type_index, applied_dedupe_key
@@ -3643,15 +3643,15 @@ class InsightsFlowViewSet(
 
     @extend_schema(
         operation_id="insights_flows_invocation_results_retrieve",
-        parameters=[HogInvocationResultsRequestSerializer],
-        responses=HogInvocationResultSerializer(many=True),
+        parameters=[ScriptInvocationResultsRequestSerializer],
+        responses=ScriptInvocationResultSerializer(many=True),
     )
     @action(detail=True, methods=["GET"], pagination_class=None, filter_backends=[])
     def invocation_results(self, request: Request, *args, **kwargs):
         obj = self.get_object()
         tag_invocation_results_query(self.function_kind)
 
-        param_serializer = HogInvocationResultsRequestSerializer(data=request.query_params)
+        param_serializer = ScriptInvocationResultsRequestSerializer(data=request.query_params)
         param_serializer.is_valid(raise_exception=True)
         params = param_serializer.validated_data
 
@@ -3662,7 +3662,7 @@ class InsightsFlowViewSet(
         if params.get("before"):
             before_date, _, _ = relative_date_parse_with_delta_mapping(params["before"], self.team.timezone_info)
 
-        data = fetch_hog_invocation_results(
+        data = fetch_invocations(
             team_id=self.team_id,
             function_kind=self.function_kind,
             function_id=str(obj.id),
@@ -3672,12 +3672,12 @@ class InsightsFlowViewSet(
             after=after_date,
             before=before_date,
         )
-        return Response(HogInvocationResultSerializer(data, many=True).data)
+        return Response(ScriptInvocationResultSerializer(data, many=True).data)
 
     @extend_schema(
         operation_id="insights_flows_invocation_result_retrieve",
         parameters=[OpenApiParameter("invocation_id", str, OpenApiParameter.PATH)],
-        responses=HogInvocationResultDetailSerializer,
+        responses=ScriptInvocationResultDetailSerializer,
     )
     @action(
         detail=True,
@@ -3689,7 +3689,7 @@ class InsightsFlowViewSet(
         obj = self.get_object()
         tag_invocation_results_query(self.function_kind)
 
-        data = fetch_hog_invocation_result(
+        data = fetch_script_invocation_result(
             team_id=self.team_id,
             function_kind=self.function_kind,
             function_id=str(obj.id),
@@ -3697,7 +3697,7 @@ class InsightsFlowViewSet(
         )
         if data is None:
             raise exceptions.NotFound("Invocation not found.")
-        return Response(HogInvocationResultDetailSerializer(data).data)
+        return Response(ScriptInvocationResultDetailSerializer(data).data)
 
     @extend_schema(
         operation_id="insights_flows_assets_retrieve",
@@ -4201,7 +4201,7 @@ class InternalInsightsFlowViewSet(TeamAndOrgViewSetMixin, LogEntryMixin, AppMetr
                     {
                         "affected": result.affected,
                         "total": result.total,
-                        "limit": get_hogflow_batch_trigger_limit(team.id),
+                        "limit": get_flow_batch_trigger_limit(team.id),
                         "dedupe_key": None,
                     }
                 ).data

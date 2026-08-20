@@ -15,7 +15,7 @@ proto definition, code generation, Rust implementation, and client updates.
 
 ## Before you start: eligibility check
 
-Personhog serves person, distinct ID, group, group type mapping, cohort membership, and feature flag hash key override data.
+personinsights serves person, distinct ID, group, group type mapping, cohort membership, and feature flag hash key override data.
 If the data being accessed doesn't live in one of these tables, this RPC doesn't belong in personinsights:
 
 | Table                                | Data category | Routing                                                      |
@@ -95,7 +95,7 @@ cd nodejs && pnpm run generate:personinsights-proto
 Then update:
 
 - `nodejs/src/common/personinsights/groups.ts` or `persons.ts` — add a wrapper method to the
-  matching operations class (`PersonHogGroupOperations` / `PersonHogPersonOperations`),
+  matching operations class (`PersonGroupOperations` / `PersonPersonOperations`),
   following the pattern of existing methods. `client.ts` only constructs and exposes
   these operation objects; it holds no RPC wrappers itself.
 - `nodejs/src/common/personinsights/client.test.ts` — add a default stub to `SERVICE_DEFAULTS` for the new RPC

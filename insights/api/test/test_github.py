@@ -206,7 +206,7 @@ class TestSecretAlertEndpoint(APIBaseTest):
         # Valid test payload (uses project secret type)
         self.valid_payload = [
             {
-                "token": "phx_test_token_123",
+                "token": "sk-test_token_123",
                 "type": GITHUB_TYPE_FOR_SECURE_API_KEY,
                 "url": "https://github.com/insights/insights/blob/master/example.py",
                 "source": "github",
@@ -232,7 +232,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
         mock_verify.return_value = None  # Signature verification passes
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(self.valid_payload),
             content_type="application/json",
             headers={"github-public-key-identifier": "test_kid", "github-public-key-signature": "test_signature"},
@@ -252,7 +252,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
     def test_secret_alert_missing_headers(self):
         """Test that missing headers are rejected."""
         response = self.client.post(
-            "/api/alerts/github", data=json.dumps(self.valid_payload), content_type="application/json"
+            "/v1/alerts/github", data=json.dumps(self.valid_payload), content_type="application/json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -266,7 +266,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
         mock_verify.side_effect = SignatureVerificationError("Invalid signature")
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(self.valid_payload),
             content_type="application/json",
             headers={"github-public-key-identifier": "test_kid", "github-public-key-signature": "invalid_signature"},
@@ -285,7 +285,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
         # This test doesn't mock verify_github_signature, so it actually tests the full flow
         # The signature will fail, but we're testing that we don't get RawPostDataException
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(self.valid_payload),
             content_type="application/json",
             headers={"github-public-key-identifier": "test_kid", "github-public-key-signature": "invalid_signature"},
@@ -300,7 +300,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
         """Test that the endpoint accepts application/json content type (not 415 error)."""
         # Test without signature headers first to verify content type is accepted
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(self.valid_payload),
             content_type="application/json",
         )
@@ -330,7 +330,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
 
         # Send alert with the token
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -369,11 +369,11 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
 
         # Send alert with a non-existent token
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
-                        "token": "phx_nonexistent_token_12345678901234567890",
+                        "token": "sk-nonexistent_token_12345678901234567890",
                         "type": GITHUB_TYPE_FOR_PERSONAL_API_KEY,
                         "url": "https://github.com/test/repo/blob/main/config.py",
                         "source": "github",
@@ -408,7 +408,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
 
         # Send alert with the token
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -452,7 +452,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
 
         # Send alert with the token
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -480,13 +480,13 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
         mock_verify.return_value = None
 
         # Set up a secret token on the team
-        token = "phx_test_secret_token_1234567890"
+        token = "sk-test_secret_token_1234567890"
         self.team.secret_api_token = token
         self.team.save()
 
         # Send alert with the token
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -521,14 +521,14 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
         mock_verify.return_value = None
 
         # Set up a backup secret token on the team
-        token = "phx_test_backup_secret_token_123"
-        self.team.secret_api_token = "phx_different_primary_token"
+        token = "sk-test_backup_secret_token_123"
+        self.team.secret_api_token = "sk-different_primary_token"
         self.team.secret_api_token_backup = token
         self.team.save()
 
         # Send alert with the backup token
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -555,7 +555,7 @@ dYtHUlWNMx0y6YwVG8nlBiJk2e0n+zpzs2WwszrnC7wfCqgU6rU3TkDvBQ==
 class TestProjectSecretAPIKeySecretAlert(APIBaseTest):
     def _post_alert(self, tokens: list[str]):
         return self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -606,7 +606,7 @@ class TestProjectSecretAPIKeySecretAlert(APIBaseTest):
     @patch("insights.api.project_secret_api_key.send_project_secret_api_key_exposed")
     def test_legacy_team_secret_token_is_not_rolled(self, mock_psak_exposed, mock_ff_exposed, mock_verify):
         mock_verify.return_value = None
-        token = "phs_legacy_team_secret_token_123"
+        token = "sk-legacy_team_secret_token_123"
         self.team.secret_api_token = token
         self.team.save()
 
@@ -639,7 +639,7 @@ class TestProjectSecretAPIKeySecretAlert(APIBaseTest):
     def test_mixed_batch_labels_each_token_independently(self, mock_psak_exposed, mock_ff_exposed, mock_verify):
         mock_verify.return_value = None
         _, psak_value = create_project_secret_api_key(team=self.team, created_by=self.user)
-        legacy_token = "phs_legacy_team_secret_token_123"
+        legacy_token = "sk-legacy_team_secret_token_123"
         self.team.secret_api_token = legacy_token
         self.team.save()
 
@@ -710,12 +710,12 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
         """Verify no HTTP call to EU when all results are true_positive."""
         mock_verify.return_value = None
 
-        token = "phx_test_secret_token_1234567890"
+        token = "sk-test_secret_token_1234567890"
         self.team.secret_api_token = token
         self.team.save()
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -742,7 +742,7 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
         mock_verify.return_value = None
         mock_relay.return_value = None
 
-        token = "phx_unknown_token_1234567890"
+        token = "sk-unknown_token_1234567890"
         payload = [
             {
                 "token": token,
@@ -753,7 +753,7 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
         ]
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(payload),
             content_type="application/json",
             headers={"github-public-key-identifier": "test_kid", "github-public-key-signature": "test_sig"},
@@ -773,7 +773,7 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
         """US returns false_positive, EU returns true_positive → final is true_positive."""
         mock_verify.return_value = None
 
-        token = "phx_eu_key_1234567890"
+        token = "sk-eu_key_1234567890"
         token_hash = sha256(token.encode("utf-8")).hexdigest()
 
         mock_relay.return_value = [
@@ -781,7 +781,7 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
         ]
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -807,10 +807,10 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
         mock_verify.return_value = None
         mock_relay.return_value = None
 
-        token = "phx_unknown_token_1234567890"
+        token = "sk-unknown_token_1234567890"
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -836,10 +836,10 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
         """Verify no call when GITHUB_SECRET_ALERT_RELAY_URL is None."""
         mock_verify.return_value = None
 
-        token = "phx_unknown_token_1234567890"
+        token = "sk-unknown_token_1234567890"
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -873,12 +873,12 @@ class TestSecretAlertRegionTracking(APIBaseTest):
         mock_verify.return_value = None
         mock_get_region.return_value = "US"
 
-        token = "phx_test_secret_token_for_region"
+        token = "sk-test_secret_token_for_region"
         self.team.secret_api_token = token
         self.team.save()
 
         self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -909,7 +909,7 @@ class TestSecretAlertRegionTracking(APIBaseTest):
         mock_verify.return_value = None
         mock_get_region.return_value = "US"
 
-        token = "phx_eu_only_key_1234567890"
+        token = "sk-eu_only_key_1234567890"
         token_hash = sha256(token.encode("utf-8")).hexdigest()
 
         mock_relay.return_value = [
@@ -917,7 +917,7 @@ class TestSecretAlertRegionTracking(APIBaseTest):
         ]
 
         self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -947,10 +947,10 @@ class TestSecretAlertRegionTracking(APIBaseTest):
         mock_verify.return_value = None
         mock_relay.return_value = None
 
-        token = "phx_nonexistent_token_1234567890"
+        token = "sk-nonexistent_token_1234567890"
 
         self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -992,7 +992,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         mock_verify.return_value = None
 
         oauth_app = self._create_oauth_app()
-        token = "pha_test_access_token_github_alert_123"
+        token = "at-test_access_token_github_alert_123"
         access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=oauth_app,
@@ -1003,7 +1003,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         access_token_id = access_token.id
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -1037,7 +1037,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         mock_verify.return_value = None
 
         oauth_app = self._create_oauth_app()
-        token = "phr_test_refresh_token_github_alert_123"
+        token = "rt-test_refresh_token_github_alert_123"
         refresh_token = OAuthRefreshToken.objects.create(
             user=self.user,
             application=oauth_app,
@@ -1045,7 +1045,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         )
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -1079,11 +1079,11 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         mock_verify.return_value = None
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
-                        "token": "pha_nonexistent_access_token_12345678901234567890",
+                        "token": "at-nonexistent_access_token_12345678901234567890",
                         "type": GITHUB_TYPE_FOR_OAUTH_ACCESS_TOKEN,
                         "url": "https://github.com/test/repo/blob/main/config.py",
                         "source": "github",
@@ -1104,11 +1104,11 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         mock_verify.return_value = None
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
-                        "token": "phr_nonexistent_refresh_token_12345678901234567890",
+                        "token": "rt-nonexistent_refresh_token_12345678901234567890",
                         "type": GITHUB_TYPE_FOR_OAUTH_REFRESH_TOKEN,
                         "url": "https://github.com/test/repo/blob/main/config.py",
                         "source": "github",
@@ -1134,13 +1134,13 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         refresh_token = OAuthRefreshToken.objects.create(
             user=self.user,
             application=oauth_app,
-            token="phr_related_refresh_token_123",
+            token="rt-related_refresh_token_123",
         )
 
         access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=oauth_app,
-            token="pha_test_access_with_refresh_123",
+            token="at-test_access_with_refresh_123",
             expires=timezone.now() + timedelta(hours=1),
             scope="openid profile",
             source_refresh_token=refresh_token,
@@ -1160,11 +1160,11 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         grant_id = grant.id
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
-                        "token": "pha_test_access_with_refresh_123",
+                        "token": "at-test_access_with_refresh_123",
                         "type": GITHUB_TYPE_FOR_OAUTH_ACCESS_TOKEN,
                         "url": "https://github.com/test/repo/blob/main/secrets.txt",
                         "source": "github",
@@ -1196,13 +1196,13 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         refresh_token = OAuthRefreshToken.objects.create(
             user=self.user,
             application=oauth_app,
-            token="phr_leaked_refresh_token_456",
+            token="rt-leaked_refresh_token_456",
         )
 
         access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=oauth_app,
-            token="pha_related_access_token_456",
+            token="at-related_access_token_456",
             expires=timezone.now() + timedelta(hours=1),
             scope="openid profile",
             source_refresh_token=refresh_token,
@@ -1222,11 +1222,11 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         grant_id = grant.id
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
-                        "token": "phr_leaked_refresh_token_456",
+                        "token": "rt-leaked_refresh_token_456",
                         "type": GITHUB_TYPE_FOR_OAUTH_REFRESH_TOKEN,
                         "url": "https://github.com/test/repo/blob/main/secrets.txt",
                         "source": "github",
@@ -1253,7 +1253,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         mock_verify.return_value = None
 
         oauth_app = self._create_oauth_app()
-        token = "phr_already_revoked_token_123"
+        token = "rt-already_revoked_token_123"
         OAuthRefreshToken.objects.create(
             user=self.user,
             application=oauth_app,
@@ -1262,7 +1262,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         )
 
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
@@ -1294,7 +1294,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=oauth_app,
-            token="pha_initial_access_token_no_source",
+            token="at-initial_access_token_no_source",
             expires=timezone.now() + timedelta(hours=1),
             scope="openid profile",
             source_refresh_token=None,  # Initial token has no source_refresh_token
@@ -1305,7 +1305,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         refresh_token = OAuthRefreshToken.objects.create(
             user=self.user,
             application=oauth_app,
-            token="phr_paired_refresh_no_link",
+            token="rt-paired_refresh_no_link",
             access_token=access_token,
         )
 
@@ -1324,11 +1324,11 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
 
         # Leak the access token
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
-                        "token": "pha_initial_access_token_no_source",
+                        "token": "at-initial_access_token_no_source",
                         "type": GITHUB_TYPE_FOR_OAUTH_ACCESS_TOKEN,
                         "url": "https://github.com/test/repo/blob/main/secrets.txt",
                         "source": "github",
@@ -1365,7 +1365,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         access_token = OAuthAccessToken.objects.create(
             user=self.user,
             application=oauth_app,
-            token="pha_initial_access_for_refresh_leak",
+            token="at-initial_access_for_refresh_leak",
             expires=timezone.now() + timedelta(hours=1),
             scope="openid profile",
             source_refresh_token=None,
@@ -1376,7 +1376,7 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
         refresh_token = OAuthRefreshToken.objects.create(
             user=self.user,
             application=oauth_app,
-            token="phr_initial_refresh_to_leak",
+            token="rt-initial_refresh_to_leak",
             access_token=access_token,
         )
 
@@ -1395,11 +1395,11 @@ class TestOAuthTokenSecretAlert(APIBaseTest):
 
         # Leak the refresh token
         response = self.client.post(
-            "/api/alerts/github",
+            "/v1/alerts/github",
             data=json.dumps(
                 [
                     {
-                        "token": "phr_initial_refresh_to_leak",
+                        "token": "rt-initial_refresh_to_leak",
                         "type": GITHUB_TYPE_FOR_OAUTH_REFRESH_TOKEN,
                         "url": "https://github.com/test/repo/blob/main/secrets.txt",
                         "source": "github",

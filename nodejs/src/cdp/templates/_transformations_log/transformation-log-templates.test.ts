@@ -6,7 +6,7 @@ import {
     executeLogTransformation,
 } from '~/logs/transformations/script-log-exec'
 
-import { compileHog } from '../compiler'
+import { compileScript } from '../compiler'
 import { template as logDefaultTemplate } from './default/default.template'
 import { template as logDropBySeverityTemplate } from './drop-by-severity/drop-by-severity.template'
 import { template as logPiiScrubTemplate } from './pii-scrub/pii-scrub.template'
@@ -40,7 +40,7 @@ const run = async (
     record: LogRecord,
     inputs: Record<string, unknown> = {}
 ): Promise<{ outcome: LogTransformationOutcome; record: LogRecord }> => {
-    const bytecode = await compileHog(code)
+    const bytecode = await compileScript(code)
     const globals = buildLogRecordGlobals(record, PROJECT, inputs)
     const outcome = executeLogTransformation(bytecode, record, globals, {})
     return { outcome, record }

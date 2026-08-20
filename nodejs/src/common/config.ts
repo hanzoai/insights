@@ -32,10 +32,10 @@ export enum PluginServerMode {
     cdp_internal_events = 'cdp-internal-events',
     cdp_cyclotron_worker = 'cdp-cyclotron-worker',
     cdp_precalculated_filters = 'cdp-precalculated-filters',
-    cdp_hogflow_subscription_matcher = 'cdp-hogflow-subscription-matcher',
+    cdp_flow_subscription_matcher = 'cdp-flow-subscription-matcher',
     cdp_cohort_membership = 'cdp-cohort-membership',
-    cdp_cyclotron_worker_hogflow = 'cdp-cyclotron-worker-hogflow',
-    cdp_cyclotron_worker_hogflow_legacy_pg = 'cdp-cyclotron-worker-hogflow-legacy-pg',
+    cdp_cyclotron_worker_flow = 'cdp-cyclotron-worker-flow',
+    cdp_cyclotron_worker_flow_legacy_pg = 'cdp-cyclotron-worker-flow-legacy-pg',
     cdp_cyclotron_worker_email = 'cdp-cyclotron-worker-email',
     cdp_cyclotron_worker_email_legacy_pg = 'cdp-cyclotron-worker-email-legacy-pg',
     cdp_api = 'cdp-api',
@@ -50,7 +50,7 @@ export enum PluginServerMode {
     recording_api = 'recording-api',
     ingestion_v2_combined = 'ingestion-v2-combined',
     ingestion_traces = 'ingestion-traces',
-    cdp_hogflow_scheduler = 'cdp-hogflow-scheduler',
+    cdp_flow_scheduler = 'cdp-flow-scheduler',
     ingestion_api = 'ingestion-api',
 }
 
@@ -95,7 +95,7 @@ export type CommonConfig = BaseServerConfig & {
     POSTGRES_BEHAVIORAL_COHORTS_USER: string
     POSTGRES_BEHAVIORAL_COHORTS_PASSWORD: string
 
-    // PersonHog gRPC
+    // PersonFn gRPC
     PERSONFN_ENABLED: boolean
     PERSONFN_ADDR: string
     PERSONFN_GROUPS_ROLLOUT_PERCENTAGE: number
@@ -171,9 +171,9 @@ export type CommonConfig = BaseServerConfig & {
     LAZY_LOADER_DEFAULT_BUFFER_MS: number
     LAZY_LOADER_MAX_SIZE: number
     INTERNAL_API_BASE_URL: string
-    HOGFLOW_SCHEDULER_POLL_INTERVAL_MS: number
-    HOGFLOW_SCHEDULER_MAX_POLL_INTERVAL_MS: number
-    HOGFLOW_SCHEDULER_HEALTH_TIMEOUT_MS: number
+    FLOW_SCHEDULER_POLL_INTERVAL_MS: number
+    FLOW_SCHEDULER_MAX_POLL_INTERVAL_MS: number
+    FLOW_SCHEDULER_HEALTH_TIMEOUT_MS: number
     EXTERNAL_REQUEST_TIMEOUT_MS: number
     EXTERNAL_REQUEST_CONNECT_TIMEOUT_MS: number
     EXTERNAL_REQUEST_KEEP_ALIVE_TIMEOUT_MS: number
@@ -268,7 +268,7 @@ export function getDefaultCommonConfig(): CommonConfig {
         POSTGRES_BEHAVIORAL_COHORTS_USER: 'postgres',
         POSTGRES_BEHAVIORAL_COHORTS_PASSWORD: '',
 
-        // PersonHog gRPC
+        // PersonFn gRPC
         PERSONFN_ENABLED: false,
         PERSONFN_ADDR: '',
         PERSONFN_GROUPS_ROLLOUT_PERCENTAGE: 0,
@@ -348,9 +348,9 @@ export function getDefaultCommonConfig(): CommonConfig {
             : 'http://localhost:8000',
         INTERNAL_API_SECRET: isProdEnv() ? '' : LOCAL_DEV_INTERNAL_API_SECRET,
         INTERNAL_API_SECRET_FALLBACKS: '',
-        HOGFLOW_SCHEDULER_POLL_INTERVAL_MS: 60_000,
-        HOGFLOW_SCHEDULER_MAX_POLL_INTERVAL_MS: 5 * 60_000,
-        HOGFLOW_SCHEDULER_HEALTH_TIMEOUT_MS: 10 * 60_000,
+        FLOW_SCHEDULER_POLL_INTERVAL_MS: 60_000,
+        FLOW_SCHEDULER_MAX_POLL_INTERVAL_MS: 5 * 60_000,
+        FLOW_SCHEDULER_HEALTH_TIMEOUT_MS: 10 * 60_000,
         EXTERNAL_REQUEST_TIMEOUT_MS: 3000,
         EXTERNAL_REQUEST_CONNECT_TIMEOUT_MS: 3000,
         EXTERNAL_REQUEST_KEEP_ALIVE_TIMEOUT_MS: 10000,

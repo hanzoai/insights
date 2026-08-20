@@ -1568,8 +1568,8 @@ export interface PaginatedTaskDetailDTOListApi {
  * * `signal_report` - Signal Report
  * * `signals_scout` - Signals Scout
  * * `support_reply` - Support Reply
- * * `hogdesk` - HogDesk
- * * `review_hog` - ReviewHog
+ * * `desk` - Desk
+ * * `review` - Review
  * * `image_builder` - Image Builder
  * * `loop` - Loop
  * * `mcp_analytics` - MCP Analytics
@@ -1590,8 +1590,8 @@ export const OriginProductEnumApi = {
     SignalReport: 'signal_report',
     SignalsScout: 'signals_scout',
     SupportReply: 'support_reply',
-    Hogdesk: 'hogdesk',
-    ReviewHog: 'review_hog',
+    Desk: 'desk',
+    Review: 'review',
     ImageBuilder: 'image_builder',
     Loop: 'loop',
     McpAnalytics: 'mcp_analytics',
@@ -1629,8 +1629,8 @@ export interface TaskCreateApi {
      * * `signal_report` - Signal Report
      * * `signals_scout` - Signals Scout
      * * `support_reply` - Support Reply
-     * * `hogdesk` - HogDesk
-     * * `review_hog` - ReviewHog
+     * * `desk` - Desk
+     * * `review` - Review
      * * `image_builder` - Image Builder
      * * `loop` - Loop
      * * `mcp_analytics` - MCP Analytics */
@@ -1772,8 +1772,8 @@ export interface TaskWriteApi {
      * * `signal_report` - Signal Report
      * * `signals_scout` - Signals Scout
      * * `support_reply` - Support Reply
-     * * `hogdesk` - HogDesk
-     * * `review_hog` - ReviewHog
+     * * `desk` - Desk
+     * * `review` - Review
      * * `image_builder` - Image Builder
      * * `loop` - Loop
      * * `mcp_analytics` - MCP Analytics */
@@ -1900,8 +1900,8 @@ export interface PatchedTaskWriteApi {
      * * `signal_report` - Signal Report
      * * `signals_scout` - Signals Scout
      * * `support_reply` - Support Reply
-     * * `hogdesk` - HogDesk
-     * * `review_hog` - ReviewHog
+     * * `desk` - Desk
+     * * `review` - Review
      * * `image_builder` - Image Builder
      * * `loop` - Loop
      * * `mcp_analytics` - MCP Analytics */

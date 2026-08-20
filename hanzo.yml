@@ -18,12 +18,35 @@
 # linters need none of them, and pulling an Emscripten toolchain to run oxlint
 # is how a gate becomes slow enough that people start skipping it.
 #
-# Not the pytest or jest suites: those need Postgres, ClickHouse and Kafka
+# Not the pytest or jest suites: those need Postgres, Datastore and Kafka
 # (see ci-backend.yml standing them up as services). That is an integration
 # lane. A gate that is red for a missing database says nothing about the commit.
+# The second gate is cheap and catches a failure lint cannot see. An upstream
+# rebase removes a file we invented without raising a conflict — upstream never
+# had it, so "take upstream's version" is a clean delete — and a deleted module
+# takes its own tests with it, so nothing goes red. e443a4dab removed three that
+# way on 08-01 and it was found on 08-08, two rebases later. Runs first because
+# it needs no install.
 test:
-  - name: lint
-    run: |
-      set -e
-      pnpm install --frozen-lockfile --ignore-scripts
-      pnpm run lint
+    - name: one plane
+      # This forge collects workflows from the FIRST entry of WORKFLOW_DIRS that
+      # exists. .hanzo/workflows/ exists, so a file under .github/workflows/ is
+      # not a second lane — it is a file that runs nowhere, and it fails by being
+      # silent: the checks that would go red are the ones no longer running. That
+      # is how 121 of them accumulated here, under a green repo, taking the
+      # semgrep suite with them.
+      #
+      # Nothing runs on github.com, so there is no case for the directory. The
+      # same assertion guards hanzoai/ci as `one-definition`.
+      run: |
+          set -e
+          [ -d .github/workflows ] && {
+            echo "::error::.github/workflows is back — this forge reads .hanzo/workflows, so those files run nowhere and go green by not running"; exit 1; } || true
+          echo "OK: one plane ($(ls .hanzo/workflows | wc -l) workflows, all of them live)"
+    - name: fork inventory
+      run: python3 scripts/fork-inventory.py
+    - name: lint
+      run: |
+          set -e
+          pnpm install --frozen-lockfile --ignore-scripts
+          pnpm run lint

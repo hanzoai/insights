@@ -1,6 +1,6 @@
 from insights.datastore.client.connection import NodeRole
 from insights.datastore.client.migration_tools import run_sql_with_exceptions
-from insights.models.tophog.sql import (
+from insights.models.topfn.sql import (
     DISTRIBUTED_TOPFN_TABLE_SQL,
     KAFKA_TOPFN_TABLE_SQL,
     TOPFN_DATA_TABLE_SQL,
@@ -8,18 +8,18 @@ from insights.models.tophog.sql import (
     WRITABLE_TOPFN_TABLE_SQL,
 )
 
-# Migration to create tophog tables for top-N metrics tracking.
+# Migration to create topfn tables for top-N metrics tracking.
 #
-# TopHog tracks per-key metrics (count, time) within pipeline steps and
+# TopFn tracks per-key metrics (count, time) within pipeline steps and
 # flushes top-N reports to Kafka on an interval. This table stores those
 # reports for queryable observability.
 #
 # Architecture:
-# - sharded_tophog: Sharded MergeTree on DATA nodes
-# - tophog: Distributed read table on DATA nodes
-# - writable_tophog: Distributed write table on INGESTION_MEDIUM nodes
-# - kafka_tophog: Kafka engine table on INGESTION_MEDIUM nodes
-# - tophog_mv: Materialized view on INGESTION_MEDIUM nodes
+# - sharded_topfn: Sharded MergeTree on DATA nodes
+# - topfn: Distributed read table on DATA nodes
+# - writable_topfn: Distributed write table on INGESTION_MEDIUM nodes
+# - kafka_topfn: Kafka engine table on INGESTION_MEDIUM nodes
+# - topfn_mv: Materialized view on INGESTION_MEDIUM nodes
 
 operations = [
     # 1. Create sharded data table on data nodes only

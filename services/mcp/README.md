@@ -55,11 +55,11 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { URL } from 'node:url'
 
-const AUTH = process.env.INSIGHTS_AUTH_HEADER // "Bearer phx_…"
+const AUTH = process.env.INSIGHTS_AUTH_HEADER // "Bearer sk-…"
 const MCP_URL = process.env.MCP_URL || 'https://mcp.hanzo.ai/mcp'
 
 if (!AUTH?.startsWith('Bearer ')) {
-  console.error('Set INSIGHTS_AUTH_HEADER="Bearer phx_..."')
+  console.error('Set INSIGHTS_AUTH_HEADER="Bearer sk-..."')
   process.exit(1)
 }
 

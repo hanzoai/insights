@@ -34,7 +34,7 @@ async def start_temporal_env() -> WorkflowEnvironment:
     Awaited on the harness's main event loop, so eval workflows and the local
     dev server share one loop instead of the fixture's private throwaway loop.
     """
-    # Hogli loads the dev OTLP exporter config, but the eval harness does not
+    # Scriptli loads the dev OTLP exporter config, but the eval harness does not
     # start a collector. Disable trace export only while the Temporal child is
     # spawned, then restore the parent process environment immediately.
     previous_traces_exporter = os.environ.get("OTEL_TRACES_EXPORTER")

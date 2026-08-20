@@ -16,9 +16,20 @@ camel_case_pattern = re.compile(r"(?<!^)(?<![A-Z])(?=[A-Z])")
 
 # Class-name → snake-case overrides that don't fall out of the default regex.
 # NOTE: Sync with ./test/test_visitor.py#test_insightsql_visitor_naming_exceptions
+#
+# These keys are the REGEX OUTPUT, not the class name, and that is the whole
+# trap. `InsightsQLXTag` reduces to `insights_qlxtag`, because the pattern only
+# breaks before a capital that follows a lower-case letter — so the run `QLXT`
+# stays welded to the `tag`. The keys said `script_qlxtag`, which is what the
+# class reduced to under an earlier name; the class was renamed and the key was
+# not, so the replacement stopped matching anything.
+#
+# Nothing failed at import. accept() computes the name, finds no such method,
+# and raises only when a query actually contains the tag — so the whole
+# InsightsQLX surface was unreachable while every test that avoided it passed.
 _VISIT_NAME_REPLACEMENTS = {
-    "hog_qlxtag": "insightsqlx_tag",
-    "hog_qlxattribute": "insightsqlx_attribute",
+    "insights_qlxtag": "insightsqlx_tag",
+    "insights_qlxattribute": "insightsqlx_attribute",
     "uuidtype": "uuid_type",
     "string_jsontype": "string_json_type",
 }

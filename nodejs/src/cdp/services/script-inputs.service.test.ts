@@ -6,10 +6,10 @@ import { closeHub, createHub } from '~/common/utils/db/hub'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '~/types'
 
-import { createHogExecutionGlobals, createInsightsFunction, insertIntegration } from '../_tests/fixtures'
-import { compileHog } from '../templates/compiler'
+import { createScriptExecutionGlobals, createInsightsFunction, insertIntegration } from '../_tests/fixtures'
+import { compileScript } from '../templates/compiler'
 import { InsightsFunctionInvocationGlobals, InsightsFunctionType } from '../types'
-import { HogInputsService, formatHogInput, getAppIdentifierForPush } from './script-inputs.service'
+import { ScriptInputsService, formatScriptInput, getAppIdentifierForPush } from './script-inputs.service'
 import { RecipientTokensService } from './messaging/recipient-tokens.service'
 
 describe('getAppIdentifierForPush', () => {
@@ -48,7 +48,7 @@ describe('getAppIdentifierForPush', () => {
 describe('Script Inputs', () => {
     let hub: Hub
     let team: Team
-    let hogInputsService: HogInputsService
+    let scriptInputsService: ScriptInputsService
 
     beforeEach(async () => {
         await resetTestDatabase()
@@ -79,7 +79,7 @@ describe('Script Inputs', () => {
         })
 
         const recipientTokensService = new RecipientTokensService(hub.ENCRYPTION_SALT_KEYS, hub.SITE_URL)
-        hogInputsService = new HogInputsService(hub.integrationManager, recipientTokensService, hub.encryptedFields)
+        scriptInputsService = new ScriptInputsService(hub.integrationManager, recipientTokensService, hub.encryptedFields)
     })
 
     afterEach(async () => {
@@ -89,7 +89,7 @@ describe('Script Inputs', () => {
     describe('formatInput', () => {
         it('can handle null values in input objects', async () => {
             const globals = {
-                ...createHogExecutionGlobals({
+                ...createScriptExecutionGlobals({
                     event: {
                         event: 'test',
                         uuid: 'test-uuid',
@@ -110,7 +110,7 @@ describe('Script Inputs', () => {
             }
 
             // Call formatInput directly to test that it handles null values
-            const result = await formatHogInput(inputWithNulls, globals)
+            const result = await formatScriptInput(inputWithNulls, globals)
 
             // Verify that null values are preserved
             expect(result.body.value.person).toBeNull()
@@ -120,7 +120,7 @@ describe('Script Inputs', () => {
 
         it('can handle deep null and undefined values', async () => {
             const globals = {
-                ...createHogExecutionGlobals({
+                ...createScriptExecutionGlobals({
                     event: {
                         event: 'test',
                         uuid: 'test-uuid',
@@ -143,7 +143,7 @@ describe('Script Inputs', () => {
                 },
             }
 
-            const result = await formatHogInput(complexInput, globals)
+            const result = await formatScriptInput(complexInput, globals)
 
             // Verify all null and undefined values are properly preserved
             expect(result.body.value.data.first).toBeNull()
@@ -167,7 +167,7 @@ describe('Script Inputs', () => {
                     hog_templated: {
                         value: 'event: "{event.event}"',
                         templating: 'script',
-                        bytecode: await compileHog('return f\'event: "{event.event}"\''),
+                        bytecode: await compileScript('return f\'event: "{event.event}"\''),
                     },
                     liquid_templated: {
                         value: 'event: "{{ event.event }}"',
@@ -181,16 +181,16 @@ describe('Script Inputs', () => {
                 ],
             })
 
-            globals = createHogExecutionGlobals()
+            globals = createScriptExecutionGlobals()
         })
 
         it('should template out script inputs', async () => {
-            const inputs = await hogInputsService.buildInputs(insightsFunction, globals)
+            const inputs = await scriptInputsService.buildInputs(insightsFunction, globals)
             expect(inputs.hog_templated).toMatchInlineSnapshot(`"event: "test""`)
         })
 
         it('should template out liquid inputs', async () => {
-            const inputs = await hogInputsService.buildInputs(insightsFunction, globals)
+            const inputs = await scriptInputsService.buildInputs(insightsFunction, globals)
             expect(inputs.liquid_templated).toMatchInlineSnapshot(`"event: "test""`)
         })
 
@@ -209,7 +209,7 @@ describe('Script Inputs', () => {
                     { key: 'auth', type: 'integration', required: true },
                 ],
             })
-            const inputs = await hogInputsService.buildInputs(insightsFunction, globals)
+            const inputs = await scriptInputsService.buildInputs(insightsFunction, globals)
 
             expect(inputs.oauth).toMatchInlineSnapshot(`
                 {
@@ -240,7 +240,7 @@ describe('Script Inputs', () => {
             }
             insightsFunction.inputs_schema = [{ key: 'is_enabled', type: 'boolean', required: false, templating: true }]
 
-            const inputs = await hogInputsService.buildInputs(insightsFunction, globals)
+            const inputs = await scriptInputsService.buildInputs(insightsFunction, globals)
             expect(inputs.is_enabled).toBe(true)
         })
 
@@ -253,14 +253,14 @@ describe('Script Inputs', () => {
             }
             insightsFunction.inputs_schema = [{ key: 'is_enabled', type: 'boolean', required: false, templating: true }]
 
-            const inputs = await hogInputsService.buildInputs(insightsFunction, globals)
+            const inputs = await scriptInputsService.buildInputs(insightsFunction, globals)
             expect(inputs.is_enabled).toBe(false)
         })
 
         it('should not load integrations from a different team', async () => {
             insightsFunction.team_id = 100
 
-            const inputs = await hogInputsService.buildInputs(insightsFunction, globals)
+            const inputs = await scriptInputsService.buildInputs(insightsFunction, globals)
 
             expect(inputs.oauth).toMatchInlineSnapshot(`null`)
         })
@@ -278,7 +278,7 @@ describe('Script Inputs', () => {
 
             insightsFunction.inputs_schema = [{ key: 'email', type: 'native_email', required: true, templating: true }]
 
-            const inputs = await hogInputsService.buildInputs(insightsFunction, globals)
+            const inputs = await scriptInputsService.buildInputs(insightsFunction, globals)
             expect(inputs.email.to.email).toEqual('test@hanzo.ai')
             expect(inputs.email.html).toEqual(
                 `<div>Manage subscription preferences here <a href="http://localhost:8000/messaging-preferences/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZWFtX2lkIjoyLCJpZGVudGlmaWVyIjoidGVzdEBwb3N0aG9nLmNvbSIsImlhdCI6MTczNTY4OTYwMCwiZXhwIjoxNzM2Mjk0NDAwLCJhdWQiOiJwb3N0aG9nOm1lc3NhZ2luZzpzdWJzY3JpcHRpb25fcHJlZmVyZW5jZXMifQ.pBh-COzTEyApuxe8J5sViPanp1lV1IClepOTVFZNhIs/">here</a>Or, click <a href="http://localhost:8000/messaging-preferences/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZWFtX2lkIjoyLCJpZGVudGlmaWVyIjoidGVzdEBwb3N0aG9nLmNvbSIsImlhdCI6MTczNTY4OTYwMCwiZXhwIjoxNzM2Mjk0NDAwLCJhdWQiOiJwb3N0aG9nOm1lc3NhZ2luZzpzdWJzY3JpcHRpb25fcHJlZmVyZW5jZXMifQ.pBh-COzTEyApuxe8J5sViPanp1lV1IClepOTVFZNhIs/?one_click_unsubscribe=1">here</a> to immediately unsubscribe from all marketing emails</div>`
@@ -309,7 +309,7 @@ describe('Script Inputs', () => {
                 ],
             })
 
-            const inputs = await hogInputsService.buildInputs(insightsFunction, globals)
+            const inputs = await scriptInputsService.buildInputs(insightsFunction, globals)
             expect(inputs.push_subscription).toBeNull()
         })
     })

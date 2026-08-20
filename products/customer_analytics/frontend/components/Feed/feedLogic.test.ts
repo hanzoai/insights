@@ -17,11 +17,11 @@ describe('feedLogic', () => {
         lastParams = null
         useMocks({
             get: {
-                '/api/projects/:team_id/signals/reports/': ({ request }) => {
+                '/v1/projects/:team_id/signals/reports/': ({ request }) => {
                     lastParams = new URL(request.url).searchParams
                     return [200, { results: [], count: 0 }]
                 },
-                '/api/projects/:team_id/signals/scout/configs/': () => [
+                '/v1/projects/:team_id/signals/scout/configs/': () => [
                     200,
                     [
                         { id: '1', skill_name: 'signals-scout-customer-analytics' },

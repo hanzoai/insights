@@ -9,7 +9,7 @@ import { insertRow } from '~/tests/helpers/sql'
 import { DatastorePerson, DatastoreTimestamp, ProjectId, RawDatastoreEvent, Team } from '../../types'
 import { CohortMembershipChange } from '../consumers/cdp-cohort-membership.consumer'
 import { CdpInternalEvent } from '../schema'
-import { compileHog } from '../templates/compiler'
+import { compileScript } from '../templates/compiler'
 import {
     CyclotronJobInvocationInsightsFunction,
     CyclotronJobQueueKind,
@@ -137,7 +137,7 @@ export const insertInsightsFunction = async (
 ): Promise<InsightsFunctionType> => {
     // This is only used for testing so we need to override some values
 
-    const res = await insertRow(postgres, 'insights_hogfunction', {
+    const res = await insertRow(postgres, 'insights_function', {
         ...createInsightsFunction({
             ...insightsFunction,
             team_id: team_id,
@@ -180,10 +180,10 @@ export const insertInsightsFunctionTemplate = async (
         ...insightsFunctionTemplate,
     })
     if (template.code_language === 'script') {
-        template.bytecode = await compileHog(template.code)
+        template.bytecode = await compileScript(template.code)
     }
 
-    const res = await insertRow(postgres, 'insights_hogfunctiontemplate', {
+    const res = await insertRow(postgres, 'insights_function_template', {
         id: randomUUID(),
         template_id: template.id,
         sha: 'sha',
@@ -225,7 +225,7 @@ export const insertIntegration = async (
     return res
 }
 
-export const createHogExecutionGlobals = (
+export const createScriptExecutionGlobals = (
     data: Partial<InsightsFunctionInvocationGlobals> = {}
 ): InsightsFunctionInvocationGlobals => {
     return {
@@ -270,7 +270,7 @@ export const createExampleInvocation = (
     const insightsFunction = createInsightsFunction(_insightsFunction)
     // Add the source of the trigger to the globals
 
-    const globals = createHogExecutionGlobals(_globals)
+    const globals = createScriptExecutionGlobals(_globals)
     globals.source = {
         name: insightsFunction.name ?? `Script function: ${insightsFunction.id}`,
         url: `${globals.project.url}/pipeline/destinations/script-${insightsFunction.id}/configuration/`,

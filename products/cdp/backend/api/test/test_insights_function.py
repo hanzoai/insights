@@ -22,7 +22,11 @@ from products.cdp.backend.api.insights_function import (
 )
 from products.cdp.backend.api.test.test_insights_function_templates import MOCK_NODE_TEMPLATES
 from products.cdp.backend.models.insights_function_template import InsightsFunctionTemplate
-from products.cdp.backend.models.insights_functions.insights_function import DEFAULT_STATE, InsightsFunction, InsightsFunctionState
+from products.cdp.backend.models.insights_functions.insights_function import (
+    DEFAULT_STATE,
+    InsightsFunction,
+    InsightsFunctionState,
+)
 from products.cohorts.backend.models.cohort import Cohort
 
 from common.scriptvm.python.operation import INSIGHTSQL_BYTECODE_VERSION, Operation
@@ -32,7 +36,7 @@ geoip_template = MOCK_NODE_TEMPLATES[2]
 
 
 EXAMPLE_FULL = {
-    "name": "HogHook",
+    "name": "ScriptHook",
     "script": "fetch(inputs.url, {\n  'headers': inputs.headers,\n  'body': inputs.payload,\n  'method': inputs.method\n});",
     "type": "destination",
     "code_language": "script",
@@ -82,7 +86,7 @@ EXAMPLE_FULL = {
 
 def get_db_field_value(field, model_id):
     cursor = connection.cursor()
-    cursor.execute(f"select {field} from insights_hogfunction where id='{model_id}';")
+    cursor.execute(f"select {field} from insights_function where id='{model_id}';")
     return cursor.fetchone()[0]
 
 
@@ -107,7 +111,7 @@ class TestInsightsFunctionAPIWithoutAvailableFeature(DatastoreTestMixin, APIBase
         payload.update(data or {})
 
         return self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data=payload,
         )
 
@@ -145,7 +149,7 @@ class TestInsightsFunctionAPIWithoutAvailableFeature(DatastoreTestMixin, APIBase
         }
 
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{response.json()['id']}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{response.json()['id']}/",
             data=payload,
         )
 
@@ -157,7 +161,7 @@ class TestInsightsFunctionAPIWithoutAvailableFeature(DatastoreTestMixin, APIBase
         self.organization.save()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "My custom function",
                 "script": "fetch('https://example.com');",
@@ -174,7 +178,7 @@ class TestInsightsFunctionAPIWithoutAvailableFeature(DatastoreTestMixin, APIBase
 
         # Update it
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{function_id}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{function_id}/",
             data={"name": "New name"},
         )
         self.assertEqual(update_response.status_code, status.HTTP_200_OK, update_response.json())
@@ -182,7 +186,7 @@ class TestInsightsFunctionAPIWithoutAvailableFeature(DatastoreTestMixin, APIBase
 
         # Delete it
         delete_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{function_id}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{function_id}/",
             data={"deleted": True},
         )
         self.assertEqual(delete_response.status_code, status.HTTP_200_OK, delete_response.json())
@@ -211,7 +215,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         params: dict = {"scope": "InsightsFunction", "page": 1, "limit": 20}
         if function_id:
             params["item_id"] = function_id
-        activity = self.client.get(f"/api/projects/{self.team.pk}/activity_log", data=params)
+        activity = self.client.get(f"/v1/projects/{self.team.pk}/activity_log", data=params)
         self.assertEqual(activity.status_code, status.HTTP_200_OK)
         return activity.json().get("results")
 
@@ -250,7 +254,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             self.user.is_staff = True
             self.user.save()
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={"type": "destination", "name": "X", "template_id": "template-hidden-dest", "inputs": {}},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
@@ -283,7 +287,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             script="return event",
         )
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{fn.id}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{fn.id}/",
             data=patch,
         )
         assert response.status_code == expected, response.json()
@@ -317,7 +321,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             filters={"filter_test_accounts": True},
         )
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{fn.id}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{fn.id}/",
             data=patch,
         )
         assert response.status_code == expected, response.json()
@@ -342,7 +346,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             filters={"filter_test_accounts": True},
         )
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{fn.id}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{fn.id}/",
             data={"enabled": "false"},
         )
         assert response.status_code == status.HTTP_200_OK, response.json()
@@ -351,7 +355,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
     def test_create_insights_function(self, *args):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "type": "destination",
                 "name": "Fetch URL",
@@ -421,7 +425,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
     def test_creates_with_template_id(self, *args):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Fetch URL",
                 "description": "Test description",
@@ -456,7 +460,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             "template_id": "template-webhook",
             "type": "destination",
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_functions/", data=payload)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_functions/", data=payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
         assert response.json() == {
             "attr": "inputs__url",
@@ -467,7 +471,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         payload["inputs"] = {"url": {"value": "https://example.com"}}
 
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_functions/", data=payload)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_functions/", data=payload)
         assert response.status_code == status.HTTP_201_CREATED, response.json()
         assert response.json()["script"] == webhook_template["code"].strip()
         assert response.json()["inputs_schema"] == webhook_template["inputs_schema"]
@@ -477,7 +481,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
     def test_deletes_via_update(self, *args):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 **EXAMPLE_FULL,
                 "name": "Fetch URL",
@@ -486,7 +490,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         assert response.status_code == status.HTTP_201_CREATED, response.json()
         id = response.json()["id"]
 
-        list_res = self.client.get(f"/api/projects/{self.team.id}/insights_functions/")
+        list_res = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/")
         assert list_res.status_code == status.HTTP_200_OK, list_res.json()
         # Assert that it isn't in the list
         assert (
@@ -494,12 +498,12 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{response.json()['id']}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{response.json()['id']}/",
             data={"deleted": True},
         )
         assert response.status_code == status.HTTP_200_OK, response.json()
 
-        list_res = self.client.get(f"/api/projects/{self.team.id}/insights_functions/")
+        list_res = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/")
         assert list_res.status_code == status.HTTP_200_OK, list_res.json()
         assert next((item for item in list_res.json()["results"] if item["id"] == response.json()["id"]), None) is None
 
@@ -556,26 +560,27 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
     def test_can_undelete_insights_function(self, *args):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={**EXAMPLE_FULL},
         )
         id = response.json()["id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{id}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{id}/",
             data={"deleted": True},
         )
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert (
-            self.client.get(f"/api/projects/{self.team.id}/insights_functions/{id}").status_code == status.HTTP_404_NOT_FOUND
+            self.client.get(f"/v1/projects/{self.team.id}/insights_functions/{id}").status_code
+            == status.HTTP_404_NOT_FOUND
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{id}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{id}/",
             data={"deleted": False},
         )
         assert response.status_code == status.HTTP_200_OK, response.json()
-        assert self.client.get(f"/api/projects/{self.team.id}/insights_functions/{id}").status_code == status.HTTP_200_OK
+        assert self.client.get(f"/v1/projects/{self.team.id}/insights_functions/{id}").status_code == status.HTTP_200_OK
 
     def test_inputs_required(self, *args):
         payload = {
@@ -587,7 +592,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             "type": "destination",
         }
         # Check required
-        res = self.client.post(f"/api/projects/{self.team.id}/insights_functions/", data={**payload})
+        res = self.client.post(f"/v1/projects/{self.team.id}/insights_functions/", data={**payload})
         assert res.status_code == status.HTTP_400_BAD_REQUEST, res.json()
         assert res.json() == {
             "type": "validation_error",
@@ -606,7 +611,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             "type": "invalid_type",
         }
         # Check required
-        res = self.client.post(f"/api/projects/{self.team.id}/insights_functions/", data={**payload})
+        res = self.client.post(f"/v1/projects/{self.team.id}/insights_functions/", data={**payload})
         assert res.status_code == status.HTTP_400_BAD_REQUEST, res.json()
         assert res.json() == {
             "type": "validation_error",
@@ -635,7 +640,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         for key, (value, expected_detail) in bad_inputs.items():
             res = self.client.post(
-                f"/api/projects/{self.team.id}/insights_functions/", data={**payload, "inputs": {key: {"value": value}}}
+                f"/v1/projects/{self.team.id}/insights_functions/", data={**payload, "inputs": {key: {"value": value}}}
             )
             assert res.json() == {
                 "type": "validation_error",
@@ -655,7 +660,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             "type": "destination",
         }
         # Check required
-        res = self.client.post(f"/api/projects/{self.team.id}/insights_functions/", data={**payload})
+        res = self.client.post(f"/v1/projects/{self.team.id}/insights_functions/", data={**payload})
         assert res.status_code == status.HTTP_400_BAD_REQUEST
 
         assert res.json() == {
@@ -687,10 +692,10 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         # Fernet encryption is deterministic, but has a temporal component and utilizes os.urandom() for the IV
         with freeze_time("2024-01-01T00:01:00Z"):
             with patch("os.urandom", return_value=b"\x00" * 16):
-                res = self.client.post(f"/api/projects/{self.team.id}/insights_functions/", data={**payload})
+                res = self.client.post(f"/v1/projects/{self.team.id}/insights_functions/", data={**payload})
         assert res.status_code == status.HTTP_201_CREATED, res.json()
         assert res.json()["inputs"] == expectation
-        res = self.client.get(f"/api/projects/{self.team.id}/insights_functions/{res.json()['id']}")
+        res = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/{res.json()['id']}")
         assert res.json()["inputs"] == expectation
 
         # Finally check the DB has the real value
@@ -731,10 +736,10 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
                 },
             },
         }
-        res = self.client.post(f"/api/projects/{self.team.id}/insights_functions/", data={**payload})
+        res = self.client.post(f"/v1/projects/{self.team.id}/insights_functions/", data={**payload})
         assert res.json()["inputs"] == {"secret1": {"secret": True}}, res.json()
         res = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{res.json()['id']}",
+            f"/v1/projects/{self.team.id}/insights_functions/{res.json()['id']}",
             data={
                 "inputs": {
                     "secret1": {
@@ -768,11 +773,11 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
                 },
             },
         }
-        res = self.client.post(f"/api/projects/{self.team.id}/insights_functions/", data={**payload})
+        res = self.client.post(f"/v1/projects/{self.team.id}/insights_functions/", data={**payload})
         id = res.json()["id"]
         assert res.json().get("inputs") == {"secret1": {"secret": True}}, res.json()
         res = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{res.json()['id']}",
+            f"/v1/projects/{self.team.id}/insights_functions/{res.json()['id']}",
             data={
                 "inputs": {
                     "secret1": {
@@ -843,9 +848,9 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         ]
         assert filtered_actual_activities == expected_activities
 
-    def test_generates_hog_bytecode(self, *args):
+    def test_generates_script_bytecode(self, *args):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 **EXAMPLE_FULL,
                 "script": "let i := 0;\nwhile(i < 3) {\n  i := i + 1;\n  fetch(inputs.url, {\n    'headers': {\n      'x-count': f'{i}'\n    },\n    'body': inputs.payload,\n    'method': inputs.method\n  });\n}",
@@ -857,7 +862,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         ), response.json()
 
     def test_generates_inputs_bytecode(self, *args):
-        response = self.client.post(f"/api/projects/{self.team.id}/insights_functions/", data=EXAMPLE_FULL)
+        response = self.client.post(f"/v1/projects/{self.team.id}/insights_functions/", data=EXAMPLE_FULL)
         assert response.status_code == status.HTTP_201_CREATED, response.json()
         assert response.json()["inputs"] == {
             "url": {
@@ -944,7 +949,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         ]
         self.team.save()
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 **EXAMPLE_FULL,
                 "filters": {
@@ -1012,7 +1017,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
     def test_saves_masking_config(self, *args):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 **EXAMPLE_FULL,
                 "masking": {"ttl": 60, "threshold": 20, "hash": "{person.properties.email}"},
@@ -1036,12 +1041,12 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             }
 
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_functions/",
+                f"/v1/projects/{self.team.id}/insights_functions/",
                 data=EXAMPLE_FULL,
             )
             assert response.status_code == status.HTTP_201_CREATED, response.json()
 
-            response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/{response.json()['id']}")
+            response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/{response.json()['id']}")
             assert response.json()["status"] == {
                 "state": 1,
                 "tokens": 0,
@@ -1053,11 +1058,11 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             mock_get.side_effect = lambda x: Exception("oh no")
 
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_functions/",
+                f"/v1/projects/{self.team.id}/insights_functions/",
                 data=EXAMPLE_FULL,
             )
             assert response.status_code == status.HTTP_201_CREATED, response.json()
-            response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/{response.json()['id']}")
+            response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/{response.json()['id']}")
             assert response.json()["status"] == DEFAULT_STATE
 
     def test_patches_status_on_enabled_update(self, *args):
@@ -1073,7 +1078,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
                     }
 
                     response = self.client.post(
-                        f"/api/projects/{self.team.id}/insights_functions/",
+                        f"/v1/projects/{self.team.id}/insights_functions/",
                         data={
                             **EXAMPLE_FULL,
                             "name": "Fetch URL",
@@ -1084,14 +1089,14 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
                     assert response.json()["status"]["state"] == InsightsFunctionState.DISABLED.value
 
                     self.client.patch(
-                        f"/api/projects/{self.team.id}/insights_functions/{response.json()['id']}/",
+                        f"/v1/projects/{self.team.id}/insights_functions/{response.json()['id']}/",
                         data={"enabled": False},
                     )
 
                     assert mock_patch.call_count == 0
 
                     self.client.patch(
-                        f"/api/projects/{self.team.id}/insights_functions/{response.json()['id']}/",
+                        f"/v1/projects/{self.team.id}/insights_functions/{response.json()['id']}/",
                         data={"enabled": True},
                     )
 
@@ -1201,7 +1206,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         ]
         self.team.save()
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 **EXAMPLE_FULL,
                 "filters": {
@@ -1217,23 +1222,23 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         assert response.status_code == status.HTTP_201_CREATED, response.json()
 
         filters: Any = {"filter_test_accounts": True}
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/?filters={json.dumps(filters)}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/?filters={json.dumps(filters)}")
         assert len(response.json()["results"]) == 1
 
         filters = {"filter_test_accounts": False}
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/?filters={json.dumps(filters)}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/?filters={json.dumps(filters)}")
         assert len(response.json()["results"]) == 0
 
         filters = {"actions": [{"id": f"other"}]}
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/?filters={json.dumps(filters)}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/?filters={json.dumps(filters)}")
         assert len(response.json()["results"]) == 0
 
         filters = {"actions": [{"id": f"{action1.id}"}]}
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/?filters={json.dumps(filters)}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/?filters={json.dumps(filters)}")
         assert len(response.json()["results"]) == 1
 
         filters = {"actions": [{"id": f"{action2.id}"}]}
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/?filters={json.dumps(filters)}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/?filters={json.dumps(filters)}")
         assert len(response.json()["results"]) == 1
 
     def test_list_with_filter_groups_filter(self, *args):
@@ -1244,7 +1249,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 **EXAMPLE_FULL,
                 "filters": {"events": [{"id": "$pageview", "name": "$pageview", "type": "events", "order": 0}]},
@@ -1253,7 +1258,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         insights_function_id_1 = response.json()["id"]
         assert response.status_code == status.HTTP_201_CREATED, response.json()
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 **EXAMPLE_FULL,
                 "filters": {
@@ -1266,14 +1271,14 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         filter_groups: Any = [{"events": [{"id": "$pageview", "type": "events"}]}]
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights_functions/?filter_groups={json.dumps(filter_groups)}"
+            f"/v1/projects/{self.team.id}/insights_functions/?filter_groups={json.dumps(filter_groups)}"
         )
         assert len(response.json()["results"]) == 1
         assert response.json()["results"][0]["id"] == insights_function_id_1
 
         filter_groups = [{"actions": [{"id": f"{action1.id}", "type": "actions"}]}]
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights_functions/?filter_groups={json.dumps(filter_groups)}"
+            f"/v1/projects/{self.team.id}/insights_functions/?filter_groups={json.dumps(filter_groups)}"
         )
         assert len(response.json()["results"]) == 1
         assert response.json()["results"][0]["id"] == insights_function_id_2
@@ -1283,13 +1288,13 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             {"events": [{"id": "$pageview", "type": "events"}]},
         ]
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights_functions/?filter_groups={json.dumps(filter_groups)}"
+            f"/v1/projects/{self.team.id}/insights_functions/?filter_groups={json.dumps(filter_groups)}"
         )
         assert len(response.json()["results"]) == 2
 
     def test_list_with_type_filter(self, *args):
         response_destination = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 **EXAMPLE_FULL,
                 "filters": {
@@ -1301,9 +1306,9 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         destination_id = response_destination.json()["id"]
 
         response_transform = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
-                "name": "HogTransform",
+                "name": "ScriptTransform",
                 "script": "return event",
                 "type": "transformation",
                 "template_id": "template-geoip",
@@ -1315,27 +1320,27 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         transformation_id = response_transform.json()["id"]
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/")
         assert len(response.json()["results"]) == 2
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/?type=destination")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/?type=destination")
         assert len(response.json()["results"]) == 1
         assert response.json()["results"][0]["id"] == destination_id
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/?type=transformation")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/?type=transformation")
         assert len(response.json()["results"]) == 1
         assert response.json()["results"][0]["id"] == transformation_id
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/?type=destination,site_app")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/?type=destination,site_app")
         assert len(response.json()["results"]) == 1
         assert response.json()["results"][0]["id"] == destination_id
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/?type=destination,transformation")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/?type=destination,transformation")
         assert len(response.json()["results"]) == 2
 
     def test_warehouse_source_webhook_excluded(self, *args):
         destination = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={**EXAMPLE_FULL},
         )
         assert destination.status_code == status.HTTP_201_CREATED
@@ -1348,18 +1353,18 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         )
 
         # List should not include warehouse_source_webhook functions
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/")
         ids = [r["id"] for r in response.json()["results"]]
         assert str(webhook_func.id) not in ids
         assert len(response.json()["results"]) == 1
 
         # Detail should return 404
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/{webhook_func.id}/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/{webhook_func.id}/")
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_list_with_enabled_filter(self, *args):
         response_destination = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 **EXAMPLE_FULL,
                 "filters": {
@@ -1371,9 +1376,9 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         destination_id = response_destination.json()["id"]
 
         response_transform = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
-                "name": "HogTransform",
+                "name": "ScriptTransform",
                 "script": "return event",
                 "type": "transformation",
                 "template_id": "template-geoip",
@@ -1383,25 +1388,25 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         transformation_id = response_transform.json()["id"]
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/")
         assert len(response.json()["results"]) == 2
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/?enabled=true")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/?enabled=true")
 
         assert len(response.json()["results"]) == 1
         assert response.json()["results"][0]["id"] == destination_id
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/?enabled=false")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/?enabled=false")
         assert len(response.json()["results"]) == 1
         assert response.json()["results"][0]["id"] == transformation_id
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/?enabled=true,false")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/?enabled=true,false")
         assert len(response.json()["results"]) == 2
 
     @patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_create_insights_function_with_site_app_type(self, mock_transpile_fn):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Site App Function",
                 "script": "export function onLoad() { console.log('Hello, site_app'); }",
@@ -1416,7 +1421,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
     @patch("insights.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_create_insights_function_with_site_destination_type(self, mock_transpile_fn):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Site Destination Function",
                 "script": "export function onLoad() { console.log('Hello, site_destination'); }",
@@ -1430,14 +1435,14 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
     def test_cannot_modify_type_of_existing_insights_function(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data=EXAMPLE_FULL,
         )
 
         assert response.status_code == status.HTTP_201_CREATED, response.json()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{response.json()['id']}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{response.json()['id']}/",
             data={"type": "site_app"},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
@@ -1450,7 +1455,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
     def test_cannot_create_warehouse_source_webhook_via_api(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 **EXAMPLE_FULL,
                 "type": "warehouse_source_webhook",
@@ -1466,13 +1471,13 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
     def test_cannot_update_to_warehouse_source_webhook_via_api(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data=EXAMPLE_FULL,
         )
         assert response.status_code == status.HTTP_201_CREATED, response.json()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{response.json()['id']}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{response.json()['id']}/",
             data={"type": "warehouse_source_webhook"},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
@@ -1485,7 +1490,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
     def test_transpiled_field_not_populated_for_other_types(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data=EXAMPLE_FULL,
         )
 
@@ -1495,7 +1500,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
     def test_create_insights_function_with_invalid_typescript(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Invalid Site App Function",
                 "script": "export function onLoad() { console.log('Missing closing brace');",
@@ -1524,7 +1529,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         }
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data=payload,
         )
         result = response.json()
@@ -1564,7 +1569,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         def create(payload):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_functions/",
+                f"/v1/projects/{self.team.id}/insights_functions/",
                 data=payload,
             )
             return response
@@ -1599,7 +1604,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         def create(payload):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_functions/",
+                f"/v1/projects/{self.team.id}/insights_functions/",
                 data=payload,
             )
             return response
@@ -1694,7 +1699,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
     def test_transformation_type_gets_execution_order_automatically(self):
         # Create first transformation function
         response1 = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "type": "transformation",
                 "name": "First Transformation",
@@ -1710,7 +1715,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         # Create second transformation function
         response2 = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "type": "transformation",
                 "name": "Second Transformation",
@@ -1726,7 +1731,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         # Create a non-transformation function - should not get execution_order
         response3 = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 **EXAMPLE_FULL,  # This is fine for destination type
                 "type": "destination",
@@ -1741,7 +1746,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         # First create all functions with the same timestamp
         with freeze_time("2024-01-01T00:00:00Z"):
             self.client.post(
-                f"/api/projects/{self.team.id}/insights_functions/",
+                f"/v1/projects/{self.team.id}/insights_functions/",
                 data={
                     **EXAMPLE_FULL,
                     "name": "Function 1",
@@ -1750,7 +1755,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             ).json()
 
             self.client.post(
-                f"/api/projects/{self.team.id}/insights_functions/",
+                f"/v1/projects/{self.team.id}/insights_functions/",
                 data={
                     **EXAMPLE_FULL,
                     "name": "Function 2",
@@ -1759,7 +1764,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             ).json()
 
             self.client.post(
-                f"/api/projects/{self.team.id}/insights_functions/",
+                f"/v1/projects/{self.team.id}/insights_functions/",
                 data={
                     **EXAMPLE_FULL,
                     "name": "Function 3",
@@ -1768,7 +1773,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             ).json()
 
             self.client.post(
-                f"/api/projects/{self.team.id}/insights_functions/",
+                f"/v1/projects/{self.team.id}/insights_functions/",
                 data={
                     **EXAMPLE_FULL,
                     "name": "Function 4",
@@ -1776,7 +1781,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
                 },
             ).json()
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/")
         assert response.status_code == status.HTTP_200_OK
 
         results = response.json()["results"]
@@ -1791,13 +1796,13 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
     def test_can_call_a_test_invocation(self):
         with patch(
-            "products.cdp.backend.api.insights_function.create_hog_invocation_test"
-        ) as mock_create_hog_invocation_test:
+            "products.cdp.backend.api.insights_function.create_script_invocation_test"
+        ) as mock_create_script_invocation_test:
             res = MagicMock(status_code=200, json=lambda: {"status": "success"})
-            mock_create_hog_invocation_test.return_value = res
+            mock_create_script_invocation_test.return_value = res
 
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_functions/new/invocations/",
+                f"/v1/projects/{self.team.id}/insights_functions/new/invocations/",
                 data={
                     "configuration": {
                         **EXAMPLE_FULL,
@@ -1808,14 +1813,14 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             assert response.status_code == status.HTTP_200_OK, response.json()
             assert response.json() == {"status": "success"}
 
-            assert mock_create_hog_invocation_test.call_count == 1
-            assert mock_create_hog_invocation_test.call_args_list[0].kwargs["team_id"] == self.team.id
-            assert mock_create_hog_invocation_test.call_args_list[0].kwargs["insights_function_id"] == "new"
+            assert mock_create_script_invocation_test.call_count == 1
+            assert mock_create_script_invocation_test.call_args_list[0].kwargs["team_id"] == self.team.id
+            assert mock_create_script_invocation_test.call_args_list[0].kwargs["insights_function_id"] == "new"
             assert (
-                mock_create_hog_invocation_test.call_args_list[0].kwargs["payload"]["configuration"]["type"]
+                mock_create_script_invocation_test.call_args_list[0].kwargs["payload"]["configuration"]["type"]
                 == "destination"
             )
-            assert mock_create_hog_invocation_test.call_args_list[0].kwargs["payload"]["configuration"]["inputs"][
+            assert mock_create_script_invocation_test.call_args_list[0].kwargs["payload"]["configuration"]["inputs"][
                 "url"
             ] == {
                 "bytecode": [
@@ -1842,9 +1847,9 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
     def test_rerun_rejected_for_non_rerunnable_type(self, insights_function_type):
         fn = InsightsFunction.objects.create(team=self.team, type=insights_function_type, script="return event")
 
-        with patch("products.cdp.backend.api.insights_function.rerun_hog_invocations") as mock_rerun:
+        with patch("products.cdp.backend.api.insights_function.rerun_script_invocations") as mock_rerun:
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_functions/{fn.id}/rerun/",
+                f"/v1/projects/{self.team.id}/insights_functions/{fn.id}/rerun/",
                 data={
                     "filter": {
                         "window_start": "2026-07-01T00:00:00Z",
@@ -1861,11 +1866,11 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
     def test_rerun_allowed_for_destination(self):
         fn = InsightsFunction.objects.create(team=self.team, type="destination", script="return event")
 
-        with patch("products.cdp.backend.api.insights_function.rerun_hog_invocations") as mock_rerun:
+        with patch("products.cdp.backend.api.insights_function.rerun_script_invocations") as mock_rerun:
             mock_rerun.return_value = MagicMock(status_code=200, json=lambda: {"rerun_job_id": "job-1"})
 
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_functions/{fn.id}/rerun/",
+                f"/v1/projects/{self.team.id}/insights_functions/{fn.id}/rerun/",
                 data={
                     "filter": {
                         "window_start": "2026-07-01T00:00:00Z",
@@ -1920,7 +1925,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         for name in function_names:
             InsightsFunction.objects.create(team=self.team, name=name, type="destination", script="return event")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/", {"search": search})
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/", {"search": search})
         assert response.status_code == status.HTTP_200_OK
         result_names = [r["name"] for r in response.json()["results"]]
 
@@ -1930,7 +1935,9 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             assert name not in result_names, f"expected {name!r} excluded, got {result_names}"
 
     def test_list_filter_by_search_matches_description_with_lower_rank_than_name(self):
-        name_match = InsightsFunction.objects.create(team=self.team, name="revenue", type="destination", script="return event")
+        name_match = InsightsFunction.objects.create(
+            team=self.team, name="revenue", type="destination", script="return event"
+        )
         description_match = InsightsFunction.objects.create(
             team=self.team,
             name="Q4 review",
@@ -1940,7 +1947,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         )
         InsightsFunction.objects.create(team=self.team, name="Unrelated", type="destination", script="return event")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/?search=revenue")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/?search=revenue")
         assert response.status_code == status.HTTP_200_OK
         result_ids = [r["id"] for r in response.json()["results"]]
 
@@ -1957,7 +1964,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         a = InsightsFunction.objects.create(team=self.team, name="Alpha", type="destination", script="return event")
         b = InsightsFunction.objects.create(team=self.team, name="Beta", type="destination", script="return event")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/", {"search": search})
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/", {"search": search})
         assert response.status_code == status.HTTP_200_OK
         result_ids = {r["id"] for r in response.json()["results"]}
 
@@ -1970,14 +1977,16 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         ]
     )
     def test_list_filter_by_search_pathological_input_does_not_500(self, _name, search):
-        InsightsFunction.objects.create(team=self.team, name="Webhook overview", type="destination", script="return event")
+        InsightsFunction.objects.create(
+            team=self.team, name="Webhook overview", type="destination", script="return event"
+        )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/", {"search": search})
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/", {"search": search})
         assert response.status_code == status.HTTP_200_OK
 
     def test_list_filter_by_search_nul_bytes_do_not_500(self):
         InsightsFunction.objects.create(team=self.team, name="Alpha", type="destination", script="return event")
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/", {"search": "\x00\x00\x00"})
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/", {"search": "\x00\x00\x00"})
         assert response.status_code == status.HTTP_200_OK
 
     def test_list_filter_by_search_handles_null_name_with_description_match(self):
@@ -1992,7 +2001,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             script="return event",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/?search=marketing")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/?search=marketing")
         assert response.status_code == status.HTTP_200_OK
         result_ids = [r["id"] for r in response.json()["results"]]
 
@@ -2010,7 +2019,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         ]
     )
     def test_list_filter_by_search_enforces_length_cap(self, _name, length, expected_status):
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/", {"search": "a" * length})
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/", {"search": "a" * length})
         assert response.status_code == expected_status
 
         if expected_status == status.HTTP_400_BAD_REQUEST:
@@ -2031,9 +2040,11 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         matching = InsightsFunction.objects.create(
             team=self.team, name=function_name, type="destination", script="return event"
         )
-        InsightsFunction.objects.create(team=self.team, name="Totally unrelated", type="destination", script="return event")
+        InsightsFunction.objects.create(
+            team=self.team, name="Totally unrelated", type="destination", script="return event"
+        )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/", {"search": search})
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/", {"search": search})
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
 
@@ -2047,7 +2058,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         for name in ("slack notification", "notification slack", "slcak metrics", "Engineering metrics"):
             InsightsFunction.objects.create(team=self.team, name=name, type="destination", script="return event")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/?search=slack")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/?search=slack")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
 
@@ -2058,10 +2069,14 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         }, "similar matches must be hidden when exact matches exist"
 
     def test_list_filter_by_search_decides_match_tier_after_type_filter(self):
-        InsightsFunction.objects.create(team=self.team, name="slack notification", type="destination", script="return event")
-        InsightsFunction.objects.create(team=self.team, name="slcak transform", type="transformation", script="return event")
+        InsightsFunction.objects.create(
+            team=self.team, name="slack notification", type="destination", script="return event"
+        )
+        InsightsFunction.objects.create(
+            team=self.team, name="slcak transform", type="transformation", script="return event"
+        )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/?search=slack&type=transformation")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/?search=slack&type=transformation")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
 
@@ -2072,7 +2087,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
     def test_list_filter_by_search_match_type_absent_without_search(self):
         InsightsFunction.objects.create(team=self.team, name="Alpha", type="destination", script="return event")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/")
         assert response.status_code == status.HTTP_200_OK
         results = response.json()["results"]
 
@@ -2085,7 +2100,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         )
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             {"search": "alerts+ops@example.com", "full": "true"},
         )
         assert response.status_code == status.HTTP_200_OK
@@ -2097,7 +2112,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
     def test_can_update_with_null_filters(self):
         # First create a function with filters
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Test Function",
                 "type": "destination",
@@ -2120,7 +2135,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         # Now update the function with null filters
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{function_id}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{function_id}/",
             data={"filters": None},
         )
         assert response.status_code == status.HTTP_200_OK, response.json()
@@ -2134,7 +2149,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         # Also test with empty object
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{function_id}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{function_id}/",
             data={"filters": {}},
         )
         assert response.status_code == status.HTTP_200_OK, response.json()
@@ -2148,11 +2163,11 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
     def test_transformation_rejects_inputs_referencing_unavailable_globals(self):
         # Realtime transformations only have project, event, and inputs in scope
-        # (HogTransformerService.createInvocationGlobals). Saving an input template
+        # (ScriptTransformerService.createInvocationGlobals). Saving an input template
         # that references person/groups/source must fail validation rather than
         # crash ingestion at runtime.
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Bad transformation",
                 "type": "transformation",
@@ -2178,7 +2193,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         # 1. Create several disabled transformations (more than the limit)
         for i in range(5):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_functions/",
+                f"/v1/projects/{self.team.id}/insights_functions/",
                 data={
                     "name": f"Disabled Transformation {i}",
                     "type": "transformation",
@@ -2191,7 +2206,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         # 2. Create enabled transformations up to the limit
         for i in range(MAX_TRANSFORMATIONS_PER_TEAM):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_functions/",
+                f"/v1/projects/{self.team.id}/insights_functions/",
                 data={
                     "name": f"Enabled Transformation {i}",
                     "type": "transformation",
@@ -2203,7 +2218,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         # 3. Verify we hit the limit when trying to create one more enabled transformation
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "One Too Many",
                 "type": "transformation",
@@ -2216,7 +2231,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         # 4. Verify we can still create disabled transformations when at the limit
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Another Disabled",
                 "type": "transformation",
@@ -2234,7 +2249,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         assert enabled_transformation is not None, "No enabled transformation found to delete"
         self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{enabled_transformation.id}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{enabled_transformation.id}/",
             data={"deleted": True},
         )
 
@@ -2245,39 +2260,39 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         assert disabled_transformation is not None, "No disabled transformation found to enable"
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{disabled_transformation.id}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{disabled_transformation.id}/",
             data={"enabled": True},
         )
         assert response.status_code == status.HTTP_200_OK
 
-    def test_validates_raw_hog_code_size(self):
-        """Test that we validate the raw HOG code size before compiling it."""
-        # Generate a large HOG code string that exceeds the maximum allowed size
-        large_hog_code = "return " + "x" * (MAX_FN_CODE_SIZE_BYTES + 1000)
+    def test_validates_raw_script_code_size(self):
+        """Test that we validate the raw Script code size before compiling it."""
+        # Generate a large Script code string that exceeds the maximum allowed size
+        large_script_code = "return " + "x" * (MAX_FN_CODE_SIZE_BYTES + 1000)
 
-        # Try to create a function with HOG code exceeding the size limit
-        # No need to mock compile_hog as we're checking the string size directly
+        # Try to create a function with Script code exceeding the size limit
+        # No need to mock compile_script as we're checking the string size directly
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
-                "name": "Large HOG Code Function",
+                "name": "Large Script Code Function",
                 "type": "transformation",
-                "script": large_hog_code,
+                "script": large_script_code,
             },
         )
 
         # Verify the creation was rejected with the correct error
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
-        assert "HOG code exceeds maximum size" in response.json()["detail"]
+        assert "Script code exceeds maximum size" in response.json()["detail"]
         assert f"{MAX_FN_CODE_SIZE_BYTES // 1024}KB" in response.json()["detail"]
 
-    def test_validates_raw_hog_code_size_during_update(self):
-        """Test that we validate the raw HOG code size when updating an existing function."""
+    def test_validates_raw_script_code_size_during_update(self):
+        """Test that we validate the raw Script code size when updating an existing function."""
         # First create a script function with small, valid code
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
-                "name": "Valid HOG Code Function",
+                "name": "Valid Script Code Function",
                 "type": "transformation",
                 "script": "return event",
             },
@@ -2286,20 +2301,20 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         assert response.status_code == status.HTTP_201_CREATED, response.json()
         function_id = response.json()["id"]
 
-        # Generate a large HOG code string for the update that exceeds the limit
-        large_hog_code = "return " + "x" * (MAX_FN_CODE_SIZE_BYTES + 1000)
+        # Generate a large Script code string for the update that exceeds the limit
+        large_script_code = "return " + "x" * (MAX_FN_CODE_SIZE_BYTES + 1000)
 
-        # Update the function with large HOG code
+        # Update the function with large Script code
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{function_id}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{function_id}/",
             data={
-                "script": large_hog_code,
+                "script": large_script_code,
             },
         )
 
         # Verify the update was rejected with the correct error
         assert update_response.status_code == status.HTTP_400_BAD_REQUEST, update_response.json()
-        assert "HOG code exceeds maximum size" in update_response.json()["detail"]
+        assert "Script code exceeds maximum size" in update_response.json()["detail"]
         assert f"{MAX_FN_CODE_SIZE_BYTES // 1024}KB" in update_response.json()["detail"]
 
     def test_transformation_undeletion_puts_at_end(self, *args):
@@ -2307,7 +2322,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         # Create initial transformations
         response1 = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Transform A",
                 "type": "transformation",
@@ -2321,7 +2336,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         assert response1.status_code == status.HTTP_201_CREATED
 
         response2 = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Transform B",
                 "type": "transformation",
@@ -2337,14 +2352,14 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         # Delete function B
         delete_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{fn_b_id}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{fn_b_id}/",
             data={"deleted": True},
         )
         assert delete_response.status_code == status.HTTP_200_OK
 
         # Create a third function
         response3 = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Transform C",
                 "type": "transformation",
@@ -2357,7 +2372,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         )
         assert response3.status_code == status.HTTP_201_CREATED
         # At this point we should have A with order 1 and C with order 2
-        list_response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/")
+        list_response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/")
         results = list_response.json()["results"]
         transformations = [f for f in results if f["type"] == "transformation"]
         assert len(transformations) == 2
@@ -2369,13 +2384,13 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         # Now undelete function B
         undelete_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{fn_b_id}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{fn_b_id}/",
             data={"deleted": False},
         )
         assert undelete_response.status_code == status.HTTP_200_OK
 
         # Check order - B should now be at the end (order 3)
-        list_response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/")
+        list_response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/")
         results = list_response.json()["results"]
         transformations = [f for f in results if f["type"] == "transformation"]
         assert len(transformations) == 3
@@ -2390,7 +2405,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         # Create initial transformations - all enabled
         response1 = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Transform A",
                 "type": "transformation",
@@ -2405,7 +2420,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         assert response1.status_code == status.HTTP_201_CREATED
 
         response2 = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Transform B",
                 "type": "transformation",
@@ -2422,14 +2437,14 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         # Disable function B
         disable_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{fn_b_id}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{fn_b_id}/",
             data={"enabled": False},
         )
         assert disable_response.status_code == status.HTTP_200_OK
 
         # Create a third function
         response3 = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Transform C",
                 "type": "transformation",
@@ -2444,7 +2459,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         assert response3.status_code == status.HTTP_201_CREATED
 
         # Check current order before re-enabling
-        list_response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/")
+        list_response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/")
         results = list_response.json()["results"]
         transformations = sorted(
             [f for f in results if f["type"] == "transformation"], key=lambda x: x["execution_order"] or 999
@@ -2458,13 +2473,13 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         # Now re-enable function B without specifying an execution_order
         reenable_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{fn_b_id}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{fn_b_id}/",
             data={"enabled": True},
         )
         assert reenable_response.status_code == status.HTTP_200_OK
 
         # Check order - B should now be at the end
-        list_response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/")
+        list_response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/")
         results = list_response.json()["results"]
         transformations = sorted(
             [f for f in results if f["type"] == "transformation"], key=lambda x: x["execution_order"] or 999
@@ -2480,7 +2495,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         # Create three transformations with consecutive orders
         response1 = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Transform A",
                 "type": "transformation",
@@ -2494,7 +2509,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         assert response1.status_code == status.HTTP_201_CREATED
 
         response2 = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Transform B",
                 "type": "transformation",
@@ -2509,7 +2524,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         fn_b_id = response2.json()["id"]
 
         response3 = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Transform C",
                 "type": "transformation",
@@ -2523,7 +2538,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         assert response3.status_code == status.HTTP_201_CREATED
 
         # Verify initial order: A=1, B=2, C=3
-        list_response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/")
+        list_response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/")
         results = list_response.json()["results"]
         transformations = [f for f in results if f["type"] == "transformation"]
         assert len(transformations) == 3
@@ -2535,13 +2550,13 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         # Test 1: Update B's execution_order to match A (both will have order 1)
         update_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{fn_b_id}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{fn_b_id}/",
             data={"execution_order": 1},
         )
         assert update_response.status_code == status.HTTP_200_OK
 
         # Check the updated orders
-        list_response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/")
+        list_response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/")
         results = list_response.json()["results"]
         transformations = [f for f in results if f["type"] == "transformation"]
 
@@ -2559,7 +2574,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
     def test_create_in_folder(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "type": "destination",
                 "name": "Fetch URL With Folder",
@@ -2606,7 +2621,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         # Create a InsightsFunction with template_id
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "FK Test Function",
                 "script": "return event",
@@ -2619,11 +2634,13 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         insights_function_id = response.json()["id"]
         insights_function = InsightsFunction.objects.get(id=insights_function_id)
         assert insights_function.insights_function_template is not None, "FK should be set when template_id is provided"
-        assert insights_function.insights_function_template.id == _template.id, "FK should point to the correct template"
+        assert insights_function.insights_function_template.id == _template.id, (
+            "FK should point to the correct template"
+        )
 
         # Create a InsightsFunction without template_id
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "No Template FK",
                 "script": "return event",
@@ -2634,7 +2651,9 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         assert response.status_code == 201, response.json()
         insights_function_id = response.json()["id"]
         insights_function = InsightsFunction.objects.get(id=insights_function_id)
-        assert insights_function.insights_function_template is None, "FK should be null when template_id is not provided"
+        assert insights_function.insights_function_template is None, (
+            "FK should be null when template_id is not provided"
+        )
 
     def test_insights_function_template_fk_validation_error_on_missing_template(self):
         """
@@ -2644,7 +2663,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         initial_count = InsightsFunction.objects.count()
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Should Fail",
                 "script": "return event",
@@ -2666,7 +2685,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         # Create 150 script functions (more than the default page size of 100)
         for i in range(150):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/insights_functions/",
+                f"/v1/projects/{self.team.id}/insights_functions/",
                 data={
                     "name": f"Test Function {i:03d}",
                     "script": "return event",
@@ -2677,25 +2696,25 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
             assert response.status_code == status.HTTP_201_CREATED, f"Failed to create function {i}: {response.json()}"
 
         # Test 1: Without limit parameter (should return default 100 due to pagination)
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/")
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["results"]) == 100, "Without limit, should return default page size of 100"
         assert response.json()["count"] == 150, "Total count should be 150"
 
         # Test 2: With limit=50 (should return only 50)
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/?limit=50")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/?limit=50")
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["results"]) == 50, "With limit=50, should return 50 items"
         assert response.json()["count"] == 150, "Total count should still be 150"
 
         # Test 3: With limit=300 (should return all 150)
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/?limit=300")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/?limit=300")
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["results"]) == 150, "With limit=300, should return all 150 items"
         assert response.json()["count"] == 150, "Total count should be 150"
 
         # Test 4: Verify that pagination still works with offset
-        response = self.client.get(f"/api/projects/{self.team.id}/insights_functions/?limit=50&offset=100")
+        response = self.client.get(f"/v1/projects/{self.team.id}/insights_functions/?limit=50&offset=100")
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()["results"]) == 50, "With limit=50 and offset=100, should return last 50 items"
         assert response.json()["count"] == 150, "Total count should still be 150"
@@ -2705,7 +2724,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         """Test that enable_backfills is blocked when the feature flag is disabled."""
         # Create a script function
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 **EXAMPLE_FULL,
                 "name": "Test Backfill Function",
@@ -2716,7 +2735,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
         # Try to enable backfills without the feature flag
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/{function_id}/enable_backfills/",
+            f"/v1/projects/{self.team.id}/insights_functions/{function_id}/enable_backfills/",
         )
 
         # Should be denied
@@ -2730,7 +2749,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
 
     def test_enable_backfills_blocked_for_non_event_source(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 **EXAMPLE_FULL,
                 "name": "Person Updates Function",
@@ -2743,7 +2762,7 @@ class TestInsightsFunctionAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTest
         function_id = response.json()["id"]
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/{function_id}/enable_backfills/",
+            f"/v1/projects/{self.team.id}/insights_functions/{function_id}/enable_backfills/",
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -2765,7 +2784,7 @@ class TestLogTransformationAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTes
             "enabled": False,
             **kwargs,
         }
-        return self.client.post(f"/api/projects/{self.team.id}/insights_functions/", data=data)
+        return self.client.post(f"/v1/projects/{self.team.id}/insights_functions/", data=data)
 
     def test_create_log_transformation(self):
         response = self._create_log_transformation()
@@ -2783,7 +2802,7 @@ class TestLogTransformationAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTes
 
         # The flag does not gate other types
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Event transformation",
                 "type": "transformation",
@@ -2798,14 +2817,14 @@ class TestLogTransformationAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTes
 
         self.mock_feature_enabled.return_value = False
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{function_id}/",
+            f"/v1/projects/{self.team.id}/insights_functions/{function_id}/",
             data={"name": "Renamed while flag off"},
         )
         assert response.status_code == status.HTTP_200_OK, response.json()
 
     def test_execution_order_is_scoped_per_type(self):
         event_response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Event transformation",
                 "type": "transformation",
@@ -2851,7 +2870,7 @@ class TestLogTransformationAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTes
         first_id = first.json()["id"]
 
         delete_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{first_id}/", data={"deleted": True}
+            f"/v1/projects/{self.team.id}/insights_functions/{first_id}/", data={"deleted": True}
         )
         assert delete_response.status_code == status.HTTP_200_OK
 
@@ -2860,7 +2879,7 @@ class TestLogTransformationAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTes
             assert response.status_code == status.HTTP_201_CREATED, response.json()
 
         restore_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{first_id}/", data={"deleted": False}
+            f"/v1/projects/{self.team.id}/insights_functions/{first_id}/", data={"deleted": False}
         )
         assert restore_response.status_code == status.HTTP_400_BAD_REQUEST
         assert (
@@ -2870,13 +2889,13 @@ class TestLogTransformationAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTes
 
         # Under the cap, restore works: free a slot, then the restore succeeds.
         disable_response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/{first_id}/", data={"deleted": False, "enabled": False}
+            f"/v1/projects/{self.team.id}/insights_functions/{first_id}/", data={"deleted": False, "enabled": False}
         )
         assert disable_response.status_code == status.HTTP_200_OK
 
         # The cap is per type: enabled event transformations are not blocked by it
         response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={
                 "name": "Event transformation",
                 "type": "transformation",
@@ -2904,11 +2923,11 @@ class TestLogTransformationAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTes
             ("person_global", "let e := person.properties.email\nreturn record"),
         ]
     )
-    def test_rejects_async_functions_and_unavailable_globals_in_hog_code(self, _name, script):
+    def test_rejects_async_functions_and_unavailable_globals_in_script_code(self, _name, script):
         response = self._create_log_transformation(script=script)
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
 
-    def test_allows_locals_loops_and_lambdas_in_hog_code(self):
+    def test_allows_locals_loops_and_lambdas_in_script_code(self):
         response = self._create_log_transformation(
             script=(
                 "fun redact(value) { return replaceAll(value, 'x', 'y') }\n"
@@ -2942,7 +2961,7 @@ class TestLogTransformationAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTes
         second = self._create_log_transformation(name="B", enabled=True).json()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/rearrange/",
+            f"/v1/projects/{self.team.id}/insights_functions/rearrange/",
             data={"orders": {first["id"]: 2, second["id"]: 1}},
         )
 
@@ -2954,14 +2973,14 @@ class TestLogTransformationAPI(DatastoreTestMixin, APIBaseTest, QueryMatchingTes
     def test_rearrange_rejects_mixed_types(self):
         log_function = self._create_log_transformation(name="A", enabled=True).json()
         event_response = self.client.post(
-            f"/api/projects/{self.team.id}/insights_functions/",
+            f"/v1/projects/{self.team.id}/insights_functions/",
             data={"name": "Event transformation", "type": "transformation", "script": "return event"},
         )
         assert event_response.status_code == status.HTTP_201_CREATED, event_response.json()
         event_function = event_response.json()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights_functions/rearrange/",
+            f"/v1/projects/{self.team.id}/insights_functions/rearrange/",
             data={"orders": {log_function["id"]: 1, event_function["id"]: 2}},
         )
 

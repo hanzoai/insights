@@ -3,8 +3,8 @@ import { Counter } from 'prom-client'
 
 import { InternalFetchService } from '~/common/services/internal-fetch'
 import { instrumentFn } from '~/common/tracing/tracing-utils'
-import { logger, serializeError } from '~/common/utils/logger'
 import { captureException } from '~/common/utils/insights'
+import { logger, serializeError } from '~/common/utils/logger'
 import { UUIDT } from '~/common/utils/utils'
 
 import { HealthCheckResult, HealthCheckResultError, HealthCheckResultOk, PluginsServerConfig, Team } from '../../types'
@@ -14,35 +14,35 @@ import {
     MAX_RESOLVER_ATTEMPTS,
     deserializeResolverState,
     serializeResolverState,
-} from '../services/insightsflows/batch-resolver.types'
-import { InsightsFlowBatchPersonQueryService } from '../services/insightsflows/hogflow-batch-person-query.service'
+} from '../services/flows/batch-resolver.types'
+import { FlowBatchPersonQueryService } from '../services/flows/flow-batch-person-query.service'
 import { invocationToV2JobInit } from '../services/job-queue/job-queue-postgres-v2'
 import { CyclotronJobInvocation } from '../types'
 import {
-    convertAccountBatchInsightsFlowRequestToInsightsFunctionInvocationGlobals,
-    convertBatchInsightsFlowRequestToInsightsFunctionInvocationGlobals,
+    convertAccountBatchFlowRequestToInsightsFunctionInvocationGlobals,
+    convertBatchFlowRequestToInsightsFunctionInvocationGlobals,
     logEntry,
 } from '../utils'
 import { convertToInsightsFunctionFilterGlobal } from '../utils/script-function-filtering'
 import { CdpConsumerBase, CdpConsumerBaseDeps } from './cdp-base.consumer'
-import { counterBatchInsightsFlowTriggerFailed } from './metrics'
+import { counterBatchFlowTriggerFailed } from './metrics'
 
 const RETRY_BACKOFF_MS = 5_000
 
-const counterBatchInsightsFlowAudienceTruncated = new Counter({
-    name: 'cdp_batch_hog_flow_audience_truncated',
+const counterBatchFlowAudienceTruncated = new Counter({
+    name: 'cdp_batch_flow_audience_truncated',
     help: 'A batch script flow run hit the per-team maxAudienceSize cap before finishing the audience',
-    labelNames: ['hog_flow_id'],
+    labelNames: ['flow_id'],
 })
 
-const counterBatchInsightsFlowResolverPagesProcessed = new Counter({
-    name: 'cdp_batch_hog_flow_resolver_pages_processed',
+const counterBatchFlowResolverPagesProcessed = new Counter({
+    name: 'cdp_batch_flow_resolver_pages_processed',
     help: 'Total pages processed by the cyclotron-based batch resolver',
     labelNames: ['outcome'], // success | fetch_failure | terminal_write_failure | invalid_state
 })
 
-const counterBatchInsightsFlowResolverJobs = new Counter({
-    name: 'cdp_batch_hog_flow_resolver_jobs',
+const counterBatchFlowResolverJobs = new Counter({
+    name: 'cdp_batch_flow_resolver_jobs',
     help: 'Batch script flow resolver jobs by lifecycle outcome',
     labelNames: ['outcome'], // started | completed | failed
 })
@@ -63,7 +63,7 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
         config: PluginsServerConfig,
         deps: CdpConsumerBaseDeps,
         private cyclotronWorker: CyclotronV2Worker,
-        private hogFlowBatchPersonQueryService: InsightsFlowBatchPersonQueryService,
+        private flowBatchPersonQueryService: FlowBatchPersonQueryService,
         private internalFetchService: InternalFetchService
     ) {
         super(config, deps)
@@ -102,8 +102,8 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
             // Schema drift, corrupted state, or a job from an incompatible
             // older deploy. None should happen in steady state — alert on
             // the counter so we notice fast.
-            counterBatchInsightsFlowResolverPagesProcessed.labels({ outcome: 'invalid_state' }).inc()
-            counterBatchInsightsFlowResolverJobs.labels({ outcome: 'failed' }).inc()
+            counterBatchFlowResolverPagesProcessed.labels({ outcome: 'invalid_state' }).inc()
+            counterBatchFlowResolverJobs.labels({ outcome: 'failed' }).inc()
             logger.error('🔴', `${this.name} - invalid resolver state, failing job`, {
                 jobId: job.id,
                 teamId: job.teamId,
@@ -125,7 +125,7 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
         // cursor/pagesProcessed/pendingTerminal but bumps attempts — without
         // it, `started` would fire again on every retry of the first page.
         if (!state.pendingTerminal && state.cursor === null && state.pagesProcessed === 0 && state.attempts === 0) {
-            counterBatchInsightsFlowResolverJobs.labels({ outcome: 'started' }).inc()
+            counterBatchFlowResolverJobs.labels({ outcome: 'started' }).inc()
         }
 
         try {
@@ -133,7 +133,7 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
                 try {
                     await this.processTerminalWrite(job, state)
                 } catch (err) {
-                    counterBatchInsightsFlowResolverPagesProcessed.labels({ outcome: 'terminal_write_failure' }).inc()
+                    counterBatchFlowResolverPagesProcessed.labels({ outcome: 'terminal_write_failure' }).inc()
                     logger.error('🔴', `${this.name} - unexpected error in processTerminalWrite`, {
                         batchJobId: state.batchJobId,
                         pendingTerminal: state.pendingTerminal,
@@ -175,18 +175,18 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
      * is preserved in state so the page replays cleanly.
      */
     private async processOnePage(job: CyclotronV2DequeuedJob, state: BatchResolverState): Promise<void> {
-        const [team, hogFlow] = await Promise.all([
+        const [team, flow] = await Promise.all([
             this.deps.teamManager.getTeam(state.teamId),
-            this.hogFlowManager.getInsightsFlow(state.hogFlowId),
+            this.flowManager.getFlow(state.flowId),
         ])
 
-        if (!team || !hogFlow) {
-            logger.error('🔴', `${this.name} - missing team or hogflow, failing resolver`, {
+        if (!team || !flow) {
+            logger.error('🔴', `${this.name} - missing team or flow, failing resolver`, {
                 teamId: state.teamId,
-                hogFlowId: state.hogFlowId,
+                flowId: state.flowId,
                 batchJobId: state.batchJobId,
             })
-            counterBatchInsightsFlowTriggerFailed.labels({ hog_flow_id: state.hogFlowId, reason: 'missing_entity' }).inc()
+            counterBatchFlowTriggerFailed.labels({ flow_id: state.flowId, reason: 'missing_entity' }).inc()
             await this.transitionToFailedTerminal(job, state, 'Workflow or team was deleted mid-run')
             return
         }
@@ -198,7 +198,7 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
         try {
             if (isAccountAudience) {
                 const accountPage = await instrumentFn('cdpBatchResolve.getAccountAudiencePage', () =>
-                    this.hogFlowBatchPersonQueryService.getAccountAudiencePage(team, state.filters, state.cursor)
+                    this.flowBatchPersonQueryService.getAccountAudiencePage(team, state.filters, state.cursor)
                 )
                 page = {
                     ids: accountPage.accounts,
@@ -208,7 +208,7 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
                 }
             } else {
                 const personsPage = await instrumentFn('cdpBatchResolve.getBlastRadiusPersons', () =>
-                    this.hogFlowBatchPersonQueryService.getBlastRadiusPersons(
+                    this.flowBatchPersonQueryService.getBlastRadiusPersons(
                         team,
                         state.filters,
                         state.groupTypeIndex,
@@ -219,7 +219,7 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
                 page = { ids: personsPage.users_affected, cursor: personsPage.cursor, has_more: personsPage.has_more }
             }
         } catch (err) {
-            counterBatchInsightsFlowResolverPagesProcessed.labels({ outcome: 'fetch_failure' }).inc()
+            counterBatchFlowResolverPagesProcessed.labels({ outcome: 'fetch_failure' }).inc()
             const nextAttempts = state.attempts + 1
             if (nextAttempts >= MAX_RESOLVER_ATTEMPTS) {
                 logger.error(
@@ -262,26 +262,26 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
         const eligibleIds = page.ids.slice(0, remainingBudget)
         const pageTruncated = eligibleIds.length < page.ids.length
 
-        const defaultVariables = mergeDefaultVariables(hogFlow.variables, state.variables)
+        const defaultVariables = mergeDefaultVariables(flow.variables, state.variables)
         const children: CyclotronV2JobInit[] = eligibleIds.map((id) =>
             invocationToV2JobInit(
                 isAccountAudience
-                    ? buildAccountInsightsFlowInvocation({
+                    ? buildAccountFlowInvocation({
                           siteUrl: this.config.SITE_URL,
                           parentRunId: state.batchJobId,
                           team,
-                          hogFlowId: hogFlow.id,
-                          flowVersion: hogFlow.version,
+                          flowId: flow.id,
+                          flowVersion: flow.version,
                           externalId: id,
                           groupType: page.accountGroupType ?? '',
                           defaultVariables,
                       })
-                    : buildInsightsFlowInvocation({
+                    : buildFlowInvocation({
                           siteUrl: this.config.SITE_URL,
                           parentRunId: state.batchJobId,
                           team,
-                          hogFlowId: hogFlow.id,
-                          flowVersion: hogFlow.version,
+                          flowId: flow.id,
+                          flowVersion: flow.version,
                           personId: id,
                           defaultVariables,
                       })
@@ -312,7 +312,7 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
             this.emitTruncationLog(newState)
         }
 
-        counterBatchInsightsFlowResolverPagesProcessed.labels({ outcome: 'success' }).inc()
+        counterBatchFlowResolverPagesProcessed.labels({ outcome: 'success' }).inc()
 
         logger.info(
             '📝',
@@ -321,7 +321,7 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
     }
 
     private emitTruncationLog(state: BatchResolverState): void {
-        counterBatchInsightsFlowAudienceTruncated.labels({ hog_flow_id: state.hogFlowId }).inc()
+        counterBatchFlowAudienceTruncated.labels({ flow_id: state.flowId }).inc()
         const message = `Audience reached the max cap of ${state.maxAudienceSize}, ${state.totalEnqueued} persons enqueued; the remainder did not receive this workflow.`
         logger.warn('⚠️', `${this.name} - audience truncated`, {
             batchJobId: state.batchJobId,
@@ -332,13 +332,13 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
             [
                 {
                     team_id: state.teamId,
-                    log_source: 'hog_flow',
+                    log_source: 'flow',
                     log_source_id: state.batchJobId,
                     instance_id: state.batchJobId,
                     ...logEntry('warn', message),
                 },
             ],
-            'hog_flow'
+            'flow'
         )
     }
 
@@ -361,13 +361,13 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
             [
                 {
                     team_id: state.teamId,
-                    log_source: 'hog_flow',
+                    log_source: 'flow',
                     log_source_id: state.batchJobId,
                     instance_id: state.batchJobId,
                     ...logEntry('error', `Batch resolver failed: ${reasonMessage}`),
                 },
             ],
-            'hog_flow'
+            'flow'
         )
 
         const newState: BatchResolverState = {
@@ -387,10 +387,10 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
         try {
             await this.putBatchJobStatus(state.teamId, state.batchJobId, state.pendingTerminal)
         } catch (err) {
-            counterBatchInsightsFlowResolverPagesProcessed.labels({ outcome: 'terminal_write_failure' }).inc()
+            counterBatchFlowResolverPagesProcessed.labels({ outcome: 'terminal_write_failure' }).inc()
             const nextAttempts = state.attempts + 1
             if (nextAttempts >= MAX_RESOLVER_ATTEMPTS) {
-                counterBatchInsightsFlowResolverJobs.labels({ outcome: 'failed' }).inc()
+                counterBatchFlowResolverJobs.labels({ outcome: 'failed' }).inc()
                 logger.error(
                     '🔴',
                     `${this.name} - terminal status write failed permanently after ${MAX_RESOLVER_ATTEMPTS} attempts; failing job`,
@@ -417,7 +417,7 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
             return
         }
 
-        counterBatchInsightsFlowResolverJobs
+        counterBatchFlowResolverJobs
             .labels({ outcome: state.pendingTerminal === 'completed' ? 'completed' : 'failed' })
             .inc()
 
@@ -431,7 +431,7 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
     }
 
     private async putBatchJobStatus(teamId: number, batchJobId: string, status: 'completed' | 'failed'): Promise<void> {
-        const urlPath = `/api/projects/${teamId}/internal/hog_flows/batch_jobs/${batchJobId}/status` as const
+        const urlPath = `/v1/projects/${teamId}/internal/insights_flows/batch_jobs/${batchJobId}/status` as const
 
         const { fetchResponse, fetchError } = await this.internalFetchService.fetch({
             urlPath,
@@ -456,30 +456,30 @@ export class CdpCyclotronWorkerBatchResolve extends CdpConsumerBase<PluginsServe
 }
 
 function mergeDefaultVariables(
-    hogFlowVariables: Array<{ key: string; default?: unknown }> | undefined | null,
+    flowVariables: Array<{ key: string; default?: unknown }> | undefined | null,
     runOverrides: Record<string, unknown>
 ): Record<string, unknown> {
     const defaults: Record<string, unknown> = {}
-    for (const variable of hogFlowVariables ?? []) {
+    for (const variable of flowVariables ?? []) {
         defaults[variable.key] = variable.default ?? null
     }
     return { ...defaults, ...runOverrides }
 }
 
-// Mirrors buildInsightsFlowInvocation for an account audience: the invocation carries the
-// account's group key (via $groups and distinct_id) and no person at all — the hogflow
+// Mirrors buildFlowInvocation for an account audience: the invocation carries the
+// account's group key (via $groups and distinct_id) and no person at all — the flow
 // worker skips person resolution for account audiences.
-export function buildAccountInsightsFlowInvocation(params: {
+export function buildAccountFlowInvocation(params: {
     siteUrl: string
     parentRunId: string
     team: Team
-    hogFlowId: string
+    flowId: string
     flowVersion: number
     externalId: string
     groupType: string
     defaultVariables: Record<string, unknown>
 }): CyclotronJobInvocation {
-    const invocationGlobals = convertAccountBatchInsightsFlowRequestToInsightsFunctionInvocationGlobals({
+    const invocationGlobals = convertAccountBatchFlowRequestToInsightsFunctionInvocationGlobals({
         team: params.team,
         externalId: params.externalId,
         groupType: params.groupType,
@@ -495,32 +495,32 @@ export function buildAccountInsightsFlowInvocation(params: {
             accountAudience: true,
             actionStepCount: 0,
             variables: params.defaultVariables,
-            // Same reason as createInsightsFlowInvocation: a broadcast's conversions arrive long after
+            // Same reason as createFlowInvocation: a broadcast's conversions arrive long after
             // the send, so they attribute to the version that sent, not the one live by then.
             flowVersion: params.flowVersion,
         } as any,
         teamId: params.team.id,
-        functionId: params.hogFlowId,
+        functionId: params.flowId,
         parentRunId: params.parentRunId,
         filterGlobals,
-        queue: 'hogflow' as const,
+        queue: 'flow' as const,
         queuePriority: 1,
         queueScheduledAt: DateTime.now(),
     } as CyclotronJobInvocation
 }
 
-// Mirrors `createInsightsFlowInvocation` from the legacy Kafka consumer so children
+// Mirrors `createFlowInvocation` from the legacy Kafka consumer so children
 // land in cyclotron_jobs looking the same regardless of dispatch path.
-function buildInsightsFlowInvocation(params: {
+function buildFlowInvocation(params: {
     siteUrl: string
     parentRunId: string
     team: Team
-    hogFlowId: string
+    flowId: string
     flowVersion: number
     personId: string
     defaultVariables: Record<string, unknown>
 }): CyclotronJobInvocation {
-    const invocationGlobals = convertBatchInsightsFlowRequestToInsightsFunctionInvocationGlobals({
+    const invocationGlobals = convertBatchFlowRequestToInsightsFunctionInvocationGlobals({
         team: params.team,
         personId: params.personId,
         siteUrl: params.siteUrl,
@@ -535,16 +535,16 @@ function buildInsightsFlowInvocation(params: {
             personId: params.personId,
             actionStepCount: 0,
             variables: params.defaultVariables,
-            // Same reason as createInsightsFlowInvocation: a broadcast's conversions arrive days after
+            // Same reason as createFlowInvocation: a broadcast's conversions arrive days after
             // the send, so they have to attribute to the version that sent, not the one live then.
             flowVersion: params.flowVersion,
         } as any,
         teamId: params.team.id,
-        functionId: params.hogFlowId,
+        functionId: params.flowId,
         parentRunId: params.parentRunId,
         person: invocationGlobals.person as any,
         filterGlobals,
-        queue: 'hogflow' as const,
+        queue: 'flow' as const,
         queuePriority: 1,
         queueScheduledAt: DateTime.now(),
     } as CyclotronJobInvocation

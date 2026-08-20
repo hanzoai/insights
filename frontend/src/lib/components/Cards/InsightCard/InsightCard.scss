@@ -45,7 +45,7 @@
     // Script-charts doesn't need the legacy padding compensation — its canvas is
     // absolutely positioned, so the inherited overlay padding pushes badges
     // below the x-axis instead of aligning them.
-    .HogChartsAnnotationsLayer .AnnotationsOverlay {
+    .ScriptChartsAnnotationsLayer .AnnotationsOverlay {
         padding: 0;
     }
 

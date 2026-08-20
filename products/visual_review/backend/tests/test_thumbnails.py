@@ -198,7 +198,7 @@ class TestThumbnailEndpoint(VisualReviewTeamScopedTestMixin, APIBaseTest):
 
     def _thumbnail_url(self, identifier: str | None = None) -> str:
         ident = identifier if identifier is not None else self.IDENTIFIER
-        return f"/api/projects/{self.team.id}/visual_review/repos/{self.repo.id}/thumbnails/{ident}/"
+        return f"/v1/projects/{self.team.id}/visual_review/repos/{self.repo.id}/thumbnails/{ident}/"
 
     def test_returns_thumbnail_bytes(self):
         self._seed_snapshot_with_thumbnail()
@@ -235,7 +235,7 @@ class TestThumbnailEndpoint(VisualReviewTeamScopedTestMixin, APIBaseTest):
         import uuid
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/visual_review/repos/{uuid.uuid4()}/thumbnails/{self.IDENTIFIER}/"
+            f"/v1/projects/{self.team.id}/visual_review/repos/{uuid.uuid4()}/thumbnails/{self.IDENTIFIER}/"
         )
 
         self.assertEqual(response.status_code, 404)

@@ -21,7 +21,7 @@ from typing import Any
 import click
 
 from insightscli import telemetry
-from insightscli.command_types import BinScriptCommand, CompositeCommand, DirectCommand, HogliCommand
+from insightscli.command_types import BinScriptCommand, CompositeCommand, DirectCommand, ScriptliCommand
 from insightscli.hooks import post_command_hooks, telemetry_property_hooks
 from insightscli.lazy_commands import add_commands_dir_to_path, add_repo_root_to_path, resolve_click_command
 from insightscli.manifest import (
@@ -42,7 +42,7 @@ _DEFAULT_HELP = "Developer CLI framework with YAML-based command definitions."
 # typing insightscli inside a shell that insightscli spawned (flox:activate, sandbox)
 # counts as nested too. Captured at import, before this process sets the
 # sentinel for its own children.
-_NESTED_INVOCATION_VAR = "HOGLI_NESTED_INVOCATION"
+_NESTED_INVOCATION_VAR = "INSIGHTSCLI_NESTED_INVOCATION"
 _IS_NESTED = _NESTED_INVOCATION_VAR in os.environ
 
 
@@ -339,7 +339,7 @@ def concepts() -> None:
 # Sentinel that prevents `_apply_env_config` from re-execing into the wrap
 # command in an infinite loop. Set by insightscli right before exec'ing the wrap
 # binary; checked at the top of `_apply_env_config` on subsequent invocations.
-_SECRETS_WRAPPED_ENV = "HOGLI_SECRETS_WRAPPED"
+_SECRETS_WRAPPED_ENV = "INSIGHTSCLI_SECRETS_WRAPPED"
 
 # Substituted to the absolute path of the secrets file when building the wrap
 # argv. Kept as a constant so the README, AGENTS.md, and runtime stay in sync.
@@ -397,7 +397,7 @@ def _apply_env_config(invoked_subcommand: str | None = None) -> None:
       listed wins for duplicate keys; shell env always wins.
     - ``config.env.secrets``: secrets file. Wrap re-exec is gated on
       ``_command_needs_secrets`` — when open, the file exists, the marker
-      matches, and ``wrap[0]`` is on PATH, set the ``HOGLI_SECRETS_WRAPPED``
+      matches, and ``wrap[0]`` is on PATH, set the ``INSIGHTSCLI_SECRETS_WRAPPED``
       sentinel and ``execvp`` into the wrap (which re-runs insightscli with
       secrets resolved). Otherwise load the file directly with
       marker-matching lines skipped, so unresolved refs don't leak as
@@ -556,7 +556,7 @@ def _register_script_commands() -> None:
                 continue
 
             if insightscli:
-                HogliCommand(cli_name, config).register(cli)
+                ScriptliCommand(cli_name, config).register(cli)
                 continue
 
             if bin_script:

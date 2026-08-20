@@ -8,14 +8,14 @@ from pydantic import BaseModel, Field
 from insights.insightsql import errors as insightsql_errors
 from insights.insightsql.parser import parse_program
 
-from insights.cdp.validation import compile_hog
+from insights.cdp.validation import compile_script
 
 from products.cdp.backend.prompts import (
     DESTINATION_LIMITATIONS_MESSAGE,
     EVENT_PROPERTY_TAXONOMY_MESSAGE,
     EVENT_TAXONOMY_MESSAGE,
     FILTER_TAXONOMY_MESSAGE,
-    IDENTITY_MESSAGE_HOG,
+    IDENTITY_MESSAGE_SCRIPT,
     INPUT_SCHEMA_TYPES_MESSAGE,
     INSIGHTS_EXAMPLE_MESSAGE,
     INSIGHTS_FUNCTION_FILTERS_ASSISTANT_ROOT_SYSTEM_PROMPT,
@@ -48,7 +48,7 @@ class InsightsFunctionFiltersOutput(BaseModel):
 
 
 class CreateIQLTransformationFunctionTool(MaxTool):
-    name: str = "create_hog_transformation_function"  # Must match a value in AssistantTool enum
+    name: str = "create_script_transformation_function"  # Must match a value in AssistantTool enum
     description: str = (
         "Write or edit the script code to create your desired function and apply it to the current editor"
     )
@@ -62,10 +62,10 @@ class CreateIQLTransformationFunctionTool(MaxTool):
     )
 
     def _run_impl(self, instructions: str) -> tuple[str, str]:
-        current_script_code = self.context.get("current_hog_code", "")
+        current_script_code = self.context.get("current_script_code", "")
 
         system_content = (
-            IDENTITY_MESSAGE_HOG
+            IDENTITY_MESSAGE_SCRIPT
             + "\n\n<example_script_code>\n"
             + INSIGHTS_EXAMPLE_MESSAGE
             + "\n</example_script_code>\n\n"
@@ -126,7 +126,7 @@ class CreateIQLTransformationFunctionTool(MaxTool):
             )
 
         try:
-            compile_hog(script_code, "transformation")
+            compile_script(script_code, "transformation")
         except Exception:
             # Try to get a more specific error by parsing directly
             try:
@@ -243,7 +243,7 @@ class CreateInsightsFunctionInputsTool(MaxTool):
 
     def _run_impl(self, instructions: str) -> tuple[str, list]:
         current_inputs_schema = self.context.get("current_inputs_schema", [])
-        script_code = self.context.get("hog_code", "")
+        script_code = self.context.get("script_code", "")
 
         system_content = (
             INSIGHTS_FUNCTION_INPUTS_SYSTEM_PROMPT

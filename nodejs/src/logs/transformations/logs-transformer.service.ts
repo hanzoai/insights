@@ -78,7 +78,7 @@ export const transformationInfraErrorsCounter = new Counter({
 export interface LogsTransformerConfig {
     siteUrl: string
     /** Hard per-record VM kill */
-    hogTimeoutMs: number
+    scriptTimeoutMs: number
     /** Cumulative VM time budget per Kafka message */
     messageBudgetMs: number
     /** Cumulative VM time budget per consumer batch */
@@ -123,7 +123,7 @@ const ATTR_TRANSFORMATIONS_SKIPPED = '$transformations_skipped'
  * it through unchanged. Budgets bound the worst-case added latency; when exhausted,
  * remaining records skip transformation and are annotated.
  *
- * Unlike the events HogTransformerService there are no per-invocation result objects:
+ * Unlike the events ScriptTransformerService there are no per-invocation result objects:
  * at logs volume (100k+ records/s for large teams) metrics are aggregated per
  * (function, message) and print() output is only kept for failing invocations.
  */
@@ -321,7 +321,7 @@ export class LogsTransformerService {
             let outcome
             try {
                 outcome = executeLogTransformation(fn.bytecode, record, globals, {
-                    timeoutMs: this.config.hogTimeoutMs,
+                    timeoutMs: this.config.scriptTimeoutMs,
                     sensitiveValues: this.getSensitiveValues(fn, ctx.sensitiveValuesCache),
                 })
             } catch (error) {
@@ -408,7 +408,7 @@ export class LogsTransformerService {
         fn: InsightsFunctionType,
         globals: LogTransformationGlobals
     ): { inputs: Record<string, unknown>; durationMs: number } {
-        return resolveLogTransformationInputs(fn, globals, this.config.hogTimeoutMs)
+        return resolveLogTransformationInputs(fn, globals, this.config.scriptTimeoutMs)
     }
 
     private getSensitiveValues(fn: InsightsFunctionType, cache: Map<string, string[]>): string[] {

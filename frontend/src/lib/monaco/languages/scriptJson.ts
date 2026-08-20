@@ -1,0 +1,172 @@
+/* oxlint-disable no-useless-escape */
+import { Monaco } from '@monaco-editor/react'
+import { languages } from 'monaco-editor'
+
+import { insightsQLAutocompleteProvider } from 'lib/monaco/insightsQLAutocompleteProvider'
+import { insightsQLMetadataProvider } from 'lib/monaco/insightsQLMetadataProvider'
+
+import { ScriptLanguage } from '~/queries/schema/schema-general'
+
+import { conf as _conf, language as _language } from './script'
+
+export const conf: () => languages.LanguageConfiguration = () => ({
+    ..._conf(),
+})
+
+export const language: () => languages.IMonarchLanguage = () => ({
+    ..._language(),
+    jsonKeywords: ['true', 'false', 'null', 'undefined'],
+    tokenizer: {
+        root: [[/[{}]/, 'delimiter.bracket'], { include: 'json' }],
+
+        json: [
+            // whitespace
+            { include: '@whitespace' },
+
+            // numbers
+            [/(@digits)[eE]([\-+]?(@digits))?/, 'number.float'],
+            [/(@digits)\.(@digits)([eE][\-+]?(@digits))?/, 'number.float'],
+            [/(@digits)n?/, 'number'],
+            [
+                /[\w@]+/,
+                {
+                    cases: {
+                        '@jsonKeywords': 'keyword',
+                    },
+                },
+            ],
+
+            // delimiter: after number because of .\d floats
+            [/[;,.]/, 'delimiter'],
+
+            // strings
+            [/"([^"\\]|\\.)*$/, 'string.invalid'], // non-teminated string
+            [/"/, 'string', '@string_format_json'],
+        ],
+
+        script: [
+            // whitespace
+            { include: '@whitespace' },
+
+            // delimiters and operators
+            [/[()\[\]]/, '@brackets'],
+            [/[<>](?!@symbols)/, '@brackets'],
+            [/!(?=([^=]|$))/, 'delimiter'],
+            [
+                /@symbols/,
+                {
+                    cases: {
+                        '@operators': 'delimiter',
+                        '@default': '',
+                    },
+                },
+            ],
+
+            // numbers
+            [/(@digits)[eE]([\-+]?(@digits))?/, 'number.float'],
+            [/(@digits)\.(@digits)([eE][\-+]?(@digits))?/, 'number.float'],
+            [/(@digits)n?/, 'number'],
+
+            // delimiter: after number because of .\d floats
+            [/[;,.]/, 'delimiter'],
+
+            // strings that are actually fields, show as type.identifier to highlight
+            [/"([^"\\]|\\.)*$/, 'type.identifier.invalid'], // non-teminated type.identifier
+            [/'([^'\\]|\\.)*$/, 'type.identifier.invalid'], // non-teminated type.identifier
+            [/"/, 'type.identifier', '@string_double'],
+            [/`/, 'type.identifier', '@string_backtick'],
+
+            // strings
+            [/f'/, 'string', '@string_format'],
+            [/'/, 'string', '@string_single'],
+
+            // identifiers and keywords
+            [
+                /#?[a-z_$][\w$]*/,
+                {
+                    cases: {
+                        '@keywords': 'keyword',
+                        '@default': 'identifier',
+                    },
+                },
+            ],
+        ],
+
+        whitespace: [
+            [/[ \t\r\n]+/, ''],
+            [/\/\*\*(?!\/)/, 'comment.doc', '@jsdoc'],
+            [/\/\*/, 'comment', '@comment'],
+            [/\/\/.*$/, 'comment'],
+            [/--.*$/, 'comment'],
+        ],
+
+        comment: [
+            [/[^\/*]+/, 'comment'],
+            [/\*\//, 'comment', '@pop'],
+            [/[\/*]/, 'comment'],
+        ],
+
+        jsdoc: [
+            [/[^\/*]+/, 'comment.doc'],
+            [/\*\//, 'comment.doc', '@pop'],
+            [/[\/*]/, 'comment.doc'],
+        ],
+
+        string_double: [
+            [/[^\\"]+/, 'type.identifier'],
+            [/@escapes/, 'type.identifier.escape'],
+            [/\\./, 'type.identifier.escape.invalid'],
+            [/"/, 'type.identifier', '@pop'],
+        ],
+
+        string_backtick: [
+            [/[^\\`]+/, 'type.identifier'],
+            [/@escapes/, 'type.identifier.escape'],
+            [/\\./, 'type.identifier.escape.invalid'],
+            [/`/, 'type.identifier', '@pop'],
+        ],
+
+        string_single: [
+            [/[^\\']+/, 'string'],
+            [/@escapes/, 'string.escape'],
+            [/\\./, 'string.escape.invalid'],
+            [/'/, 'string', '@pop'],
+        ],
+
+        string_format: [
+            [/\{/, { token: 'delimiter.bracket', next: '@bracketCounting' }],
+            [/[^\\'{]+/, 'string'],
+            [/@escapes/, 'string.escape'],
+            [/\\./, 'string.escape.invalid'],
+            [/'/, 'string', '@pop'],
+        ],
+
+        string_format_json: [
+            [/\{/, { token: 'delimiter.bracket', next: '@bracketCounting' }],
+            [/[^\\"{]+/, 'string'],
+            [/@escapes/, 'string.escape'],
+            [/\\./, 'string.escape.invalid'],
+            [/"/, 'string', '@pop'],
+        ],
+
+        bracketCounting: [
+            [/\{/, 'delimiter.bracket', '@bracketCounting'],
+            [/\}/, 'delimiter.bracket', '@pop'],
+            { include: 'script' },
+        ],
+    },
+})
+
+export function initScriptJsonLanguage(monaco: Monaco): void {
+    if (!monaco.languages.getLanguages().some(({ id }: { id: string }) => id === 'scriptJson')) {
+        monaco.languages.register({
+            id: 'scriptJson',
+            mimetypes: ['application/script+json'],
+        })
+        monaco.languages.setLanguageConfiguration('scriptJson', conf())
+        monaco.languages.setMonarchTokensProvider('scriptJson', language())
+        monaco.languages.registerCompletionItemProvider('scriptJson', insightsQLAutocompleteProvider(ScriptLanguage.scriptJson))
+        monaco.languages.registerCodeActionProvider('scriptJson', insightsQLMetadataProvider())
+    }
+}
+/* oxlint-enable no-useless-escape */

@@ -65,14 +65,14 @@ review). To hand-author or directly apply rules, use the `managing-path-cleaning
 - **Onboarding step**: `OnboardingWebAnalyticsPathCleaningStep` (stepKey `path_cleaning`) surfaces the
   same banner during Web analytics onboarding.
 - **API** (`products/web_analytics/backend/api/web_analytics_path_cleaning_suggestions.py`):
-  `POST /api/projects/:id/web_analytics_path_cleaning_suggestions/generate/` produces and stores a
+  `POST /v1/projects/:id/web_analytics_path_cleaning_suggestions/generate/` produces and stores a
   fresh suggestion on demand; `GET .../{issue_id}/preview/` applies the rules to a fresh sample of
   the team's top paths and returns before/after pairs (read scope, computed on demand, never
   stored — this backs the banner's "Preview on your paths" modal); `POST .../{issue_id}/apply/`
   merges the rules and resolves the issue (project admin only — the same gate the team API puts on
   `path_cleaning_filters`).
   Listing and dismissing go through the generic health-issues API
-  (`GET /api/projects/:id/health_issues/?kind=path_cleaning_suggestions&status=active&dismissed=false`,
+  (`GET /v1/projects/:id/health_issues/?kind=path_cleaning_suggestions&status=active&dismissed=false`,
   `PATCH .../health_issues/{id}/` with `{"dismissed": true}`).
 - **Health page**: the check renders on `/web/health` alongside the other web-analytics checks, with
   remediation guidance for humans and agents.

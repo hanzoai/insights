@@ -804,10 +804,10 @@ def test_job_trace_key_distinguishes_jobs() -> None:
 @pytest.mark.parametrize(
     "env,expected",
     [
-        ({"INSIGHTS_DEVEX_PROJECT_API_TOKEN": "phc_a", "INSIGHTS_CI_TRACES_EXTRA_TOKEN": "phc_b"}, ["phc_a", "phc_b"]),
-        ({"INSIGHTS_DEVEX_PROJECT_API_TOKEN": "phc_a", "INSIGHTS_CI_TRACES_EXTRA_TOKEN": "phc_a"}, ["phc_a"]),
-        ({"INSIGHTS_DEVEX_PROJECT_API_TOKEN": "phc_a"}, ["phc_a"]),
-        ({"INSIGHTS_CI_TRACES_EXTRA_TOKEN": "phc_b"}, ["phc_b"]),
+        ({"INSIGHTS_DEVEX_PROJECT_API_TOKEN": "pk-a", "INSIGHTS_CI_TRACES_EXTRA_TOKEN": "pk-b"}, ["pk-a", "pk-b"]),
+        ({"INSIGHTS_DEVEX_PROJECT_API_TOKEN": "pk-a", "INSIGHTS_CI_TRACES_EXTRA_TOKEN": "pk-a"}, ["pk-a"]),
+        ({"INSIGHTS_DEVEX_PROJECT_API_TOKEN": "pk-a"}, ["pk-a"]),
+        ({"INSIGHTS_CI_TRACES_EXTRA_TOKEN": "pk-b"}, ["pk-b"]),
         ({"INSIGHTS_DEVEX_PROJECT_API_TOKEN": "", "INSIGHTS_CI_TRACES_EXTRA_TOKEN": ""}, []),
         ({}, []),
     ],

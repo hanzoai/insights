@@ -79,7 +79,7 @@ export function ConfirmOrganization(): JSX.Element {
                     label="Organization name"
                     help="You can always rename your organization later"
                 >
-                    <Input className="ph-ignore-input" placeholder="Hogflix Movies" />
+                    <Input className="ph-ignore-input" placeholder="Scriptflix Movies" />
                 </Field>
 
                 <SignupRoleSelect />

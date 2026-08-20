@@ -2,8 +2,8 @@ module.exports = {
     transform: {
         '^.+\\.[cm]?[jt]s$': ['@swc/jest'],
     },
-    // insights-js's rrweb subpath entries are shipped as ESM; let them through to the transform.
-    transformIgnorePatterns: ['node_modules/(?!.*insights-js/dist/rrweb)'],
+    // The rrweb packages ship ESM; let them through to the transform.
+    transformIgnorePatterns: ['node_modules/(?!.*@hanzo/insights-rrweb)'],
     testEnvironment: 'node',
     // Wraps the describe/it/test globals to enforce .test_quarantine.json jest entries.
     setupFilesAfterEnv: ['../../frontend/jest.quarantine.ts'],

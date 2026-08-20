@@ -51,7 +51,7 @@ class TestBedrockSpecific:
                 "messages": [{"role": "user", "content": "Hello"}],
             },
             headers={
-                "Authorization": "Bearer phx_test_key",
+                "Authorization": "Bearer sk-test_key",
                 "X-Insights-Provider": "bedrock",
                 "anthropic-beta": "interleaved-thinking-2025-05-14, extended-thinking-2025-05-14",
             },
@@ -83,7 +83,7 @@ class TestBedrockSpecific:
                 "model": "claude-sonnet-4-6",
                 "messages": [{"role": "user", "content": "Hello"}],
             },
-            headers={"Authorization": "Bearer phx_test_key", "X-Insights-Provider": "bedrock"},
+            headers={"Authorization": "Bearer sk-test_key", "X-Insights-Provider": "bedrock"},
         )
 
         assert response.status_code == 200
@@ -110,7 +110,7 @@ class TestBedrockSpecific:
                 "model": "claude-sonnet-4-6",
                 "messages": [{"role": "user", "content": "Hello"}],
             },
-            headers={"Authorization": "Bearer phx_test_key", "X-Insights-Provider": "bedrock"},
+            headers={"Authorization": "Bearer sk-test_key", "X-Insights-Provider": "bedrock"},
         )
 
         assert response.status_code == 200
@@ -152,7 +152,7 @@ class TestBedrockSpecific:
         response = authenticated_client.post(
             "/v1/messages",
             json={"model": model, "messages": [{"role": "user", "content": "Hello"}]},
-            headers={"Authorization": "Bearer phx_test_key", "X-Insights-Provider": "bedrock"},
+            headers={"Authorization": "Bearer sk-test_key", "X-Insights-Provider": "bedrock"},
         )
 
         assert response.status_code == 200
@@ -199,7 +199,7 @@ class TestBedrockFallback:
                 "messages": [{"role": "user", "content": "Hello"}],
             },
             headers={
-                "Authorization": "Bearer phx_test_key",
+                "Authorization": "Bearer sk-test_key",
                 "X-Insights-Use-Bedrock-Fallback": "true",
             },
         )
@@ -231,7 +231,7 @@ class TestBedrockFallback:
                 "messages": [{"role": "user", "content": "Hello"}],
             },
             headers={
-                "Authorization": "Bearer phx_test_key",
+                "Authorization": "Bearer sk-test_key",
                 "X-Insights-Use-Bedrock-Fallback": "true",
             },
         )
@@ -257,7 +257,7 @@ class TestBedrockFallback:
                 "messages": [{"role": "user", "content": "Hello"}],
             },
             headers={
-                "Authorization": "Bearer phx_test_key",
+                "Authorization": "Bearer sk-test_key",
                 "X-Insights-Use-Bedrock-Fallback": "false",
             },
         )
@@ -290,7 +290,7 @@ class TestBedrockFallback:
                 "messages": [{"role": "user", "content": "Hello"}],
             },
             headers={
-                "Authorization": "Bearer phx_test_key",
+                "Authorization": "Bearer sk-test_key",
                 "X-Insights-Use-Bedrock-Fallback": "true",
             },
         )
@@ -323,7 +323,7 @@ class TestBedrockFallback:
                 "messages": [{"role": "user", "content": "Hello"}],
             },
             headers={
-                "Authorization": "Bearer phx_test_key",
+                "Authorization": "Bearer sk-test_key",
                 "X-Insights-Use-Bedrock-Fallback": "true",
             },
         )
@@ -343,7 +343,7 @@ class TestBedrockCountTokensViaProvider:
     @pytest.fixture
     def valid_request_headers(self) -> dict[str, str]:
         return {
-            "Authorization": "Bearer phx_test_key",
+            "Authorization": "Bearer sk-test_key",
             "X-Insights-Provider": "bedrock",
         }
 
@@ -400,7 +400,7 @@ class TestBedrockCountTokensViaProvider:
         authenticated_client.post(
             "/v1/messages/count_tokens",
             json={"model": model, "messages": [{"role": "user", "content": "Hello"}]},
-            headers={"Authorization": "Bearer phx_test_key", "X-Insights-Provider": "bedrock"},
+            headers={"Authorization": "Bearer sk-test_key", "X-Insights-Provider": "bedrock"},
         )
 
         call_args = mock_count_tokens.call_args
@@ -705,7 +705,7 @@ class TestBedrockCountTokensViaProvider:
         response = authenticated_client.post(
             "/v1/messages/count_tokens",
             json=body,
-            headers={"Authorization": "Bearer phx_test_key", "X-Insights-Provider": "bedrock"},
+            headers={"Authorization": "Bearer sk-test_key", "X-Insights-Provider": "bedrock"},
         )
 
         assert response.status_code == 200
@@ -907,7 +907,7 @@ class TestModelMapping:
         response = authenticated_client.post(
             "/bedrock/v1/messages",
             json={"model": "us.anthropic.claude-sonnet-4-6", "messages": [{"role": "user", "content": "Hello"}]},
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer sk-test_key"},
         )
         # "/bedrock/v1/messages" now matches "/{product}/v1/messages" with product="bedrock",
         # which is not a valid product, so returns 400

@@ -24,10 +24,10 @@ from .run_tagger import (
     build_tagger_system_prompt,
     disable_tagger_activity,
     emit_tagger_event_activity,
-    execute_hog_tagger_activity,
+    execute_script_tagger_activity,
     execute_tagger_activity,
     fetch_tagger_activity,
-    run_hog_tagger,
+    run_script_tagger,
 )
 
 
@@ -358,7 +358,7 @@ class TestRunTaggerWorkflow:
                 {
                     "tags": ["billing"],
                     "reasoning": "matched billing keyword",
-                    "is_hog": True,
+                    "is_script": True,
                 },
                 "script",
                 False,
@@ -440,7 +440,7 @@ class TestRunTaggerWorkflow:
         team = setup_data["team"]
         tagger = {"id": str(setup_data["tagger"].id), "name": "Feature Tagger"}
         event_data = create_mock_event_data(team.id, properties={})
-        result = {"tags": ["billing"], "reasoning": "matched", "is_hog": True}
+        result = {"tags": ["billing"], "reasoning": "matched", "is_script": True}
 
         capture_result = MagicMock(
             raise_for_status=MagicMock(side_effect=CaptureInternalError("boom", status_code=status_code))
@@ -483,11 +483,11 @@ class TestRunTaggerWorkflow:
         assert parsed.event_data == event_data
 
 
-def make_hog_tagger_dict(team_id: int, source: str, tags: list[dict] | None = None) -> dict:
+def make_script_tagger_dict(team_id: int, source: str, tags: list[dict] | None = None) -> dict:
     """Build the tagger payload that the workflow passes to the Script activity."""
-    from insights.cdp.validation import compile_hog
+    from insights.cdp.validation import compile_script
 
-    bytecode = compile_hog(source, "tagger")
+    bytecode = compile_script(source, "tagger")
     return {
         "id": "00000000-0000-0000-0000-000000000000",
         "name": "Script Tagger",
@@ -501,8 +501,8 @@ def make_hog_tagger_dict(team_id: int, source: str, tags: list[dict] | None = No
     }
 
 
-class TestRunHogTagger:
-    """Direct tests of run_hog_tagger — covers ScriptVM error branches without
+class TestRunScriptTagger:
+    """Direct tests of run_script_tagger — covers ScriptVM error branches without
     needing the Django DB or Temporal scaffolding."""
 
     @staticmethod
@@ -510,21 +510,21 @@ class TestRunHogTagger:
         return create_mock_event_data(team_id=1)
 
     def test_returns_list_of_strings(self):
-        from insights.cdp.validation import compile_hog
+        from insights.cdp.validation import compile_script
 
-        bytecode = compile_hog("return ['billing']", "tagger")
+        bytecode = compile_script("return ['billing']", "tagger")
 
-        result = run_hog_tagger(bytecode, self._event_data(), valid_tag_names={"billing", "analytics"})
+        result = run_script_tagger(bytecode, self._event_data(), valid_tag_names={"billing", "analytics"})
 
         assert result["tags"] == ["billing"]
         assert result["error"] is None
 
     def test_filters_unknown_tags_against_whitelist(self):
-        from insights.cdp.validation import compile_hog
+        from insights.cdp.validation import compile_script
 
-        bytecode = compile_hog("return ['billing', 'unknown', 'analytics']", "tagger")
+        bytecode = compile_script("return ['billing', 'unknown', 'analytics']", "tagger")
 
-        result = run_hog_tagger(bytecode, self._event_data(), valid_tag_names={"billing", "analytics"})
+        result = run_script_tagger(bytecode, self._event_data(), valid_tag_names={"billing", "analytics"})
 
         assert result["tags"] == ["billing", "analytics"]
         assert "unknown" not in result["tags"]
@@ -534,52 +534,52 @@ class TestRunHogTagger:
         """When tagger_config['tags'] is empty (Script-only freeform), the source's
         return value is taken at face value — this is the documented behavior
         for Script taggers without a tag whitelist."""
-        from insights.cdp.validation import compile_hog
+        from insights.cdp.validation import compile_script
 
-        bytecode = compile_hog("return ['anything', 'goes']", "tagger")
+        bytecode = compile_script("return ['anything', 'goes']", "tagger")
 
-        result = run_hog_tagger(bytecode, self._event_data(), valid_tag_names=set())
+        result = run_script_tagger(bytecode, self._event_data(), valid_tag_names=set())
 
         assert result["tags"] == ["anything", "goes"]
         assert result["error"] is None
 
     def test_string_return_is_promoted_to_single_tag_list(self):
-        from insights.cdp.validation import compile_hog
+        from insights.cdp.validation import compile_script
 
-        bytecode = compile_hog("return 'billing'", "tagger")
+        bytecode = compile_script("return 'billing'", "tagger")
 
-        result = run_hog_tagger(bytecode, self._event_data(), valid_tag_names={"billing"})
+        result = run_script_tagger(bytecode, self._event_data(), valid_tag_names={"billing"})
 
         assert result["tags"] == ["billing"]
         assert result["error"] is None
 
     def test_non_list_return_type_surfaces_error(self):
-        from insights.cdp.validation import compile_hog
+        from insights.cdp.validation import compile_script
 
-        bytecode = compile_hog("return 42", "tagger")
+        bytecode = compile_script("return 42", "tagger")
 
-        result = run_hog_tagger(bytecode, self._event_data(), valid_tag_names={"billing"})
+        result = run_script_tagger(bytecode, self._event_data(), valid_tag_names={"billing"})
 
         assert result["tags"] == []
         assert result["error"] is not None
         assert "Must return a list of tag names" in result["error"]
 
     def test_null_return_yields_empty_tags_no_error(self):
-        from insights.cdp.validation import compile_hog
+        from insights.cdp.validation import compile_script
 
-        bytecode = compile_hog("return null", "tagger")
+        bytecode = compile_script("return null", "tagger")
 
-        result = run_hog_tagger(bytecode, self._event_data(), valid_tag_names={"billing"})
+        result = run_script_tagger(bytecode, self._event_data(), valid_tag_names={"billing"})
 
         assert result["tags"] == []
         assert result["error"] is None
 
     def test_print_output_captured_as_reasoning(self):
-        from insights.cdp.validation import compile_hog
+        from insights.cdp.validation import compile_script
 
-        bytecode = compile_hog("print('inspecting input'); return ['billing']", "tagger")
+        bytecode = compile_script("print('inspecting input'); return ['billing']", "tagger")
 
-        result = run_hog_tagger(bytecode, self._event_data(), valid_tag_names={"billing"})
+        result = run_script_tagger(bytecode, self._event_data(), valid_tag_names={"billing"})
 
         assert result["tags"] == ["billing"]
         assert "inspecting input" in result["reasoning"]
@@ -590,7 +590,7 @@ class TestRunHogTagger:
         with patch(
             "common.scriptvm.python.execute.execute_bytecode", side_effect=ScriptVMRuntimeExceededException(5.0, 1000)
         ):
-            result = run_hog_tagger(["dummy"], self._event_data(), valid_tag_names={"billing"})
+            result = run_script_tagger(["dummy"], self._event_data(), valid_tag_names={"billing"})
 
         assert result["tags"] == []
         assert "timed out" in (result["error"] or "").lower()
@@ -602,7 +602,7 @@ class TestRunHogTagger:
             "common.scriptvm.python.execute.execute_bytecode",
             side_effect=ScriptVMMemoryExceededException(1024, 4096),
         ):
-            result = run_hog_tagger(["dummy"], self._event_data(), valid_tag_names={"billing"})
+            result = run_script_tagger(["dummy"], self._event_data(), valid_tag_names={"billing"})
 
         assert result["tags"] == []
         assert "memory" in (result["error"] or "").lower()
@@ -612,40 +612,40 @@ class TestRunHogTagger:
             "common.scriptvm.python.execute.execute_bytecode",
             side_effect=RuntimeError("kaboom"),
         ):
-            result = run_hog_tagger(["dummy"], self._event_data(), valid_tag_names={"billing"})
+            result = run_script_tagger(["dummy"], self._event_data(), valid_tag_names={"billing"})
 
         assert result["tags"] == []
         assert result["error"] is not None
         assert "Unexpected error" in result["error"]
 
 
-class TestExecuteHogTaggerActivity:
+class TestExecuteScriptTaggerActivity:
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
-    async def test_happy_path_returns_is_hog_marker(self, setup_data):
+    async def test_happy_path_returns_is_script_marker(self, setup_data):
         team = setup_data["team"]
-        tagger = make_hog_tagger_dict(
+        tagger = make_script_tagger_dict(
             team.id,
             source="return ['billing']",
             tags=[{"name": "billing"}, {"name": "analytics"}],
         )
 
-        result = await execute_hog_tagger_activity(tagger, create_mock_event_data(team.id))
+        result = await execute_script_tagger_activity(tagger, create_mock_event_data(team.id))
 
         assert result["tags"] == ["billing"]
-        assert result["is_hog"] is True
+        assert result["is_script"] is True
 
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
     async def test_filters_unknown_tags(self, setup_data):
         team = setup_data["team"]
-        tagger = make_hog_tagger_dict(
+        tagger = make_script_tagger_dict(
             team.id,
             source="return ['billing', 'unknown', 'analytics']",
             tags=[{"name": "billing"}, {"name": "analytics"}],
         )
 
-        result = await execute_hog_tagger_activity(tagger, create_mock_event_data(team.id))
+        result = await execute_script_tagger_activity(tagger, create_mock_event_data(team.id))
 
         assert result["tags"] == ["billing", "analytics"]
         assert "unknown" not in result["tags"]
@@ -663,7 +663,7 @@ class TestExecuteHogTaggerActivity:
         }
 
         with pytest.raises(ApplicationError, match="Missing bytecode"):
-            await execute_hog_tagger_activity(tagger, create_mock_event_data(team.id))
+            await execute_script_tagger_activity(tagger, create_mock_event_data(team.id))
 
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
@@ -678,20 +678,20 @@ class TestExecuteHogTaggerActivity:
         }
 
         with pytest.raises(ApplicationError, match="Unsupported tagger type"):
-            await execute_hog_tagger_activity(tagger, create_mock_event_data(team.id))
+            await execute_script_tagger_activity(tagger, create_mock_event_data(team.id))
 
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
     async def test_non_list_return_raises_application_error(self, setup_data):
         team = setup_data["team"]
-        tagger = make_hog_tagger_dict(
+        tagger = make_script_tagger_dict(
             team.id,
             source="return 42",
             tags=[{"name": "billing"}],
         )
 
         with pytest.raises(ApplicationError, match="Must return a list"):
-            await execute_hog_tagger_activity(tagger, create_mock_event_data(team.id))
+            await execute_script_tagger_activity(tagger, create_mock_event_data(team.id))
 
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
@@ -699,7 +699,7 @@ class TestExecuteHogTaggerActivity:
         from common.scriptvm.python.utils import ScriptVMRuntimeExceededException
 
         team = setup_data["team"]
-        tagger = make_hog_tagger_dict(
+        tagger = make_script_tagger_dict(
             team.id,
             source="return ['billing']",
             tags=[{"name": "billing"}],
@@ -710,7 +710,7 @@ class TestExecuteHogTaggerActivity:
             side_effect=ScriptVMRuntimeExceededException(5.0, 1000),
         ):
             with pytest.raises(ApplicationError, match="timed out"):
-                await execute_hog_tagger_activity(tagger, create_mock_event_data(team.id))
+                await execute_script_tagger_activity(tagger, create_mock_event_data(team.id))
 
     @pytest.mark.asyncio
     @pytest.mark.django_db(transaction=True)
@@ -718,7 +718,7 @@ class TestExecuteHogTaggerActivity:
         from common.scriptvm.python.utils import ScriptVMMemoryExceededException
 
         team = setup_data["team"]
-        tagger = make_hog_tagger_dict(
+        tagger = make_script_tagger_dict(
             team.id,
             source="return ['billing']",
             tags=[{"name": "billing"}],
@@ -729,7 +729,7 @@ class TestExecuteHogTaggerActivity:
             side_effect=ScriptVMMemoryExceededException(1024, 4096),
         ):
             with pytest.raises(ApplicationError, match="Memory limit"):
-                await execute_hog_tagger_activity(tagger, create_mock_event_data(team.id))
+                await execute_script_tagger_activity(tagger, create_mock_event_data(team.id))
 
 
 class TestBuildTagResultSchema:

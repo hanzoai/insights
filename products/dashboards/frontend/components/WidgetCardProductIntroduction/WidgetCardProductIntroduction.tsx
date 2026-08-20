@@ -8,7 +8,7 @@ import { cn } from 'lib/utils/css-classes'
 
 type WidgetCardProductIntroductionProps = Omit<
     ProductIntroductionProps,
-    'hogLayout' | 'useMainContentContainerQueries'
+    'scriptLayout' | 'useMainContentContainerQueries'
 > & {
     /** Script above copy at all tile widths (disables responsive side-by-side layout). */
     stacked?: boolean
@@ -38,7 +38,7 @@ export function WidgetCardProductIntroduction({
             <ProductIntroduction
                 {...props}
                 contentClassName={cn('max-w-none', contentClassName)}
-                hogLayout={isStacked ? 'vertical' : 'responsive'}
+                scriptLayout={isStacked ? 'vertical' : 'responsive'}
             />
         </div>
     )

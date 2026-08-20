@@ -120,7 +120,7 @@ function HistoryRow({
                 <span
                     className={`w-3 h-3 rounded-full border-2 ${
                         isCurrent
-                            ? 'bg-accent border-accent shadow-[0_0_0_4px_rgba(245,78,0,0.18)]'
+                            ? 'bg-accent border-accent shadow-[0_0_0_4px_rgba(51,51,51,0.18)]'
                             : 'bg-bg-light border-secondary'
                     }`}
                 />

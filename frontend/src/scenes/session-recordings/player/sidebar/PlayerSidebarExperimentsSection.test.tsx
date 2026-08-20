@@ -25,7 +25,7 @@ describe('PlayerSidebarExperimentsSection', () => {
     beforeEach(() => {
         setupSessionRecordingTest({
             getMocks: {
-                '/api/projects/:team_id/experiments/session_context/': experimentSessionContextEnrolledCurrentResponse,
+                '/v1/projects/:team_id/experiments/session_context/': experimentSessionContextEnrolledCurrentResponse,
             },
         })
         featureFlagLogic.mount()

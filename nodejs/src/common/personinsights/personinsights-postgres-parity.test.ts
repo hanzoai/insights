@@ -2,7 +2,7 @@ import { create } from '@bufbuild/protobuf'
 import { type ServiceImpl, createRouterTransport } from '@connectrpc/connect'
 import { DateTime } from 'luxon'
 
-import { PersonHogService } from '~/common/generated/personinsights/personinsights/service/v1/service_pb'
+import { PersonFnService } from '~/common/generated/personinsights/personinsights/service/v1/service_pb'
 import {
     GroupSchema,
     GroupTypeMappingSchema,
@@ -19,7 +19,7 @@ import { UUIDT } from '~/common/utils/utils'
 import { insertRow, resetTestDatabase } from '~/tests/helpers/sql'
 import { GroupTypeIndex, Hub, ProjectId, PropertyUpdateOperation, RawPerson, TeamId } from '~/types'
 
-import { PersonHogClient } from './client'
+import { PersonFnClient } from './client'
 
 jest.mock('~/common/utils/logger')
 
@@ -107,17 +107,17 @@ const SERVICE_DEFAULTS = {
     updatePersonProperties: () => ({}),
 } as const
 
-function createMockPersonHogClient(serviceImpl: Partial<ServiceImpl<typeof PersonHogService>>): PersonHogClient {
+function createMockPersonFnClient(serviceImpl: Partial<ServiceImpl<typeof PersonFnService>>): PersonFnClient {
     const transport = createRouterTransport(({ service }) => {
-        service(PersonHogService, {
+        service(PersonFnService, {
             ...SERVICE_DEFAULTS,
             ...serviceImpl,
         })
     })
-    return PersonHogClient.fromTransport(transport)
+    return PersonFnClient.fromTransport(transport)
 }
 
-describe('PersonHog ↔ Postgres parity', () => {
+describe('PersonFn ↔ Postgres parity', () => {
     let hub: Hub
 
     const teamId = 1 as TeamId
@@ -223,7 +223,7 @@ describe('PersonHog ↔ Postgres parity', () => {
                 const fromPostgres = await postgresRepo.fetchGroup(teamId, 0 as GroupTypeIndex, 'acme')
                 const rawRow = await readRawGroup(teamId, 0, 'acme')
 
-                const grpcClient = createMockPersonHogClient({
+                const grpcClient = createMockPersonFnClient({
                     getGroup: () => ({ group: postgresRowToProtoGroup(rawRow!) }),
                 })
                 const fromGrpc = await grpcClient.groups.fetchGroup(teamId, 0, 'acme')
@@ -234,7 +234,7 @@ describe('PersonHog ↔ Postgres parity', () => {
             it('group not found produces identical output', async () => {
                 const fromPostgres = await postgresRepo.fetchGroup(teamId, 0 as GroupTypeIndex, 'nonexistent')
 
-                const grpcClient = createMockPersonHogClient({
+                const grpcClient = createMockPersonFnClient({
                     getGroup: () => ({}),
                 })
                 const fromGrpc = await grpcClient.groups.fetchGroup(teamId, 0, 'nonexistent')
@@ -257,7 +257,7 @@ describe('PersonHog ↔ Postgres parity', () => {
                 const fromPostgres = await postgresRepo.fetchGroup(teamId, 1 as GroupTypeIndex, 'complex')
                 const rawRow = await readRawGroup(teamId, 1, 'complex')
 
-                const grpcClient = createMockPersonHogClient({
+                const grpcClient = createMockPersonFnClient({
                     getGroup: () => ({ group: postgresRowToProtoGroup(rawRow!) }),
                 })
                 const fromGrpc = await grpcClient.groups.fetchGroup(teamId, 1, 'complex')
@@ -273,7 +273,7 @@ describe('PersonHog ↔ Postgres parity', () => {
                 const fromPostgres = await postgresRepo.fetchGroup(teamId, 0 as GroupTypeIndex, 'grp-日本語')
                 const rawRow = await readRawGroup(teamId, 0, 'grp-日本語')
 
-                const grpcClient = createMockPersonHogClient({
+                const grpcClient = createMockPersonFnClient({
                     getGroup: () => ({ group: postgresRowToProtoGroup(rawRow!) }),
                 })
                 const fromGrpc = await grpcClient.groups.fetchGroup(teamId, 0, 'grp-日本語')
@@ -303,7 +303,7 @@ describe('PersonHog ↔ Postgres parity', () => {
                 const rawAcme = await readRawGroup(teamId, 0, 'acme')
                 const rawEng = await readRawGroup(teamId, 1, 'eng-team')
 
-                const grpcClient = createMockPersonHogClient({
+                const grpcClient = createMockPersonFnClient({
                     getGroupsBatch: () => ({
                         results: [
                             {
@@ -344,7 +344,7 @@ describe('PersonHog ↔ Postgres parity', () => {
 
                 const rawExists = await readRawGroup(teamId, 0, 'exists')
 
-                const grpcClient = createMockPersonHogClient({
+                const grpcClient = createMockPersonFnClient({
                     getGroupsBatch: () => ({
                         results: [
                             {
@@ -370,7 +370,7 @@ describe('PersonHog ↔ Postgres parity', () => {
             it('empty input produces identical output', async () => {
                 const fromPostgres = await postgresRepo.fetchGroupsByKeys([])
 
-                const grpcClient = createMockPersonHogClient({})
+                const grpcClient = createMockPersonFnClient({})
                 const fromGrpc = await grpcClient.groups.fetchGroupsByKeys([], [], [])
 
                 expect(fromGrpc).toEqual(fromPostgres)
@@ -385,7 +385,7 @@ describe('PersonHog ↔ Postgres parity', () => {
 
                 const fromPostgres = await postgresRepo.fetchGroupTypesByTeamIds([teamId])
 
-                const grpcClient = createMockPersonHogClient({
+                const grpcClient = createMockPersonFnClient({
                     getGroupTypeMappingsByTeamIds: () => ({
                         results: [
                             create(GroupTypeMappingsByKeySchema, {
@@ -405,11 +405,11 @@ describe('PersonHog ↔ Postgres parity', () => {
 
             it('team with no group types — known shape divergence', async () => {
                 // Postgres pre-initializes empty arrays for all requested IDs.
-                // PersonHogClient omits keys with no mappings.
+                // PersonFnClient omits keys with no mappings.
                 // Downstream code handles this with result[teamId] ?? [].
                 const fromPostgres = await postgresRepo.fetchGroupTypesByTeamIds([teamId])
 
-                const grpcClient = createMockPersonHogClient({
+                const grpcClient = createMockPersonFnClient({
                     getGroupTypeMappingsByTeamIds: () => ({ results: [] }),
                 })
                 const fromGrpc = await grpcClient.groups.fetchGroupTypesByTeamIds([teamId])
@@ -431,7 +431,7 @@ describe('PersonHog ↔ Postgres parity', () => {
 
                 const fromPostgres = await postgresRepo.fetchGroupTypesByTeamIds([teamId, teamId2])
 
-                const grpcClient = createMockPersonHogClient({
+                const grpcClient = createMockPersonFnClient({
                     getGroupTypeMappingsByTeamIds: () => ({
                         results: [
                             create(GroupTypeMappingsByKeySchema, {
@@ -456,7 +456,7 @@ describe('PersonHog ↔ Postgres parity', () => {
             it('empty input produces identical output', async () => {
                 const fromPostgres = await postgresRepo.fetchGroupTypesByTeamIds([])
 
-                const grpcClient = createMockPersonHogClient({})
+                const grpcClient = createMockPersonFnClient({})
                 const fromGrpc = await grpcClient.groups.fetchGroupTypesByTeamIds([])
 
                 expect(fromGrpc).toEqual(fromPostgres)
@@ -470,7 +470,7 @@ describe('PersonHog ↔ Postgres parity', () => {
 
                 const fromPostgres = await postgresRepo.fetchGroupTypesByProjectIds([projectId])
 
-                const grpcClient = createMockPersonHogClient({
+                const grpcClient = createMockPersonFnClient({
                     getGroupTypeMappingsByProjectIds: () => ({
                         results: [
                             create(GroupTypeMappingsByKeySchema, {
@@ -490,7 +490,7 @@ describe('PersonHog ↔ Postgres parity', () => {
             it('project with no group types — known shape divergence', async () => {
                 const fromPostgres = await postgresRepo.fetchGroupTypesByProjectIds([projectId])
 
-                const grpcClient = createMockPersonHogClient({
+                const grpcClient = createMockPersonFnClient({
                     getGroupTypeMappingsByProjectIds: () => ({ results: [] }),
                 })
                 const fromGrpc = await grpcClient.groups.fetchGroupTypesByProjectIds([projectId])
@@ -503,7 +503,7 @@ describe('PersonHog ↔ Postgres parity', () => {
             it('empty input produces identical output', async () => {
                 const fromPostgres = await postgresRepo.fetchGroupTypesByProjectIds([])
 
-                const grpcClient = createMockPersonHogClient({})
+                const grpcClient = createMockPersonFnClient({})
                 const fromGrpc = await grpcClient.groups.fetchGroupTypesByProjectIds([])
 
                 expect(fromGrpc).toEqual(fromPostgres)
@@ -577,7 +577,7 @@ describe('PersonHog ↔ Postgres parity', () => {
                 const fromPostgres = await postgresRepo.fetchPerson(teamId, 'user-1')
                 const rawRow = await readRawPerson(teamId, 'user-1')
 
-                const grpcClient = createMockPersonHogClient({
+                const grpcClient = createMockPersonFnClient({
                     getPersonsByDistinctIds: () => ({
                         results: [
                             {
@@ -599,7 +599,7 @@ describe('PersonHog ↔ Postgres parity', () => {
             it('person not found produces identical output', async () => {
                 const fromPostgres = await postgresRepo.fetchPerson(teamId, 'nonexistent')
 
-                const grpcClient = createMockPersonHogClient({
+                const grpcClient = createMockPersonFnClient({
                     getPersonsByDistinctIds: () => ({ results: [] }),
                 })
                 const fromGrpc = await grpcClient.persons.fetchPersonsByDistinctIds([
@@ -623,7 +623,7 @@ describe('PersonHog ↔ Postgres parity', () => {
                 const fromPostgres = await postgresRepo.fetchPerson(teamId, 'complex-user')
                 const rawRow = await readRawPerson(teamId, 'complex-user')
 
-                const grpcClient = createMockPersonHogClient({
+                const grpcClient = createMockPersonFnClient({
                     getPersonsByDistinctIds: () => ({
                         results: [
                             {
@@ -648,7 +648,7 @@ describe('PersonHog ↔ Postgres parity', () => {
                 const fromPostgres = await postgresRepo.fetchPerson(teamId, 'grp-日本語')
                 const rawRow = await readRawPerson(teamId, 'grp-日本語')
 
-                const grpcClient = createMockPersonHogClient({
+                const grpcClient = createMockPersonFnClient({
                     getPersonsByDistinctIds: () => ({
                         results: [
                             {
@@ -675,7 +675,7 @@ describe('PersonHog ↔ Postgres parity', () => {
                 const identifiedRaw = await readRawPerson(teamId, 'identified-user')
                 const anonymousRaw = await readRawPerson(teamId, 'anonymous-user')
 
-                const grpcClient = createMockPersonHogClient({
+                const grpcClient = createMockPersonFnClient({
                     getPersonsByDistinctIds: (req: any) => {
                         const distinctId = req.teamDistinctIds[0].distinctId
                         const raw = distinctId === 'identified-user' ? identifiedRaw : anonymousRaw
@@ -720,7 +720,7 @@ describe('PersonHog ↔ Postgres parity', () => {
                 const rawAlice = await readRawPerson(teamId, 'alice')
                 const rawBob = await readRawPerson(teamId, 'bob')
 
-                const grpcClient = createMockPersonHogClient({
+                const grpcClient = createMockPersonFnClient({
                     getPersonsByDistinctIds: () => ({
                         results: [
                             {
@@ -755,7 +755,7 @@ describe('PersonHog ↔ Postgres parity', () => {
 
                 const rawExists = await readRawPerson(teamId, 'exists')
 
-                const grpcClient = createMockPersonHogClient({
+                const grpcClient = createMockPersonFnClient({
                     getPersonsByDistinctIds: () => ({
                         results: [
                             {
@@ -780,7 +780,7 @@ describe('PersonHog ↔ Postgres parity', () => {
             it('empty input produces identical output', async () => {
                 const fromPostgres = await postgresRepo.fetchPersonsByDistinctIds([])
 
-                const grpcClient = createMockPersonHogClient({})
+                const grpcClient = createMockPersonFnClient({})
                 const fromGrpc = await grpcClient.persons.fetchPersonsByDistinctIds([])
 
                 expect(fromGrpc).toEqual(fromPostgres)
@@ -796,7 +796,7 @@ describe('PersonHog ↔ Postgres parity', () => {
 
                 const rawAlice = await readRawPerson(teamId, 'alice')
 
-                const grpcClient = createMockPersonHogClient({
+                const grpcClient = createMockPersonFnClient({
                     getPersonsByUuids: () => ({
                         persons: [postgresRowToProtoPerson(rawAlice!)],
                     }),
@@ -810,7 +810,7 @@ describe('PersonHog ↔ Postgres parity', () => {
                 const missingUuid = new UUIDT().toString()
                 const fromPostgres = await postgresRepo.fetchPersonsByPersonIds([{ teamId, personId: missingUuid }])
 
-                const grpcClient = createMockPersonHogClient({
+                const grpcClient = createMockPersonFnClient({
                     getPersonsByUuids: () => ({ persons: [] }),
                 })
                 const fromGrpc = await grpcClient.persons.fetchPersonsByPersonIds([{ teamId, personId: missingUuid }])
@@ -822,7 +822,7 @@ describe('PersonHog ↔ Postgres parity', () => {
             it('empty input produces identical output', async () => {
                 const fromPostgres = await postgresRepo.fetchPersonsByPersonIds([])
 
-                const grpcClient = createMockPersonHogClient({})
+                const grpcClient = createMockPersonFnClient({})
                 const fromGrpc = await grpcClient.persons.fetchPersonsByPersonIds([])
 
                 expect(fromGrpc).toEqual(fromPostgres)

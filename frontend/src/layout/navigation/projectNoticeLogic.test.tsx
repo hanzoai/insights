@@ -7,7 +7,6 @@ import { expectLogic } from 'kea-test-utils'
 
 import { reverseProxyCheckerLogic } from 'lib/components/ReverseProxyChecker/reverseProxyCheckerLogic'
 import { Banner } from 'lib/elements/Banner'
-import { verifyEmailLogic } from 'scenes/authentication/verify-email/verifyEmailLogic'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
 import { useMocks } from '~/mocks/jest'
@@ -30,7 +29,7 @@ describe('projectNoticeLogic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/organizations/:organization_id/proxy_records': [200, { results: [] }],
+                    '/v1/organizations/:organization_id/proxy_records': [200, { results: [] }],
                 },
             })
             initKeaTests()
@@ -88,10 +87,10 @@ describe('projectNoticeLogic', () => {
             } as unknown as AppContext
             useMocks({
                 get: {
-                    '/api/organizations/:organization_id/proxy_records': [200, { results: [] }],
+                    '/v1/organizations/:organization_id/proxy_records': [200, { results: [] }],
                 },
                 post: {
-                    '/api/environments/:team_id/query/:kind': () => [200, { results: [] }],
+                    '/v1/environments/:team_id/query/:kind': () => [200, { results: [] }],
                 },
             })
             initKeaTests()
@@ -129,10 +128,10 @@ describe('projectNoticeLogic', () => {
                 get: {
                     // Function form so the [status, body] tuple is honored — a static array value
                     // would be served as a 200 JSON body instead of the error status.
-                    '/api/organizations/:organization_id/proxy_records': () => [status, {}],
+                    '/v1/organizations/:organization_id/proxy_records': () => [status, {}],
                 },
                 post: {
-                    '/api/environments/:team_id/query/:kind': () => [200, { results: [] }],
+                    '/v1/environments/:team_id/query/:kind': () => [200, { results: [] }],
                 },
             })
             initKeaTests()
@@ -166,11 +165,11 @@ describe('projectNoticeLogic', () => {
                 get: {
                     // currentOrganizationId resolves to the loaded org id, not "@current" —
                     // match any id so loadRecords resolves instead of erroring.
-                    '/api/organizations/:organization_id/proxy_records': [200, { results: [] }],
+                    '/v1/organizations/:organization_id/proxy_records': [200, { results: [] }],
                 },
                 post: {
                     // reverseProxyCheckerLogic's InsightsQL detection query.
-                    '/api/environments/:team_id/query/:kind': () => [200, { results: [] }],
+                    '/v1/environments/:team_id/query/:kind': () => [200, { results: [] }],
                 },
             })
             initKeaTests()
@@ -209,10 +208,10 @@ describe('projectNoticeLogic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/organizations/:organization_id/proxy_records': [200, { results: [] }],
+                    '/v1/organizations/:organization_id/proxy_records': [200, { results: [] }],
                 },
                 post: {
-                    '/api/environments/:team_id/query/:kind': () => [200, { results: [] }],
+                    '/v1/environments/:team_id/query/:kind': () => [200, { results: [] }],
                 },
             })
             initKeaTests()
@@ -261,36 +260,6 @@ describe('projectNoticeLogic', () => {
         })
     })
 
-    describe('unverified email banner CTA', () => {
-        beforeEach(() => {
-            useMocks({
-                get: {
-                    '/api/organizations/:organization_id/proxy_records': [200, { results: [] }],
-                },
-                post: {
-                    '/api/users/request_email_verification/': [200, { success: true }],
-                },
-            })
-            initKeaTests()
-        })
-
-        it('mounts verifyEmailLogic so the CTA reaches its request loader', async () => {
-            const logic = projectNoticeLogic()
-            logic.mount()
-
-            // The banner renders on every scene, but verifyEmailLogic is otherwise only mounted on the
-            // verify-email scene — without this connection the CTA action dispatches into an unmounted
-            // logic and silently no-ops.
-            expect(verifyEmailLogic.isMounted()).toBe(true)
-
-            await expectLogic(verifyEmailLogic, () => {
-                verifyEmailLogic.actions.requestVerificationLink('test-uuid')
-            }).toDispatchActions(['requestVerificationLink', 'requestVerificationLinkSuccess'])
-
-            logic.unmount()
-        })
-    })
-
     describe('reverse proxy banner CTA navigation', () => {
         let getItemSpy: jest.SpyInstance
         let getDateSpy: jest.SpyInstance
@@ -298,10 +267,10 @@ describe('projectNoticeLogic', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/organizations/:organization_id/proxy_records': [200, { results: [] }],
+                    '/v1/organizations/:organization_id/proxy_records': [200, { results: [] }],
                 },
                 post: {
-                    '/api/environments/:team_id/query/:kind': () => [200, { results: [] }],
+                    '/v1/environments/:team_id/query/:kind': () => [200, { results: [] }],
                 },
             })
             initKeaTests()

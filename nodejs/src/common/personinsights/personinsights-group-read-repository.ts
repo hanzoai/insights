@@ -1,7 +1,7 @@
 import { GroupReadRepository } from '~/common/groups/repositories/group-repository.interface'
 import { GroupTypeIndex, ProjectId, TeamId } from '~/types'
 
-import { PersonHogClient } from './client'
+import { PersonFnClient } from './client'
 import { withRetry } from './grpc-retry'
 import { timedGrpc } from './metrics'
 
@@ -10,9 +10,9 @@ import { timedGrpc } from './metrics'
  * dependency — all reads go through personinsights with automatic retries
  * on transient errors.
  */
-export class PersonHogGroupReadRepository implements GroupReadRepository {
+export class PersonFnGroupReadRepository implements GroupReadRepository {
     constructor(
-        private grpcClient: PersonHogClient,
+        private grpcClient: PersonFnClient,
         private clientLabel: string = 'unknown'
     ) {}
 

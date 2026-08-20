@@ -53,10 +53,12 @@ export const BatchExportsCreateBody = /* @__PURE__ */ zod
         name: zod.string().describe('Human-readable name for the batch export.'),
         model: zod
             .enum(['events', 'persons', 'sessions', 'insightsql'])
-            .describe('\* `events` - Events\n\* `persons` - Persons\n\* `sessions` - Sessions\n\* `insightsql` - Hogql')
+            .describe(
+                '\* `events` - Events\n\* `persons` - Persons\n\* `sessions` - Sessions\n\* `insightsql` - Insightsql'
+            )
             .optional()
             .describe(
-                'Which data model to export (events, persons, sessions).\n\n\* `events` - Events\n\* `persons` - Persons\n\* `sessions` - Sessions\n\* `insightsql` - Hogql'
+                'Which data model to export (events, persons, sessions).\n\n\* `events` - Events\n\* `persons` - Persons\n\* `sessions` - Sessions\n\* `insightsql` - Insightsql'
             ),
         destination: zod
             .union([
@@ -411,10 +413,12 @@ export const BatchExportsPartialUpdateBody = /* @__PURE__ */ zod
         name: zod.string().optional().describe('Human-readable name for the batch export.'),
         model: zod
             .enum(['events', 'persons', 'sessions', 'insightsql'])
-            .describe('\* `events` - Events\n\* `persons` - Persons\n\* `sessions` - Sessions\n\* `insightsql` - Hogql')
+            .describe(
+                '\* `events` - Events\n\* `persons` - Persons\n\* `sessions` - Sessions\n\* `insightsql` - Insightsql'
+            )
             .optional()
             .describe(
-                'Which data model to export (events, persons, sessions).\n\n\* `events` - Events\n\* `persons` - Persons\n\* `sessions` - Sessions\n\* `insightsql` - Hogql'
+                'Which data model to export (events, persons, sessions).\n\n\* `events` - Events\n\* `persons` - Persons\n\* `sessions` - Sessions\n\* `insightsql` - Insightsql'
             ),
         destination: zod
             .union([
@@ -969,7 +973,9 @@ export const FileDownloadBatchExportsCancelCreateBody = /* @__PURE__ */ zod
             .describe('Typed configuration for a FileDownload batch-export destination.'),
         model: zod
             .enum(['events', 'persons', 'sessions', 'insightsql'])
-            .describe('\* `events` - events\n\* `persons` - persons\n\* `sessions` - sessions\n\* `insightsql` - insightsql'),
+            .describe(
+                '\* `events` - events\n\* `persons` - persons\n\* `sessions` - sessions\n\* `insightsql` - insightsql'
+            ),
         include: zod.array(zod.string()).optional(),
         exclude: zod.array(zod.string()).optional(),
         insightsql_query: zod

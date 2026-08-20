@@ -39,10 +39,10 @@ const meta: Meta = {
                 '/stats': () => [200, { users_on_product: 2387 }],
 
                 // Avoid displaying error of missing $pageview/$pageleave/$web_vitals events
-                '/api/projects/:team_id/event_definitions': () => [200, { count: 5 }],
+                '/v1/projects/:team_id/event_definitions': () => [200, { count: 5 }],
             },
             post: {
-                '/api/environments/:team_id/query/:kind': async ({ request }) => {
+                '/v1/environments/:team_id/query/:kind': async ({ request }) => {
                     const query = ((await request.json()) as any).query
                     const queryKind = query.kind
 
@@ -118,10 +118,10 @@ WebAnalyticsDashboardLoading.decorators = [
     mswDecorator({
         get: {
             '/stats': () => [200, { users_on_product: 2387 }],
-            '/api/projects/:team_id/event_definitions': () => [200, { count: 5 }],
+            '/v1/projects/:team_id/event_definitions': () => [200, { count: 5 }],
         },
         post: {
-            '/api/environments/:team_id/query/:kind': () => new Promise<never>(() => {}),
+            '/v1/environments/:team_id/query/:kind': () => new Promise<never>(() => {}),
         },
     }),
 ]

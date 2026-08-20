@@ -3,7 +3,7 @@ import { OverflowOutput } from '~/common/outputs'
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
 import { createApplyEventRestrictionsStep, createParseHeadersStep } from '~/ingestion/common/steps/event-preprocessing'
 import { newBatchingPipeline } from '~/ingestion/framework/builders'
-import { createTopHogWrapper, sum, timer } from '~/ingestion/framework/extensions/tophog'
+import { createTopFnWrapper, sum, timer } from '~/ingestion/framework/extensions/topfn'
 import { aggregateKafkaDebugContexts } from '~/ingestion/framework/helpers'
 import { PipelineConfig } from '~/ingestion/framework/result-handling-pipeline'
 import { ok } from '~/ingestion/framework/results'
@@ -55,12 +55,12 @@ export function createMlMirrorReplayPipeline(
         sessionFilter,
         keyStore,
         sessionKeyResolutionMaxConcurrency,
-        topHog,
+        topFn,
         isDebugLoggingEnabled,
     } = config
 
     const pipelineConfig: PipelineConfig<OverflowOutput> = { outputs, promiseScheduler }
-    const topHogWrapper = createTopHogWrapper(topHog)
+    const topFnWrapper = createTopFnWrapper(topFn)
 
     return newBatchingPipeline<
         SessionReplayPipelineInput,
@@ -139,7 +139,7 @@ export function createMlMirrorReplayPipeline(
                                                 (b) => {
                                                     // The native Rust addon fuses parse+anonymize in one step.
                                                     const parsed = b.pipe(
-                                                        topHogWrapper(
+                                                        topFnWrapper(
                                                             createParseAndAnonymizeMessageStep(
                                                                 imageScrub && {
                                                                     pseudonymSecret: imageScrub.pseudonymSecret,
@@ -162,7 +162,7 @@ export function createMlMirrorReplayPipeline(
                                                           )
                                                         : parsed
                                                     return withImagesProduced.pipe(
-                                                        topHogWrapper(
+                                                        topFnWrapper(
                                                             createRecordSessionEventStep({
                                                                 isDebugLoggingEnabled,
                                                             }),

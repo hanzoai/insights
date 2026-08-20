@@ -106,7 +106,7 @@ class TestSetGapStatus(BaseTest):
 class TestKnowledgeGapSuggestionAPI(APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/api/projects/{self.team.id}/business_knowledge/gap_suggestions/"
+        self.url = f"/v1/projects/{self.team.id}/business_knowledge/gap_suggestions/"
 
     def test_list_aggregated(self, _ff) -> None:
         for _ in range(2):
@@ -175,7 +175,7 @@ class TestKnowledgeGapSuggestionScopes(APIBaseTest):
 
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/api/projects/{self.team.id}/business_knowledge/gap_suggestions/"
+        self.url = f"/v1/projects/{self.team.id}/business_knowledge/gap_suggestions/"
         self.ticket_id = str(uuid.uuid4())
         logic.upsert_knowledge_gaps(self.team.id, self.ticket_id, ["Topic A"])
 

@@ -90,7 +90,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/llm_prompts/': toPaginatedResponse(MOCK_PROMPTS),
+                '/v1/projects/:team_id/llm_prompts/': toPaginatedResponse(MOCK_PROMPTS),
             },
         }),
     ],
@@ -104,7 +104,7 @@ export const EmptyState: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/llm_prompts/': toPaginatedResponse([]),
+                '/v1/projects/:team_id/llm_prompts/': toPaginatedResponse([]),
             },
         }),
     ],

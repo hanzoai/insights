@@ -43,9 +43,9 @@ dev = [
 insightscli = "insightscli.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/PostHog/posthog"
-Documentation = "https://github.com/PostHog/posthog/tree/master/tools/hogli"
-Repository = "https://github.com/PostHog/posthog"
+Homepage = "https://github.com/hanzoai/insights"
+Documentation = "https://github.com/hanzoai/insights/tree/main/tools/insightscli"
+Repository = "https://github.com/hanzoai/insights"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/insightscli"]

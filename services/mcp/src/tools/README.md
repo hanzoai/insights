@@ -221,7 +221,7 @@ public featureFlags(params: { projectId: number }) {
         create: async ({ data }: { data: CreateFeatureFlagInput }) => {
             return this.request<FeatureFlagResponseSchema>({
                 method: "POST",
-                path: `/api/projects/${params.projectId}/feature_flags/`,
+                path: `/v1/projects/${params.projectId}/feature_flags/`,
                 body: data,
                 schema: FeatureFlagResponseSchema,
             });

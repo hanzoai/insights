@@ -7,7 +7,7 @@ from django.db import DatabaseError
 from django.test import override_settings
 
 from insights.schema import (
-    HogLanguage,
+    ScriptLanguage,
     InsightsQLMetadata,
     InsightsQLMetadataResponse,
     InsightsQLQuery,
@@ -37,7 +37,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         return get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.INSIGHTS_QL_EXPR,
+                language=ScriptLanguage.INSIGHTS_QL_EXPR,
                 query=query,
                 sourceQuery=InsightsQLQuery(query=f"select * from {table}"),
                 response=None,
@@ -49,7 +49,11 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
     def _select(self, query: str, modifiers: Optional[InsightsQLQueryModifiers] = None) -> InsightsQLMetadataResponse:
         return get_insightsql_metadata(
             query=InsightsQLMetadata(
-                kind="InsightsQLMetadata", language=HogLanguage.INSIGHTS_QL, query=query, response=None, modifiers=modifiers
+                kind="InsightsQLMetadata",
+                language=ScriptLanguage.INSIGHTS_QL,
+                query=query,
+                response=None,
+                modifiers=modifiers,
             ),
             team=self.team,
         )
@@ -60,7 +64,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         return get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.INSIGHTS_QL,
+                language=ScriptLanguage.INSIGHTS_QL,
                 query=query,
                 response=None,
                 variables=variables,
@@ -72,14 +76,16 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
     def _program(self, query: str, globals: Optional[dict] = None) -> InsightsQLMetadataResponse:
         return get_insightsql_metadata(
             query=InsightsQLMetadata(
-                kind="InsightsQLMetadata", language=HogLanguage.HOG, query=query, globals=globals, response=None
+                kind="InsightsQLMetadata", language=ScriptLanguage.SCRIPT, query=query, globals=globals, response=None
             ),
             team=self.team,
         )
 
     def _template(self, query: str) -> InsightsQLMetadataResponse:
         return get_insightsql_metadata(
-            query=InsightsQLMetadata(kind="InsightsQLMetadata", language=HogLanguage.INSIGHTS_TEMPLATE, query=query, response=None),
+            query=InsightsQLMetadata(
+                kind="InsightsQLMetadata", language=ScriptLanguage.SCRIPT_TEMPLATE, query=query, response=None
+            ),
             team=self.team,
         )
 
@@ -390,7 +396,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.INSIGHTS_QL,
+                language=ScriptLanguage.INSIGHTS_QL,
                 query="SELECT 1",
                 response=None,
                 connectionId=str(source.id),
@@ -420,7 +426,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         metadata = get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.INSIGHTS_QL,
+                language=ScriptLanguage.INSIGHTS_QL,
                 query="SELECT 1",
                 response=None,
                 connectionId=str(source.id),
@@ -454,7 +460,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         metadata = get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.INSIGHTS_QL,
+                language=ScriptLanguage.INSIGHTS_QL,
                 query="SELECT * FROM persons LIMIT 1",
                 response=None,
                 connectionId=str(source.id),
@@ -494,7 +500,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         metadata = get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.INSIGHTS_QL,
+                language=ScriptLanguage.INSIGHTS_QL,
                 query="SELECT * FROM insights_user LIMIT 1",
                 response=None,
                 connectionId=str(source.id),
@@ -538,7 +544,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         metadata = get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.INSIGHTS_QL,
+                language=ScriptLanguage.INSIGHTS_QL,
                 query="SELECT * FROM events LIMIT 1",
                 response=None,
                 connectionId=str(source.id),
@@ -579,7 +585,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         metadata = get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.INSIGHTS_QL_EXPR,
+                language=ScriptLanguage.INSIGHTS_QL_EXPR,
                 query="icu_collate_nl(name, 'nl')",
                 sourceQuery=InsightsQLQuery(query="select * from insights_user"),
                 response=None,
@@ -621,7 +627,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         metadata = get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.INSIGHTS_QL,
+                language=ScriptLanguage.INSIGHTS_QL,
                 query="SELECT * FROM insights_user LIMIT 1",
                 response=None,
                 connectionId=str(source.id),
@@ -646,7 +652,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
         metadata = get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.INSIGHTS_QL,
+                language=ScriptLanguage.INSIGHTS_QL,
                 query="SELECT 1",
                 response=None,
                 connectionId=str(selected_source.id),
@@ -747,7 +753,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
 
     def test_valid_view_nested_view(self):
         saved_query_response = self.client.post(
-            f"/api/environments/{self.team.id}/warehouse_saved_queries/",
+            f"/v1/environments/{self.team.id}/warehouse_saved_queries/",
             {
                 "name": "event_view",
                 "query": {
@@ -781,7 +787,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
             },
         )
 
-    def test_hog_program(self):
+    def test_script_program(self):
         metadata = self._program("let i := 3")
         self.assertEqual(
             metadata.dict(),
@@ -792,7 +798,7 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
             },
         )
 
-    def test_hog_program_invalid(self):
+    def test_script_program_invalid(self):
         metadata = self._program("let i := NONO()")
         self.assertEqual(
             metadata.dict(),
@@ -802,11 +808,13 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
                 "isValid": False,
                 "notices": [],
                 "warnings": [],
-                "errors": [{"end": 15, "fix": None, "message": "Script function `NONO` is not implemented", "start": 9}],
+                "errors": [
+                    {"end": 15, "fix": None, "message": "Script function `NONO` is not implemented", "start": 9}
+                ],
             },
         )
 
-    def test_hog_program_globals(self):
+    def test_script_program_globals(self):
         metadata = self._program("print(event, region)", globals={"event": "banana"})
         self.assertEqual(
             metadata.dict(),
@@ -838,7 +846,9 @@ class TestMetadata(DatastoreTestMixin, APIBaseTest):
             metadata.dict()
             | {
                 "isValid": False,
-                "errors": [{"end": 17, "fix": None, "message": "Script function `NONO` is not implemented", "start": 11}],
+                "errors": [
+                    {"end": 17, "fix": None, "message": "Script function `NONO` is not implemented", "start": 11}
+                ],
             },
         )
 

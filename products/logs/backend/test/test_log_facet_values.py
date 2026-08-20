@@ -32,13 +32,13 @@ class TestLogFacetValues(DatastoreTestMixin, APIBaseTest):
 
     def _facet(self, facet_field: str, **filters) -> dict[str, int]:
         body = {"query": {"facetField": facet_field, "dateRange": self.DATE_RANGE, **filters}}
-        response = self.client.post(f"/api/projects/{self.team.pk}/logs/facet_values", body, format="json")
+        response = self.client.post(f"/v1/projects/{self.team.pk}/logs/facet_values", body, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         return {r["value"]: r["count"] for r in response.json()["results"]}
 
     def _facet_attr(self, key: str, **filters) -> dict[str, int]:
         body = {"query": {"facetResourceAttribute": key, "dateRange": self.DATE_RANGE, **filters}}
-        response = self.client.post(f"/api/projects/{self.team.pk}/logs/facet_values", body, format="json")
+        response = self.client.post(f"/v1/projects/{self.team.pk}/logs/facet_values", body, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         return {r["value"]: r["count"] for r in response.json()["results"]}
 
@@ -102,7 +102,7 @@ class TestLogFacetValues(DatastoreTestMixin, APIBaseTest):
 
     def test_invalid_facet_field_is_rejected(self):
         body = {"query": {"facetField": "body", "dateRange": self.DATE_RANGE}}
-        response = self.client.post(f"/api/projects/{self.team.pk}/logs/facet_values", body, format="json")
+        response = self.client.post(f"/v1/projects/{self.team.pk}/logs/facet_values", body, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @parameterized.expand([("k8s.namespace.name",), ("k8s.pod.name",), ("k8s.node.name",)])
@@ -205,5 +205,5 @@ class TestLogFacetValues(DatastoreTestMixin, APIBaseTest):
             {"facetField": "service_name", "facetResourceAttribute": "k8s.pod.name"},  # both
         ):
             body = {"query": {**query, "dateRange": self.DATE_RANGE}}
-            response = self.client.post(f"/api/projects/{self.team.pk}/logs/facet_values", body, format="json")
+            response = self.client.post(f"/v1/projects/{self.team.pk}/logs/facet_values", body, format="json")
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

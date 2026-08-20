@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 import type { ReactNode } from 'react'
 
-import { MailHog } from 'lib/components/mascots'
+import { MailScript } from 'lib/components/mascots'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Button } from 'lib/elements/Button'
 import { Modal } from 'lib/elements/Modal'
@@ -152,7 +152,7 @@ export function TabbedManageSubscriptions({
             } yet. Add one to send an up-to-date snapshot to Slack or email on a schedule.`,
             emptyState: (
                 <SubscriptionEmptyState
-                    illustration={<MailHog className="object-contain shrink-0 w-24 h-20" />}
+                    illustration={<MailScript className="object-contain shrink-0 w-24 h-20" />}
                     title={`${isInsightContext ? 'Insight' : 'Dashboard'} subscriptions`}
                     description={`Send an up-to-date snapshot of this ${
                         isInsightContext ? 'insight' : 'dashboard'

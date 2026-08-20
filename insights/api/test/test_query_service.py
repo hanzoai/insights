@@ -17,7 +17,7 @@ from insights.schema import (
     DatabaseSchemaSource,
     DatabaseSerializedFieldType,
     DataVisualizationNode,
-    HogLanguage,
+    ScriptLanguage,
     InsightsQLAutocomplete,
     InsightsQLAutocompleteResponse,
     InsightsQLQuery,
@@ -403,7 +403,7 @@ class TestQueryService(APIBaseTest):
             InsightsQLAutocomplete(
                 kind="InsightsQLAutocomplete",
                 query="SELECT * FROM ",
-                language=HogLanguage.INSIGHTS_QL,
+                language=ScriptLanguage.INSIGHTS_QL,
                 startPosition=14,
                 endPosition=14,
             ),
@@ -454,7 +454,7 @@ class TestQueryService(APIBaseTest):
             InsightsQLAutocomplete(
                 kind="InsightsQLAutocomplete",
                 query="SELECT * FROM ",
-                language=HogLanguage.INSIGHTS_QL,
+                language=ScriptLanguage.INSIGHTS_QL,
                 startPosition=14,
                 endPosition=14,
                 connectionId=str(source.id),
@@ -509,7 +509,7 @@ class TestQueryService(APIBaseTest):
             InsightsQLAutocomplete(
                 kind="InsightsQLAutocomplete",
                 query="SELECT * FROM ",
-                language=HogLanguage.INSIGHTS_QL,
+                language=ScriptLanguage.INSIGHTS_QL,
                 startPosition=14,
                 endPosition=14,
                 connectionId=str(selected_source.id),
@@ -574,7 +574,7 @@ class TestQueryService(APIBaseTest):
             InsightsQLAutocomplete(
                 kind="InsightsQLAutocomplete",
                 query="SELECT * FROM ",
-                language=HogLanguage.INSIGHTS_QL,
+                language=ScriptLanguage.INSIGHTS_QL,
                 startPosition=14,
                 endPosition=14,
                 connectionId=str(source.id),
@@ -608,7 +608,7 @@ class TestQueryService(APIBaseTest):
             InsightsQLAutocomplete(
                 kind="InsightsQLAutocomplete",
                 query="SELECT * FROM ",
-                language=HogLanguage.INSIGHTS_QL,
+                language=ScriptLanguage.INSIGHTS_QL,
                 startPosition=14,
                 endPosition=14,
                 connectionId=str(source.id),
@@ -642,7 +642,7 @@ class TestQueryService(APIBaseTest):
             query = InsightsQLAutocomplete(
                 kind="InsightsQLAutocomplete",
                 query="SELECT * FROM ",
-                language=HogLanguage.INSIGHTS_QL,
+                language=ScriptLanguage.INSIGHTS_QL,
                 startPosition=14,
                 endPosition=14,
                 connectionId=str(source.id),
@@ -677,7 +677,7 @@ class TestQueryService(APIBaseTest):
             query = InsightsQLAutocomplete(
                 kind="InsightsQLAutocomplete",
                 query="SELECT * FROM ",
-                language=HogLanguage.INSIGHTS_QL,
+                language=ScriptLanguage.INSIGHTS_QL,
                 startPosition=14,
                 endPosition=14,
                 connectionId=str(source.id),

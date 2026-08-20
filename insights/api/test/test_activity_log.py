@@ -72,7 +72,7 @@ class TestActivityLog(APIBaseTest, QueryMatchingTest):
         if "filters" not in data:
             data["filters"] = {"events": [{"id": "$pageview"}]}
 
-        response = self.client.post(f"/api/projects/{team_id}/insights", data=data)
+        response = self.client.post(f"/v1/projects/{team_id}/insights", data=data)
         self.assertEqual(response.status_code, expected_status)
 
         response_json = response.json()
@@ -89,20 +89,20 @@ class TestActivityLog(APIBaseTest, QueryMatchingTest):
 
             frozen_time.tick(delta=timedelta(minutes=6))
             flag_one = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/",
+                f"/v1/projects/{self.team.id}/feature_flags/",
                 _feature_flag_json_payload("one"),
             ).json()["id"]
 
             frozen_time.tick(delta=timedelta(minutes=6))
             flag_two = self.client.post(
-                f"/api/projects/{self.team.id}/feature_flags/",
+                f"/v1/projects/{self.team.id}/feature_flags/",
                 _feature_flag_json_payload("two"),
             ).json()["id"]
 
             frozen_time.tick(delta=timedelta(minutes=6))
 
             notebook_json = self.client.post(
-                f"/api/projects/{self.team.id}/notebooks/",
+                f"/v1/projects/{self.team.id}/notebooks/",
                 {"content": "print('hello world')", "name": "notebook"},
             ).json()
 
@@ -141,7 +141,7 @@ class TestActivityLog(APIBaseTest, QueryMatchingTest):
         for created_insight_id in created_insights[:7]:
             frozen_time.tick(delta=timedelta(minutes=6))
             update_response = self.client.patch(
-                f"/api/projects/{self.team.id}/insights/{created_insight_id}",
+                f"/v1/projects/{self.team.id}/insights/{created_insight_id}",
                 {"name": f"{created_insight_id}-insight-changed-by-{the_user.id}"},
             )
             self.assertEqual(update_response.status_code, status.HTTP_200_OK)
@@ -149,7 +149,7 @@ class TestActivityLog(APIBaseTest, QueryMatchingTest):
             frozen_time.tick(delta=timedelta(minutes=6))
         assert (
             self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_one}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_one}",
                 {"name": f"one-edited-by-{the_user.id}"},
             ).status_code
             == status.HTTP_200_OK
@@ -158,7 +158,7 @@ class TestActivityLog(APIBaseTest, QueryMatchingTest):
         frozen_time.tick(delta=timedelta(minutes=6))
         assert (
             self.client.patch(
-                f"/api/projects/{self.team.id}/feature_flags/{flag_two}",
+                f"/v1/projects/{self.team.id}/feature_flags/{flag_two}",
                 {"name": f"two-edited-by-{the_user.id}"},
             ).status_code
             == status.HTTP_200_OK
@@ -176,7 +176,7 @@ class TestActivityLog(APIBaseTest, QueryMatchingTest):
             frozen_time.tick(delta=timedelta(seconds=5))
             assert (
                 self.client.patch(
-                    f"/api/projects/{self.team.id}/notebooks/{notebook_short_id}",
+                    f"/v1/projects/{self.team.id}/notebooks/{notebook_short_id}",
                     {"content": typed_text, "version": notebook_version},
                 ).status_code
                 == status.HTTP_200_OK
@@ -190,13 +190,13 @@ class TestActivityLog(APIBaseTest, QueryMatchingTest):
         self.team.receive_org_level_activity_logs = True
         self.team.save()
 
-        res = self.client.get(f"/api/projects/{self.team.id}/activity_log")
+        res = self.client.get(f"/v1/projects/{self.team.id}/activity_log")
 
         assert res.status_code == status.HTTP_200_OK
         assert len(res.json()["results"]) == 46
 
     def test_can_list_all_activity_filtered_by_scope(self) -> None:
-        res = self.client.get(f"/api/projects/{self.team.id}/activity_log?scope=FeatureFlag")
+        res = self.client.get(f"/v1/projects/{self.team.id}/activity_log?scope=FeatureFlag")
         assert res.status_code == status.HTTP_200_OK
         assert len(res.json()["results"]) == 6
         assert [r["scope"] for r in res.json()["results"]] == ["FeatureFlag"] * 6
@@ -209,7 +209,7 @@ class TestActivityLogAuditLogsGate(APIBaseTest):
         self.organization.save()
 
         with self.is_cloud(True):
-            res = self.client.get(f"/api/projects/{self.team.id}/{endpoint}/")
+            res = self.client.get(f"/v1/projects/{self.team.id}/{endpoint}/")
 
         assert res.status_code == status.HTTP_402_PAYMENT_REQUIRED
 
@@ -219,7 +219,7 @@ class TestActivityLogAuditLogsGate(APIBaseTest):
         self.organization.save()
 
         with self.is_cloud(True):
-            res = self.client.get(f"/api/projects/{self.team.id}/{endpoint}/")
+            res = self.client.get(f"/v1/projects/{self.team.id}/{endpoint}/")
 
         assert res.status_code == status.HTTP_200_OK
 
@@ -229,7 +229,7 @@ class TestActivityLogAuditLogsGate(APIBaseTest):
         self.organization.save()
 
         with self.is_cloud(False):
-            res = self.client.get(f"/api/projects/{self.team.id}/{endpoint}/")
+            res = self.client.get(f"/v1/projects/{self.team.id}/{endpoint}/")
 
         assert res.status_code == status.HTTP_200_OK
 
@@ -239,13 +239,13 @@ class TestActivityLogAuditLogsGate(APIBaseTest):
         self.organization.save()
 
         with self.is_cloud(True), patch("insights.permissions.is_impersonated_session", return_value=True):
-            res = self.client.get(f"/api/projects/{self.team.id}/{endpoint}/")
+            res = self.client.get(f"/v1/projects/{self.team.id}/{endpoint}/")
 
         assert res.status_code == status.HTTP_200_OK
 
 
 class TestOrganizationAdvancedActivityLogsViewSet(APIBaseTest):
-    """Tests for the org-scoped activity logs viewset at /api/organizations/<id>/advanced_activity_logs/."""
+    """Tests for the org-scoped activity logs viewset at /v1/organizations/<id>/advanced_activity_logs/."""
 
     def setUp(self) -> None:
         super().setUp()
@@ -318,7 +318,7 @@ class TestOrganizationAdvancedActivityLogsViewSet(APIBaseTest):
         )
 
     def _list(self, **query) -> Any:
-        url = f"/api/organizations/{self.organization.id}/advanced_activity_logs/"
+        url = f"/v1/organizations/{self.organization.id}/advanced_activity_logs/"
         return self.client.get(url, data=query)
 
     def test_admin_sees_all_org_rows(self) -> None:
@@ -381,7 +381,7 @@ class TestOrganizationAdvancedActivityLogsViewSet(APIBaseTest):
         assert res.status_code == status.HTTP_402_PAYMENT_REQUIRED
 
     def test_export_endpoint_is_disabled_on_organization_route(self) -> None:
-        url = f"/api/organizations/{self.organization.id}/advanced_activity_logs/export/"
+        url = f"/v1/organizations/{self.organization.id}/advanced_activity_logs/export/"
         res = self.client.post(url, data={"format": "csv"}, format="json")
 
         assert res.status_code == status.HTTP_400_BAD_REQUEST
@@ -422,7 +422,7 @@ class TestOrganizationAdvancedActivityLogsAvailableFilters(APIBaseTest):
 
     def test_available_filters_returns_org_wide_static_filters(self) -> None:
         # Small-org branch (live computation path) — covered by default in tests.
-        url = f"/api/organizations/{self.organization.id}/advanced_activity_logs/available_filters/"
+        url = f"/v1/organizations/{self.organization.id}/advanced_activity_logs/available_filters/"
         res = self.client.get(url)
 
         assert res.status_code == status.HTTP_200_OK
@@ -439,7 +439,7 @@ class TestActivityLogBearerAuthAttribution(APIBaseTest):
 
     def _create_experiment_and_get_activity(self, auth_header: str, flag_key: str) -> ActivityLog:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/",
+            f"/v1/projects/{self.team.id}/experiments/",
             {"name": "Bearer auth experiment", "feature_flag_key": flag_key},
             headers={"authorization": auth_header},
         )
@@ -468,7 +468,7 @@ class TestActivityLogBearerAuthAttribution(APIBaseTest):
         return OAuthAccessToken.objects.create(
             user=self.user,
             application=application,
-            token="pha_activity_attribution_token",
+            token="at-activity_attribution_token",
             expires=timezone.now() + timedelta(hours=1),
             scope="experiment:write feature_flag:write",
             impersonated_by=impersonated_by,

@@ -339,7 +339,7 @@ class TestTeamSetTokenAndSave(BaseTest):
 
     def setUp(self) -> None:
         super().setUp()
-        self.team.api_token = "phc_old_token_value"
+        self.team.api_token = "pk-old_token_value"
         self.team.save()
 
     @parameterized.expand(
@@ -347,7 +347,7 @@ class TestTeamSetTokenAndSave(BaseTest):
             ("empty", "", "non-empty"),
             ("whitespace_only", "   ", "non-empty"),
             ("too_long", "a" * (API_TOKEN_MAX_LENGTH + 1), f"{API_TOKEN_MAX_LENGTH} characters"),
-            ("identical", "phc_old_token_value", "identical"),
+            ("identical", "pk-old_token_value", "identical"),
         ]
     )
     def test_set_token_and_save_validation_rejects_invalid(self, _name: str, new_token: str, message_fragment: str):
@@ -359,61 +359,57 @@ class TestTeamSetTokenAndSave(BaseTest):
             )
         assert message_fragment in str(ctx.exception)
         self.team.refresh_from_db()
-        assert self.team.api_token == "phc_old_token_value"
+        assert self.team.api_token == "pk-old_token_value"
 
-    @patch("insights.tasks.integrations.push_vercel_secrets.delay")
     @patch("insights.models.team.team.set_team_in_cache")
-    def test_set_token_and_save_success_runs_full_side_effect_chain(self, mock_set_cache, mock_push_vercel) -> None:
+    def test_set_token_and_save_success_runs_full_side_effect_chain(self, mock_set_cache) -> None:
         self.team.set_token_and_save(
-            new_token="phc_new_token_value",
+            new_token="pk-new_token_value",
             user=self.user,
             is_impersonated_session=False,
         )
 
         self.team.refresh_from_db()
-        assert self.team.api_token == "phc_new_token_value"
+        assert self.team.api_token == "pk-new_token_value"
 
         cache_calls = [call.args for call in mock_set_cache.call_args_list]
-        assert ("phc_old_token_value", None) in cache_calls
-        assert any(args[0] == "phc_new_token_value" and args[1] is self.team for args in cache_calls)
-
-        mock_push_vercel.assert_called_once_with(self.team.id)
+        assert ("pk-old_token_value", None) in cache_calls
+        assert any(args[0] == "pk-new_token_value" and args[1] is self.team for args in cache_calls)
 
         log_entry = ActivityLog.objects.get(scope="Team", item_id=str(self.team.pk), activity="updated")
         assert log_entry.detail is not None
         change = log_entry.detail["changes"][0]
         assert change["field"] == "api_token"
-        assert change["before"] == "phc_old_token_value"
-        assert change["after"] == "phc_new_token_value"
+        assert change["before"] == "pk-old_token_value"
+        assert change["after"] == "pk-new_token_value"
 
     def test_set_token_and_save_rejects_token_already_taken_by_another_team(self) -> None:
-        other_team = Team.objects.create(organization=self.organization, api_token="phc_already_taken")
+        other_team = Team.objects.create(organization=self.organization, api_token="pk-already_taken")
 
         with self.assertRaises(ValueError) as ctx:
             self.team.set_token_and_save(
-                new_token="phc_already_taken",
+                new_token="pk-already_taken",
                 user=self.user,
                 is_impersonated_session=False,
             )
         assert "already in use" in str(ctx.exception)
 
         other_team.refresh_from_db()
-        assert other_team.api_token == "phc_already_taken"
+        assert other_team.api_token == "pk-already_taken"
         self.team.refresh_from_db()
-        assert self.team.api_token == "phc_old_token_value"
+        assert self.team.api_token == "pk-old_token_value"
 
     def test_set_token_and_save_strips_whitespace(self) -> None:
         self.team.set_token_and_save(
-            new_token="  phc_trimmed  ",
+            new_token="  pk-trimmed  ",
             user=self.user,
             is_impersonated_session=False,
         )
         self.team.refresh_from_db()
-        assert self.team.api_token == "phc_trimmed"
+        assert self.team.api_token == "pk-trimmed"
 
-    @patch("insights.tasks.integrations.push_vercel_secrets.delay")
     @patch("insights.models.team.team.set_team_in_cache")
-    def test_set_token_and_save_accepts_token_at_field_max_length(self, _mock_set_cache, _mock_push_vercel) -> None:
+    def test_set_token_and_save_accepts_token_at_field_max_length(self, _mock_set_cache) -> None:
         new_token = "a" * self.API_TOKEN_MAX_LENGTH
         self.team.set_token_and_save(
             new_token=new_token,
@@ -423,38 +419,36 @@ class TestTeamSetTokenAndSave(BaseTest):
         self.team.refresh_from_db()
         assert self.team.api_token == new_token
 
-    @patch("insights.tasks.integrations.push_vercel_secrets.delay")
-    def test_set_token_and_save_evicts_old_and_warms_new_cache(self, _mock_push_vercel) -> None:
+    def test_set_token_and_save_evicts_old_and_warms_new_cache(self) -> None:
         cache.clear()
-        set_team_in_cache("phc_old_token_value", self.team)
-        assert get_team_in_cache("phc_old_token_value") is not None
+        set_team_in_cache("pk-old_token_value", self.team)
+        assert get_team_in_cache("pk-old_token_value") is not None
 
         self.team.set_token_and_save(
-            new_token="phc_new_token_value",
+            new_token="pk-new_token_value",
             user=self.user,
             is_impersonated_session=False,
         )
 
-        assert get_team_in_cache("phc_old_token_value") is None
+        assert get_team_in_cache("pk-old_token_value") is None
 
-        cached_new = get_team_in_cache("phc_new_token_value")
+        cached_new = get_team_in_cache("pk-new_token_value")
         assert cached_new is not None
-        assert cached_new.api_token == "phc_new_token_value"
+        assert cached_new.api_token == "pk-new_token_value"
 
-    @patch("insights.tasks.integrations.push_vercel_secrets.delay")
-    def test_set_token_and_save_rejection_leaves_cache_untouched(self, _mock_push_vercel) -> None:
-        Team.objects.create(organization=self.organization, api_token="phc_already_taken")
+    def test_set_token_and_save_rejection_leaves_cache_untouched(self) -> None:
+        Team.objects.create(organization=self.organization, api_token="pk-already_taken")
         cache.clear()
-        set_team_in_cache("phc_old_token_value", self.team)
+        set_team_in_cache("pk-old_token_value", self.team)
 
         with self.assertRaises(ValueError):
             self.team.set_token_and_save(
-                new_token="phc_already_taken",
+                new_token="pk-already_taken",
                 user=self.user,
                 is_impersonated_session=False,
             )
 
-        cached = get_team_in_cache("phc_old_token_value")
+        cached = get_team_in_cache("pk-old_token_value")
         assert cached is not None
-        assert cached.api_token == "phc_old_token_value"
-        assert get_team_in_cache("phc_already_taken") is None
+        assert cached.api_token == "pk-old_token_value"
+        assert get_team_in_cache("pk-already_taken") is None

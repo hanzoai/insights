@@ -504,14 +504,14 @@ def shrink_to_shape(
 # ===========================================================================
 #
 # Shared by `log_corpus_diagnostic.py` (InsightsQL queries from Datastore
-# `system.query_log`) and `hog_corpus_diagnostic.py` (Script programs from the
-# Aurora Postgres `insights_hogfunction` table). Metabase access, the
+# `system.query_log`) and `script_corpus_diagnostic.py` (Script programs from the
+# Aurora Postgres `insights_function` table). Metabase access, the
 # paginated download, the oracle-vs-candidate parity grind, and the failure
 # report are identical across both — only the SQL and its redaction dialect
 # (Datastore `replaceRegexpAll` vs Postgres `regexp_replace`) differ, and
 # those stay in the per-corpus scripts.
 
-# Metabase's `/api/dataset` endpoint truncates every response to 2000 rows
+# Metabase's `/v1/dataset` endpoint truncates every response to 2000 rows
 # regardless of the SQL `LIMIT`; anything larger is fetched by paging.
 MB_PAGE_SIZE = 2000
 
@@ -574,7 +574,7 @@ def discover_metabase_db(
 
 def _fetch_metabase_page(region: str, database_id: int, sql: str, tmp_path: Path, repo_root: Path) -> dict:
     """Run one SQL query via `insightscli metabase:query`, returning the parsed
-    Metabase `/api/dataset` JSON. insightscli writes to `tmp_path`."""
+    Metabase `/v1/dataset` JSON. insightscli writes to `tmp_path`."""
     subprocess.run(
         [
             insightscli_bin(repo_root),
@@ -610,7 +610,7 @@ def download_corpus(
     repo_root: Path,
 ) -> None:
     """Fetch up to `sql_limit` corpus rows and write them to `dump_path`
-    (Metabase `/api/dataset` JSON shape: `{"data": {"cols", "rows"}}`).
+    (Metabase `/v1/dataset` JSON shape: `{"data": {"cols", "rows"}}`).
 
     `build_sql(limit, offset)` produces the corpus SQL for one page.
     Metabase caps responses at `MB_PAGE_SIZE`, so larger pulls are paged
@@ -671,7 +671,7 @@ def load_corpus_rows(path: Path, *, text_col: str, count_col: str | None = None)
         status = payload.get("status") if isinstance(payload, dict) else "<unknown>"
         error = payload.get("error") if isinstance(payload, dict) else None
         raise RuntimeError(
-            f"dump at {path} isn't a Metabase /api/dataset success payload (status={status!r}, error={error!r})"
+            f"dump at {path} isn't a Metabase /v1/dataset success payload (status={status!r}, error={error!r})"
         )
     col_idx = {c.get("name"): i for i, c in enumerate(data["cols"])}
     if text_col not in col_idx:

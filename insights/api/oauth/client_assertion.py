@@ -114,7 +114,10 @@ def expected_assertion_audiences(*token_endpoint_paths: str) -> list[str]:
     return [site_url, *(f"{site_url}{path}" for path in token_endpoint_paths)]
 
 
-AGENTIC_TOKEN_ENDPOINT_PATH = "/api/agentic/oauth/token"
+# Both spellings, because the endpoint genuinely answers on both while the alias stands:
+# an assertion is addressed to the URL the client called, and refusing the one it used
+# would reject a legitimate caller. The /api/ entry goes when the alias does.
+AGENTIC_TOKEN_ENDPOINT_PATHS = ("/v1/agentic/oauth/token", "/api/agentic/oauth/token")
 
 
 def describe_jwks(jwks_uri: str) -> list[str]:
@@ -234,7 +237,9 @@ def verify_client_assertion(app: OAuthApplication, assertion: str, *, audiences:
             assertion,
             key=key,
             algorithms=ALLOWED_ASSERTION_ALGORITHMS,
-            audience=audiences if audiences is not None else expected_assertion_audiences(AGENTIC_TOKEN_ENDPOINT_PATH),
+            audience=audiences
+            if audiences is not None
+            else expected_assertion_audiences(*AGENTIC_TOKEN_ENDPOINT_PATHS),
             issuer=client_identifier,
             leeway=ASSERTION_CLOCK_SKEW_SECONDS,
             options={

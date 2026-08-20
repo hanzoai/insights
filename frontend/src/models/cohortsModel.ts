@@ -441,7 +441,7 @@ export const cohortsModel = kea<cohortsModelType>([
         if (isAuthenticatedTeam(values.currentTeam)) {
             actions.loadAllCohorts()
         } else {
-            // Shared views can't hit /api/cohorts — seed from the inlined export payload.
+            // Shared views can't hit /v1/cohorts — seed from the inlined export payload.
             const exportedCohorts = getCurrentExporterData()?.cohorts
             if (exportedCohorts?.length) {
                 actions.hydrateAllCohortsFromExport(exportedCohorts)

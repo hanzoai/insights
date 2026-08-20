@@ -14,13 +14,13 @@ from insights.schema import (
     InsightsQLAutocomplete,
     InsightsQLMetadata,
     InsightsQLVariable,
-    HogQuery,
-    HogQueryResponse,
+    ScriptQuery,
+    ScriptQueryResponse,
     QuerySchemaRoot,
 )
 
 from insights.insightsql.autocomplete import get_insightsql_autocomplete
-from insights.insightsql.compiler.bytecode import execute_hog
+from insights.insightsql.compiler.bytecode import execute_script
 from insights.insightsql.constants import LimitContext
 from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.direct_connection import resolve_database_for_connection
@@ -334,21 +334,21 @@ def process_query_model(
         elif execution_mode == ExecutionMode.CACHE_ONLY_NEVER_CALCULATE:
             # Caching is handled by query runners, so in this case we can only return a cache miss
             result = CacheMissResponse(cache_key=None)
-        elif isinstance(query, HogQuery):
+        elif isinstance(query, ScriptQuery):
             if is_cloud() and (user is None or not user.is_staff):
                 return {"results": "Script queries currently require staff user privileges."}
 
             try:
-                hog_result = execute_hog(query.code or "", team=team)
-                bytecode = hog_result.bytecodes.get("root", None)
-                result = HogQueryResponse(
-                    results=hog_result.result,
+                script_result = execute_script(query.code or "", team=team)
+                bytecode = script_result.bytecodes.get("root", None)
+                result = ScriptQueryResponse(
+                    results=script_result.result,
                     bytecode=bytecode,
                     coloredBytecode=color_bytecode(bytecode) if bytecode else None,
-                    stdout="\n".join(hog_result.stdout),
+                    stdout="\n".join(script_result.stdout),
                 )
             except Exception as e:
-                result = HogQueryResponse(results=f"ERROR: {str(e)}")
+                result = ScriptQueryResponse(results=f"ERROR: {str(e)}")
         else:
             raise ValidationError(f"Unsupported query kind: {query.__class__.__name__}")
     else:  # Query runner available - it will handle execution as well as caching

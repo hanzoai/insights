@@ -1,18 +1,17 @@
 import Vapi from '@vapi-ai/web'
 import { memo, type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import * as robotPng from '@hanzo/brand/hoggies/png/robot'
 import { Button, Input } from '@hanzo/elements'
 
 import { Logo } from 'lib/brand'
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { uuid } from 'lib/utils/dom'
 import { fromParams } from 'lib/utils/url'
 
 import { InterviewExportPayload } from '../types'
 
-const MascotRobot = pngHoggie(robotPng)
+const MascotRobot = pngMascot()
 
 // Fields a shared-link respondent sends to /start_call/. Empty {} for personalised links.
 interface StartCallBody {
@@ -322,7 +321,7 @@ const CallBodyPanel = memo(function CallBodyPanel({
  * response contains only that call's join payload, never reusable Vapi credentials.
  */
 async function fetchStartCallPayload(accessToken: string, body: StartCallBody): Promise<StartCallPayload> {
-    const response = await fetch(`/api/user_interviews/share/${accessToken}/start_call/`, {
+    const response = await fetch(`/v1/user_interviews/share/${accessToken}/start_call/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

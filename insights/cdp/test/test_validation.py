@@ -13,7 +13,7 @@ from insights.cdp.validation import (
     InputsSchemaItemSerializer,
     MappingsSerializer,
     RecordAliasRewriter,
-    compile_hog,
+    compile_script,
     generate_template_bytecode,
 )
 
@@ -360,7 +360,7 @@ class TestInsightsFunctionValidation(DatastoreTestMixin, APIBaseTest, QueryMatch
         # Only A is present, so A=0
         assert validated["A"]["order"] == 0
 
-    def test_validate_inputs_no_bytcode_if_not_hog(self):
+    def test_validate_inputs_no_bytcode_if_not_script(self):
         # A depends on a non-existing input X
         # This should ignore X since it's not defined.
         # So no error, but A has no real dependencies that matter.
@@ -391,7 +391,7 @@ class TestInsightsFunctionValidation(DatastoreTestMixin, APIBaseTest, QueryMatch
             ),
         ]
     )
-    def test_liquid_syntax_in_hog_templated_input_names_the_expected_syntax(self, _name, item_type, value):
+    def test_liquid_syntax_in_script_templated_input_names_the_expected_syntax(self, _name, item_type, value):
         # Liquid-style {{ ... }} in a script-templated field is the dominant authoring mistake
         # behind template errors, and the transpiler's own message ("Placeholders are not
         # allowed in this context") never names it - agents bisect blind on it. The error
@@ -422,7 +422,7 @@ class TestInsightsFunctionValidation(DatastoreTestMixin, APIBaseTest, QueryMatch
     )
     def test_validate_transformation_inputs_rejects_unavailable_global(self, _name: str, value: str):
         # Transformations only have access to project, event, and inputs at runtime
-        # (HogTransformerService.createInvocationGlobals). Referencing other globals
+        # (ScriptTransformerService.createInvocationGlobals). Referencing other globals
         # must be caught at validation time so we don't crash the realtime ingestion
         # worker with a "Global variable not found" error from the Script VM.
         inputs_schema = [{"key": "payload", "type": "string", "required": True}]
@@ -666,7 +666,7 @@ class TestInsightsFunctionValidation(DatastoreTestMixin, APIBaseTest, QueryMatch
             validate_inputs(inputs_schema, inputs)
         assert "Liquid templating is not supported for boolean fields" in str(ctx.exception)
 
-    def test_validate_boolean_input_allows_hog_templating(self):
+    def test_validate_boolean_input_allows_script_templating(self):
         inputs_schema = [{"key": "opt_out", "type": "boolean", "required": False}]
         inputs = {"opt_out": {"value": "{event.properties.opt_out}", "templating": "script"}}
         validated = validate_inputs(inputs_schema, inputs)
@@ -680,15 +680,15 @@ class TestInsightsFunctionValidation(DatastoreTestMixin, APIBaseTest, QueryMatch
             ("subtraction_code", "let x := event.properties.count - total", False),
         ]
     )
-    def test_hyphenated_property_detection_in_hog(self, _name, hog_code, should_error):
+    def test_hyphenated_property_detection_in_script(self, _name, script_code, should_error):
         if should_error:
             with self.assertRaises(ValidationError) as ctx:
-                compile_hog(hog_code, "destination")
+                compile_script(script_code, "destination")
             error_msg = str(ctx.exception)
             assert "Hyphens are not supported" in error_msg
             assert "bracket notation" in error_msg
         else:
-            compile_hog(hog_code, "destination")
+            compile_script(script_code, "destination")
 
     def test_non_failure_status_codes_schema_type_is_valid(self):
         inputs_schema = [

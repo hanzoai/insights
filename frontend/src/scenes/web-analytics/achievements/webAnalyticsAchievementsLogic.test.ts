@@ -12,10 +12,10 @@ import type { AchievementsListResponseApi } from 'products/web_analytics/fronten
 
 import { webAnalyticsAchievementsLogic } from './webAnalyticsAchievementsLogic'
 
-const OVERVIEW_URL = '/api/projects/:team_id/web_analytics_achievements/overview/'
-const ACKNOWLEDGE_URL = '/api/projects/:team_id/web_analytics_achievements/acknowledge_celebration/'
-const PREFERENCES_URL = '/api/projects/:team_id/web_analytics_achievements/preferences/'
-const RECORD_INTERACTION_URL = '/api/projects/:team_id/web_analytics_achievements/record_interaction/'
+const OVERVIEW_URL = '/v1/projects/:team_id/web_analytics_achievements/overview/'
+const ACKNOWLEDGE_URL = '/v1/projects/:team_id/web_analytics_achievements/acknowledge_celebration/'
+const PREFERENCES_URL = '/v1/projects/:team_id/web_analytics_achievements/preferences/'
+const RECORD_INTERACTION_URL = '/v1/projects/:team_id/web_analytics_achievements/record_interaction/'
 
 const MOCK_OVERVIEW: AchievementsListResponseApi = {
     definitions: [],

@@ -43,7 +43,7 @@ function makeStep({
 }
 
 const options = {
-    getColor: () => '#1d4aff',
+    getColor: () => '#3d3d3d',
     getLabel: (variant: FunnelStepWithConversionMetrics) => String(variant.breakdown_value ?? variant.name),
     fillerColor: '#eef0f3',
 }

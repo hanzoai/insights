@@ -3,17 +3,17 @@ import { GroupRepository } from '~/common/groups/repositories/group-repository.i
 import { PersonRepository } from '~/common/persons/repositories/person-repository'
 import { logger } from '~/common/utils/logger'
 
-import { PersonHogClient, parseRolloutTeamIds } from './client'
-import { PersonHogGroupRepository } from './personinsights-group-repository'
-import { PersonHogPersonRepository } from './personinsights-person-repository'
+import { PersonFnClient, parseRolloutTeamIds } from './client'
+import { PersonFnGroupRepository } from './personinsights-group-repository'
+import { PersonFnPersonRepository } from './personinsights-person-repository'
 
-export { PersonHogClient } from './client'
-export type { PersonHogClientConfig } from './client'
-export { PersonHogGroupRepository } from './personinsights-group-repository'
-export { PersonHogPersonRepository } from './personinsights-person-repository'
+export { PersonFnClient } from './client'
+export type { PersonFnClientConfig } from './client'
+export { PersonFnGroupRepository } from './personinsights-group-repository'
+export { PersonFnPersonRepository } from './personinsights-person-repository'
 
-/** PersonHog gRPC client config */
-export type PersonHogConfig = Pick<
+/** PersonFn gRPC client config */
+export type PersonFnConfig = Pick<
     CommonConfig,
     | 'PERSONFN_ENABLED'
     | 'PERSONFN_ADDR'
@@ -33,14 +33,14 @@ export type PersonHogConfig = Pick<
     | 'PLUGIN_SERVER_MODE'
 >
 
-export function createPersonHogClient(config: PersonHogConfig): PersonHogClient | null {
+export function createPersonFnClient(config: PersonFnConfig): PersonFnClient | null {
     if (!config.PERSONFN_ENABLED || !config.PERSONFN_ADDR) {
         return null
     }
 
-    logger.info('🔌', `PersonHog gRPC client connecting to ${config.PERSONFN_ADDR}`)
+    logger.info('🔌', `PersonFn gRPC client connecting to ${config.PERSONFN_ADDR}`)
 
-    return PersonHogClient.fromConfig({
+    return PersonFnClient.fromConfig({
         addr: config.PERSONFN_ADDR,
         clientName: config.PLUGIN_SERVER_MODE ?? 'unknown',
         useTls: config.PERSONFN_TLS,
@@ -56,7 +56,7 @@ export function createPersonHogClient(config: PersonHogConfig): PersonHogClient 
 }
 
 export function buildGroupRepository(
-    grpcClient: PersonHogClient | null,
+    grpcClient: PersonFnClient | null,
     postgresGroupRepository: GroupRepository,
     rolloutPercentage: number,
     rolloutTeamIdsRaw: string,
@@ -66,10 +66,10 @@ export function buildGroupRepository(
     if (grpcClient && (rolloutPercentage > 0 || rolloutTeamIds.size > 0)) {
         logger.info(
             '🔌',
-            `PersonHog gRPC (groups) rollout at ${rolloutPercentage}%` +
+            `PersonFn gRPC (groups) rollout at ${rolloutPercentage}%` +
                 (rolloutTeamIds.size > 0 ? `, team IDs: [${[...rolloutTeamIds].join(', ')}]` : '')
         )
-        return new PersonHogGroupRepository(
+        return new PersonFnGroupRepository(
             postgresGroupRepository,
             grpcClient,
             rolloutPercentage,
@@ -81,7 +81,7 @@ export function buildGroupRepository(
 }
 
 export function buildPersonRepository(
-    grpcClient: PersonHogClient | null,
+    grpcClient: PersonFnClient | null,
     postgresPersonRepository: PersonRepository,
     rolloutPercentage: number,
     rolloutTeamIdsRaw: string,
@@ -91,10 +91,10 @@ export function buildPersonRepository(
     if (grpcClient && (rolloutPercentage > 0 || rolloutTeamIds.size > 0)) {
         logger.info(
             '🔌',
-            `PersonHog gRPC (persons) rollout at ${rolloutPercentage}%` +
+            `PersonFn gRPC (persons) rollout at ${rolloutPercentage}%` +
                 (rolloutTeamIds.size > 0 ? `, team IDs: [${[...rolloutTeamIds].join(', ')}]` : '')
         )
-        return new PersonHogPersonRepository(
+        return new PersonFnPersonRepository(
             postgresPersonRepository,
             grpcClient,
             rolloutPercentage,

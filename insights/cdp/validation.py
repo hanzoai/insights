@@ -44,7 +44,7 @@ register_supported_function("insightsSetAccountProperties")
 
 
 # Globals that the realtime transformer actually populates at runtime.
-# Keep in sync with HogTransformerService.createInvocationGlobals
+# Keep in sync with ScriptTransformerService.createInvocationGlobals
 # (nodejs/src/cdp/script-transformations/script-transformer.service.ts).
 TRANSFORMATION_AVAILABLE_GLOBALS = {"project", "event", "inputs"}
 
@@ -697,9 +697,9 @@ def topological_sort(nodes: list[str], edges: dict[str, list[str]]) -> list[str]
     return sorted_list
 
 
-def compile_hog(
+def compile_script(
     script: str,
-    hog_type: str,
+    script_type: str,
     in_repl: Optional[bool] = False,
     null_safe_comparisons: bool = False,
 ) -> list[Any]:
@@ -714,14 +714,14 @@ def compile_hog(
 
         supported_functions: set[str] = set()
 
-        if hog_type == "destination":
+        if script_type == "destination":
             supported_functions = CORE_SUPPORTED_FUNCTIONS | PRODUCT_ASYNC_FUNCTIONS
-        elif hog_type == "tagger":
+        elif script_type == "tagger":
             # Taggers classify; they must not perform side effects, so we deliberately exclude
             # CORE_SUPPORTED_FUNCTIONS (fetch, insightsCapture) and PRODUCT_ASYNC_FUNCTIONS.
             # Stated explicitly so a future refactor can't silently widen the surface.
             supported_functions = set()
-        elif hog_type == "transformation_log":
+        elif script_type == "transformation_log":
             # Log transformations run synchronously per log record in the logs ingestion
             # hot path — no async functions (fetch, insightsCapture) can ever be allowed.
             # Stated explicitly so a future refactor can't silently widen the surface.
@@ -758,7 +758,7 @@ def compile_hog(
         # The compiler only records unknown-function calls as context errors; the call still
         # compiles and fails at runtime. Log transformations run in a synchronous VM with no
         # async functions registered, so surface the error at save time instead.
-        if hog_type == "transformation_log" and context.errors:
+        if script_type == "transformation_log" and context.errors:
             raise serializers.ValidationError({"script": context.errors[0].message})
 
         return bytecode

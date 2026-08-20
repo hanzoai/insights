@@ -426,7 +426,7 @@ export interface GoalApi {
 }
 
 export interface RecapPersonaApi {
-    /** Stable persona identifier. One of: just_getting_started, conversion_machine, traffic_magnet, crowd_favorite, search_hog, word_of_mouth, loyal_following, rising_star, steady_hog. */
+    /** Stable persona identifier. One of: just_getting_started, conversion_machine, traffic_magnet, crowd_favorite, search_script, word_of_mouth, loyal_following, rising_star, steady_script. */
     id: string
     /** Display name for the persona, e.g. 'Traffic Magnet'. */
     name: string

@@ -43,7 +43,7 @@ const AssistantDataVisualizationYAxisSettings = z.object({
 })
 
 const AssistantDataVisualizationAxisDisplaySettings = z.object({
-    color: z.string().describe('Custom color for this series as a hex string (e.g. `#1d4aff`).').optional(),
+    color: z.string().describe('Custom color for this series as a hex string (e.g. `#3d3d3d`).').optional(),
     displayType: z
         .enum(['auto', 'line', 'bar', 'area'])
         .describe(

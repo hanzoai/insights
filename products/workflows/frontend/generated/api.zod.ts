@@ -9,26 +9,26 @@
  */
 import * as zod from 'zod'
 
-export const hogFlowTemplatesCreateBodyNameMax = 400
+export const flowTemplatesCreateBodyNameMax = 400
 
-export const hogFlowTemplatesCreateBodyImageUrlMax = 8201
+export const flowTemplatesCreateBodyImageUrlMax = 8201
 
-export const hogFlowTemplatesCreateBodyTriggerMaskingOneTtlMin = 60
-export const hogFlowTemplatesCreateBodyTriggerMaskingOneTtlMax = 94608000
+export const flowTemplatesCreateBodyTriggerMaskingOneTtlMin = 60
+export const flowTemplatesCreateBodyTriggerMaskingOneTtlMax = 94608000
 
-export const hogFlowTemplatesCreateBodyActionsItemNameMax = 400
+export const flowTemplatesCreateBodyActionsItemNameMax = 400
 
-export const hogFlowTemplatesCreateBodyActionsItemDescriptionDefault = ``
-export const hogFlowTemplatesCreateBodyActionsItemFiltersOneSourceDefault = `events`
-export const hogFlowTemplatesCreateBodyActionsItemTypeMax = 100
+export const flowTemplatesCreateBodyActionsItemDescriptionDefault = ``
+export const flowTemplatesCreateBodyActionsItemFiltersOneSourceDefault = `events`
+export const flowTemplatesCreateBodyActionsItemTypeMax = 100
 
-export const hogFlowTemplatesCreateBodyAbortActionMax = 400
+export const flowTemplatesCreateBodyAbortActionMax = 400
 
 export const InsightsFlowTemplatesCreateBody = /* @__PURE__ */ zod
     .object({
-        name: zod.string().max(hogFlowTemplatesCreateBodyNameMax),
+        name: zod.string().max(flowTemplatesCreateBodyNameMax),
         description: zod.string().optional(),
-        image_url: zod.string().max(hogFlowTemplatesCreateBodyImageUrlMax).nullish(),
+        image_url: zod.string().max(flowTemplatesCreateBodyImageUrlMax).nullish(),
         tags: zod.array(zod.string()).optional(),
         scope: zod
             .enum(['team', 'organization', 'global'])
@@ -39,8 +39,8 @@ export const InsightsFlowTemplatesCreateBody = /* @__PURE__ */ zod
                 zod.object({
                     ttl: zod
                         .number()
-                        .min(hogFlowTemplatesCreateBodyTriggerMaskingOneTtlMin)
-                        .max(hogFlowTemplatesCreateBodyTriggerMaskingOneTtlMax)
+                        .min(flowTemplatesCreateBodyTriggerMaskingOneTtlMin)
+                        .max(flowTemplatesCreateBodyTriggerMaskingOneTtlMax)
                         .nullish()
                         .describe('Seconds (60 to ~94M \/ 3y) to suppress repeat firings of the same hash.'),
                     threshold: zod
@@ -76,8 +76,8 @@ export const InsightsFlowTemplatesCreateBody = /* @__PURE__ */ zod
             zod
                 .object({
                     id: zod.string(),
-                    name: zod.string().max(hogFlowTemplatesCreateBodyActionsItemNameMax),
-                    description: zod.string().default(hogFlowTemplatesCreateBodyActionsItemDescriptionDefault),
+                    name: zod.string().max(flowTemplatesCreateBodyActionsItemNameMax),
+                    description: zod.string().default(flowTemplatesCreateBodyActionsItemDescriptionDefault),
                     on_error: zod
                         .union([
                             zod.enum(['continue', 'abort']).describe('\* `continue` - continue\n\* `abort` - abort'),
@@ -97,7 +97,7 @@ export const InsightsFlowTemplatesCreateBody = /* @__PURE__ */ zod
                                     .describe(
                                         '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                     )
-                                    .default(hogFlowTemplatesCreateBodyActionsItemFiltersOneSourceDefault),
+                                    .default(flowTemplatesCreateBodyActionsItemFiltersOneSourceDefault),
                                 actions: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                 events: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                 data_warehouse: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
@@ -110,7 +110,7 @@ export const InsightsFlowTemplatesCreateBody = /* @__PURE__ */ zod
                             zod.null(),
                         ])
                         .optional(),
-                    type: zod.string().max(hogFlowTemplatesCreateBodyActionsItemTypeMax),
+                    type: zod.string().max(flowTemplatesCreateBodyActionsItemTypeMax),
                     config: zod.unknown(),
                     output_variable: zod.unknown().optional(),
                 })
@@ -118,7 +118,7 @@ export const InsightsFlowTemplatesCreateBody = /* @__PURE__ */ zod
                     'Custom action serializer for templates that skips input validation\n(since templates should have default\/empty values).'
                 )
         ),
-        abort_action: zod.string().max(hogFlowTemplatesCreateBodyAbortActionMax).nullish(),
+        abort_action: zod.string().max(flowTemplatesCreateBodyAbortActionMax).nullish(),
         variables: zod
             .array(
                 zod
@@ -131,26 +131,26 @@ export const InsightsFlowTemplatesCreateBody = /* @__PURE__ */ zod
         'Serializer for creating script flow templates.\nValidates and sanitizes the workflow before creating it as a template.'
     )
 
-export const hogFlowTemplatesUpdateBodyNameMax = 400
+export const flowTemplatesUpdateBodyNameMax = 400
 
-export const hogFlowTemplatesUpdateBodyImageUrlMax = 8201
+export const flowTemplatesUpdateBodyImageUrlMax = 8201
 
-export const hogFlowTemplatesUpdateBodyTriggerMaskingOneTtlMin = 60
-export const hogFlowTemplatesUpdateBodyTriggerMaskingOneTtlMax = 94608000
+export const flowTemplatesUpdateBodyTriggerMaskingOneTtlMin = 60
+export const flowTemplatesUpdateBodyTriggerMaskingOneTtlMax = 94608000
 
-export const hogFlowTemplatesUpdateBodyActionsItemNameMax = 400
+export const flowTemplatesUpdateBodyActionsItemNameMax = 400
 
-export const hogFlowTemplatesUpdateBodyActionsItemDescriptionDefault = ``
-export const hogFlowTemplatesUpdateBodyActionsItemFiltersOneSourceDefault = `events`
-export const hogFlowTemplatesUpdateBodyActionsItemTypeMax = 100
+export const flowTemplatesUpdateBodyActionsItemDescriptionDefault = ``
+export const flowTemplatesUpdateBodyActionsItemFiltersOneSourceDefault = `events`
+export const flowTemplatesUpdateBodyActionsItemTypeMax = 100
 
-export const hogFlowTemplatesUpdateBodyAbortActionMax = 400
+export const flowTemplatesUpdateBodyAbortActionMax = 400
 
 export const InsightsFlowTemplatesUpdateBody = /* @__PURE__ */ zod
     .object({
-        name: zod.string().max(hogFlowTemplatesUpdateBodyNameMax),
+        name: zod.string().max(flowTemplatesUpdateBodyNameMax),
         description: zod.string().optional(),
-        image_url: zod.string().max(hogFlowTemplatesUpdateBodyImageUrlMax).nullish(),
+        image_url: zod.string().max(flowTemplatesUpdateBodyImageUrlMax).nullish(),
         tags: zod.array(zod.string()).optional(),
         scope: zod
             .enum(['team', 'organization', 'global'])
@@ -161,8 +161,8 @@ export const InsightsFlowTemplatesUpdateBody = /* @__PURE__ */ zod
                 zod.object({
                     ttl: zod
                         .number()
-                        .min(hogFlowTemplatesUpdateBodyTriggerMaskingOneTtlMin)
-                        .max(hogFlowTemplatesUpdateBodyTriggerMaskingOneTtlMax)
+                        .min(flowTemplatesUpdateBodyTriggerMaskingOneTtlMin)
+                        .max(flowTemplatesUpdateBodyTriggerMaskingOneTtlMax)
                         .nullish()
                         .describe('Seconds (60 to ~94M \/ 3y) to suppress repeat firings of the same hash.'),
                     threshold: zod
@@ -198,8 +198,8 @@ export const InsightsFlowTemplatesUpdateBody = /* @__PURE__ */ zod
             zod
                 .object({
                     id: zod.string(),
-                    name: zod.string().max(hogFlowTemplatesUpdateBodyActionsItemNameMax),
-                    description: zod.string().default(hogFlowTemplatesUpdateBodyActionsItemDescriptionDefault),
+                    name: zod.string().max(flowTemplatesUpdateBodyActionsItemNameMax),
+                    description: zod.string().default(flowTemplatesUpdateBodyActionsItemDescriptionDefault),
                     on_error: zod
                         .union([
                             zod.enum(['continue', 'abort']).describe('\* `continue` - continue\n\* `abort` - abort'),
@@ -219,7 +219,7 @@ export const InsightsFlowTemplatesUpdateBody = /* @__PURE__ */ zod
                                     .describe(
                                         '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                     )
-                                    .default(hogFlowTemplatesUpdateBodyActionsItemFiltersOneSourceDefault),
+                                    .default(flowTemplatesUpdateBodyActionsItemFiltersOneSourceDefault),
                                 actions: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                 events: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                 data_warehouse: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
@@ -232,7 +232,7 @@ export const InsightsFlowTemplatesUpdateBody = /* @__PURE__ */ zod
                             zod.null(),
                         ])
                         .optional(),
-                    type: zod.string().max(hogFlowTemplatesUpdateBodyActionsItemTypeMax),
+                    type: zod.string().max(flowTemplatesUpdateBodyActionsItemTypeMax),
                     config: zod.unknown(),
                     output_variable: zod.unknown().optional(),
                 })
@@ -240,7 +240,7 @@ export const InsightsFlowTemplatesUpdateBody = /* @__PURE__ */ zod
                     'Custom action serializer for templates that skips input validation\n(since templates should have default\/empty values).'
                 )
         ),
-        abort_action: zod.string().max(hogFlowTemplatesUpdateBodyAbortActionMax).nullish(),
+        abort_action: zod.string().max(flowTemplatesUpdateBodyAbortActionMax).nullish(),
         variables: zod
             .array(
                 zod
@@ -253,26 +253,26 @@ export const InsightsFlowTemplatesUpdateBody = /* @__PURE__ */ zod
         'Serializer for creating script flow templates.\nValidates and sanitizes the workflow before creating it as a template.'
     )
 
-export const hogFlowTemplatesPartialUpdateBodyNameMax = 400
+export const flowTemplatesPartialUpdateBodyNameMax = 400
 
-export const hogFlowTemplatesPartialUpdateBodyImageUrlMax = 8201
+export const flowTemplatesPartialUpdateBodyImageUrlMax = 8201
 
-export const hogFlowTemplatesPartialUpdateBodyTriggerMaskingOneTtlMin = 60
-export const hogFlowTemplatesPartialUpdateBodyTriggerMaskingOneTtlMax = 94608000
+export const flowTemplatesPartialUpdateBodyTriggerMaskingOneTtlMin = 60
+export const flowTemplatesPartialUpdateBodyTriggerMaskingOneTtlMax = 94608000
 
-export const hogFlowTemplatesPartialUpdateBodyActionsItemNameMax = 400
+export const flowTemplatesPartialUpdateBodyActionsItemNameMax = 400
 
-export const hogFlowTemplatesPartialUpdateBodyActionsItemDescriptionDefault = ``
-export const hogFlowTemplatesPartialUpdateBodyActionsItemFiltersOneSourceDefault = `events`
-export const hogFlowTemplatesPartialUpdateBodyActionsItemTypeMax = 100
+export const flowTemplatesPartialUpdateBodyActionsItemDescriptionDefault = ``
+export const flowTemplatesPartialUpdateBodyActionsItemFiltersOneSourceDefault = `events`
+export const flowTemplatesPartialUpdateBodyActionsItemTypeMax = 100
 
-export const hogFlowTemplatesPartialUpdateBodyAbortActionMax = 400
+export const flowTemplatesPartialUpdateBodyAbortActionMax = 400
 
 export const InsightsFlowTemplatesPartialUpdateBody = /* @__PURE__ */ zod
     .object({
-        name: zod.string().max(hogFlowTemplatesPartialUpdateBodyNameMax).optional(),
+        name: zod.string().max(flowTemplatesPartialUpdateBodyNameMax).optional(),
         description: zod.string().optional(),
-        image_url: zod.string().max(hogFlowTemplatesPartialUpdateBodyImageUrlMax).nullish(),
+        image_url: zod.string().max(flowTemplatesPartialUpdateBodyImageUrlMax).nullish(),
         tags: zod.array(zod.string()).optional(),
         scope: zod
             .enum(['team', 'organization', 'global'])
@@ -284,8 +284,8 @@ export const InsightsFlowTemplatesPartialUpdateBody = /* @__PURE__ */ zod
                 zod.object({
                     ttl: zod
                         .number()
-                        .min(hogFlowTemplatesPartialUpdateBodyTriggerMaskingOneTtlMin)
-                        .max(hogFlowTemplatesPartialUpdateBodyTriggerMaskingOneTtlMax)
+                        .min(flowTemplatesPartialUpdateBodyTriggerMaskingOneTtlMin)
+                        .max(flowTemplatesPartialUpdateBodyTriggerMaskingOneTtlMax)
                         .nullish()
                         .describe('Seconds (60 to ~94M \/ 3y) to suppress repeat firings of the same hash.'),
                     threshold: zod
@@ -322,10 +322,10 @@ export const InsightsFlowTemplatesPartialUpdateBody = /* @__PURE__ */ zod
                 zod
                     .object({
                         id: zod.string(),
-                        name: zod.string().max(hogFlowTemplatesPartialUpdateBodyActionsItemNameMax),
+                        name: zod.string().max(flowTemplatesPartialUpdateBodyActionsItemNameMax),
                         description: zod
                             .string()
-                            .default(hogFlowTemplatesPartialUpdateBodyActionsItemDescriptionDefault),
+                            .default(flowTemplatesPartialUpdateBodyActionsItemDescriptionDefault),
                         on_error: zod
                             .union([
                                 zod
@@ -347,7 +347,7 @@ export const InsightsFlowTemplatesPartialUpdateBody = /* @__PURE__ */ zod
                                         .describe(
                                             '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                         )
-                                        .default(hogFlowTemplatesPartialUpdateBodyActionsItemFiltersOneSourceDefault),
+                                        .default(flowTemplatesPartialUpdateBodyActionsItemFiltersOneSourceDefault),
                                     actions: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                     events: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                     data_warehouse: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
@@ -360,7 +360,7 @@ export const InsightsFlowTemplatesPartialUpdateBody = /* @__PURE__ */ zod
                                 zod.null(),
                             ])
                             .optional(),
-                        type: zod.string().max(hogFlowTemplatesPartialUpdateBodyActionsItemTypeMax),
+                        type: zod.string().max(flowTemplatesPartialUpdateBodyActionsItemTypeMax),
                         config: zod.unknown(),
                         output_variable: zod.unknown().optional(),
                     })
@@ -369,7 +369,7 @@ export const InsightsFlowTemplatesPartialUpdateBody = /* @__PURE__ */ zod
                     )
             )
             .optional(),
-        abort_action: zod.string().max(hogFlowTemplatesPartialUpdateBodyAbortActionMax).nullish(),
+        abort_action: zod.string().max(flowTemplatesPartialUpdateBodyAbortActionMax).nullish(),
         variables: zod
             .array(
                 zod
@@ -382,26 +382,26 @@ export const InsightsFlowTemplatesPartialUpdateBody = /* @__PURE__ */ zod
         'Serializer for creating script flow templates.\nValidates and sanitizes the workflow before creating it as a template.'
     )
 
-export const hogFlowsCreateBodyNameMax = 400
+export const flowsCreateBodyNameMax = 400
 
-export const hogFlowsCreateBodyDescriptionDefault = ``
-export const hogFlowsCreateBodyTriggerMaskingOneTtlMin = 60
-export const hogFlowsCreateBodyTriggerMaskingOneTtlMax = 94608000
+export const flowsCreateBodyDescriptionDefault = ``
+export const flowsCreateBodyTriggerMaskingOneTtlMin = 60
+export const flowsCreateBodyTriggerMaskingOneTtlMax = 94608000
 
-export const hogFlowsCreateBodyConversionOneEventsItemFiltersOneSourceDefault = `events`
-export const hogFlowsCreateBodyActionsItemIdMax = 200
+export const flowsCreateBodyConversionOneEventsItemFiltersOneSourceDefault = `events`
+export const flowsCreateBodyActionsItemIdMax = 200
 
-export const hogFlowsCreateBodyActionsItemNameMax = 400
+export const flowsCreateBodyActionsItemNameMax = 400
 
-export const hogFlowsCreateBodyActionsItemDescriptionDefault = ``
-export const hogFlowsCreateBodyActionsItemFiltersOneSourceDefault = `events`
-export const hogFlowsCreateBodyActionsItemConfigTwoConditionFiltersOneSourceDefault = `events`
-export const hogFlowsCreateBodyActionsItemConfigTwoEventsItemFiltersOneSourceDefault = `events`
+export const flowsCreateBodyActionsItemDescriptionDefault = ``
+export const flowsCreateBodyActionsItemFiltersOneSourceDefault = `events`
+export const flowsCreateBodyActionsItemConfigTwoConditionFiltersOneSourceDefault = `events`
+export const flowsCreateBodyActionsItemConfigTwoEventsItemFiltersOneSourceDefault = `events`
 
 export const InsightsFlowsCreateBody = /* @__PURE__ */ zod
     .object({
-        name: zod.string().max(hogFlowsCreateBodyNameMax).nullish().describe('Workflow name.'),
-        description: zod.string().default(hogFlowsCreateBodyDescriptionDefault).describe('Optional description.'),
+        name: zod.string().max(flowsCreateBodyNameMax).nullish().describe('Workflow name.'),
+        description: zod.string().default(flowsCreateBodyDescriptionDefault).describe('Optional description.'),
         status: zod
             .enum(['draft', 'active', 'archived'])
             .describe('\* `draft` - Draft\n\* `active` - Active\n\* `archived` - Archived')
@@ -414,8 +414,8 @@ export const InsightsFlowsCreateBody = /* @__PURE__ */ zod
                 zod.object({
                     ttl: zod
                         .number()
-                        .min(hogFlowsCreateBodyTriggerMaskingOneTtlMin)
-                        .max(hogFlowsCreateBodyTriggerMaskingOneTtlMax)
+                        .min(flowsCreateBodyTriggerMaskingOneTtlMin)
+                        .max(flowsCreateBodyTriggerMaskingOneTtlMax)
                         .nullish()
                         .describe('Seconds (60 to ~94M \/ 3y) to suppress repeat firings of the same hash.'),
                     threshold: zod
@@ -456,7 +456,7 @@ export const InsightsFlowsCreateBody = /* @__PURE__ */ zod
                                             .describe(
                                                 '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                             )
-                                            .default(hogFlowsCreateBodyConversionOneEventsItemFiltersOneSourceDefault),
+                                            .default(flowsCreateBodyConversionOneEventsItemFiltersOneSourceDefault),
                                         actions: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                         events: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                         data_warehouse: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
@@ -534,12 +534,12 @@ export const InsightsFlowsCreateBody = /* @__PURE__ */ zod
                 zod.object({
                     id: zod
                         .string()
-                        .max(hogFlowsCreateBodyActionsItemIdMax)
+                        .max(flowsCreateBodyActionsItemIdMax)
                         .describe('Unique node ID within the workflow.'),
-                    name: zod.string().max(hogFlowsCreateBodyActionsItemNameMax).describe('Display name.'),
+                    name: zod.string().max(flowsCreateBodyActionsItemNameMax).describe('Display name.'),
                     description: zod
                         .string()
-                        .default(hogFlowsCreateBodyActionsItemDescriptionDefault)
+                        .default(flowsCreateBodyActionsItemDescriptionDefault)
                         .describe('Optional description.'),
                     on_error: zod
                         .union([
@@ -560,7 +560,7 @@ export const InsightsFlowsCreateBody = /* @__PURE__ */ zod
                                     .describe(
                                         '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                     )
-                                    .default(hogFlowsCreateBodyActionsItemFiltersOneSourceDefault),
+                                    .default(flowsCreateBodyActionsItemFiltersOneSourceDefault),
                                 actions: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                 events: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                 data_warehouse: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
@@ -614,7 +614,7 @@ export const InsightsFlowsCreateBody = /* @__PURE__ */ zod
                                                                 '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                                             )
                                                             .default(
-                                                                hogFlowsCreateBodyActionsItemConfigTwoConditionFiltersOneSourceDefault
+                                                                flowsCreateBodyActionsItemConfigTwoConditionFiltersOneSourceDefault
                                                             ),
                                                         actions: zod
                                                             .array(zod.record(zod.string(), zod.unknown()))
@@ -661,7 +661,7 @@ export const InsightsFlowsCreateBody = /* @__PURE__ */ zod
                                                                     '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                                                 )
                                                                 .default(
-                                                                    hogFlowsCreateBodyActionsItemConfigTwoEventsItemFiltersOneSourceDefault
+                                                                    flowsCreateBodyActionsItemConfigTwoEventsItemFiltersOneSourceDefault
                                                                 ),
                                                             actions: zod
                                                                 .array(zod.record(zod.string(), zod.unknown()))
@@ -726,26 +726,26 @@ export const InsightsFlowsCreateBody = /* @__PURE__ */ zod
     })
     .describe('Mixin for serializers to add user access control fields')
 
-export const hogFlowsUpdateBodyNameMax = 400
+export const flowsUpdateBodyNameMax = 400
 
-export const hogFlowsUpdateBodyDescriptionDefault = ``
-export const hogFlowsUpdateBodyTriggerMaskingOneTtlMin = 60
-export const hogFlowsUpdateBodyTriggerMaskingOneTtlMax = 94608000
+export const flowsUpdateBodyDescriptionDefault = ``
+export const flowsUpdateBodyTriggerMaskingOneTtlMin = 60
+export const flowsUpdateBodyTriggerMaskingOneTtlMax = 94608000
 
-export const hogFlowsUpdateBodyConversionOneEventsItemFiltersOneSourceDefault = `events`
-export const hogFlowsUpdateBodyActionsItemIdMax = 200
+export const flowsUpdateBodyConversionOneEventsItemFiltersOneSourceDefault = `events`
+export const flowsUpdateBodyActionsItemIdMax = 200
 
-export const hogFlowsUpdateBodyActionsItemNameMax = 400
+export const flowsUpdateBodyActionsItemNameMax = 400
 
-export const hogFlowsUpdateBodyActionsItemDescriptionDefault = ``
-export const hogFlowsUpdateBodyActionsItemFiltersOneSourceDefault = `events`
-export const hogFlowsUpdateBodyActionsItemConfigTwoConditionFiltersOneSourceDefault = `events`
-export const hogFlowsUpdateBodyActionsItemConfigTwoEventsItemFiltersOneSourceDefault = `events`
+export const flowsUpdateBodyActionsItemDescriptionDefault = ``
+export const flowsUpdateBodyActionsItemFiltersOneSourceDefault = `events`
+export const flowsUpdateBodyActionsItemConfigTwoConditionFiltersOneSourceDefault = `events`
+export const flowsUpdateBodyActionsItemConfigTwoEventsItemFiltersOneSourceDefault = `events`
 
 export const InsightsFlowsUpdateBody = /* @__PURE__ */ zod
     .object({
-        name: zod.string().max(hogFlowsUpdateBodyNameMax).nullish().describe('Workflow name.'),
-        description: zod.string().default(hogFlowsUpdateBodyDescriptionDefault).describe('Optional description.'),
+        name: zod.string().max(flowsUpdateBodyNameMax).nullish().describe('Workflow name.'),
+        description: zod.string().default(flowsUpdateBodyDescriptionDefault).describe('Optional description.'),
         status: zod
             .enum(['draft', 'active', 'archived'])
             .describe('\* `draft` - Draft\n\* `active` - Active\n\* `archived` - Archived')
@@ -758,8 +758,8 @@ export const InsightsFlowsUpdateBody = /* @__PURE__ */ zod
                 zod.object({
                     ttl: zod
                         .number()
-                        .min(hogFlowsUpdateBodyTriggerMaskingOneTtlMin)
-                        .max(hogFlowsUpdateBodyTriggerMaskingOneTtlMax)
+                        .min(flowsUpdateBodyTriggerMaskingOneTtlMin)
+                        .max(flowsUpdateBodyTriggerMaskingOneTtlMax)
                         .nullish()
                         .describe('Seconds (60 to ~94M \/ 3y) to suppress repeat firings of the same hash.'),
                     threshold: zod
@@ -800,7 +800,7 @@ export const InsightsFlowsUpdateBody = /* @__PURE__ */ zod
                                             .describe(
                                                 '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                             )
-                                            .default(hogFlowsUpdateBodyConversionOneEventsItemFiltersOneSourceDefault),
+                                            .default(flowsUpdateBodyConversionOneEventsItemFiltersOneSourceDefault),
                                         actions: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                         events: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                         data_warehouse: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
@@ -878,12 +878,12 @@ export const InsightsFlowsUpdateBody = /* @__PURE__ */ zod
                 zod.object({
                     id: zod
                         .string()
-                        .max(hogFlowsUpdateBodyActionsItemIdMax)
+                        .max(flowsUpdateBodyActionsItemIdMax)
                         .describe('Unique node ID within the workflow.'),
-                    name: zod.string().max(hogFlowsUpdateBodyActionsItemNameMax).describe('Display name.'),
+                    name: zod.string().max(flowsUpdateBodyActionsItemNameMax).describe('Display name.'),
                     description: zod
                         .string()
-                        .default(hogFlowsUpdateBodyActionsItemDescriptionDefault)
+                        .default(flowsUpdateBodyActionsItemDescriptionDefault)
                         .describe('Optional description.'),
                     on_error: zod
                         .union([
@@ -904,7 +904,7 @@ export const InsightsFlowsUpdateBody = /* @__PURE__ */ zod
                                     .describe(
                                         '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                     )
-                                    .default(hogFlowsUpdateBodyActionsItemFiltersOneSourceDefault),
+                                    .default(flowsUpdateBodyActionsItemFiltersOneSourceDefault),
                                 actions: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                 events: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                 data_warehouse: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
@@ -958,7 +958,7 @@ export const InsightsFlowsUpdateBody = /* @__PURE__ */ zod
                                                                 '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                                             )
                                                             .default(
-                                                                hogFlowsUpdateBodyActionsItemConfigTwoConditionFiltersOneSourceDefault
+                                                                flowsUpdateBodyActionsItemConfigTwoConditionFiltersOneSourceDefault
                                                             ),
                                                         actions: zod
                                                             .array(zod.record(zod.string(), zod.unknown()))
@@ -1005,7 +1005,7 @@ export const InsightsFlowsUpdateBody = /* @__PURE__ */ zod
                                                                     '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                                                 )
                                                                 .default(
-                                                                    hogFlowsUpdateBodyActionsItemConfigTwoEventsItemFiltersOneSourceDefault
+                                                                    flowsUpdateBodyActionsItemConfigTwoEventsItemFiltersOneSourceDefault
                                                                 ),
                                                             actions: zod
                                                                 .array(zod.record(zod.string(), zod.unknown()))
@@ -1070,28 +1070,28 @@ export const InsightsFlowsUpdateBody = /* @__PURE__ */ zod
     })
     .describe('Mixin for serializers to add user access control fields')
 
-export const hogFlowsPartialUpdateBodyNameMax = 400
+export const flowsPartialUpdateBodyNameMax = 400
 
-export const hogFlowsPartialUpdateBodyDescriptionDefault = ``
-export const hogFlowsPartialUpdateBodyTriggerMaskingOneTtlMin = 60
-export const hogFlowsPartialUpdateBodyTriggerMaskingOneTtlMax = 94608000
+export const flowsPartialUpdateBodyDescriptionDefault = ``
+export const flowsPartialUpdateBodyTriggerMaskingOneTtlMin = 60
+export const flowsPartialUpdateBodyTriggerMaskingOneTtlMax = 94608000
 
-export const hogFlowsPartialUpdateBodyConversionOneEventsItemFiltersOneSourceDefault = `events`
-export const hogFlowsPartialUpdateBodyActionsItemIdMax = 200
+export const flowsPartialUpdateBodyConversionOneEventsItemFiltersOneSourceDefault = `events`
+export const flowsPartialUpdateBodyActionsItemIdMax = 200
 
-export const hogFlowsPartialUpdateBodyActionsItemNameMax = 400
+export const flowsPartialUpdateBodyActionsItemNameMax = 400
 
-export const hogFlowsPartialUpdateBodyActionsItemDescriptionDefault = ``
-export const hogFlowsPartialUpdateBodyActionsItemFiltersOneSourceDefault = `events`
-export const hogFlowsPartialUpdateBodyActionsItemConfigTwoConditionFiltersOneSourceDefault = `events`
-export const hogFlowsPartialUpdateBodyActionsItemConfigTwoEventsItemFiltersOneSourceDefault = `events`
+export const flowsPartialUpdateBodyActionsItemDescriptionDefault = ``
+export const flowsPartialUpdateBodyActionsItemFiltersOneSourceDefault = `events`
+export const flowsPartialUpdateBodyActionsItemConfigTwoConditionFiltersOneSourceDefault = `events`
+export const flowsPartialUpdateBodyActionsItemConfigTwoEventsItemFiltersOneSourceDefault = `events`
 
 export const InsightsFlowsPartialUpdateBody = /* @__PURE__ */ zod
     .object({
-        name: zod.string().max(hogFlowsPartialUpdateBodyNameMax).nullish().describe('Workflow name.'),
+        name: zod.string().max(flowsPartialUpdateBodyNameMax).nullish().describe('Workflow name.'),
         description: zod
             .string()
-            .default(hogFlowsPartialUpdateBodyDescriptionDefault)
+            .default(flowsPartialUpdateBodyDescriptionDefault)
             .describe('Optional description.'),
         status: zod
             .enum(['draft', 'active', 'archived'])
@@ -1105,8 +1105,8 @@ export const InsightsFlowsPartialUpdateBody = /* @__PURE__ */ zod
                 zod.object({
                     ttl: zod
                         .number()
-                        .min(hogFlowsPartialUpdateBodyTriggerMaskingOneTtlMin)
-                        .max(hogFlowsPartialUpdateBodyTriggerMaskingOneTtlMax)
+                        .min(flowsPartialUpdateBodyTriggerMaskingOneTtlMin)
+                        .max(flowsPartialUpdateBodyTriggerMaskingOneTtlMax)
                         .nullish()
                         .describe('Seconds (60 to ~94M \/ 3y) to suppress repeat firings of the same hash.'),
                     threshold: zod
@@ -1148,7 +1148,7 @@ export const InsightsFlowsPartialUpdateBody = /* @__PURE__ */ zod
                                                 '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                             )
                                             .default(
-                                                hogFlowsPartialUpdateBodyConversionOneEventsItemFiltersOneSourceDefault
+                                                flowsPartialUpdateBodyConversionOneEventsItemFiltersOneSourceDefault
                                             ),
                                         actions: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                         events: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
@@ -1227,12 +1227,12 @@ export const InsightsFlowsPartialUpdateBody = /* @__PURE__ */ zod
                 zod.object({
                     id: zod
                         .string()
-                        .max(hogFlowsPartialUpdateBodyActionsItemIdMax)
+                        .max(flowsPartialUpdateBodyActionsItemIdMax)
                         .describe('Unique node ID within the workflow.'),
-                    name: zod.string().max(hogFlowsPartialUpdateBodyActionsItemNameMax).describe('Display name.'),
+                    name: zod.string().max(flowsPartialUpdateBodyActionsItemNameMax).describe('Display name.'),
                     description: zod
                         .string()
-                        .default(hogFlowsPartialUpdateBodyActionsItemDescriptionDefault)
+                        .default(flowsPartialUpdateBodyActionsItemDescriptionDefault)
                         .describe('Optional description.'),
                     on_error: zod
                         .union([
@@ -1253,7 +1253,7 @@ export const InsightsFlowsPartialUpdateBody = /* @__PURE__ */ zod
                                     .describe(
                                         '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                     )
-                                    .default(hogFlowsPartialUpdateBodyActionsItemFiltersOneSourceDefault),
+                                    .default(flowsPartialUpdateBodyActionsItemFiltersOneSourceDefault),
                                 actions: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                 events: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                 data_warehouse: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
@@ -1307,7 +1307,7 @@ export const InsightsFlowsPartialUpdateBody = /* @__PURE__ */ zod
                                                                 '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                                             )
                                                             .default(
-                                                                hogFlowsPartialUpdateBodyActionsItemConfigTwoConditionFiltersOneSourceDefault
+                                                                flowsPartialUpdateBodyActionsItemConfigTwoConditionFiltersOneSourceDefault
                                                             ),
                                                         actions: zod
                                                             .array(zod.record(zod.string(), zod.unknown()))
@@ -1354,7 +1354,7 @@ export const InsightsFlowsPartialUpdateBody = /* @__PURE__ */ zod
                                                                     '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                                                 )
                                                                 .default(
-                                                                    hogFlowsPartialUpdateBodyActionsItemConfigTwoEventsItemFiltersOneSourceDefault
+                                                                    flowsPartialUpdateBodyActionsItemConfigTwoEventsItemFiltersOneSourceDefault
                                                                 ),
                                                             actions: zod
                                                                 .array(zod.record(zod.string(), zod.unknown()))
@@ -1504,7 +1504,7 @@ export const InsightsFlowsBatchJobsCreateBody = /* @__PURE__ */ zod.object({
         .describe(
             'Not currently tracked — stays at its initial value. Use the workflow logs\/metrics endpoints for run outcome.\n\n\* `waiting` - Waiting\n\* `queued` - Queued\n\* `active` - Active\n\* `completed` - Completed\n\* `cancelled` - Cancelled\n\* `failed` - Failed'
         ),
-    hog_flow: zod.uuid().describe('ID of the workflow this batch run belongs to.'),
+    script_flow: zod.uuid().describe('ID of the workflow this batch run belongs to.'),
     variables: zod.unknown().optional().describe('Variable value overrides applied to this run.'),
 })
 
@@ -1599,33 +1599,33 @@ export const InsightsFlowsGraphPartialUpdateBody = /* @__PURE__ */ zod.object({
         ),
 })
 
-export const hogFlowsInvocationsCreateBodyConfigurationOneNameMax = 400
+export const flowsInvocationsCreateBodyConfigurationOneNameMax = 400
 
-export const hogFlowsInvocationsCreateBodyConfigurationOneDescriptionDefault = ``
-export const hogFlowsInvocationsCreateBodyConfigurationOneCreatedByOneDistinctIdMax = 200
+export const flowsInvocationsCreateBodyConfigurationOneDescriptionDefault = ``
+export const flowsInvocationsCreateBodyConfigurationOneCreatedByOneDistinctIdMax = 200
 
-export const hogFlowsInvocationsCreateBodyConfigurationOneCreatedByOneFirstNameMax = 150
+export const flowsInvocationsCreateBodyConfigurationOneCreatedByOneFirstNameMax = 150
 
-export const hogFlowsInvocationsCreateBodyConfigurationOneCreatedByOneLastNameMax = 150
+export const flowsInvocationsCreateBodyConfigurationOneCreatedByOneLastNameMax = 150
 
-export const hogFlowsInvocationsCreateBodyConfigurationOneCreatedByOneEmailMax = 254
+export const flowsInvocationsCreateBodyConfigurationOneCreatedByOneEmailMax = 254
 
-export const hogFlowsInvocationsCreateBodyConfigurationOneTriggerMaskingOneTtlMin = 60
-export const hogFlowsInvocationsCreateBodyConfigurationOneTriggerMaskingOneTtlMax = 94608000
+export const flowsInvocationsCreateBodyConfigurationOneTriggerMaskingOneTtlMin = 60
+export const flowsInvocationsCreateBodyConfigurationOneTriggerMaskingOneTtlMax = 94608000
 
-export const hogFlowsInvocationsCreateBodyConfigurationOneConversionOneEventsItemFiltersOneSourceDefault = `events`
-export const hogFlowsInvocationsCreateBodyConfigurationOneActionsItemIdMax = 200
+export const flowsInvocationsCreateBodyConfigurationOneConversionOneEventsItemFiltersOneSourceDefault = `events`
+export const flowsInvocationsCreateBodyConfigurationOneActionsItemIdMax = 200
 
-export const hogFlowsInvocationsCreateBodyConfigurationOneActionsItemNameMax = 400
+export const flowsInvocationsCreateBodyConfigurationOneActionsItemNameMax = 400
 
-export const hogFlowsInvocationsCreateBodyConfigurationOneActionsItemDescriptionDefault = ``
-export const hogFlowsInvocationsCreateBodyConfigurationOneActionsItemFiltersOneSourceDefault = `events`
-export const hogFlowsInvocationsCreateBodyConfigurationOneActionsItemConfigTwoConditionFiltersOneSourceDefault = `events`
-export const hogFlowsInvocationsCreateBodyConfigurationOneActionsItemConfigTwoEventsItemFiltersOneSourceDefault = `events`
-export const hogFlowsInvocationsCreateBodyConfigurationOneSchedulesItemTimezoneMax = 64
+export const flowsInvocationsCreateBodyConfigurationOneActionsItemDescriptionDefault = ``
+export const flowsInvocationsCreateBodyConfigurationOneActionsItemFiltersOneSourceDefault = `events`
+export const flowsInvocationsCreateBodyConfigurationOneActionsItemConfigTwoConditionFiltersOneSourceDefault = `events`
+export const flowsInvocationsCreateBodyConfigurationOneActionsItemConfigTwoEventsItemFiltersOneSourceDefault = `events`
+export const flowsInvocationsCreateBodyConfigurationOneSchedulesItemTimezoneMax = 64
 
-export const hogFlowsInvocationsCreateBodyMockAsyncFunctionsDefault = true
-export const hogFlowsInvocationsCreateBodyUseDraftDefault = false
+export const flowsInvocationsCreateBodyMockAsyncFunctionsDefault = true
+export const flowsInvocationsCreateBodyUseDraftDefault = false
 
 export const InsightsFlowsInvocationsCreateBody = /* @__PURE__ */ zod.object({
     configuration: zod
@@ -1633,12 +1633,12 @@ export const InsightsFlowsInvocationsCreateBody = /* @__PURE__ */ zod.object({
             id: zod.uuid(),
             name: zod
                 .string()
-                .max(hogFlowsInvocationsCreateBodyConfigurationOneNameMax)
+                .max(flowsInvocationsCreateBodyConfigurationOneNameMax)
                 .nullish()
                 .describe('Workflow name.'),
             description: zod
                 .string()
-                .default(hogFlowsInvocationsCreateBodyConfigurationOneDescriptionDefault)
+                .default(flowsInvocationsCreateBodyConfigurationOneDescriptionDefault)
                 .describe('Optional description.'),
             version: zod.number(),
             status: zod
@@ -1654,17 +1654,17 @@ export const InsightsFlowsInvocationsCreateBody = /* @__PURE__ */ zod.object({
                 uuid: zod.uuid(),
                 distinct_id: zod
                     .string()
-                    .max(hogFlowsInvocationsCreateBodyConfigurationOneCreatedByOneDistinctIdMax)
+                    .max(flowsInvocationsCreateBodyConfigurationOneCreatedByOneDistinctIdMax)
                     .nullish(),
                 first_name: zod
                     .string()
-                    .max(hogFlowsInvocationsCreateBodyConfigurationOneCreatedByOneFirstNameMax)
+                    .max(flowsInvocationsCreateBodyConfigurationOneCreatedByOneFirstNameMax)
                     .optional(),
                 last_name: zod
                     .string()
-                    .max(hogFlowsInvocationsCreateBodyConfigurationOneCreatedByOneLastNameMax)
+                    .max(flowsInvocationsCreateBodyConfigurationOneCreatedByOneLastNameMax)
                     .optional(),
-                email: zod.email().max(hogFlowsInvocationsCreateBodyConfigurationOneCreatedByOneEmailMax),
+                email: zod.email().max(flowsInvocationsCreateBodyConfigurationOneCreatedByOneEmailMax),
                 is_email_verified: zod.boolean().nullish(),
                 mascot_config: zod.record(zod.string(), zod.unknown()).nullable(),
                 role_at_organization: zod
@@ -1696,8 +1696,8 @@ export const InsightsFlowsInvocationsCreateBody = /* @__PURE__ */ zod.object({
                     zod.object({
                         ttl: zod
                             .number()
-                            .min(hogFlowsInvocationsCreateBodyConfigurationOneTriggerMaskingOneTtlMin)
-                            .max(hogFlowsInvocationsCreateBodyConfigurationOneTriggerMaskingOneTtlMax)
+                            .min(flowsInvocationsCreateBodyConfigurationOneTriggerMaskingOneTtlMin)
+                            .max(flowsInvocationsCreateBodyConfigurationOneTriggerMaskingOneTtlMax)
                             .nullish()
                             .describe('Seconds (60 to ~94M \/ 3y) to suppress repeat firings of the same hash.'),
                         threshold: zod
@@ -1739,7 +1739,7 @@ export const InsightsFlowsInvocationsCreateBody = /* @__PURE__ */ zod.object({
                                                     '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                                 )
                                                 .default(
-                                                    hogFlowsInvocationsCreateBodyConfigurationOneConversionOneEventsItemFiltersOneSourceDefault
+                                                    flowsInvocationsCreateBodyConfigurationOneConversionOneEventsItemFiltersOneSourceDefault
                                                 ),
                                             actions: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                             events: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
@@ -1820,15 +1820,15 @@ export const InsightsFlowsInvocationsCreateBody = /* @__PURE__ */ zod.object({
                     zod.object({
                         id: zod
                             .string()
-                            .max(hogFlowsInvocationsCreateBodyConfigurationOneActionsItemIdMax)
+                            .max(flowsInvocationsCreateBodyConfigurationOneActionsItemIdMax)
                             .describe('Unique node ID within the workflow.'),
                         name: zod
                             .string()
-                            .max(hogFlowsInvocationsCreateBodyConfigurationOneActionsItemNameMax)
+                            .max(flowsInvocationsCreateBodyConfigurationOneActionsItemNameMax)
                             .describe('Display name.'),
                         description: zod
                             .string()
-                            .default(hogFlowsInvocationsCreateBodyConfigurationOneActionsItemDescriptionDefault)
+                            .default(flowsInvocationsCreateBodyConfigurationOneActionsItemDescriptionDefault)
                             .describe('Optional description.'),
                         on_error: zod
                             .union([
@@ -1852,7 +1852,7 @@ export const InsightsFlowsInvocationsCreateBody = /* @__PURE__ */ zod.object({
                                             '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                         )
                                         .default(
-                                            hogFlowsInvocationsCreateBodyConfigurationOneActionsItemFiltersOneSourceDefault
+                                            flowsInvocationsCreateBodyConfigurationOneActionsItemFiltersOneSourceDefault
                                         ),
                                     actions: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                     events: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
@@ -1911,7 +1911,7 @@ export const InsightsFlowsInvocationsCreateBody = /* @__PURE__ */ zod.object({
                                                                     '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                                                 )
                                                                 .default(
-                                                                    hogFlowsInvocationsCreateBodyConfigurationOneActionsItemConfigTwoConditionFiltersOneSourceDefault
+                                                                    flowsInvocationsCreateBodyConfigurationOneActionsItemConfigTwoConditionFiltersOneSourceDefault
                                                                 ),
                                                             actions: zod
                                                                 .array(zod.record(zod.string(), zod.unknown()))
@@ -1958,7 +1958,7 @@ export const InsightsFlowsInvocationsCreateBody = /* @__PURE__ */ zod.object({
                                                                         '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                                                     )
                                                                     .default(
-                                                                        hogFlowsInvocationsCreateBodyConfigurationOneActionsItemConfigTwoEventsItemFiltersOneSourceDefault
+                                                                        flowsInvocationsCreateBodyConfigurationOneActionsItemConfigTwoEventsItemFiltersOneSourceDefault
                                                                     ),
                                                                 actions: zod
                                                                     .array(zod.record(zod.string(), zod.unknown()))
@@ -2036,7 +2036,7 @@ export const InsightsFlowsInvocationsCreateBody = /* @__PURE__ */ zod.object({
                             .describe('ISO 8601 datetime the schedule starts from.'),
                         timezone: zod
                             .string()
-                            .max(hogFlowsInvocationsCreateBodyConfigurationOneSchedulesItemTimezoneMax)
+                            .max(flowsInvocationsCreateBodyConfigurationOneSchedulesItemTimezoneMax)
                             .optional()
                             .describe("IANA timezone for interpreting the RRULE (default 'UTC')."),
                         variables: zod
@@ -2091,7 +2091,7 @@ export const InsightsFlowsInvocationsCreateBody = /* @__PURE__ */ zod.object({
         .describe('Test trigger payload, typically {event, person, groups}.'),
     mock_async_functions: zod
         .boolean()
-        .default(hogFlowsInvocationsCreateBodyMockAsyncFunctionsDefault)
+        .default(flowsInvocationsCreateBodyMockAsyncFunctionsDefault)
         .describe('True (default) mocks HTTP\/email\/SMS. False fires real side effects.'),
     current_action_id: zod
         .string()
@@ -2101,18 +2101,18 @@ export const InsightsFlowsInvocationsCreateBody = /* @__PURE__ */ zod.object({
         ),
     use_draft: zod
         .boolean()
-        .default(hogFlowsInvocationsCreateBodyUseDraftDefault)
+        .default(flowsInvocationsCreateBodyUseDraftDefault)
         .describe(
             "Test the workflow's staged draft instead of its live config. Set this only when workflows-get returns a non-null 'draft'; it can't be combined with an explicit configuration override."
         ),
 })
 
-export const hogFlowsPublishCreateBodyConfirmDefault = false
+export const flowsPublishCreateBodyConfirmDefault = false
 
 export const InsightsFlowsPublishCreateBody = /* @__PURE__ */ zod.object({
     confirm: zod
         .boolean()
-        .default(hogFlowsPublishCreateBodyConfirmDefault)
+        .default(flowsPublishCreateBodyConfirmDefault)
         .describe(
             'False (default) previews the publish: returns the impact on people in-flight without changing anything. True applies the staged draft to the live workflow.'
         ),
@@ -2133,13 +2133,13 @@ export const InsightsFlowsPublishCreateBody = /* @__PURE__ */ zod.object({
  * onto cyclotron with `is_retry=1`.
  *
  * Because rerun replays historical event/person/group data, it requires
- * `person:read` and `group:read` on top of `hog_flow:write`.
+ * `person:read` and `group:read` on top of `script_flow:write`.
  */
-export const hogFlowsRerunCreateBodyFilterOneMaxAttemptsMax = 255
+export const flowsRerunCreateBodyFilterOneMaxAttemptsMax = 255
 
-export const hogFlowsRerunCreateBodyFilterOneMaxCountMax = 10000
+export const flowsRerunCreateBodyFilterOneMaxCountMax = 10000
 
-export const hogFlowsRerunCreateBodyFilterOneInvocationIdsMax = 10000
+export const flowsRerunCreateBodyFilterOneInvocationIdsMax = 10000
 
 export const InsightsFlowsRerunCreateBody = /* @__PURE__ */ zod
     .object({
@@ -2168,18 +2168,18 @@ export const InsightsFlowsRerunCreateBody = /* @__PURE__ */ zod
                 max_attempts: zod
                     .number()
                     .min(1)
-                    .max(hogFlowsRerunCreateBodyFilterOneMaxAttemptsMax)
+                    .max(flowsRerunCreateBodyFilterOneMaxAttemptsMax)
                     .optional()
                     .describe('Skip invocations that have already been attempted this many times or more.'),
                 max_count: zod
                     .number()
                     .min(1)
-                    .max(hogFlowsRerunCreateBodyFilterOneMaxCountMax)
+                    .max(flowsRerunCreateBodyFilterOneMaxCountMax)
                     .optional()
                     .describe('Maximum number of invocations to rerun in this request. Server-side cap is 10000.'),
                 invocation_ids: zod
                     .array(zod.string())
-                    .max(hogFlowsRerunCreateBodyFilterOneInvocationIdsMax)
+                    .max(flowsRerunCreateBodyFilterOneInvocationIdsMax)
                     .optional()
                     .describe(
                         'Optional restriction to specific invocation IDs within the window. Capped at 10000 per request. Always combined with `window_start`\/`window_end` so the Datastore query can be partition-pruned.'
@@ -2187,23 +2187,23 @@ export const InsightsFlowsRerunCreateBody = /* @__PURE__ */ zod
             })
             .describe('Filter shape for the rerun endpoint. `window_start`\/`window_end` are required.')
             .describe(
-                'Required. `window_start` \/ `window_end` pin the query to a small set of date partitions on the `hog_invocation_results` table. Optional `invocation_ids` restricts to specific invocations within that window.'
+                'Required. `window_start` \/ `window_end` pin the query to a small set of date partitions on the `invocations` table. Optional `invocation_ids` restricts to specific invocations within that window.'
             ),
     })
     .describe('Rerun invocations of a script function or script flow from their stored payloads.')
 
-export const hogFlowsRevisionsRestoreCreateBodyOverwriteDefault = false
+export const flowsRevisionsRestoreCreateBodyOverwriteDefault = false
 
 export const InsightsFlowsRevisionsRestoreCreateBody = /* @__PURE__ */ zod.object({
     overwrite: zod
         .boolean()
-        .default(hogFlowsRevisionsRestoreCreateBodyOverwriteDefault)
+        .default(flowsRevisionsRestoreCreateBodyOverwriteDefault)
         .describe(
             "Replace the open staged draft with this revision's content. Without it, restoring while a draft is open returns 409."
         ),
 })
 
-export const hogFlowsSchedulesCreateBodyTimezoneMax = 64
+export const flowsSchedulesCreateBodyTimezoneMax = 64
 
 export const InsightsFlowsSchedulesCreateBody = /* @__PURE__ */ zod.object({
     rrule: zod
@@ -2214,7 +2214,7 @@ export const InsightsFlowsSchedulesCreateBody = /* @__PURE__ */ zod.object({
     starts_at: zod.iso.datetime({ offset: true }).describe('ISO 8601 datetime the schedule starts from.'),
     timezone: zod
         .string()
-        .max(hogFlowsSchedulesCreateBodyTimezoneMax)
+        .max(flowsSchedulesCreateBodyTimezoneMax)
         .optional()
         .describe("IANA timezone for interpreting the RRULE (default 'UTC')."),
     variables: zod
@@ -2223,7 +2223,7 @@ export const InsightsFlowsSchedulesCreateBody = /* @__PURE__ */ zod.object({
         .describe('Variable value overrides merged with the workflow defaults on each run.'),
 })
 
-export const hogFlowsSchedulesPartialUpdateBodyTimezoneMax = 64
+export const flowsSchedulesPartialUpdateBodyTimezoneMax = 64
 
 export const InsightsFlowsSchedulesPartialUpdateBody = /* @__PURE__ */ zod.object({
     rrule: zod
@@ -2235,7 +2235,7 @@ export const InsightsFlowsSchedulesPartialUpdateBody = /* @__PURE__ */ zod.objec
     starts_at: zod.iso.datetime({ offset: true }).optional().describe('ISO 8601 datetime the schedule starts from.'),
     timezone: zod
         .string()
-        .max(hogFlowsSchedulesPartialUpdateBodyTimezoneMax)
+        .max(flowsSchedulesPartialUpdateBodyTimezoneMax)
         .optional()
         .describe("IANA timezone for interpreting the RRULE (default 'UTC')."),
     variables: zod
@@ -2244,28 +2244,28 @@ export const InsightsFlowsSchedulesPartialUpdateBody = /* @__PURE__ */ zod.objec
         .describe('Variable value overrides merged with the workflow defaults on each run.'),
 })
 
-export const hogFlowsBulkDeleteCreateBodyNameMax = 400
+export const flowsBulkDeleteCreateBodyNameMax = 400
 
-export const hogFlowsBulkDeleteCreateBodyDescriptionDefault = ``
-export const hogFlowsBulkDeleteCreateBodyTriggerMaskingOneTtlMin = 60
-export const hogFlowsBulkDeleteCreateBodyTriggerMaskingOneTtlMax = 94608000
+export const flowsBulkDeleteCreateBodyDescriptionDefault = ``
+export const flowsBulkDeleteCreateBodyTriggerMaskingOneTtlMin = 60
+export const flowsBulkDeleteCreateBodyTriggerMaskingOneTtlMax = 94608000
 
-export const hogFlowsBulkDeleteCreateBodyConversionOneEventsItemFiltersOneSourceDefault = `events`
-export const hogFlowsBulkDeleteCreateBodyActionsItemIdMax = 200
+export const flowsBulkDeleteCreateBodyConversionOneEventsItemFiltersOneSourceDefault = `events`
+export const flowsBulkDeleteCreateBodyActionsItemIdMax = 200
 
-export const hogFlowsBulkDeleteCreateBodyActionsItemNameMax = 400
+export const flowsBulkDeleteCreateBodyActionsItemNameMax = 400
 
-export const hogFlowsBulkDeleteCreateBodyActionsItemDescriptionDefault = ``
-export const hogFlowsBulkDeleteCreateBodyActionsItemFiltersOneSourceDefault = `events`
-export const hogFlowsBulkDeleteCreateBodyActionsItemConfigTwoConditionFiltersOneSourceDefault = `events`
-export const hogFlowsBulkDeleteCreateBodyActionsItemConfigTwoEventsItemFiltersOneSourceDefault = `events`
+export const flowsBulkDeleteCreateBodyActionsItemDescriptionDefault = ``
+export const flowsBulkDeleteCreateBodyActionsItemFiltersOneSourceDefault = `events`
+export const flowsBulkDeleteCreateBodyActionsItemConfigTwoConditionFiltersOneSourceDefault = `events`
+export const flowsBulkDeleteCreateBodyActionsItemConfigTwoEventsItemFiltersOneSourceDefault = `events`
 
 export const InsightsFlowsBulkDeleteCreateBody = /* @__PURE__ */ zod
     .object({
-        name: zod.string().max(hogFlowsBulkDeleteCreateBodyNameMax).nullish().describe('Workflow name.'),
+        name: zod.string().max(flowsBulkDeleteCreateBodyNameMax).nullish().describe('Workflow name.'),
         description: zod
             .string()
-            .default(hogFlowsBulkDeleteCreateBodyDescriptionDefault)
+            .default(flowsBulkDeleteCreateBodyDescriptionDefault)
             .describe('Optional description.'),
         status: zod
             .enum(['draft', 'active', 'archived'])
@@ -2279,8 +2279,8 @@ export const InsightsFlowsBulkDeleteCreateBody = /* @__PURE__ */ zod
                 zod.object({
                     ttl: zod
                         .number()
-                        .min(hogFlowsBulkDeleteCreateBodyTriggerMaskingOneTtlMin)
-                        .max(hogFlowsBulkDeleteCreateBodyTriggerMaskingOneTtlMax)
+                        .min(flowsBulkDeleteCreateBodyTriggerMaskingOneTtlMin)
+                        .max(flowsBulkDeleteCreateBodyTriggerMaskingOneTtlMax)
                         .nullish()
                         .describe('Seconds (60 to ~94M \/ 3y) to suppress repeat firings of the same hash.'),
                     threshold: zod
@@ -2322,7 +2322,7 @@ export const InsightsFlowsBulkDeleteCreateBody = /* @__PURE__ */ zod
                                                 '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                             )
                                             .default(
-                                                hogFlowsBulkDeleteCreateBodyConversionOneEventsItemFiltersOneSourceDefault
+                                                flowsBulkDeleteCreateBodyConversionOneEventsItemFiltersOneSourceDefault
                                             ),
                                         actions: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                         events: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
@@ -2401,12 +2401,12 @@ export const InsightsFlowsBulkDeleteCreateBody = /* @__PURE__ */ zod
                 zod.object({
                     id: zod
                         .string()
-                        .max(hogFlowsBulkDeleteCreateBodyActionsItemIdMax)
+                        .max(flowsBulkDeleteCreateBodyActionsItemIdMax)
                         .describe('Unique node ID within the workflow.'),
-                    name: zod.string().max(hogFlowsBulkDeleteCreateBodyActionsItemNameMax).describe('Display name.'),
+                    name: zod.string().max(flowsBulkDeleteCreateBodyActionsItemNameMax).describe('Display name.'),
                     description: zod
                         .string()
-                        .default(hogFlowsBulkDeleteCreateBodyActionsItemDescriptionDefault)
+                        .default(flowsBulkDeleteCreateBodyActionsItemDescriptionDefault)
                         .describe('Optional description.'),
                     on_error: zod
                         .union([
@@ -2427,7 +2427,7 @@ export const InsightsFlowsBulkDeleteCreateBody = /* @__PURE__ */ zod
                                     .describe(
                                         '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                     )
-                                    .default(hogFlowsBulkDeleteCreateBodyActionsItemFiltersOneSourceDefault),
+                                    .default(flowsBulkDeleteCreateBodyActionsItemFiltersOneSourceDefault),
                                 actions: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                 events: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
                                 data_warehouse: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
@@ -2481,7 +2481,7 @@ export const InsightsFlowsBulkDeleteCreateBody = /* @__PURE__ */ zod
                                                                 '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                                             )
                                                             .default(
-                                                                hogFlowsBulkDeleteCreateBodyActionsItemConfigTwoConditionFiltersOneSourceDefault
+                                                                flowsBulkDeleteCreateBodyActionsItemConfigTwoConditionFiltersOneSourceDefault
                                                             ),
                                                         actions: zod
                                                             .array(zod.record(zod.string(), zod.unknown()))
@@ -2528,7 +2528,7 @@ export const InsightsFlowsBulkDeleteCreateBody = /* @__PURE__ */ zod
                                                                     '\* `events` - events\n\* `person-updates` - person-updates\n\* `data-warehouse-table` - data-warehouse-table'
                                                                 )
                                                                 .default(
-                                                                    hogFlowsBulkDeleteCreateBodyActionsItemConfigTwoEventsItemFiltersOneSourceDefault
+                                                                    flowsBulkDeleteCreateBodyActionsItemConfigTwoEventsItemFiltersOneSourceDefault
                                                                 ),
                                                             actions: zod
                                                                 .array(zod.record(zod.string(), zod.unknown()))

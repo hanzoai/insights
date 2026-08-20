@@ -1,4 +1,4 @@
-.CheekyHogTopRight {
+.CheekyScriptTopRight {
     position: absolute;
     top: 0;
     right: 0;
@@ -7,15 +7,15 @@
     transform: translate(0, 0) rotate(0deg);
 }
 
-.CheekyHogTopRight--peek {
-    animation: CheekyHogTopRight__Peek 0.3s ease-out forwards;
+.CheekyScriptTopRight--peek {
+    animation: CheekyScriptTopRight__Peek 0.3s ease-out forwards;
 }
 
-.CheekyHogTopRight--hide {
-    animation: CheekyHogTopRight__Hide 0.3s ease-out forwards;
+.CheekyScriptTopRight--hide {
+    animation: CheekyScriptTopRight__Hide 0.3s ease-out forwards;
 }
 
-@keyframes CheekyHogTopRight__Peek {
+@keyframes CheekyScriptTopRight__Peek {
     from {
         transform: translate(0, 0) rotate(0deg);
     }
@@ -25,7 +25,7 @@
     }
 }
 
-@keyframes CheekyHogTopRight__Hide {
+@keyframes CheekyScriptTopRight__Hide {
     from {
         transform: translate(60%, 0) rotate(45deg);
     }
@@ -35,7 +35,7 @@
     }
 }
 
-.CheekyHogTopLeft {
+.CheekyScriptTopLeft {
     position: absolute;
     top: 0;
     left: 0;
@@ -44,15 +44,15 @@
     transform: translate(0, 0) rotate(0deg);
 }
 
-.CheekyHogTopLeft--peek {
-    animation: CheekyHogTopLeft__Peek 0.3s ease-out forwards;
+.CheekyScriptTopLeft--peek {
+    animation: CheekyScriptTopLeft__Peek 0.3s ease-out forwards;
 }
 
-.CheekyHogTopLeft--hide {
-    animation: CheekyHogTopLeft__Hide 0.3s ease-out forwards;
+.CheekyScriptTopLeft--hide {
+    animation: CheekyScriptTopLeft__Hide 0.3s ease-out forwards;
 }
 
-@keyframes CheekyHogTopLeft__Peek {
+@keyframes CheekyScriptTopLeft__Peek {
     from {
         transform: translate(0, 0) rotate(0deg);
     }
@@ -62,7 +62,7 @@
     }
 }
 
-@keyframes CheekyHogTopLeft__Hide {
+@keyframes CheekyScriptTopLeft__Hide {
     from {
         transform: translate(-80%, 0) rotate(-45deg);
     }

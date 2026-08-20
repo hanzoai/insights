@@ -1,6 +1,6 @@
 import { Message } from 'node-rdkafka'
 
-import { AppMetricsOutput, DlqOutput, IngestionWarningsOutput, TophogOutput } from '~/common/outputs'
+import { AppMetricsOutput, DlqOutput, IngestionWarningsOutput, TopFnOutput } from '~/common/outputs'
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
 import { EventIngestionRestrictionManager } from '~/common/utils/event-ingestion-restrictions'
 import { PromiseScheduler } from '~/common/utils/promise-scheduler'
@@ -25,7 +25,7 @@ import { createDropOldEventsStep } from '~/ingestion/common/steps/event-processi
 import { createNormalizeEventStep } from '~/ingestion/common/steps/event-processing/normalize-event-step'
 import { createPrepareEventStep } from '~/ingestion/common/steps/event-processing/prepare-event-step'
 import { createRecordIngestionLagStep } from '~/ingestion/common/steps/record-ingestion-lag'
-import { TopHogRegistry } from '~/ingestion/framework/extensions/tophog'
+import { TopFnRegistry } from '~/ingestion/framework/extensions/topfn'
 
 import { createCheckHeatmapOptInStep } from './check-heatmap-opt-in-step'
 import { createDisablePersonProcessingStep } from './disable-person-processing-step'
@@ -33,7 +33,7 @@ import { createExtractHeatmapDataStep } from './extract-heatmap-data-step'
 import { HeatmapsOutput } from './outputs'
 
 export interface HeatmapsPipelineConfig {
-    outputs: IngestionOutputs<HeatmapsOutput | IngestionWarningsOutput | DlqOutput | AppMetricsOutput | TophogOutput>
+    outputs: IngestionOutputs<HeatmapsOutput | IngestionWarningsOutput | DlqOutput | AppMetricsOutput | TopFnOutput>
     teamManager: TeamManager
     // The managers come from a started `Lifecycle`'s service map, where
     // `start` and `stop` are stripped from the type — the pipeline only
@@ -42,7 +42,7 @@ export interface HeatmapsPipelineConfig {
     eventFilterManager: EventFilterManager
     cookielessManager: CookielessManager
     promiseScheduler: PromiseScheduler
-    topHog: TopHogRegistry
+    topFn: TopFnRegistry
 }
 
 interface HeatmapsPipelineInput {
@@ -63,7 +63,7 @@ export function createHeatmapsPipeline<TInput extends HeatmapsPipelineInput, TCo
         eventFilterManager,
         cookielessManager,
         promiseScheduler,
-        topHog,
+        topFn,
     } = config
 
     return (
@@ -72,7 +72,7 @@ export function createHeatmapsPipeline<TInput extends HeatmapsPipelineInput, TCo
             outputs,
             promiseScheduler,
             concurrentBatches: 1,
-            topHog,
+            topFn,
         })
             .beforeBatch((b) => b.pipe(createEventFiltersBatchAppMetricsBeforeBatchStep(outputs)))
             .parseHeaders()

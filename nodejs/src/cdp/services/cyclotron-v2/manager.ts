@@ -31,7 +31,7 @@ export const EMAIL_DEQUEUE_BLOCK_SIZE = BigInt(16_777_216)
 /**
  * Atomically bump the per-team email counter and return the formatted
  * `dequeue_seq` string for one new email job. Exported because the worker's
- * `reschedule()` path also needs to assign `dequeue_seq` when a script/hogflow
+ * `reschedule()` path also needs to assign `dequeue_seq` when a script/flow
  * job is re-routed into the email queue — without this, those rows land with
  * `NULL dequeue_seq` and bypass the per-team interleave (`NULLS FIRST` would
  * drain them ahead of any fair-ordered rows).

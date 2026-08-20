@@ -31,7 +31,7 @@ class TestOrganizationDomainActivityLogging(APIBaseTest):
 
     def _create_verified_domain(self, domain="test.example.com"):
         response = self.client.post(
-            "/api/organizations/@current/domains/",
+            "/v1/organizations/@current/domains/",
             {"domain": domain},
         )
         self.assertEqual(response.status_code, 201)
@@ -46,7 +46,7 @@ class TestOrganizationDomainActivityLogging(APIBaseTest):
 
     def test_domain_creation_activity_logging(self):
         response = self.client.post(
-            "/api/organizations/@current/domains/",
+            "/v1/organizations/@current/domains/",
             {"domain": "new.example.com"},
         )
         self.assertEqual(response.status_code, 201)
@@ -71,7 +71,7 @@ class TestOrganizationDomainActivityLogging(APIBaseTest):
         domain = self._create_verified_domain("delete-me.example.com")
         domain_id = str(domain.id)
 
-        response = self.client.delete(f"/api/organizations/@current/domains/{domain.id}")
+        response = self.client.delete(f"/v1/organizations/@current/domains/{domain.id}")
         self.assertEqual(response.status_code, 204)
 
         log = ActivityLog.objects.filter(
@@ -109,7 +109,7 @@ class TestOrganizationDomainActivityLogging(APIBaseTest):
         domain = self._create_verified_domain(f"{domain_prefix}.example.com")
 
         response = self.client.patch(
-            f"/api/organizations/@current/domains/{domain.id}/",
+            f"/v1/organizations/@current/domains/{domain.id}/",
             {field: value},
         )
         self.assertEqual(response.status_code, 200)
@@ -130,7 +130,7 @@ class TestOrganizationDomainActivityLogging(APIBaseTest):
     @patch("insights.models.organization_domain.dns.resolver.resolve")
     def test_domain_verification_activity_logging(self, mock_dns_query):
         response = self.client.post(
-            "/api/organizations/@current/domains/",
+            "/v1/organizations/@current/domains/",
             {"domain": "verify.example.com"},
         )
         self.assertEqual(response.status_code, 201)
@@ -153,7 +153,7 @@ class TestOrganizationDomainActivityLogging(APIBaseTest):
         )
 
         with freeze_time("2024-01-15T12:00:00Z"):
-            response = self.client.post(f"/api/organizations/@current/domains/{domain.id}/verify")
+            response = self.client.post(f"/v1/organizations/@current/domains/{domain.id}/verify")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()["is_verified"])
 
@@ -172,7 +172,7 @@ class TestOrganizationDomainActivityLogging(APIBaseTest):
     @patch("insights.models.organization_domain.dns.resolver.resolve")
     def test_failed_verification_excludes_last_verification_retry(self, mock_dns_query):
         response = self.client.post(
-            "/api/organizations/@current/domains/",
+            "/v1/organizations/@current/domains/",
             {"domain": "fail-verify.example.com"},
         )
         self.assertEqual(response.status_code, 201)
@@ -184,7 +184,7 @@ class TestOrganizationDomainActivityLogging(APIBaseTest):
 
         mock_dns_query.side_effect = dns.resolver.NoAnswer()
 
-        response = self.client.post(f"/api/organizations/@current/domains/{domain.id}/verify")
+        response = self.client.post(f"/v1/organizations/@current/domains/{domain.id}/verify")
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.json()["is_verified"])
 
