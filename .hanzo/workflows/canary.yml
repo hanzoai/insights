@@ -56,21 +56,21 @@ jobs:
       # deploy.yml guards against has nothing to bite here.
       - name: Build + push
         env:
-          # The credential the build reads our own packages with. FORGE_TOKEN is the
+          # The credential the build reads our own packages with. GIT_TOKEN is the
           # provisioned one; where nothing more specific is set, the runner's own job
           # token is what that credential is.
-          FORGE_TOKEN: ${{ secrets.FORGE_TOKEN }}
+          GIT_TOKEN: ${{ github.token }}
           RUNNER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           VERSION="canary-$(echo "${GITHUB_SHA}" | cut -c1-11)"
           IMAGE="ghcr.io/hanzoai/insights:${VERSION}"
 
-          export FORGE_TOKEN="${FORGE_TOKEN:-$RUNNER_TOKEN}"
+          export GIT_TOKEN="${GIT_TOKEN:-$RUNNER_TOKEN}"
           ./bin/check-forge-credential
 
           DOCKER_BUILDKIT=1 docker build -f Dockerfile \
-            --secret id=FORGE_TOKEN,env=FORGE_TOKEN \
+            --secret id=GIT_TOKEN,env=GIT_TOKEN \
             --build-arg COMMIT_HASH="${GITHUB_SHA}" \
             --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
             --label "org.opencontainers.image.version=${VERSION}" \
