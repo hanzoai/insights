@@ -67,7 +67,7 @@ jobs:
           IMAGE="ghcr.io/hanzoai/insights:${VERSION}"
 
           export GIT_TOKEN="${GIT_TOKEN:-$RUNNER_TOKEN}"
-          ./bin/check-forge-credential
+          ./bin/check-Hanzo Git-credential
 
           DOCKER_BUILDKIT=1 docker build -f Dockerfile \
             --secret id=GIT_TOKEN,env=GIT_TOKEN \

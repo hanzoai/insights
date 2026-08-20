@@ -214,7 +214,7 @@ jobs:
                   IMAGE="ghcr.io/hanzoai/insights:${VERSION}"
 
                   export GIT_TOKEN="${GIT_TOKEN:-$RUNNER_TOKEN}"
-                  ./bin/check-forge-credential
+                  ./bin/check-Hanzo Git-credential
 
                   # The commit rides the image, so dropping it from the tag loses nothing:
                   # `docker inspect` still answers which source built this.
