@@ -158,6 +158,28 @@ jobs:
             - name: Every import names a committed module
               run: ./bin/check-imports-are-committed
 
+            # The rename is an INVARIANT, not a memory. This fork exists as a rename of
+            # an upstream tree, and every convergence re-imports tens of thousands of
+            # files that still carry the old name — so the brand does not come back in
+            # one reviewable commit, it comes back a few files at a time, and the first
+            # symptom is that it shipped. bin/debrand has held the rules since 08-01 and
+            # NOTHING INVOKED IT: measured 08-20, zero of the eight forge workflows ran
+            # it, while this file's sibling names.yml describes it in its header as
+            # "absolute, on the deploy path". The header was true about the intent and
+            # false about the tree.
+            #
+            # Here, before the GHCR login, because it needs no credential and a failure
+            # costs nothing: ~10s measured on this tree (127MB RSS, stdlib-only, reads
+            # the git index). Failing after the image is built wastes 30-60 minutes.
+            #
+            # Bare `--check` on purpose. It asserts only what is absolutely true of every
+            # tree we ship — zero tracked paths and zero unallowlisted files name the
+            # upstream. That is a fact a tree either has or does not. The differential
+            # vocabulary rules stay in names.yml, off the deploy path, because they encode
+            # a JUDGEMENT and a judgement must never be able to wedge production.
+            - name: The rename holds
+              run: python3 bin/debrand --check
+
             - name: Log in to GHCR
               run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
 
