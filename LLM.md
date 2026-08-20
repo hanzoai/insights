@@ -14,7 +14,7 @@ ONE ingest door: `POST https://api.hanzo.ai/v1/event` (cloud binary). Every
 SDK wire path (`/e`, `/batch`, `/capture`, `/i/v0/e`, `/v1/e`) on
 insights/analytics/sentry hosts rewrites to it at the ingress. Cloud also
 serves the Sentry wires (`/v1/event/:project/envelope|store`), the tag script
-(`GET /v1/event.js`), the sentry read surface (`/v1/sentry/*` for
+(`GET /v1/event.js`), the Sentinel read surface (`/v1/sentinel/*` for
 sentry.hanzo.ai's embedded console), and projects error + gen_ai span signals
 into o11y (sentry lens + LLM lens; kill switches CLOUD_SENTRY_LENS /
 CLOUD_LLM_LENS). o11y.hanzo.ai emits its SDK events to insights.hanzo.ai —
