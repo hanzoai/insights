@@ -202,24 +202,24 @@ jobs:
             # a matching label. Same shape as platform's build, which is proven green.
             - name: Build + push
               env:
-                  # The credential the build reads our own packages with. FORGE_TOKEN is
+                  # The credential the build reads our own packages with. GIT_TOKEN is
                   # the provisioned one; where nothing more specific is set, the runner's
                   # own job token is what that credential is. One credential, resolved in
                   # order — not two mechanisms.
-                  FORGE_TOKEN: ${{ secrets.FORGE_TOKEN }}
+                  GIT_TOKEN: ${{ github.token }}
                   RUNNER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                   set -euo pipefail
                   VERSION="${{ steps.ver.outputs.version }}"
                   IMAGE="ghcr.io/hanzoai/insights:${VERSION}"
 
-                  export FORGE_TOKEN="${FORGE_TOKEN:-$RUNNER_TOKEN}"
+                  export GIT_TOKEN="${GIT_TOKEN:-$RUNNER_TOKEN}"
                   ./bin/check-forge-credential
 
                   # The commit rides the image, so dropping it from the tag loses nothing:
                   # `docker inspect` still answers which source built this.
                   DOCKER_BUILDKIT=1 docker build -f Dockerfile \
-                    --secret id=FORGE_TOKEN,env=FORGE_TOKEN \
+                    --secret id=GIT_TOKEN,env=GIT_TOKEN \
                     --build-arg COMMIT_HASH="${GITHUB_SHA}" \
                     --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
                     --label "org.opencontainers.image.version=${VERSION}" \
