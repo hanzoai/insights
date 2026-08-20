@@ -6,13 +6,12 @@ from insights.insightsql.errors import TableAccessDeniedError
 
 from insights.constants import AvailableFeature
 from insights.models import OrganizationMembership, Team
+from insights.models.ee_models import AccessControl
 
 from products.cohorts.backend.models.cohort import Cohort
 from products.cohorts.backend.models.util import insightsql_cohort_subquery_sql
 from products.data_tools.backend.models.join import DataWarehouseJoin
 from products.warehouse_sources.backend.facade.models import DataWarehouseCredential, DataWarehouseTable
-
-from insights.models.ee_models import AccessControl
 
 # A behavioral filter whose insightsql event filter reads the warehouse table directly (cohort
 # filters reject the data_warehouse_* property types at the pydantic layer). Reaching the same
@@ -94,7 +93,7 @@ class TestCohortSaveWarehouseAccessControl(APIBaseTest):
 
     def _save_cohort(self):
         return self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": "warehouse cohort", "filters": WAREHOUSE_FILTERS},
         )
 
@@ -124,7 +123,7 @@ class TestCohortSaveWarehouseAccessControl(APIBaseTest):
         AccessControl.objects.create(team=self.team, resource="warehouse_objects", access_level="none")
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort.pk}/",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort.pk}/",
             {"is_static": False},
         )
 
@@ -136,7 +135,7 @@ class TestCohortSaveWarehouseAccessControl(APIBaseTest):
         AccessControl.objects.create(team=self.team, resource="warehouse_objects", access_level="none")
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {
                 "name": "query cohort",
                 "is_static": True,
@@ -155,7 +154,7 @@ class TestCohortSaveWarehouseAccessControl(APIBaseTest):
         # Legacy `groups` writes skip field-level validate_filters - the object-level gate must
         # still catch a warehouse reference smuggled in through them.
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort.pk}/",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort.pk}/",
             {"groups": [{"properties": WAREHOUSE_FILTERS["properties"]["values"]}]},
         )
 

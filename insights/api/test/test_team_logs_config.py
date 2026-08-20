@@ -16,7 +16,7 @@ from products.logs.backend.models import (
     TeamLogsConfig,
 )
 
-# Both routes resolve to the same handler — /api/projects/ is canonical, /api/environments/
+# Both routes resolve to the same handler — /v1/projects/ is canonical, /v1/environments/
 # remains as the back-compat alias. See `handle_logs_config` in insights/api/team.py.
 URL_PREFIXES = [("projects", "api/projects"), ("environments", "api/environments")]
 
@@ -72,7 +72,7 @@ class TestTeamLogsConfig(APIBaseTest):
         # Pre-plural readers (older MCP prompts, cached frontends) still read the
         # singular field — it must track the first entry of the plural list.
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/logs_config/",
+            f"/v1/projects/{self.team.id}/logs_config/",
             {"logs_distinct_id_attribute_keys": ["user.id", "backup.id"]},
             format="json",
         )
@@ -85,7 +85,7 @@ class TestTeamLogsConfig(APIBaseTest):
         # The singular field is a read-only alias now — a write to it must not 400
         # (old clients keep working) but must not change anything either.
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/logs_config/",
+            f"/v1/projects/{self.team.id}/logs_config/",
             {"logs_distinct_id_attribute_key": "user.id"},
             format="json",
         )
@@ -130,20 +130,20 @@ class TestTeamLogsConfig(APIBaseTest):
         self.assertEqual(sibling_response.json(), DEFAULT_CONFIG)
 
     def test_project_and_environment_share_same_config(self):
-        # Writes via the canonical /api/projects/ URL must be visible via the
-        # /api/environments/ alias and vice versa — both routes operate on the
+        # Writes via the canonical /v1/projects/ URL must be visible via the
+        # /v1/environments/ alias and vice versa — both routes operate on the
         # same env-scoped TeamLogsConfig keyed by team_id.
         self.client.patch(
-            f"/api/projects/{self.team.id}/logs_config/",
+            f"/v1/projects/{self.team.id}/logs_config/",
             {"logs_distinct_id_attribute_keys": ["user.id"]},
             format="json",
         )
-        env_response = self.client.get(f"/api/environments/{self.team.id}/logs_config/")
+        env_response = self.client.get(f"/v1/environments/{self.team.id}/logs_config/")
         self.assertEqual(env_response.json()["logs_distinct_id_attribute_keys"], ["user.id"])
 
     def test_patch_updates_session_id_keys_preserving_order(self):
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/logs_config/",
+            f"/v1/projects/{self.team.id}/logs_config/",
             {"logs_session_id_attribute_keys": ["session.id", "insightsSessionId"]},
             format="json",
         )
@@ -158,17 +158,17 @@ class TestTeamLogsConfig(APIBaseTest):
         # A naive serializer change could make a PATCH on one field reset the other
         # to its default — the two settings must update independently.
         self.client.patch(
-            f"/api/projects/{self.team.id}/logs_config/",
+            f"/v1/projects/{self.team.id}/logs_config/",
             {"logs_session_id_attribute_keys": ["session.id"]},
             format="json",
         )
         self.client.patch(
-            f"/api/projects/{self.team.id}/logs_config/",
+            f"/v1/projects/{self.team.id}/logs_config/",
             {"logs_distinct_id_attribute_keys": ["user.id"]},
             format="json",
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/logs_config/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/logs_config/")
         self.assertEqual(
             response.json(),
             {
@@ -188,7 +188,7 @@ class TestTeamLogsConfig(APIBaseTest):
         # Wiring guard: the endpoint must reject bodies the serializer marks invalid.
         # The full validation matrix lives in TestTeamLogsConfigSerializerValidation.
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/logs_config/",
+            f"/v1/projects/{self.team.id}/logs_config/",
             {field: []},
             format="json",
         )

@@ -44,7 +44,7 @@ export function sleep(ms: number): Promise<void> {
  *
  * Intentionally narrower than manager.bulkCreateJobs: no `overwriteExisting`
  * path, no email-queue `dequeue_seq` computation (the resolver enqueues
- * children onto 'hogflow', not 'email'). Email re-routing happens later via
+ * children onto 'flow', not 'email'). Email re-routing happens later via
  * the worker's reschedule path which already handles dequeue_seq assignment.
  */
 async function insertNewJobsInTx(client: PoolClient, newJobs: CyclotronV2JobInit[]): Promise<string[]> {
@@ -489,7 +489,7 @@ export class CyclotronV2Worker {
 
                 // Cross-queue routing into the email queue: assign a fresh
                 // dequeue_seq so the row participates in fair ordering. Without
-                // this, hogflow → email re-routing (via job.reschedule({
+                // this, flow → email re-routing (via job.reschedule({
                 // queueName: 'email' })) lands the row with NULL dequeue_seq,
                 // which `NULLS FIRST` drains ahead of every fair-ordered row —
                 // defeating the per-team interleave for the most common email

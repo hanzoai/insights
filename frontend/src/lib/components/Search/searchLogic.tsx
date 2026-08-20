@@ -1257,7 +1257,7 @@ export const searchLogic = kea<searchLogicType>([
                             name = safeString(result.extra_fields.name) || result.result_id
                             href = `/early_access_features/${result.result_id}`
                             break
-                        case 'hog_flow':
+                        case 'script_flow':
                             name = safeString(result.extra_fields.name) || result.result_id
                             href = `/workflows/${result.result_id}/workflow`
                             break
@@ -1548,7 +1548,7 @@ export const searchLogic = kea<searchLogicType>([
                         'action',
                         'event_definition',
                         'property_definition',
-                        'hog_flow',
+                        'script_flow',
                     ]
 
                     for (const category of categoryOrder) {

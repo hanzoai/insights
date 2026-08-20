@@ -2,8 +2,8 @@ from typing import Any
 
 import re2
 
-from common.scriptvm.python.objects import is_hog_date, is_hog_datetime
-from common.scriptvm.python.stl.date import date_string_to_seconds, to_hog_datetime
+from common.scriptvm.python.objects import is_script_date, is_script_datetime
+from common.scriptvm.python.stl.date import date_string_to_seconds, to_script_datetime
 
 _CASE_INSENSITIVE_OPTS = re2.Options()
 _CASE_INSENSITIVE_OPTS.case_sensitive = False
@@ -12,11 +12,11 @@ COST_PER_UNIT = 8
 
 
 def _temporal_seconds(value: Any) -> float | None:
-    """Epoch seconds for a Script datetime/date value, else None. A bare HogDate is UTC midnight."""
-    if is_hog_datetime(value):
+    """Epoch seconds for a Script datetime/date value, else None. A bare ScriptDate is UTC midnight."""
+    if is_script_datetime(value):
         return value["dt"]
-    if is_hog_date(value):
-        return to_hog_datetime(value)["dt"]
+    if is_script_date(value):
+        return to_script_datetime(value)["dt"]
     return None
 
 
@@ -162,14 +162,14 @@ def calculate_cost(object, marked: set | None = None) -> int:
 
 def unify_comparison_types(left, right):
     # Two temporal values order by epoch seconds (matching Datastore and the TS/Rust VMs). Without
-    # this a HogDateTime/HogDate dict falls through unchanged and ordering operators end up comparing
+    # this a ScriptDateTime/ScriptDate dict falls through unchanged and ordering operators end up comparing
     # dicts, which Python can't order.
     left_seconds = _temporal_seconds(left)
     right_seconds = _temporal_seconds(right)
     if left_seconds is not None and right_seconds is not None:
         return left_seconds, right_seconds
     # A bare-field SQL comparison like `timestamp > toDateTime(...)` puts a plain date-like string
-    # against a HogDateTime/HogDate object. Parse the string the same way `toDateTime` would rather
+    # against a ScriptDateTime/ScriptDate object. Parse the string the same way `toDateTime` would rather
     # than falling through to the string/number branches below, which leave it unordered.
     if left_seconds is not None and isinstance(right, str):
         right_seconds_from_string = date_string_to_seconds(right)

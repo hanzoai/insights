@@ -18,7 +18,7 @@ source: query-mcp-tool-failures + benchmark task sql-daily-event-volume
 attempt: clarified input description in products/data_warehouse/mcp/tools.yaml (execute-sql.query)
 baseline: probes 24/26 ok, p95 2100ms; agent-mode task success 19/27, tool-selection 22/27
 after: probes 26/26 ok, p95 2050ms; agent-mode task success 22/27, tool-selection 25/27
-verdict: KEEP → PR #67991 (stamphog)
+verdict: KEEP → PR #67991 (stamp)
 ```
 
 Discarded example:

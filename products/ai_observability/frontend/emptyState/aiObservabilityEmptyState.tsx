@@ -1,7 +1,6 @@
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
 import { IconLlmAnalytics } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import type { SceneProductEmptyState } from 'lib/components/ProductEmptyState/types'
 
 import { ProductKey } from '~/queries/schema/schema-general'
@@ -9,7 +8,7 @@ import { ProductKey } from '~/queries/schema/schema-general'
 import { aiObservabilitySharedLogic } from '../aiObservabilitySharedLogic'
 import { AIObservabilityTracePreview } from './AIObservabilityTracePreview'
 
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
+const MascotMagnifyingGlass = pngMascot()
 
 export const aiObservabilityEmptyState: SceneProductEmptyState = {
     statusLogic: aiObservabilitySharedLogic,

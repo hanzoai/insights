@@ -120,7 +120,7 @@ using `datasourceUid: "victoriametrics"` and `regex: "<prefix>.*"`.
 | `events_pipeline_*`                                                              | Legacy pipeline step metrics               | `step_name`                                              |
 | `person_*`                                                                       | Person processing (~30 metrics)            | `db_write_mode`, `operation`, `method`                   |
 | `group_*` (non-AWS)                                                              | Group processing                           | `operation`                                              |
-| `personinsights_*`                                                                    | PersonHog gRPC client + service            | `method`, `source`, `client`                             |
+| `personinsights_*`                                                                    | personinsights gRPC client + service            | `method`, `source`, `client`                             |
 | `overflow_redirect_*`                                                            | Stateful overflow routing                  | `type`, `result`, `decision`, `operation`                |
 | `cookieless_*`                                                                   | Cookieless mode                            | —                                                        |
 | `http_request_duration_seconds`                                                  | HTTP health/readiness server               | `method`, `route`, `status_code`                         |
@@ -187,7 +187,7 @@ agent pool, KMinion instance, and topic namespace:
 
 | VC name                          | Topics carried                                                                                                                                                                                                                                                                                                                       | KMinion instance                         |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
-| `warpstream-ingestion-v2`        | `datastore_events_json`, `datastore_person`, `datastore_person_distinct_id`, `datastore_groups`, `datastore_ai_events_json`, `datastore_heatmap_events`, `datastore_app_metrics2`, `datastore_tophog`, `datastore_ingestion_warnings`, `distinct_id_usage_events_json`, `log_entries`, `team_event_partitioned_events_json` | `kminion-warpstream-ingestion`           |
+| `warpstream-ingestion-v2`        | `datastore_events_json`, `datastore_person`, `datastore_person_distinct_id`, `datastore_groups`, `datastore_ai_events_json`, `datastore_heatmap_events`, `datastore_app_metrics2`, `datastore_topfn`, `datastore_ingestion_warnings`, `distinct_id_usage_events_json`, `log_entries`, `team_event_partitioned_events_json` | `kminion-warpstream-ingestion`           |
 | `warpstream-replay-v2`           | `ingestion-sessionreplay-main-*`, `datastore_session_replay_events`, `datastore_session_replay_features`                                                                                                                                                                                                                           | `kminion-warpstream-replay`              |
 | `warpstream-logs`                | `ingestion-logs`, `datastore_logs`                                                                                                                                                                                                                                                                                                  | `kminion-warpstream-logs`                |
 | `warpstream-traces`              | `ingestion-traces`, `datastore_traces`                                                                                                                                                                                                                                                                                              | `kminion-warpstream-traces`              |
@@ -313,7 +313,7 @@ Profile types: `process_cpu:cpu:nanoseconds:cpu:nanoseconds`,
 | `dbfj5c31spa1ogf`                        | MSK vs Warpstream — Active Produce Topics | Side-by-side produce volume comparison                |
 | `8e93b023-a544-4a3b-8fac-123459d4eb84`   | WarpStream: Datastore Consumer Lag       | CH consumer lag on WarpStream topics (US only)        |
 | `ws-coarse-lag-explore`                  | WarpStream Coarse Lag — Explore           | Agent-reported lag (US only, personal dashboard)      |
-| `personinsights-service`                      | Personhog service                         | PersonHog latency decomposition                       |
+| `personinsights-service`                      | personinsights service                         | personinsights latency decomposition                       |
 | `dbfgkwxs3gw8owd`                        | KMinion Consumer Group Lag                | Consumer lag by group (including CH groups)           |
 | `logs`                                   | Logs (product)                            | Logs ingestion                                        |
 | `vm-datastore-cluster-overview`         | Datastore (cluster overview)             | QPS, memory, disk, replication, parts, merges         |
@@ -420,5 +420,5 @@ See [references/investigation-playbooks.md](./references/investigation-playbooks
 for step-by-step workflows covering: health checks, event drops, latency, consumer lag,
 person processing (including the pganalyze query-level view of the persons DB),
 Kafka/MSK issues, Redis, Postgres, session replay, Datastore downstream health,
-single-partition lag (keyed-cost diagnosis, handing off to the `querying-tophog`
+single-partition lag (keyed-cost diagnosis, handing off to the `querying-topfn`
 skill for actor identification), and cross-environment comparison.

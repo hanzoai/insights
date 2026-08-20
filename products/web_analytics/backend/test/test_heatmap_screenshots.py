@@ -28,7 +28,7 @@ class TestHeatmapsAPI(APIBaseTest):
     @patch("products.web_analytics.backend.tasks.heatmap_screenshot.generate_heatmap_screenshot.delay")
     def test_generate_creates_saved_with_target_widths(self, mock_task):
         resp = self.client.post(
-            f"/api/environments/{self.team.id}/saved/",
+            f"/v1/environments/{self.team.id}/saved/",
             {"url": "https://example.com", "widths": [768, 1024]},
         )
         self.assertEqual(resp.status_code, 201)
@@ -42,7 +42,7 @@ class TestHeatmapsAPI(APIBaseTest):
     @patch("products.web_analytics.backend.tasks.heatmap_screenshot.generate_heatmap_screenshot.delay")
     def test_create_defaults_consent_blocking_off(self, _mock_task):
         resp = self.client.post(
-            f"/api/environments/{self.team.id}/saved/",
+            f"/v1/environments/{self.team.id}/saved/",
             {"url": "https://example.com"},
         )
         self.assertEqual(resp.status_code, 201)
@@ -53,7 +53,7 @@ class TestHeatmapsAPI(APIBaseTest):
     @patch("products.web_analytics.backend.tasks.heatmap_screenshot.generate_heatmap_screenshot.delay")
     def test_create_persists_consent_blocking_when_enabled(self, _mock_task):
         resp = self.client.post(
-            f"/api/environments/{self.team.id}/saved/",
+            f"/v1/environments/{self.team.id}/saved/",
             {"url": "https://example.com", "block_consent_modals": True},
         )
         self.assertEqual(resp.status_code, 201)
@@ -71,7 +71,7 @@ class TestHeatmapsAPI(APIBaseTest):
         )
 
         resp = self.client.post(
-            f"/api/environments/{self.team.id}/saved/preflight/",
+            f"/v1/environments/{self.team.id}/saved/preflight/",
             {"url": "https://example.com/page"},
         )
 
@@ -82,7 +82,7 @@ class TestHeatmapsAPI(APIBaseTest):
 
     def test_preflight_rejects_a_wildcard_url(self):
         resp = self.client.post(
-            f"/api/environments/{self.team.id}/saved/preflight/",
+            f"/v1/environments/{self.team.id}/saved/preflight/",
             {"url": "https://example.com/*"},
         )
 
@@ -105,7 +105,7 @@ class TestHeatmapsAPI(APIBaseTest):
                 user=self.user, label="t", secure_value=hash_key_value(token), scopes=["heatmap:read"]
             )
             return self.client.post(
-                f"/api/projects/{self.team.id}/saved/preflight/",
+                f"/v1/projects/{self.team.id}/saved/preflight/",
                 {"url": "https://example.com/page"},
                 headers={"authorization": f"Bearer {token}"},
             )
@@ -120,7 +120,7 @@ class TestHeatmapsAPI(APIBaseTest):
     @patch("products.web_analytics.backend.tasks.heatmap_screenshot.generate_heatmap_screenshot.delay")
     def test_prewarm_starts_single_width_render_hidden_from_list(self, mock_delay):
         resp = self.client.post(
-            f"/api/environments/{self.team.id}/saved/prewarm/",
+            f"/v1/environments/{self.team.id}/saved/prewarm/",
             {"url": "https://example.com"},
         )
         self.assertEqual(resp.status_code, 201)
@@ -131,19 +131,19 @@ class TestHeatmapsAPI(APIBaseTest):
         mock_delay.assert_called_once_with(saved.id)
 
         # Speculative rows must never surface in the user's saved-heatmap list.
-        listed = self.client.get(f"/api/environments/{self.team.id}/saved/")
+        listed = self.client.get(f"/v1/environments/{self.team.id}/saved/")
         self.assertEqual(listed.status_code, 200)
         self.assertEqual(listed.data["count"], 0)
 
     @patch("products.web_analytics.backend.tasks.heatmap_screenshot.generate_heatmap_screenshot.delay")
     def test_prewarm_is_idempotent_within_window(self, mock_delay):
         first = self.client.post(
-            f"/api/environments/{self.team.id}/saved/prewarm/",
+            f"/v1/environments/{self.team.id}/saved/prewarm/",
             {"url": "https://example.com"},
         )
         self.assertEqual(first.status_code, 201)
         second = self.client.post(
-            f"/api/environments/{self.team.id}/saved/prewarm/",
+            f"/v1/environments/{self.team.id}/saved/prewarm/",
             {"url": "https://example.com"},
         )
         self.assertEqual(second.status_code, 200)
@@ -154,7 +154,7 @@ class TestHeatmapsAPI(APIBaseTest):
     @patch("products.web_analytics.backend.api.heatmaps_api.generate_heatmap_screenshot")
     def test_create_promotes_matching_prewarm_and_keeps_snapshots(self, mock_task):
         prewarm_resp = self.client.post(
-            f"/api/environments/{self.team.id}/saved/prewarm/",
+            f"/v1/environments/{self.team.id}/saved/prewarm/",
             {"url": "https://example.com"},
         )
         self.assertEqual(prewarm_resp.status_code, 201)
@@ -165,7 +165,7 @@ class TestHeatmapsAPI(APIBaseTest):
         SavedHeatmap.objects.filter(id=prewarm_id).update(status=SavedHeatmap.Status.COMPLETED)
 
         create_resp = self.client.post(
-            f"/api/environments/{self.team.id}/saved/",
+            f"/v1/environments/{self.team.id}/saved/",
             {"url": "https://example.com", "name": "My heatmap", "widths": [768, 1024]},
         )
         self.assertEqual(create_resp.status_code, 201)
@@ -186,7 +186,7 @@ class TestHeatmapsAPI(APIBaseTest):
     @patch("products.web_analytics.backend.api.heatmaps_api.generate_heatmap_screenshot")
     def test_create_reuses_in_flight_prewarm_without_a_second_render(self, mock_task):
         prewarm_resp = self.client.post(
-            f"/api/environments/{self.team.id}/saved/prewarm/",
+            f"/v1/environments/{self.team.id}/saved/prewarm/",
             {"url": "https://example.com"},
         )
         self.assertEqual(prewarm_resp.status_code, 201)
@@ -194,7 +194,7 @@ class TestHeatmapsAPI(APIBaseTest):
         # Prewarm render still in flight: status stays 'processing', no snapshot yet.
 
         create_resp = self.client.post(
-            f"/api/environments/{self.team.id}/saved/",
+            f"/v1/environments/{self.team.id}/saved/",
             {"url": "https://example.com", "name": "My heatmap"},
         )
         self.assertEqual(create_resp.status_code, 201)
@@ -220,7 +220,7 @@ class TestHeatmapsAPI(APIBaseTest):
         HeatmapSnapshot.objects.create(heatmap=saved, width=1024, content=b"old")
 
         r = self.client.patch(
-            f"/api/environments/{self.team.id}/saved/{saved.short_id}/",
+            f"/v1/environments/{self.team.id}/saved/{saved.short_id}/",
             {"block_consent_modals": True},
         )
         self.assertEqual(r.status_code, 200)
@@ -231,7 +231,7 @@ class TestHeatmapsAPI(APIBaseTest):
 
     def test_content_returns_202_until_snapshot_exists(self):
         saved = SavedHeatmap.objects.create(team=self.team, url="https://example.com", created_by=self.user)
-        r = self.client.get(f"/api/environments/{self.team.id}/heatmap_screenshots/{saved.id}/content/?width=1024")
+        r = self.client.get(f"/v1/environments/{self.team.id}/heatmap_screenshots/{saved.id}/content/?width=1024")
         self.assertEqual(r.status_code, 202)
 
     def test_content_returns_snapshot_bytes_and_defaults_width(self):
@@ -242,7 +242,7 @@ class TestHeatmapsAPI(APIBaseTest):
             status=SavedHeatmap.Status.COMPLETED,
         )
         HeatmapSnapshot.objects.create(heatmap=saved, width=1024, content=b"jpegdata1024")
-        r = self.client.get(f"/api/environments/{self.team.id}/heatmap_screenshots/{saved.id}/content/")
+        r = self.client.get(f"/v1/environments/{self.team.id}/heatmap_screenshots/{saved.id}/content/")
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r["Content-Type"], "image/jpeg")
         self.assertTrue(r["Content-Disposition"].endswith('1024.jpg"'))
@@ -258,7 +258,7 @@ class TestHeatmapsAPI(APIBaseTest):
         HeatmapSnapshot.objects.create(heatmap=saved, width=768, content=b"jpeg768")
         HeatmapSnapshot.objects.create(heatmap=saved, width=1024, content=b"jpeg1024")
         # Request 800 should pick 768 (closest)
-        r = self.client.get(f"/api/environments/{self.team.id}/heatmap_screenshots/{saved.id}/content/?width=800")
+        r = self.client.get(f"/v1/environments/{self.team.id}/heatmap_screenshots/{saved.id}/content/?width=800")
         self.assertEqual(r.status_code, 200)
         self.assertIn('768.jpg"', r["Content-Disposition"])
         self.assertEqual(r.content, b"jpeg768")
@@ -271,7 +271,7 @@ class TestHeatmapsAPI(APIBaseTest):
             status=SavedHeatmap.Status.COMPLETED,
         )
         HeatmapSnapshot.objects.create(heatmap=saved, width=1024, content=None, content_location="s3://bucket/key")
-        r = self.client.get(f"/api/environments/{self.team.id}/heatmap_screenshots/{saved.id}/content/?width=1024")
+        r = self.client.get(f"/v1/environments/{self.team.id}/heatmap_screenshots/{saved.id}/content/?width=1024")
         self.assertEqual(r.status_code, 501)
 
     def test_content_served_increments_metric(self):
@@ -287,14 +287,14 @@ class TestHeatmapsAPI(APIBaseTest):
             return REGISTRY.get_sample_value("heatmap_screenshot_content_requests_total", {"outcome": "served"}) or 0.0
 
         before = _served_count()
-        r = self.client.get(f"/api/environments/{self.team.id}/heatmap_screenshots/{saved.id}/content/?width=1024")
+        r = self.client.get(f"/v1/environments/{self.team.id}/heatmap_screenshots/{saved.id}/content/?width=1024")
         self.assertEqual(r.status_code, 200)
         self.assertEqual(_served_count() - before, 1)
 
     def test_saved_list_excludes_deleted_and_includes_created_by(self):
         SavedHeatmap.objects.create(team=self.team, url="https://a.example", created_by=self.user)
         SavedHeatmap.objects.create(team=self.team, url="https://b.example", created_by=self.user, deleted=True)
-        r = self.client.get(f"/api/environments/{self.team.id}/saved/")
+        r = self.client.get(f"/v1/environments/{self.team.id}/saved/")
         self.assertEqual(r.status_code, 200)
         urls = [x["url"] for x in r.data["results"]]
         self.assertIn("https://a.example", urls)
@@ -314,7 +314,7 @@ class TestHeatmapsAPI(APIBaseTest):
     )
     def test_saved_list_validates_and_bounds_pagination(self, _name, query, expected_status):
         SavedHeatmap.objects.create(team=self.team, url="https://a.example", created_by=self.user)
-        r = self.client.get(f"/api/environments/{self.team.id}/saved/", query)
+        r = self.client.get(f"/v1/environments/{self.team.id}/saved/", query)
         assert r.status_code == expected_status
 
     def test_team_isolation_for_content(self):
@@ -322,7 +322,7 @@ class TestHeatmapsAPI(APIBaseTest):
             organization=self.organization, initiating_user=self.user, name="Other Team"
         )
         other = SavedHeatmap.objects.create(team=other_team, url="https://example.com")
-        r = self.client.get(f"/api/environments/{self.team.id}/heatmap_screenshots/{other.id}/content/")
+        r = self.client.get(f"/v1/environments/{self.team.id}/heatmap_screenshots/{other.id}/content/")
         self.assertEqual(r.status_code, 404)
 
     def test_content_endpoint_accepts_export_renderer_jwt(self):
@@ -346,7 +346,7 @@ class TestHeatmapsAPI(APIBaseTest):
         )
         unauthenticated = APIClient()
         r = unauthenticated.get(
-            f"/api/environments/{self.team.id}/heatmap_screenshots/{saved.id}/content/?width=1024",
+            f"/v1/environments/{self.team.id}/heatmap_screenshots/{saved.id}/content/?width=1024",
             headers={"authorization": f"Bearer {token}"},
         )
         self.assertEqual(r.status_code, 200)
@@ -367,7 +367,7 @@ class TestHeatmapsAPI(APIBaseTest):
         # Force updated_at to 15 minutes ago
         SavedHeatmap.objects.filter(id=saved.id).update(updated_at=timezone.now() - timedelta(minutes=15))
 
-        r = self.client.get(f"/api/environments/{self.team.id}/saved/{saved.short_id}/")
+        r = self.client.get(f"/v1/environments/{self.team.id}/saved/{saved.short_id}/")
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.data["status"], "processing")
 
@@ -387,7 +387,7 @@ class TestHeatmapsAPI(APIBaseTest):
             type=SavedHeatmap.Type.SCREENSHOT,
         )
 
-        r = self.client.get(f"/api/environments/{self.team.id}/saved/{saved.short_id}/")
+        r = self.client.get(f"/v1/environments/{self.team.id}/saved/{saved.short_id}/")
         self.assertEqual(r.status_code, 200)
 
         # Task was NOT re-enqueued (still within threshold)
@@ -405,7 +405,7 @@ class TestHeatmapsAPI(APIBaseTest):
         )
         HeatmapSnapshot.objects.create(heatmap=saved, width=1024, content=b"old")
 
-        r = self.client.post(f"/api/environments/{self.team.id}/saved/{saved.short_id}/regenerate/")
+        r = self.client.post(f"/v1/environments/{self.team.id}/saved/{saved.short_id}/regenerate/")
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.data["status"], "processing")
         self.assertIsNone(r.data["exception"])
@@ -421,7 +421,7 @@ class TestHeatmapsAPI(APIBaseTest):
             type=SavedHeatmap.Type.IFRAME,
         )
 
-        r = self.client.post(f"/api/environments/{self.team.id}/saved/{saved.short_id}/regenerate/")
+        r = self.client.post(f"/v1/environments/{self.team.id}/saved/{saved.short_id}/regenerate/")
         self.assertEqual(r.status_code, 400)
 
 
@@ -434,7 +434,7 @@ class TestSavedHeatmapRegeneratePersonalAPIKeyScopes(APIBaseTest):
     def test_regenerate_allowed_with_heatmap_write_scope(self):
         key = self.create_personal_api_key_with_scopes(["heatmap:write"])
         # Use a non-existent short_id; a 404 proves the scope gate was passed.
-        url = f"/api/environments/{self.team.id}/saved/nonexistent-short-id/regenerate/"
+        url = f"/v1/environments/{self.team.id}/saved/nonexistent-short-id/regenerate/"
         r = self.client.post(url, **self._auth(key))
         assert r.status_code != 403, r.json()
 
@@ -447,6 +447,6 @@ class TestSavedHeatmapRegeneratePersonalAPIKeyScopes(APIBaseTest):
     )
     def test_regenerate_rejected_without_heatmap_write_scope(self, _name: str, scopes: list[str]):
         key = self.create_personal_api_key_with_scopes(scopes)
-        url = f"/api/environments/{self.team.id}/saved/nonexistent-short-id/regenerate/"
+        url = f"/v1/environments/{self.team.id}/saved/nonexistent-short-id/regenerate/"
         r = self.client.post(url, **self._auth(key))
         assert r.status_code == 403, r.json()

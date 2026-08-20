@@ -2719,7 +2719,7 @@ export interface RecentInsightsFunctionsApi {
 }
 
 /**
- * One row in `inventory.recent_hog_flows.recent`.
+ * One row in `inventory.recent_script_flows.recent`.
  */
 export interface RecentInsightsFlowEntryApi {
     /** Script flow UUID. */
@@ -2736,7 +2736,7 @@ export interface RecentInsightsFlowEntryApi {
 }
 
 /**
- * `inventory.recent_hog_flows` — total + non-archived count, plus the 5 most recently modified.
+ * `inventory.recent_script_flows` — total + non-archived count, plus the 5 most recently modified.
  */
 export interface RecentInsightsFlowsApi {
     /** Total script flows on the team. */
@@ -2900,7 +2900,7 @@ export interface ProjectProfileInventoryApi {
     /** Script function orientation: total + enabled count, plus the 5 most recently updated destinations / transformations the team has wired up via the CDP pipelines. */
     recent_insights_functions: RecentInsightsFunctionsApi
     /** Script flow orientation: total + non-archived count, plus the 5 most recently updated automation flows. */
-    recent_hog_flows: RecentInsightsFlowsApi
+    recent_script_flows: RecentInsightsFlowsApi
     /** Notebook orientation: total + the 5 most recently modified notebooks — useful signal for what the team has been investigating. */
     recent_notebooks: RecentNotebooksApi
     /** Cohort orientation: total + the 5 most recently created cohorts on the team. */

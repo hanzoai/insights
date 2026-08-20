@@ -1,17 +1,16 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { cloneElement, ReactElement } from 'react'
 
-import * as xRayPng from '@hanzo/brand/hoggies/png/x-ray'
-import { IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 import { Button, Switch, Table, Tag, Link } from '@hanzo/elements'
+import { IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { AccessControlActionChildrenProps } from 'lib/components/AccessControlAction'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { slackChannelDisplayName } from 'lib/integrations/slackChannel'
 import { Dialog } from 'lib/elements/Dialog'
-import { TableColumns } from 'lib/elements/Table'
 import { ProfilePicture } from 'lib/elements/ProfilePicture'
+import { TableColumns } from 'lib/elements/Table'
+import { slackChannelDisplayName } from 'lib/integrations/slackChannel'
 import { urls } from 'scenes/urls'
 
 import { AccessControlLevel } from '~/types'
@@ -22,7 +21,7 @@ import { getReplayVisionDeleteDisabledReason, getReplayVisionEditDisabledReason 
 import { humanizeCadence, parseRruleToCadence } from '../cadence'
 import { visionActionsLogic } from '../visionActionsLogic'
 
-const MascotXRay = pngHoggie(xRayPng)
+const MascotXRay = pngMascot()
 
 function humanizeSchedule(action: VisionActionApi): string {
     // Alerts don't run on their stored rrule: every_match checks ride each scanner sweep, and
@@ -121,7 +120,7 @@ function VisionActionsTable({
                 productName="Digests and alerts"
                 thingName="digest or alert"
                 isEmpty
-                customHog={MascotXRay}
+                customScript={MascotXRay}
                 description="Get scheduled digests of this scanner's observations, synthesized by AI on the cadence you choose. Or set alerts that notify you when new matches appear or a threshold is reached. Both can deliver to Slack."
                 actionElementOverride={
                     <div className="flex gap-2">

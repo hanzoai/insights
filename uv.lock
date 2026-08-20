@@ -8,19 +8,17 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
+exclude-newer = "2026-08-06T21:31:15.477555466Z"
 exclude-newer-span = "P7D"
 
 [options.exclude-newer-package]
-hanzo-insights = false
-pixelhog = false
-modal = false
-insights-hogland = false
-django = false
-google-ads = false
 deltalite = false
 insightsql-parser = false
+hanzo-insights = false
+modal = false
+django = false
 insightsql-parser-rs = false
+google-ads = false
 
 [manifest]
 members = [
@@ -1601,7 +1599,7 @@ dependencies = [
 [[package]]
 name = "datastore-orm"
 version = "2.1.0.post20"
-source = { git = "https://github.com/hanzoai/datastore-orm?rev=56c46e4bc6a424fd68b12df2afbacea4090b2dbb#56c46e4bc6a424fd68b12df2afbacea4090b2dbb" }
+source = { git = "https://git.hanzo.ai/hanzoai/datastore-orm?rev=56c46e4bc6a424fd68b12df2afbacea4090b2dbb#56c46e4bc6a424fd68b12df2afbacea4090b2dbb" }
 dependencies = [
     { name = "iso8601" },
     { name = "pytz" },
@@ -2171,18 +2169,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/e0/4d/f332313098c1de1b2d2ff91cf2674415cc7cddab2ca1b01ae29774bd5fdf/docstring_parser-0.18.0.tar.gz", hash = "sha256:292510982205c12b1248696f44959db3cdd1740237a968ea1e2e7a900eeb2015", size = 29341, upload-time = "2026-04-14T04:09:19.867Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a7/5f/ed01f9a3cdffbd5a008556fc7b2a08ddb1cc6ace7effa7340604b1d16699/docstring_parser-0.18.0-py3-none-any.whl", hash = "sha256:b3fcbed555c47d8479be0796ef7e19c2670d428d72e96da63f3a40122860374b", size = 22484, upload-time = "2026-04-14T04:09:18.638Z" },
-]
-
-[[package]]
-name = "drf-exceptions-hog"
-version = "0.4.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "djangorestframework" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/dc/92/c87b3e5c08c9cc5c542c17fa0fdde94f05106b596a6645d108c3ea22b930/drf-exceptions-hog-0.4.0.tar.gz", hash = "sha256:d7b4ec771c7a1dc58409746e09373af50b5d4029fa4fdfa6d0b597625ed9cdab", size = 13051, upload-time = "2023-05-08T14:57:22.356Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b2/47/695a351c0ceae378905c824f2a1b7b465ca076a73d6fd502cd2ecae3d9d1/drf_exceptions_hog-0.4.0-py3-none-any.whl", hash = "sha256:12dc820012f04be86bc8195ba06a09ab6c451fb21ac9d7b3067681f182057d41", size = 10649, upload-time = "2023-05-08T14:57:19.765Z" },
 ]
 
 [[package]]
@@ -3363,7 +3349,6 @@ dependencies = [
     { name = "djangorestframework-dataclasses" },
     { name = "dlt" },
     { name = "dnspython" },
-    { name = "drf-exceptions-hog" },
     { name = "drf-extensions" },
     { name = "drf-spectacular" },
     { name = "duckdb" },
@@ -3468,7 +3453,6 @@ dependencies = [
     { name = "social-auth-core" },
     { name = "sqlparse" },
     { name = "sshtunnel" },
-    { name = "statshog" },
     { name = "stripe" },
     { name = "structlog" },
     { name = "tbb", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
@@ -3486,7 +3470,6 @@ dependencies = [
     { name = "xgboost" },
     { name = "xmlsec" },
     { name = "zstd" },
-    { name = "zxcvbn" },
 ]
 
 [package.dev-dependencies]
@@ -3614,7 +3597,7 @@ requires-dist = [
     { name = "databricks-sql-connector", specifier = "~=4.3.0" },
     { name = "datastore-connect", git = "https://github.com/hanzo-ds/connect?rev=ccbd4b5" },
     { name = "datastore-driver", git = "https://github.com/hanzo-ds/driver?rev=119df3f" },
-    { name = "datastore-orm", git = "https://github.com/hanzoai/datastore-orm?rev=56c46e4bc6a424fd68b12df2afbacea4090b2dbb" },
+    { name = "datastore-orm", git = "https://git.hanzo.ai/hanzoai/datastore-orm?rev=56c46e4bc6a424fd68b12df2afbacea4090b2dbb" },
     { name = "datastore-pool", git = "https://github.com/hanzo-ds/pool?rev=7260d56" },
     { name = "defusedxml", specifier = "~=0.7.1" },
     { name = "deltalake", extras = ["pyarrow"], specifier = "==1.6.1" },
@@ -3640,7 +3623,6 @@ requires-dist = [
     { name = "djangorestframework-dataclasses", specifier = "~=1.4.0" },
     { name = "dlt", specifier = "==1.18.2" },
     { name = "dnspython", specifier = "==2.6.1" },
-    { name = "drf-exceptions-hog", specifier = "==0.4.0" },
     { name = "drf-extensions", specifier = "~=0.8.0" },
     { name = "drf-spectacular", specifier = "~=0.29.0" },
     { name = "duckdb", specifier = "~=1.5.2" },
@@ -3745,7 +3727,6 @@ requires-dist = [
     { name = "social-auth-core", specifier = "~=4.8.7" },
     { name = "sqlparse", specifier = "==0.5.4" },
     { name = "sshtunnel", specifier = "==0.4.0" },
-    { name = "statshog", specifier = "==1.0.6" },
     { name = "stripe", specifier = "==12.2.0" },
     { name = "structlog", specifier = "==25.5.0" },
     { name = "tbb", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'", specifier = "==2022.3.1" },
@@ -3763,7 +3744,6 @@ requires-dist = [
     { name = "xgboost", specifier = "==3.2.0" },
     { name = "xmlsec", specifier = "==1.3.17" },
     { name = "zstd", specifier = "==1.5.7.2" },
-    { name = "zxcvbn", specifier = "==4.5.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -7830,15 +7810,6 @@ wheels = [
 ]
 
 [[package]]
-name = "statshog"
-version = "1.0.6"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/b3/88/20ee9ac030520c2817f93e545005b631283be05f990ae415c444beb52792/statshog-1.0.6.tar.gz", hash = "sha256:53f5cddd809266b13405206ee3717cc26d47663485611c0c1bcb1e8221469188", size = 26711, upload-time = "2021-05-07T11:50:02.903Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/70/af/c609ab70f4cba573c5c5aa6e091cdddafe2b36e037f37031fa5cef2e9bc6/statshog-1.0.6-py2.py3-none-any.whl", hash = "sha256:0b7948df83a0d5de68a2479f14679cd7d26cd28e2488779de19e0a099c4841d8", size = 13887, upload-time = "2021-05-07T11:49:59.822Z" },
-]
-
-[[package]]
 name = "stpyv8"
 version = "13.1.201.22"
 source = { registry = "https://pypi.org/simple" }
@@ -9322,13 +9293,4 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/25/ca/4a6882846e3049be249031f825251a9229ecad471e18e7fd27974540549c/zstd-1.5.7.2-cp313-cp313-win32.whl", hash = "sha256:edf816c218e5978033b7bb47dcb453dfb71038cb8a9bf4877f3f823e74d58174", size = 149452, upload-time = "2025-06-23T12:57:32.116Z" },
     { url = "https://files.pythonhosted.org/packages/e7/aa/89339605864c9803e4738f176932a6c9f1ad99d03c03ef2cb0634ddca680/zstd-1.5.7.2-cp313-cp313-win_amd64.whl", hash = "sha256:eea9bddf06f3f5e1e450fd647665c86df048a45e8b956d53522387c1dff41b7a", size = 166625, upload-time = "2025-06-23T12:57:33.334Z" },
     { url = "https://files.pythonhosted.org/packages/07/e9/501291a2f9b300b2c73dcc6d086df778e895e71573df9575def54d9dbab2/zstd-1.5.7.2-cp313-cp313t-manylinux_2_14_x86_64.whl", hash = "sha256:1d71f9f92b3abe18b06b5f0aefa5b9c42112beef3bff27e36028d147cb4426a6", size = 302906, upload-time = "2025-06-23T13:21:13.331Z" },
-]
-
-[[package]]
-name = "zxcvbn"
-version = "4.5.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/ae/40/9366940b1484fd4e9423c8decbbf34a73bf52badb36281e082fe02b57aca/zxcvbn-4.5.0.tar.gz", hash = "sha256:70392c0fff39459d7f55d0211151401e79e76fcc6e2c22b61add62900359c7c1", size = 411249, upload-time = "2025-02-19T19:03:02.699Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/c2/16/7410f8e714a109d43d17f4e27c8eabb351557653a9b570db1bd7dfdfd822/zxcvbn-4.5.0-py2.py3-none-any.whl", hash = "sha256:2b6eed621612ce6d65e6e4c7455b966acee87d0280e257956b1f06ccc66bd5ff", size = 409397, upload-time = "2025-02-19T19:03:00.521Z" },
 ]

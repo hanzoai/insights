@@ -1,13 +1,13 @@
 /**
  * @jest-environment jsdom
  */
-import { canvasMutation } from 'insights-js/rrweb'
-import { EventType, IncrementalSource, eventWithTime } from 'insights-js/rrweb-types'
+import { canvasMutation } from '@hanzo/insights-rrweb'
+import { EventType, IncrementalSource, eventWithTime } from '@hanzo/insights-rrweb-types'
 
 import { CanvasReplayerPlugin } from './canvas-plugin'
 
 // Mock rrweb canvasMutation function
-jest.mock('insights-js/rrweb', () => ({
+jest.mock('@hanzo/insights-rrweb', () => ({
     canvasMutation: jest.fn().mockResolvedValue(undefined),
     Replayer: jest.fn(),
 }))

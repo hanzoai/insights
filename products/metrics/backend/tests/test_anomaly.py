@@ -161,7 +161,7 @@ class TestCharacterizeAnomaly(DatastoreTestMixin, APIBaseTest):
 
     def test_characterize_via_api(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/characterize",
+            f"/v1/projects/{self.team.id}/metrics/characterize",
             data={
                 "query": {
                     "metricName": "queue_depth",
@@ -180,7 +180,7 @@ class TestCharacterizeAnomaly(DatastoreTestMixin, APIBaseTest):
 
     def test_characterize_via_api_rejects_bad_window(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/metrics/characterize",
+            f"/v1/projects/{self.team.id}/metrics/characterize",
             data={
                 "query": {
                     "metricName": "queue_depth",

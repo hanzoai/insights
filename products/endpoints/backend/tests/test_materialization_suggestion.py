@@ -160,7 +160,7 @@ class TestSuggestMaterializationFixEngine:
 class TestMaterializationSuggestionAPI(APIBaseTest):
     def _post_suggestion(self, name):
         return self.client.post(
-            f"/api/projects/{self.team.id}/endpoints/{name}/materialization_suggestion/",
+            f"/v1/projects/{self.team.id}/endpoints/{name}/materialization_suggestion/",
             {},
             format="json",
         )
@@ -243,7 +243,7 @@ class TestMaterializationSuggestionAPI(APIBaseTest):
         assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
 
     def test_materialization_conditions_returns_live_source(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/endpoints/materialization_conditions/")
+        response = self.client.get(f"/v1/projects/{self.team.id}/endpoints/materialization_conditions/")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
 

@@ -58,7 +58,7 @@ export function FormattingToolbar({
     returnFocusToEditor,
 }: {
     selectedBlockStyle: TextBlockStyle | null
-    /** Whether every selected block sits inside a blockquote — orthogonal to the text style. */
+    /** Whether every selected block sits inside a blockquote — ortscriptonal to the text style. */
     selectedBlockQuoted: boolean
     placement: 'above' | 'below'
     top: number
@@ -253,7 +253,7 @@ export function FormattingToolbar({
                 aria-label="Text style"
             >
                 {TEXT_BLOCK_STYLE_BUTTONS.map((button) => {
-                    // Quote membership is orthogonal to the text style, so a quoted heading lights up
+                    // Quote membership is ortscriptonal to the text style, so a quoted heading lights up
                     // both its heading button and the quote button. The quote button always dispatches
                     // 'blockquote' — the editor toggles membership based on the selection's current state.
                     const isActive =

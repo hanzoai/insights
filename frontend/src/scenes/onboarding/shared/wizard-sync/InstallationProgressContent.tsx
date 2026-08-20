@@ -1,10 +1,9 @@
 import { type ReactNode } from 'react'
 
-import * as wizardPng from '@hanzo/brand/hoggies/png/wizard-1'
-import { IconDocument, IconPullRequest, IconRocket, IconSearch, IconTerminal, IconX } from '@hanzo/icons'
 import { Banner, Button, Spinner } from '@hanzo/elements'
+import { IconDocument, IconPullRequest, IconRocket, IconSearch, IconTerminal, IconX } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { cn } from 'lib/utils/css-classes'
 
 import { CheckList } from '../components/CheckList'
@@ -16,7 +15,7 @@ import { StepIcon } from './StepIcon'
 import { Timeline } from './Timeline'
 import { resolveWorkflowId, SELF_DRIVING_WORKFLOW_ID } from './workflows'
 
-const MascotWizard = pngHoggie(wizardPng)
+const MascotWizard = pngMascot()
 
 /**
  * Presentational renderer for an `InstallationProgress`: a text header, a connected step timeline, and

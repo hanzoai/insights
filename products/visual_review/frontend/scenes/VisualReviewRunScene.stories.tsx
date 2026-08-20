@@ -110,11 +110,11 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                [`/api/projects/:team_id/visual_review/runs/${RUN_ID}/`]: run,
-                [`/api/projects/:team_id/visual_review/runs/${RUN_ID}/snapshots/`]: snapshots,
-                [`/api/projects/:team_id/visual_review/runs/${RUN_ID}/tolerated-hashes/`]: emptyList,
-                [`/api/projects/:team_id/visual_review/repos/${REPO_ID}/`]: repo,
-                [`/api/projects/:team_id/visual_review/repos/${REPO_ID}/quarantine/`]: emptyList,
+                [`/v1/projects/:team_id/visual_review/runs/${RUN_ID}/`]: run,
+                [`/v1/projects/:team_id/visual_review/runs/${RUN_ID}/snapshots/`]: snapshots,
+                [`/v1/projects/:team_id/visual_review/runs/${RUN_ID}/tolerated-hashes/`]: emptyList,
+                [`/v1/projects/:team_id/visual_review/repos/${REPO_ID}/`]: repo,
+                [`/v1/projects/:team_id/visual_review/repos/${REPO_ID}/quarantine/`]: emptyList,
             },
         }),
     ],
@@ -133,7 +133,7 @@ export const TrackingOnlyMasterRun: StoryObj = {
     decorators: [
         mswDecorator({
             get: {
-                [`/api/projects/:team_id/visual_review/runs/${RUN_ID}/`]: masterRun,
+                [`/v1/projects/:team_id/visual_review/runs/${RUN_ID}/`]: masterRun,
             },
         }),
     ],

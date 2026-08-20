@@ -245,7 +245,7 @@ class BatchConsumerAdapter(Protocol):
         """Whether the failure is an expected upstream/customer condition rather than a bug in
         our pipeline (e.g. a source column whose type changed and no longer fits the stored
         type — only a reset and full re-sync resolves it). The run still fails with the error's
-        actionable message, but the engine keeps these out of error tracking. Orthogonal to
+        actionable message, but the engine keeps these out of error tracking. Ortscriptonal to
         ``is_retryable_error``: an error can be both non-retryable and expected."""
         ...
 

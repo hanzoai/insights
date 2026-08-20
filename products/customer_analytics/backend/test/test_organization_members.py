@@ -17,7 +17,7 @@ class TestOrganizationMembersForAccountAPI(APIBaseTest):
         self.target_org = Organization.objects.create(name="Customer Org")
 
     def _url(self, organization_id: object) -> str:
-        return f"/api/projects/{self.team.id}/organization_members/?organization_id={organization_id}"
+        return f"/v1/projects/{self.team.id}/organization_members/?organization_id={organization_id}"
 
     def _join(self, email: str, **kwargs) -> User:
         user = User.objects.create(email=email, **kwargs)
@@ -62,7 +62,7 @@ class TestOrganizationMembersForAccountAPI(APIBaseTest):
     )
     @patch("hanzo_insights.feature_enabled", return_value=True)
     def test_empty_results_for_bad_organization_id(self, _name, query_string, _mock_flag):
-        response = self.client.get(f"/api/projects/{self.team.id}/organization_members/{query_string}")
+        response = self.client.get(f"/v1/projects/{self.team.id}/organization_members/{query_string}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["results"], [])
 

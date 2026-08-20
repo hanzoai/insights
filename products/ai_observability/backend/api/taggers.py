@@ -33,9 +33,9 @@ from insights.permissions import AccessControlPermission
 from insights.rbac.access_control_api_mixin import AccessControlViewSetMixin
 from insights.temporal.ai_observability.message_utils import extract_text_from_messages
 from insights.temporal.ai_observability.run_evaluation import extract_event_io
-from insights.temporal.ai_observability.run_tagger import run_hog_tagger
+from insights.temporal.ai_observability.run_tagger import run_script_tagger
 
-from ..script import compile_ai_observability_hog
+from ..script import compile_ai_observability_script
 from ..models.model_configuration import LLMModelConfiguration
 from ..models.provider_keys import LLMProvider, LLMProviderKey
 from ..models.taggers import Tagger, TaggerType, validate_tagger_config
@@ -93,7 +93,7 @@ class LLMTaggerConfigSerializer(serializers.Serializer):
         return data
 
 
-class HogTaggerConfigSerializer(serializers.Serializer):
+class ScriptTaggerConfigSerializer(serializers.Serializer):
     source = serializers.CharField(  # type: ignore[assignment]
         min_length=1,
         help_text="Script source code to classify a generation into tags.",
@@ -108,7 +108,7 @@ class HogTaggerConfigSerializer(serializers.Serializer):
 
 TAGGER_CONFIG_SCHEMA = PolymorphicProxySerializer(
     component_name="TaggerConfig",
-    serializers=[LLMTaggerConfigSerializer, HogTaggerConfigSerializer],
+    serializers=[LLMTaggerConfigSerializer, ScriptTaggerConfigSerializer],
     resource_type_field_name=None,
 )
 
@@ -337,7 +337,7 @@ class TaggerFilter(django_filters.FilterSet):
         return queryset
 
 
-class TestHogTaggerTagSerializer(serializers.Serializer):
+class TestScriptTaggerTagSerializer(serializers.Serializer):
     # Enforce the same {name, description?} shape as TagDefinitionSerializer so a payload
     # like {"tags": [{}]} is rejected with a 400 instead of blowing up on KeyError downstream.
     name = serializers.CharField(max_length=100, help_text="Tag identifier to allow in Script test results.")
@@ -350,7 +350,7 @@ class TestHogTaggerTagSerializer(serializers.Serializer):
     )
 
 
-class TestHogTaggerRequestSerializer(serializers.Serializer):
+class TestScriptTaggerRequestSerializer(serializers.Serializer):
     source = serializers.CharField(
         required=True,
         min_length=1,
@@ -363,7 +363,7 @@ class TestHogTaggerRequestSerializer(serializers.Serializer):
         max_value=10,
         help_text="Number of recent $ai_generation events to test against (1-10, default 5).",
     )
-    tags = TestHogTaggerTagSerializer(
+    tags = TestScriptTaggerTagSerializer(
         many=True,
         required=False,
         default=list,
@@ -371,7 +371,7 @@ class TestHogTaggerRequestSerializer(serializers.Serializer):
     )
 
 
-class TestHogTaggerResultItemSerializer(serializers.Serializer):
+class TestScriptTaggerResultItemSerializer(serializers.Serializer):
     event_uuid = serializers.CharField(help_text="UUID of the sampled $ai_generation event.")
     trace_id = serializers.CharField(allow_null=True, required=False, help_text="Trace ID if available.")
     input_preview = serializers.CharField(help_text="First 200 characters of the generation input.")
@@ -381,8 +381,8 @@ class TestHogTaggerResultItemSerializer(serializers.Serializer):
     error = serializers.CharField(allow_null=True, required=False, help_text="Error message if the Script code failed.")
 
 
-class TestHogTaggerResponseSerializer(serializers.Serializer):
-    results = TestHogTaggerResultItemSerializer(many=True, help_text="Per-event Script tagger test results.")
+class TestScriptTaggerResponseSerializer(serializers.Serializer):
+    results = TestScriptTaggerResultItemSerializer(many=True, help_text="Per-event Script tagger test results.")
     message = serializers.CharField(
         required=False, help_text="Optional message, for example when no recent AI events were found."
     )
@@ -531,13 +531,13 @@ class TaggerViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, ForbidDes
         updated_instance = cast(Tagger, serializer.instance)
         return Response(self._serialize_saved_tagger(updated_instance), status=status.HTTP_200_OK)
 
-    @extend_schema(request=TestHogTaggerRequestSerializer, responses=TestHogTaggerResponseSerializer)
-    @action(detail=False, methods=["post"], url_path="test_hog", required_scopes=["tagger:read"])
-    @llma_track_latency("llma_taggers_test_hog")
-    @monitor(feature=Feature.QUERY, endpoint="llma_taggers_test_hog", method="POST")
-    def test_hog(self, request: Request, **kwargs) -> Response:
+    @extend_schema(request=TestScriptTaggerRequestSerializer, responses=TestScriptTaggerResponseSerializer)
+    @action(detail=False, methods=["post"], url_path="test_script", required_scopes=["tagger:read"])
+    @llma_track_latency("llma_taggers_test_script")
+    @monitor(feature=Feature.QUERY, endpoint="llma_taggers_test_script", method="POST")
+    def test_script(self, request: Request, **kwargs) -> Response:
         """Test Script tagger code against sample events without saving."""
-        test_serializer = TestHogTaggerRequestSerializer(data=request.data)
+        test_serializer = TestScriptTaggerRequestSerializer(data=request.data)
         if not test_serializer.is_valid():
             return Response({"error": test_serializer.errors}, status=400)
 
@@ -549,7 +549,7 @@ class TaggerViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, ForbidDes
         try:
             # Use "tagger" kind so we don't expose PRODUCT_ASYNC_FUNCTIONS (fetch, insightsCapture, …) —
             # taggers should only classify, never perform side effects.
-            bytecode = compile_ai_observability_hog(source, "tagger")
+            bytecode = compile_ai_observability_script(source, "tagger")
         except (ValueError, SyntaxError):
             logger.exception("Compilation error in Script source")
             return Response({"error": "Invalid Script source provided"}, status=400)
@@ -612,7 +612,7 @@ class TaggerViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, ForbidDes
                 "distinct_id": distinct_id or "",
             }
 
-            result = run_hog_tagger(bytecode, event_data, valid_tag_names)
+            result = run_script_tagger(bytecode, event_data, valid_tag_names)
 
             input_raw, output_raw = extract_event_io(event_type, properties)
             input_preview = extract_text_from_messages(input_raw)[:200]

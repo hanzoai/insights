@@ -1,9 +1,8 @@
 import { useActions, useValues } from 'kea'
 
-import * as chartPng from '@hanzo/brand/hoggies/png/chart'
 import { Button } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { Shortcut } from 'lib/components/Shortcuts/Shortcut'
@@ -30,7 +29,7 @@ import { DashboardsContent } from 'products/dashboards/frontend/components/Dashb
 
 import { FeaturedTemplatesChooser } from './templates/FeaturedTemplatesChooser'
 
-const MascotChart = pngHoggie(chartPng)
+const MascotChart = pngMascot()
 
 const DASHBOARD_DOCS_URL = 'https://hanzo.ai/docs/product-analytics/dashboards'
 
@@ -99,12 +98,7 @@ export function Dashboards(): JSX.Element {
                     </>
                 }
             />
-            <Tabs
-                activeKey={currentTab}
-                onChange={(newKey) => setCurrentTab(newKey)}
-                tabs={enabledTabs}
-                sceneInset
-            />
+            <Tabs activeKey={currentTab} onChange={(newKey) => setCurrentTab(newKey)} tabs={enabledTabs} sceneInset />
 
             <div>
                 {currentTab === DashboardsTab.Templates ? (
@@ -119,8 +113,8 @@ export function Dashboards(): JSX.Element {
                         description="Keep analytics, session replay, logs, and the rest of your Insights stack in one place. Below are customer-favorite dashboards to get you started quickly. Or skip them and start blank, up to you."
                         isEmpty={true}
                         docsURL={DASHBOARD_DOCS_URL}
-                        customHog={MascotChart}
-                        hogLayout="responsive"
+                        customScript={MascotChart}
+                        scriptLayout="responsive"
                         useMainContentContainerQueries={true}
                         contentClassName="max-w-[1000px]"
                         actionElementOverride={<FeaturedTemplatesChooser />}

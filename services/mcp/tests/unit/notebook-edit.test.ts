@@ -478,7 +478,7 @@ describe('editHandler', () => {
                         status: 409,
                         statusText: 'Conflict',
                         body: conflictBody,
-                        url: 'http://test/api/projects/42/notebooks/aBcD1234/collab/save/',
+                        url: 'http://test/v1/projects/42/notebooks/aBcD1234/collab/save/',
                         method: 'POST',
                     }),
                 },

@@ -1,13 +1,13 @@
-import { isHogDate, isHogDateTime } from './objects'
-import { dateStringToSeconds, toHogDate, toHogDateTime } from './stl/date'
+import { isScriptDate, isScriptDateTime } from './objects'
+import { dateStringToSeconds, toScriptDate, toScriptDateTime } from './stl/date'
 
-/** Epoch seconds for a Script datetime/date value, else null. A bare HogDate is UTC midnight. */
+/** Epoch seconds for a Script datetime/date value, else null. A bare ScriptDate is UTC midnight. */
 function temporalSeconds(value: any): number | null {
-    if (isHogDateTime(value)) {
+    if (isScriptDateTime(value)) {
         return value.dt
     }
-    if (isHogDate(value)) {
-        return toHogDateTime(value).dt
+    if (isScriptDate(value)) {
+        return toScriptDateTime(value).dt
     }
     return null
 }
@@ -110,7 +110,7 @@ export function setNestedValue(obj: any, chain: any[], value: any): void {
 }
 
 // Recursively convert objects to maps
-export function convertJSToHog(x: any, found?: Map<any, any>): any {
+export function convertJSToScript(x: any, found?: Map<any, any>): any {
     if (!found) {
         found = new Map()
     }
@@ -120,21 +120,21 @@ export function convertJSToHog(x: any, found?: Map<any, any>): any {
     if (Array.isArray(x)) {
         const obj: any[] = []
         found.set(x, obj)
-        x.forEach((v) => obj.push(convertJSToHog(v, found)))
+        x.forEach((v) => obj.push(convertJSToScript(v, found)))
         found.delete(x)
         return obj
     } else if (typeof x === 'object' && x !== null) {
-        if (x.__hogDateTime__) {
-            return toHogDateTime(x.dt, x.zone)
-        } else if (x.__hogDate__) {
-            return toHogDate(x.year, x.month, x.day)
-        } else if (x.__hogClosure__ || x.__hogCallable__) {
+        if (x.__dateTime__) {
+            return toScriptDateTime(x.dt, x.zone)
+        } else if (x.__date__) {
+            return toScriptDate(x.year, x.month, x.day)
+        } else if (x.__closure__ || x.__callable__) {
             return x
         }
         const map = new Map()
         found.set(x, map)
         for (const key in x) {
-            map.set(key, convertJSToHog(x[key], found))
+            map.set(key, convertJSToScript(x[key], found))
         }
         found.delete(x)
         return map
@@ -142,7 +142,7 @@ export function convertJSToHog(x: any, found?: Map<any, any>): any {
     return x
 }
 
-export function convertHogToJS(x: any, found?: Map<any, any>): any {
+export function convertScriptToJS(x: any, found?: Map<any, any>): any {
     if (!found) {
         found = new Map()
     }
@@ -153,24 +153,24 @@ export function convertHogToJS(x: any, found?: Map<any, any>): any {
         const obj: Record<string, any> = {}
         found.set(x, obj)
         x.forEach((value, key) => {
-            obj[key] = convertHogToJS(value, found)
+            obj[key] = convertScriptToJS(value, found)
         })
         found.delete(x)
         return obj
     } else if (typeof x === 'object' && Array.isArray(x)) {
         const obj: any[] = []
         found.set(x, obj)
-        x.forEach((v) => obj.push(convertHogToJS(v, found)))
+        x.forEach((v) => obj.push(convertScriptToJS(v, found)))
         found.delete(x)
         return obj
     } else if (typeof x === 'object' && x !== null) {
-        if (x.__hogDateTime__ || x.__hogDate__ || x.__hogClosure__ || x.__hogCallable__) {
+        if (x.__dateTime__ || x.__date__ || x.__closure__ || x.__callable__) {
             return x
         }
         const obj: Record<string, any> = {}
         found.set(x, obj)
         for (const key in x) {
-            obj[key] = convertHogToJS(x[key], found)
+            obj[key] = convertScriptToJS(x[key], found)
         }
         found.delete(x)
         return obj
@@ -225,7 +225,7 @@ export function unifyComparisonTypes(left: any, right: any): [any, any] {
         return [leftSeconds, rightSeconds]
     }
     // A bare-field SQL comparison like `timestamp > toDateTime(...)` puts a plain date-like string
-    // (e.g. the filter globals' ISO `timestamp`) against a HogDateTime/HogDate object. Parse the
+    // (e.g. the filter globals' ISO `timestamp`) against a ScriptDateTime/ScriptDate object. Parse the
     // string the same way `toDateTime` would rather than falling through to the generic branches
     // below, where `object > string` stays unordered and silently evaluates to false.
     if (leftSeconds !== null && typeof right === 'string') {

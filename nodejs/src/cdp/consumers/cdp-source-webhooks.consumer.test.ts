@@ -9,7 +9,7 @@ import express from 'ultimate-express'
 
 import { insertInsightsFunction, insertInsightsFunctionTemplate } from '~/cdp/_tests/fixtures'
 import { CdpApi } from '~/cdp/cdp-api'
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { Flow } from '~/cdp/schema/flow'
 import { template as pixelTemplate } from '~/cdp/templates/_sources/pixel/pixel.template'
 import { template as incomingWebhookTemplate } from '~/cdp/templates/_sources/webhook/incoming_webhook.template'
 import { CyclotronJobInvocationInsightsFunction, CyclotronJobInvocationResult, InsightsFunctionType } from '~/cdp/types'
@@ -21,11 +21,11 @@ import { forSnapshot } from '~/tests/helpers/snapshots'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '~/types'
 
-import { FixtureInsightsFlowBuilder } from '../_tests/builders/hogflow.builder'
-import { insertInsightsFlow } from '../_tests/fixtures-insightsflows'
+import { FixtureFlowBuilder } from '../_tests/builders/flow.builder'
+import { insertFlow } from '../_tests/fixtures-flows'
 import { getCustomHttpResponse } from '../consumers/cdp-source-webhooks.consumer'
-import { HogWatcherState } from '../services/monitoring/script-watcher.service'
-import { compileHog } from '../templates/compiler'
+import { ScriptWatcherState } from '../services/monitoring/script-watcher.service'
+import { compileScript } from '../templates/compiler'
 import { compileInputs } from '../templates/test/test-helpers'
 
 describe('getCustomHttpResponse', () => {
@@ -113,18 +113,18 @@ describe('SourceWebhooksConsumer', () => {
 
         let mockExecuteSpy: jest.SpyInstance
         let mockQueueInvocationsSpy: jest.SpyInstance
-        let mockQueueHogflowInvocationsSpy: jest.SpyInstance
+        let mockQueueScriptflowInvocationsSpy: jest.SpyInstance
 
         beforeEach(async () => {
             hub.CDP_WATCHER_OBSERVE_RESULTS_BUFFER_TIME_MS = 50
             api = new CdpApi(hub, createCdpConsumerDeps(hub), {
-                hogQueue: createMockJobQueue(),
-                hogflowQueue: createMockJobQueue(),
+                scriptQueue: createMockJobQueue(),
+                flowQueue: createMockJobQueue(),
             })
-            mockExecuteSpy = jest.spyOn(api['cdpSourceWebhooksConsumer']['hogExecutorAsync'], 'execute')
-            mockQueueInvocationsSpy = jest.spyOn(api['cdpSourceWebhooksConsumer']['hogQueue'], 'queueInvocations')
-            mockQueueHogflowInvocationsSpy = jest.spyOn(
-                api['cdpSourceWebhooksConsumer']['hogflowQueue'],
+            mockExecuteSpy = jest.spyOn(api['cdpSourceWebhooksConsumer']['scriptExecutorAsync'], 'execute')
+            mockQueueInvocationsSpy = jest.spyOn(api['cdpSourceWebhooksConsumer']['scriptQueue'], 'queueInvocations')
+            mockQueueScriptflowInvocationsSpy = jest.spyOn(
+                api['cdpSourceWebhooksConsumer']['flowQueue'],
                 'queueInvocations'
             )
             app = setupExpressApp()
@@ -134,14 +134,14 @@ describe('SourceWebhooksConsumer', () => {
             insightsFunction = await insertInsightsFunction(hub.postgres, team.id, {
                 type: 'source_webhook',
                 script: incomingWebhookTemplate.code,
-                bytecode: await compileHog(incomingWebhookTemplate.code),
+                bytecode: await compileScript(incomingWebhookTemplate.code),
                 inputs: await compileInputs(incomingWebhookTemplate, {}),
             })
 
             insightsFunctionPixel = await insertInsightsFunction(hub.postgres, team.id, {
                 type: 'source_webhook',
                 script: pixelTemplate.code,
-                bytecode: await compileHog(pixelTemplate.code),
+                bytecode: await compileScript(pixelTemplate.code),
                 inputs: await compileInputs(pixelTemplate, {}),
             })
 
@@ -208,7 +208,7 @@ describe('SourceWebhooksConsumer', () => {
                 // Deletion via the django API is a soft delete that leaves `enabled` untouched
                 await hub.postgres.query(
                     PostgresUse.COMMON_WRITE,
-                    `UPDATE insights_hogfunction SET deleted=true, updated_at = NOW() WHERE id = $1`,
+                    `UPDATE insights_function SET deleted=true, updated_at = NOW() WHERE id = $1`,
                     [insightsFunction.id],
                     'testKey'
                 )
@@ -249,7 +249,10 @@ describe('SourceWebhooksConsumer', () => {
                 // Verify that queueInvocationResults WAS called for regular webhooks (this captures the event)
                 expect(mockQueueInvocationResults).toHaveBeenCalledTimes(1)
                 const result = mockQueueInvocationResults.mock.calls[0][0][0]
-                expect(result.capturedInsightsEvents[0].properties).toHaveProperty('$insights_function_execution_count', 1)
+                expect(result.capturedInsightsEvents[0].properties).toHaveProperty(
+                    '$insights_function_execution_count',
+                    1
+                )
 
                 await waitForBackgroundTasks()
                 expect(mockInternalFetch).toHaveBeenCalledTimes(1)
@@ -336,7 +339,7 @@ describe('SourceWebhooksConsumer', () => {
                 const customBinaryFunction = await insertInsightsFunction(hub.postgres, team.id, {
                     type: 'source_webhook',
                     script: `return { 'httpResponse': { 'status': 200, 'body': '${base64Png}', 'contentType': 'image/png', 'isBase64Encoded': true } }`,
-                    bytecode: await compileHog(
+                    bytecode: await compileScript(
                         `return { 'httpResponse': { 'status': 200, 'body': '${base64Png}', 'contentType': 'image/png', 'isBase64Encoded': true } }`
                     ),
                     inputs: {},
@@ -353,7 +356,7 @@ describe('SourceWebhooksConsumer', () => {
                 const customTextFunction = await insertInsightsFunction(hub.postgres, team.id, {
                     type: 'source_webhook',
                     script: `return { 'httpResponse': { 'status': 200, 'body': 'Hello, world!', 'contentType': 'text/plain' } }`,
-                    bytecode: await compileHog(
+                    bytecode: await compileScript(
                         `return { 'httpResponse': { 'status': 200, 'body': 'Hello, world!', 'contentType': 'text/plain' } }`
                     ),
                     inputs: {},
@@ -378,7 +381,7 @@ describe('SourceWebhooksConsumer', () => {
                     const fn = await insertInsightsFunction(hub.postgres, team.id, {
                         type: 'source_webhook',
                         script: `return { 'httpResponse': { 'status': 200, 'body': '${payload}', 'contentType': '${dangerousType}' } }`,
-                        bytecode: await compileHog(
+                        bytecode: await compileScript(
                             `return { 'httpResponse': { 'status': 200, 'body': '${payload}', 'contentType': '${dangerousType}' } }`
                         ),
                         inputs: {},
@@ -397,7 +400,7 @@ describe('SourceWebhooksConsumer', () => {
                 const fn = await insertInsightsFunction(hub.postgres, team.id, {
                     type: 'source_webhook',
                     script: `return { 'httpResponse': { 'status': 200, 'body': 'data', 'contentType': 'application/x-custom' } }`,
-                    bytecode: await compileHog(
+                    bytecode: await compileScript(
                         `return { 'httpResponse': { 'status': 200, 'body': 'data', 'contentType': 'application/x-custom' } }`
                     ),
                     inputs: {},
@@ -411,7 +414,7 @@ describe('SourceWebhooksConsumer', () => {
                 const fn = await insertInsightsFunction(hub.postgres, team.id, {
                     type: 'source_webhook',
                     script: `return { 'httpResponse': { 'status': 200, 'body': '<script>alert(1)</script>', 'contentType': 'text/html; charset=utf-8' } }`,
-                    bytecode: await compileHog(
+                    bytecode: await compileScript(
                         `return { 'httpResponse': { 'status': 200, 'body': '<script>alert(1)</script>', 'contentType': 'text/html; charset=utf-8' } }`
                     ),
                     inputs: {},
@@ -426,7 +429,7 @@ describe('SourceWebhooksConsumer', () => {
                 const fn = await insertInsightsFunction(hub.postgres, team.id, {
                     type: 'source_webhook',
                     script: `return { 'httpResponse': { 'status': 200, 'body': 'hello', 'contentType': 'text/plain; charset=utf-7' } }`,
-                    bytecode: await compileHog(
+                    bytecode: await compileScript(
                         `return { 'httpResponse': { 'status': 200, 'body': 'hello', 'contentType': 'text/plain; charset=utf-7' } }`
                     ),
                     inputs: {},
@@ -442,7 +445,7 @@ describe('SourceWebhooksConsumer', () => {
                 const customBinaryFunction = await insertInsightsFunction(hub.postgres, team.id, {
                     type: 'source_webhook',
                     script: `return { 'httpResponse': { 'status': 200, 'body': '${base64Data}', 'isBase64Encoded': true } }`,
-                    bytecode: await compileHog(
+                    bytecode: await compileScript(
                         `return { 'httpResponse': { 'status': 200, 'body': '${base64Data}', 'isBase64Encoded': true } }`
                     ),
                     inputs: {},
@@ -455,11 +458,11 @@ describe('SourceWebhooksConsumer', () => {
         })
 
         describe('script flow processing', () => {
-            let hogFlow: InsightsFlow
+            let flow: Flow
 
             beforeEach(async () => {
                 const template = await insertInsightsFunctionTemplate(hub.postgres, incomingWebhookTemplate)
-                hogFlow = new FixtureInsightsFlowBuilder()
+                flow = new FixtureFlowBuilder()
                     .withTeamId(team.id)
                     .withSimpleWorkflow({
                         trigger: {
@@ -468,21 +471,21 @@ describe('SourceWebhooksConsumer', () => {
                             inputs: {
                                 event: {
                                     value: 'my-event',
-                                    bytecode: await compileHog(`return f'my-event'`),
+                                    bytecode: await compileScript(`return f'my-event'`),
                                 },
                                 distinct_id: {
                                     value: '{request.body.distinct_id}',
-                                    bytecode: await compileHog(`return f'{request.body.distinct_id}'`),
+                                    bytecode: await compileScript(`return f'{request.body.distinct_id}'`),
                                 },
                                 method: {
                                     value: 'POST',
-                                    bytecode: await compileHog(`return f'POST'`),
+                                    bytecode: await compileScript(`return f'POST'`),
                                 },
                             },
                         },
                     })
                     .build()
-                await insertInsightsFlow(hub.postgres, hogFlow)
+                await insertFlow(hub.postgres, flow)
             })
 
             it('should 404 if the script flow does not exist', async () => {
@@ -494,7 +497,7 @@ describe('SourceWebhooksConsumer', () => {
 
             it('should invoke a workflow with the parsed inputs', async () => {
                 const res = await doPostRequest({
-                    webhookId: hogFlow.id,
+                    webhookId: flow.id,
                     body: {
                         event: 'my-event',
                         distinct_id: 'test-distinct-id',
@@ -505,15 +508,15 @@ describe('SourceWebhooksConsumer', () => {
                     status: 'queued',
                 })
                 expect(mockExecuteSpy).toHaveBeenCalledTimes(1)
-                expect(mockQueueHogflowInvocationsSpy).toHaveBeenCalledTimes(1)
-                const call = mockQueueHogflowInvocationsSpy.mock.calls[0][0][0]
-                expect(call.queue).toEqual('hogflow')
-                expect(call.hogFlow).toMatchObject(hogFlow)
+                expect(mockQueueScriptflowInvocationsSpy).toHaveBeenCalledTimes(1)
+                const call = mockQueueScriptflowInvocationsSpy.mock.calls[0][0][0]
+                expect(call.queue).toEqual('flow')
+                expect(call.flow).toMatchObject(flow)
             })
 
             it('should add logs and metrics', async () => {
                 const res = await doPostRequest({
-                    webhookId: hogFlow.id,
+                    webhookId: flow.id,
                     body: {
                         event: 'my-event',
                         distinct_id: 'test-distinct-id',
@@ -544,7 +547,7 @@ describe('SourceWebhooksConsumer', () => {
                 )
 
                 const res = await doPostRequest({
-                    webhookId: hogFlow.id,
+                    webhookId: flow.id,
                     body: {
                         event: 'my-event',
                         distinct_id: 'test-distinct-id',
@@ -560,9 +563,9 @@ describe('SourceWebhooksConsumer', () => {
                 // (this is what actually captures the event)
                 expect(mockQueueInvocationResults).not.toHaveBeenCalled()
 
-                // Verify the workflow invocation was queued to hogflowQueue
-                expect(mockQueueHogflowInvocationsSpy).toHaveBeenCalledTimes(1)
-                const invocation = mockQueueHogflowInvocationsSpy.mock.calls[0][0][0]
+                // Verify the workflow invocation was queued to flowQueue
+                expect(mockQueueScriptflowInvocationsSpy).toHaveBeenCalledTimes(1)
+                const invocation = mockQueueScriptflowInvocationsSpy.mock.calls[0][0][0]
 
                 expect(invocation.state.event).toMatchObject({
                     event: 'my-event',
@@ -577,7 +580,7 @@ describe('SourceWebhooksConsumer', () => {
 
             it('should add logs and metrics for a controlled failed script flow', async () => {
                 const res = await doPostRequest({
-                    webhookId: hogFlow.id,
+                    webhookId: flow.id,
                     body: {
                         event: 'my-event',
                         missing_distinct_id: 'test-distinct-id',
@@ -599,7 +602,7 @@ describe('SourceWebhooksConsumer', () => {
 
             it('should add logs and metrics for an uncontrolled failed script flow', async () => {
                 // Hacky but otherwise its quite hard to trigger an uncontrolled error
-                hogFlow = new FixtureInsightsFlowBuilder()
+                flow = new FixtureFlowBuilder()
                     .withTeamId(team.id)
                     .withSimpleWorkflow({
                         trigger: {
@@ -608,16 +611,16 @@ describe('SourceWebhooksConsumer', () => {
                             inputs: {
                                 distinct_id: {
                                     value: '{i.do.not.exist}',
-                                    bytecode: await compileHog(`return f'{i.do.not.exist}'`),
+                                    bytecode: await compileScript(`return f'{i.do.not.exist}'`),
                                 },
                             },
                         },
                     })
                     .build()
-                await insertInsightsFlow(hub.postgres, hogFlow)
+                await insertFlow(hub.postgres, flow)
 
                 const res = await doPostRequest({
-                    webhookId: hogFlow.id,
+                    webhookId: flow.id,
                     body: {
                         event: 'my-event',
                         missing_distinct_id: 'test-distinct-id',
@@ -637,11 +640,11 @@ describe('SourceWebhooksConsumer', () => {
             })
         })
 
-        describe('hogwatcher', () => {
+        describe('scriptwatcher', () => {
             it('should return a degraded response if the function is degraded', async () => {
-                await api['cdpSourceWebhooksConsumer']['hogWatcher'].forceStateChange(
+                await api['cdpSourceWebhooksConsumer']['scriptWatcher'].forceStateChange(
                     insightsFunction,
-                    HogWatcherState.degraded
+                    ScriptWatcherState.degraded
                 )
                 const res = await doPostRequest({
                     body: {
@@ -653,13 +656,13 @@ describe('SourceWebhooksConsumer', () => {
                 expect(mockExecuteSpy).not.toHaveBeenCalled()
                 expect(mockQueueInvocationsSpy).toHaveBeenCalledTimes(1)
                 const call = mockQueueInvocationsSpy.mock.calls[0][0][0]
-                expect(call.queue).toEqual('hogoverflow')
+                expect(call.queue).toEqual('overflow')
             })
 
             it('should return a disabled response if the function is disabled', async () => {
-                await api['cdpSourceWebhooksConsumer']['hogWatcher'].forceStateChange(
+                await api['cdpSourceWebhooksConsumer']['scriptWatcher'].forceStateChange(
                     insightsFunction,
-                    HogWatcherState.disabled
+                    ScriptWatcherState.disabled
                 )
                 const res = await doPostRequest({})
                 expect(res.status).toEqual(429)

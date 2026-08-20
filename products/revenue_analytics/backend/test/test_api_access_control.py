@@ -5,10 +5,9 @@ from unittest.mock import patch
 from rest_framework import status
 
 from insights.constants import AvailableFeature
+from insights.models.ee_models import AccessControl
 from insights.models.organization import OrganizationMembership
 from insights.models.user import User
-
-AccessControl = pytest.importorskip("ee.models.rbac.access_control").AccessControl
 
 pytestmark = [pytest.mark.django_db]
 
@@ -19,8 +18,8 @@ _HELPER = "products.revenue_analytics.backend.api.find_values_for_revenue_analyt
 class TestRevenueAnalyticsAPIAccessControl(APIBaseTest):
     def setUp(self):
         super().setUp()
-        self.taxonomy_url = f"/api/environments/{self.team.pk}/revenue_analytics/taxonomy/values/"
-        self.joins_url = f"/api/environments/{self.team.pk}/revenue_analytics/joins/"
+        self.taxonomy_url = f"/v1/environments/{self.team.pk}/revenue_analytics/taxonomy/values/"
+        self.joins_url = f"/v1/environments/{self.team.pk}/revenue_analytics/joins/"
         self.organization.available_product_features = [
             {"key": AvailableFeature.ACCESS_CONTROL, "name": AvailableFeature.ACCESS_CONTROL}
         ]

@@ -13,7 +13,7 @@ interface ColumnMeta {
     unit: string
 }
 
-const meta: Meta = { title: 'Components/HogCharts/DefaultTooltip', parameters: { layout: 'centered' } }
+const meta: Meta = { title: 'Components/ScriptCharts/DefaultTooltip', parameters: { layout: 'centered' } }
 export default meta
 
 type Story = StoryObj<{}>

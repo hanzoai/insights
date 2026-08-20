@@ -133,7 +133,7 @@ class TestRunStateSnapshotPaths(TestCase):
 
 
 class TestGetSandboxMcpConfigs(TestCase):
-    TOKEN = "phx_test_token"
+    TOKEN = "sk-test_token"
     PROJECT_ID = 42
 
     def _expected_headers(self, *, read_only: bool = True, consumer: str = "insights-code") -> list[dict[str, str]]:
@@ -332,7 +332,7 @@ class TestMcpServerConfigToDict(TestCase):
 
 
 class TestFetchUserMcpServerConfigs(TestCase):
-    TOKEN = "phx_test_token"
+    TOKEN = "sk-test_token"
     TEAM_ID = 42
     USER_ID = 7
     API_BASE = "https://us.hanzo.ai"
@@ -344,7 +344,7 @@ class TestFetchUserMcpServerConfigs(TestCase):
         defaults = {
             "id": "abc-123",
             "name": "Linear",
-            "proxy_path": f"/api/environments/{self.TEAM_ID}/mcp_server_installations/abc-123/proxy/",
+            "proxy_path": f"/v1/environments/{self.TEAM_ID}/mcp_server_installations/abc-123/proxy/",
         }
         defaults.update(kwargs)
         return ActiveInstallationInfo(**defaults)
@@ -375,7 +375,7 @@ class TestFetchUserMcpServerConfigs(TestCase):
             McpServerConfig(
                 type="http",
                 name="Linear",
-                url=f"{self.API_BASE}/api/environments/{self.TEAM_ID}/mcp_server_installations/abc-123/proxy/",
+                url=f"{self.API_BASE}/v1/environments/{self.TEAM_ID}/mcp_server_installations/abc-123/proxy/",
                 headers=self._expected_user_headers(),
             )
         ]
@@ -449,7 +449,7 @@ class TestFetchUserMcpServerConfigs(TestCase):
             self._make_installation(
                 id="shared-id",
                 name="Shared",
-                proxy_path="/api/mcp_store/gateway/servers/server-id/proxy/",
+                proxy_path="/v1/mcp_store/gateway/servers/server-id/proxy/",
                 scope="shared",
                 proxy_token="agent-token",
             ),
@@ -474,7 +474,7 @@ class TestFetchUserMcpServerConfigs(TestCase):
             McpServerConfig(
                 type="http",
                 name="Shared",
-                url=f"{self.API_BASE}/api/mcp_store/gateway/servers/server-id/proxy/",
+                url=f"{self.API_BASE}/v1/mcp_store/gateway/servers/server-id/proxy/",
                 headers=[
                     {"name": "Authorization", "value": "Bearer agent-token"},
                     {"name": "x-insights-mcp-consumer", "value": "insights-code"},
@@ -516,7 +516,7 @@ class TestFetchUserMcpServerConfigs(TestCase):
 
         configs = get_user_mcp_server_configs(self.TOKEN, self.TEAM_ID, self.USER_ID)
 
-        assert configs[0].url.startswith("https://us.hanzo.ai/api/")
+        assert configs[0].url.startswith("https://us.hanzo.ai/v1/")
 
     @patch(MOCK_API_URL)
     @patch(MOCK_FACADE)
@@ -524,10 +524,10 @@ class TestFetchUserMcpServerConfigs(TestCase):
         mock_api_url.return_value = self.API_BASE
         mock_facade.return_value = [
             self._make_installation(
-                id="abc-1", name="Linear", proxy_path="/api/environments/42/mcp_server_installations/abc-1/proxy/"
+                id="abc-1", name="Linear", proxy_path="/v1/environments/42/mcp_server_installations/abc-1/proxy/"
             ),
             self._make_installation(
-                id="abc-2", name="Notion", proxy_path="/api/environments/42/mcp_server_installations/abc-2/proxy/"
+                id="abc-2", name="Notion", proxy_path="/v1/environments/42/mcp_server_installations/abc-2/proxy/"
             ),
         ]
 
@@ -586,7 +586,7 @@ class TestGetGitIdentityEnvVars(TestCase):
         [
             (Task.OriginProduct.ERROR_TRACKING,),
             (Task.OriginProduct.SUPPORT_QUEUE,),
-            (Task.OriginProduct.HOGDESK,),
+            (Task.OriginProduct.Desk,),
             (Task.OriginProduct.EVAL_CLUSTERS,),
             (Task.OriginProduct.SESSION_SUMMARIES,),
         ]
@@ -1181,13 +1181,13 @@ class TestBuildSandboxEnvironmentVariables(SimpleTestCase):
     def test_snapshot_resume_env_includes_otel_config_when_configured(self, _api, _jwt) -> None:
         with override_settings(
             SANDBOX_AGENT_OTEL_LOGS_URL="https://us.i.hanzo.ai/i/v1/logs",
-            SANDBOX_AGENT_OTEL_LOGS_TOKEN="phc_telemetry",
+            SANDBOX_AGENT_OTEL_LOGS_TOKEN="pk-telemetry",
             SANDBOX_AGENT_OTEL_TRACES_URL="https://us.i.hanzo.ai/i/v1/traces",
         ):
             env = build_sandbox_environment_variables(None, "access-token", 1, otel_telemetry_enabled=True)
 
         assert env["INSIGHTS_AGENT_OTEL_LOGS_URL"] == "https://us.i.hanzo.ai/i/v1/logs"
-        assert env["INSIGHTS_AGENT_OTEL_LOGS_TOKEN"] == "phc_telemetry"
+        assert env["INSIGHTS_AGENT_OTEL_LOGS_TOKEN"] == "pk-telemetry"
         assert env["INSIGHTS_AGENT_OTEL_TRACES_URL"] == "https://us.i.hanzo.ai/i/v1/traces"
 
     @patch(
@@ -1219,7 +1219,7 @@ class TestBuildSandboxEnvironmentVariables(SimpleTestCase):
     def test_snapshot_resume_env_omits_otel_config_when_flag_disabled(self, _api, _jwt) -> None:
         with override_settings(
             SANDBOX_AGENT_OTEL_LOGS_URL="https://us.i.hanzo.ai/i/v1/logs",
-            SANDBOX_AGENT_OTEL_LOGS_TOKEN="phc_telemetry",
+            SANDBOX_AGENT_OTEL_LOGS_TOKEN="pk-telemetry",
             SANDBOX_AGENT_OTEL_TRACES_URL="https://us.i.hanzo.ai/i/v1/traces",
         ):
             env = build_sandbox_environment_variables(None, "access-token", 1)

@@ -11,7 +11,7 @@ from products.reminders.backend.models import Reminder
 
 class TestReminderAPI(APIBaseTest):
     def _url(self, suffix: str = "") -> str:
-        return f"/api/reminders/{suffix}"
+        return f"/v1/reminders/{suffix}"
 
     def _payload(self, **overrides: object) -> dict[str, object]:
         future = (datetime.now(UTC) + timedelta(days=1)).isoformat()

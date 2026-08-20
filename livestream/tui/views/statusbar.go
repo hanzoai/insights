@@ -60,7 +60,7 @@ func (v *StatusBarView) ViewHeader() string {
 	headerStyle := lipgloss.NewStyle().
 		Bold(true).
 		Foreground(lipgloss.Color("#FFFFFF")).
-		Background(lipgloss.AdaptiveColor{Light: "#F54E00", Dark: "#F54E00"}).
+		Background(lipgloss.Color("#333333")).
 		Padding(0, 1)
 
 	connectedStyle := lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "#388E3C", Dark: "#77B96C"}).Bold(true)
@@ -68,7 +68,7 @@ func (v *StatusBarView) ViewHeader() string {
 	reconnectingStyle := lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "#F57C00", Dark: "#FFB74D"}).Bold(true)
 	pausedStyle := lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "#F57C00", Dark: "#FFB74D"}).Bold(true)
 
-	logoColors := []lipgloss.Color{"#1D4AFF", "#F54E00", "#F9BD2B", "#1D1F27"}
+	logoColors := []lipgloss.Color{"#CCCCCC", "#8F8F8F", "#333333", "#1D1F27"}
 	logo := ""
 	for _, c := range logoColors {
 		logo += lipgloss.NewStyle().Background(c).Render(" ")
@@ -93,7 +93,7 @@ func (v *StatusBarView) ViewHeader() string {
 	}
 
 	filterStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.AdaptiveColor{Light: "#1D4AFF", Dark: "#1D4AFF"})
+		Foreground(lipgloss.AdaptiveColor{Light: "#333333", Dark: "#CCCCCC"})
 	filterLabelStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.AdaptiveColor{Light: "#888888", Dark: "#666666"})
 
@@ -128,7 +128,7 @@ func (v *StatusBarView) ViewHeader() string {
 
 func (v *StatusBarView) ViewFooter() string {
 	keyStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.AdaptiveColor{Light: "#F54E00", Dark: "#F54E00"}).
+		Foreground(lipgloss.AdaptiveColor{Light: "#333333", Dark: "#CCCCCC"}).
 		Bold(true)
 	descStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.AdaptiveColor{Light: "#888888", Dark: "#666666"})

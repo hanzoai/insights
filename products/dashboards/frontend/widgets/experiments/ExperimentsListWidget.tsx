@@ -1,10 +1,9 @@
 import { clsx } from 'clsx'
 import insights from 'insights-js'
 
-import * as experimentPng from '@hanzo/brand/hoggies/png/experiment'
 import { Skeleton } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { TZLabel } from 'lib/components/TZLabel'
 import { Button } from 'lib/elements/Button'
 import { Link } from 'lib/elements/Link'
@@ -24,7 +23,7 @@ import {
 import type { DashboardWidgetComponentProps } from '../registry'
 import { parseExperimentsListWidgetConfig } from './experimentsWidgetConfigValidation'
 
-const MascotExperiment = pngHoggie(experimentPng)
+const MascotExperiment = pngMascot()
 
 export type ExperimentsListWidgetRow = {
     id: number

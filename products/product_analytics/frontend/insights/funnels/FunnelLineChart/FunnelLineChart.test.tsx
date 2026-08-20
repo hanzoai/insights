@@ -2,14 +2,14 @@ import '@testing-library/jest-dom'
 
 import { cleanup, configure, screen, waitFor } from '@testing-library/react'
 
-import { dragSelection, ensureJsdom, waitForHogChartTooltip } from '@hanzo/quill-charts/testing'
+import { dragSelection, ensureJsdom, waitForScriptChartTooltip } from '@hanzo/quill-charts/testing'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 
 import {
     buildFunnelsQuery,
     chart,
-    getHogChart,
+    getScriptChart,
     getQuerySource,
     personsModal,
     renderInsight,
@@ -35,7 +35,7 @@ describe('FunnelLineChart', () => {
 
             const tooltip = await chart.hoverTooltip(2)
 
-            expect(getHogChart().seriesCount).toBe(1)
+            expect(getScriptChart().seriesCount).toBe(1)
             expect(tooltip.element.textContent).toContain(FUNNEL_CONVERSION_SERIES_LABEL)
             expect(tooltip.element.textContent).toContain('40%')
         })
@@ -48,11 +48,11 @@ describe('FunnelLineChart', () => {
             })
 
             await waitFor(() => {
-                expect(getHogChart().seriesCount).toBe(2)
+                expect(getScriptChart().seriesCount).toBe(2)
             })
 
             await chart.clickAtIndex(2)
-            const tooltip = await waitForHogChartTooltip()
+            const tooltip = await waitForScriptChartTooltip()
             expect(tooltip.textContent).toContain('Spike')
             expect(tooltip.textContent).toContain('Bramble')
         })
@@ -157,7 +157,7 @@ describe('FunnelLineChart', () => {
 
             await screen.findByLabelText(/chart with/i)
             await waitFor(() => {
-                const texts = getHogChart()
+                const texts = getScriptChart()
                     .valueLabels()
                     .map((l) => l.text)
                 // default fixture data [10, 25, 40, 60, 35] rendered as percentages

@@ -35,7 +35,7 @@ describe('infiniteListLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/event_definitions': ({ request }) => {
+                '/v1/projects/:team/event_definitions': ({ request }) => {
                     const url = new URL(request.url)
                     const search = url.searchParams.get('search')
                     const limit = Number(url.searchParams.get('limit'))
@@ -53,7 +53,7 @@ describe('infiniteListLogic', () => {
                         },
                     ]
                 },
-                '/api/projects/:team/property_definitions': ({ request }) => {
+                '/v1/projects/:team/property_definitions': ({ request }) => {
                     const url = new URL(request.url)
                     const search = url.searchParams.get('search')
                     let results = search
@@ -402,7 +402,7 @@ describe('infiniteListLogic', () => {
             requestCounts = {}
             useMocks({
                 get: {
-                    '/api/projects/:team/event_definitions': ({ request }) => {
+                    '/v1/projects/:team/event_definitions': ({ request }) => {
                         const url = new URL(request.url)
                         const search = url.searchParams.get('search') ?? ''
                         requestCounts[search] = (requestCounts[search] ?? 0) + 1
@@ -462,7 +462,7 @@ describe('infiniteListLogic', () => {
             surveyRequestCount = 0
             useMocks({
                 get: {
-                    '/api/projects/:team/event_definitions': ({ request }) => {
+                    '/v1/projects/:team/event_definitions': ({ request }) => {
                         const url = new URL(request.url)
                         const search = url.searchParams.get('search') ?? ''
                         if (search === 'survey') {
@@ -543,7 +543,7 @@ describe('infiniteListLogic', () => {
         it('falls back to the empty state instead of spinning forever when the fetch fails', async () => {
             useMocks({
                 get: {
-                    '/api/projects/:team/event_definitions': () => [500, { detail: 'server error' }],
+                    '/v1/projects/:team/event_definitions': () => [500, { detail: 'server error' }],
                 },
             })
             initKeaTests()

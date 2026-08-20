@@ -1,4 +1,4 @@
-import type { Replayer } from 'insights-js/rrweb'
+import type { Replayer } from '@hanzo/insights-rrweb'
 
 /**
  * Scales the recording's native resolution to fit within the browser

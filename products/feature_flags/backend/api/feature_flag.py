@@ -4368,7 +4368,7 @@ class FeatureFlagViewSet(
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         # Remote config usage is tracked for telemetry only (never billed), and only genuine SDK
-        # fetches (legacy team secret token or feature-flag-scoped PSAK, both phs_…) count. Session
+        # fetches (legacy team secret token or feature-flag-scoped PSAK, both sk-…) count. Session
         # and personal-key requests are the app's own preview/decrypt feature, not customer usage,
         # and a session-authenticated GET would otherwise let a cross-site request inflate the team's
         # usage numbers.

@@ -592,7 +592,7 @@ function testTopicEnv(): NodeJS.ProcessEnv {
         INGESTION_OUTPUT_PERSON_DISTINCT_IDS_TOPIC: 'datastore_person_distinct_id_test',
         INGESTION_OUTPUT_APP_METRICS_TOPIC: 'datastore_app_metrics2_test',
         INGESTION_OUTPUT_LOG_ENTRIES_TOPIC: 'log_entries_test',
-        INGESTION_OUTPUT_TOPFN_TOPIC: 'datastore_tophog_test',
+        INGESTION_OUTPUT_TOPFN_TOPIC: 'datastore_topfn_test',
     }
 }
 

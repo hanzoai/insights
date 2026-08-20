@@ -45,10 +45,10 @@ describe('quickFiltersModalLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/quick_filters/': { results: mockQuickFilters },
+                '/v1/environments/:team_id/quick_filters/': { results: mockQuickFilters },
             },
             delete: {
-                '/api/environments/:team_id/quick_filters/:id/': [204],
+                '/v1/environments/:team_id/quick_filters/:id/': [204],
             },
         })
         initKeaTests()

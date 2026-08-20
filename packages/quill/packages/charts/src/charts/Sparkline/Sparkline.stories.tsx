@@ -9,7 +9,7 @@ const FALLING = [9800, 9200, 8600, 8400, 7700, 7300, 6900, 6500, 6000, 5400, 480
 const VOLATILE = [40, 65, 30, 85, 20, 70, 45, 90, 35, 75, 25, 60]
 const FLAT = [50, 52, 49, 51, 50, 53, 48, 50, 51, 49, 52, 50]
 
-const meta: Meta = { title: 'Components/HogCharts/Sparkline', parameters: { layout: 'centered' } }
+const meta: Meta = { title: 'Components/ScriptCharts/Sparkline', parameters: { layout: 'centered' } }
 export default meta
 
 type Story = StoryObj

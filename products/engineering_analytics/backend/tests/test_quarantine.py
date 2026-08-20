@@ -272,7 +272,7 @@ class TestQuarantineBuild(BaseTest):
         assert result.available is False
         assert len(result.parse_errors) == 1 and "could not fetch" in result.parse_errors[0]
 
-    @parameterized.expand(["Insights", "Post Script/repo", "Insights/po$thog", "-bad/repo", "a/b/c", "Insights/"])
+    @parameterized.expand(["Insights", "Post Script/repo", "Insights/po$tscript", "-bad/repo", "a/b/c", "Insights/"])
     def test_invalid_repo_rejected_before_fetch(self, repo: str) -> None:
         with mock.patch(_REQUESTS_GET) as get:
             result = build_quarantine(team=self.team, repo=repo)
@@ -360,7 +360,7 @@ class TestQuarantineAPI(APIBaseTest):
         cache.clear()
 
     def _url(self) -> str:
-        return f"/api/projects/{self.team.id}/engineering_analytics/quarantine/"
+        return f"/v1/projects/{self.team.id}/engineering_analytics/quarantine/"
 
     @freeze_time("2026-06-12")
     def test_quarantine_serializes(self) -> None:
@@ -668,7 +668,7 @@ class TestQuarantineRequest(BaseTest):
 
 class TestQuarantineRequestAPI(APIBaseTest):
     def _url(self) -> str:
-        return f"/api/projects/{self.team.id}/engineering_analytics/quarantine/request/"
+        return f"/v1/projects/{self.team.id}/engineering_analytics/quarantine/request/"
 
     def _body(self, **overrides: Any) -> dict[str, Any]:
         body: dict[str, Any] = {

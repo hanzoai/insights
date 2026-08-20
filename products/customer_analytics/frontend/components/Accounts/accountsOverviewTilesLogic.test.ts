@@ -1,5 +1,5 @@
-import { expectLogic } from 'kea-test-utils'
 import insights from 'insights-js'
+import { expectLogic } from 'kea-test-utils'
 
 import { NodeKind } from '~/queries/schema/schema-general'
 import { initKeaTests } from '~/test/init'
@@ -11,7 +11,7 @@ import {
     isTileClickable,
     numericColumnOptions,
     parseTileValues,
-    stripHogqlAlias,
+    stripInsightsqlAlias,
     tileCaption,
     tileFilterFor,
     tileMetricExpression,
@@ -24,17 +24,17 @@ import {
     MAX_ACCOUNTS_OVERVIEW_TILES,
 } from './constants'
 
-describe('stripHogqlAlias', () => {
+describe('stripInsightsqlAlias', () => {
     it('strips a trailing AS alias', () => {
-        expect(stripHogqlAlias('accounts.health.score AS score')).toBe('accounts.health.score')
+        expect(stripInsightsqlAlias('accounts.health.score AS score')).toBe('accounts.health.score')
     })
 
     it('leaves a plain expression untouched', () => {
-        expect(stripHogqlAlias('health_score')).toBe('health_score')
+        expect(stripInsightsqlAlias('health_score')).toBe('health_score')
     })
 
     it('does not strip AS in the middle', () => {
-        expect(stripHogqlAlias("toString(JSONExtract(properties, 'score', 'Nullable(Int64)'))")).toBe(
+        expect(stripInsightsqlAlias("toString(JSONExtract(properties, 'score', 'Nullable(Int64)'))")).toBe(
             "toString(JSONExtract(properties, 'score', 'Nullable(Int64)'))"
         )
     })

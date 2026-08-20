@@ -158,7 +158,7 @@ function HeatmapInner({
     // theme.colors are already resolved, so the memo re-runs (and re-resolves the accent against
     // the current theme) on a light/dark flip too.
     const accent = useMemo(
-        () => resolveCssColor(config?.color || theme.colors[0] || '#1d4aff'),
+        () => resolveCssColor(config?.color || theme.colors[0] || '#3d3d3d'),
         [config?.color, theme.colors]
     )
 

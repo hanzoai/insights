@@ -290,7 +290,7 @@ class TestFreeTierModelListing:
             c.app.state.quota_resolver.get_resource_status = AsyncMock(
                 return_value=QuotaResourceStatus(limited=False, code_usage_billing_active=False)
             )
-            response = c.get("/insights_code/v1/models", headers={"Authorization": "Bearer phx_unbilled_org_models"})
+            response = c.get("/insights_code/v1/models", headers={"Authorization": "Bearer sk-unbilled_org_models"})
 
         assert response.status_code == 200
         body = response.json()
@@ -315,7 +315,7 @@ class TestFreeTierModelListing:
             c.app.state.quota_resolver.get_resource_status = AsyncMock(
                 return_value=QuotaResourceStatus(limited=False, code_usage_billing_active=True)
             )
-            response = c.get("/insights_code/v1/models", headers={"Authorization": "Bearer phx_billed_org_models"})
+            response = c.get("/insights_code/v1/models", headers={"Authorization": "Bearer sk-billed_org_models"})
 
         assert response.status_code == 200
         models = response.json()["data"]
@@ -329,7 +329,7 @@ class TestFreeTierModelListing:
         mock_db_pool.acquire = AsyncMock(side_effect=RuntimeError("db down"))
 
         with TestClient(app) as c:
-            response = c.get("/insights_code/v1/models", headers={"Authorization": "Bearer phx_auth_outage_models"})
+            response = c.get("/insights_code/v1/models", headers={"Authorization": "Bearer sk-auth_outage_models"})
 
         assert response.status_code == 200
         models = response.json()["data"]

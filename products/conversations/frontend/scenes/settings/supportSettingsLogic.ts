@@ -598,7 +598,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
         savePlaceholderText: true,
         // Notification recipients
         setNotificationRecipients: (users: UserBasicType[]) => ({ users }),
-        // Slack channel settings (SupportHog)
+        // Slack channel settings (Support)
         connectSlack: (nextPath: string) => ({ nextPath }),
         setSlackChannels: (channelIds: string[]) => ({ channelIds }),
         loadSlackChannelsWithToken: true,
@@ -907,7 +907,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
                 loadGithubRepos: async () => {
                     try {
                         // nosemgrep: prefer-codegen-api
-                        const response = await api.create('api/conversations/v1/github/repos', {})
+                        const response = await api.create('v1/conversations/v1/github/repos', {})
                         return response.repos || []
                     } catch {
                         toast.error('Failed to load GitHub repositories')
@@ -922,7 +922,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
                 loadSlackChannelsWithToken: async () => {
                     try {
                         // nosemgrep: prefer-codegen-api
-                        const response = await api.create(`api/conversations/v1/slack/channels`, {})
+                        const response = await api.create(`v1/conversations/v1/slack/channels`, {})
                         return response.channels || []
                     } catch {
                         toast.error('Failed to load Slack channels')
@@ -937,7 +937,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
                 loadTeamsTeamsWithToken: async () => {
                     try {
                         // nosemgrep: prefer-codegen-api
-                        const response = await api.create('api/conversations/v1/teams/teams', {})
+                        const response = await api.create('v1/conversations/v1/teams/teams', {})
                         return response.teams || []
                     } catch {
                         toast.error('Failed to load Teams groups')
@@ -952,7 +952,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
                 loadTeamsChannelsForTeam: async ({ teamId }: { teamId: string }) => {
                     try {
                         // nosemgrep: prefer-codegen-api
-                        const response = await api.create('api/conversations/v1/teams/channels', {
+                        const response = await api.create('v1/conversations/v1/teams/channels', {
                             team_id: teamId,
                         })
                         const channels = response.channels || []
@@ -1184,7 +1184,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
         connectSlack: async ({ nextPath }) => {
             const query = encodeURIComponent(nextPath)
             // nosemgrep: prefer-codegen-api
-            const response = await api.get(`api/conversations/v1/slack/authorize?next=${query}`)
+            const response = await api.get(`v1/conversations/v1/slack/authorize?next=${query}`)
             window.location.href = response.url
         },
         generateNewToken: async () => {
@@ -1365,7 +1365,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
         loadEmailConfigs: async () => {
             try {
                 // nosemgrep: prefer-codegen-api
-                const response = await api.get('api/conversations/v1/email/status')
+                const response = await api.get('v1/conversations/v1/email/status')
                 actions.loadEmailConfigsDone(response.configs || [])
             } catch {
                 actions.loadEmailConfigsDone([])
@@ -1380,7 +1380,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
             }
             try {
                 // nosemgrep: prefer-codegen-api
-                const response = await api.create('api/conversations/v1/email/connect', {
+                const response = await api.create('v1/conversations/v1/email/connect', {
                     from_email: newEmailFromEmail,
                     from_name: newEmailFromName,
                 })
@@ -1400,7 +1400,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
         disconnectEmail: async ({ configId }) => {
             try {
                 // nosemgrep: prefer-codegen-api
-                await api.create('api/conversations/v1/email/disconnect', { config_id: configId })
+                await api.create('v1/conversations/v1/email/disconnect', { config_id: configId })
             } catch {
                 toast.error('Failed to disconnect email')
                 return
@@ -1420,7 +1420,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
         setDefaultEmail: async ({ configId }) => {
             try {
                 // nosemgrep: prefer-codegen-api
-                await api.create('api/conversations/v1/email/set-default', { config_id: configId })
+                await api.create('v1/conversations/v1/email/set-default', { config_id: configId })
             } catch {
                 toast.error('Failed to set default email address')
                 actions.setDefaultEmailFailed()
@@ -1432,7 +1432,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
         verifyEmailDomain: async ({ configId }) => {
             try {
                 // nosemgrep: prefer-codegen-api
-                const response = await api.create('api/conversations/v1/email/verify-domain', {
+                const response = await api.create('v1/conversations/v1/email/verify-domain', {
                     config_id: configId,
                 })
                 actions.verifyEmailDomainDone(configId, response.domain_verified, response.dns_records || null)
@@ -1449,7 +1449,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
         sendTestEmail: async ({ configId }) => {
             try {
                 // nosemgrep: prefer-codegen-api
-                const response = await api.create('api/conversations/v1/email/send-test', {
+                const response = await api.create('v1/conversations/v1/email/send-test', {
                     config_id: configId,
                 })
                 actions.sendTestEmailDone(configId)
@@ -1462,7 +1462,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
         disconnectSlack: async () => {
             try {
                 // nosemgrep: prefer-codegen-api
-                await api.create('api/conversations/v1/slack/disconnect', {})
+                await api.create('v1/conversations/v1/slack/disconnect', {})
             } catch {
                 toast.error('Failed to disconnect Slack')
                 return
@@ -1485,7 +1485,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
             try {
                 const query = encodeURIComponent(nextPath)
                 // nosemgrep: prefer-codegen-api
-                const response = await api.get(`api/conversations/v1/teams/authorize?next=${query}`)
+                const response = await api.get(`v1/conversations/v1/teams/authorize?next=${query}`)
                 window.location.href = response.url
             } catch {
                 toast.error('Failed to start Microsoft Teams authorization')
@@ -1494,7 +1494,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
         disconnectTeams: async () => {
             try {
                 // nosemgrep: prefer-codegen-api
-                await api.create('api/conversations/v1/teams/disconnect', {})
+                await api.create('v1/conversations/v1/teams/disconnect', {})
             } catch {
                 toast.error('Failed to disconnect Microsoft Teams')
                 return
@@ -1506,7 +1506,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
         installTeamsApp: async ({ teamId }) => {
             try {
                 // nosemgrep: prefer-codegen-api
-                const response = await api.create('api/conversations/v1/teams/install', {
+                const response = await api.create('v1/conversations/v1/teams/install', {
                     team_id: teamId,
                 })
                 if (response?.ok) {
@@ -1514,7 +1514,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
                     actions.loadTeamsChannelsForTeam(teamId)
                 } else {
                     actions.setTeamsInstallStatus('error', teamId)
-                    toast.error('Failed to install SupportHog in the selected Teams group')
+                    toast.error('Failed to install Support in the selected Teams group')
                 }
             } catch (err: any) {
                 const detail = err?.data?.error ?? err?.detail ?? ''
@@ -1525,18 +1525,18 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
                 if (detail === 'catalog_not_configured') {
                     actions.setTeamsInstallStatus('error', teamId)
                     toast.error(
-                        'SupportHog Teams app is not configured on this Insights instance. Contact your administrator.'
+                        'Support Teams app is not configured on this Insights instance. Contact your administrator.'
                     )
                     return
                 }
                 actions.setTeamsInstallStatus('error', teamId)
-                toast.error('Failed to install SupportHog in the selected Teams group')
+                toast.error('Failed to install Support in the selected Teams group')
             }
         },
         addTeamsChannelPair: async ({ teamId, channelId }) => {
             try {
                 // nosemgrep: prefer-codegen-api
-                await api.create('api/conversations/v1/teams/select-channel', {
+                await api.create('v1/conversations/v1/teams/select-channel', {
                     action: 'add',
                     team_id: teamId,
                     channel_id: channelId,
@@ -1559,7 +1559,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
         removeTeamsChannelPair: async ({ channelId }) => {
             try {
                 // nosemgrep: prefer-codegen-api
-                await api.create('api/conversations/v1/teams/select-channel', {
+                await api.create('v1/conversations/v1/teams/select-channel', {
                     action: 'remove',
                     channel_id: channelId,
                 })
@@ -1611,7 +1611,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
         connectGithub: async ({ integrationId }) => {
             try {
                 // nosemgrep: prefer-codegen-api
-                await api.create('api/conversations/v1/github/connect', { integration_id: integrationId })
+                await api.create('v1/conversations/v1/github/connect', { integration_id: integrationId })
                 actions.loadCurrentTeam()
                 actions.loadGithubRepos()
                 toast.success('GitHub connected')
@@ -1622,7 +1622,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
         disconnectGithub: async () => {
             try {
                 // nosemgrep: prefer-codegen-api
-                await api.create('api/conversations/v1/github/disconnect', {})
+                await api.create('v1/conversations/v1/github/disconnect', {})
                 actions.loadCurrentTeam()
                 toast.success('GitHub disconnected')
             } catch {
@@ -1632,7 +1632,7 @@ export const supportSettingsLogic = kea<supportSettingsLogicType>([
         setGithubRepos: async ({ repos }) => {
             try {
                 // nosemgrep: prefer-codegen-api
-                await api.create('api/conversations/v1/github/select-repos', { repos })
+                await api.create('v1/conversations/v1/github/select-repos', { repos })
                 actions.loadCurrentTeam()
             } catch {
                 toast.error('Failed to save repository selection')

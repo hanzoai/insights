@@ -56,7 +56,7 @@ export type InsightsFlowFiltersProps = {
 }
 
 /**
- * Standard components wherever we do conditional matching to support whatever we know the hogflow engine supports
+ * Standard components wherever we do conditional matching to support whatever we know the flow engine supports
  */
 export function InsightsFlowEventFilters({
     filters,
@@ -98,7 +98,7 @@ export function InsightsFlowEventFilters({
                 // TODO: Improve the types here...
                 setFilters(filters as InsightsFlowAction['filters'])
             }}
-            typeKey={typeKey ?? 'hogflow-filters'}
+            typeKey={typeKey ?? 'flow-filters'}
             mathAvailability={MathAvailability.None}
             hideRename
             hideDuplicate
@@ -111,7 +111,7 @@ export function InsightsFlowEventFilters({
             }}
             buttonCopy={buttonCopy ?? 'Add filter'}
             allowNonCapturedEvents
-            hogQLGlobals={sampleGlobals}
+            insightsQLGlobals={sampleGlobals}
             operatorAllowlist={WORKFLOW_OPERATOR_ALLOWLIST}
         />
     )
@@ -166,7 +166,7 @@ export function InsightsFlowPropertyFilters({
                 select: defaultDataTableColumns(NodeKind.EventsQuery),
                 after: '-30d',
             }}
-            hogQLGlobals={sampleGlobals}
+            insightsQLGlobals={sampleGlobals}
             operatorAllowlist={WORKFLOW_OPERATOR_ALLOWLIST}
         />
     )

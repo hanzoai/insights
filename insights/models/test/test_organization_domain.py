@@ -11,7 +11,7 @@ class TestOrganizationDomainEnforcement(BaseTest):
     def _org_with_domain(self, *, enforce: bool = True) -> Organization:
         org = Organization.objects.create(name="Enforced org", enforce_verified_domains=enforce)
         OrganizationDomain.objects.create(
-            domain="hogflix.hanzo.ai",
+            domain="scriptflix.hanzo.ai",
             organization=org,
             verified_at=timezone.now(),
         )
@@ -21,7 +21,7 @@ class TestOrganizationDomainEnforcement(BaseTest):
         [
             # (name, enforce, email, expect_blocked)
             ("blocks_domain_not_verified_for_org", True, "outsider@gmail.com", True),
-            ("allows_verified_domain", True, "insider@hogflix.hanzo.ai", False),
+            ("allows_verified_domain", True, "insider@scriptflix.hanzo.ai", False),
             ("allows_when_setting_off", False, "outsider@gmail.com", False),
         ]
     )
@@ -33,8 +33,8 @@ class TestOrganizationDomainEnforcement(BaseTest):
         # The allow-list is all of the org's verified domains — multi-domain orgs must accept
         # emails from every verified domain.
         org = self._org_with_domain()
-        OrganizationDomain.objects.create(domain="hogflix.dev", organization=org, verified_at=timezone.now())
-        self.assertFalse(OrganizationDomain.objects.is_email_blocked_by_domain_enforcement("x@hogflix.dev", org))
+        OrganizationDomain.objects.create(domain="scriptflix.dev", organization=org, verified_at=timezone.now())
+        self.assertFalse(OrganizationDomain.objects.is_email_blocked_by_domain_enforcement("x@scriptflix.dev", org))
         self.assertTrue(OrganizationDomain.objects.is_email_blocked_by_domain_enforcement("x@gmail.com", org))
 
     def test_unverified_domain_does_not_count(self):

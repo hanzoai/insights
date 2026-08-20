@@ -69,7 +69,7 @@ function PlainTextEditor(): JSX.Element {
                     </span>
                     <CodeEditorResizeable
                         className="flex-1"
-                        language={templatingEngine === 'script' ? 'hogTemplate' : 'liquid'}
+                        language={templatingEngine === 'script' ? 'scriptTemplate' : 'liquid'}
                         value={value}
                         onChange={onChange}
                         globals={logicProps.variables}
@@ -308,7 +308,7 @@ function LiquidSupportedText({
                 className="flex-1"
                 globals={globals}
                 value={value}
-                language={templating === 'script' ? 'hogTemplate' : 'liquid'}
+                language={templating === 'script' ? 'scriptTemplate' : 'liquid'}
                 onChange={onChange}
             />
         </span>

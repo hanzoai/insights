@@ -167,7 +167,7 @@ export const saveToCohortModalContentLogic = kea<saveToCohortModalContentLogicTy
             const toastId = `save-cohort-${cohort.id}-${Date.now()}`
             try {
                 toast.info('Saving cohort...', { toastId, autoClose: false })
-                await api.update(`api/projects/${values.currentProjectId}/cohorts/${cohort.id}`, {
+                await api.update(`v1/projects/${values.currentProjectId}/cohorts/${cohort.id}`, {
                     query: query,
                 })
 

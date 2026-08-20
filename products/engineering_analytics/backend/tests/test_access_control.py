@@ -68,7 +68,7 @@ class TestEngineeringAnalyticsAccessControl(WarehouseAccessControlTestMixin):
         self._create_access_control(self.no_access_user, resource_id=str(self.source_b.id), access_level="none")
 
     def _url(self, action: str) -> str:
-        return f"/api/projects/{self.team.id}/engineering_analytics/{action}/"
+        return f"/v1/projects/{self.team.id}/engineering_analytics/{action}/"
 
     def test_denied_user_cannot_read_source_b_via_source_id(self) -> None:
         # The resolver must filter B out of the denied user's queryset, so naming B explicitly

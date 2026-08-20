@@ -226,13 +226,13 @@ class TestTeam(BaseTest):
 
     def test_each_team_gets_project_with_custom_name_and_same_id(self):
         # Can be removed once environments are fully rolled out
-        team = Team.objects.create_with_data(organization=self.organization, initiating_user=self.user, name="Hogflix")
+        team = Team.objects.create_with_data(organization=self.organization, initiating_user=self.user, name="Scriptflix")
 
         project = Project.objects.filter(id=team.id).first()
 
         assert project is not None
         self.assertEqual(project.organization, team.organization)
-        self.assertEqual(project.name, "Hogflix")
+        self.assertEqual(project.name, "Scriptflix")
 
     @mock.patch("insights.models.project.Project.objects.create", side_effect=Exception)
     def test_team_not_created_if_project_creation_fails(self, mock_create):
@@ -241,7 +241,7 @@ class TestTeam(BaseTest):
         initial_project_count = Project.objects.count()
 
         with self.assertRaises(Exception):
-            Team.objects.create_with_data(organization=self.organization, initiating_user=self.user, name="Hogflix")
+            Team.objects.create_with_data(organization=self.organization, initiating_user=self.user, name="Scriptflix")
 
         self.assertEqual(Team.objects.count(), initial_team_count)
         self.assertEqual(Project.objects.count(), initial_project_count)

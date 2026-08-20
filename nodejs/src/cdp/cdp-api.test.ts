@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken'
 import supertest from 'supertest'
 import express from 'ultimate-express'
 
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { Flow } from '~/cdp/schema/flow'
 import { setupExpressApp } from '~/common/api/router'
 import { deleteKeysWithPrefix } from '~/common/redis/_tests/redis'
 import { createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'
@@ -18,7 +18,7 @@ import { createCdpConsumerDeps } from '../../tests/helpers/cdp'
 import { forSnapshot } from '../../tests/helpers/snapshots'
 import { createTeam, getFirstTeam, resetTestDatabase } from '../../tests/helpers/sql'
 import { Hub, Team } from '../types'
-import { FixtureInsightsFlowBuilder } from './_tests/builders/hogflow.builder'
+import { FixtureFlowBuilder } from './_tests/builders/flow.builder'
 import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from './_tests/examples'
 import {
     insertInsightsFunction as _insertInsightsFunction,
@@ -26,12 +26,12 @@ import {
     insertInsightsFunctionTemplate,
     insertIntegration,
 } from './_tests/fixtures'
-import { insertInsightsFlow as _insertInsightsFlow } from './_tests/fixtures-insightsflows'
+import { insertFlow as _insertFlow } from './_tests/fixtures-flows'
 import { CdpApi } from './cdp-api'
 import { CdpConsumerBaseDeps } from './consumers/cdp-base.consumer'
 import { insightsFilterOutPlugin } from './legacy-plugins/_transformations/insights-filter-out-plugin/template'
-import { BASE_REDIS_KEY, HogWatcherState } from './services/monitoring/script-watcher.service'
-import { compileHog } from './templates/compiler'
+import { BASE_REDIS_KEY, ScriptWatcherState } from './services/monitoring/script-watcher.service'
+import { compileScript } from './templates/compiler'
 import { InsightsFunctionInvocationGlobals, InsightsFunctionType } from './types'
 
 // Email MX validation runs on every email send, so without a mock the test-panel
@@ -87,10 +87,10 @@ describe('CDP API', () => {
         return item
     }
 
-    const insertInsightsFlow = async (hogFlow: Partial<InsightsFlow>) => {
-        const item = await _insertInsightsFlow(hub.postgres, { team_id: team.id, ...hogFlow } as InsightsFlow)
+    const insertFlow = async (flow: Partial<Flow>) => {
+        const item = await _insertFlow(hub.postgres, { team_id: team.id, ...flow } as Flow)
         // Trigger the reload that django would do
-        api['hogFlowManager']['onInsightsFlowsReloaded'](team.id, [item.id])
+        api['flowManager']['onFlowsReloaded'](team.id, [item.id])
         return item
     }
 
@@ -103,8 +103,8 @@ describe('CDP API', () => {
 
         cdpDeps = createCdpConsumerDeps(hub)
         api = new CdpApi(hub, cdpDeps, {
-            hogQueue: createMockJobQueue(),
-            hogflowQueue: createMockJobQueue(),
+            scriptQueue: createMockJobQueue(),
+            flowQueue: createMockJobQueue(),
         })
         app = setupExpressApp()
         app.use('/', api.router())
@@ -658,7 +658,7 @@ describe('CDP API', () => {
                 team_id: team.id,
                 enabled: true,
                 script,
-                bytecode: await compileHog(script),
+                bytecode: await compileScript(script),
                 inputs: { needle: { value: 'hunter2' } },
             })
         })
@@ -706,7 +706,7 @@ describe('CDP API', () => {
                 .post(`/api/projects/${team.id}/insights_functions/new/invocations`)
                 .send({
                     globals: logRecordGlobals,
-                    configuration: { ...configuration, script, bytecode: await compileHog(script) },
+                    configuration: { ...configuration, script, bytecode: await compileScript(script) },
                 })
 
             expect(res.status).toEqual(200)
@@ -723,7 +723,7 @@ describe('CDP API', () => {
                 .post(`/api/projects/${team.id}/insights_functions/new/invocations`)
                 .send({
                     globals: logRecordGlobals,
-                    configuration: { ...configuration, script, bytecode: await compileHog(script) },
+                    configuration: { ...configuration, script, bytecode: await compileScript(script) },
                 })
 
             expect(res.status).toEqual(200)
@@ -753,8 +753,8 @@ describe('CDP API', () => {
         })
 
         it('returns the states of all script functions', async () => {
-            await api['hogWatcher'].forceStateChange(insightsFunction, HogWatcherState.degraded)
-            await api['hogWatcher'].forceStateChange(insightsFunctionMultiFetch, HogWatcherState.disabled)
+            await api['scriptWatcher'].forceStateChange(insightsFunction, ScriptWatcherState.degraded)
+            await api['scriptWatcher'].forceStateChange(insightsFunctionMultiFetch, ScriptWatcherState.disabled)
 
             const res = await supertest(app).get('/api/insights_functions/states')
             expect(res.status).toEqual(200)
@@ -799,7 +799,7 @@ describe('CDP API', () => {
 
         it('accepts large payloads on script flow invocations endpoint', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${insightsFunction.team_id}/hog_flows/new/invocations`)
+                .post(`/api/projects/${insightsFunction.team_id}/insights_flows/new/invocations`)
                 .send({ globals, mock_async_functions: true, configuration: { large_field: largePayload } })
 
             // 400 from missing flow config, not 413/500 from body size
@@ -815,7 +815,7 @@ describe('CDP API', () => {
         })
     })
 
-    describe('hogflow invocation groups', () => {
+    describe('flow invocation groups', () => {
         const resolvedGroup = {
             id: 'org-1',
             type: 'organization',
@@ -837,7 +837,7 @@ describe('CDP API', () => {
         let getGroupsSpy: jest.SpyInstance
 
         beforeEach(() => {
-            executeSpy = jest.spyOn(api['hogFlowExecutor'], 'executeCurrentAction').mockImplementation(((
+            executeSpy = jest.spyOn(api['flowExecutor'], 'executeCurrentAction').mockImplementation(((
                 invocation: any
             ) =>
                 Promise.resolve({
@@ -858,7 +858,7 @@ describe('CDP API', () => {
 
         it('resolves groups from the event when none are provided', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${team.id}/hog_flows/new/invocations`)
+                .post(`/api/projects/${team.id}/insights_flows/new/invocations`)
                 .send({ globals: groupGlobals, mock_async_functions: true, configuration: {} })
 
             expect(res.status).toEqual(200)
@@ -878,7 +878,7 @@ describe('CDP API', () => {
                 organization: { ...resolvedGroup, id: 'org-provided', properties: { plan: 'startup' } },
             }
             const res = await supertest(app)
-                .post(`/api/projects/${team.id}/hog_flows/new/invocations`)
+                .post(`/api/projects/${team.id}/insights_flows/new/invocations`)
                 .send({
                     globals: { ...groupGlobals, groups: providedGroups },
                     mock_async_functions: true,
@@ -892,7 +892,7 @@ describe('CDP API', () => {
         })
     })
 
-    describe('hogflow wait_until_condition test invocations', () => {
+    describe('flow wait_until_condition test invocations', () => {
         // Matches events whose name equals `eventName` - same shape the serializer compiles
         // for an "events to wait for" entry.
         const eventBytecode = (eventName: string): any[] => ['_H', 1, 32, eventName, 32, 'event', 1, 1, 11]
@@ -931,7 +931,7 @@ describe('CDP API', () => {
             ['non-matching', 'some_other_event', 'wait_node'],
         ])('a %s test event resolves the wait step correctly', async (_, eventName, expectedNextActionId) => {
             const res = await supertest(app)
-                .post(`/api/projects/${team.id}/hog_flows/new/invocations`)
+                .post(`/api/projects/${team.id}/insights_flows/new/invocations`)
                 .send({
                     globals: { ...globals, event: { ...globals.event!, event: eventName } },
                     mock_async_functions: true,
@@ -982,7 +982,7 @@ describe('CDP API', () => {
             ],
         }
 
-        const res = await supertest(app).post(`/api/projects/${team.id}/hog_flows/new/invocations`).send({
+        const res = await supertest(app).post(`/api/projects/${team.id}/insights_flows/new/invocations`).send({
             globals,
             mock_async_functions: true,
             configuration: flowConfiguration,
@@ -996,11 +996,11 @@ describe('CDP API', () => {
         expect(allLogText).toContain('***REDACTED***')
     })
 
-    describe('batch hogflow invocations', () => {
-        let batchInsightsFlow: InsightsFlow
+    describe('batch flow invocations', () => {
+        let batchFlow: Flow
 
         beforeEach(async () => {
-            batchInsightsFlow = await insertInsightsFlow({
+            batchFlow = await insertFlow({
                 id: new UUIDT().toString(),
                 name: 'test batch script flow',
                 status: 'active',
@@ -1027,7 +1027,7 @@ describe('CDP API', () => {
         it('errors if missing team', async () => {
             const nonExistentTeamId = new UUIDT().toString()
             const res = await supertest(app)
-                .post(`/api/projects/${nonExistentTeamId}/hog_flows/${batchInsightsFlow.id}/batch_invocations/job-123`)
+                .post(`/api/projects/${nonExistentTeamId}/insights_flows/${batchFlow.id}/batch_invocations/job-123`)
                 .send({})
 
             expect(res.status).toEqual(404)
@@ -1037,7 +1037,7 @@ describe('CDP API', () => {
         it('errors if missing script flow', async () => {
             const nonExistentUuid = new UUIDT().toString()
             const res = await supertest(app)
-                .post(`/api/projects/${batchInsightsFlow.team_id}/hog_flows/${nonExistentUuid}/batch_invocations/job-123`)
+                .post(`/api/projects/${batchFlow.team_id}/insights_flows/${nonExistentUuid}/batch_invocations/job-123`)
                 .send({})
 
             expect(res.status).toEqual(404)
@@ -1045,7 +1045,7 @@ describe('CDP API', () => {
         })
 
         it('errors if script flow is not a batch trigger type', async () => {
-            const nonBatchInsightsFlow = await insertInsightsFlow({
+            const nonBatchFlow = await insertFlow({
                 id: new UUIDT().toString(),
                 name: 'test non-batch script flow',
                 status: 'active',
@@ -1061,7 +1061,7 @@ describe('CDP API', () => {
 
             const res = await supertest(app)
                 .post(
-                    `/api/projects/${nonBatchInsightsFlow.team_id}/hog_flows/${nonBatchInsightsFlow.id}/batch_invocations/job-123`
+                    `/api/projects/${nonBatchFlow.team_id}/insights_flows/${nonBatchFlow.id}/batch_invocations/job-123`
                 )
                 .send({})
 
@@ -1081,7 +1081,7 @@ describe('CDP API', () => {
             try {
                 const res = await supertest(app)
                     .post(
-                        `/api/projects/${batchInsightsFlow.team_id}/hog_flows/${batchInsightsFlow.id}/batch_invocations/job-789`
+                        `/api/projects/${batchFlow.team_id}/insights_flows/${batchFlow.id}/batch_invocations/job-789`
                     )
                     .send({
                         filters: { filter_test_accounts: true },
@@ -1095,19 +1095,19 @@ describe('CDP API', () => {
                 expect(createJobMock).toHaveBeenCalledTimes(1)
                 const arg = createJobMock.mock.calls[0][0]
                 expect(arg).toMatchObject({
-                    teamId: batchInsightsFlow.team_id,
-                    queueName: 'hogflow_batch_resolve',
+                    teamId: batchFlow.team_id,
+                    queueName: 'flow_batch_resolve',
                     parentRunId: 'job-789',
-                    functionId: batchInsightsFlow.id,
+                    functionId: batchFlow.id,
                 })
                 expect(arg.state).toBeInstanceOf(Buffer)
                 const state = parseJSON((arg.state as Buffer).toString('utf-8')) as Record<string, unknown>
                 expect(state).toMatchObject({
                     batchJobId: 'job-789',
-                    teamId: batchInsightsFlow.team_id,
-                    hogFlowId: batchInsightsFlow.id,
+                    teamId: batchFlow.team_id,
+                    flowId: batchFlow.id,
                     filters: {
-                        properties: (batchInsightsFlow as any).trigger.filters.properties,
+                        properties: (batchFlow as any).trigger.filters.properties,
                         filter_test_accounts: true,
                     },
                     maxAudienceSize: 1234,
@@ -1139,7 +1139,7 @@ describe('CDP API', () => {
             try {
                 const res = await supertest(app)
                     .post(
-                        `/api/projects/${batchInsightsFlow.team_id}/hog_flows/${batchInsightsFlow.id}/batch_invocations/job-791`
+                        `/api/projects/${batchFlow.team_id}/insights_flows/${batchFlow.id}/batch_invocations/job-791`
                     )
                     .send({ filters: { properties: snapshotProperties } })
 
@@ -1147,14 +1147,14 @@ describe('CDP API', () => {
                 const arg = createJobMock.mock.calls[0][0]
                 const state = parseJSON((arg.state as Buffer).toString('utf-8')) as Record<string, any>
                 expect(state.filters.properties).toEqual(snapshotProperties)
-                expect(state.filters.properties).not.toEqual((batchInsightsFlow as any).trigger.filters.properties)
+                expect(state.filters.properties).not.toEqual((batchFlow as any).trigger.filters.properties)
             } finally {
                 api['batchResolverProducer'] = null
             }
         })
 
         it('sets email dedupe on the resolver state when the flow sends email to the default {{person.properties.email}}', async () => {
-            const emailInsightsFlow = await insertInsightsFlow({
+            const emailFlow = await insertFlow({
                 id: new UUIDT().toString(),
                 name: 'test batch email script flow',
                 status: 'active',
@@ -1199,7 +1199,7 @@ describe('CDP API', () => {
             try {
                 const res = await supertest(app)
                     .post(
-                        `/api/projects/${emailInsightsFlow.team_id}/hog_flows/${emailInsightsFlow.id}/batch_invocations/job-790`
+                        `/api/projects/${emailFlow.team_id}/insights_flows/${emailFlow.id}/batch_invocations/job-790`
                     )
                     .send({})
 
@@ -1216,7 +1216,7 @@ describe('CDP API', () => {
             // Regression guard for the wrong-property footgun: if the customer wired their
             // email action to send to `person.properties.work_email`, deduping on
             // `person.properties.email` would collapse the wrong groups. Better to skip dedupe.
-            const emailInsightsFlow = await insertInsightsFlow({
+            const emailFlow = await insertFlow({
                 id: new UUIDT().toString(),
                 name: 'test batch email script flow (custom recipient)',
                 status: 'active',
@@ -1261,7 +1261,7 @@ describe('CDP API', () => {
             try {
                 const res = await supertest(app)
                     .post(
-                        `/api/projects/${emailInsightsFlow.team_id}/hog_flows/${emailInsightsFlow.id}/batch_invocations/job-791`
+                        `/api/projects/${emailFlow.team_id}/insights_flows/${emailFlow.id}/batch_invocations/job-791`
                     )
                     .send({})
 
@@ -1275,15 +1275,15 @@ describe('CDP API', () => {
         })
     })
 
-    describe('scheduled hogflow invocations', () => {
-        let scheduleInsightsFlow: InsightsFlow
+    describe('scheduled flow invocations', () => {
+        let scheduleFlow: Flow
         let mockQueueInvocations: jest.Mock
 
         beforeEach(async () => {
             mockQueueInvocations = jest.fn().mockResolvedValue(undefined)
-            api['hogflowQueue'] = { queueInvocations: mockQueueInvocations } as any
+            api['flowQueue'] = { queueInvocations: mockQueueInvocations } as any
 
-            scheduleInsightsFlow = await insertInsightsFlow({
+            scheduleFlow = await insertFlow({
                 id: new UUIDT().toString(),
                 name: 'test schedule script flow',
                 status: 'active',
@@ -1300,7 +1300,7 @@ describe('CDP API', () => {
         it('errors if missing team', async () => {
             const nonExistentTeamId = new UUIDT().toString()
             const res = await supertest(app)
-                .post(`/api/projects/${nonExistentTeamId}/hog_flows/${scheduleInsightsFlow.id}/scheduled_invocations`)
+                .post(`/api/projects/${nonExistentTeamId}/insights_flows/${scheduleFlow.id}/scheduled_invocations`)
                 .send({})
 
             expect(res.status).toEqual(404)
@@ -1310,7 +1310,7 @@ describe('CDP API', () => {
         it('errors if missing script flow', async () => {
             const nonExistentUuid = new UUIDT().toString()
             const res = await supertest(app)
-                .post(`/api/projects/${scheduleInsightsFlow.team_id}/hog_flows/${nonExistentUuid}/scheduled_invocations`)
+                .post(`/api/projects/${scheduleFlow.team_id}/insights_flows/${nonExistentUuid}/scheduled_invocations`)
                 .send({})
 
             expect(res.status).toEqual(404)
@@ -1318,7 +1318,7 @@ describe('CDP API', () => {
         })
 
         it('errors if trigger type is not schedule', async () => {
-            const eventInsightsFlow = await insertInsightsFlow({
+            const eventFlow = await insertFlow({
                 id: new UUIDT().toString(),
                 name: 'test event script flow',
                 status: 'active',
@@ -1333,7 +1333,7 @@ describe('CDP API', () => {
             })
 
             const res = await supertest(app)
-                .post(`/api/projects/${eventInsightsFlow.team_id}/hog_flows/${eventInsightsFlow.id}/scheduled_invocations`)
+                .post(`/api/projects/${eventFlow.team_id}/insights_flows/${eventFlow.id}/scheduled_invocations`)
                 .send({})
 
             expect(res.status).toEqual(400)
@@ -1342,7 +1342,7 @@ describe('CDP API', () => {
 
         it('queues invocation and returns queued status', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${scheduleInsightsFlow.team_id}/hog_flows/${scheduleInsightsFlow.id}/scheduled_invocations`)
+                .post(`/api/projects/${scheduleFlow.team_id}/insights_flows/${scheduleFlow.id}/scheduled_invocations`)
                 .send({ variables: { greeting: 'Hello' } })
 
             expect(res.status).toEqual(200)
@@ -1353,7 +1353,7 @@ describe('CDP API', () => {
 
         it('queues invocation with empty variables when none provided', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${scheduleInsightsFlow.team_id}/hog_flows/${scheduleInsightsFlow.id}/scheduled_invocations`)
+                .post(`/api/projects/${scheduleFlow.team_id}/insights_flows/${scheduleFlow.id}/scheduled_invocations`)
                 .send({})
 
             expect(res.status).toEqual(200)
@@ -1363,8 +1363,8 @@ describe('CDP API', () => {
         })
     })
 
-    describe('hogflow in-flight count', () => {
-        let countInsightsFlow: InsightsFlow
+    describe('flow in-flight count', () => {
+        let countFlow: Flow
         let mockCountInFlightJobs: jest.Mock
 
         beforeEach(async () => {
@@ -1378,7 +1378,7 @@ describe('CDP API', () => {
                 rescheduleParkedJobs: jest.fn(),
             }
 
-            countInsightsFlow = await insertInsightsFlow({
+            countFlow = await insertFlow({
                 id: new UUIDT().toString(),
                 name: 'test in-flight count script flow',
                 status: 'active',
@@ -1399,17 +1399,17 @@ describe('CDP API', () => {
 
         it('returns the in-flight job count for a workflow', async () => {
             const res = await supertest(app).get(
-                `/api/projects/${countInsightsFlow.team_id}/hog_flows/${countInsightsFlow.id}/in_flight_count`
+                `/api/projects/${countFlow.team_id}/insights_flows/${countFlow.id}/in_flight_count`
             )
 
             expect(res.status).toEqual(200)
             expect(res.body).toEqual({ count: 3, by_action: { delay_1: 2 }, position_unknown: 1 })
-            expect(mockCountInFlightJobs).toHaveBeenCalledWith(countInsightsFlow.team_id, countInsightsFlow.id)
+            expect(mockCountInFlightJobs).toHaveBeenCalledWith(countFlow.team_id, countFlow.id)
         })
 
         it('errors if missing script flow', async () => {
             const res = await supertest(app).get(
-                `/api/projects/${countInsightsFlow.team_id}/hog_flows/${new UUIDT().toString()}/in_flight_count`
+                `/api/projects/${countFlow.team_id}/insights_flows/${new UUIDT().toString()}/in_flight_count`
             )
 
             expect(res.status).toEqual(404)
@@ -1420,7 +1420,7 @@ describe('CDP API', () => {
             const otherTeamId = await createTeam(hub.postgres, team.organization_id)
 
             const res = await supertest(app).get(
-                `/api/projects/${otherTeamId}/hog_flows/${countInsightsFlow.id}/in_flight_count`
+                `/api/projects/${otherTeamId}/insights_flows/${countFlow.id}/in_flight_count`
             )
 
             expect(res.status).toEqual(404)
@@ -1432,27 +1432,27 @@ describe('CDP API', () => {
             api['batchResolverProducer'] = null
 
             const res = await supertest(app).get(
-                `/api/projects/${countInsightsFlow.team_id}/hog_flows/${countInsightsFlow.id}/in_flight_count`
+                `/api/projects/${countFlow.team_id}/insights_flows/${countFlow.id}/in_flight_count`
             )
 
             expect(res.status).toEqual(503)
         })
     })
 
-    describe('hogflow reschedule parked', () => {
-        let rescheduleInsightsFlow: InsightsFlow
+    describe('flow reschedule parked', () => {
+        let rescheduleFlow: Flow
         let mockRescheduleParkedJobs: jest.Mock
         const sweepFloor = new Date('2025-06-01T00:10:00.000Z')
         const sweepUntil = new Date('2025-06-01T00:40:00.000Z')
 
         // Mirrors Django's mint (insights/plugins/plugin_server_api.py) with the shared dev/test key.
-        const mintToken = (teamId: number, hogFlowId: string, secret = 'local-dev-workflows-reschedule-jwt') =>
-            jwt.sign({ team_id: teamId, hog_flow_id: hogFlowId }, secret, {
+        const mintToken = (teamId: number, flowId: string, secret = 'local-dev-workflows-reschedule-jwt') =>
+            jwt.sign({ team_id: teamId, flow_id: flowId }, secret, {
                 audience: 'insights:workflows:reschedule_parked',
                 expiresIn: '2m',
             })
-        const authFor = (teamId: number, hogFlowId: string) => ({
-            Authorization: `Bearer ${mintToken(teamId, hogFlowId)}`,
+        const authFor = (teamId: number, flowId: string) => ({
+            Authorization: `Bearer ${mintToken(teamId, flowId)}`,
         })
 
         beforeEach(async () => {
@@ -1470,7 +1470,7 @@ describe('CDP API', () => {
                 rescheduleParkedJobs: mockRescheduleParkedJobs,
             }
 
-            rescheduleInsightsFlow = await insertInsightsFlow({
+            rescheduleFlow = await insertFlow({
                 id: new UUIDT().toString(),
                 name: 'test reschedule script flow',
                 status: 'active',
@@ -1491,8 +1491,8 @@ describe('CDP API', () => {
 
         it('runs a sweep slice and returns the bounds for follow-up slices', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${rescheduleInsightsFlow.team_id}/hog_flows/${rescheduleInsightsFlow.id}/reschedule_parked`)
-                .set(authFor(rescheduleInsightsFlow.team_id, rescheduleInsightsFlow.id))
+                .post(`/api/projects/${rescheduleFlow.team_id}/insights_flows/${rescheduleFlow.id}/reschedule_parked`)
+                .set(authFor(rescheduleFlow.team_id, rescheduleFlow.id))
                 .send({ action_ids: ['delay_1', 'wait_1'] })
 
             expect(res.status).toEqual(200)
@@ -1504,8 +1504,8 @@ describe('CDP API', () => {
                 sweep_until: sweepUntil.toISOString(),
             })
             expect(mockRescheduleParkedJobs).toHaveBeenCalledWith({
-                teamId: rescheduleInsightsFlow.team_id,
-                functionId: rescheduleInsightsFlow.id,
+                teamId: rescheduleFlow.team_id,
+                functionId: rescheduleFlow.id,
                 actionIds: ['delay_1', 'wait_1'],
                 sweepFloor: undefined,
                 sweepUntil: undefined,
@@ -1514,8 +1514,8 @@ describe('CDP API', () => {
 
         it('parses passed-through bounds into dates', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${rescheduleInsightsFlow.team_id}/hog_flows/${rescheduleInsightsFlow.id}/reschedule_parked`)
-                .set(authFor(rescheduleInsightsFlow.team_id, rescheduleInsightsFlow.id))
+                .post(`/api/projects/${rescheduleFlow.team_id}/insights_flows/${rescheduleFlow.id}/reschedule_parked`)
+                .set(authFor(rescheduleFlow.team_id, rescheduleFlow.id))
                 .send({
                     action_ids: ['delay_1'],
                     sweep_floor: sweepFloor.toISOString(),
@@ -1543,8 +1543,8 @@ describe('CDP API', () => {
             ],
         ])('rejects a bad body: %s', async (_desc, body) => {
             const res = await supertest(app)
-                .post(`/api/projects/${rescheduleInsightsFlow.team_id}/hog_flows/${rescheduleInsightsFlow.id}/reschedule_parked`)
-                .set(authFor(rescheduleInsightsFlow.team_id, rescheduleInsightsFlow.id))
+                .post(`/api/projects/${rescheduleFlow.team_id}/insights_flows/${rescheduleFlow.id}/reschedule_parked`)
+                .set(authFor(rescheduleFlow.team_id, rescheduleFlow.id))
                 .send(body)
 
             expect(res.status).toEqual(400)
@@ -1555,8 +1555,8 @@ describe('CDP API', () => {
             const otherTeamId = await createTeam(hub.postgres, team.organization_id)
 
             const res = await supertest(app)
-                .post(`/api/projects/${otherTeamId}/hog_flows/${rescheduleInsightsFlow.id}/reschedule_parked`)
-                .set(authFor(otherTeamId, rescheduleInsightsFlow.id))
+                .post(`/api/projects/${otherTeamId}/insights_flows/${rescheduleFlow.id}/reschedule_parked`)
+                .set(authFor(otherTeamId, rescheduleFlow.id))
                 .send({ action_ids: ['delay_1'] })
 
             expect(res.status).toEqual(404)
@@ -1568,20 +1568,20 @@ describe('CDP API', () => {
             [
                 'a token signed with the wrong key',
                 () => ({
-                    Authorization: `Bearer ${mintToken(rescheduleInsightsFlow.team_id, rescheduleInsightsFlow.id, 'wrong-key')}`,
+                    Authorization: `Bearer ${mintToken(rescheduleFlow.team_id, rescheduleFlow.id, 'wrong-key')}`,
                 }),
             ],
             [
                 "another workflow's token",
-                () => ({ Authorization: `Bearer ${mintToken(rescheduleInsightsFlow.team_id, new UUIDT().toString())}` }),
+                () => ({ Authorization: `Bearer ${mintToken(rescheduleFlow.team_id, new UUIDT().toString())}` }),
             ],
             [
                 "another team's token",
-                () => ({ Authorization: `Bearer ${mintToken(rescheduleInsightsFlow.team_id + 1, rescheduleInsightsFlow.id)}` }),
+                () => ({ Authorization: `Bearer ${mintToken(rescheduleFlow.team_id + 1, rescheduleFlow.id)}` }),
             ],
         ])('rejects a request with %s', async (_desc, headers) => {
             const res = await supertest(app)
-                .post(`/api/projects/${rescheduleInsightsFlow.team_id}/hog_flows/${rescheduleInsightsFlow.id}/reschedule_parked`)
+                .post(`/api/projects/${rescheduleFlow.team_id}/insights_flows/${rescheduleFlow.id}/reschedule_parked`)
                 .set(headers())
                 .send({ action_ids: ['delay_1'] })
 
@@ -1595,9 +1595,9 @@ describe('CDP API', () => {
             try {
                 const res = await supertest(app)
                     .post(
-                        `/api/projects/${rescheduleInsightsFlow.team_id}/hog_flows/${rescheduleInsightsFlow.id}/reschedule_parked`
+                        `/api/projects/${rescheduleFlow.team_id}/insights_flows/${rescheduleFlow.id}/reschedule_parked`
                     )
-                    .set(authFor(rescheduleInsightsFlow.team_id, rescheduleInsightsFlow.id))
+                    .set(authFor(rescheduleFlow.team_id, rescheduleFlow.id))
                     .send({ action_ids: ['delay_1'] })
 
                 expect(res.status).toEqual(503)
@@ -1611,21 +1611,21 @@ describe('CDP API', () => {
             api['batchResolverProducer'] = null
 
             const res = await supertest(app)
-                .post(`/api/projects/${rescheduleInsightsFlow.team_id}/hog_flows/${rescheduleInsightsFlow.id}/reschedule_parked`)
+                .post(`/api/projects/${rescheduleFlow.team_id}/insights_flows/${rescheduleFlow.id}/reschedule_parked`)
                 .send({ action_ids: ['delay_1'] })
 
             expect(res.status).toEqual(503)
         })
     })
 
-    // The test panel POSTs to /hog_flows/:id/invocations and runs the executor in-process —
+    // The test panel POSTs to /insights_flows/:id/invocations and runs the executor in-process —
     // it never enqueues into cyclotron. If the executor routes an email action onto the
     // dedicated email queue, nothing services that job and the workflow stalls on a
     // "Workflow will pause until …" log. The handler forces `isTest: true` so the
     // email branch always goes through EmailService directly on this path.
-    describe('hog_flows/:id/invocations — email actions are sent inline despite queue routing', () => {
+    describe('insights_flows/:id/invocations — email actions are sent inline despite queue routing', () => {
         let emailSpy: jest.SpyInstance
-        let hogFlowId: string
+        let flowId: string
 
         beforeEach(async () => {
             await insertIntegration(hub.postgres, team.id, {
@@ -1665,7 +1665,7 @@ describe('CDP API', () => {
                 ],
             })
 
-            const hogFlow = new FixtureInsightsFlowBuilder()
+            const flow = new FixtureFlowBuilder()
                 .withTeamId(team.id)
                 .withStatus('active')
                 .withExitCondition('exit_only_at_end')
@@ -1700,13 +1700,13 @@ describe('CDP API', () => {
                     ],
                 })
                 .build()
-            const inserted = await insertInsightsFlow(hogFlow)
-            hogFlowId = inserted.id
+            const inserted = await insertFlow(flow)
+            flowId = inserted.id
 
             // Stub EmailService so the test doesn't depend on a running maildev SMTP. The spy
             // captures whether the inline path was taken — that's the assertion that proves the fix.
             emailSpy = jest
-                .spyOn(api['hogExecutorAsync']['deps'].emailService, 'executeSendEmail')
+                .spyOn(api['scriptExecutorAsync']['deps'].emailService, 'executeSendEmail')
                 .mockImplementation((invocation: any) =>
                     Promise.resolve({
                         invocation,
@@ -1734,7 +1734,7 @@ describe('CDP API', () => {
         })
 
         it('sends the email inline via EmailService instead of routing to the email queue', async () => {
-            const res = await supertest(app).post(`/api/projects/${team.id}/hog_flows/${hogFlowId}/invocations`).send({
+            const res = await supertest(app).post(`/api/projects/${team.id}/insights_flows/${flowId}/invocations`).send({
                 globals,
                 configuration: {},
                 current_action_id: 'email_1',

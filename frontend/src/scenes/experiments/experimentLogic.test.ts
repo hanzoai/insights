@@ -51,26 +51,26 @@ describe('experimentLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/projects/:team/experiments': {
+                '/v1/projects/:team/experiments': {
                     count: 1,
                     next: null,
                     previous: null,
                     results: [{ id: 1, name: 'Test Exp', description: 'bla' }],
                 },
-                '/api/projects/:team/experiment_holdouts': {
+                '/v1/projects/:team/experiment_holdouts': {
                     count: 0,
                     next: null,
                     previous: null,
                     results: [],
                 },
-                '/api/projects/:team/experiment_saved_metrics': {
+                '/v1/projects/:team/experiment_saved_metrics': {
                     count: 0,
                     next: null,
                     previous: null,
                     results: [],
                 },
-                '/api/projects/:team/experiments/:id': experiment,
-                [`/api/projects/:team/experiments/${RUNNING_EXP_ID}/results`]: {
+                '/v1/projects/:team/experiments/:id': experiment,
+                [`/v1/projects/:team/experiments/${RUNNING_EXP_ID}/results`]: {
                     filters: { breakdown: '$feature/test-experiment', breakdown_type: 'event', insight: 'TRENDS' },
                     insight: [
                         { breakdown_value: 'control', count: 200 },
@@ -80,7 +80,7 @@ describe('experimentLogic', () => {
                     ],
                     probability: { control: 0.7, test_1: 0.1, test_2: 0.2, test_3: 0 },
                 },
-                [`/api/projects/:team/experiments/${RUNNING_FUNNEL_EXP_ID}/results`]: {
+                [`/v1/projects/:team/experiments/${RUNNING_FUNNEL_EXP_ID}/results`]: {
                     filters: { breakdown: '$feature/test-experiment', breakdown_type: 'event', insight: 'FUNNELS' },
                     insight: [
                         [
@@ -116,7 +116,7 @@ describe('experimentLogic', () => {
 
             useMocks({
                 post: {
-                    '/api/environments/:team/query/:kind': (() => {
+                    '/v1/environments/:team/query/:kind': (() => {
                         let callCount = 0
                         return () => {
                             callCount++
@@ -134,7 +134,7 @@ describe('experimentLogic', () => {
                     })(),
                 },
                 get: {
-                    '/api/environments/:team/query/:id': (() => {
+                    '/v1/environments/:team/query/:id': (() => {
                         let callCount = 0
                         return () => {
                             callCount++
@@ -184,7 +184,7 @@ describe('experimentLogic', () => {
 
             useMocks({
                 post: {
-                    '/api/environments/:team/query/:kind': (() => {
+                    '/v1/environments/:team/query/:kind': (() => {
                         let callCount = 0
                         return () => {
                             callCount++
@@ -202,7 +202,7 @@ describe('experimentLogic', () => {
                     })(),
                 },
                 get: {
-                    '/api/environments/:team/query/:id': (() => {
+                    '/v1/environments/:team/query/:id': (() => {
                         let callCount = 0
                         return () => {
                             callCount++
@@ -252,7 +252,7 @@ describe('experimentLogic', () => {
 
             useMocks({
                 post: {
-                    '/api/environments/:team/query': async () => {
+                    '/v1/environments/:team/query': async () => {
                         await new Promise((resolve) => setTimeout(resolve, 30))
                         return [
                             200,
@@ -264,7 +264,7 @@ describe('experimentLogic', () => {
                     },
                 },
                 get: {
-                    '/api/environments/:team/query/:id': async () => {
+                    '/v1/environments/:team/query/:id': async () => {
                         await new Promise((resolve) => setTimeout(resolve, 30))
                         return [200, experimentMetricResultsSuccessJson]
                     },
@@ -285,7 +285,7 @@ describe('experimentLogic', () => {
 
             useMocks({
                 post: {
-                    '/api/environments/:team/query': () => [
+                    '/v1/environments/:team/query': () => [
                         200,
                         {
                             cache_key: 'cache_key',
@@ -294,7 +294,7 @@ describe('experimentLogic', () => {
                     ],
                 },
                 get: {
-                    '/api/environments/:team/query/:id': () => [200, experimentMetricResultsSuccessJson],
+                    '/v1/environments/:team/query/:id': () => [200, experimentMetricResultsSuccessJson],
                 },
             })
 
@@ -375,7 +375,7 @@ describe('experimentLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/projects/:team/experiments/:id': experimentWithOrphan,
+                    '/v1/projects/:team/experiments/:id': experimentWithOrphan,
                 },
             })
 
@@ -415,7 +415,7 @@ describe('experimentLogic', () => {
 
             useMocks({
                 get: {
-                    '/api/projects/:team/experiments/:id': experimentWithOrphan,
+                    '/v1/projects/:team/experiments/:id': experimentWithOrphan,
                 },
             })
 
@@ -834,7 +834,7 @@ describe('experimentLogic', () => {
             const fetchedResult = { baseline: { key: 'control' }, variant_results: [] }
             useMocks({
                 post: {
-                    '/api/environments/:team/query/:kind': () => [
+                    '/v1/environments/:team/query/:kind': () => [
                         200,
                         {
                             cache_key: 'cache_key',
@@ -846,7 +846,7 @@ describe('experimentLogic', () => {
                     ],
                 },
                 get: {
-                    '/api/environments/:team/query/:id': () => [
+                    '/v1/environments/:team/query/:id': () => [
                         200,
                         {
                             query_status: {
@@ -887,13 +887,13 @@ describe('experimentLogic', () => {
         it('falls back to a full refresh when results are already loading', async () => {
             useMocks({
                 post: {
-                    '/api/environments/:team/query/:kind': () => [
+                    '/v1/environments/:team/query/:kind': () => [
                         200,
                         { cache_key: 'cache_key', query_status: experimentMetricResultsSuccessJson.query_status },
                     ],
                 },
                 get: {
-                    '/api/environments/:team/query/:id': () => [200, experimentMetricResultsSuccessJson],
+                    '/v1/environments/:team/query/:id': () => [200, experimentMetricResultsSuccessJson],
                 },
             })
 

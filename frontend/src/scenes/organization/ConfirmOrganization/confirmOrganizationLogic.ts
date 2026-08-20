@@ -118,7 +118,7 @@ export const confirmOrganizationLogic = kea<confirmOrganizationLogicType>([
 
             submit: async (formValues) => {
                 await api
-                    .create('api/social_signup/', {
+                    .create('v1/social_signup/', {
                         ...formValues,
                     })
                     .then(() => {

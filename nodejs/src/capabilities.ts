@@ -21,15 +21,15 @@ export const CAPABILITIES_CDP: PluginServerCapabilities = {
     cdpRerunWorker: true,
 }
 
-/** CDP + Workflows - full CDP with InsightsFlow workflow automation */
+/** CDP + Workflows - full CDP with Flow workflow automation */
 export const CAPABILITIES_CDP_WORKFLOWS: PluginServerCapabilities = {
     ...CAPABILITIES_CDP,
     cdpCyclotronWorkerBatchResolve: true,
-    cdpCyclotronWorkerInsightsFlow: true,
+    cdpCyclotronWorkerFlow: true,
     cdpCyclotronWorkerEmail: true,
     cdpCyclotronV2Janitor: isDevEnv(),
-    cdpHogflowScheduler: isDevEnv(),
-    cdpHogflowSubscriptionMatcher: isDevEnv(),
+    cdpScriptflowScheduler: isDevEnv(),
+    cdpScriptflowSubscriptionMatcher: isDevEnv(),
 }
 
 /** Realtime Cohorts - precalculated filters and cohort membership */
@@ -124,13 +124,13 @@ export function getPluginServerCapabilities(
             return {
                 cdpCyclotronWorker: true,
             }
-        case PluginServerMode.cdp_cyclotron_worker_hogflow:
+        case PluginServerMode.cdp_cyclotron_worker_flow:
             return {
-                cdpCyclotronWorkerInsightsFlow: true,
+                cdpCyclotronWorkerFlow: true,
             }
-        case PluginServerMode.cdp_cyclotron_worker_hogflow_legacy_pg:
+        case PluginServerMode.cdp_cyclotron_worker_flow_legacy_pg:
             return {
-                cdpCyclotronWorkerInsightsFlowLegacyPg: true,
+                cdpCyclotronWorkerFlowLegacyPg: true,
             }
         case PluginServerMode.cdp_cyclotron_worker_email:
             return {
@@ -144,9 +144,9 @@ export function getPluginServerCapabilities(
             return {
                 cdpPrecalculatedFilters: true,
             }
-        case PluginServerMode.cdp_hogflow_subscription_matcher:
+        case PluginServerMode.cdp_flow_subscription_matcher:
             return {
-                cdpHogflowSubscriptionMatcher: true,
+                cdpScriptflowSubscriptionMatcher: true,
             }
         case PluginServerMode.cdp_cohort_membership:
             return {
@@ -195,9 +195,9 @@ export function getPluginServerCapabilities(
             throw new Error(`Mode ${mode} is handled by IngestionGeneralServer, not PluginServer`)
         case PluginServerMode.ingestion_api:
             throw new Error(`Mode ${mode} is handled by IngestionApiServer, not PluginServer`)
-        case PluginServerMode.cdp_hogflow_scheduler:
+        case PluginServerMode.cdp_flow_scheduler:
             return {
-                cdpHogflowScheduler: true,
+                cdpScriptflowScheduler: true,
             }
         case PluginServerMode.recordings_blob_ingestion_v2:
         case PluginServerMode.recordings_blob_ingestion_v2_overflow:

@@ -135,7 +135,7 @@ export const errorTrackingFingerprintSceneLogic = kea<errorTrackingFingerprintSc
             if (!resolvedFingerprint) {
                 return
             }
-            // Preserve the alert attribution the link arrived with (see errorTrackingIssueLinkHogTemplate)
+            // Preserve the alert attribution the link arrived with (see errorTrackingIssueLinkScriptTemplate)
             // so the redirect to the issue page keeps its channel attribution.
             const { utm_source, utm_campaign, utm_medium } = router.values.searchParams
             router.actions.replace(

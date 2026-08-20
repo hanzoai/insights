@@ -117,17 +117,17 @@ describe('ActionFilterRow', () => {
             get: {
                 // insightLogic mounts alongside and fetches its insight by short_id; without
                 // a match it errors with "Insight ... not found"
-                '/api/environments/:team_id/insights/': ({ request }: { request: Request }) => [
+                '/v1/environments/:team_id/insights/': ({ request }: { request: Request }) => [
                     200,
                     {
                         results: [{ id: 1, short_id: new URL(request.url).searchParams.get('short_id'), query: null }],
                     },
                 ],
-                '/api/projects/:team/actions/': { results: filtersJson.actions },
-                '/api/environments/:team/groups_types/': MOCK_GROUP_TYPES,
-                '/api/projects/:team/warehouse_tables/': { results: [] },
-                '/api/projects/:team/warehouse_saved_queries/': { results: [] },
-                '/api/projects/:team/warehouse_view_links/': { results: [] },
+                '/v1/projects/:team/actions/': { results: filtersJson.actions },
+                '/v1/environments/:team/groups_types/': MOCK_GROUP_TYPES,
+                '/v1/projects/:team/warehouse_tables/': { results: [] },
+                '/v1/projects/:team/warehouse_saved_queries/': { results: [] },
+                '/v1/projects/:team/warehouse_view_links/': { results: [] },
             },
         })
 
@@ -816,7 +816,7 @@ describe('ActionFilterRow', () => {
             async ({ tab, searchText, resultValue, expectedEventId, expectedPropertyKey, expectedOperator }) => {
                 useMocks({
                     get: {
-                        '/api/environments/:team/events/values/': [{ name: resultValue }, { name: 'other-value' }],
+                        '/v1/environments/:team/events/values/': [{ name: resultValue }, { name: 'other-value' }],
                     },
                 })
 

@@ -21,13 +21,13 @@ import { Hub, Team } from '../../src/types'
 import { INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from './_tests/examples'
 import {
     insertInsightsFunction as _insertInsightsFunction,
-    createHogExecutionGlobals,
+    createScriptExecutionGlobals,
     insertIntegration,
 } from './_tests/fixtures'
 import { CdpEventsConsumer } from './consumers/cdp-events.consumer'
 import { CyclotronJobQueueKafka } from './services/job-queue/job-queue-kafka'
 import { CyclotronJobQueuePostgresV2 } from './services/job-queue/job-queue-postgres-v2'
-import { compileHog } from './templates/compiler'
+import { compileScript } from './templates/compiler'
 
 const ActualKafkaProducerWrapper = jest.requireActual('~/common/kafka/producer').KafkaProducerWrapper
 
@@ -99,7 +99,7 @@ describe('CDP Consumer loop', () => {
             fnFetchNoFilters = await insertInsightsFunction({
                 type: 'destination',
                 script: script,
-                bytecode: await compileHog(script),
+                bytecode: await compileScript(script),
                 inputs_schema: [
                     ...(INSIGHTS_INPUTS_EXAMPLES.simple_fetch.inputs_schema ?? []),
                     { key: 'oauth', type: 'integration', label: 'Slack', secret: false, required: true },
@@ -117,15 +117,15 @@ describe('CDP Consumer loop', () => {
             const postgresV2Queue = new CyclotronJobQueuePostgresV2(hub.CONSUMER_BATCH_SIZE, hub)
 
             eventsConsumer = new CdpEventsConsumer(hub, createCdpConsumerDeps(hub, kafkaProducer), {
-                hogQueue: kafkaQueue,
-                hogflowQueue: postgresV2Queue,
+                scriptQueue: kafkaQueue,
+                flowQueue: postgresV2Queue,
             })
             await eventsConsumer.start()
 
             cyclotronWorker = new CdpCyclotronWorker(hub, createCdpConsumerDeps(hub, kafkaProducer), kafkaQueue)
             await cyclotronWorker.start()
 
-            globals = createHogExecutionGlobals({
+            globals = createScriptExecutionGlobals({
                 project: {
                     id: team.id,
                 } as any,
@@ -327,7 +327,7 @@ describe('CDP Consumer loop', () => {
                 await insertInsightsFunction({
                     type: 'destination',
                     script,
-                    bytecode: await compileHog(script),
+                    bytecode: await compileScript(script),
                     inputs_schema: [
                         { key: 'aws_access_key_id', type: 'string', label: 'AKID', secret: true, required: true },
                         { key: 'aws_secret_access_key', type: 'string', label: 'SK', secret: true, required: true },
@@ -467,7 +467,7 @@ describe('CDP Consumer loop', () => {
             await insertInsightsFunction({
                 type: 'destination',
                 script,
-                bytecode: await compileHog(script),
+                bytecode: await compileScript(script),
                 inputs_schema: [
                     { key: 'aws_access_key_id', type: 'string', label: 'AKID', secret: true, required: true },
                     { key: 'aws_secret_access_key', type: 'string', label: 'SK', secret: true, required: true },
@@ -591,7 +591,7 @@ describe('CDP Consumer loop', () => {
 
         /** Row-scoped globals the DWH consumer produces for a synced warehouse row. */
         const createDwhGlobals = (rowProperties: Record<string, any> = {}): InsightsFunctionInvocationGlobals =>
-            createHogExecutionGlobals({
+            createScriptExecutionGlobals({
                 project: { id: team.id } as any,
                 event: {
                     uuid: new UUIDT().toString(),
@@ -630,7 +630,7 @@ describe('CDP Consumer loop', () => {
             fnDataWarehouseDestination = await insertInsightsFunction({
                 type: 'destination',
                 script,
-                bytecode: await compileHog(script),
+                bytecode: await compileScript(script),
                 ...INSIGHTS_INPUTS_EXAMPLES.simple_fetch,
                 ...INSIGHTS_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
@@ -639,8 +639,8 @@ describe('CDP Consumer loop', () => {
             const postgresV2Queue = new CyclotronJobQueuePostgresV2(hub.CONSUMER_BATCH_SIZE, hub)
 
             dwhConsumer = new CdpDatawarehouseEventsConsumer(hub, createCdpConsumerDeps(hub, kafkaProducer), {
-                hogQueue: kafkaQueue,
-                hogflowQueue: postgresV2Queue,
+                scriptQueue: kafkaQueue,
+                flowQueue: postgresV2Queue,
             })
             await dwhConsumer.start()
 

@@ -21,8 +21,8 @@ from insights.temporal.ai_observability.run_session_evaluation import (
     SessionFetchOutcome,
     _count_session_events,
     _SessionEventCount,
-    build_session_hog_globals,
-    execute_session_hog_eval_activity,
+    build_session_script_globals,
+    execute_session_script_eval_activity,
     execute_session_llm_judge_activity,
     fetch_session_for_evaluation,
     format_session_for_judge,
@@ -77,10 +77,10 @@ class TestSessionFetchLookback:
         assert session_fetch_lookback(max_age_seconds) == expected
 
 
-class TestBuildSessionHogGlobals:
+class TestBuildSessionScriptGlobals:
     def test_target_aggregates_across_traces(self):
         traces = [_trace("t1", cost=1.5, latency=2.0), _trace("t2", cost=0.5, latency=3.0)]
-        globals_dict = build_session_hog_globals(traces, "s-1")
+        globals_dict = build_session_script_globals(traces, "s-1")
         assert globals_dict["target"] == {
             "type": "session",
             "id": "s-1",
@@ -90,20 +90,20 @@ class TestBuildSessionHogGlobals:
 
     def test_evaluation_events_span_every_trace(self):
         traces = [_trace("t1", cost=0, latency=0, event_count=2), _trace("t2", cost=0, latency=0, event_count=3)]
-        globals_dict = build_session_hog_globals(traces, "s-1")
+        globals_dict = build_session_script_globals(traces, "s-1")
         assert len(globals_dict["evaluation_events"]) == 5
 
     def test_omits_the_trace_only_compatibility_globals(self):
         """`events` and `trace` exist for saved trace-target Script source. A session eval is new,
         so building them would double the worker memory for nothing."""
-        globals_dict = build_session_hog_globals([_trace("t1", cost=0, latency=0)], "s-1")
+        globals_dict = build_session_script_globals([_trace("t1", cost=0, latency=0)], "s-1")
         assert "events" not in globals_dict
         assert "trace" not in globals_dict
 
     def test_only_builds_globals_the_bytecode_references(self):
         traces = [_trace("t1", cost=0, latency=0)]
         # Bytecode that reads `target` but not `evaluation_events`.
-        globals_dict = build_session_hog_globals(traces, "s-1", bytecode=["_H", 1, 32, "target", 1, 1])
+        globals_dict = build_session_script_globals(traces, "s-1", bytecode=["_H", 1, 32, "target", 1, 1])
         assert "target" in globals_dict
         assert "evaluation_events" not in globals_dict
 
@@ -111,7 +111,7 @@ class TestBuildSessionHogGlobals:
         trace = _trace("t1", cost=0, latency=0)
         trace.totalCost = None
         trace.totalLatency = None
-        globals_dict = build_session_hog_globals([trace], "s-1")
+        globals_dict = build_session_script_globals([trace], "s-1")
         assert globals_dict["target"]["total_cost_usd"] == 0
         assert globals_dict["target"]["total_latency_seconds"] == 0
 
@@ -347,12 +347,12 @@ class TestExecuteSessionActivities:
         "skip_reason",
         ["session_not_found", "session_too_large", "session_payload_too_large", "session_truncated"],
     )
-    def test_hog_skips_carry_a_session_specific_reason(self, skip_reason):
+    def test_script_skips_carry_a_session_specific_reason(self, skip_reason):
         with patch(
             "insights.temporal.ai_observability.run_session_evaluation.fetch_session_for_evaluation",
             return_value=SessionFetchOutcome(traces=None, skip_reason=skip_reason, event_count=0),
         ):
-            result = async_to_sync(execute_session_hog_eval_activity)(
+            result = async_to_sync(execute_session_script_eval_activity)(
                 ExecuteSessionEvaluationInputs(
                     evaluation={
                         "evaluation_type": "script",
@@ -449,12 +449,12 @@ class TestExecuteSessionActivities:
                 ),
             ),
             patch(
-                "insights.temporal.ai_observability.run_session_evaluation.execute_hog_eval_bytecode",
+                "insights.temporal.ai_observability.run_session_evaluation.execute_script_eval_bytecode",
                 return_value=unexpected_error,
             ),
         ):
             with pytest.raises(ApplicationError, match=r"Script evaluation error \(session\)"):
-                async_to_sync(execute_session_hog_eval_activity)(
+                async_to_sync(execute_session_script_eval_activity)(
                     ExecuteSessionEvaluationInputs(
                         evaluation={
                             "evaluation_type": "script",

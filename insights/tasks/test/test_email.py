@@ -11,8 +11,6 @@ from django.utils import timezone
 
 from parameterized import parameterized
 
-from insights.api.authentication import password_reset_token_generator
-from insights.api.email_verification import email_verification_token_generator
 from insights.models import Organization, Team, User
 from insights.models.app_metrics2.sql import TRUNCATE_APP_METRICS2_TABLE_SQL
 from insights.models.instance_setting import set_instance_setting
@@ -28,9 +26,9 @@ from insights.tasks.email import (
     send_canary_email,
     send_discussions_mentioned,
     send_email_change_emails,
-    send_email_verification,
     send_external_data_failure_digest,
     send_fatal_plugin_error,
+    send_insights_ai_access_request,
     send_insights_function_disabled,
     send_insights_functions_daily_digest,
     send_insights_functions_digest_email,
@@ -38,10 +36,7 @@ from insights.tasks.email import (
     send_matview_failure_digest,
     send_member_join,
     send_new_ticket_notification,
-    send_password_reset,
-    send_insights_ai_access_request,
     send_project_secret_api_key_exposed,
-    send_provisioning_welcome,
     send_wizard_pr_ready_email,
     should_send_pipeline_error_notification,
 )
@@ -345,54 +340,6 @@ class TestEmail(APIBaseTest, DatastoreTestMixin):
 
         assert len(mocked_email_messages) == 0
 
-    def test_send_password_reset(self, MockEmailMessage: MagicMock) -> None:
-        mocked_email_messages = mock_email_messages(MockEmailMessage)
-        org, user = create_org_team_and_user("2022-01-02 00:00:00", "admin@hanzo.ai")
-        token = password_reset_token_generator.make_token(self.user)
-
-        send_password_reset(user.id, token)
-
-        assert len(mocked_email_messages) == 1
-        assert mocked_email_messages[0].send.call_count == 1
-        assert mocked_email_messages[0].html_body
-
-    def test_send_provisioning_welcome(self, MockEmailMessage: MagicMock) -> None:
-        mocked_email_messages = mock_email_messages(MockEmailMessage)
-        org, user = create_org_team_and_user("2022-01-02 00:00:00", "admin@hanzo.ai")
-        token = password_reset_token_generator.make_token(self.user)
-
-        send_provisioning_welcome(user.id, token, "Wizard")
-
-        assert len(mocked_email_messages) == 1
-        assert mocked_email_messages[0].send.call_count == 1
-        assert mocked_email_messages[0].html_body
-        assert "Set your password" in mocked_email_messages[0].html_body
-        assert "Wizard" in mocked_email_messages[0].html_body
-
-    def test_send_provisioning_welcome_with_repository(self, MockEmailMessage: MagicMock) -> None:
-        mocked_email_messages = mock_email_messages(MockEmailMessage)
-        org, user = create_org_team_and_user("2022-01-02 00:00:00", "admin@hanzo.ai")
-        token = password_reset_token_generator.make_token(self.user)
-
-        send_provisioning_welcome(user.id, token, "hanzo.ai", repository="octocat/hello-world")
-
-        assert len(mocked_email_messages) == 1
-        assert "octocat/hello-world" in mocked_email_messages[0].html_body
-        assert "pull request" in mocked_email_messages[0].html_body
-
-    def test_send_provisioning_welcome_without_partner(self, MockEmailMessage: MagicMock) -> None:
-        mocked_email_messages = mock_email_messages(MockEmailMessage)
-        org, user = create_org_team_and_user("2022-01-02 00:00:00", "admin@hanzo.ai")
-        token = password_reset_token_generator.make_token(self.user)
-
-        send_provisioning_welcome(user.id, token)
-
-        assert len(mocked_email_messages) == 1
-        assert mocked_email_messages[0].send.call_count == 1
-        assert mocked_email_messages[0].html_body
-        assert "Set your password" in mocked_email_messages[0].html_body
-        assert "via" not in mocked_email_messages[0].html_body
-
     @patch("insights.tasks.email.ph_scoped_capture")
     def test_send_wizard_pr_ready_email_uses_customer_io_context(
         self, _mock_ph_scoped_capture: MagicMock, MockEmailMessage: MagicMock
@@ -512,22 +459,6 @@ class TestEmail(APIBaseTest, DatastoreTestMixin):
         MockEmailMessage.assert_not_called()
         task.refresh_from_db()
         assert task.pr_ready_email_sent_at is not None
-
-    @patch("hanzo_insights.capture")
-    def test_send_email_verification(self, mock_capture: MagicMock, MockEmailMessage: MagicMock) -> None:
-        mocked_email_messages = mock_email_messages(MockEmailMessage)
-        org, user = create_org_team_and_user("2022-01-02 00:00:00", "admin@hanzo.ai")
-        token = email_verification_token_generator.make_token(self.user)
-        send_email_verification(user.id, token)
-
-        mock_capture.assert_called_once_with(
-            event="verification email sent",
-            distinct_id=user.distinct_id,
-            groups={"organization": str(user.current_organization_id)},
-        )
-        assert len(mocked_email_messages) == 1
-        assert mocked_email_messages[0].send.call_count == 1
-        assert mocked_email_messages[0].html_body
 
     def test_send_fatal_plugin_error(self, MockEmailMessage: MagicMock) -> None:
         mocked_email_messages = mock_email_messages(MockEmailMessage)
@@ -965,7 +896,9 @@ class TestEmail(APIBaseTest, DatastoreTestMixin):
         self.user.save()
 
         assert (
-            should_send_pipeline_error_notification(self.user, failure_rate=1.0, pipeline_id="insights_function:abc-123")
+            should_send_pipeline_error_notification(
+                self.user, failure_rate=1.0, pipeline_id="insights_function:abc-123"
+            )
             is False
         )
         assert (
@@ -973,7 +906,9 @@ class TestEmail(APIBaseTest, DatastoreTestMixin):
             is False
         )
         assert (
-            should_send_pipeline_error_notification(self.user, failure_rate=1.0, pipeline_id="insights_function:other-id")
+            should_send_pipeline_error_notification(
+                self.user, failure_rate=1.0, pipeline_id="insights_function:other-id"
+            )
             is True
         )
         assert should_send_pipeline_error_notification(self.user, failure_rate=1.0, pipeline_id=None) is True
@@ -1828,7 +1763,7 @@ class TestEmail(APIBaseTest, DatastoreTestMixin):
         )
         key, _ = create_project_secret_api_key(team=self.team, created_by=self.user, label="Production key")
 
-        send_project_secret_api_key_exposed(self.team.id, key.id, "phs_...abcd", "This key was detected by GitHub.")
+        send_project_secret_api_key_exposed(self.team.id, key.id, "sk-...abcd", "This key was detected by GitHub.")
 
         assert len(mocked_email_messages) == 1
         message = mocked_email_messages[0]
@@ -1838,7 +1773,7 @@ class TestEmail(APIBaseTest, DatastoreTestMixin):
         recipient_emails = {dest["raw_email"] for dest in message.to}
         assert recipient_emails == {self.user.email}
         assert message.properties["label"] == "Production key"
-        assert message.properties["mask_value"] == "phs_...abcd"
+        assert message.properties["mask_value"] == "sk-...abcd"
         assert (
             message.properties["url"]
             == f"{settings.SITE_URL}/project/{self.team.pk}/settings/environment-secret-api-keys"
@@ -1854,7 +1789,7 @@ class TestEmail(APIBaseTest, DatastoreTestMixin):
         self.user.save()
         key, _ = create_project_secret_api_key(team=self.team, label="Production key")
 
-        send_project_secret_api_key_exposed(self.team.id, key.id, "phs_...abcd", "")
+        send_project_secret_api_key_exposed(self.team.id, key.id, "sk-...abcd", "")
 
         assert len(mocked_email_messages) == 0
 

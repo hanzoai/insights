@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { IconX } from '@hanzo/icons'
 import { Button, Divider, Skeleton } from '@hanzo/elements'
 
-import { BurningMoneyHog } from 'lib/components/mascots'
+import { BurningMoneyScript } from 'lib/components/mascots'
 
 import { billingLogic } from './billingLogic'
 import { PurchaseCreditsModal } from './PurchaseCreditsModal'
@@ -33,7 +33,7 @@ export const CreditCTAHero = (): JSX.Element | null => {
                     onClick={() => toggleCreditCTAHeroDismissed(false)}
                 >
                     <span className="flex items-center gap-1.5">
-                        <BurningMoneyHog
+                        <BurningMoneyScript
                             className="w-8 h-8 group-hover:animate-bounce"
                             style={{ animationDuration: '0.75s' }}
                         />
@@ -125,7 +125,7 @@ export const CreditCTAHero = (): JSX.Element | null => {
                         )}
                     </div>
                     <div className="flex flex-col justify-center items-end w-30">
-                        <BurningMoneyHog className="w-full h-auto" />
+                        <BurningMoneyScript className="w-full h-auto" />
                         {creditOverview.status === 'pending' && creditOverview.invoice_url && (
                             <Button
                                 type="primary"

@@ -1,12 +1,12 @@
 import { Message } from 'node-rdkafka'
 
 import { logger } from '~/common/utils/logger'
-import { TopHogRegistry, createTopHogWrapper } from '~/ingestion/framework/extensions/tophog'
+import { TopFnRegistry, createTopFnWrapper } from '~/ingestion/framework/extensions/topfn'
 import { PipelineResultType, dlq, ok } from '~/ingestion/framework/results'
-import { createRecordingTopHog } from '~/tests/helpers/tophog'
+import { createRecordingTopFn } from '~/tests/helpers/topfn'
 import { EventHeaders } from '~/types'
 
-import { createParseKafkaMessageStep, parseMessageTopHogMetrics } from './parse-kafka-message'
+import { createParseKafkaMessageStep, parseMessageTopFnMetrics } from './parse-kafka-message'
 
 // Mock dependencies
 jest.mock('~/common/utils/logger')
@@ -465,11 +465,11 @@ describe('createParseKafkaMessageStep', () => {
         })
     })
 
-    describe('parseMessageTopHogMetrics', () => {
-        function createWrappedStep(registry: TopHogRegistry) {
-            return createTopHogWrapper(registry)(
+    describe('parseMessageTopFnMetrics', () => {
+        function createWrappedStep(registry: TopFnRegistry) {
+            return createTopFnWrapper(registry)(
                 createParseKafkaMessageStep<{ message: Message; headers: EventHeaders }>(),
-                parseMessageTopHogMetrics()
+                parseMessageTopFnMetrics()
             )
         }
 
@@ -480,7 +480,7 @@ describe('createParseKafkaMessageStep', () => {
         }
 
         it('records sizes and timing keyed by token, including for messages that fail to parse', async () => {
-            const { registry, records } = createRecordingTopHog()
+            const { registry, records } = createRecordingTopFn()
             const wrapped = createWrappedStep(registry)
 
             const malformed = Buffer.from('not json')
@@ -516,7 +516,7 @@ describe('createParseKafkaMessageStep', () => {
         })
 
         it('records a successful parse the same way, falling back to an unknown token key', async () => {
-            const { registry, records } = createRecordingTopHog()
+            const { registry, records } = createRecordingTopFn()
             const wrapped = createWrappedStep(registry)
 
             const value = Buffer.from(

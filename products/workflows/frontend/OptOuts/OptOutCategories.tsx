@@ -1,11 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useState } from 'react'
 
-import * as construction2Png from '@hanzo/brand/hoggies/png/construction-2'
-import { IconDownload, IconPlus } from '@hanzo/icons'
 import { Button, Collapse, Dialog, Skeleton, Tag } from '@hanzo/elements'
+import { IconDownload, IconPlus } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { More } from 'lib/elements/Button/More'
 import { Divider } from 'lib/elements/Divider'
@@ -15,7 +14,7 @@ import { NewCategoryModal } from './NewCategoryModal'
 import { optOutCategoriesLogic } from './optOutCategoriesLogic'
 import { OptOutList } from './OptOutList'
 
-const MascotConstruction2 = pngHoggie(construction2Png)
+const MascotConstruction2 = pngMascot()
 
 interface MessageCategory {
     id: string
@@ -154,7 +153,7 @@ export function OptOutCategories(): JSX.Element {
                                     </Button>
                                 </>
                             }
-                            customHog={MascotConstruction2}
+                            customScript={MascotConstruction2}
                             isEmpty
                         />
                     )}

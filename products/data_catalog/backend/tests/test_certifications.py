@@ -252,7 +252,7 @@ class TestCertificationLogic(BaseTest):
 class TestCertificationAPI(APIBaseTest):
     def setUp(self) -> None:
         super().setUp()
-        self.url = f"/api/projects/{self.team.id}/data_catalog/certifications/"
+        self.url = f"/v1/projects/{self.team.id}/data_catalog/certifications/"
 
     def test_create_and_certify(self) -> None:
         table = _table(self.team)
@@ -396,7 +396,9 @@ class TestSerializedSchemaCertification(APIBaseTest):
             team=self.team,
             credential=credential,
             url_pattern="https://bucket.s3/data/*",
-            columns={"id": {"insightsql": "StringDatabaseField", "datastore": "Nullable(String)", "schema_valid": True}},
+            columns={
+                "id": {"insightsql": "StringDatabaseField", "datastore": "Nullable(String)", "schema_valid": True}
+            },
         )
         self.view = DataWarehouseSavedQuery.objects.create(
             team=self.team,

@@ -120,7 +120,7 @@ class WelcomeViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
 
     scope_object = "organization"
 
-    # Exposed at /api/organizations/{org}/welcome/current/. Avoids the `list` action so
+    # Exposed at /v1/organizations/{org}/welcome/current/. Avoids the `list` action so
     # drf-spectacular doesn't wrap the response in a paginated envelope.
     @extend_schema(
         responses={

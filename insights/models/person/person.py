@@ -362,7 +362,7 @@ class Person(models.Model):
 
     def _split_distinct_ids_batch(self, distinct_ids: list[str]) -> list[SplitOutcome]:
         """Split one batch of distinct_ids onto new persons via the personinsights
-        SplitPerson RPC. Personhog owns this write — there is no ORM path.
+        SplitPerson RPC. Person owns this write — there is no ORM path.
 
         The server creates each new person with a deterministic UUIDv5
         (matching ``uuidFromDistinctId``) and bumps versions by 101, higher

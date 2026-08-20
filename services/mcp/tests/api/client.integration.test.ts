@@ -55,7 +55,7 @@ describe('API Client Integration Tests', { concurrent: false }, () => {
             try {
                 await client.request({
                     method: 'PATCH',
-                    path: `/api/projects/${testProjectId}/feature_flags/${flagId}/`,
+                    path: `/v1/projects/${testProjectId}/feature_flags/${flagId}/`,
                     body: { deleted: true },
                 })
             } catch (error) {
@@ -79,7 +79,7 @@ describe('API Client Integration Tests', { concurrent: false }, () => {
             try {
                 await client.request({
                     method: 'PATCH',
-                    path: `/api/projects/${testProjectId}/experiments/${experimentId}/`,
+                    path: `/v1/projects/${testProjectId}/experiments/${experimentId}/`,
                     body: { deleted: true },
                 })
             } catch (error) {
@@ -243,7 +243,7 @@ describe('API Client Integration Tests', { concurrent: false }, () => {
                 results: Array<{ id: number; key: string; name?: string; active?: boolean }>
             }>({
                 method: 'GET',
-                path: `/api/projects/${testProjectId}/feature_flags/`,
+                path: `/v1/projects/${testProjectId}/feature_flags/`,
                 query: { limit: 10, offset: 0 },
             })
 
@@ -262,7 +262,7 @@ describe('API Client Integration Tests', { concurrent: false }, () => {
             // Create
             const createResult = await client.request<{ id: number; key: string; name: string; active: boolean }>({
                 method: 'POST',
-                path: `/api/projects/${testProjectId}/feature_flags/`,
+                path: `/v1/projects/${testProjectId}/feature_flags/`,
                 body: {
                     key: testKey,
                     name: 'Test flag',
@@ -283,7 +283,7 @@ describe('API Client Integration Tests', { concurrent: false }, () => {
             // Get by ID
             const getResult = await client.request<{ id: number; key: string; name: string; active: boolean }>({
                 method: 'GET',
-                path: `/api/projects/${testProjectId}/feature_flags/${flagId}/`,
+                path: `/v1/projects/${testProjectId}/feature_flags/${flagId}/`,
             })
             expect(getResult.key).toBe(testKey)
             expect(getResult.name).toBe('Test flag')
@@ -291,7 +291,7 @@ describe('API Client Integration Tests', { concurrent: false }, () => {
             // Find by key via list endpoint
             const findResult = await client.request<{ results: Array<{ id: number; key: string }> }>({
                 method: 'GET',
-                path: `/api/projects/${testProjectId}/feature_flags/`,
+                path: `/v1/projects/${testProjectId}/feature_flags/`,
                 query: { limit: 100, offset: 0 },
             })
             const found = findResult.results.find((flag) => flag.key === testKey)
@@ -300,7 +300,7 @@ describe('API Client Integration Tests', { concurrent: false }, () => {
             // Update
             await client.request({
                 method: 'PATCH',
-                path: `/api/projects/${testProjectId}/feature_flags/${flagId}/`,
+                path: `/v1/projects/${testProjectId}/feature_flags/${flagId}/`,
                 body: {
                     name: 'Updated test flag',
                     active: false,
@@ -310,7 +310,7 @@ describe('API Client Integration Tests', { concurrent: false }, () => {
             // Verify update
             const updatedGetResult = await client.request<{ name: string; active: boolean }>({
                 method: 'GET',
-                path: `/api/projects/${testProjectId}/feature_flags/${flagId}/`,
+                path: `/v1/projects/${testProjectId}/feature_flags/${flagId}/`,
             })
             expect(updatedGetResult.name).toBe('Updated test flag')
             expect(updatedGetResult.active).toBe(false)

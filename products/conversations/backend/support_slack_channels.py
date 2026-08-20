@@ -1,4 +1,4 @@
-"""Shared listing of the SupportHog bot's Slack channels.
+"""Shared listing of the Support bot's Slack channels.
 
 Single source of truth for paginating ``conversations_list`` so both the support
 ticket-routing picker and the customer-analytics announcements picker (plus its
@@ -22,7 +22,7 @@ MAX_CHANNEL_PAGES = 100
 
 
 class SupportSlackNotConfigured(Exception):
-    """The team has no SupportHog bot token configured."""
+    """The team has no Support bot token configured."""
 
 
 class SupportSlackChannelsUnavailable(Exception):
@@ -30,7 +30,7 @@ class SupportSlackChannelsUnavailable(Exception):
 
 
 def list_support_bot_channels(team: "Team", *, members_only: bool = False) -> list[dict[str, Any]]:
-    """Return the SupportHog bot's Slack channels as ``{id, name, is_member}`` dicts.
+    """Return the Support bot's Slack channels as ``{id, name, is_member}`` dicts.
 
     With ``members_only=True`` only channels the bot belongs to are returned — the bot
     can only post to those (``chat.postMessage`` returns ``not_in_channel`` otherwise).

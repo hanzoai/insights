@@ -28,13 +28,13 @@ describe('customProductsLogic', () => {
         failBulkUpdate = false
         useMocks({
             get: {
-                '/api/environments/:team_id/user_product_list/': () => {
+                '/v1/environments/:team_id/user_product_list/': () => {
                     listCalls += 1
                     return [200, { results: serverPaths.map(serverRow) }]
                 },
             },
             patch: {
-                '/api/environments/:team_id/user_product_list/bulk_update/': () =>
+                '/v1/environments/:team_id/user_product_list/bulk_update/': () =>
                     failBulkUpdate ? [400, { detail: 'nope' }] : [200, { results: [] }],
             },
         })

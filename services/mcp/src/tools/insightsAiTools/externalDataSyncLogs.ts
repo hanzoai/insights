@@ -45,7 +45,7 @@ const tool = (): ToolBase<typeof schema, unknown> => ({
             searchParams.set('search', params.search)
         }
 
-        const basePath = `/api/environments/${encodeURIComponent(String(projectId))}/external_data_schemas/${encodeURIComponent(params.schema_id)}/logs/`
+        const basePath = `/v1/environments/${encodeURIComponent(String(projectId))}/external_data_schemas/${encodeURIComponent(params.schema_id)}/logs/`
         return context.api.request<unknown>({
             method: 'GET',
             path: `${basePath}?${searchParams.toString()}`,

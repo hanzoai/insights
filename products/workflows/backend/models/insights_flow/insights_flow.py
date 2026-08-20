@@ -19,8 +19,8 @@ if TYPE_CHECKING:
 logger = structlog.get_logger(__name__)
 
 # Every action type the worker can execute. Must stay in sync with the `actionHandlers` registry in
-# nodejs/src/cdp/services/insightsflows/hogflow-executor.service.ts (and the schemas mirroring it in
-# nodejs/src/cdp/schema/hogflow.ts and products/workflows/frontend/Workflows/insightsflows/steps/types.ts).
+# nodejs/src/cdp/services/insightsflows/flow-executor.service.ts (and the schemas mirroring it in
+# nodejs/src/cdp/schema/flow.ts and products/workflows/frontend/Workflows/insightsflows/steps/types.ts).
 # A type absent here has no handler, so the run dies on reaching it with "Action type 'x' not
 # supported" - and unless that step sets on_error: continue, everything downstream never happens.
 # Ordered longest-lived first so the generated API/MCP enum reads in a sensible order.
@@ -41,7 +41,7 @@ SUPPORTED_ACTION_TYPES: Final[list[str]] = [
 # The trigger's own kinds, which live in the workflow's `trigger` field rather than on an action.
 # Callers confuse the two (a stored workflow had an action of type "webhook", which is a trigger
 # kind), so the rejection message can say which mistake was made. Mirrors InsightsFlowTriggerSchema in
-# nodejs/src/cdp/schema/hogflow.ts.
+# nodejs/src/cdp/schema/flow.ts.
 TRIGGER_TYPES: Final[frozenset[str]] = frozenset({"event", "schedule", "manual", "batch", "tracking_pixel", "webhook"})
 
 # Billable action types that are subject to rate limiting and quota tracking
@@ -68,7 +68,7 @@ class InsightsFlow(UUIDTModel):
     """
 
     class Meta:
-        db_table = "insights_hogflow"
+        db_table = "insights_flow"
         indexes = [
             models.Index(fields=["status", "team"]),
             models.Index(fields=["version", "team"]),

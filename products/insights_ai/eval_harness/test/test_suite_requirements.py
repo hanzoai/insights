@@ -26,7 +26,7 @@ ALL_ENV_VARS = (
         ),
         pytest.param(
             {Infra.DEMO_DATA},
-            {Infra.DEMO_DATA, Infra.DATABASE, Infra.PERSONHOG},
+            {Infra.DEMO_DATA, Infra.DATABASE, Infra.Person},
             id="demo_data_pulls_database_and_personinsights",
         ),
         pytest.param({Infra.SANDBOX}, set(Infra), id="sandbox_pulls_everything"),
@@ -42,7 +42,7 @@ def test_expand_closes_over_implications(requested: set[Infra], expected: set[In
         pytest.param([SuiteKind.SANDBOXED], set(Infra), id="sandboxed_needs_everything"),
         pytest.param(
             [SuiteKind.ONE_SHOT],
-            {Infra.DATABASE, Infra.PERSONHOG, Infra.DEMO_DATA},
+            {Infra.DATABASE, Infra.Person, Infra.DEMO_DATA},
             id="one_shot_skips_servers_and_sandbox",
         ),
         pytest.param([SuiteKind.SANDBOXED, SuiteKind.ONE_SHOT], set(Infra), id="mixed_run_is_the_union"),

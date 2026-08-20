@@ -1,7 +1,7 @@
 import { Message } from 'node-rdkafka'
 
 import { GroupTypeManager } from '~/common/groups/group-type-manager'
-import { HogTransformer } from '~/common/script-transformations/script-transformer.interface'
+import { ScriptTransformer } from '~/common/script-transformations/script-transformer.interface'
 import { IngestionWarningsOutput } from '~/common/outputs'
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
 import { TeamManager } from '~/common/utils/team-manager'
@@ -11,7 +11,7 @@ import { PersonsStoreForBatch } from '~/ingestion/common/persons/persons-store-f
 import { createCreateEventStep } from '~/ingestion/common/steps/event-processing/create-event-step'
 import { EmitEventStepOutput, createEmitEventStep } from '~/ingestion/common/steps/event-processing/emit-event-step'
 import { EventPipelineRunnerOptions } from '~/ingestion/common/steps/event-processing/event-pipeline-options'
-import { createHogTransformEventStep } from '~/ingestion/common/steps/event-processing/script-transform-event-step'
+import { createScriptTransformEventStep } from '~/ingestion/common/steps/event-processing/script-transform-event-step'
 import { createNormalizeEventStep } from '~/ingestion/common/steps/event-processing/normalize-event-step'
 import { createNormalizeProcessPersonFlagStep } from '~/ingestion/common/steps/event-processing/normalize-process-person-flag-step'
 import { createPrepareEventStep } from '~/ingestion/common/steps/event-processing/prepare-event-step'
@@ -20,7 +20,7 @@ import { createProcessPersonlessStep } from '~/ingestion/common/steps/event-proc
 import { createProcessPersonsStep } from '~/ingestion/common/steps/event-processing/process-persons-step'
 import { createRecordIngestionLagStep } from '~/ingestion/common/steps/record-ingestion-lag'
 import { PipelineBuilder, StartPipelineBuilder } from '~/ingestion/framework/builders/pipeline-builders'
-import { TopHogWrapper, sum, sumOk, sumResult, timer } from '~/ingestion/framework/extensions/tophog'
+import { TopFnWrapper, sum, sumOk, sumResult, timer } from '~/ingestion/framework/extensions/topfn'
 import { isDropResult } from '~/ingestion/framework/results'
 import { PluginEvent } from '~/plugin-scaffold'
 import { EventHeaders, Team } from '~/types'
@@ -61,8 +61,8 @@ export interface EventSubpipelineConfig {
     >
     teamManager: TeamManager
     groupTypeManager: GroupTypeManager
-    hogTransformer: HogTransformer
-    topHog: TopHogWrapper
+    scriptTransformer: ScriptTransformer
+    topFn: TopFnWrapper
 }
 
 // The WithMergeFoldDecision constraint (not a field on EventSubpipelineInput) is deliberate: the
@@ -72,12 +72,12 @@ export function createEventSubpipeline<TInput extends EventSubpipelineInput & Wi
     builder: StartPipelineBuilder<TInput, TContext>,
     config: EventSubpipelineConfig
 ): PipelineBuilder<TInput, EmitEventStepOutput, TContext, AsyncOutput> {
-    const { options, outputs, teamManager, groupTypeManager, hogTransformer, topHog } = config
+    const { options, outputs, teamManager, groupTypeManager, scriptTransformer, topFn } = config
 
     return builder
         .pipe(createNormalizeProcessPersonFlagStep())
         .pipe(
-            topHog(createHogTransformEventStep(hogTransformer), [
+            topFn(createScriptTransformEventStep(scriptTransformer), [
                 sumOk(
                     'transformations_run',
                     (output) => ({ team_id: String(output.team.id) }),
@@ -105,7 +105,7 @@ export function createEventSubpipeline<TInput extends EventSubpipelineInput & Wi
                     (result) => (isDropResult(result) ? 1 : 0)
                 ),
             ]),
-            { retry: { tries: 5, sleepMs: 100, name: 'hog_transform_event' } }
+            { retry: { tries: 5, sleepMs: 100, name: 'transform_event' } }
         )
         .pipe(createNormalizeEventStep())
         .pipe(
@@ -118,7 +118,7 @@ export function createEventSubpipeline<TInput extends EventSubpipelineInput & Wi
             }
         )
         .pipe(
-            topHog(createProcessPersonsStep(options, outputs), [
+            topFn(createProcessPersonsStep(options, outputs), [
                 timer('process_persons_time', (input) => ({
                     team_id: String(input.team.id),
                     distinct_id: input.normalizedEvent.distinct_id,
@@ -147,7 +147,7 @@ export function createEventSubpipeline<TInput extends EventSubpipelineInput & Wi
         )
         .pipe(createPrepareEventStep())
         .pipe(
-            topHog(createProcessGroupsStep(teamManager, groupTypeManager, options), [
+            topFn(createProcessGroupsStep(teamManager, groupTypeManager, options), [
                 timer('process_groups_time', (input) => ({
                     team_id: String(input.team.id),
                     distinct_id: input.preparedEvent.distinctId,
@@ -158,7 +158,7 @@ export function createEventSubpipeline<TInput extends EventSubpipelineInput & Wi
         )
         .pipe(createCreateEventStep(EVENTS_OUTPUT, options.EXPERIMENT_EXPOSURE_DUPLICATION_TEAMS))
         .pipe(
-            topHog(
+            topFn(
                 createEmitEventStep({
                     outputs,
                 }),

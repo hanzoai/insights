@@ -8,7 +8,7 @@ import { IconPin, IconPinFilled } from '@hanzo/icons'
 import { Banner, Table as TablePrimitive, TableColumn, Tooltip } from '@hanzo/elements'
 
 import { dayjs } from 'lib/dayjs'
-import { execHog } from 'lib/script'
+import { execScript } from 'lib/script'
 import { lightenDarkenColor } from 'lib/utils/colors'
 import { InsightEmptyState, InsightErrorState } from 'scenes/insights/EmptyStates'
 
@@ -190,18 +190,18 @@ export const Table = (props: TableProps): JSX.Element => {
                 const conditionalFormattingMatches = conditionalFormattingRules
                     .filter((n) => n.columnName === sourceColumnName)
                     .filter((n) => {
-                        const isValidHog = !!n.bytecode && n.bytecode.length > 0 && n.bytecode[0] === '_H'
-                        if (!isValidHog) {
+                        const isValidScript = !!n.bytecode && n.bytecode.length > 0 && n.bytecode[0] === '_H'
+                        if (!isValidScript) {
                             insights.captureException(new Error('Invalid script bytecode for conditional formatting'), {
                                 formatRule: n,
                             })
                         }
 
-                        return isValidHog
+                        return isValidScript
                     })
                     .map((n) => ({
                         rule: n,
-                        result: execHog(n.bytecode, {
+                        result: execScript(n.bytecode, {
                             globals: {
                                 value: cell.value,
                                 input: convertTableValue(n.input, sourceColumnType),

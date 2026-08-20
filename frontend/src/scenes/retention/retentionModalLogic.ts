@@ -300,7 +300,7 @@ export const retentionModalLogic = kea<retentionModalLogicType>([
                 is_static: true,
                 name: cohortName,
             }
-            const cohort = await api.create('api/cohort', { ...cohortParams, query: values.actorsQuery })
+            const cohort = await api.create('v1/cohort', { ...cohortParams, query: values.actorsQuery })
             cohortsModel.actions.cohortCreated(cohort)
             toast.success('Cohort saved', {
                 toastId: `cohort-saved-${cohort.id}`,

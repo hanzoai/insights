@@ -950,7 +950,7 @@ database "insights" {
       sharding_key    = "cityHash64(entity_id)"
     }
   }
-  table "hog_invocation_results" {
+  table "invocations" {
     column "team_id" {
       type = "Int64"
     }
@@ -1026,7 +1026,7 @@ database "insights" {
     engine "distributed" {
       cluster_name    = "aux"
       remote_database = "insights"
-      remote_table    = "hog_invocation_results_data"
+      remote_table    = "invocations_data"
     }
   }
   table "ingestion_warnings_v2" {
@@ -1937,9 +1937,9 @@ database "insights" {
       remote_table    = "raw_error_tracking_fingerprint_issue_state"
     }
   }
-  materialized_view "hog_invocation_results_mv" {
-    to_table = "insights.hog_invocation_results_data"
-    query    = file("sql/hog_invocation_results_mv.sql")
+  materialized_view "invocations_mv" {
+    to_table = "insights.invocations_data"
+    query    = file("sql/invocations_mv.sql")
 
     column "team_id" {
       type = "Int64"

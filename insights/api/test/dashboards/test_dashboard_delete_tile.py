@@ -19,7 +19,7 @@ class TestDashboardDeleteTile(APIBaseTest):
 
     def _delete_tile(self, dashboard_id: int, tile_id: int, expected_status: int = status.HTTP_204_NO_CONTENT):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/delete_tile",
+            f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/delete_tile",
             {"tile_id": tile_id},
         )
         self.assertEqual(response.status_code, expected_status, response.content)
@@ -52,7 +52,7 @@ class TestDashboardDeleteTile(APIBaseTest):
         self._delete_tile(dashboard_id, tile_id)
 
         assert self.dashboard_api.get_dashboard(dashboard_id)["tiles"] == []
-        insight_response = self.client.get(f"/api/projects/{self.team.id}/insights/{insight_id}")
+        insight_response = self.client.get(f"/v1/projects/{self.team.id}/insights/{insight_id}")
         assert insight_response.status_code == status.HTTP_200_OK
 
     def _create_text_tile_for_removal(self, dashboard_id: int) -> int:
@@ -102,7 +102,7 @@ class TestDashboardDeleteTile(APIBaseTest):
         dashboard_id, _ = self.dashboard_api.create_dashboard({"name": "dashboard"})
         _, dashboard_json = self.dashboard_api.create_text_tile(dashboard_id, text="hi")
         tile_id = dashboard_json["tiles"][0]["id"]
-        self.client.patch(f"/api/projects/{self.team.id}/dashboards/{dashboard_id}", {"deleted": True})
+        self.client.patch(f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}", {"deleted": True})
         return dashboard_id, tile_id
 
     def _setup_tile_already_soft_deleted(self) -> tuple[int, int]:
@@ -126,7 +126,7 @@ class TestDashboardDeleteTile(APIBaseTest):
 
     def test_delete_tile_requires_tile_id(self) -> None:
         dashboard_id, _ = self.dashboard_api.create_dashboard({"name": "dashboard"})
-        response = self.client.post(f"/api/projects/{self.team.id}/dashboards/{dashboard_id}/delete_tile", {})
+        response = self.client.post(f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}/delete_tile", {})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_delete_tile_compacts_remaining_layout(self) -> None:

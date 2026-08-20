@@ -1094,7 +1094,7 @@ export const billingProductLogic = kea<billingProductLogicType>([
         handleProductUpgrade: async ({ products, redirectPath }) => {
             try {
                 const body: Record<string, string> = { products }
-                const response = await api.create('api/billing/activate', body)
+                const response = await api.create('v1/billing/activate', body)
 
                 if (response.success) {
                     await billingLogic.asyncActions.loadBilling()
@@ -1177,7 +1177,7 @@ export const billingProductLogic = kea<billingProductLogicType>([
         activateTrial: async (_, breakpoint) => {
             actions.setTrialLoading(true)
             try {
-                await api.create(`api/billing/trials/activate`, {
+                await api.create(`v1/billing/trials/activate`, {
                     type: 'autosubscribe',
                     target: props.product.type,
                 })
@@ -1193,7 +1193,7 @@ export const billingProductLogic = kea<billingProductLogicType>([
         cancelTrial: async (_, breakpoint) => {
             actions.setTrialLoading(true)
             try {
-                await api.create(`api/billing/trials/cancel`)
+                await api.create(`v1/billing/trials/cancel`)
                 toast.success('Your trial has been cancelled!')
                 if (values.surveyID) {
                     actions.reportSurveySent(values.surveyID, values.surveyResponse)
@@ -1215,7 +1215,7 @@ export const billingProductLogic = kea<billingProductLogicType>([
         removeBillingLimitNextPeriod: async ({ productType }) => {
             actions.setRemovingBillingLimitNextPeriod(true)
             try {
-                await api.update('api/billing', { reset_limit_next_period: productType })
+                await api.update('v1/billing', { reset_limit_next_period: productType })
                 toast.success('Billing limit for next period has been removed.')
             } catch (error) {
                 console.error(error)

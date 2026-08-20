@@ -22,7 +22,7 @@ describe('sharedMetricModalLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team_id/experiment_saved_metrics': ({ request }) => {
+                '/v1/projects/:team_id/experiment_saved_metrics': ({ request }) => {
                     const url = new URL(request.url)
                     const offset = parseInt(url.searchParams.get('offset') ?? '0')
                     const search = url.searchParams.get('search') ?? ''
@@ -35,7 +35,7 @@ describe('sharedMetricModalLogic', () => {
                             200,
                             {
                                 count: 3,
-                                next: `http://localhost/api/projects/997/experiment_saved_metrics?limit=${MODAL_PAGE_SIZE}&offset=${MODAL_PAGE_SIZE}&search=${search}`,
+                                next: `http://localhost/v1/projects/997/experiment_saved_metrics?limit=${MODAL_PAGE_SIZE}&offset=${MODAL_PAGE_SIZE}&search=${search}`,
                                 previous: null,
                                 results: [
                                     metric(1, NodeKind.ExperimentMetric, ['main']),
@@ -150,14 +150,14 @@ describe('sharedMetricModalLogic', () => {
     it('a metric covered by another active tag stays selected when one tag is toggled off', async () => {
         useMocks({
             get: {
-                '/api/projects/:team_id/experiment_saved_metrics': ({ request }) => {
+                '/v1/projects/:team_id/experiment_saved_metrics': ({ request }) => {
                     const offset = parseInt(new URL(request.url).searchParams.get('offset') ?? '0')
                     if (offset === 0) {
                         return [
                             200,
                             {
                                 count: 2,
-                                next: `http://localhost/api/projects/997/experiment_saved_metrics?limit=${MODAL_PAGE_SIZE}&offset=${MODAL_PAGE_SIZE}`,
+                                next: `http://localhost/v1/projects/997/experiment_saved_metrics?limit=${MODAL_PAGE_SIZE}&offset=${MODAL_PAGE_SIZE}`,
                                 previous: null,
                                 results: [metric(1, NodeKind.ExperimentMetric, ['main', 'shared'])],
                             },
@@ -253,7 +253,7 @@ describe('sharedMetricModalLogic', () => {
         // mount with a fresh mock where the baseline genuinely has none
         useMocks({
             get: {
-                '/api/projects/:team_id/experiment_saved_metrics': () => [
+                '/v1/projects/:team_id/experiment_saved_metrics': () => [
                     200,
                     { count: 0, next: null, previous: null, results: [] },
                 ],

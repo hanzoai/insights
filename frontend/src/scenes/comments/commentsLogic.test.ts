@@ -48,11 +48,11 @@ describe('commentsLogic', () => {
         initKeaTests()
         useMocks({
             get: {
-                '/api/projects/:team_id/comments': { results: [] },
-                '/api/organizations/@current/members/': { results: [] },
+                '/v1/projects/:team_id/comments': { results: [] },
+                '/v1/organizations/@current/members/': { results: [] },
             },
             post: {
-                '/api/projects/:team_id/comments': async ({ request }) => {
+                '/v1/projects/:team_id/comments': async ({ request }) => {
                     lastCreateBody = (await request.json()) as Record<string, any>
                     return [
                         201,
@@ -132,7 +132,7 @@ describe('commentsLogic', () => {
     })
 
     it('clears reply mode when the reply target stops rendering after a reload', async () => {
-        useMocks({ get: { '/api/projects/:team_id/comments': { results: [makeComment('thread-1')] } } })
+        useMocks({ get: { '/v1/projects/:team_id/comments': { results: [makeComment('thread-1')] } } })
         await expectLogic(logic, () => {
             logic.actions.loadComments()
         }).toDispatchActions(['loadCommentsSuccess'])
@@ -141,7 +141,7 @@ describe('commentsLogic', () => {
         logic.actions.setReplyingComment('thread-1')
         expect(logic.values.replyingCommentId).toBe('thread-1')
 
-        useMocks({ get: { '/api/projects/:team_id/comments': { results: [] } } })
+        useMocks({ get: { '/v1/projects/:team_id/comments': { results: [] } } })
         // The subscription dispatches the clear nested inside the reload dispatch, so
         // assert the resulting state rather than action order
         await expectLogic(logic, () => {
@@ -170,7 +170,7 @@ describe('commentsLogic', () => {
     it('lets a selected thread collapse but keeps the reply target open', async () => {
         useMocks({
             get: {
-                '/api/projects/:team_id/comments': {
+                '/v1/projects/:team_id/comments': {
                     results: [makeComment('thread-1'), makeComment('reply-1', 'thread-1')],
                 },
             },
@@ -214,7 +214,7 @@ describe('commentsLogic', () => {
     it('expands the thread containing a deep-linked comment', async () => {
         useMocks({
             get: {
-                '/api/projects/:team_id/comments': {
+                '/v1/projects/:team_id/comments': {
                     results: [makeComment('thread-1'), makeComment('reply-1', 'thread-1')],
                 },
             },
@@ -237,7 +237,7 @@ describe('commentsLogic', () => {
     it('does not expand a thread when a comment is selected by clicking', async () => {
         useMocks({
             get: {
-                '/api/projects/:team_id/comments': {
+                '/v1/projects/:team_id/comments': {
                     results: [makeComment('thread-1'), makeComment('reply-1', 'thread-1')],
                 },
             },
@@ -260,7 +260,7 @@ describe('commentsLogic', () => {
 
         useMocks({
             get: {
-                '/api/projects/:team_id/comments': {
+                '/v1/projects/:team_id/comments': {
                     results: [makeComment('thread-1'), makeComment('reply-1', 'thread-1')],
                 },
             },

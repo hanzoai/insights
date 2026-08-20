@@ -4,9 +4,9 @@ import { Counter, Gauge } from 'prom-client'
 
 import { logger } from '~/common/utils/logger'
 
-import { CYCLOTRON_INVOCATION_JOB_QUEUES, CyclotronJobInvocationInsightsFlow } from '../../types'
+import { CYCLOTRON_INVOCATION_JOB_QUEUES, CyclotronJobInvocationFlow } from '../../types'
 import { v2JobToInvocation } from '../job-queue/job-queue-postgres-v2'
-import { HogInvocationResultsService } from '../monitoring/script-invocation-results.service'
+import { ScriptInvocationResultsService } from '../monitoring/script-invocation-results.service'
 import { CyclotronV2CleanupResult, CyclotronV2DequeuedJob, CyclotronV2JanitorConfig } from './types'
 
 // Stable, low-cardinality `error_kind` stamped on the failed invocation result
@@ -17,7 +17,7 @@ export const JANITOR_POISON_PILL_ERROR_KIND = 'janitor_poison_pill'
 // Only jobs on a real invocation queue carry a replayable invocation. Everything else on this
 // shared cyclotron_jobs table (the rerun + batch-resolve wrappers, and any future meta queue) has a
 // `function_id` pointing at a target function and a `state` that is not an invocation — recording
-// one as a give-up would tag it `function_kind='hog_flow'` and let the autodrain replay a real flow
+// one as a give-up would tag it `function_kind='flow'` and let the autodrain replay a real flow
 // with fabricated globals (see recordAndDeletePoisonPills). So the janitor records give-ups only for
 // this allow-list and drops everything else without a record. Keying off the canonical allow-list
 // (it *is* the `CyclotronJobQueueKind` type) is deliberately fail-safe: a new meta queue is dropped
@@ -107,7 +107,7 @@ export class CyclotronV2Janitor {
         // the give-up path can construct a janitor without Kafka. When absent
         // the janitor never deletes poison pills (it only resets/retries) — it
         // refuses to drop a job it can't record a recovery row for.
-        private invocationResults?: HogInvocationResultsService
+        private invocationResults?: ScriptInvocationResultsService
     ) {
         this.pool = new Pool({
             connectionString: config.pool.dbUrl,
@@ -259,8 +259,8 @@ export class CyclotronV2Janitor {
 
         // Wrapper/meta jobs (rerun, batch-resolve, any future non-invocation queue) share this table.
         // A wrapper is not a replayable invocation — recording one as a `failed` result would give it
-        // `function_kind='hog_flow'` with the target's `function_id` (poisonRowToInvocation always tags
-        // hogFlow), making it indistinguishable from a genuine poisoned flow, and the autodrain would
+        // `function_kind='flow'` with the target's `function_id` (poisonRowToInvocation always tags
+        // flow), making it indistinguishable from a genuine poisoned flow, and the autodrain would
         // then rediscover and replay a real flow with fabricated globals. So give up on anything not on
         // an invocation queue separately: delete it with NO record. This is self-healing — the work a
         // wrapper was driving is re-derived on its next run.
@@ -390,9 +390,9 @@ export class CyclotronV2Janitor {
 
     // Turn a raw poisoned row into a script flow invocation the results service can
     // serialize. postgres-v2 backs script flows, so we tag it as such — the stub
-    // `hogFlow` carries only the id the lifecycle row needs (function_id), while
+    // `flow` carries only the id the lifecycle row needs (function_id), while
     // the rerun path rebuilds the full flow from the function id on replay.
-    private poisonRowToInvocation(row: PoisonRow): CyclotronJobInvocationInsightsFlow {
+    private poisonRowToInvocation(row: PoisonRow): CyclotronJobInvocationFlow {
         const job: CyclotronV2DequeuedJob = {
             id: row.id,
             teamId: row.team_id,
@@ -415,7 +415,7 @@ export class CyclotronV2Janitor {
             bulkCreateAndCheckIn: () => Promise.resolve({ newJobIds: [] }),
         }
         const invocation = v2JobToInvocation(job)
-        return { ...invocation, hogFlow: { id: invocation.functionId } } as CyclotronJobInvocationInsightsFlow
+        return { ...invocation, flow: { id: invocation.functionId } } as CyclotronJobInvocationFlow
     }
 
     private async resetStalledJobs(): Promise<number> {

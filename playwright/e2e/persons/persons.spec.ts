@@ -7,7 +7,7 @@ test.describe('Persons', () => {
     let workspace: PlaywrightWorkspaceSetupResult | null = null
 
     function personsApi(distinctId: string): string {
-        return `/api/environments/${workspace!.team_id}/persons/?distinct_id=${distinctId}`
+        return `/v1/environments/${workspace!.team_id}/persons/?distinct_id=${distinctId}`
     }
 
     test.beforeAll(async ({ playwrightSetup }) => {

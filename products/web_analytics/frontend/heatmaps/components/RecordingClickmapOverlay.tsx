@@ -167,7 +167,7 @@ export function RecordingClickmapOverlay({
                                 left: box.left,
                                 width: box.width,
                                 height: box.height,
-                                backgroundColor: `rgba(245, 78, 0, ${
+                                backgroundColor: `rgba(51, 51, 51, ${
                                     0.1 + 0.4 * (highestClickCount ? box.count / highestClickCount : 0)
                                 })`,
                             }}

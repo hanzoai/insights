@@ -357,23 +357,23 @@ if [[ -d "$UV_PROJECT_ENVIRONMENT/bin" ]]; then
 fi
 
 # Install shell completions for insightscli
-HOGLI_COMPLETION_DIR="$FLOX_ENV_CACHE/completions"
-mkdir -p "$HOGLI_COMPLETION_DIR"
+INSIGHTSCLI_COMPLETION_DIR="$FLOX_ENV_CACHE/completions"
+mkdir -p "$INSIGHTSCLI_COMPLETION_DIR"
 if [[ -d "$UV_PROJECT_ENVIRONMENT/bin" ]]; then
   "$UV_PROJECT_ENVIRONMENT/bin/python" \
-    -m insightscli.completion --shell bash > "$HOGLI_COMPLETION_DIR/insightscli.bash" 2>/dev/null || true
+    -m insightscli.completion --shell bash > "$INSIGHTSCLI_COMPLETION_DIR/insightscli.bash" 2>/dev/null || true
   "$UV_PROJECT_ENVIRONMENT/bin/python" \
-    -m insightscli.completion --shell zsh > "$HOGLI_COMPLETION_DIR/_insightscli" 2>/dev/null || true
+    -m insightscli.completion --shell zsh > "$INSIGHTSCLI_COMPLETION_DIR/_insightscli" 2>/dev/null || true
 fi
 
 # Generate insightscli man page into the active environment so `man insightscli` works.
-HOGLI_MANPAGE_DIR="$UV_PROJECT_ENVIRONMENT/share/man/man1"
+INSIGHTSCLI_MANPAGE_DIR="$UV_PROJECT_ENVIRONMENT/share/man/man1"
 if [[ -d "$UV_PROJECT_ENVIRONMENT/bin" ]]; then
   (
-    mkdir -p "$HOGLI_MANPAGE_DIR"
+    mkdir -p "$INSIGHTSCLI_MANPAGE_DIR"
     "$UV_PROJECT_ENVIRONMENT/bin/python" \
       "$FLOX_ENV_PROJECT/tools/insightscli/scripts/generate_man_page.py" \
-      --output "$HOGLI_MANPAGE_DIR/insightscli.1" >/dev/null 2>&1
+      --output "$INSIGHTSCLI_MANPAGE_DIR/insightscli.1" >/dev/null 2>&1
   ) || true
 fi
 

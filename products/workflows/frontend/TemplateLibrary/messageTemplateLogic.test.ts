@@ -21,8 +21,8 @@ describe('messageTemplateLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/messaging_templates/:id/': { id: 'existing-id', name: 'Existing' },
-                '/api/environments/:team_id/insights_functions/:id/': { id: 'message-id', name: 'Sent message' },
+                '/v1/environments/:team_id/messaging_templates/:id/': { id: 'existing-id', name: 'Existing' },
+                '/v1/environments/:team_id/insights_functions/:id/': { id: 'message-id', name: 'Sent message' },
             },
         })
         initKeaTests()

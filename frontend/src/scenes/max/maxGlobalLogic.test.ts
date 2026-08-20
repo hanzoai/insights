@@ -58,7 +58,7 @@ describe('maxGlobalLogic', () => {
         it.each(['/insights/abc123', '/surveys/xyz789'])(
             'opens the conversation in the side panel without replacing the main content on %s',
             async (page) => {
-                useMocks({ get: { '/api/environments/:team_id/conversations/:id': MOCK_CONVERSATION } })
+                useMocks({ get: { '/v1/environments/:team_id/conversations/:id': MOCK_CONVERSATION } })
                 router.actions.push(page)
 
                 await expectLogic(logic, () => {
@@ -101,12 +101,12 @@ describe('maxGlobalLogic', () => {
             { realm: 'Insights Cloud', preflight: { cloud: true }, expected: true },
             {
                 realm: 'self-hosted with an Anthropic key',
-                preflight: { cloud: false, is_debug: false, anthropic_available: true },
+                preflight: { cloud: false, is_debug: false, assistant_available: true },
                 expected: true,
             },
             {
                 realm: 'self-hosted without a key',
-                preflight: { cloud: false, is_debug: false, anthropic_available: false },
+                preflight: { cloud: false, is_debug: false, assistant_available: false },
                 expected: false,
             },
         ])('is $expected on $realm', async ({ preflight, expected }) => {

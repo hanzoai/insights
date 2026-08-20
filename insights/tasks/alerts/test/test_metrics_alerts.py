@@ -114,7 +114,7 @@ class TestMetricsAlerts(APIBaseTest, DatastoreTestMixin):
             "threshold": {"configuration": {"type": "absolute", "bounds": {"lower": lower, "upper": upper}}},
             **alert_overrides,
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/alerts", data=data)
+        response = self.client.post(f"/v1/projects/{self.team.id}/alerts", data=data)
         assert response.status_code == expected_status, response.json()
         return response.json()
 
@@ -235,7 +235,7 @@ class TestMetricsAlerts(APIBaseTest, DatastoreTestMixin):
         mock_feature_enabled.side_effect = None
         mock_feature_enabled.return_value = False
         response = self.client.post(
-            f"/api/projects/{self.team.id}/alerts/simulate",
+            f"/v1/projects/{self.team.id}/alerts/simulate",
             data={
                 "insight": insight["id"],
                 "detector_config": {"type": "zscore", "threshold": 0.9, "window": 10},
@@ -250,7 +250,7 @@ class TestMetricsAlerts(APIBaseTest, DatastoreTestMixin):
         # Metrics has no detector extractor: simulation must 400 cleanly via the registry, not 500.
         insight = self.create_metrics_insight()
         response = self.client.post(
-            f"/api/projects/{self.team.id}/alerts/simulate",
+            f"/v1/projects/{self.team.id}/alerts/simulate",
             data={
                 "insight": insight["id"],
                 "detector_config": {"type": "zscore", "threshold": 0.9, "window": 10},
@@ -286,7 +286,7 @@ class TestMetricsAlerts(APIBaseTest, DatastoreTestMixin):
             scopes=scopes,
         )
         response = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             data={
                 "name": "metrics alert",
                 "insight": insight["id"],
@@ -331,20 +331,20 @@ class TestMetricsAlerts(APIBaseTest, DatastoreTestMixin):
         )
         authorization = f"Bearer {key_value}"
 
-        list_response = self.client.get(f"/api/projects/{self.team.id}/alerts", HTTP_AUTHORIZATION=authorization)
+        list_response = self.client.get(f"/v1/projects/{self.team.id}/alerts", HTTP_AUTHORIZATION=authorization)
         assert list_response.status_code == 200, list_response.json()
         listed_ids = {result["id"] for result in list_response.json()["results"]}
         assert (alert["id"] in listed_ids) is visible
 
         detail_response = self.client.get(
-            f"/api/projects/{self.team.id}/alerts/{alert['id']}", HTTP_AUTHORIZATION=authorization
+            f"/v1/projects/{self.team.id}/alerts/{alert['id']}", HTTP_AUTHORIZATION=authorization
         )
         assert detail_response.status_code == (200 if visible else 404), detail_response.json()
 
         # Thresholds (nested under the insight) embed full alerts including check values, so they
         # must be gated the same way.
         thresholds_response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/{insight['id']}/thresholds", HTTP_AUTHORIZATION=authorization
+            f"/v1/projects/{self.team.id}/insights/{insight['id']}/thresholds", HTTP_AUTHORIZATION=authorization
         )
         assert thresholds_response.status_code == 200, thresholds_response.json()
         threshold_alert_ids = {
@@ -541,7 +541,7 @@ class TestMetricsAlerts(APIBaseTest, DatastoreTestMixin):
         }
         trends_insight = self.dashboard_api.create_insight(data={"name": "t", "query": trends_query})[1]
         response = self.client.post(
-            f"/api/projects/{self.team.id}/alerts",
+            f"/v1/projects/{self.team.id}/alerts",
             data={
                 "name": "trends alert",
                 "insight": trends_insight["id"],

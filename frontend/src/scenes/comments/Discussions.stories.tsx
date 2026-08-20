@@ -42,7 +42,7 @@ const meta: Meta<StoryArgs> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/comments': discussionsJson,
+                '/v1/projects/:team_id/comments': discussionsJson,
             },
         }),
     ],

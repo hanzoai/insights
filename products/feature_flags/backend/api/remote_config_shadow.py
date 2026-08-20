@@ -67,10 +67,10 @@ def shadow_compare_remote_config(request: Request, django_response: Response, *,
         return
 
     try:
-        # Rebuild the canonical /api/projects path Rust serves (not request.get_full_path(), which can
-        # be an /api/environments or legacy alias). Rust resolves the project from ?token= when present,
+        # Rebuild the canonical /v1/projects path Rust serves (not request.get_full_path(), which can
+        # be an /v1/environments or legacy alias). Rust resolves the project from ?token= when present,
         # else from this segment — both give the same flag.
-        url = f"{settings.FEATURE_FLAGS_DEFINITIONS_SERVICE_URL}/api/projects/{project_id}/feature_flags/{key}/remote_config"
+        url = f"{settings.FEATURE_FLAGS_DEFINITIONS_SERVICE_URL}/v1/projects/{project_id}/feature_flags/{key}/remote_config"
         rust = _SHADOW_SESSION.get(
             url,
             params=request.query_params.dict(),

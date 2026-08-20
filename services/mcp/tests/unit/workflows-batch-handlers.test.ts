@@ -16,8 +16,8 @@ const BATCH_FILTERS = { properties: [{ key: 'email', value: 'is_set', type: 'per
 
 /**
  * Mock context whose api.request dispatches by method+path:
- *  - GET  .../hog_flows/{id}/         -> the workflow (with the given trigger)
- *  - POST .../hog_flows/user_blast_radius/ -> the given blast radius
+ *  - GET  .../script_flows/{id}/         -> the workflow (with the given trigger)
+ *  - POST .../script_flows/user_blast_radius/ -> the given blast radius
  *  - POST .../batch_jobs/ or .../schedules/ -> echoes the created resource
  */
 function createMockContext(opts: {
@@ -26,7 +26,7 @@ function createMockContext(opts: {
     status?: string
 }): { context: Context; request: ReturnType<typeof vi.fn> } {
     const request = vi.fn(async ({ method, path }: RequestArgs) => {
-        if (method === 'GET' && /\/hog_flows\/[^/]+\/$/.test(path)) {
+        if (method === 'GET' && /\/script_flows\/[^/]+\/$/.test(path)) {
             return { id: 'wf-1', status: opts.status ?? 'active', trigger: opts.trigger }
         }
         if (method === 'POST' && path.endsWith('/user_blast_radius/')) {
@@ -72,10 +72,10 @@ describe('workflows batch handlers', () => {
             const result = await blastRadiusTool.handler(context, { workflow_id: 'wf-1' })
 
             const c = calls(request)
-            expect(c[0]).toMatchObject({ method: 'GET', path: '/api/projects/1/hog_flows/wf-1/' })
+            expect(c[0]).toMatchObject({ method: 'GET', path: '/v1/projects/1/script_flows/wf-1/' })
             expect(c[1]).toMatchObject({
                 method: 'POST',
-                path: '/api/projects/1/hog_flows/user_blast_radius/',
+                path: '/v1/projects/1/script_flows/user_blast_radius/',
                 body: { filters: BATCH_FILTERS },
             })
             // confirm_token must surface to the agent: it is a required workflows-run-batch input.
@@ -100,7 +100,7 @@ describe('workflows batch handlers', () => {
             const batchCall = calls(request).find((c) => c.path.endsWith('/batch_jobs/'))
             expect(batchCall).toMatchObject({
                 method: 'POST',
-                path: '/api/projects/1/hog_flows/wf-1/batch_jobs/',
+                path: '/v1/projects/1/script_flows/wf-1/batch_jobs/',
                 body: { filters: BATCH_FILTERS, confirm_token: 'tok-123', variables: { plan: 'pro' } },
             })
             expect(result).toMatchObject({ id: 'batch-1' })
@@ -224,7 +224,7 @@ describe('workflows batch handlers', () => {
             const schedCall = calls(request).find((c) => c.path.endsWith('/schedules/'))
             expect(schedCall).toMatchObject({
                 method: 'POST',
-                path: '/api/projects/1/hog_flows/wf-1/schedules/',
+                path: '/v1/projects/1/script_flows/wf-1/schedules/',
                 body: {
                     rrule: 'FREQ=DAILY;INTERVAL=1',
                     starts_at: '2026-06-01T00:00:00Z',

@@ -190,7 +190,7 @@ class HyperCache:
         self.token_based = token_based
         # Credential-centric mode: keys by an already-hashed credential string
         # (sha256$<hex>) rather than a team. Used by the gateway credential
-        # policy cache, where one blob exists per phx_/pha_ credential.
+        # policy cache, where one blob exists per sk-/at- credential.
         self.hashed_credential_based = hashed_credential_based
         self.cache_ttl = cache_ttl
         self.cache_miss_ttl = cache_miss_ttl

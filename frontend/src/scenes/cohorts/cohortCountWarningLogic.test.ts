@@ -43,8 +43,8 @@ describe('cohortCountWarningLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team_id/cohorts/': toPaginatedResponse([mockCohort]),
-                '/api/projects/:team_id/cohorts/:id/': mockCohort,
+                '/v1/projects/:team_id/cohorts/': toPaginatedResponse([mockCohort]),
+                '/v1/projects/:team_id/cohorts/:id/': mockCohort,
             },
         })
         initKeaTests()

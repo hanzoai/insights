@@ -9,7 +9,7 @@ import {
     accountRelationshipDefinitionsList,
     customPropertyDefinitionsList,
 } from 'products/customer_analytics/frontend/generated/api'
-import { OutputMappingSuggestion } from 'products/workflows/frontend/Workflows/insightsflows/hogFlowEditorLogic'
+import { OutputMappingSuggestion } from 'products/workflows/frontend/Workflows/insightsflows/flowEditorLogic'
 import { registerActionNodeCategory } from 'products/workflows/frontend/Workflows/insightsflows/registry/actions/actionNodeRegistry'
 import { CyclotronInputType } from 'products/workflows/frontend/Workflows/insightsflows/steps/types'
 

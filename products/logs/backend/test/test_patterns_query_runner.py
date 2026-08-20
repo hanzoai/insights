@@ -51,7 +51,7 @@ class TestPatternsQueryRunner(DatastoreTestMixin, APIBaseTest):
                 self._log(f"User {name} not found", severity="error", service="auth")
                 for name in ("alice", "bob", "carol")
             ]
-            + [self._log(f"GET /api/orders/{i} ok", service="api") for i in range(2)]
+            + [self._log(f"GET /v1/orders/{i} ok", service="api") for i in range(2)]
         )
 
         results = self._run()

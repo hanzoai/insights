@@ -34,13 +34,13 @@ class TestTeamMergeTrendAPI(DatastoreTestMixin, APIBaseTest):
         connect_github_source_without_data(self.team, prefix="mt", repository="Insights/insights")
 
         response = self.client.get(
-            f"/api/projects/{self.team.id}/engineering_analytics/team_merge_trend/",
+            f"/v1/projects/{self.team.id}/engineering_analytics/team_merge_trend/",
             {"owner_team": "team-replay"},
         )
         assert response.status_code == status.HTTP_200_OK, response.content
         assert response.json() == {"owner_team": "team-replay", "has_membership_data": False, "points": []}
 
-        missing = self.client.get(f"/api/projects/{self.team.id}/engineering_analytics/team_merge_trend/")
+        missing = self.client.get(f"/v1/projects/{self.team.id}/engineering_analytics/team_merge_trend/")
         assert missing.status_code == status.HTTP_400_BAD_REQUEST
 
 

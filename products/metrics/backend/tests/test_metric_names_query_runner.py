@@ -134,11 +134,11 @@ class TestMetricsValuesAPI(DatastoreTestMixin, APIBaseTest):
 
     def test_values_requires_authentication(self):
         self.client.logout()
-        response = self.client.get(f"/api/projects/{self.team.id}/metrics/values")
+        response = self.client.get(f"/v1/projects/{self.team.id}/metrics/values")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_values_returns_empty_for_no_data(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/metrics/values")
+        response = self.client.get(f"/v1/projects/{self.team.id}/metrics/values")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {"results": []})
 
@@ -147,7 +147,7 @@ class TestMetricsValuesAPI(DatastoreTestMixin, APIBaseTest):
         _seed_point(team_id=self.team.id, metric_name="m1", value=1.0, timestamp=anchor)
         _seed_point(team_id=self.team.id, metric_name="m2", value=2.0, timestamp=anchor, metric_type="gauge")
 
-        response = self.client.get(f"/api/projects/{self.team.id}/metrics/values")
+        response = self.client.get(f"/v1/projects/{self.team.id}/metrics/values")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         body = response.json()
         names = {row["name"] for row in body["results"]}
@@ -158,14 +158,14 @@ class TestMetricsValuesAPI(DatastoreTestMixin, APIBaseTest):
         _seed_point(team_id=self.team.id, metric_name="http.duration", value=1.0, timestamp=anchor)
         _seed_point(team_id=self.team.id, metric_name="queue.depth", value=2.0, timestamp=anchor)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/metrics/values?value=http")
+        response = self.client.get(f"/v1/projects/{self.team.id}/metrics/values?value=http")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         names = [row["name"] for row in response.json()["results"]]
         self.assertEqual(names, ["http.duration"])
 
     def test_values_rejects_invalid_limit(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/metrics/values?limit=not-a-number")
+        response = self.client.get(f"/v1/projects/{self.team.id}/metrics/values?limit=not-a-number")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-        response = self.client.get(f"/api/projects/{self.team.id}/metrics/values?limit=0")
+        response = self.client.get(f"/v1/projects/{self.team.id}/metrics/values?limit=0")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

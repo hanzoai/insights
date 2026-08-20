@@ -1467,7 +1467,7 @@ class TestGitHubWebhookFanout(TestCase):
 
 
 class TestFindSignalImplementationRun(TestCase):
-    """The tasks-facade linkage other products gate automation on (stamphog's inbox carve-out)."""
+    """The tasks-facade linkage other products gate automation on (stamp's inbox carve-out)."""
 
     STAMPED_BRANCH = "insights-self-driving/fix-the-thing-3f9a2c"
 

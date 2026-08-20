@@ -99,11 +99,6 @@ const config: StorybookConfig = {
             },
             optimizeDeps: {
                 include: ['buffer'],
-                // @hanzo/brand's png stubs locate their image via new URL(..., import.meta.url);
-                // prebundling into .vite/deps would break that relative resolution. The package is
-                // pure ESM, so serving it unbundled is safe, and Vite's build handles the URL
-                // pattern natively.
-                exclude: ['@hanzo/brand'],
             },
             build: {
                 rollupOptions: {

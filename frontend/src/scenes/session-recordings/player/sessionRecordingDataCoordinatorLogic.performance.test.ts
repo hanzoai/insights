@@ -42,7 +42,7 @@ describe('sessionRecordingDataCoordinatorLogic performance', () => {
                 },
             ],
             getMocks: {
-                '/api/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
+                '/v1/environments/:team_id/session_recordings/:id/snapshots': ({ request }) => {
                     const url = new URL(request.url)
                     if (url.searchParams.get('source') === 'blob_v2') {
                         const key = url.searchParams.get('blob_key')

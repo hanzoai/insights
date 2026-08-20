@@ -16,7 +16,7 @@ const meta: Meta<ErrorDisplayProps> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/error_tracking/stack_frames/': {
+                '/v1/projects/:team_id/error_tracking/stack_frames/': {
                     results: [
                         {
                             id: '123456789',

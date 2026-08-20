@@ -12,7 +12,7 @@ const LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const SERIES: Series[] = [{ key: 'visits', label: 'Visits', color: '', data: [20, 35, 28, 60, 45, 70, 52] }]
 
 const meta: Meta = {
-    title: 'Components/HogCharts/HighlightedRange',
+    title: 'Components/ScriptCharts/HighlightedRange',
     parameters: { layout: 'centered' },
 }
 export default meta

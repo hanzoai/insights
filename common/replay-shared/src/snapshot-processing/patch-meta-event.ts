@@ -1,4 +1,4 @@
-import { EventType } from 'insights-js/rrweb-types'
+import { EventType } from '@hanzo/insights-rrweb-types'
 
 import { RecordingSnapshot } from '../types'
 import { isObject } from '../utils'

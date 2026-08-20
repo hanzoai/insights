@@ -107,7 +107,7 @@ export interface ActionFilterProps {
     excludedProperties?: TaxonomicPopoverProps['excludedProperties']
     /** Allow adding non-captured events */
     allowNonCapturedEvents?: boolean
-    hogQLGlobals?: Record<string, any>
+    insightsQLGlobals?: Record<string, any>
     definitionPopoverRenderer?: DefinitionPopoverRenderer
     operatorAllowlist?: PropertyOperator[]
     /** Extra content rendered in the footer alongside the "Add series" button */
@@ -148,7 +148,7 @@ export const ActionFilter = React.forwardRef<HTMLDivElement, ActionFilterProps>(
         addFilterDocLink,
         excludedProperties,
         allowNonCapturedEvents,
-        hogQLGlobals,
+        insightsQLGlobals,
         definitionPopoverRenderer,
         operatorAllowlist,
         customFooter,
@@ -219,7 +219,7 @@ export const ActionFilter = React.forwardRef<HTMLDivElement, ActionFilterProps>(
         addFilterDocLink,
         excludedProperties,
         allowNonCapturedEvents,
-        hogQLGlobals,
+        insightsQLGlobals,
         operatorAllowlist,
         inlineEventsDocLink: isTrendsFilter(filters)
             ? 'https://hanzo.ai/docs/product-analytics/trends/overview#combine-events-inline'

@@ -8,7 +8,7 @@ from products.data_tools.backend.models.query_tab_state import QueryTabState
 class TestQueryTabState(APIBaseTest):
     def test_create_query_tab_state(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/query_tab_state",
+            f"/v1/projects/{self.team.id}/query_tab_state",
             data={
                 "state": {
                     "editorModelsStateKey": '["my_model"]',
@@ -37,7 +37,7 @@ class TestQueryTabState(APIBaseTest):
             },
         )
         response = self.client.get(
-            f"/api/projects/{self.team.id}/query_tab_state/{query_tab_state.pk}",
+            f"/v1/projects/{self.team.id}/query_tab_state/{query_tab_state.pk}",
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
@@ -60,7 +60,7 @@ class TestQueryTabState(APIBaseTest):
         )
 
         response = self.client.put(
-            f"/api/projects/{self.team.id}/query_tab_state/{query_tab_state.pk}",
+            f"/v1/projects/{self.team.id}/query_tab_state/{query_tab_state.pk}",
             data={
                 "state": {
                     "editorModelsStateKey": '["my_model_2"]',
@@ -90,7 +90,7 @@ class TestQueryTabState(APIBaseTest):
         )
 
         response = self.client.delete(
-            f"/api/projects/{self.team.id}/query_tab_state/{query_tab_state.pk}",
+            f"/v1/projects/{self.team.id}/query_tab_state/{query_tab_state.pk}",
         )
         self.assertEqual(response.status_code, 204)
         self.assertEqual(QueryTabState.objects.count(), 0)
@@ -109,7 +109,7 @@ class TestQueryTabState(APIBaseTest):
 
         # Test successful retrieval
         response = self.client.get(
-            f"/api/projects/{self.team.id}/query_tab_state/user/?user_id={self.user.uuid}",
+            f"/v1/projects/{self.team.id}/query_tab_state/user/?user_id={self.user.uuid}",
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["id"], str(query_tab_state.id))
@@ -124,14 +124,14 @@ class TestQueryTabState(APIBaseTest):
 
         # Test missing user_id parameter
         response = self.client.get(
-            f"/api/projects/{self.team.id}/query_tab_state/user/",
+            f"/v1/projects/{self.team.id}/query_tab_state/user/",
         )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {"error": "user_id is required"})
 
         # Test non-existent user_id
         response = self.client.get(
-            f"/api/projects/{self.team.id}/query_tab_state/user/?user_id={uuid.uuid4()}",
+            f"/v1/projects/{self.team.id}/query_tab_state/user/?user_id={uuid.uuid4()}",
         )
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json(), {"error": "User not found"})

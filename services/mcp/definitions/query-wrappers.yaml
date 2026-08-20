@@ -1,7 +1,7 @@
 # MCP query wrapper tool definitions.
 #
 # Each wrapper generates a typed tool that accepts a single query schema
-# from frontend/src/queries/schema.json and POSTs to /api/environments/{project_id}/query/.
+# from frontend/src/queries/schema.json and POSTs to /v1/environments/{project_id}/query/.
 #
 # schema_ref must match a definition name in schema.json exactly.
 # The Zod input schema is auto-generated from the JSON Schema at build time.

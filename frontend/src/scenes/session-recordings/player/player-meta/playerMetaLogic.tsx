@@ -48,7 +48,7 @@ const recordingPropertyKeys = ['click_count', 'keypress_count', 'console_error_c
 // "Summarize" button should be disabled when every event would be filtered away (otherwise
 // the user triggers a summary that fails with "This recording has no events to summarize").
 // Keep in sync with SESSION_SUMMARY_EVENT_BLOCKLIST and SESSION_EVENTS_REPLAY_CUTOFF_MS in
-// ee/hogai/session_summaries/constants.py.
+// ee/scriptai/session_summaries/constants.py.
 const SUMMARY_EVENT_MINI_FILTER_KEYS = [
     'events-insights',
     'events-custom',

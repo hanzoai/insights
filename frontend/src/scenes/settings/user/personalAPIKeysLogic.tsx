@@ -343,7 +343,7 @@ export const personalAPIKeysLogic = kea<personalAPIKeysLogicType>([
             null as TeamBasicType[] | null,
             {
                 loadAllTeams: async () => {
-                    return await api.loadPaginatedResults('api/projects')
+                    return await api.loadPaginatedResults('v1/projects')
                 },
             },
         ],

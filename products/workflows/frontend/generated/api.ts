@@ -35,10 +35,10 @@ import type {
     InsightsFlowsMetricsTotalsRetrieveParams,
     InsightsFlowsReputationRetrieveParams,
     InsightsFlowsRevisionsListParams,
-    HogInvocationRerunRequestApi,
-    HogInvocationRerunResponseApi,
-    HogInvocationResultApi,
-    HogInvocationResultDetailApi,
+    ScriptInvocationRerunRequestApi,
+    ScriptInvocationRerunResponseApi,
+    ScriptInvocationResultApi,
+    ScriptInvocationResultDetailApi,
     MessageAssetApi,
     PaginatedInsightsFlowMinimalListApi,
     PaginatedInsightsFlowRevisionBasicListApi,
@@ -70,7 +70,7 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>]
     : DistributeReadOnlyOverUnions<T>
 
 export const getInternalInsightsFlowsProcessDueSchedulesCreateUrl = () => {
-    return `/api/internal/hog_flows/process_due_schedules`
+    return `/api/internal/script_flows/process_due_schedules`
 }
 
 /**
@@ -96,14 +96,14 @@ export const getInsightsFlowTemplatesListUrl = (projectId: string, params?: Insi
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/hog_flow_templates/?${stringifiedParams}`
-        : `/api/projects/${projectId}/hog_flow_templates/`
+        ? `/api/projects/${projectId}/script_flow_templates/?${stringifiedParams}`
+        : `/api/projects/${projectId}/script_flow_templates/`
 }
 
 /**
  * Override list to include global templates from files alongside team templates from DB.
  */
-export const hogFlowTemplatesList = async (
+export const flowTemplatesList = async (
     projectId: string,
     params?: InsightsFlowTemplatesListParams,
     options?: RequestInit
@@ -115,31 +115,31 @@ export const hogFlowTemplatesList = async (
 }
 
 export const getInsightsFlowTemplatesCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/hog_flow_templates/`
+    return `/api/projects/${projectId}/script_flow_templates/`
 }
 
-export const hogFlowTemplatesCreate = async (
+export const flowTemplatesCreate = async (
     projectId: string,
-    hogFlowTemplateApi: NonReadonly<InsightsFlowTemplateApi>,
+    flowTemplateApi: NonReadonly<InsightsFlowTemplateApi>,
     options?: RequestInit
 ): Promise<InsightsFlowTemplateApi> => {
     return apiMutator<InsightsFlowTemplateApi>(getInsightsFlowTemplatesCreateUrl(projectId), {
         ...options,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(hogFlowTemplateApi),
+        body: JSON.stringify(flowTemplateApi),
     })
 }
 
 export const getInsightsFlowTemplatesRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/hog_flow_templates/${id}/`
+    return `/api/projects/${projectId}/script_flow_templates/${id}/`
 }
 
 /**
  * Check file-based global templates first, then DB team templates.
  * The queryset excludes all global templates from DB, so this only returns team templates from DB.
  */
-export const hogFlowTemplatesRetrieve = async (
+export const flowTemplatesRetrieve = async (
     projectId: string,
     id: string,
     options?: RequestInit
@@ -151,28 +151,28 @@ export const hogFlowTemplatesRetrieve = async (
 }
 
 export const getInsightsFlowTemplatesUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/hog_flow_templates/${id}/`
+    return `/api/projects/${projectId}/script_flow_templates/${id}/`
 }
 
-export const hogFlowTemplatesUpdate = async (
+export const flowTemplatesUpdate = async (
     projectId: string,
     id: string,
-    hogFlowTemplateApi: NonReadonly<InsightsFlowTemplateApi>,
+    flowTemplateApi: NonReadonly<InsightsFlowTemplateApi>,
     options?: RequestInit
 ): Promise<InsightsFlowTemplateApi> => {
     return apiMutator<InsightsFlowTemplateApi>(getInsightsFlowTemplatesUpdateUrl(projectId, id), {
         ...options,
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(hogFlowTemplateApi),
+        body: JSON.stringify(flowTemplateApi),
     })
 }
 
 export const getInsightsFlowTemplatesPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/hog_flow_templates/${id}/`
+    return `/api/projects/${projectId}/script_flow_templates/${id}/`
 }
 
-export const hogFlowTemplatesPartialUpdate = async (
+export const flowTemplatesPartialUpdate = async (
     projectId: string,
     id: string,
     patchedInsightsFlowTemplateApi?: NonReadonly<PatchedInsightsFlowTemplateApi>,
@@ -187,10 +187,10 @@ export const hogFlowTemplatesPartialUpdate = async (
 }
 
 export const getInsightsFlowTemplatesDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/hog_flow_templates/${id}/`
+    return `/api/projects/${projectId}/script_flow_templates/${id}/`
 }
 
-export const hogFlowTemplatesDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
+export const flowTemplatesDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
     return apiMutator<void>(getInsightsFlowTemplatesDestroyUrl(projectId, id), {
         ...options,
         method: 'DELETE',
@@ -213,11 +213,11 @@ export const getInsightsFlowTemplatesLogsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/hog_flow_templates/${id}/logs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/hog_flow_templates/${id}/logs/`
+        ? `/api/projects/${projectId}/script_flow_templates/${id}/logs/?${stringifiedParams}`
+        : `/api/projects/${projectId}/script_flow_templates/${id}/logs/`
 }
 
-export const hogFlowTemplatesLogsRetrieve = async (
+export const flowTemplatesLogsRetrieve = async (
     projectId: string,
     id: string,
     params?: InsightsFlowTemplatesLogsRetrieveParams,
@@ -241,11 +241,11 @@ export const getInsightsFlowsListUrl = (projectId: string, params?: InsightsFlow
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/hog_flows/?${stringifiedParams}`
-        : `/api/projects/${projectId}/hog_flows/`
+        ? `/api/projects/${projectId}/script_flows/?${stringifiedParams}`
+        : `/api/projects/${projectId}/script_flows/`
 }
 
-export const hogFlowsList = async (
+export const flowsList = async (
     projectId: string,
     params?: InsightsFlowsListParams,
     options?: RequestInit
@@ -257,27 +257,27 @@ export const hogFlowsList = async (
 }
 
 export const getInsightsFlowsCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/hog_flows/`
+    return `/api/projects/${projectId}/script_flows/`
 }
 
-export const hogFlowsCreate = async (
+export const flowsCreate = async (
     projectId: string,
-    hogFlowApi: NonReadonly<InsightsFlowApi>,
+    flowApi: NonReadonly<InsightsFlowApi>,
     options?: RequestInit
 ): Promise<InsightsFlowApi> => {
     return apiMutator<InsightsFlowApi>(getInsightsFlowsCreateUrl(projectId), {
         ...options,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(hogFlowApi),
+        body: JSON.stringify(flowApi),
     })
 }
 
 export const getInsightsFlowsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/hog_flows/${id}/`
+    return `/api/projects/${projectId}/script_flows/${id}/`
 }
 
-export const hogFlowsRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<InsightsFlowApi> => {
+export const flowsRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<InsightsFlowApi> => {
     return apiMutator<InsightsFlowApi>(getInsightsFlowsRetrieveUrl(projectId, id), {
         ...options,
         method: 'GET',
@@ -285,28 +285,28 @@ export const hogFlowsRetrieve = async (projectId: string, id: string, options?: 
 }
 
 export const getInsightsFlowsUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/hog_flows/${id}/`
+    return `/api/projects/${projectId}/script_flows/${id}/`
 }
 
-export const hogFlowsUpdate = async (
+export const flowsUpdate = async (
     projectId: string,
     id: string,
-    hogFlowApi: NonReadonly<InsightsFlowApi>,
+    flowApi: NonReadonly<InsightsFlowApi>,
     options?: RequestInit
 ): Promise<InsightsFlowApi> => {
     return apiMutator<InsightsFlowApi>(getInsightsFlowsUpdateUrl(projectId, id), {
         ...options,
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(hogFlowApi),
+        body: JSON.stringify(flowApi),
     })
 }
 
 export const getInsightsFlowsPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/hog_flows/${id}/`
+    return `/api/projects/${projectId}/script_flows/${id}/`
 }
 
-export const hogFlowsPartialUpdate = async (
+export const flowsPartialUpdate = async (
     projectId: string,
     id: string,
     patchedInsightsFlowApi?: NonReadonly<PatchedInsightsFlowApi>,
@@ -321,10 +321,10 @@ export const hogFlowsPartialUpdate = async (
 }
 
 export const getInsightsFlowsDestroyUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/hog_flows/${id}/`
+    return `/api/projects/${projectId}/script_flows/${id}/`
 }
 
-export const hogFlowsDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
+export const flowsDestroy = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
     return apiMutator<void>(getInsightsFlowsDestroyUrl(projectId, id), {
         ...options,
         method: 'DELETE',
@@ -332,10 +332,10 @@ export const hogFlowsDestroy = async (projectId: string, id: string, options?: R
 }
 
 export const getInsightsFlowsActionsEmailPartialUpdateUrl = (projectId: string, id: string, actionId: string) => {
-    return `/api/projects/${projectId}/hog_flows/${id}/actions/${actionId}/email/`
+    return `/api/projects/${projectId}/script_flows/${id}/actions/${actionId}/email/`
 }
 
-export const hogFlowsActionsEmailPartialUpdate = async (
+export const flowsActionsEmailPartialUpdate = async (
     projectId: string,
     id: string,
     actionId: string,
@@ -362,11 +362,11 @@ export const getInsightsFlowsAssetsRetrieveUrl = (projectId: string, id: string,
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/hog_flows/${id}/assets/?${stringifiedParams}`
-        : `/api/projects/${projectId}/hog_flows/${id}/assets/`
+        ? `/api/projects/${projectId}/script_flows/${id}/assets/?${stringifiedParams}`
+        : `/api/projects/${projectId}/script_flows/${id}/assets/`
 }
 
-export const hogFlowsAssetsRetrieve = async (
+export const flowsAssetsRetrieve = async (
     projectId: string,
     id: string,
     params?: InsightsFlowsAssetsRetrieveParams,
@@ -394,11 +394,11 @@ export const getInsightsFlowsAssetContentRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/hog_flows/${id}/assets/content/?${stringifiedParams}`
-        : `/api/projects/${projectId}/hog_flows/${id}/assets/content/`
+        ? `/api/projects/${projectId}/script_flows/${id}/assets/content/?${stringifiedParams}`
+        : `/api/projects/${projectId}/script_flows/${id}/assets/content/`
 }
 
-export const hogFlowsAssetContentRetrieve = async (
+export const flowsAssetContentRetrieve = async (
     projectId: string,
     id: string,
     params: InsightsFlowsAssetContentRetrieveParams,
@@ -411,10 +411,10 @@ export const hogFlowsAssetContentRetrieve = async (
 }
 
 export const getInsightsFlowsBatchJobsListUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/hog_flows/${id}/batch_jobs/`
+    return `/api/projects/${projectId}/script_flows/${id}/batch_jobs/`
 }
 
-export const hogFlowsBatchJobsList = async (
+export const flowsBatchJobsList = async (
     projectId: string,
     id: string,
     options?: RequestInit
@@ -426,28 +426,28 @@ export const hogFlowsBatchJobsList = async (
 }
 
 export const getInsightsFlowsBatchJobsCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/hog_flows/${id}/batch_jobs/`
+    return `/api/projects/${projectId}/script_flows/${id}/batch_jobs/`
 }
 
-export const hogFlowsBatchJobsCreate = async (
+export const flowsBatchJobsCreate = async (
     projectId: string,
     id: string,
-    hogFlowBatchJobApi: NonReadonly<InsightsFlowBatchJobApi>,
+    flowBatchJobApi: NonReadonly<InsightsFlowBatchJobApi>,
     options?: RequestInit
 ): Promise<InsightsFlowBatchJobApi> => {
     return apiMutator<InsightsFlowBatchJobApi>(getInsightsFlowsBatchJobsCreateUrl(projectId, id), {
         ...options,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(hogFlowBatchJobApi),
+        body: JSON.stringify(flowBatchJobApi),
     })
 }
 
 export const getInsightsFlowsDiscardDraftCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/hog_flows/${id}/discard_draft/`
+    return `/api/projects/${projectId}/script_flows/${id}/discard_draft/`
 }
 
-export const hogFlowsDiscardDraftCreate = async (
+export const flowsDiscardDraftCreate = async (
     projectId: string,
     id: string,
     options?: RequestInit
@@ -459,10 +459,10 @@ export const hogFlowsDiscardDraftCreate = async (
 }
 
 export const getInsightsFlowsGraphPartialUpdateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/hog_flows/${id}/graph/`
+    return `/api/projects/${projectId}/script_flows/${id}/graph/`
 }
 
-export const hogFlowsGraphPartialUpdate = async (
+export const flowsGraphPartialUpdate = async (
     projectId: string,
     id: string,
     patchedInsightsFlowGraphUpdateApi?: PatchedInsightsFlowGraphUpdateApi,
@@ -492,33 +492,33 @@ export const getInsightsFlowsInvocationResultsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/hog_flows/${id}/invocation_results/?${stringifiedParams}`
-        : `/api/projects/${projectId}/hog_flows/${id}/invocation_results/`
+        ? `/api/projects/${projectId}/script_flows/${id}/invocation_results/?${stringifiedParams}`
+        : `/api/projects/${projectId}/script_flows/${id}/invocation_results/`
 }
 
-export const hogFlowsInvocationResultsRetrieve = async (
+export const flowsInvocationResultsRetrieve = async (
     projectId: string,
     id: string,
     params?: InsightsFlowsInvocationResultsRetrieveParams,
     options?: RequestInit
-): Promise<HogInvocationResultApi[]> => {
-    return apiMutator<HogInvocationResultApi[]>(getInsightsFlowsInvocationResultsRetrieveUrl(projectId, id, params), {
+): Promise<ScriptInvocationResultApi[]> => {
+    return apiMutator<ScriptInvocationResultApi[]>(getInsightsFlowsInvocationResultsRetrieveUrl(projectId, id, params), {
         ...options,
         method: 'GET',
     })
 }
 
 export const getInsightsFlowsInvocationResultRetrieveUrl = (projectId: string, id: string, invocationId: string) => {
-    return `/api/projects/${projectId}/hog_flows/${id}/invocation_results/${invocationId}/`
+    return `/api/projects/${projectId}/script_flows/${id}/invocation_results/${invocationId}/`
 }
 
-export const hogFlowsInvocationResultRetrieve = async (
+export const flowsInvocationResultRetrieve = async (
     projectId: string,
     id: string,
     invocationId: string,
     options?: RequestInit
-): Promise<HogInvocationResultDetailApi> => {
-    return apiMutator<HogInvocationResultDetailApi>(
+): Promise<ScriptInvocationResultDetailApi> => {
+    return apiMutator<ScriptInvocationResultDetailApi>(
         getInsightsFlowsInvocationResultRetrieveUrl(projectId, id, invocationId),
         {
             ...options,
@@ -528,20 +528,20 @@ export const hogFlowsInvocationResultRetrieve = async (
 }
 
 export const getInsightsFlowsInvocationsCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/hog_flows/${id}/invocations/`
+    return `/api/projects/${projectId}/script_flows/${id}/invocations/`
 }
 
-export const hogFlowsInvocationsCreate = async (
+export const flowsInvocationsCreate = async (
     projectId: string,
     id: string,
-    hogFlowInvocationApi?: NonReadonly<InsightsFlowInvocationApi>,
+    flowInvocationApi?: NonReadonly<InsightsFlowInvocationApi>,
     options?: RequestInit
 ): Promise<void> => {
     return apiMutator<void>(getInsightsFlowsInvocationsCreateUrl(projectId, id), {
         ...options,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(hogFlowInvocationApi),
+        body: JSON.stringify(flowInvocationApi),
     })
 }
 
@@ -557,11 +557,11 @@ export const getInsightsFlowsLogsRetrieveUrl = (projectId: string, id: string, p
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/hog_flows/${id}/logs/?${stringifiedParams}`
-        : `/api/projects/${projectId}/hog_flows/${id}/logs/`
+        ? `/api/projects/${projectId}/script_flows/${id}/logs/?${stringifiedParams}`
+        : `/api/projects/${projectId}/script_flows/${id}/logs/`
 }
 
-export const hogFlowsLogsRetrieve = async (
+export const flowsLogsRetrieve = async (
     projectId: string,
     id: string,
     params?: InsightsFlowsLogsRetrieveParams,
@@ -589,11 +589,11 @@ export const getInsightsFlowsMetricsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/hog_flows/${id}/metrics/?${stringifiedParams}`
-        : `/api/projects/${projectId}/hog_flows/${id}/metrics/`
+        ? `/api/projects/${projectId}/script_flows/${id}/metrics/?${stringifiedParams}`
+        : `/api/projects/${projectId}/script_flows/${id}/metrics/`
 }
 
-export const hogFlowsMetricsRetrieve = async (
+export const flowsMetricsRetrieve = async (
     projectId: string,
     id: string,
     params?: InsightsFlowsMetricsRetrieveParams,
@@ -621,11 +621,11 @@ export const getInsightsFlowsMetricsTotalsRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/hog_flows/${id}/metrics/totals/?${stringifiedParams}`
-        : `/api/projects/${projectId}/hog_flows/${id}/metrics/totals/`
+        ? `/api/projects/${projectId}/script_flows/${id}/metrics/totals/?${stringifiedParams}`
+        : `/api/projects/${projectId}/script_flows/${id}/metrics/totals/`
 }
 
-export const hogFlowsMetricsTotalsRetrieve = async (
+export const flowsMetricsTotalsRetrieve = async (
     projectId: string,
     id: string,
     params?: InsightsFlowsMetricsTotalsRetrieveParams,
@@ -638,25 +638,25 @@ export const hogFlowsMetricsTotalsRetrieve = async (
 }
 
 export const getInsightsFlowsPublishCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/hog_flows/${id}/publish/`
+    return `/api/projects/${projectId}/script_flows/${id}/publish/`
 }
 
-export const hogFlowsPublishCreate = async (
+export const flowsPublishCreate = async (
     projectId: string,
     id: string,
-    hogFlowPublishRequestApi?: InsightsFlowPublishRequestApi,
+    flowPublishRequestApi?: InsightsFlowPublishRequestApi,
     options?: RequestInit
 ): Promise<InsightsFlowPublishResponseApi> => {
     return apiMutator<InsightsFlowPublishResponseApi>(getInsightsFlowsPublishCreateUrl(projectId, id), {
         ...options,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(hogFlowPublishRequestApi),
+        body: JSON.stringify(flowPublishRequestApi),
     })
 }
 
 export const getInsightsFlowsRerunCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/hog_flows/${id}/rerun/`
+    return `/api/projects/${projectId}/script_flows/${id}/rerun/`
 }
 
 /**
@@ -668,19 +668,19 @@ export const getInsightsFlowsRerunCreateUrl = (projectId: string, id: string) =>
  * onto cyclotron with `is_retry=1`.
  *
  * Because rerun replays historical event/person/group data, it requires
- * `person:read` and `group:read` on top of `hog_flow:write`.
+ * `person:read` and `group:read` on top of `script_flow:write`.
  */
-export const hogFlowsRerunCreate = async (
+export const flowsRerunCreate = async (
     projectId: string,
     id: string,
-    hogInvocationRerunRequestApi: HogInvocationRerunRequestApi,
+    scriptInvocationRerunRequestApi: ScriptInvocationRerunRequestApi,
     options?: RequestInit
-): Promise<HogInvocationRerunResponseApi> => {
-    return apiMutator<HogInvocationRerunResponseApi>(getInsightsFlowsRerunCreateUrl(projectId, id), {
+): Promise<ScriptInvocationRerunResponseApi> => {
+    return apiMutator<ScriptInvocationRerunResponseApi>(getInsightsFlowsRerunCreateUrl(projectId, id), {
         ...options,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(hogInvocationRerunRequestApi),
+        body: JSON.stringify(scriptInvocationRerunRequestApi),
     })
 }
 
@@ -696,11 +696,11 @@ export const getInsightsFlowsRevisionsListUrl = (projectId: string, id: string, 
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/hog_flows/${id}/revisions/?${stringifiedParams}`
-        : `/api/projects/${projectId}/hog_flows/${id}/revisions/`
+        ? `/api/projects/${projectId}/script_flows/${id}/revisions/?${stringifiedParams}`
+        : `/api/projects/${projectId}/script_flows/${id}/revisions/`
 }
 
-export const hogFlowsRevisionsList = async (
+export const flowsRevisionsList = async (
     projectId: string,
     id: string,
     params?: InsightsFlowsRevisionsListParams,
@@ -713,10 +713,10 @@ export const hogFlowsRevisionsList = async (
 }
 
 export const getInsightsFlowsRevisionsRetrieveUrl = (projectId: string, id: string, version: number) => {
-    return `/api/projects/${projectId}/hog_flows/${id}/revisions/${version}/`
+    return `/api/projects/${projectId}/script_flows/${id}/revisions/${version}/`
 }
 
-export const hogFlowsRevisionsRetrieve = async (
+export const flowsRevisionsRetrieve = async (
     projectId: string,
     id: string,
     version: number,
@@ -729,29 +729,29 @@ export const hogFlowsRevisionsRetrieve = async (
 }
 
 export const getInsightsFlowsRevisionsRestoreCreateUrl = (projectId: string, id: string, version: number) => {
-    return `/api/projects/${projectId}/hog_flows/${id}/revisions/${version}/restore/`
+    return `/api/projects/${projectId}/script_flows/${id}/revisions/${version}/restore/`
 }
 
-export const hogFlowsRevisionsRestoreCreate = async (
+export const flowsRevisionsRestoreCreate = async (
     projectId: string,
     id: string,
     version: number,
-    hogFlowRevisionRestoreRequestApi?: InsightsFlowRevisionRestoreRequestApi,
+    flowRevisionRestoreRequestApi?: InsightsFlowRevisionRestoreRequestApi,
     options?: RequestInit
 ): Promise<InsightsFlowApi> => {
     return apiMutator<InsightsFlowApi>(getInsightsFlowsRevisionsRestoreCreateUrl(projectId, id, version), {
         ...options,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(hogFlowRevisionRestoreRequestApi),
+        body: JSON.stringify(flowRevisionRestoreRequestApi),
     })
 }
 
 export const getInsightsFlowsSchedulesListUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/hog_flows/${id}/schedules/`
+    return `/api/projects/${projectId}/script_flows/${id}/schedules/`
 }
 
-export const hogFlowsSchedulesList = async (
+export const flowsSchedulesList = async (
     projectId: string,
     id: string,
     options?: RequestInit
@@ -763,28 +763,28 @@ export const hogFlowsSchedulesList = async (
 }
 
 export const getInsightsFlowsSchedulesCreateUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/hog_flows/${id}/schedules/`
+    return `/api/projects/${projectId}/script_flows/${id}/schedules/`
 }
 
-export const hogFlowsSchedulesCreate = async (
+export const flowsSchedulesCreate = async (
     projectId: string,
     id: string,
-    hogFlowScheduleApi: NonReadonly<InsightsFlowScheduleApi>,
+    flowScheduleApi: NonReadonly<InsightsFlowScheduleApi>,
     options?: RequestInit
 ): Promise<InsightsFlowScheduleApi> => {
     return apiMutator<InsightsFlowScheduleApi>(getInsightsFlowsSchedulesCreateUrl(projectId, id), {
         ...options,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(hogFlowScheduleApi),
+        body: JSON.stringify(flowScheduleApi),
     })
 }
 
 export const getInsightsFlowsSchedulesPartialUpdateUrl = (projectId: string, id: string, scheduleId: string) => {
-    return `/api/projects/${projectId}/hog_flows/${id}/schedules/${scheduleId}/`
+    return `/api/projects/${projectId}/script_flows/${id}/schedules/${scheduleId}/`
 }
 
-export const hogFlowsSchedulesPartialUpdate = async (
+export const flowsSchedulesPartialUpdate = async (
     projectId: string,
     id: string,
     scheduleId: string,
@@ -800,10 +800,10 @@ export const hogFlowsSchedulesPartialUpdate = async (
 }
 
 export const getInsightsFlowsSchedulesDestroyUrl = (projectId: string, id: string, scheduleId: string) => {
-    return `/api/projects/${projectId}/hog_flows/${id}/schedules/${scheduleId}/`
+    return `/api/projects/${projectId}/script_flows/${id}/schedules/${scheduleId}/`
 }
 
-export const hogFlowsSchedulesDestroy = async (
+export const flowsSchedulesDestroy = async (
     projectId: string,
     id: string,
     scheduleId: string,
@@ -816,24 +816,24 @@ export const hogFlowsSchedulesDestroy = async (
 }
 
 export const getInsightsFlowsBulkDeleteCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/hog_flows/bulk_delete/`
+    return `/api/projects/${projectId}/script_flows/bulk_delete/`
 }
 
-export const hogFlowsBulkDeleteCreate = async (
+export const flowsBulkDeleteCreate = async (
     projectId: string,
-    hogFlowApi: NonReadonly<InsightsFlowApi>,
+    flowApi: NonReadonly<InsightsFlowApi>,
     options?: RequestInit
 ): Promise<InsightsFlowApi> => {
     return apiMutator<InsightsFlowApi>(getInsightsFlowsBulkDeleteCreateUrl(projectId), {
         ...options,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(hogFlowApi),
+        body: JSON.stringify(flowApi),
     })
 }
 
 export const getInsightsFlowsEmailSendingSuspensionRetrieveUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/hog_flows/email_sending_suspension/`
+    return `/api/projects/${projectId}/script_flows/email_sending_suspension/`
 }
 
 /**
@@ -841,7 +841,7 @@ export const getInsightsFlowsEmailSendingSuspensionRetrieveUrl = (projectId: str
  * with no reputation computation. Every project member sees this — a suspension stops
  * everyone's email, so hiding it would leave silent send failures unexplained.
  */
-export const hogFlowsEmailSendingSuspensionRetrieve = async (
+export const flowsEmailSendingSuspensionRetrieve = async (
     projectId: string,
     options?: RequestInit
 ): Promise<EmailSendingSuspensionStatusApi> => {
@@ -866,11 +866,11 @@ export const getInsightsFlowsMetricsGlobalRetrieveUrl = (
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/hog_flows/metrics/global/?${stringifiedParams}`
-        : `/api/projects/${projectId}/hog_flows/metrics/global/`
+        ? `/api/projects/${projectId}/script_flows/metrics/global/?${stringifiedParams}`
+        : `/api/projects/${projectId}/script_flows/metrics/global/`
 }
 
-export const hogFlowsMetricsGlobalRetrieve = async (
+export const flowsMetricsGlobalRetrieve = async (
     projectId: string,
     params?: InsightsFlowsMetricsGlobalRetrieveParams,
     options?: RequestInit
@@ -893,8 +893,8 @@ export const getInsightsFlowsReputationRetrieveUrl = (projectId: string, params?
     const stringifiedParams = normalizedParams.toString()
 
     return stringifiedParams.length > 0
-        ? `/api/projects/${projectId}/hog_flows/reputation/?${stringifiedParams}`
-        : `/api/projects/${projectId}/hog_flows/reputation/`
+        ? `/api/projects/${projectId}/script_flows/reputation/?${stringifiedParams}`
+        : `/api/projects/${projectId}/script_flows/reputation/`
 }
 
 /**
@@ -903,7 +903,7 @@ export const getInsightsFlowsReputationRetrieveUrl = (projectId: string, params?
  * capped), together with the authoritative AWS SES tenant verdict — sending status and open
  * reputation findings. Our rates are the per-workflow diagnosis; AWS judges and enforces.
  */
-export const hogFlowsReputationRetrieve = async (
+export const flowsReputationRetrieve = async (
     projectId: string,
     params?: InsightsFlowsReputationRetrieveParams,
     options?: RequestInit
@@ -915,10 +915,10 @@ export const hogFlowsReputationRetrieve = async (
 }
 
 export const getInsightsFlowsUserBlastRadiusCreateUrl = (projectId: string) => {
-    return `/api/projects/${projectId}/hog_flows/user_blast_radius/`
+    return `/api/projects/${projectId}/script_flows/user_blast_radius/`
 }
 
-export const hogFlowsUserBlastRadiusCreate = async (
+export const flowsUserBlastRadiusCreate = async (
     projectId: string,
     blastRadiusRequestApi: BlastRadiusRequestApi,
     options?: RequestInit
@@ -932,7 +932,7 @@ export const hogFlowsUserBlastRadiusCreate = async (
 }
 
 export const getInternalInsightsFlowsAccountAudienceCreateUrl = (teamId: string) => {
-    return `/api/projects/${teamId}/internal/hog_flows/account_audience`
+    return `/api/projects/${teamId}/internal/script_flows/account_audience`
 }
 
 /**
@@ -947,7 +947,7 @@ export const internalInsightsFlowsAccountAudienceCreate = async (teamId: string,
 }
 
 export const getInternalInsightsFlowsBatchJobsStatusUpdateUrl = (teamId: string, batchJobId: string) => {
-    return `/api/projects/${teamId}/internal/hog_flows/batch_jobs/${batchJobId}/status`
+    return `/api/projects/${teamId}/internal/script_flows/batch_jobs/${batchJobId}/status`
 }
 
 /**
@@ -970,7 +970,7 @@ export const internalInsightsFlowsBatchJobsStatusUpdate = async (
 }
 
 export const getInternalInsightsFlowsUserBlastRadiusCreateUrl = (teamId: string) => {
-    return `/api/projects/${teamId}/internal/hog_flows/user_blast_radius`
+    return `/api/projects/${teamId}/internal/script_flows/user_blast_radius`
 }
 
 /**
@@ -985,7 +985,7 @@ export const internalInsightsFlowsUserBlastRadiusCreate = async (teamId: string,
 }
 
 export const getInternalInsightsFlowsUserBlastRadiusPersonsCreateUrl = (teamId: string) => {
-    return `/api/projects/${teamId}/internal/hog_flows/user_blast_radius_persons`
+    return `/api/projects/${teamId}/internal/script_flows/user_blast_radius_persons`
 }
 
 /**

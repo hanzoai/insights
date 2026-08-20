@@ -10,12 +10,11 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.admin.sites import site as admin_site
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required as base_login_required
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.migrations.executor import MigrationExecutor
 from django.db.models import Q
-from django.http import HttpRequest, HttpResponse, HttpResponseNotAllowed, JsonResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseNotAllowed, HttpResponseNotFound, JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import never_cache
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -26,24 +25,19 @@ import structlog
 from opentelemetry import trace
 
 from insights.api.capture import capture_internal
+from insights.git import get_git_commit_short
 from insights.auth import AUTH_BRAND_COOKIE, apply_auth_brand_cookie, normalize_auth_brand
 from insights.cloud_utils import is_cloud
 from insights.email import is_email_available
 from insights.exceptions_capture import capture_exception
 from insights.health import is_datastore_connected, is_kafka_connected
-from insights.helpers.dev_login import is_dev_login_allowed
 from insights.models import Organization, Team, User
 from insights.models.activity_logging.activity_log import Detail, log_activity
 from insights.models.integration import SlackIntegration
 from insights.models.oauth import find_oauth_access_token, find_oauth_refresh_token
 from insights.models.personal_api_key import find_personal_api_key
 from insights.models.project_secret_api_key import find_project_secret_api_key
-from insights.models.utils import (
-    OAUTH_ACCESS_TOKEN_PREFIX,
-    OAUTH_REFRESH_TOKEN_PREFIX,
-    PROJECT_API_TOKEN_PREFIX,
-    SECRET_API_TOKEN_PREFIX,
-)
+from insights.models.utils import KeyKind, key_kind
 from insights.plugins.plugin_server_api import validate_messaging_preferences_token
 from insights.redis import get_client
 from insights.utils import (
@@ -100,9 +94,6 @@ def login_required(view):
             return view(request, *args, **kwargs)
         if not User.objects.exists():
             return redirect("/preflight")
-        elif not request.user.is_authenticated and settings.AUTO_LOGIN:
-            user = User.objects.filter(is_active=True).first()
-            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
         response = base_handler(request, *args, **kwargs)
 
         # Don't include next=/ in the login redirect URL since "/" is the default destination
@@ -116,6 +107,19 @@ def login_required(view):
         return apply_auth_brand_cookie(request, response)
 
     return handler
+
+
+def static_not_found(request: HttpRequest) -> HttpResponse:
+    """A hashed asset this build does not have is missing, not private.
+
+    Every deploy emits new filenames and drops the previous set, so a page loaded
+    before a rollout asks for chunks the new pods never had. Those requests used to
+    fall through to the SPA catch-all, which is login_required -- so the browser
+    asked for a JavaScript module and got a 302 to the IdP, then reported "Expected
+    a JavaScript module but the server responded with MIME type text/html". That
+    reads as a bundler fault and sends you hunting; the truth is the file is gone.
+    """
+    return HttpResponseNotFound("Not found\n", content_type="text/plain")
 
 
 def health(request):
@@ -228,6 +232,9 @@ def preflight_check(request: HttpRequest) -> JsonResponse:
         "object_storage": in_cloud or _traced("preflight.is_object_storage_available", is_object_storage_available),
         "public_egress_ip_addresses": settings.PUBLIC_EGRESS_IP_ADDRESSES,
         "wizard_cloud_run_available": bool(settings.WIZARD_CLOUD_RUN_OAUTH_CLIENT_ID),
+        # Which commit is serving. Deploy verification asks this; it used to sign in to read
+        # instance_status instead, which is a session for a fact that is not private.
+        "git_sha": get_git_commit_short() or None,
     }
     auth_brand = normalize_auth_brand(request.COOKIES.get(AUTH_BRAND_COOKIE))
     if auth_brand:
@@ -235,9 +242,6 @@ def preflight_check(request: HttpRequest) -> JsonResponse:
 
     if settings.DEBUG or settings.E2E_TESTING:
         response["is_debug"] = True
-
-    if is_dev_login_allowed():
-        response["allow_dev_login"] = True
 
     if settings.TEST:
         response["is_test"] = True
@@ -254,9 +258,14 @@ def preflight_check(request: HttpRequest) -> JsonResponse:
             if not in_cloud
             else None,
             "openai_available": bool(os.environ.get("OPENAI_API_KEY")),
-            # Max runs on Anthropic, so it needs its own signal — otherwise self-hosted instances
-            # render the assistant but fail at call time with no key configured.
-            "anthropic_available": bool(os.environ.get("ANTHROPIC_API_KEY")),
+            # Whether the assistant has somewhere to send a request, named for the
+            # question rather than for one vendor. It answered from ANTHROPIC_API_KEY
+            # alone, so an instance routed through our own gateway — which is what
+            # build_async_anthropic_client prefers, and what pays — reported the
+            # assistant as unavailable and told the user to go get a vendor key.
+            # Our own gateway needs no key here: the caller's IAM token is the
+            # credential, so a configured URL is the whole condition.
+            "assistant_available": bool(settings.AI_GATEWAY_URL or os.environ.get("ANTHROPIC_API_KEY")),
             "site_url": settings.SITE_URL,
             "instance_preferences": settings.INSTANCE_PREFERENCES,
             "buffer_conversion_seconds": settings.BUFFER_CONVERSION_SECONDS,
@@ -460,17 +469,14 @@ def api_key_search_view(request: HttpRequest):
             return HttpResponseNotAllowed(permitted_methods=["POST"])
         query = query.strip()
 
+    searched_kind = key_kind(query)
+
     personal_api_key_object = None
     personal_api_key_hash_mode = None
-    # Legacy personal API keys predate the phx_ prefix, so any query without another known
-    # prefix is also treated as a personal key candidate (matching authentication behavior).
-    non_personal_api_key_prefixes = (
-        SECRET_API_TOKEN_PREFIX,
-        OAUTH_ACCESS_TOKEN_PREFIX,
-        OAUTH_REFRESH_TOKEN_PREFIX,
-        PROJECT_API_TOKEN_PREFIX,
-    )
-    if query and not query.startswith(non_personal_api_key_prefixes):
+    # A personal key and a project secret key share the secret mark, so both are looked
+    # up and whichever store holds it answers. Legacy personal keys predate the marks
+    # entirely, so an unmarked query is a candidate too (matching authentication).
+    if query and searched_kind in (None, KeyKind.SECRET):
         result = find_personal_api_key(query)
         if result is not None:
             personal_api_key_object, personal_api_key_hash_mode = result
@@ -478,7 +484,7 @@ def api_key_search_view(request: HttpRequest):
     project_secret_api_key_object = None
     team_object = None
     team_object_key_type = None
-    if query is not None and query.startswith(SECRET_API_TOKEN_PREFIX):
+    if searched_kind is KeyKind.SECRET:
         project_secret_api_key_object = find_project_secret_api_key(query)
 
         Team = apps.get_model(app_label="insights", model_name="Team")
@@ -492,11 +498,11 @@ def api_key_search_view(request: HttpRequest):
             pass
 
     oauth_access_token_object = None
-    if query is not None and query.startswith(OAUTH_ACCESS_TOKEN_PREFIX):
+    if searched_kind is KeyKind.OAUTH_ACCESS:
         oauth_access_token_object = find_oauth_access_token(query)
 
     oauth_refresh_token_object = None
-    if query is not None and query.startswith(OAUTH_REFRESH_TOKEN_PREFIX):
+    if searched_kind is KeyKind.OAUTH_REFRESH:
         oauth_refresh_token_object = find_oauth_refresh_token(query)
 
     context = {

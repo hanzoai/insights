@@ -9,7 +9,7 @@ import { captureException } from '~/common/utils/insights'
 
 import { HealthCheckResult, PluginsServerConfig, Team } from '../../types'
 import { CdpDataWarehouseEvent, CdpDataWarehouseEventSchema } from '../schema'
-import { InsightsFlowInvocationPipeline } from '../services/script-flow-invocation-pipeline.service'
+import { FlowInvocationPipeline } from '../services/script-flow-invocation-pipeline.service'
 import { InsightsFunctionInvocationPipeline } from '../services/script-function-invocation-pipeline.service'
 import { JobQueue } from '../services/job-queue/job-queue.interface'
 import { CyclotronJobInvocation, InsightsFunctionInvocationGlobals, InsightsFunctionTypeType } from '../types'
@@ -21,49 +21,49 @@ import { counterParseError } from './metrics'
 export const WAREHOUSE_SOURCE_ROW_EVENT = '$warehouse_source_row'
 
 // Special property on the synthetic event holding the dot-notated source table name.
-// Used by the pipeline's eligibility predicate to match warehouse-table InsightsFlow triggers
+// Used by the pipeline's eligibility predicate to match warehouse-table Flow triggers
 // against the row's source table without adding a top-level field to globals.
 export const DWH_SOURCE_TABLE_PROPERTY = '$source_table'
 
 export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase {
     protected name = 'CdpDatawarehouseEventsConsumer'
-    protected hogTypes: InsightsFunctionTypeType[] = ['destination']
+    protected scriptTypes: InsightsFunctionTypeType[] = ['destination']
 
-    protected hogQueue: JobQueue
-    protected hogflowQueue: JobQueue
+    protected scriptQueue: JobQueue
+    protected flowQueue: JobQueue
     protected kafkaConsumer: KafkaConsumerInterface
     private insightsFunctionPipeline: InsightsFunctionInvocationPipeline
-    private hogFlowPipeline: InsightsFlowInvocationPipeline
+    private flowPipeline: FlowInvocationPipeline
 
     constructor(
         config: PluginsServerConfig,
         deps: CdpConsumerBaseDeps,
-        jobQueues: { hogQueue: JobQueue; hogflowQueue: JobQueue }
+        jobQueues: { scriptQueue: JobQueue; flowQueue: JobQueue }
     ) {
         super(config, deps)
-        this.hogQueue = jobQueues.hogQueue
-        this.hogflowQueue = jobQueues.hogflowQueue
+        this.scriptQueue = jobQueues.scriptQueue
+        this.flowQueue = jobQueues.flowQueue
         this.kafkaConsumer = createKafkaConsumer({
             groupId: 'cdp-data-warehouse-events-consumer',
             topic: 'cdp_data_warehouse_source_table',
         })
         this.insightsFunctionPipeline = new InsightsFunctionInvocationPipeline(config, {
             insightsFunctionManager: this.insightsFunctionManager,
-            hogInputsService: this.hogInputsService,
-            hogWatcher: this.hogWatcher,
-            hogWatcherMirror: this.hogWatcherMirror,
-            hogMasker: this.hogMasker,
+            scriptInputsService: this.scriptInputsService,
+            scriptWatcher: this.scriptWatcher,
+            scriptWatcherMirror: this.scriptWatcherMirror,
+            scriptMasker: this.scriptMasker,
             insightsFunctionMonitoringService: this.insightsFunctionMonitoringService,
             quotaLimiting: deps.quotaLimiting,
             redis: this.redis,
             valkeyShadow: this.valkeyShadow,
         })
-        this.hogFlowPipeline = new InsightsFlowInvocationPipeline(config, {
-            hogFlowManager: this.hogFlowManager,
-            hogFlowExecutor: this.hogFlowExecutor,
-            hogWatcher: this.hogWatcher,
-            hogWatcherMirror: this.hogWatcherMirror,
-            hogMasker: this.hogMasker,
+        this.flowPipeline = new FlowInvocationPipeline(config, {
+            flowManager: this.flowManager,
+            flowExecutor: this.flowExecutor,
+            scriptWatcher: this.scriptWatcher,
+            scriptWatcherMirror: this.scriptWatcherMirror,
+            scriptMasker: this.scriptMasker,
             insightsFunctionMonitoringService: this.insightsFunctionMonitoringService,
             quotaLimiting: deps.quotaLimiting,
             redis: this.redis,
@@ -81,23 +81,23 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase {
         // Warehouse rows carry no `$groups` property — group enrichment is a no-op here, so we skip the
         // call entirely to avoid the per-batch group-types lookup.
 
-        const [hogInvocations, hogflowInvocations] = await Promise.all([
+        const [scriptInvocations, flowInvocations] = await Promise.all([
             this.insightsFunctionPipeline.buildInvocations(invocationGlobals, {
-                hogTypes: this.hogTypes,
+                scriptTypes: this.scriptTypes,
                 filterFn: (fn) => (fn.filters?.source ?? 'events') === 'data-warehouse-table',
             }),
             // Source-compatibility matching lives in the consumer rather than the executor — the
             // consumer knows it's serving warehouse rows, so it filters flows to only those whose
             // trigger.table_name matches the row's $source_table property. The executor then just
             // evaluates filter bytecode on the matched flows.
-            this.hogFlowPipeline.buildInvocations(invocationGlobals, {
+            this.flowPipeline.buildInvocations(invocationGlobals, {
                 eligibilityFn: (flow, globals) =>
                     flow.trigger.type === 'data-warehouse-table' &&
                     flow.trigger.table_name === globals.event?.properties?.[DWH_SOURCE_TABLE_PROPERTY],
             }),
         ])
 
-        const invocationsToBeQueued = [...hogInvocations, ...hogflowInvocations]
+        const invocationsToBeQueued = [...scriptInvocations, ...flowInvocations]
 
         // Emit a `running` lifecycle row for each freshly-created invocation so the runs UI shows
         // warehouse-triggered flows as in-flight (matching the event consumer). The terminal row is
@@ -109,11 +109,11 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase {
 
         return {
             backgroundTask: Promise.all([
-                instrumentFn({ key: 'cdp.background_task.queue_hog_invocations', sendException: false }, () =>
-                    this.hogQueue.queueInvocations(hogInvocations)
+                instrumentFn({ key: 'cdp.background_task.queue_invocations', sendException: false }, () =>
+                    this.scriptQueue.queueInvocations(scriptInvocations)
                 ),
-                instrumentFn({ key: 'cdp.background_task.queue_hogflow_invocations', sendException: false }, () =>
-                    this.hogflowQueue.queueInvocations(hogflowInvocations)
+                instrumentFn({ key: 'cdp.background_task.queue_flow_invocations', sendException: false }, () =>
+                    this.flowQueue.queueInvocations(flowInvocations)
                 ),
                 instrumentFn({ key: 'cdp.background_task.monitoring_flush', sendException: false }, async () => {
                     try {
@@ -141,13 +141,13 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase {
                     const kafkaEvent = parseJSON(message.value!.toString()) as unknown
                     const event = CdpDataWarehouseEventSchema.parse(kafkaEvent)
 
-                    const [teamInsightsFunctions, teamInsightsFlows, team] = await Promise.all([
-                        this.insightsFunctionManager.getInsightsFunctionsForTeam(event.team_id, this.hogTypes),
-                        this.hogFlowManager.getInsightsFlowsForTeam(event.team_id),
+                    const [teamInsightsFunctions, teamFlows, team] = await Promise.all([
+                        this.insightsFunctionManager.getInsightsFunctionsForTeam(event.team_id, this.scriptTypes),
+                        this.flowManager.getFlowsForTeam(event.team_id),
                         this.deps.teamManager.getTeam(event.team_id),
                     ])
 
-                    if ((!teamInsightsFunctions.length && !teamInsightsFlows.length) || !team) {
+                    if ((!teamInsightsFunctions.length && !teamFlows.length) || !team) {
                         return
                     }
 
@@ -166,7 +166,7 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase {
 
     public override async start(): Promise<void> {
         await super.start()
-        await Promise.all([this.hogQueue.startAsProducer(), this.hogflowQueue.startAsProducer()])
+        await Promise.all([this.scriptQueue.startAsProducer(), this.flowQueue.startAsProducer()])
         await this.kafkaConsumer.connect(async (messages) => {
             logger.info('🔁', `${this.name} - handling batch`, { size: messages.length })
             return await instrumentFn('cdpConsumer.handleEachBatch', async () => {
@@ -180,7 +180,7 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase {
     public override async stop(): Promise<void> {
         logger.info('💤', 'Stopping consumer...')
         await this.kafkaConsumer.disconnect()
-        await Promise.all([this.hogQueue.stopProducer(), this.hogflowQueue.stopProducer()])
+        await Promise.all([this.scriptQueue.stopProducer(), this.flowQueue.stopProducer()])
         await super.stop()
     }
 
@@ -202,7 +202,7 @@ function convertDataWarehouseEventToInsightsFunctionInvocationGlobals(
     //     billing dedup (keyed on event.uuid) counts each row distinctly and stably across re-runs
     //   - `$warehouse_source_row` as the event name so downstream code can identify warehouse-row globals
     //   - the dot-notated source table name on `properties.$source_table` so consumers can match
-    //     warehouse-table InsightsFlow triggers without a new top-level field on globals
+    //     warehouse-table Flow triggers without a new top-level field on globals
     return {
         project: {
             id: team.id,

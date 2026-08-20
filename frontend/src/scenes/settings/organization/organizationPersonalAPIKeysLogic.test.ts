@@ -8,7 +8,7 @@ import { organizationPersonalAPIKeysLogic } from './organizationPersonalAPIKeysL
 const MOCK_KEYS = [
     {
         owner: { first_name: 'Ada', last_name: 'Lovelace', email: 'ada@x.com' },
-        mask_value: 'phx_***1234',
+        mask_value: 'sk-***1234',
         scopes: ['insight:read'],
         access_scope: { type: 'all' },
         last_used_at: null,
@@ -16,7 +16,7 @@ const MOCK_KEYS = [
     },
     {
         owner: { first_name: 'Alan', last_name: 'Turing', email: 'alan@x.com' },
-        mask_value: 'phx_***5678',
+        mask_value: 'sk-***5678',
         scopes: ['feature_flag:write'],
         access_scope: { type: 'projects', projects: [{ id: 1, name: 'Default project' }] },
         last_used_at: '2026-02-01T00:00:00Z',
@@ -30,7 +30,7 @@ describe('organizationPersonalAPIKeysLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/organizations/:organization_id/personal_api_keys/': {
+                '/v1/organizations/:organization_id/personal_api_keys/': {
                     count: MOCK_KEYS.length,
                     next: null,
                     previous: null,

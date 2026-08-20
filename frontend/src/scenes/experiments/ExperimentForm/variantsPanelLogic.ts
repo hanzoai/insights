@@ -238,7 +238,7 @@ export const variantsPanelLogic = kea<variantsPanelLogicType>({
 
                     // Double-check with API for recently created flags
                     const response = await api.get(
-                        `api/projects/${values.currentProjectId}/feature_flags/?${toParams({ search: key })}`
+                        `v1/projects/${values.currentProjectId}/feature_flags/?${toParams({ search: key })}`
                     )
 
                     if (response.results.length > 0) {

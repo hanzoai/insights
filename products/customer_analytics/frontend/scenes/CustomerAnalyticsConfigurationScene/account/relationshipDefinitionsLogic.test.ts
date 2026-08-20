@@ -11,8 +11,8 @@ import type { AccountRelationshipDefinitionApi } from 'products/customer_analyti
 
 import { relationshipDefinitionsLogic } from './relationshipDefinitionsLogic'
 
-const DEFINITIONS_URL = '/api/projects/:team_id/account_relationship_definitions/'
-const DEFINITION_URL = '/api/projects/:team_id/account_relationship_definitions/:id/'
+const DEFINITIONS_URL = '/v1/projects/:team_id/account_relationship_definitions/'
+const DEFINITION_URL = '/v1/projects/:team_id/account_relationship_definitions/:id/'
 
 const buildDefinition = (
     overrides: Partial<AccountRelationshipDefinitionApi> = {}

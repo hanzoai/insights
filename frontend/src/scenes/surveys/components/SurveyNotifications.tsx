@@ -4,7 +4,7 @@ import { IconCopy, IconPlus } from '@hanzo/icons'
 import { Button, Menu, Skeleton, Switch } from '@hanzo/elements'
 
 import { ConfirmDeleteButton } from 'lib/components/ConfirmDeleteButton'
-import { MailHog } from 'lib/components/mascots'
+import { MailScript } from 'lib/components/mascots'
 import { MenuItems } from 'lib/elements/Menu/Menu'
 import { InsightsFunctionIcon } from 'scenes/insights-functions/configuration/InsightsFunctionIcon'
 import { getNotificationDescription } from 'scenes/insights-functions/list/notificationDescription'
@@ -119,7 +119,7 @@ export function SurveyNotifications({
     if (surveyNotifications.length === 0) {
         return (
             <section className="flex flex-col items-center gap-5 px-6 py-12 text-center">
-                <MailHog className="h-32 w-auto" />
+                <MailScript className="h-32 w-auto" />
                 <div className="flex flex-col gap-1.5 max-w-md">
                     <h3 className="m-0 text-base font-semibold">Get notified when responses land</h3>
                     <p className="m-0 text-sm text-muted">

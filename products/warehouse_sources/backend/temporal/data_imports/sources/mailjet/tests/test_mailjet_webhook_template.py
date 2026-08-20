@@ -17,7 +17,7 @@ SCHEMA_MAPPING = {"messageevent": "schema_message_events"}
 class TestMailjetWarehouseWebhookTemplate(BaseInsightsFunctionTemplateTest):
     template = template
 
-    def createHogGlobals(self, globals=None) -> dict:
+    def createScriptGlobals(self, globals=None) -> dict:
         data: dict = {
             "request": {
                 "method": "POST",

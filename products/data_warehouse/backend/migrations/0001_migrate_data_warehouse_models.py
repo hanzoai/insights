@@ -11,6 +11,7 @@ from django.db import migrations, models
 
 import insights.models.utils
 import insights.helpers.encrypted_fields
+from insights.migration_helpers import CreateTableIfNotExists
 
 import products.data_modeling.backend.facade.models
 import products.data_modeling.backend.facade.modeling
@@ -824,6 +825,25 @@ class Migration(migrations.Migration):
                         fields=("team", "kind"), name="datawarehouse_unique_managed_viewset_team_kind"
                     ),
                 ),
+            ],
+        ),
+        # Absent on a fresh install, where no `insights` migration ever created them.
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                CreateTableIfNotExists(model_name="datawarehousecredential"),
+                CreateTableIfNotExists(model_name="datawarehousemanagedviewset"),
+                CreateTableIfNotExists(model_name="datawarehousesavedquery"),
+                CreateTableIfNotExists(model_name="datawarehousetable"),
+                CreateTableIfNotExists(model_name="externaldatasource"),
+                CreateTableIfNotExists(model_name="externaldatasourcerevenueanalyticsconfig"),
+                CreateTableIfNotExists(model_name="querytabstate"),
+                CreateTableIfNotExists(model_name="externaldataschema"),
+                CreateTableIfNotExists(model_name="externaldatajob"),
+                CreateTableIfNotExists(model_name="datawarehouseviewlink"),
+                CreateTableIfNotExists(model_name="datawarehousesavedquerydraft"),
+                CreateTableIfNotExists(model_name="datawarehousemodelpath"),
+                CreateTableIfNotExists(model_name="datawarehousejoin"),
+                CreateTableIfNotExists(model_name="datamodelingjob"),
             ],
         ),
     ]

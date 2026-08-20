@@ -30,13 +30,13 @@ describe('sessionRecordingsPlaylistSceneLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/session_recording_playlists/:id': mockPlaylist,
+                '/v1/projects/:team/session_recording_playlists/:id': mockPlaylist,
             },
             post: {
-                '/api/projects/:team/session_recording_playlists/:id/playlist_viewed': [200, {}],
+                '/v1/projects/:team/session_recording_playlists/:id/playlist_viewed': [200, {}],
             },
             patch: {
-                '/api/projects/:team/session_recording_playlists/:id': () => {
+                '/v1/projects/:team/session_recording_playlists/:id': () => {
                     return [
                         200,
                         {
@@ -65,7 +65,7 @@ describe('sessionRecordingsPlaylistSceneLogic', () => {
             const savedFilter = { ...mockPlaylist, type: 'filters' as const }
             useMocks({
                 get: {
-                    '/api/projects/:team/session_recording_playlists/:id': savedFilter,
+                    '/v1/projects/:team/session_recording_playlists/:id': savedFilter,
                 },
             })
             router.actions.push(urls.replayPlaylist(savedFilter.short_id))

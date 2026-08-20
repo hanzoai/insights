@@ -16,12 +16,12 @@ describe('inboxReportDetailLogic feedback note submission', () => {
         feedbackPosts = 0
         useMocks({
             get: {
-                '/api/projects/:team_id/signals/reports/:id/artefacts/': { results: [] },
-                '/api/projects/:team_id/signals/reports/:id/signals/': [],
-                '/api/projects/:team_id/signals/reports/available_reviewers/': [],
+                '/v1/projects/:team_id/signals/reports/:id/artefacts/': { results: [] },
+                '/v1/projects/:team_id/signals/reports/:id/signals/': [],
+                '/v1/projects/:team_id/signals/reports/available_reviewers/': [],
             },
             post: {
-                '/api/projects/:team_id/signals/reports/:id/feedback/': () => {
+                '/v1/projects/:team_id/signals/reports/:id/feedback/': () => {
                     feedbackPosts += 1
                     return [200, { forwarded: true }]
                 },

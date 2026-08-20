@@ -33,13 +33,13 @@ describe('loginSessionsLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/users/@me/login_sessions/': () => [200, SESSIONS],
+                '/v1/users/@me/login_sessions/': () => [200, SESSIONS],
             },
             delete: {
-                '/api/users/@me/login_sessions/:id/': () => [204, null],
+                '/v1/users/@me/login_sessions/:id/': () => [204, null],
             },
             post: {
-                '/api/users/@me/login_sessions/revoke_others/': () => [200, { revoked_count: 1 }],
+                '/v1/users/@me/login_sessions/revoke_others/': () => [200, { revoked_count: 1 }],
             },
         })
         initKeaTests()

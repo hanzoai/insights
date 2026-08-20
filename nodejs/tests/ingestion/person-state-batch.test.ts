@@ -1985,8 +1985,8 @@ describe('PersonState.processEvent()', () => {
 
             // verify Datastore distinct_ids
             await datastore.delayUntilEventIngested(() => fetchDistinctIdsDatastoreVersion1())
-            const clickHouseDistinctIds = await fetchDistinctIdsDatastore(persons[0])
-            expect(clickHouseDistinctIds).toEqual(expect.arrayContaining([oldUserDistinctId, newUserDistinctId]))
+            const datastoreDistinctIds = await fetchDistinctIdsDatastore(persons[0])
+            expect(datastoreDistinctIds).toEqual(expect.arrayContaining([oldUserDistinctId, newUserDistinctId]))
         })
 
         it(`does not merge people when distinct_id user is not identified and $anon_distinct_id user is`, async () => {
@@ -2185,8 +2185,8 @@ describe('PersonState.processEvent()', () => {
 
             // verify Datastore distinct_ids
             await datastore.delayUntilEventIngested(() => fetchDistinctIdsDatastoreVersion1())
-            const clickHouseDistinctIds = await fetchDistinctIdsDatastore(persons[0])
-            expect(clickHouseDistinctIds).toEqual(expect.arrayContaining([oldUserDistinctId, newUserDistinctId]))
+            const datastoreDistinctIds = await fetchDistinctIdsDatastore(persons[0])
+            expect(datastoreDistinctIds).toEqual(expect.arrayContaining([oldUserDistinctId, newUserDistinctId]))
         })
 
         it(`handles race condition when other thread creates the user`, async () => {
@@ -2410,8 +2410,8 @@ describe('PersonState.processEvent()', () => {
 
             // verify Datastore distinct_ids
             await datastore.delayUntilEventIngested(() => fetchDistinctIdsDatastoreVersion1())
-            const clickHouseDistinctIds = await fetchDistinctIdsDatastore(persons[0])
-            expect(clickHouseDistinctIds).toEqual(expect.arrayContaining([oldUserDistinctId, newUserDistinctId]))
+            const datastoreDistinctIds = await fetchDistinctIdsDatastore(persons[0])
+            expect(datastoreDistinctIds).toEqual(expect.arrayContaining([oldUserDistinctId, newUserDistinctId]))
         })
     })
 
@@ -2916,8 +2916,8 @@ describe('PersonState.processEvent()', () => {
 
             // verify Datastore distinct_ids
             await datastore.delayUntilEventIngested(() => fetchDistinctIdsDatastoreVersion1())
-            const clickHouseDistinctIds = await fetchDistinctIdsDatastore(person!)
-            expect(clickHouseDistinctIds).toEqual(expect.arrayContaining([firstUserDistinctId, secondUserDistinctId]))
+            const datastoreDistinctIds = await fetchDistinctIdsDatastore(person!)
+            expect(datastoreDistinctIds).toEqual(expect.arrayContaining([firstUserDistinctId, secondUserDistinctId]))
         })
 
         const getMergeEventMessages = () =>

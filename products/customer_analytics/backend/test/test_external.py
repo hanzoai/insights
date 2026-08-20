@@ -46,7 +46,7 @@ class TestExternalAccountAPI(APIBaseTest):
             team_id=self.team.id, name="CSM"
         )
         self.csm_key = str(self.csm_definition.id)
-        self.url = "/api/customer_analytics/external/account"
+        self.url = "/v1/customer_analytics/external/account"
         csp_enabled = patch(
             "products.customer_analytics.backend.presentation.views.external.hanzo_insights.feature_enabled",
             return_value=True,
@@ -86,7 +86,7 @@ class TestExternalAccountAPI(APIBaseTest):
             ("no_header", ""),
             ("bad_scheme", "Basic abc123"),
             ("empty_bearer", "Bearer "),
-            ("wrong_token", "Bearer phs_wrong_token"),
+            ("wrong_token", "Bearer sk-wrong_token"),
         ]
     )
     def test_get_rejects_invalid_auth(self, _name, auth_value):
@@ -472,7 +472,7 @@ class TestExternalAccountCustomPropertiesAPI(APIBaseTest):
         self.seats = create_custom_property_definition(
             team_id=self.team.id, name="Seats", display_type=DisplayType.NUMBER
         )
-        self.url = "/api/customer_analytics/external/account/custom_property_values"
+        self.url = "/v1/customer_analytics/external/account/custom_property_values"
         csp_enabled = patch(
             "products.customer_analytics.backend.presentation.views.external.hanzo_insights.feature_enabled",
             return_value=True,

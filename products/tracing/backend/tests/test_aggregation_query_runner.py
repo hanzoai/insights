@@ -117,7 +117,7 @@ class TestTraceSpansTreeCallRatio(_TraceSpansTestBase):
 
 class TestTraceSpansAggregationPercentiles(_TraceSpansTestBase):
     SERVICE = "web"
-    NAME = "GET /api/things"
+    NAME = "GET /v1/things"
     # (duration_ms, span_count): sized so each percentile of n=1000 lands inside one uniform band.
     BANDS = [(10, 600), (100, 360), (1000, 35), (5000, 5)]
 
@@ -167,7 +167,7 @@ class TestTraceSpansAggregationPercentiles(_TraceSpansTestBase):
 class TestTraceSpansTreePercentiles(_TraceSpansTestBase):
     SERVICE = "web"
     PARENT_NAME = "entry-op"
-    CHILD_NAME = "GET /api/things"
+    CHILD_NAME = "GET /v1/things"
     # Same banding as the flat test, applied to the 1000 child spans of one (parent → child) edge.
     BANDS = [(10, 600), (100, 360), (1000, 35), (5000, 5)]
 

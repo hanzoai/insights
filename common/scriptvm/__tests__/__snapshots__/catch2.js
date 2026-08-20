@@ -1,4 +1,4 @@
-function print (...args) { console.log(...args.map(__printHogStringOutput)) }
+function print (...args) { console.log(...args.map(__printStringOutput)) }
 function concat (...args) { return args.map((arg) => (arg === null ? '' : __STLToString(arg))).join('') }
 function __getProperty(objectOrArray, key, nullish) {
     if ((nullish && !objectOrArray) || key === 0) { return null }
@@ -6,24 +6,24 @@ function __getProperty(objectOrArray, key, nullish) {
     else { return objectOrArray[key] }
 }
 function __STLToString(arg) {
-    if (arg && __isHogDate(arg)) { return `${arg.year}-${arg.month.toString().padStart(2, '0')}-${arg.day.toString().padStart(2, '0')}`; }
-    else if (arg && __isHogDateTime(arg)) { return __DateTimeToString(arg); }
-    return __printHogStringOutput(arg); }
-function __printHogStringOutput(obj) { if (typeof obj === 'string') { return obj } return __printHogValue(obj) }
-function __printHogValue(obj, marked = new Set()) {
+    if (arg && __isDate(arg)) { return `${arg.year}-${arg.month.toString().padStart(2, '0')}-${arg.day.toString().padStart(2, '0')}`; }
+    else if (arg && __isDateTime(arg)) { return __DateTimeToString(arg); }
+    return __printStringOutput(arg); }
+function __printStringOutput(obj) { if (typeof obj === 'string') { return obj } return __printValue(obj) }
+function __printValue(obj, marked = new Set()) {
     if (typeof obj === 'object' && obj !== null && obj !== undefined) {
-        if (marked.has(obj) && !__isHogDateTime(obj) && !__isHogDate(obj) && !__isHogError(obj)) { return 'null'; }
+        if (marked.has(obj) && !__isDateTime(obj) && !__isDate(obj) && !__isError(obj)) { return 'null'; }
         marked.add(obj);
         try {
             if (Array.isArray(obj)) {
-                if (obj.__isHogTuple) { return obj.length < 2 ? `tuple(${obj.map((o) => __printHogValue(o, marked)).join(', ')})` : `(${obj.map((o) => __printHogValue(o, marked)).join(', ')})`; }
-                return `[${obj.map((o) => __printHogValue(o, marked)).join(', ')}]`;
+                if (obj.__isTuple) { return obj.length < 2 ? `tuple(${obj.map((o) => __printValue(o, marked)).join(', ')})` : `(${obj.map((o) => __printValue(o, marked)).join(', ')})`; }
+                return `[${obj.map((o) => __printValue(o, marked)).join(', ')}]`;
             }
-            if (__isHogDateTime(obj)) { const millis = String(obj.dt); return `DateTime(${millis}${millis.includes('.') ? '' : '.0'}, ${__escapeString(obj.zone)})`; }
-            if (__isHogDate(obj)) return `Date(${obj.year}, ${obj.month}, ${obj.day})`;
-            if (__isHogError(obj)) { return `${String(obj.type)}(${__escapeString(obj.message)}${obj.payload ? `, ${__printHogValue(obj.payload, marked)}` : ''})`; }
-            if (obj instanceof Map) { return `{${Array.from(obj.entries()).map(([key, value]) => `${__printHogValue(key, marked)}: ${__printHogValue(value, marked)}`).join(', ')}}`; }
-            return `{${Object.entries(obj).map(([key, value]) => `${__printHogValue(key, marked)}: ${__printHogValue(value, marked)}`).join(', ')}}`;
+            if (__isDateTime(obj)) { const millis = String(obj.dt); return `DateTime(${millis}${millis.includes('.') ? '' : '.0'}, ${__escapeString(obj.zone)})`; }
+            if (__isDate(obj)) return `Date(${obj.year}, ${obj.month}, ${obj.day})`;
+            if (__isError(obj)) { return `${String(obj.type)}(${__escapeString(obj.message)}${obj.payload ? `, ${__printValue(obj.payload, marked)}` : ''})`; }
+            if (obj instanceof Map) { return `{${Array.from(obj.entries()).map(([key, value]) => `${__printValue(key, marked)}: ${__printValue(value, marked)}`).join(', ')}}`; }
+            return `{${Object.entries(obj).map(([key, value]) => `${__printValue(key, marked)}: ${__printValue(value, marked)}`).join(', ')}}`;
         } finally {
             marked.delete(obj);
         }
@@ -33,7 +33,7 @@ function __printHogValue(obj, marked = new Set()) {
             if (typeof obj === 'function') return `fn<${__escapeIdentifier(obj.name || 'lambda')}(${obj.length})>`;
     return obj.toString();
 }
-function __isHogError(obj) {return obj && obj.__hogError__ === true}
+function __isError(obj) {return obj && obj.__error__ === true}
 function __escapeString(value) {
     const singlequoteEscapeCharsMap = { '\b': '\\b', '\f': '\\f', '\r': '\\r', '\n': '\\n', '\t': '\\t', '\0': '\\0', '\v': '\\v', '\\': '\\\\', "'": "\\'" }
     return `'${value.split('').map((c) => singlequoteEscapeCharsMap[c] || c).join('')}'`;
@@ -44,10 +44,10 @@ function __escapeIdentifier(identifier) {
     if (/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(identifier)) return identifier;
     return `\`${identifier.split('').map((c) => backquoteEscapeCharsMap[c] || c).join('')}\``;
 }
-function __isHogDateTime(obj) { return obj && obj.__hogDateTime__ === true }
-function __isHogDate(obj) { return obj && obj.__hogDate__ === true }
+function __isDateTime(obj) { return obj && obj.__dateTime__ === true }
+function __isDate(obj) { return obj && obj.__date__ === true }
 function __DateTimeToString(dt) {
-    if (__isHogDateTime(dt)) {
+    if (__isDateTime(dt)) {
         const date = new Date(dt.dt * 1000);
         const timeZone = dt.zone || 'UTC';
         const milliseconds = Math.floor(dt.dt * 1000 % 1000);
@@ -86,10 +86,10 @@ function __DateTimeToString(dt) {
         return isoString;
     }
 }
-function HogError (type, message, payload) { return __newHogError(type, message, payload) }
-function __newHogError(type, message, payload) {
+function ScriptError (type, message, payload) { return __newError(type, message, payload) }
+function __newError(type, message, payload) {
     let error = new Error(message || 'An error occurred');
-    error.__hogError__ = true
+    error.__error__ = true
     error.type = type
     error.payload = payload
     return error
@@ -97,7 +97,7 @@ function __newHogError(type, message, payload) {
 
 try {
     try {
-            throw HogError("FishError", "You forgot to feed your fish");
+            throw ScriptError("FishError", "You forgot to feed your fish");
         } catch (__error) { if (__error.type === "FoodError") { let e = __error;
         print(concat("Problem with your food: ", __getProperty(e, "message", true)));
     }
@@ -111,7 +111,7 @@ print(concat("Error: ", __getProperty(e, "message", true)));
 }
 try {
     try {
-            throw HogError("FunkyError", "You forgot to feed your fish");
+            throw ScriptError("FunkyError", "You forgot to feed your fish");
         } catch (__error) { if (__error.type === "FoodError") { let e = __error;
         print(concat("Problem with your food: ", __getProperty(e, "message", true)));
     }
@@ -125,7 +125,7 @@ print(concat("Error of type ", __getProperty(e, "type", true), ": ", __getProper
 }
 try {
     try {
-            throw HogError("FishError", "You forgot to feed your fish");
+            throw ScriptError("FishError", "You forgot to feed your fish");
         } catch (__error) { if (__error.type === "FoodError") { let e = __error;
         print(concat("Problem with your food: ", __getProperty(e, "message", true)));
     }

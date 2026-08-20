@@ -23,10 +23,10 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/integrations': {},
+                '/v1/projects/:team_id/integrations': {},
 
-                '/api/projects/:team_id/feature_flags': featureFlags,
-                '/api/projects/:team_id/feature_flags/1111111111111/': [
+                '/v1/projects/:team_id/feature_flags': featureFlags,
+                '/v1/projects/:team_id/feature_flags/1111111111111/': [
                     404,
                     {
                         type: 'invalid',
@@ -34,18 +34,18 @@ const meta: Meta = {
                         detail: 'Not found.',
                     },
                 ],
-                '/api/projects/:team_id/feature_flags/:flagId/': ({ params }) => [
+                '/v1/projects/:team_id/feature_flags/:flagId/': ({ params }) => [
                     200,
                     featureFlags.results.find((r) => r.id === Number(params['flagId'])),
                 ],
-                '/api/projects/:team_id/feature_flags/:flagId/status': () => [
+                '/v1/projects/:team_id/feature_flags/:flagId/status': () => [
                     200,
                     {
                         status: 'active',
                         reason: 'Feature flag is active',
                     },
                 ],
-                '/api/environments/:team_id/default_evaluation_contexts/': {
+                '/v1/environments/:team_id/default_evaluation_contexts/': {
                     default_evaluation_contexts: [],
                     available_contexts: [],
                     hidden_contexts: [],
@@ -53,9 +53,9 @@ const meta: Meta = {
                 },
             },
             post: {
-                '/api/environments/:team_id/query/:kind': {},
+                '/v1/environments/:team_id/query/:kind': {},
                 // flag targeting has loaders, make sure they don't keep loading
-                '/api/projects/:team_id/feature_flags/user_blast_radius/': () => [200, { affected: 120, total: 2000 }],
+                '/v1/projects/:team_id/feature_flags/user_blast_radius/': () => [200, { affected: 120, total: 2000 }],
             },
         }),
     ],

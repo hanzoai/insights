@@ -33,6 +33,7 @@ from insights.schema import (
 )
 
 from insights.datastore.client import sync_execute
+from insights.models.ee_models import Role
 from insights.models.utils import uuid7
 
 from products.error_tracking.backend.insightsql_queries.error_tracking_query_builder import ErrorTrackingQueryBuilder
@@ -46,8 +47,6 @@ from products.error_tracking.backend.models import (
     sync_issues_to_datastore,
     update_error_tracking_issue_fingerprints,
 )
-
-from insights.models.ee_models import Role
 
 
 class TestErrorTrackingQueryRunner(DatastoreTestMixin, NonAtomicBaseTestKeepIdentities):
@@ -522,9 +521,7 @@ class TestErrorTrackingQueryRunner(DatastoreTestMixin, NonAtomicBaseTestKeepIden
                     PropertyGroupFilterValue(
                         type=FilterLogicalOperator.OR_,
                         values=[
-                            PersonPropertyFilter(
-                                key="email", value="email@hanzo.ai", operator=PropertyOperator.EXACT
-                            ),
+                            PersonPropertyFilter(key="email", value="email@hanzo.ai", operator=PropertyOperator.EXACT),
                         ],
                     )
                 ],

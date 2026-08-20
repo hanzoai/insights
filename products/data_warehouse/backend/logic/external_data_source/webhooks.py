@@ -86,14 +86,14 @@ def get_or_create_webhook_insights_function(
         inputs.update({key: {"value": value} for key, value in extra_inputs.items()})
 
     try:
-        existing_hog = InsightsFunction.objects.get(
+        existing_script = InsightsFunction.objects.get(
             team=team,
             type="warehouse_source_webhook",
             inputs__source_id__value=source_id,
             deleted=False,
         )
-        if existing_hog.inputs:
-            existing_mapping = existing_hog.inputs.get("schema_mapping", {}).get("value", {})
+        if existing_script.inputs:
+            existing_mapping = existing_script.inputs.get("schema_mapping", {}).get("value", {})
         else:
             existing_mapping = {}
     except InsightsFunction.DoesNotExist:
@@ -137,19 +137,19 @@ def get_or_create_webhook_insights_function(
 def create_and_register_webhook(
     source: WebhookSource,
     config: Config,
-    hog_fn_result: WebhookInsightsFunctionCreateResult,
+    script_fn_result: WebhookInsightsFunctionCreateResult,
     team_id: int,
     api_version: str | None = None,
 ) -> WebhookSetupResult:
     """Create the external webhook and save any extra inputs (e.g. signing secret) onto the InsightsFunction."""
-    assert hog_fn_result.insights_function is not None
+    assert script_fn_result.insights_function is not None
 
     result: WebhookCreationResult = source.create_webhook(
-        config, hog_fn_result.webhook_url, team_id, api_version=api_version
+        config, script_fn_result.webhook_url, team_id, api_version=api_version
     )
 
     if result.success and result.extra_inputs:
-        insights_function = hog_fn_result.insights_function
+        insights_function = script_fn_result.insights_function
         assert insights_function.inputs is not None
         insights_function.inputs = {
             **insights_function.inputs,
@@ -159,7 +159,7 @@ def create_and_register_webhook(
 
     return WebhookSetupResult(
         success=result.success,
-        webhook_url=hog_fn_result.webhook_url,
+        webhook_url=script_fn_result.webhook_url,
         error=result.error,
         pending_inputs=list(result.pending_inputs),
     )
@@ -168,14 +168,14 @@ def create_and_register_webhook(
 def reconcile_webhook_events(
     source: WebhookSource,
     config: Config,
-    hog_fn_result: WebhookInsightsFunctionCreateResult,
+    script_fn_result: WebhookInsightsFunctionCreateResult,
     team_id: int,
     eligible_schema_names: list[str],
     api_version: str | None = None,
 ) -> WebhookSyncResult:
     """Reconcile a registered webhook's events with the selected schemas (no-op by default)."""
     return source.sync_webhook_events(
-        config, hog_fn_result.webhook_url, team_id, eligible_schema_names, api_version=api_version
+        config, script_fn_result.webhook_url, team_id, eligible_schema_names, api_version=api_version
     )
 
 

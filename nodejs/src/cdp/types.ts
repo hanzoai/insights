@@ -1,9 +1,8 @@
+import { VMState } from '@hanzo/scriptvm'
 import { DateTime } from 'luxon'
 
-import { VMState } from '@hanzo/scriptvm'
-
 import { CyclotronInputType, CyclotronInvocationQueueParametersType } from '~/cdp/schema/cyclotron'
-import { InsightsFlow } from '~/cdp/schema/hogflow'
+import { Flow } from '~/cdp/schema/flow'
 
 import {
     DatastoreTimestamp,
@@ -14,7 +13,7 @@ import {
     Team,
 } from '../types'
 
-export type HogBytecode = any[]
+export type ScriptBytecode = any[]
 
 // subset of EntityFilter
 export interface InsightsFunctionFilterBase {
@@ -26,13 +25,13 @@ export interface InsightsFunctionFilterBase {
 
 export interface InsightsFunctionFilterEvent extends InsightsFunctionFilterBase {
     type: 'events'
-    bytecode?: HogBytecode
+    bytecode?: ScriptBytecode
 }
 
 export interface InsightsFunctionFilterAction extends InsightsFunctionFilterBase {
     type: 'actions'
     // Loaded at run time from Action model
-    bytecode?: HogBytecode
+    bytecode?: ScriptBytecode
 }
 
 export type InsightsFunctionFilter = InsightsFunctionFilterEvent | InsightsFunctionFilterAction
@@ -40,7 +39,7 @@ export type InsightsFunctionFilter = InsightsFunctionFilterEvent | InsightsFunct
 export type InsightsFunctionMasking = {
     ttl: number | null
     hash: string
-    bytecode: HogBytecode
+    bytecode: ScriptBytecode
     threshold: number | null
 }
 
@@ -50,7 +49,7 @@ export interface InsightsFunctionFilters {
     actions?: InsightsFunctionFilterAction[]
     properties?: Record<string, any>[] // Global property filters that apply to all events
     filter_test_accounts?: boolean
-    bytecode?: HogBytecode
+    bytecode?: ScriptBytecode
 }
 
 export type GroupType = {
@@ -112,7 +111,7 @@ export type InsightsFunctionInvocationGlobals = {
     unsubscribe_url_one_click?: string // For email actions, the one-click unsubscribe URL to use
 
     actions?: InsightsFunctionInvocationActionVariables
-    variables?: Record<string, any> // For InsightsFlows, workflow-level variables
+    variables?: Record<string, any> // For Flows, workflow-level variables
 }
 
 /**
@@ -183,10 +182,10 @@ export type InsightsFunctionFilterGlobals = {
         properties: Record<string, any>
     }
 
-    variables: Record<string, any> | undefined // For InsightsFlows, workflow-level variables
+    variables: Record<string, any> | undefined // For Flows, workflow-level variables
 }
 
-export type MetricLogSource = 'insights_function' | 'hog_flow' | 'legacy_plugin'
+export type MetricLogSource = 'insights_function' | 'flow' | 'legacy_plugin'
 
 export type LogEntryLevel = 'debug' | 'info' | 'warn' | 'error'
 
@@ -254,7 +253,7 @@ export type MinimalAppMetric = {
         | 'exited_workflow_changed'
         | 'redirected_workflow_changed'
     count: number
-    // Key parts for the mirrored version-scoped row: the flow and the `version` of the InsightsFlow row that
+    // Key parts for the mirrored version-scoped row: the flow and the `version` of the Flow row that
     // actually executed the step. Not columns on `app_metrics2` — the monitoring service consumes these
     // to key a row under the `hog_flow_version` app source, and never forwards them to Kafka. Absent
     // means this metric only lands in the version-agnostic series.
@@ -276,7 +275,7 @@ export interface InsightsFunctionTiming {
 }
 
 // IMPORTANT: All queue names should be lowercase and only [A-Z0-9] characters are allowed.
-export const CYCLOTRON_INVOCATION_JOB_QUEUES = ['script', 'hogoverflow', 'hogflow', 'email'] as const
+export const CYCLOTRON_INVOCATION_JOB_QUEUES = ['script', 'overflow', 'flow', 'email'] as const
 export type CyclotronJobQueueKind = (typeof CYCLOTRON_INVOCATION_JOB_QUEUES)[number]
 
 export const CYCLOTRON_JOB_QUEUE_SOURCES = ['postgres', 'postgres-v2', 'kafka'] as const
@@ -326,7 +325,7 @@ export type CyclotronJobInvocationInsightsFunctionContext = {
     // `rerunAttempts` is incremented when an invocation is rehydrated by the
     // rerun paginator and stays sticky across the entire rerun run. The
     // lifecycle row producer reads this to drive the `attempts` + `is_retry`
-    // columns in `hog_invocation_results`.
+    // columns in `invocations`.
     rerunAttempts?: number
     // ISO timestamp of the *original* cyclotron-scheduled time. Stamped on the
     // first 'running' lifecycle row and carried through both cyclotron fetch
@@ -334,7 +333,7 @@ export type CyclotronJobInvocationInsightsFunctionContext = {
     // verbatim — ReplacingMergeTree would otherwise collapse to the latest
     // version (a retry's scheduled time) and lose the original.
     firstScheduledAt?: string
-    actionId?: string // The hogflow action node ID, used for metrics instance_id when executing within a workflow
+    actionId?: string // The flow action node ID, used for metrics instance_id when executing within a workflow
 }
 
 export type CyclotronJobInvocationInsightsFunction = CyclotronJobInvocation & {
@@ -342,15 +341,15 @@ export type CyclotronJobInvocationInsightsFunction = CyclotronJobInvocation & {
     insightsFunction: InsightsFunctionType
 }
 
-export type CyclotronJobInvocationInsightsFlow = CyclotronJobInvocation & {
-    state?: InsightsFlowInvocationContext
-    hogFlow: InsightsFlow
+export type CyclotronJobInvocationFlow = CyclotronJobInvocation & {
+    state?: FlowInvocationContext
+    flow: Flow
     person?: CyclotronPerson
     groups?: InsightsFunctionInvocationGlobals['groups']
     filterGlobals: InsightsFunctionFilterGlobals
 }
 
-export type InsightsFlowInvocationContext = {
+export type FlowInvocationContext = {
     event: InsightsFunctionInvocationGlobals['event']
     personId?: string // Persisted person UUID, used when distinct_id is not available (e.g. batch workflows, manual person triggers)
     // Stamped at enqueue for account-audience batch children: event.distinct_id is the account's
@@ -398,7 +397,7 @@ export type InsightsFlowInvocationContext = {
         // Set by script-function action handler when it returns `finished: false` without an
         // explicit `queueScheduledAt` — i.e. the reschedule is purely to move the job onto a
         // dedicated queue (e.g. 'email' for SES rate-limit gating) and the next dequeue will
-        // continue the same action. Consumed across three sites in hogflow-executor.service.ts
+        // continue the same action. Consumed across three sites in flow-executor.service.ts
         // to suppress the redundant log lines that would otherwise leak the routing into
         // customer-visible workflow logs:
         //   - `scheduleInvocation` on the dequeue that set it: skips the "Workflow will pause
@@ -412,7 +411,7 @@ export type InsightsFlowInvocationContext = {
         routingOnlyReschedule?: boolean
         // Set when a wait_until_condition re-parks on its polling interval. Lets the handler
         // attribute a later condition match to the periodic poll (vs evaluate-on-entry) and emit
-        // the cdp_hogflow_wait_poll_only_advance metric — the signal that proves whether the poll
+        // the cdp_flow_wait_poll_only_advance metric — the signal that proves whether the poll
         // ever catches a wake the subscription streams missed, gating its eventual removal.
         pollReparked?: boolean
     }
@@ -432,7 +431,7 @@ export type InsightsFlowInvocationContext = {
     rerunAttempts?: number
     // Stamped on the first 'running' row and carried verbatim through cyclotron
     // fetch retries and reruns so `first_scheduled_at` survives the
-    // ReplacingMergeTree collapse on the hog_invocation_results table.
+    // ReplacingMergeTree collapse on the invocations table.
     firstScheduledAt?: string
 }
 
@@ -511,7 +510,7 @@ export type InsightsFunctionType = {
     enabled: boolean
     deleted: boolean
     script: string
-    bytecode: HogBytecode
+    bytecode: ScriptBytecode
     inputs_schema?: InsightsFunctionInputSchemaType[]
     inputs?: Record<string, CyclotronInputType | null>
     encrypted_inputs?: Record<string, CyclotronInputType>
@@ -551,7 +550,7 @@ export type InsightsFunctionTemplate = {
 }
 
 export type InsightsFunctionTemplateCompiled = InsightsFunctionTemplate & {
-    bytecode: HogBytecode
+    bytecode: ScriptBytecode
 }
 
 // Slightly different model from the DB
@@ -561,7 +560,7 @@ export type DBInsightsFunctionTemplate = {
     sha: string
     name: string
     inputs_schema: InsightsFunctionInputSchemaType[]
-    bytecode: HogBytecode
+    bytecode: ScriptBytecode
     type: InsightsFunctionTypeType
     free: boolean
 }
@@ -590,7 +589,7 @@ export type WarehouseWebhookPayload = {
 
 export type MessageAssetRow = {
     team_id: number
-    function_kind: 'hog_flow' | 'insights_function'
+    function_kind: 'flow' | 'insights_function'
     function_id: string
     parent_run_id: string
     invocation_id: string

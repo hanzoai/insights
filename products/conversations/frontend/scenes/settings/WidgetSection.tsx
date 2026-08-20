@@ -1,16 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import {
-    Banner,
-    Button,
-    Card,
-    ColorPicker,
-    Divider,
-    Input,
-    Select,
-    Switch,
-    Link,
-} from '@hanzo/elements'
+import { Banner, Button, Card, ColorPicker, Divider, Input, Select, Switch, Link } from '@hanzo/elements'
 
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -98,7 +88,6 @@ export function WidgetSection(): JSX.Element {
                                     <label className="w-40 shrink-0 font-medium">Button color</label>
                                     <ColorPicker
                                         colors={[
-                                            '#1d4aff',
                                             '#00aaff',
                                             '#00cc44',
                                             '#ffaa00',
@@ -107,7 +96,7 @@ export function WidgetSection(): JSX.Element {
                                             '#1abc9c',
                                             '#000000',
                                         ]}
-                                        selectedColor={currentTeam?.conversations_settings?.widget_color || '#1d4aff'}
+                                        selectedColor={currentTeam?.conversations_settings?.widget_color || '#000000'}
                                         onSelectColor={(color) => {
                                             updateCurrentTeam({
                                                 conversations_settings: {

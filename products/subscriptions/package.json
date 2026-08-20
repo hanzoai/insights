@@ -2,12 +2,11 @@
     "name": "@hanzo/products-subscriptions",
     "scripts": {},
     "dependencies": {
-        "@hanzo/brand": "catalog:",
+        "insights-js": "catalog:",
         "kea": "catalog:",
         "kea-forms": "catalog:",
         "kea-loaders": "catalog:",
         "kea-router": "catalog:",
-        "insights-js": "catalog:",
         "rrule": "^2.8.1"
     },
     "devDependencies": {

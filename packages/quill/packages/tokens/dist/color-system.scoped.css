@@ -53,7 +53,7 @@
   --fill-hover: color-mix(in oklab, var(--foreground) 4%, transparent);
 
   /* Data-visualization palette + graph chrome (see data-viz.ts) */
-  --data-color-1: #1d4aff;
+  --data-color-1: #3d3d3d;
   --data-color-2: #621da6;
   --data-color-3: #42827e;
   --data-color-4: #ce0e74;

@@ -1,15 +1,13 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useCallback, useRef } from 'react'
 
-import * as directorPng from '@hanzo/brand/hoggies/png/director'
-
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { EmptyMessage } from 'lib/components/EmptyMessage/EmptyMessage'
 import { Resizer } from 'lib/components/Resizer/Resizer'
 import { ResizerLogicProps, resizerLogic } from 'lib/components/Resizer/resizerLogic'
-import { useWindowSize } from 'lib/hooks/useWindowSize'
 import { Skeleton } from 'lib/elements/Skeleton'
 import { Spinner } from 'lib/elements/Spinner'
+import { useWindowSize } from 'lib/hooks/useWindowSize'
 import { cn } from 'lib/utils/css-classes'
 import { Playlist } from 'scenes/session-recordings/playlist/Playlist'
 
@@ -21,7 +19,7 @@ import { SessionRecordingPlayer } from '../player/SessionRecordingPlayer'
 import { playlistFiltersLogic } from './playlistFiltersLogic'
 import { SessionRecordingPlaylistLogicProps, sessionRecordingsPlaylistLogic } from './sessionRecordingsPlaylistLogic'
 
-const MascotDirector = pngHoggie(directorPng)
+const MascotDirector = pngMascot()
 
 export function SessionRecordingsPlaylist({
     ...props

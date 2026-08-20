@@ -27,13 +27,13 @@ import { PersonType } from '~/types'
 
 import { renderWorkflowLogMessage } from '../../../logs/log-utils'
 import { TRIGGER_NODE_ID, workflowLogic } from '../../../workflowLogic'
-import { hogFlowEditorLogic } from '../../hogFlowEditorLogic'
-import { hogFlowEditorNotificationTestLogic } from './hogFlowEditorNotificationTestLogic'
-import { reorderGlobalsForEmailAction } from './hogFlowEditorNotificationTestLogic'
+import { flowEditorLogic } from '../../flowEditorLogic'
+import { flowEditorNotificationTestLogic } from './flowEditorNotificationTestLogic'
+import { reorderGlobalsForEmailAction } from './flowEditorNotificationTestLogic'
 
 export function EmailActionTestContent(): JSX.Element | null {
-    const { workflow, selectedNode } = useValues(hogFlowEditorLogic)
-    const { setSelectedNodeId } = useActions(hogFlowEditorLogic)
+    const { workflow, selectedNode } = useValues(flowEditorLogic)
+    const { setSelectedNodeId } = useActions(flowEditorLogic)
     const { logicProps } = useValues(workflowLogic)
 
     const {
@@ -51,7 +51,7 @@ export function EmailActionTestContent(): JSX.Element | null {
         sampleGlobalsLoading,
         sampleGlobalsError,
         emailAddressOverride,
-    } = useValues(hogFlowEditorNotificationTestLogic(logicProps))
+    } = useValues(flowEditorNotificationTestLogic(logicProps))
     const {
         submitTestInvocation,
         setTestResult,
@@ -61,7 +61,7 @@ export function EmailActionTestContent(): JSX.Element | null {
         loadSamplePersonByDistinctId,
         setEmailAddressOverride,
         setSampleGlobals,
-    } = useActions(hogFlowEditorNotificationTestLogic(logicProps))
+    } = useActions(flowEditorNotificationTestLogic(logicProps))
 
     const emailInput = emailAddressOverride || sampleGlobals?.person?.properties?.email || ''
 
@@ -99,7 +99,7 @@ export function EmailActionTestContent(): JSX.Element | null {
 
     return (
         <Form
-            logic={hogFlowEditorNotificationTestLogic}
+            logic={flowEditorNotificationTestLogic}
             props={logicProps}
             formKey="testInvocation"
             enableFormOnSubmit

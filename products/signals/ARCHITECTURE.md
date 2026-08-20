@@ -455,7 +455,7 @@ An **append-only, attributed, schema-validated log of the work done on a report*
 
 **Charts.** `SignalReport.charts` holds the queries the inbox renders on the report, so a finding about a metric move can be seen rather than taken on trust. They sit on the report rather than in its artefact log because a chart is part of what the report _says_, not a record of something that happened to it — it illustrates the summary and is replaced with it, where a log entry would accumulate versions the reader never asked for. Their schema lives in `report_charts.py` (`ReportChart`), kept as dependency-light as `artefact_schemas.py` for the same reason: it loads with the signals models.
 
-`query` is an `InsightVizNode` / `DataVisualizationNode` / `SavedInsightNode` node, kept as an unparsed dict — validating it against the real node models would mean importing `insights.schema`, so only the `kind` allowlist, a size bound, and the executable-payload refusals (`bytecode`, a nested `HogQuery`, `sendRawQuery` — a chart renders data, it does not run code — plus a nested `SuggestedQuestionsQuery`, refused for cost, since its runner calls an LLM once per reader who opens the report) are enforced server-side, and the renderer degrades in place on a bad query. That is the same contract a notebook's `ph-query` node has.
+`query` is an `InsightVizNode` / `DataVisualizationNode` / `SavedInsightNode` node, kept as an unparsed dict — validating it against the real node models would mean importing `insights.schema`, so only the `kind` allowlist, a size bound, and the executable-payload refusals (`bytecode`, a nested `ScriptQuery`, `sendRawQuery` — a chart renders data, it does not run code — plus a nested `SuggestedQuestionsQuery`, refused for cost, since its runner calls an LLM once per reader who opens the report) are enforced server-side, and the renderer degrades in place on a bad query. That is the same contract a notebook's `ph-query` node has.
 
 `chart_id` is the author's own slug because a report's summary and its charts are written in one call: the summary places a chart by referencing it as a markdown link with a `chart:` target (`[Daily signups](chart:signups-drop)`), and an unreferenced chart still renders below the summary. Ids are unique within the set, so a reference resolves to exactly one chart. Placement is resolved from the same markdown parse the renderer runs (`frontend/src/scenes/inbox/utils/chartPlacement.ts`) rather than by matching the raw summary: a reference in a code span is literal text, one in a table cell or heading has no room to draw, and a repeated reference points back at a chart rather than asking for a second copy — each of those resolves to "not placed here", so the chart falls to the trailing block instead of being drawn twice or lost. A paragraph holding nothing but references lays its charts out as a row. Height comes from the node (a `BoldNumber` gets a short box, a retention grid a tall scrolling one) unless the author sets `size`.
 
@@ -509,7 +509,7 @@ Notes:
 
 - One row per user (enforced by `OneToOneField`)
 - User is not scoped to a team — the autostart logic resolves team membership at runtime
-- Managed via `PUT /api/users/@me/signal_autonomy/` (opt in / update) and `DELETE` (opt out)
+- Managed via `PUT /v1/users/@me/signal_autonomy/` (opt in / update) and `DELETE` (opt out)
 
 ### `SignalReportTask` (legacy — implementation gate only)
 
@@ -790,7 +790,7 @@ Internal-only service-to-service endpoint authenticated via `X-Internal-Api-Secr
 
 | Method | Path                                            | Description                       |
 | ------ | ----------------------------------------------- | --------------------------------- |
-| POST   | `/api/projects/{team_id}/internal/signals/emit` | Emit a signal for a specific team |
+| POST   | `/v1/projects/{team_id}/internal/signals/emit` | Emit a signal for a specific team |
 
 #### `SignalSourceConfigViewSet`
 
@@ -1084,9 +1084,9 @@ The autonomy system allows Signals to automatically start a Tasks coding run whe
 
 Autonomy is configured at two levels:
 
-1. **Team level** (`SignalTeamConfig`): Sets the `default_autostart_priority` threshold (`P0`–`P4`). Auto-created as a team extension via `register_team_extension_signal`. Managed via `GET/POST /api/projects/:team_id/signals/config/`.
+1. **Team level** (`SignalTeamConfig`): Sets the `default_autostart_priority` threshold (`P0`–`P4`). Auto-created as a team extension via `register_team_extension_signal`. Managed via `GET/POST /v1/projects/:team_id/signals/config/`.
 
-2. **User level** (`SignalUserAutonomyConfig`): Per-user opt-in. A row existing means the user is opted in. Each user can optionally override the team priority threshold with `autostart_priority`. Managed via `GET/PUT/DELETE /api/users/@me/signal_autonomy/`.
+2. **User level** (`SignalUserAutonomyConfig`): Per-user opt-in. A row existing means the user is opted in. Each user can optionally override the team priority threshold with `autostart_priority`. Managed via `GET/PUT/DELETE /v1/users/@me/signal_autonomy/`.
 
 The management command `enable_signals_autonomy` can set both in one shot:
 
@@ -1281,7 +1281,7 @@ Signal {index}:
 How to exercise the PR refund flow (`backend/billing.py`, the `refund` action, the credited-path billing sync) against a fully local two-service setup:
 
 1. **Billing service**: follow "Developing locally" in the billing repo's README (boots on `http://localhost:8100`).
-   The dispute endpoint (`POST /api/signals/dispute-pr`) must exist on the billing checkout.
+   The dispute endpoint (`POST /v1/signals/dispute-pr`) must exist on the billing checkout.
    Dev mode auto-creates the `License` and `Customer` rows on first authenticated call — nothing to seed there.
 2. **Insights**: start the stack with `BILLING_SERVICE_URL=http://localhost:8100` visible to **both** the web backend and the celery worker (put it in `.env.local`, which wins over `.env.development`).
    The dev license auto-creates as `…::license-so-secret`, matching billing's default `LICENSE_SECRET_KEY`; a stale `ee_license` row with a different secret is the classic JWT-auth failure — check `SELECT key FROM ee_license;`.

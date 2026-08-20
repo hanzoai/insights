@@ -1701,9 +1701,9 @@ interface EventSchemas {
     'hi there': Record<string, any>
     'hJ@#$#####$#': Record<string, any>
     "HnBReouZ') OR 325=(SELECT 325 FROM PG_SLEEP(15))--": Record<string, any>
-    hog_flow_activated: Record<string, any>
-    hog_flow_created: Record<string, any>
-    hog_flow_started: Record<string, any>
+    script_flow_activated: Record<string, any>
+    script_flow_created: Record<string, any>
+    script_flow_started: Record<string, any>
     'script function created from plugin config api': Record<string, any>
     'script function saved': Record<string, any>
     insights_function_state_change: Record<string, any>

@@ -90,7 +90,7 @@ const meta: Meta<typeof CreatePromptExperimentModal> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:project_id/experiments/prompt_templates/': () => [200, MOCK_TEMPLATES],
+                '/v1/projects/:project_id/experiments/prompt_templates/': () => [200, MOCK_TEMPLATES],
             },
         }),
     ],

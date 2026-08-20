@@ -25,7 +25,7 @@ from products.customer_analytics.backend.models import Account, CustomPropertyDe
 from products.notebooks.backend.models import ResourceNotebook
 
 
-class TestFacadeHogqlSystemTables(SimpleTestCase):
+class TestFacadeInsightsqlSystemTables(SimpleTestCase):
     @parameterized.expand(
         [
             ("accounts", accounts, Account),

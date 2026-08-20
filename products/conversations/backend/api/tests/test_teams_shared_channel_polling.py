@@ -58,7 +58,7 @@ def _graph_message(
     if user_id is not None:
         msg["from"] = {"user": {"id": user_id, "displayName": "Alice"}}
     else:
-        msg["from"] = {"application": {"id": "app-1", "displayName": "SupportHog"}}
+        msg["from"] = {"application": {"id": "app-1", "displayName": "Support"}}
     return msg
 
 

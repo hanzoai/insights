@@ -136,7 +136,7 @@ WHERE name = '<endpoint_name>' AND endpoint LIKE '%/endpoints/%' AND is_personal
 ## Workflow
 
 1. Identify the endpoint by name. If the user gave a URL, parse the name from
-   `/api/projects/{team_id}/endpoints/{name}/run`.
+   `/v1/projects/{team_id}/endpoints/{name}/run`.
 2. `endpoint-get` to fetch full config. Note: `data_freshness_seconds`, `is_materialized`,
    current version, query kind.
 3. `endpoint-materialization-status` to see materialisation health (failed? eligible?).

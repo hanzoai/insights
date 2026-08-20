@@ -146,7 +146,7 @@ class TestBatchImportSupportAPI(APIBaseTest):
         token = self._create_pat(scopes=scopes)
         self.client.logout()
 
-        response = self.client.get("/api/managed_migrations_support/", headers={"authorization": f"Bearer {token}"})
+        response = self.client.get("/v1/managed_migrations_support/", headers={"authorization": f"Bearer {token}"})
         self.assertEqual(response.status_code, expected_status, response.content)
 
     @parameterized.expand(
@@ -165,7 +165,7 @@ class TestBatchImportSupportAPI(APIBaseTest):
         token = self._create_pat(scopes=["batch_import_support:read"], **{scoped_field: scoped_value})
         self.client.logout()
 
-        response = self.client.get("/api/managed_migrations_support/", headers={"authorization": f"Bearer {token}"})
+        response = self.client.get("/v1/managed_migrations_support/", headers={"authorization": f"Bearer {token}"})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
 
     @parameterized.expand(
@@ -179,7 +179,7 @@ class TestBatchImportSupportAPI(APIBaseTest):
         self.user.is_staff = is_staff
         self.user.save()
 
-        response = self.client.get("/api/managed_migrations_support/")
+        response = self.client.get("/v1/managed_migrations_support/")
         self.assertEqual(response.status_code, expected_status, response.content)
 
     def test_staff_can_see_imports_on_teams_they_do_not_belong_to(self):
@@ -191,13 +191,13 @@ class TestBatchImportSupportAPI(APIBaseTest):
         self.assertFalse(self.user.organization_memberships.filter(organization=other_org).exists())
         batch_import = self._create_import(team=other_team)
 
-        list_response = self.client.get("/api/managed_migrations_support/")
+        list_response = self.client.get("/v1/managed_migrations_support/")
         self.assertEqual(list_response.status_code, status.HTTP_200_OK)
         returned = next(r for r in list_response.json()["results"] if r["id"] == str(batch_import.id))
         self.assertEqual(returned["team_id"], other_team.id)
         self.assertEqual(returned["team_name"], "Cross Org Team")
 
-        detail_response = self.client.get(f"/api/managed_migrations_support/{batch_import.id}/")
+        detail_response = self.client.get(f"/v1/managed_migrations_support/{batch_import.id}/")
         self.assertEqual(detail_response.status_code, status.HTTP_200_OK)
 
     @parameterized.expand(
@@ -216,7 +216,7 @@ class TestBatchImportSupportAPI(APIBaseTest):
         if not use_session:
             self.client.logout()
 
-        response = self.client.get(f"/api/managed_migrations_support/?personal_api_key={token}")
+        response = self.client.get(f"/v1/managed_migrations_support/?personal_api_key={token}")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED, response.content)
 
     def test_audit_log_never_contains_credentials(self):
@@ -230,7 +230,7 @@ class TestBatchImportSupportAPI(APIBaseTest):
 
         with structlog.testing.capture_logs() as logs:
             response = self.client.get(
-                "/api/managed_migrations_support/",
+                "/v1/managed_migrations_support/",
                 {
                     "status": "paused",
                     "unexpected_param": "sensitive",
@@ -264,7 +264,7 @@ class TestBatchImportSupportAPI(APIBaseTest):
         ).to_capture(send_rate=1000)
         batch_import.save()
 
-        for url in ["/api/managed_migrations_support/", f"/api/managed_migrations_support/{batch_import.id}/"]:
+        for url in ["/v1/managed_migrations_support/", f"/v1/managed_migrations_support/{batch_import.id}/"]:
             response = self.client.get(url)
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             content = response.content.decode()
@@ -294,7 +294,7 @@ class TestBatchImportSupportAPI(APIBaseTest):
             },
         )
 
-        response = self.client.get(f"/api/managed_migrations_support/{batch_import.id}/")
+        response = self.client.get(f"/v1/managed_migrations_support/{batch_import.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
 
@@ -323,7 +323,7 @@ class TestBatchImportSupportAPI(APIBaseTest):
     def test_unclaimed_running_job_is_waiting_to_start_and_empty_config_does_not_500(self):
         batch_import = self._create_import(status=BatchImport.Status.RUNNING, lease_id=None, state=None)
 
-        response = self.client.get(f"/api/managed_migrations_support/{batch_import.id}/")
+        response = self.client.get(f"/v1/managed_migrations_support/{batch_import.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
 
@@ -353,8 +353,8 @@ class TestBatchImportSupportAPI(APIBaseTest):
             display_status_message=f"Part {secret_url} begins with gzip-compressed data",
         )
 
-        list_response = self.client.get("/api/managed_migrations_support/")
-        detail_response = self.client.get(f"/api/managed_migrations_support/{batch_import.id}/")
+        list_response = self.client.get("/v1/managed_migrations_support/")
+        detail_response = self.client.get(f"/v1/managed_migrations_support/{batch_import.id}/")
 
         redacted = "https://bucket.s3.amazonaws.com/exports/day-1.jsonl"
         row = next(r for r in list_response.json()["results"] if r["id"] == str(batch_import.id))
@@ -374,11 +374,11 @@ class TestBatchImportSupportAPI(APIBaseTest):
         paused = self._create_import(status=BatchImport.Status.PAUSED, status_message="Invalid JSON syntax")
         running_other_team = self._create_import(team=other_team)
 
-        by_status = self.client.get("/api/managed_migrations_support/", {"status": "paused"})
+        by_status = self.client.get("/v1/managed_migrations_support/", {"status": "paused"})
         self.assertEqual([r["id"] for r in by_status.json()["results"]], [str(paused.id)])
 
-        by_team = self.client.get("/api/managed_migrations_support/", {"team_id": other_team.id})
+        by_team = self.client.get("/v1/managed_migrations_support/", {"team_id": other_team.id})
         self.assertEqual([r["id"] for r in by_team.json()["results"]], [str(running_other_team.id)])
 
-        by_search = self.client.get("/api/managed_migrations_support/", {"search": "Invalid JSON"})
+        by_search = self.client.get("/v1/managed_migrations_support/", {"search": "Invalid JSON"})
         self.assertEqual([r["id"] for r in by_search.json()["results"]], [str(paused.id)])

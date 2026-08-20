@@ -134,8 +134,8 @@ describe('VariantDistributionEditor', () => {
         beforeEach(() => {
             useMocks({
                 get: {
-                    '/api/projects/:team_id/feature_flags/': () => [200, { results: [], count: 0 }],
-                    '/api/projects/:team_id/experiments': () => [200, { results: [], count: 0 }],
+                    '/v1/projects/:team_id/feature_flags/': () => [200, { results: [], count: 0 }],
+                    '/v1/projects/:team_id/experiments': () => [200, { results: [], count: 0 }],
                 },
             })
             initKeaTests()

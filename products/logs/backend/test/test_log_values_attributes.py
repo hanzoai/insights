@@ -47,11 +47,11 @@ class TestLogValuesAttributesTimezones(DatastoreTestMixin, APIBaseTest):
             self.team.timezone = tz
             self.team.save()
 
-            response = self.client.get(f"/api/projects/{self.team.id}/logs/values", query_params)
+            response = self.client.get(f"/v1/projects/{self.team.id}/logs/values", query_params)
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             values_results_by_timezone[tz] = response.json()["results"]
 
-            response = self.client.get(f"/api/projects/{self.team.id}/logs/attributes", query_params)
+            response = self.client.get(f"/v1/projects/{self.team.id}/logs/attributes", query_params)
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             attributes_results_by_timezone[tz] = response.json()
 
@@ -82,7 +82,7 @@ class TestLogValuesAttributesTimezones(DatastoreTestMixin, APIBaseTest):
             "value": "or",
         }
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/logs/values", query_params)
+        response = self.client.get(f"/v1/projects/{self.team.pk}/logs/values", query_params)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         results = response.json()["results"]
@@ -105,7 +105,7 @@ class TestLogValuesAttributesTimezones(DatastoreTestMixin, APIBaseTest):
             "serviceNames": '["argo-rollouts"]',
         }
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/logs/values", query_params)
+        response = self.client.get(f"/v1/projects/{self.team.pk}/logs/values", query_params)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         results = response.json()["results"]
@@ -124,7 +124,7 @@ class TestLogValuesAttributesTimezones(DatastoreTestMixin, APIBaseTest):
             "serviceNames": '["cdp-api"]',
         }
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/logs/values", query_params)
+        response = self.client.get(f"/v1/projects/{self.team.pk}/logs/values", query_params)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         results = response.json()["results"]
@@ -140,7 +140,7 @@ class TestLogValuesAttributesTimezones(DatastoreTestMixin, APIBaseTest):
             "attribute_type": "log",
         }
 
-        response_all = self.client.get(f"/api/projects/{self.team.pk}/logs/values", query_params_all)
+        response_all = self.client.get(f"/v1/projects/{self.team.pk}/logs/values", query_params_all)
         self.assertEqual(response_all.status_code, status.HTTP_200_OK)
         all_results = response_all.json()["results"]
 
@@ -149,7 +149,7 @@ class TestLogValuesAttributesTimezones(DatastoreTestMixin, APIBaseTest):
             "value": "",
         }
 
-        response_empty = self.client.get(f"/api/projects/{self.team.pk}/logs/values", query_params_empty)
+        response_empty = self.client.get(f"/v1/projects/{self.team.pk}/logs/values", query_params_empty)
         self.assertEqual(response_empty.status_code, status.HTTP_200_OK)
         empty_results = response_empty.json()["results"]
 
@@ -175,7 +175,7 @@ class TestLogValuesAttributesTimezones(DatastoreTestMixin, APIBaseTest):
             "attribute_type": attribute_type,
         }
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/logs/values", query_params)
+        response = self.client.get(f"/v1/projects/{self.team.pk}/logs/values", query_params)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         results = response.json()["results"]
@@ -197,7 +197,7 @@ class TestLogValuesAttributesTimezones(DatastoreTestMixin, APIBaseTest):
             "search": "argo-rollouts-dashboard",
         }
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/logs/attributes", query_params)
+        response = self.client.get(f"/v1/projects/{self.team.pk}/logs/attributes", query_params)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         results = response.json()["results"]
@@ -214,7 +214,7 @@ class TestLogValuesAttributesTimezones(DatastoreTestMixin, APIBaseTest):
             "search_values": "true",
         }
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/logs/attributes", query_params)
+        response = self.client.get(f"/v1/projects/{self.team.pk}/logs/attributes", query_params)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         results = response.json()["results"]
@@ -242,7 +242,7 @@ class TestLogValuesAttributesTimezones(DatastoreTestMixin, APIBaseTest):
             "search_values": "true",
         }
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/logs/attributes", query_params)
+        response = self.client.get(f"/v1/projects/{self.team.pk}/logs/attributes", query_params)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         results = response.json()["results"]
@@ -266,7 +266,7 @@ class TestLogValuesAttributesTimezones(DatastoreTestMixin, APIBaseTest):
             "search_values": "true",
         }
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/logs/attributes", query_params)
+        response = self.client.get(f"/v1/projects/{self.team.pk}/logs/attributes", query_params)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         results = response.json()["results"]
@@ -287,7 +287,7 @@ class TestLogValuesAttributesTimezones(DatastoreTestMixin, APIBaseTest):
             "search": "id",
         }
 
-        response = self.client.get(f"/api/projects/{self.team.pk}/logs/attributes", query_params)
+        response = self.client.get(f"/v1/projects/{self.team.pk}/logs/attributes", query_params)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         results = response.json()["results"]
@@ -343,7 +343,7 @@ class TestLogAttributesIlikeEscaping(DatastoreTestMixin, APIBaseTest):
 
     def _attributes(self, params: dict) -> list[dict]:
         query_params = {"dateRange": self.DATE_RANGE, **params}
-        response = self.client.get(f"/api/projects/{self.team.pk}/logs/attributes", query_params)
+        response = self.client.get(f"/v1/projects/{self.team.pk}/logs/attributes", query_params)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         return response.json()["results"]
 
@@ -357,7 +357,7 @@ class TestLogAttributesIlikeEscaping(DatastoreTestMixin, APIBaseTest):
     def test_value_search_escapes_ilike_wildcards(self):
         # The /logs/values endpoint must escape the wildcard too.
         query_params = {"dateRange": self.DATE_RANGE, "key": "promo.code", "attribute_type": "log", "value": "50%off"}
-        response = self.client.get(f"/api/projects/{self.team.pk}/logs/values", query_params)
+        response = self.client.get(f"/v1/projects/{self.team.pk}/logs/values", query_params)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         names = {r["name"] for r in response.json()["results"]}
         self.assertIn("50%off", names)

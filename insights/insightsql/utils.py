@@ -70,13 +70,13 @@ def is_simple_value(value: Any) -> bool:
     return False
 
 
-def deserialize_hx_tag(hog_tag: dict) -> InsightsQLXTag:
-    tag_kind = hog_tag.get("__hx_tag", None)
+def deserialize_hx_tag(script_tag: dict) -> InsightsQLXTag:
+    tag_kind = script_tag.get("__hx_tag", None)
     if tag_kind is None:
         raise ValueError("Missing '__hx_tag' key in InsightsQLXTag")
 
     attributes = []
-    for k, v in hog_tag.items():
+    for k, v in script_tag.items():
         if k == "__hx_tag":
             continue
         value: Any
@@ -94,18 +94,18 @@ def deserialize_hx_tag(hog_tag: dict) -> InsightsQLXTag:
     return InsightsQLXTag(kind=tag_kind, attributes=attributes)
 
 
-def deserialize_hx_ast(hog_ast: dict) -> AST:
+def deserialize_hx_ast(script_ast: dict) -> AST:
     """
     Deserialize a HX AST and tag dicts into real Python AST classes.
       - Dicts with `__hx_ast` -> AST node
       - Dicts with `__hx_tag` -> InsightsQLXTag
       - Lists that may contain tags, primitive values, or more lists
     """
-    tag_kind = hog_ast.get("__hx_tag")
+    tag_kind = script_ast.get("__hx_tag")
     if tag_kind is not None:
-        return deserialize_hx_tag(hog_ast)
+        return deserialize_hx_tag(script_ast)
 
-    kind = hog_ast.get("__hx_ast")
+    kind = script_ast.get("__hx_ast")
     if kind is None or kind not in AST_CLASSES:
         raise ValueError(f"Invalid or missing '__hx_ast' kind: {kind}")
 
@@ -134,7 +134,7 @@ def deserialize_hx_ast(hog_ast: dict) -> AST:
 
         raise ValueError(f"Unexpected value of type '{type(value).__name__}' for field expecting '{field_type}'")
 
-    for key, value in hog_ast.items():
+    for key, value in script_ast.items():
         if key == "__hx_ast":
             continue
         if key not in cls_fields:

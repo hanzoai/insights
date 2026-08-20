@@ -1,8 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { IconRefresh } from '@hanzo/icons'
-import { Button, Dialog, Input, Label, Skeleton } from '@hanzo/elements'
+import { Button, Input, Label, Skeleton } from '@hanzo/elements'
 
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
@@ -11,7 +10,6 @@ import { JSSnippet } from 'lib/components/JSSnippet'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { getPublicSupportSnippet } from 'lib/components/Support/supportLogic'
 import { TeamMembershipLevel } from 'lib/constants'
-import { Field } from 'lib/elements/Field'
 import { Link } from 'lib/elements/Link'
 import { userHasAccess } from 'lib/utils/accessControlUtils'
 import { debounce } from 'lib/utils/async'
@@ -114,69 +112,18 @@ function DebugInfoPanel(): JSX.Element | null {
 }
 
 export function TeamVariables(): JSX.Element {
-    const { currentTeam, isTeamTokenResetAvailable } = useValues(teamLogic)
-    const { resetToken } = useActions(teamLogic)
-    const restrictedReason = useRestrictedArea({
-        scope: RestrictionScope.Project,
-        minimumAccessLevel: TeamMembershipLevel.Admin,
-    })
+    const { currentTeam } = useValues(teamLogic)
     const { preflight } = useValues(preflightLogic)
 
     const region = preflight?.region
-
-    const RESET_CONFIRMATION = 'RESET'
-
-    const openDialog = (): void => {
-        Dialog.openForm({
-            maxWidth: 480,
-            title: 'Reset project token?',
-            description:
-                'This will immediately invalidate your current project token. Any apps, websites, or services using it will stop sending data to Insights until you update them with the new token. This action cannot be undone.',
-            initialValues: { confirmation: '' },
-            content: (
-                <Field name="confirmation">
-                    <Input
-                        placeholder={`Type "${RESET_CONFIRMATION}" to confirm`}
-                        autoFocus
-                        data-attr="reset-api-key-confirmation-input"
-                    />
-                </Field>
-            ),
-            errors: {
-                confirmation: (value: string) =>
-                    (value || '').toUpperCase() !== RESET_CONFIRMATION
-                        ? `Type "${RESET_CONFIRMATION}" to confirm`
-                        : undefined,
-            },
-            primaryButtonProps: {
-                status: 'danger',
-                children: 'Reset token',
-            },
-            onSubmit: () => {
-                resetToken()
-            },
-        })
-    }
 
     return (
         <div className="space-y-4 max-w-200">
             <div className="border rounded p-4 space-y-3 bg-bg-light">
                 <Label className="mb-0">Project token</Label>
-                <CodeSnippet
-                    compact
-                    thing="project token"
-                    actions={
-                        isTeamTokenResetAvailable ? (
-                            <Button
-                                icon={<IconRefresh />}
-                                disabledReason={restrictedReason}
-                                noPadding
-                                onClick={openDialog}
-                                tooltip="Reset token"
-                            />
-                        ) : undefined
-                    }
-                >
+                {/* Hanzo cloud mints this key against the project it resolves to, and
+                    has no route that replaces one, so there is nothing to reset it to. */}
+                <CodeSnippet compact thing="project token">
                     {currentTeam?.api_token || ''}
                 </CodeSnippet>
                 <p className="text-muted text-xs mb-0">

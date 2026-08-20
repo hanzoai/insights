@@ -11,8 +11,8 @@ from django.utils.text import slugify
 
 from nanoid import generate
 
-from insights.datastore.client import sync_execute
 from insights.constants import PRODUCT_TOUR_TARGETING_FLAG_PREFIX
+from insights.datastore.client import sync_execute
 from insights.models import Team, User
 from insights.models.event.sql import BULK_INSERT_EVENT_SQL
 from insights.persons_seed import PersonData, fetch_recent_persons_with_distinct_id
@@ -188,7 +188,7 @@ class Command(BaseCommand):
                 "appearance": {
                     "backgroundColor": "#ffffff",
                     "textColor": "#000000",
-                    "buttonColor": "#1d4aff",
+                    "buttonColor": "#1d1f27",
                 },
             },
             "created_by_id": user_id,

@@ -168,7 +168,7 @@ class TestInsightsQLQueryRunner(DatastoreTestMixin, APIBaseTest):
         )
         self.assertFalse(runner.requires_fresh_calculation())
 
-    def test_variables_in_hog_expression(self):
+    def test_variables_in_script_expression(self):
         variable = InsightVariable.objects.create(team=self.team, name="Foo", code_name="foo", type="Boolean")
         variable_id = str(variable.id)
 
@@ -184,7 +184,7 @@ class TestInsightsQLQueryRunner(DatastoreTestMixin, APIBaseTest):
         response = runner.calculate()
         self.assertEqual(response.results[0][0], "exists")
 
-    def test_variables_in_hog_expression_sql(self):
+    def test_variables_in_script_expression_sql(self):
         variable = InsightVariable.objects.create(team=self.team, name="Bar", code_name="bar", type="Boolean")
         variable_id = str(variable.id)
 

@@ -161,7 +161,7 @@ class ZendeskImportClient:
         else:
             params["start_time"] = start_time
 
-        data = self._request("GET", "/api/v2/incremental/tickets/cursor", params=params)
+        data = self._request("GET", "/v1/v2/incremental/tickets/cursor", params=params)
         tickets = data.get("tickets") or []
         ticket_ids = [int(t["id"]) for t in tickets if t.get("id") is not None]
         end_of_stream = bool(data.get("end_of_stream"))
@@ -180,7 +180,7 @@ class ZendeskImportClient:
             batch = ticket_ids[i : i + TICKETS_SHOW_MANY_BATCH]
             data = self._request(
                 "GET",
-                "/api/v2/tickets/show_many.json",
+                "/v1/v2/tickets/show_many.json",
                 params={"ids": ",".join(str(tid) for tid in batch)},
             )
             results.extend(data.get("tickets") or [])
@@ -195,7 +195,7 @@ class ZendeskImportClient:
             batch = unique_ids[i : i + USERS_SHOW_MANY_BATCH]
             data = self._request(
                 "GET",
-                "/api/v2/users/show_many.json",
+                "/v1/v2/users/show_many.json",
                 params={"ids": ",".join(str(uid) for uid in batch)},
             )
             for user in data.get("users") or []:
@@ -205,7 +205,7 @@ class ZendeskImportClient:
 
     def fetch_comments(self, ticket_id: int) -> list[dict[str, Any]]:
         comments: list[dict[str, Any]] = []
-        url: str | None = f"/api/v2/tickets/{ticket_id}/comments.json"
+        url: str | None = f"/v1/v2/tickets/{ticket_id}/comments.json"
         params: dict[str, Any] | None = {"per_page": COMMENTS_PER_PAGE}
         while url:
             data = self._request("GET", url, params=params)

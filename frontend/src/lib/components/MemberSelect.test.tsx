@@ -22,7 +22,6 @@ function member(id: string, user: UserBasicType, level: number): OrganizationMem
         level,
         joined_at: '2020-09-24T15:05:26Z',
         updated_at: '2020-09-24T15:05:26Z',
-        is_2fa_enabled: false,
         has_social_auth: false,
         last_login: null,
     }
@@ -34,7 +33,7 @@ describe('MemberSelect', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                '/api/organizations/:organization_id/members/': {
+                '/v1/organizations/:organization_id/members/': {
                     results: [member('1', MOCK_DEFAULT_BASIC_USER, 8), member('2', MOCK_SECOND_BASIC_USER, 1)],
                 },
             },

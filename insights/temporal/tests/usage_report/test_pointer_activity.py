@@ -1,21 +1,16 @@
-"""Tests for `enqueue_pointer_message` — the activity that sends the
-single SQS pointer to billing.
+"""Tests for `enqueue_pointer_message`.
 
-We mock the SQS producer so the test verifies (a) the queue name we route
-to, (b) the exact JSON body shape billing will read, and (c) the message
-attributes.
+The activity builds the pointer describing where the day's chunks landed and
+records the run metrics. Delivery to billing was an enterprise concern this
+fork does not carry, so what is left to guard is the metric bookkeeping.
 """
 
-import json
 from datetime import UTC, datetime
-from typing import Any
 
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-from django.conf import settings
-
-from insights.temporal.usage_report.activities import SQS_POINTER_VERSION, SQS_QUEUE_NAME, enqueue_pointer_message
+from insights.temporal.usage_report.activities import enqueue_pointer_message
 from insights.temporal.usage_report.types import AggregateResult, EnqueuePointerInputs, WorkflowContext
 
 
@@ -43,185 +38,20 @@ def _agg() -> AggregateResult:
 
 
 @pytest.mark.asyncio
-async def test_pointer_uses_v2_queue_and_correct_payload(activity_environment) -> None:
-    """End-to-end activity test: sends to `usage_reports_v2` with the
-    expected pointer body and metadata attributes.
-    """
-    captured: dict[str, Any] = {}
-    fake_producer = MagicMock()
-    fake_producer.send_message.return_value = {"MessageId": "abc"}
+async def test_metric_failure_does_not_fail_activity(activity_environment) -> None:
+    """A metric-layer failure must not fail the activity.
 
-    def fake_get_producer(queue_name):
-        captured["queue_name"] = queue_name
-        return fake_producer
-
-    with (
-        patch("insights.temporal.usage_report.activities.settings") as mock_settings,
-        patch("insights.temporal.usage_report.activities.bucket", return_value="insights-billing-usage-reports"),
-        patch("ee.sqs.SQSProducer.get_sqs_producer", side_effect=fake_get_producer),
-        patch("insights.temporal.usage_report.activities.get_instance_region", return_value="US"),
-    ):
-        mock_settings.EE_AVAILABLE = True
-        mock_settings.SITE_URL = "https://us.hanzo.ai"
-
-        await activity_environment.run(
-            enqueue_pointer_message,
-            EnqueuePointerInputs(ctx=_ctx(), aggregate=_agg()),
-        )
-
-    # Routed to the new dedicated queue
-    assert captured["queue_name"] == "usage_reports_v2"
-    assert SQS_QUEUE_NAME == "usage_reports_v2"
-
-    fake_producer.send_message.assert_called_once()
-    call_kwargs = fake_producer.send_message.call_args.kwargs
-
-    # Body has every field billing reads
-    body = json.loads(call_kwargs["message_body"])
-    assert body == {
-        "version": SQS_POINTER_VERSION,
-        "run_id": "run-test",
-        "workflow_started_at": "2026-05-05T01:45:00+00:00",
-        "date": "2026-05-04",
-        "period_start": "2026-05-04T00:00:00+00:00",
-        "period_end": "2026-05-04T23:59:59.999999+00:00",
-        "report_completeness": "complete",
-        "region": "US",
-        "site_url": "https://us.hanzo.ai",
-        "bucket": "insights-billing-usage-reports",
-        "manifest_key": "tasks/billing/usage_reports/2026-05-04/run-test/manifest.json",
-        "chunk_prefix": "tasks/billing/usage_reports/2026-05-04/run-test/chunks/",
-        "chunk_count": 2,
-        "total_orgs": 12345,
-        "total_orgs_with_usage": 678,
-    }
-
-    # Metadata attributes carry routing/versioning info billing keys off
-    assert call_kwargs["message_attributes"] == {
-        "content_type": "application/json",
-        "schema_version": str(SQS_POINTER_VERSION),
-        "run_id": "run-test",
-    }
-
-
-@pytest.mark.asyncio
-async def test_pointer_omits_workflow_started_at_for_legacy_ctx(activity_environment) -> None:
-    """An activity input serialized before `workflow_started_at` existed (field
-    is None) must still send a valid pointer, just without the key. Guards the
-    backwards-compat rollout: an in-flight or retried old payload crossing a
-    deploy can't crash the enqueue, and billing skips the metric via `.get(...)`.
-    """
-    legacy_ctx = WorkflowContext(
-        run_id="run-legacy",
-        period_start=datetime(2026, 5, 4, 0, 0, 0, tzinfo=UTC),
-        period_end=datetime(2026, 5, 4, 23, 59, 59, 999999, tzinfo=UTC),
-        date_str="2026-05-04",
-    )
-    fake_producer = MagicMock()
-    fake_producer.send_message.return_value = {"MessageId": "abc"}
-
-    with (
-        patch("insights.temporal.usage_report.activities.settings") as mock_settings,
-        patch("insights.temporal.usage_report.activities.bucket", return_value="insights"),
-        patch("ee.sqs.SQSProducer.get_sqs_producer", return_value=fake_producer),
-        patch("insights.temporal.usage_report.activities.get_instance_region", return_value="US"),
-    ):
-        mock_settings.EE_AVAILABLE = True
-        mock_settings.SITE_URL = "https://us.hanzo.ai"
-
-        await activity_environment.run(
-            enqueue_pointer_message,
-            EnqueuePointerInputs(ctx=legacy_ctx, aggregate=_agg()),
-        )
-
-    fake_producer.send_message.assert_called_once()
-    body = json.loads(fake_producer.send_message.call_args.kwargs["message_body"])
-    assert "workflow_started_at" not in body
-
-
-@pytest.mark.asyncio
-async def test_pointer_skipped_when_ee_unavailable(activity_environment) -> None:
-    """Self-hosted (no EE) → activity is a no-op, no SQS import or call."""
-    fake_producer = MagicMock()
-
-    with (
-        patch("insights.temporal.usage_report.activities.settings") as mock_settings,
-        patch("ee.sqs.SQSProducer.get_sqs_producer", return_value=fake_producer) as get_producer,
-    ):
-        mock_settings.EE_AVAILABLE = False
-
-        await activity_environment.run(
-            enqueue_pointer_message,
-            EnqueuePointerInputs(ctx=_ctx(), aggregate=_agg()),
-        )
-
-    get_producer.assert_not_called()
-    fake_producer.send_message.assert_not_called()
-
-
-@pytest.mark.asyncio
-async def test_pointer_raises_when_producer_misconfigured(activity_environment) -> None:
-    """If `get_sqs_producer` returns None we should fail loudly (so Temporal
-    retries) rather than silently drop the pointer.
+    The chunks and manifest are already written at that point — if the activity
+    raised, Temporal would retry it and redo the whole aggregation.
     """
     with (
         patch("insights.temporal.usage_report.activities.settings") as mock_settings,
         patch("insights.temporal.usage_report.activities.bucket", return_value="insights"),
-        patch("ee.sqs.SQSProducer.get_sqs_producer", return_value=None),
-    ):
-        mock_settings.EE_AVAILABLE = True
-        mock_settings.SITE_URL = "https://us.hanzo.ai"
-
-        with pytest.raises(Exception, match="usage_reports_v2"):
-            await activity_environment.run(
-                enqueue_pointer_message,
-                EnqueuePointerInputs(ctx=_ctx(), aggregate=_agg()),
-            )
-
-
-@pytest.mark.asyncio
-async def test_pointer_raises_when_send_returns_none(activity_environment) -> None:
-    """`send_message` returning `None` indicates an SQS error — must raise
-    so Temporal retries.
-    """
-    fake_producer = MagicMock()
-    fake_producer.send_message.return_value = None
-
-    with (
-        patch("insights.temporal.usage_report.activities.settings") as mock_settings,
-        patch("insights.temporal.usage_report.activities.bucket", return_value="insights"),
-        patch("ee.sqs.SQSProducer.get_sqs_producer", return_value=fake_producer),
-        patch("insights.temporal.usage_report.activities.get_instance_region", return_value="US"),
-    ):
-        mock_settings.EE_AVAILABLE = True
-        mock_settings.SITE_URL = "https://us.hanzo.ai"
-
-        with pytest.raises(Exception, match="no response"):
-            await activity_environment.run(
-                enqueue_pointer_message,
-                EnqueuePointerInputs(ctx=_ctx(), aggregate=_agg()),
-            )
-
-
-@pytest.mark.asyncio
-async def test_pointer_send_survives_post_send_metric_failure(activity_environment) -> None:
-    """A metric-layer failure after the SQS send must not fail the activity.
-
-    The pointer is already delivered at that point — if the activity raised,
-    Temporal would retry it and billing would receive a duplicate pointer.
-    """
-    fake_producer = MagicMock()
-    fake_producer.send_message.return_value = {"MessageId": "abc"}
-
-    with (
-        patch("insights.temporal.usage_report.activities.settings") as mock_settings,
-        patch("insights.temporal.usage_report.activities.bucket", return_value="insights"),
-        patch("ee.sqs.SQSProducer.get_sqs_producer", return_value=fake_producer),
         patch("insights.temporal.usage_report.activities.get_instance_region", return_value="US"),
         patch(
             "insights.temporal.usage_report.activities.record_aggregate_output",
             side_effect=RuntimeError("metrics backend down"),
-        ),
+        ) as record_aggregate,
     ):
         mock_settings.EE_AVAILABLE = True
         mock_settings.SITE_URL = "https://us.hanzo.ai"
@@ -231,13 +61,5 @@ async def test_pointer_send_survives_post_send_metric_failure(activity_environme
             EnqueuePointerInputs(ctx=_ctx(), aggregate=_agg()),
         )
 
-    # Sent exactly once — and the metric failure did not bubble out.
-    fake_producer.send_message.assert_called_once()
-
-
-def test_v2_queue_is_configured_in_settings() -> None:
-    queues = getattr(settings, "SQS_QUEUES", {})
-    assert SQS_QUEUE_NAME in queues, (
-        f"Queue {SQS_QUEUE_NAME!r} must be declared in settings.SQS_QUEUES — "
-        f"otherwise the pointer activity raises after S3 work is done"
-    )
+    # The failing call was reached, and its exception did not bubble out.
+    record_aggregate.assert_called_once()

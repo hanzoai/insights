@@ -27,7 +27,7 @@ export default function CyclotronJobInputAccountProperties({
     const selectedIds = new Set(entries.map(([id]) => id))
     const available = definitions.filter((d) => !selectedIds.has(d.id))
 
-    const setProperty = (id: string, hogValue: string): void => onChange({ ...properties, [id]: hogValue })
+    const setProperty = (id: string, scriptValue: string): void => onChange({ ...properties, [id]: scriptValue })
     const addProperty = (id: string): void => onChange({ ...properties, [id]: '' })
     const removeProperty = (id: string): void => {
         const next = { ...properties }
@@ -37,7 +37,7 @@ export default function CyclotronJobInputAccountProperties({
 
     return (
         <div className="flex flex-col gap-2">
-            {entries.map(([id, hogValue]) => {
+            {entries.map(([id, scriptValue]) => {
                 const definition = definitions.find((d) => d.id === id)
                 return (
                     <div className="flex gap-2 items-center" key={id}>
@@ -47,7 +47,7 @@ export default function CyclotronJobInputAccountProperties({
                         {definition?.display_type === 'select' ? (
                             <Select
                                 className="flex-2"
-                                value={hogValue || null}
+                                value={scriptValue || null}
                                 onChange={(option) => setProperty(id, option ?? '')}
                                 options={(definition.options ?? []).map((option) => ({
                                     value: option.label,
@@ -64,9 +64,9 @@ export default function CyclotronJobInputAccountProperties({
                             <CodeEditorInline
                                 className="overflow-hidden flex-2"
                                 minHeight="37"
-                                value={hogValue}
+                                value={scriptValue}
                                 onChange={(val) => setProperty(id, val ?? '')}
-                                language="hogTemplate"
+                                language="scriptTemplate"
                                 globals={sampleGlobalsWithInputs ?? undefined}
                             />
                         )}

@@ -576,7 +576,7 @@ impl<'a, E: Emitter + Clone> Parser<'a, E> {
         // is only valid here when `kw_valid_as_identifier` admits it
         // (excludes Null/Inf/Nan and the Script-statement keywords).
         let id = probe.next_token().ok();
-        if !is_hog_identifier_kind(id.as_ref().map(|t| t.kind)) {
+        if !is_script_identifier_kind(id.as_ref().map(|t| t.kind)) {
             return false;
         }
         let next = probe.next_token().ok();
@@ -584,7 +584,7 @@ impl<'a, E: Emitter + Clone> Parser<'a, E> {
             Some(TokenKind::Keyword(Kw::In)) => true,
             Some(TokenKind::Comma) => {
                 let id2 = probe.next_token().ok();
-                if !is_hog_identifier_kind(id2.as_ref().map(|t| t.kind)) {
+                if !is_script_identifier_kind(id2.as_ref().map(|t| t.kind)) {
                     return false;
                 }
                 matches!(
@@ -984,7 +984,7 @@ fn peek_starts_return_expr(tok: TokenKind) -> bool {
 /// `kw_valid_as_identifier` (the `keyword` rule omits NULL / INF / NAN
 /// and the Script-statement keywords). Used by probe sites that look
 /// ahead for an identifier shape (for-in, lambda heads).
-pub(crate) fn is_hog_identifier_kind(kind: Option<TokenKind>) -> bool {
+pub(crate) fn is_script_identifier_kind(kind: Option<TokenKind>) -> bool {
     match kind {
         Some(TokenKind::Ident) | Some(TokenKind::QuotedIdent) => true,
         Some(TokenKind::Keyword(kw)) => kw_valid_as_identifier(kw),

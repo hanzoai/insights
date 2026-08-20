@@ -321,11 +321,11 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/identity_matching_links/': {
+                '/v1/projects/:team_id/identity_matching_links/': {
                     results: LINKS_RESULT,
                     count: LINKS_RESULT.length,
                 },
-                '/api/projects/:team_id/identity_matching_links/runs/': {
+                '/v1/projects/:team_id/identity_matching_links/runs/': {
                     results: RUNS_RESULT,
                 },
             },
@@ -341,8 +341,8 @@ export const IdentityMatchingEmpty: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/identity_matching_links/': { results: [], count: 0 },
-                '/api/projects/:team_id/identity_matching_links/runs/': { results: [] },
+                '/v1/projects/:team_id/identity_matching_links/': { results: [], count: 0 },
+                '/v1/projects/:team_id/identity_matching_links/runs/': { results: [] },
             },
         }),
     ],
@@ -352,11 +352,11 @@ export const IdentityMatchingHighConfidenceOnly: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/identity_matching_links/': {
+                '/v1/projects/:team_id/identity_matching_links/': {
                     results: LINKS_RESULT.filter((l) => l.tier === 'high'),
                     count: LINKS_RESULT.filter((l) => l.tier === 'high').length,
                 },
-                '/api/projects/:team_id/identity_matching_links/runs/': {
+                '/v1/projects/:team_id/identity_matching_links/runs/': {
                     results: RUNS_RESULT,
                 },
             },
@@ -368,11 +368,11 @@ export const IdentityMatchingLogregOnly: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/identity_matching_links/': {
+                '/v1/projects/:team_id/identity_matching_links/': {
                     results: LINKS_RESULT.filter((l) => l.model_version === 'logreg_v1'),
                     count: LINKS_RESULT.filter((l) => l.model_version === 'logreg_v1').length,
                 },
-                '/api/projects/:team_id/identity_matching_links/runs/': {
+                '/v1/projects/:team_id/identity_matching_links/runs/': {
                     results: RUNS_RESULT,
                 },
             },
@@ -384,11 +384,11 @@ export const IdentityMatchingPaidAttribution: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/identity_matching_links/': {
+                '/v1/projects/:team_id/identity_matching_links/': {
                     results: LINKS_RESULT.filter((l) => l.orphan_paid_touch),
                     count: LINKS_RESULT.filter((l) => l.orphan_paid_touch).length,
                 },
-                '/api/projects/:team_id/identity_matching_links/runs/': {
+                '/v1/projects/:team_id/identity_matching_links/runs/': {
                     results: RUNS_RESULT,
                 },
             },

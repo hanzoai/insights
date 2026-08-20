@@ -1522,7 +1522,7 @@ export const InsightsFunctionsPublishCreateBody = /* @__PURE__ */ zod.object({
 /**
  * Rerun past invocations of this script function from their stored payloads.
  *
- * The CDP worker reads matching rows from the `hog_invocation_results`
+ * The CDP worker reads matching rows from the `invocations`
  * Datastore table, rehydrates the invocation from the stored
  * `invocation_globals`, and re-enqueues onto cyclotron. Each rerun
  * run reuses the original `invocation_id` with `is_retry=1` set on the
@@ -1591,7 +1591,7 @@ export const InsightsFunctionsRerunCreateBody = /* @__PURE__ */ zod
             })
             .describe('Filter shape for the rerun endpoint. `window_start`\/`window_end` are required.')
             .describe(
-                'Required. `window_start` \/ `window_end` pin the query to a small set of date partitions on the `hog_invocation_results` table. Optional `invocation_ids` restricts to specific invocations within that window.'
+                'Required. `window_start` \/ `window_end` pin the query to a small set of date partitions on the `invocations` table. Optional `invocation_ids` restricts to specific invocations within that window.'
             ),
     })
     .describe('Rerun invocations of a script function or script flow from their stored payloads.')

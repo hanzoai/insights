@@ -108,7 +108,7 @@ export const dataColorThemesModalLogic = kea<dataColorThemesModalLogicType>([
             {
                 addColor: (theme) => ({
                     ...theme,
-                    colors: [...(theme.colors || []), theme.colors[theme.colors.length - 1] || '#1d4aff'],
+                    colors: [...(theme.colors || []), theme.colors[theme.colors.length - 1] || '#3d3d3d'],
                 }),
                 duplicateColor: (theme, { index }) => ({
                     ...theme,

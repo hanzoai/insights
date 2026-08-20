@@ -243,7 +243,7 @@ mod tests {
         let mut h = HeaderMap::new();
         h.insert(
             header::AUTHORIZATION,
-            HeaderValue::from_static("Bearer phc_test_token_123"),
+            HeaderValue::from_static("Bearer pk-test_token_123"),
         );
         h.insert(
             INSIGHTS_SDK_INFO,
@@ -269,7 +269,7 @@ mod tests {
         let ctx = test_context(&headers);
         assert!(ctx.is_ok());
         let ctx = ctx.unwrap();
-        assert_eq!(ctx.api_token, "phc_test_token_123");
+        assert_eq!(ctx.api_token, "pk-test_token_123");
         assert_eq!(ctx.attempt, 1);
         assert_eq!(ctx.content_type, "application/json");
         assert!(ctx.content_encoding.is_none());
@@ -320,7 +320,7 @@ mod tests {
         let mut headers = valid_headers();
         headers.insert(
             header::AUTHORIZATION,
-            HeaderValue::from_static("Bearer phx_personal_key"),
+            HeaderValue::from_static("Bearer sk-personal_key"),
         );
         let err = test_context(&headers).unwrap_err();
         assert!(matches!(err, Error::InvalidApiToken(_)));
@@ -331,21 +331,21 @@ mod tests {
         let mut headers = valid_headers();
         headers.insert(
             header::AUTHORIZATION,
-            HeaderValue::from_static("Bearer   phc_test_token_123  "),
+            HeaderValue::from_static("Bearer   pk-test_token_123  "),
         );
         let ctx = test_context(&headers).unwrap();
-        assert_eq!(ctx.api_token, "phc_test_token_123");
+        assert_eq!(ctx.api_token, "pk-test_token_123");
     }
 
     #[test]
     fn bearer_scheme_case_insensitive() {
         for scheme in &["bearer ", "BEARER ", "beaRER "] {
-            let val = format!("{scheme}phc_test_token_123");
+            let val = format!("{scheme}pk-test_token_123");
             let mut headers = valid_headers();
             headers.insert(header::AUTHORIZATION, HeaderValue::from_str(&val).unwrap());
             let ctx = test_context(&headers).unwrap();
             assert_eq!(
-                ctx.api_token, "phc_test_token_123",
+                ctx.api_token, "pk-test_token_123",
                 "failed for scheme: {scheme}"
             );
         }

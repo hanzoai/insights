@@ -30,9 +30,6 @@ from insights.datastore.routing import ORG_PROJECT_COLUMN, ORG_PROJECT_TABLE, PR
 from insights.datastore.table_engines import ReplacingMergeTree, ReplicationScheme
 from insights.heatmaps.sql import WRITABLE_HEATMAPS_TABLE
 from insights.models.person.sql import PERSON_DISTINCT_ID_OVERRIDES_WRITABLE_TABLE, PERSONS_WRITABLE_TABLE
-from insights.session_recordings.sql.session_replay_event_sql import (
-    WRITABLE_SESSION_REPLAY_EVENTS_TABLE,
-)
 from insights.settings.data_stores import DATASTORE_DATABASE
 
 from .sql import WRITABLE_EVENTS_DATA_TABLE
@@ -60,6 +57,7 @@ EVENT_SIGNAL = "act"
 def EVENT_WHERE(source: str = "") -> str:
     """The product-event predicate, qualified where the projection binds an alias."""
     return f"{source + '.' if source else ''}signal = '{EVENT_SIGNAL}'"
+
 
 # ── routing: which PROJECT an org's events land in ───────────────────────────
 #
@@ -442,7 +440,7 @@ def USER_ALIAS_COLUMNS() -> list[tuple[str, str]]:
 # themselves.
 #
 # The predicate is QUALIFIED because this projection writes a column called
-# `person_id` and ClickHouse resolves a WHERE against the SELECT's aliases
+# `person_id` and Datastore resolves a WHERE against the SELECT's aliases
 # before the table's columns: unqualified, `person_id != ''` compares the
 # projected UUID to a string and the view fails to create at all. Naming the
 # source says which row the filter is about — the one we READ, never the one we
@@ -715,6 +713,7 @@ def DROP_HEATMAP_MV_SQL() -> str:
 # not a recording. The interaction stream is untouched in `event.fact` and still
 # answers every product-analytics question asked of it.
 REPLAY_MV = "replay_mv"
+
 
 def DROP_REPLAY_MV_SQL() -> str:
     return f"DROP TABLE IF EXISTS `{DATASTORE_DATABASE}`.`{REPLAY_MV}`"

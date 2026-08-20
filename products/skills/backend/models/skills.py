@@ -13,7 +13,7 @@ from insights.models.utils import UUIDModel
 # like the frontend tab map duplicates them).
 CATEGORY_BY_NAME_PREFIX: tuple[tuple[str, str], ...] = (
     ("signals-scout-", "scout"),
-    ("review-script-", "review_hog"),
+    ("review-script-", "review"),
 )
 
 

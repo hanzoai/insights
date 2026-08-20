@@ -75,8 +75,8 @@ See [viewset-annotations.md](references/viewset-annotations.md) for patterns and
 ### URL routing — where to register new team-nested endpoints
 
 Insights briefly split projects and environments as separate concepts then rolled
-the split back. **`/api/projects/:team_id/...` is the canonical path** for any
-team-nested endpoint. `/api/environments/:team_id/...` is a backward-compat alias
+the split back. **`/v1/projects/:team_id/...` is the canonical path** for any
+team-nested endpoint. `/v1/environments/:team_id/...` is a backward-compat alias
 preserved only for clients that integrated against it during the split.
 
 For a **new** team-nested endpoint, register it under `routers.projects`. Routes
@@ -113,11 +113,11 @@ the full reasoning.
 
 Register team-nested endpoints under `routers.projects` with a `project_<name>`
 basename. There is no `environments_router` and no dual-route helper: the legacy
-`/api/environments/*` surface has been retired as a set of registered routes.
+`/v1/environments/*` surface has been retired as a set of registered routes.
 
-Existing clients that still call `/api/environments/...` are served transparently by
+Existing clients that still call `/v1/environments/...` are served transparently by
 `EnvironmentsRewriteMiddleware`, which rewrites the path onto the equivalent
-`/api/projects/*` viewset in-process (no 307). You never register an env route for
+`/v1/projects/*` viewset in-process (no 307). You never register an env route for
 this — just register under `routers.projects` and the middleware handles the alias.
 
 ### Facade products (DataclassSerializer)

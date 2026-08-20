@@ -31,7 +31,11 @@
        carrying more light than what is behind it. --raised was #0c0c0c, a 5% lift
        over #000 — below the threshold where an edge is visible, so a card read as
        a hairline rather than a surface. Light mode is unchanged; it was correct. */
-    --ground: #000; --raised: #16161a; --ink: #fff; --ink-dim: rgb(255 255 255 / 70%);
+    /* @hanzo/design's --background. It was #000, which is a rung BELOW the
+       ground hanzo.ai and hanzo.app both paint, so this page sat darker than
+       the estate it belongs to. --raised is unchanged and still reads as a lift
+       over it. */
+    --ground: #0a0a0a; --raised: #16161a; --ink: #fff; --ink-dim: rgb(255 255 255 / 70%);
     --edge: #2c2c32; --solid: #fff; --solid-ink: #000;
   }
 }
@@ -61,10 +65,42 @@ a { color: inherit; }
 .btn:focus-visible { outline: 2px solid var(--solid); outline-offset: 2px; }
 
 /* ── header ──────────────────────────────────────────────────────────── */
-header { border-bottom: 1px solid var(--edge); }
-.bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 0; }
+/* The bar every Hanzo surface wears, at the values hanzo.ai is audited
+   against: 60 tall, one glass recipe, and NO hairline.
+
+   This one was `position: static` with a visible 1px #2c2c32 rule — so it
+   scrolled away on a page that is mostly scroll, and drew a seam where every
+   other property draws none. The glass ends itself; a line over a blurred
+   boundary reads as a join between two surfaces rather than the edge of one.
+   The pixel stays so the 60px box does not move.
+
+   Sticky, and above the page: the header carried no z-index at all, which is
+   only invisible while nothing below it is positioned. */
+header {
+  position: sticky; top: 0; z-index: 200;
+  height: 60px;
+  background: rgba(9,9,11,0.72);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  backdrop-filter: blur(20px) saturate(1.8);
+  border-bottom: 1px solid transparent;
+}
+/* Light mode keeps a real edge. The glass above is tuned for a dark ground and
+   is nearly invisible on a white one, so the rule the dark bar does not need is
+   exactly the rule the light bar does. */
+@media (prefers-color-scheme: light) {
+  header { background: rgb(255 255 255 / 72%); border-bottom-color: var(--edge); }
+}
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; height: 100%; }
 .mark { display: flex; align-items: center; gap: .625rem; font-weight: 600; letter-spacing: -.02em; text-decoration: none; }
 .mark svg { width: 1.5rem; height: 1.5rem; fill: currentColor; }
+.nav { display: flex; align-items: center; gap: 1.5rem; }
+.nav a { text-decoration: none; font-size: .875rem; color: var(--ink-dim); }
+.nav a:hover { color: var(--ink); }
+/* The button keeps its own colour, so exclude it from the dimming above. */
+.nav .btn { color: var(--ink); font-size: .8125rem; }
+/* Narrow bars keep the one control a visitor came for; the footer still
+   carries the rest of these on the same page. */
+@media (max-width: 34rem) { .nav a:not(.btn) { display: none; } }
 
 /* ── hero ────────────────────────────────────────────────────────────── */
 .hero { padding: 5rem 0 4rem; }
@@ -104,8 +140,15 @@ footer { border-top: 1px solid var(--edge); padding: 2rem 0 3rem; color: var(--i
 
 <header>
   <div class="wrap bar">
-    <a class="mark" href="/"><svg viewBox="0 0 67 67" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hanzo"><path d="M22.21 67V44.6369H0V67H22.21Z"/><path d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z"/><path d="M22.21 0H0V22.3184H22.21V0Z"/><path d="M66.7198 0H44.5098V22.3184H66.7198V0Z"/><path d="M66.7198 67V44.6369H44.5098V67H66.7198Z"/></svg>Insights</a>
-    <a class="btn btn-ghost" href="{{ login_url }}">Sign in</a>
+    <a class="mark" href="/"><svg viewBox="0 0 67 67" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hanzo"><path d="M22.21 67V44.6369H0V67H22.21Z"/><path d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z"/><path d="M22.21 0H0V22.3184H22.21V0Z"/><path d="M66.7198 0H44.5098V22.3184H66.7198V0Z"/><path d="M66.7198 67V44.6369H44.5098V67H66.7198Z"/></svg>Hanzo Insights</a>
+    {# The bar carried the mark and Sign in alone, so every other way out of this
+       page sat at the bottom of a long scroll. Same destinations the footer
+       already names, from the same context, at the top where a reader is. #}
+    <nav class="nav">
+      <a href="{{ docs_url }}">Docs</a>
+      <a href="{{ plans_url }}">Plans</a>
+      <a class="btn btn-ghost" href="{{ login_url }}">Sign in</a>
+    </nav>
   </div>
 </header>
 
@@ -188,6 +231,7 @@ footer { border-top: 1px solid var(--edge); padding: 2rem 0 3rem; color: var(--i
       <a href="{{ plans_url }}">Plans</a>
       <a href="{{ docs_url }}">Docs</a>
       <a href="{{ source_url }}">Source</a>
+      <a href="{{ hanzo_url }}">Hanzo AI</a>
     </div>
     <div>Hanzo Insights</div>
   </div>

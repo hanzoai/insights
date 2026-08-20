@@ -19,7 +19,7 @@ const meta: Meta<ActivityLogProps> = {
         mswDecorator({
             get: {
                 // TODO: setting available featues should be a decorator to make this easy
-                '/api/users/@me': () => [
+                '/v1/users/@me': () => [
                     200,
                     {
                         email: 'test@hanzo.ai',
@@ -35,14 +35,14 @@ const meta: Meta<ActivityLogProps> = {
                         },
                     },
                 ],
-                '/api/projects/:team/feature_flags/6/activity': () => [200, { results: [] }],
-                '/api/projects/:team/feature_flags/7/activity': () => [
+                '/v1/projects/:team/feature_flags/6/activity': () => [200, { results: [] }],
+                '/v1/projects/:team/feature_flags/7/activity': () => [
                     200,
                     { results: featureFlagsActivityResponseJson },
                 ],
-                '/api/environments/:team_id/insights/activity': () => [200, { results: insightsActivityResponseJson }],
-                '/api/person/:id/activity': () => [200, { results: personActivityResponseJson }],
-                '/api/projects/:id/activity': () => [200, { results: teamActivityResponseJson }],
+                '/v1/environments/:team_id/insights/activity': () => [200, { results: insightsActivityResponseJson }],
+                '/v1/person/:id/activity': () => [200, { results: personActivityResponseJson }],
+                '/v1/projects/:id/activity': () => [200, { results: teamActivityResponseJson }],
             },
         }),
     ],
@@ -95,7 +95,7 @@ export function WithNoData(): JSX.Element {
 export function WithoutAuditLogsFeaure(): JSX.Element {
     useStorybookMocks({
         get: {
-            '/api/users/@me': () => [
+            '/v1/users/@me': () => [
                 200,
                 {
                     email: 'test@hanzo.ai',

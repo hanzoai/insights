@@ -53,7 +53,7 @@ export function RetentionActorsView({ data }: { data: InsightActorsData }): Reac
                     const returned = row.appearances[i]
                     return (
                         <div
-                            className={`mx-auto h-4 w-4 rounded-sm bg-[#1d4aff] ${returned ? '' : 'opacity-20'}`}
+                            className={`mx-auto h-4 w-4 rounded-sm bg-foreground ${returned ? '' : 'opacity-20'}`}
                             title={returned ? 'Returned' : 'Did not return'}
                         />
                     )

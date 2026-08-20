@@ -1,14 +1,14 @@
 import { useValues } from 'kea'
 
-import { HogInvocations } from 'scenes/insights-functions/invocations/HogInvocations'
+import { ScriptInvocations } from 'scenes/insights-functions/invocations/ScriptInvocations'
 
 import { renderWorkflowLogMessage } from './logs/log-utils'
 import { WorkflowBatchInvocations } from './WorkflowBatchInvocations'
 import { workflowLogic } from './workflowLogic'
 
 /**
- * Workflow-side wrapper around the shared `HogInvocations` component,
- * scoped to `function_kind = 'hog_flow'`. The component does all the work —
+ * Workflow-side wrapper around the shared `ScriptInvocations` component,
+ * scoped to `function_kind = 'script_flow'`. The component does all the work —
  * this file exists so the workflow scene can wire its own tab without
  * leaking the cross-product import into every call site.
  *
@@ -27,9 +27,9 @@ export function WorkflowInvocations({ id }: { id: string }): JSX.Element | null 
     }
 
     return (
-        <HogInvocations
+        <ScriptInvocations
             id={id}
-            functionKind="hog_flow"
+            functionKind="script_flow"
             renderLogMessage={workflow ? (m) => renderWorkflowLogMessage(workflow, m) : undefined}
         />
     )

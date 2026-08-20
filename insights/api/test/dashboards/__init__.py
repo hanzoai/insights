@@ -24,12 +24,12 @@ class DashboardAPI:
             extra_data = {}
 
         api_response = self.client.patch(
-            f"/api/projects/{self.team.id}/{model_type}/{model_id}",
+            f"/v1/projects/{self.team.id}/{model_type}/{model_id}",
             {"deleted": True, **extra_data},
         )
         assert api_response.status_code == status.HTTP_200_OK
         self.assertEqual(
-            self.client.get(f"/api/projects/{self.team.id}/{model_type}/{model_id}").status_code,
+            self.client.get(f"/v1/projects/{self.team.id}/{model_type}/{model_id}").status_code,
             expected_get_status,
         )
 
@@ -41,7 +41,7 @@ class DashboardAPI:
     ) -> tuple[int, dict[str, Any]]:
         if team_id is None:
             team_id = self.team.id
-        response = self.client.post(f"/api/projects/{team_id}/dashboards/", data)
+        response = self.client.post(f"/v1/projects/{team_id}/dashboards/", data)
         self.assertEqual(response.status_code, expected_status)
 
         response_json = response.json()
@@ -57,7 +57,7 @@ class DashboardAPI:
     ) -> tuple[int, dict[str, Any]]:
         if team_id is None:
             team_id = self.team.id
-        response = self.client.patch(f"/api/projects/{team_id}/dashboards/{dashboard_id}", data)
+        response = self.client.patch(f"/v1/projects/{team_id}/dashboards/{dashboard_id}", data)
         self.assertEqual(response.status_code, expected_status)
 
         response_json = response.json()
@@ -74,7 +74,7 @@ class DashboardAPI:
         if team_id is None:
             team_id = self.team.id
 
-        response = self.client.get(f"/api/projects/{team_id}/dashboards/{dashboard_id}", query_params)
+        response = self.client.get(f"/v1/projects/{team_id}/dashboards/{dashboard_id}", query_params)
         self.assertEqual(response.status_code, expected_status)
 
         response_json = response.json()
@@ -94,7 +94,7 @@ class DashboardAPI:
         if query_params is None:
             query_params = {}
 
-        response = self.client.get(f"/api/{parent}s/{team_id}/dashboards/", query_params)
+        response = self.client.get(f"/v1/{parent}s/{team_id}/dashboards/", query_params)
         self.assertEqual(response.status_code, expected_status)
 
         response_json = response.json()
@@ -113,7 +113,7 @@ class DashboardAPI:
             query_params = {}
 
         response = self.client.get(
-            f"/api/projects/{team_id}/insights/",
+            f"/v1/projects/{team_id}/insights/",
             {"basic": True, "limit": 30, **query_params},
         )
         self.assertEqual(response.status_code, expected_status)
@@ -134,7 +134,7 @@ class DashboardAPI:
         if query_params is None:
             query_params = {}
 
-        response = self.client.get(f"/api/projects/{team_id}/insights/{insight_id}", query_params)
+        response = self.client.get(f"/v1/projects/{team_id}/insights/{insight_id}", query_params)
         self.assertEqual(response.status_code, expected_status)
 
         response_json = response.json()
@@ -153,7 +153,7 @@ class DashboardAPI:
             data["filters"] = {"events": [{"id": "$pageview"}]}
 
         response = self.client.post(
-            f"/api/projects/{team_id}/insights",
+            f"/v1/projects/{team_id}/insights",
             data=data,
         )
         self.assertEqual(response.status_code, expected_status, response.json())
@@ -171,7 +171,7 @@ class DashboardAPI:
         if team_id is None:
             team_id = self.team.id
 
-        response = self.client.patch(f"/api/projects/{team_id}/insights/{insight_id}", data=data)
+        response = self.client.patch(f"/v1/projects/{team_id}/insights/{insight_id}", data=data)
         self.assertEqual(response.status_code, expected_status, response.json())
 
         response_json = response.json()
@@ -192,7 +192,7 @@ class DashboardAPI:
             extra_data = {}
 
         response = self.client.patch(
-            f"/api/projects/{team_id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{team_id}/dashboards/{dashboard_id}",
             {"tiles": [{"text": {"body": text}, **extra_data}]},
         )
 
@@ -211,9 +211,9 @@ class DashboardAPI:
             team_id = self.team.id
 
         if insight_id is None:
-            url = f"/api/projects/{team_id}/insights/activity"
+            url = f"/v1/projects/{team_id}/insights/activity"
         else:
-            url = f"/api/projects/{team_id}/insights/{insight_id}/activity"
+            url = f"/v1/projects/{team_id}/insights/{insight_id}/activity"
 
         activity = self.client.get(url)
         self.assertEqual(activity.status_code, expected_status)
@@ -237,7 +237,7 @@ class DashboardAPI:
             extra_data = {}
 
         response = self.client.patch(
-            f"/api/projects/{team_id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{team_id}/dashboards/{dashboard_id}",
             {
                 "tiles": [
                     {
@@ -268,7 +268,7 @@ class DashboardAPI:
         if team_id is None:
             team_id = self.team.id
 
-        response = self.client.patch(f"/api/projects/{team_id}/dashboards/{dashboard_id}", {"tiles": [tile]})
+        response = self.client.patch(f"/v1/projects/{team_id}/dashboards/{dashboard_id}", {"tiles": [tile]})
 
         self.assertEqual(response.status_code, expected_status, response.json())
 
@@ -289,7 +289,7 @@ class DashboardAPI:
             tile_id = tile["id"]
             # layouts used to live on insights, but moved onto the relation from a dashboard to its insights
             response = self.client.patch(
-                f"/api/projects/{self.team.id}/dashboards/{dashboard_id}",
+                f"/v1/projects/{self.team.id}/dashboards/{dashboard_id}",
                 {
                     "tiles": [
                         {
@@ -319,7 +319,7 @@ class DashboardAPI:
         expected_status: int = status.HTTP_200_OK,
     ):
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/insights/{insight_id}",
+            f"/v1/projects/{self.team.id}/insights/{insight_id}",
             {"dashboards": dashboard_ids},
         )
         self.assertEqual(response.status_code, expected_status)
@@ -338,7 +338,7 @@ class DashboardAPI:
             config = {"limit": 10}
 
         response = self.client.patch(
-            f"/api/projects/{team_id}/dashboards/{dashboard_id}",
+            f"/v1/projects/{team_id}/dashboards/{dashboard_id}",
             {"tiles": [{"widget": {"widget_type": widget_type, "config": config}}]},
         )
         self.assertEqual(response.status_code, expected_status)

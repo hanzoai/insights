@@ -1,6 +1,6 @@
 import { gunzipSync, strFromU8, strToU8 } from 'fflate'
 import { decompress as zstdDecompressSync } from 'fzstd'
-import { EventType, IncrementalSource } from 'insights-js/rrweb-types'
+import { EventType, IncrementalSource } from '@hanzo/insights-rrweb-types'
 
 import { ReplayTelemetry } from '../telemetry'
 import { throttleCapture } from './throttle-capturing'

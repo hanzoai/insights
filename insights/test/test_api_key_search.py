@@ -47,7 +47,7 @@ class TestApiKeySearchView(BaseTest):
         self.user.is_staff = False
         self.user.save()
 
-        response = self._search("phx_whatever")
+        response = self._search("sk-whatever")
 
         self.assertEqual(response.status_code, 302)
 

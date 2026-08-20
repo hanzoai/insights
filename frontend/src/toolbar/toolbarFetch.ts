@@ -157,7 +157,7 @@ export async function toolbarUploadMedia(file: File): Promise<{ id: string; url:
     const formData = new FormData()
     formData.append('image', file)
 
-    const response = await toolbarFetch('/api/projects/@current/uploaded_media/', 'POST', formData)
+    const response = await toolbarFetch('/v1/projects/@current/uploaded_media/', 'POST', formData)
 
     if (response.status === 401) {
         // Session was valid at start but expired and refresh failed.

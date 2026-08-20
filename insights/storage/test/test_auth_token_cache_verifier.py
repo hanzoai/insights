@@ -41,8 +41,8 @@ class TestAuthTokenCacheVerifier(TestCase):
         self.team = Team.objects.create(
             organization=self.org,
             name="Test Team",
-            api_token="phc_test_verifier_token",
-            secret_api_token="phs_test_secret_token",
+            api_token="pk-test_verifier_token",
+            secret_api_token="sk-test_secret_token",
         )
         self.user = User.objects.create_and_join(
             organization=self.org,
@@ -87,10 +87,10 @@ class TestAuthTokenCacheVerifier(TestCase):
         deleted_team = Team.objects.create(
             organization=self.org,
             name="Deleted Team",
-            api_token="phc_deleted_team",
-            secret_api_token="phs_deleted_secret",
+            api_token="pk-deleted_team",
+            secret_api_token="sk-deleted_secret",
         )
-        token_hash = hash_key_value("phs_deleted_secret", mode="sha256")
+        token_hash = hash_key_value("sk-deleted_secret", mode="sha256")
         key = self._set_cache(token_hash, {"type": "secret", "team_id": deleted_team.id})
 
         # Delete the team (but keep the cache entry)
@@ -103,7 +103,7 @@ class TestAuthTokenCacheVerifier(TestCase):
 
     def test_secret_token_with_rotated_hash_is_removed(self):
         # Cache entry has the right team_id but the hash no longer matches any token
-        fake_hash = hash_key_value("phs_old_rotated_token", mode="sha256")
+        fake_hash = hash_key_value("sk-old_rotated_token", mode="sha256")
         key = self._set_cache(fake_hash, {"type": "secret", "team_id": self.team.id})
 
         verify_and_fix_auth_token_cache(self.redis, batch_size=10)
@@ -111,10 +111,10 @@ class TestAuthTokenCacheVerifier(TestCase):
         assert not self.redis.exists(key)
 
     def test_secret_token_backup_is_valid(self):
-        self.team.secret_api_token_backup = "phs_backup_token"
+        self.team.secret_api_token_backup = "sk-backup_token"
         self.team.save(update_fields=["secret_api_token_backup"])
 
-        token_hash = hash_key_value("phs_backup_token", mode="sha256")
+        token_hash = hash_key_value("sk-backup_token", mode="sha256")
         key = self._set_cache(token_hash, {"type": "secret", "team_id": self.team.id})
 
         result = verify_and_fix_auth_token_cache(self.redis, batch_size=10)
@@ -128,7 +128,7 @@ class TestAuthTokenCacheVerifier(TestCase):
         pak = PersonalAPIKey.objects.create(
             user=self.user,
             label="test-pak-valid",
-            secure_value=hash_key_value("phx_pak_valid", mode="sha256"),
+            secure_value=hash_key_value("sk-pak_valid", mode="sha256"),
             scopes=["feature_flag:read"],
         )
 
@@ -152,7 +152,7 @@ class TestAuthTokenCacheVerifier(TestCase):
         assert result.valid >= 1
 
     def test_personal_token_for_deleted_key_is_removed(self):
-        fake_sv = hash_key_value("phx_pak_deleted", mode="sha256")
+        fake_sv = hash_key_value("sk-pak_deleted", mode="sha256")
         key = self._set_cache(
             fake_sv,
             {
@@ -179,7 +179,7 @@ class TestAuthTokenCacheVerifier(TestCase):
         pak = PersonalAPIKey.objects.create(
             user=inactive_user,
             label="test-pak-inactive",
-            secure_value=hash_key_value("phx_pak_inactive", mode="sha256"),
+            secure_value=hash_key_value("sk-pak_inactive", mode="sha256"),
             scopes=["feature_flag:read"],
         )
         inactive_user.is_active = False
@@ -206,7 +206,7 @@ class TestAuthTokenCacheVerifier(TestCase):
         pak = PersonalAPIKey.objects.create(
             user=self.user,
             label="test-pak-org-change",
-            secure_value=hash_key_value("phx_pak_org_change", mode="sha256"),
+            secure_value=hash_key_value("sk-pak_org_change", mode="sha256"),
             scopes=["feature_flag:read"],
         )
 
@@ -232,7 +232,7 @@ class TestAuthTokenCacheVerifier(TestCase):
         pak = PersonalAPIKey.objects.create(
             user=self.user,
             label="test-pak-scope-change",
-            secure_value=hash_key_value("phx_pak_scope_change", mode="sha256"),
+            secure_value=hash_key_value("sk-pak_scope_change", mode="sha256"),
             scopes=["feature_flag:write"],
         )
 
@@ -258,7 +258,7 @@ class TestAuthTokenCacheVerifier(TestCase):
         pak = PersonalAPIKey.objects.create(
             user=self.user,
             label="test-pak-scoped-teams",
-            secure_value=hash_key_value("phx_pak_scoped_teams", mode="sha256"),
+            secure_value=hash_key_value("sk-pak_scoped_teams", mode="sha256"),
             scopes=["feature_flag:read"],
             scoped_teams=[self.team.id],
         )
@@ -286,7 +286,7 @@ class TestAuthTokenCacheVerifier(TestCase):
         pak = PersonalAPIKey.objects.create(
             user=self.user,
             label="test-pak-scoped-orgs",
-            secure_value=hash_key_value("phx_pak_scoped_orgs", mode="sha256"),
+            secure_value=hash_key_value("sk-pak_scoped_orgs", mode="sha256"),
             scopes=["feature_flag:read"],
             scoped_organizations=[str(self.org.id)],
         )
@@ -314,7 +314,7 @@ class TestAuthTokenCacheVerifier(TestCase):
         pak = PersonalAPIKey.objects.create(
             user=self.user,
             label="test-pak-null-org-ids",
-            secure_value=hash_key_value("phx_pak_null_org_ids", mode="sha256"),
+            secure_value=hash_key_value("sk-pak_null_org_ids", mode="sha256"),
             scopes=["feature_flag:read"],
         )
 
@@ -344,9 +344,9 @@ class TestAuthTokenCacheVerifier(TestCase):
         psak = ProjectSecretAPIKey.objects.create(
             team=self.team,
             label="test-psak-valid",
-            secure_value=hash_key_value("phx_psak_valid", mode="sha256"),
+            secure_value=hash_key_value("sk-psak_valid", mode="sha256"),
             scopes=["feature_flag:read"],
-            mask_value="phx_...vald",
+            mask_value="sk-...vald",
         )
 
         key = self._set_cache(
@@ -365,7 +365,7 @@ class TestAuthTokenCacheVerifier(TestCase):
         assert result.valid >= 1
 
     def test_project_secret_token_for_deleted_key_is_removed(self):
-        fake_sv = hash_key_value("phx_psak_deleted", mode="sha256")
+        fake_sv = hash_key_value("sk-psak_deleted", mode="sha256")
         key = self._set_cache(
             fake_sv,
             {
@@ -384,9 +384,9 @@ class TestAuthTokenCacheVerifier(TestCase):
         psak = ProjectSecretAPIKey.objects.create(
             team=self.team,
             label="test-psak-team-id",
-            secure_value=hash_key_value("phx_psak_team_id", mode="sha256"),
+            secure_value=hash_key_value("sk-psak_team_id", mode="sha256"),
             scopes=["feature_flag:read"],
-            mask_value="phx_...tmid",
+            mask_value="sk-...tmid",
         )
 
         # Cache has a wrong team_id
@@ -409,9 +409,9 @@ class TestAuthTokenCacheVerifier(TestCase):
         psak = ProjectSecretAPIKey.objects.create(
             team=self.team,
             label="test-psak-key-id",
-            secure_value=hash_key_value("phx_psak_key_id", mode="sha256"),
+            secure_value=hash_key_value("sk-psak_key_id", mode="sha256"),
             scopes=["feature_flag:read"],
-            mask_value="phx_...kyid",
+            mask_value="sk-...kyid",
         )
 
         # Cache has a wrong key_id
@@ -434,9 +434,9 @@ class TestAuthTokenCacheVerifier(TestCase):
         psak = ProjectSecretAPIKey.objects.create(
             team=self.team,
             label="test-psak-scope-change",
-            secure_value=hash_key_value("phx_psak_scope_change", mode="sha256"),
+            secure_value=hash_key_value("sk-psak_scope_change", mode="sha256"),
             scopes=["feature_flag:write"],
-            mask_value="phx_...scop",
+            mask_value="sk-...scop",
         )
 
         # Cache has old scopes
@@ -460,9 +460,9 @@ class TestAuthTokenCacheVerifier(TestCase):
         psak = ProjectSecretAPIKey.objects.create(
             team=self.team,
             label="test-psak-no-team-id",
-            secure_value=hash_key_value("phx_psak_no_team_id", mode="sha256"),
+            secure_value=hash_key_value("sk-psak_no_team_id", mode="sha256"),
             scopes=["feature_flag:read"],
-            mask_value="phx_...ntid",
+            mask_value="sk-...ntid",
         )
 
         key = self._set_cache(
@@ -484,9 +484,9 @@ class TestAuthTokenCacheVerifier(TestCase):
         psak = ProjectSecretAPIKey.objects.create(
             team=self.team,
             label="test-psak-no-key-id",
-            secure_value=hash_key_value("phx_psak_no_key_id", mode="sha256"),
+            secure_value=hash_key_value("sk-psak_no_key_id", mode="sha256"),
             scopes=["feature_flag:read"],
-            mask_value="phx_...nkid",
+            mask_value="sk-...nkid",
         )
 
         key = self._set_cache(
@@ -559,7 +559,7 @@ class TestAuthTokenCacheVerifier(TestCase):
         pak = PersonalAPIKey.objects.create(
             user=self.user,
             label="test-pak-string-org-ids",
-            secure_value=hash_key_value("phx_pak_string_org_ids", mode="sha256"),
+            secure_value=hash_key_value("sk-pak_string_org_ids", mode="sha256"),
             scopes=["feature_flag:read"],
         )
 
@@ -598,7 +598,7 @@ class TestAuthTokenCacheVerifier(TestCase):
         pak = PersonalAPIKey.objects.create(
             user=self.user,
             label="test-pak-db-error",
-            secure_value=hash_key_value("phx_pak_db_error", mode="sha256"),
+            secure_value=hash_key_value("sk-pak_db_error", mode="sha256"),
             scopes=["feature_flag:read"],
         )
 
@@ -625,9 +625,9 @@ class TestAuthTokenCacheVerifier(TestCase):
         psak = ProjectSecretAPIKey.objects.create(
             team=self.team,
             label="test-psak-db-error",
-            secure_value=hash_key_value("phx_psak_db_error", mode="sha256"),
+            secure_value=hash_key_value("sk-psak_db_error", mode="sha256"),
             scopes=["feature_flag:read"],
-            mask_value="phx_...dber",
+            mask_value="sk-...dber",
         )
 
         key = self._set_cache(
@@ -688,7 +688,7 @@ class TestAuthTokenCacheVerifier(TestCase):
         pak = PersonalAPIKey.objects.create(
             user=self.user,
             label="test-pak-empty-scopes",
-            secure_value=hash_key_value("phx_pak_empty_scopes", mode="sha256"),
+            secure_value=hash_key_value("sk-pak_empty_scopes", mode="sha256"),
             scopes=[],
         )
 
@@ -734,7 +734,7 @@ class TestAuthTokenCacheVerifier(TestCase):
         pak = PersonalAPIKey.objects.create(
             user=self.user,
             label="test-pak-no-key-id",
-            secure_value=hash_key_value("phx_pak_no_key_id", mode="sha256"),
+            secure_value=hash_key_value("sk-pak_no_key_id", mode="sha256"),
             scopes=["feature_flag:read"],
         )
 
@@ -762,7 +762,7 @@ class TestAuthTokenCacheVerifier(TestCase):
         pak = PersonalAPIKey.objects.create(
             user=self.user,
             label="test-pak-wrong-key-id",
-            secure_value=hash_key_value("phx_pak_wrong_key_id", mode="sha256"),
+            secure_value=hash_key_value("sk-pak_wrong_key_id", mode="sha256"),
             scopes=["feature_flag:read"],
         )
 
@@ -819,9 +819,9 @@ class TestAuthTokenCacheVerifier(TestCase):
         psak = ProjectSecretAPIKey.objects.create(
             team=self.team,
             label="test-psak-non-int-tid",
-            secure_value=hash_key_value("phx_psak_non_int_tid", mode="sha256"),
+            secure_value=hash_key_value("sk-psak_non_int_tid", mode="sha256"),
             scopes=["feature_flag:read"],
-            mask_value="phx_...ntid",
+            mask_value="sk-...ntid",
         )
 
         key = self._set_cache(
@@ -845,7 +845,7 @@ class TestAuthTokenCacheVerifier(TestCase):
         pak = PersonalAPIKey.objects.create(
             user=self.user,
             label="test-pak-membership-error",
-            secure_value=hash_key_value("phx_pak_membership_error", mode="sha256"),
+            secure_value=hash_key_value("sk-pak_membership_error", mode="sha256"),
             scopes=["feature_flag:read"],
         )
         key = self._set_cache(

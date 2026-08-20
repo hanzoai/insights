@@ -109,7 +109,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
 
     def test_unauthenticated_user_cannot_access_evaluation_configs(self):
         self.client.logout()
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_can_create_evaluation_config(self):
@@ -123,7 +123,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
         )
         EvaluationConfig.objects.create(team=self.team, active_provider_key=key)
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Test Evaluation",
                 "description": "Test Description",
@@ -168,7 +168,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
 
     def test_target_defaults_to_generation(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Default target",
                 "evaluation_type": "llm_judge",
@@ -185,7 +185,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
 
     def test_can_create_trace_target_evaluation(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Trace target",
                 "evaluation_type": "llm_judge",
@@ -225,7 +225,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{evaluation.id}/", {"target": to_target}
+            f"/v1/environments/{self.team.id}/evaluations/{evaluation.id}/", {"target": to_target}
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -245,7 +245,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{evaluation.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{evaluation.id}/",
             {
                 "target": "session",
                 "target_config": {"strategy": "inactivity", "quiet_period_seconds": 120, "max_age_seconds": 3600},
@@ -261,7 +261,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
 
     def test_trace_target_accepts_custom_window(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Trace custom window",
                 "evaluation_type": "llm_judge",
@@ -280,7 +280,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
 
     def test_rejects_window_below_minimum(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Trace tiny window",
                 "evaluation_type": "llm_judge",
@@ -299,7 +299,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
 
     def test_generation_target_strips_window_config(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Generation with stray config",
                 "evaluation_type": "llm_judge",
@@ -318,7 +318,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
 
     def test_rejects_unknown_window_config_key(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Trace unknown key",
                 "evaluation_type": "llm_judge",
@@ -337,7 +337,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
 
     def test_create_trace_evaluation_with_inactivity_strategy(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Inactivity eval",
                 "evaluation_type": "script",
@@ -356,7 +356,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
 
     def test_inactivity_strategy_rejects_max_age_below_quiet_period(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Bad inactivity eval",
                 "evaluation_type": "script",
@@ -383,7 +383,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{evaluation.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{evaluation.id}/",
             {"target_config": {"strategy": "inactivity"}},
         )
 
@@ -395,7 +395,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
 
     def test_rejects_invalid_target(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Bad target",
                 "evaluation_type": "llm_judge",
@@ -420,7 +420,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
             side_effect=RuntimeError("boom"),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/evaluations/",
+                f"/v1/environments/{self.team.id}/evaluations/",
                 {
                     "name": "Will Rollback",
                     "evaluation_type": "llm_judge",
@@ -438,7 +438,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
 
     def test_can_create_sentiment_evaluation_with_default_report(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Sentiment Evaluation",
                 "enabled": True,
@@ -460,7 +460,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
 
     def test_rejects_sentiment_evaluation_with_trace_target(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Sentiment over a trace",
                 "evaluation_type": "sentiment",
@@ -478,7 +478,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
 
     def test_rejects_sentiment_evaluation_with_session_target(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Session sentiment",
                 "evaluation_type": "sentiment",
@@ -492,7 +492,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
 
     def test_accepts_session_target_with_session_sized_settle_config(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Session goal",
                 "evaluation_type": "script",
@@ -515,7 +515,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
     def test_rejects_session_sized_settle_config_on_trace_target(self):
         """The documented OpenAPI range is the union of both targets, so the server is the gate."""
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Trace goal",
                 "evaluation_type": "script",
@@ -529,11 +529,11 @@ class TestEvaluationConfigsApi(APIBaseTest):
         self.assertEqual(response.json()["attr"], "target_config")
 
     @parameterized.expand(["generation", "trace", "session"])
-    def test_test_hog_previews_every_target(self, target: str):
+    def test_test_script_previews_every_target(self, target: str):
         """Every target an evaluation can run on must also be previewable, or the editor can only
         check the code for some of them."""
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/test_hog/",
+            f"/v1/environments/{self.team.id}/evaluations/test_script/",
             {"source": "return true", "target": target},
         )
         self.assertEqual(response.status_code, 200, response.json())
@@ -543,7 +543,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
         """An empty session sample is a real answer at a long quiet period, so the caller has to be
         able to tell it apart from a broken preview."""
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/test_hog/",
+            f"/v1/environments/{self.team.id}/evaluations/test_script/",
             {"source": "return true", "target": "session", "target_config": {"quiet_period_seconds": 86400}},
             format="json",
         )
@@ -556,7 +556,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
 
     def test_sentiment_evaluation_rejects_model_configuration(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Sentiment Evaluation",
                 "enabled": True,
@@ -589,7 +589,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
             payload["model_configuration"] = None
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             payload,
             format="json",
         )
@@ -602,7 +602,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
         eval_obj, mc = self._create_configured_llm_judge()
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{eval_obj.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{eval_obj.id}/",
             {"name": "Renamed"},
             format="json",
         )
@@ -611,7 +611,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
         self.assertEqual(eval_obj.model_configuration_id, mc.id)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{eval_obj.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{eval_obj.id}/",
             {"model_configuration": None},
             format="json",
         )
@@ -644,7 +644,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{eval_obj.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{eval_obj.id}/",
             {
                 "evaluation_type": "llm_judge",
                 "evaluation_config": {"prompt": "Test"},
@@ -674,7 +674,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
         eval_obj, mc = self._create_configured_llm_judge()
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{eval_obj.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{eval_obj.id}/",
             {
                 "evaluation_type": evaluation_type,
                 "evaluation_config": evaluation_config,
@@ -696,7 +696,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
     def test_db_constraint_blocks_model_config_on_non_judge_eval(self):
         # QuerySet.update() bypasses Evaluation.save(), so this exercises the DB constraint itself.
         mc = LLMModelConfiguration.objects.create(team=self.team, provider="openai", model="gpt-5-mini")
-        hog_eval = Evaluation.objects.create(
+        script_eval = Evaluation.objects.create(
             team=self.team,
             name="Script",
             evaluation_type="script",
@@ -705,7 +705,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
         )
 
         with self.assertRaises(IntegrityError), transaction.atomic():
-            Evaluation.objects.filter(id=hog_eval.id).update(model_configuration=mc)
+            Evaluation.objects.filter(id=script_eval.id).update(model_configuration=mc)
 
     @parameterized.expand(
         [
@@ -729,7 +729,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
             payload["model_configuration"] = _DEFAULT_MODEL_CONFIGURATION
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             payload,
             format="json",
         )
@@ -759,7 +759,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 2)
 
@@ -795,7 +795,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/?evaluation_type=sentiment")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/?evaluation_type=sentiment")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual([evaluation["name"] for evaluation in response.data["results"]], ["Sentiment evaluation"])
@@ -813,7 +813,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             HTTP_X_INSIGHTS_CLIENT="mcp",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -845,7 +845,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/{evaluation_config.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/{evaluation_config.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["name"], "Test Evaluation")
         self.assertEqual(response.data["description"], "Test Description")
@@ -865,7 +865,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{evaluation_config.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{evaluation_config.id}/",
             {
                 "name": "Updated Name",
                 "description": "Updated Description",
@@ -892,7 +892,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
             created_by=self.user,
         )
 
-        response = self.client.delete(f"/api/environments/{self.team.id}/evaluations/{evaluation_config.id}/")
+        response = self.client.delete(f"/v1/environments/{self.team.id}/evaluations/{evaluation_config.id}/")
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_can_search_evaluation_configs(self):
@@ -918,13 +918,13 @@ class TestEvaluationConfigsApi(APIBaseTest):
         )
 
         # Search by name
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/?search=accuracy")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/?search=accuracy")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["name"], "Accuracy Evaluation")
 
         # Search by description
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/?search=performance")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/?search=performance")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["name"], "Performance Evaluation")
@@ -952,13 +952,13 @@ class TestEvaluationConfigsApi(APIBaseTest):
         )
 
         # Filter for enabled only
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/?enabled=true")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/?enabled=true")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["name"], "Enabled Evaluation")
 
         # Filter for disabled only
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/?enabled=false")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/?enabled=false")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["name"], "Disabled Evaluation")
@@ -978,18 +978,18 @@ class TestEvaluationConfigsApi(APIBaseTest):
         )
 
         # Try to access other team's evaluation config
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/{other_evaluation.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/{other_evaluation.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         # List should not include other team's evaluation configs
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 0)
 
     def test_validation_requires_required_fields(self):
         # Missing name
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "evaluation_type": "llm_judge",
                 "model_configuration": _DEFAULT_MODEL_CONFIGURATION,
@@ -1003,7 +1003,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
 
         # Missing evaluation_type
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Test Evaluation",
                 "evaluation_config": {"prompt": "Test prompt"},
@@ -1016,7 +1016,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
 
         # Empty evaluation_config should fail validation
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Test Evaluation",
                 "evaluation_type": "llm_judge",
@@ -1029,12 +1029,12 @@ class TestEvaluationConfigsApi(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["attr"], "config")
 
-    def test_invalid_hog_source_returns_400_not_500(self):
+    def test_invalid_script_source_returns_400_not_500(self):
         # Malformed Script source passes serializer config validation (non-empty source) but fails
         # to compile in the model's save(). The compile failure must surface as a 400 validation
         # error, not an unhandled 500 — `|` is the exact character that triggered this in production.
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Bad Script Eval",
                 "evaluation_type": "script",
@@ -1060,17 +1060,17 @@ class TestEvaluationConfigsApi(APIBaseTest):
         )
 
         # Should not appear in list
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 0)
 
         # Should not be accessible for retrieval
-        response = self.client.get(f"/api/environments/{self.team.id}/evaluations/{evaluation_config.id}/")
+        response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/{evaluation_config.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_conditions_with_property_filters(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Test with Properties",
                 "evaluation_type": "llm_judge",
@@ -1108,7 +1108,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
         # dispatcher reads `rollout_percentage`, so the eval looked configured on the
         # API surface (GET echoed `sampling_rate`) but never fired.
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Typo eval",
                 "evaluation_type": "llm_judge",
@@ -1128,7 +1128,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
         self.assertEqual(stored.conditions[0]["rollout_percentage"], 100)
         self.assertNotIn("sampling_rate", stored.conditions[0])
 
-        get_response = self.client.get(f"/api/environments/{self.team.id}/evaluations/{response.data['id']}/")
+        get_response = self.client.get(f"/v1/environments/{self.team.id}/evaluations/{response.data['id']}/")
         self.assertEqual(get_response.status_code, status.HTTP_200_OK)
         self.assertNotIn("sampling_rate", get_response.data["conditions"][0])
         self.assertEqual(get_response.data["conditions"][0]["rollout_percentage"], 100)
@@ -1136,7 +1136,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
     @parameterized.expand([(-1,), (101,), (150,)])
     def test_rollout_percentage_out_of_range_rejected(self, rollout_percentage):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Out of range",
                 "evaluation_type": "llm_judge",
@@ -1152,7 +1152,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
     @parameterized.expand([(0,), (100,)])
     def test_rollout_percentage_boundaries_accepted(self, rollout_percentage):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Boundary",
                 "evaluation_type": "llm_judge",
@@ -1169,7 +1169,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
     @parameterized.expand([(["a", "b"],), ("trace",), (5,)])
     def test_non_dict_target_config_returns_400(self, bad_config):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Bad config eval",
                 "evaluation_type": "script",
@@ -1182,7 +1182,7 @@ class TestEvaluationConfigsApi(APIBaseTest):
         self.assertEqual(response.status_code, 400)
 
 
-class TestTestHogEndpoint(APIBaseTest):
+class TestTestScriptEndpoint(APIBaseTest):
     EVENT_TIMESTAMP = "2026-07-20T12:34:56Z"
 
     def _mock_insightsql_response(self, count=1):
@@ -1213,11 +1213,11 @@ class TestTestHogEndpoint(APIBaseTest):
 
     @patch("products.ai_observability.backend.api.evaluations.report_user_action")
     @patch("insights.insightsql_queries.ai.ai_table_resolver.execute_insightsql_query")
-    def test_test_hog_loads_ai_input_and_output(self, mock_query, mock_report_user_action):
+    def test_test_script_loads_ai_input_and_output(self, mock_query, mock_report_user_action):
         mock_query.return_value = self._mock_insightsql_response(2)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/test_hog/",
+            f"/v1/environments/{self.team.id}/evaluations/test_script/",
             {
                 "source": (
                     "return evaluation_events.1.output_text == '4' "
@@ -1247,27 +1247,27 @@ class TestTestHogEndpoint(APIBaseTest):
         self.assertEqual([field.chain for field in query.select[5:]], [[name] for name in HEAVY_COLUMN_NAMES])
         self.assertFalse(mock_report_user_action.call_args.args[2]["no_events"])
 
-    def test_test_hog_compilation_error(self):
+    def test_test_script_compilation_error(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/test_hog/",
+            f"/v1/environments/{self.team.id}/evaluations/test_script/",
             {"source": "this is not valid script {{{{"},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("Compilation error", response.json()["error"])
 
-    def test_test_hog_empty_source_rejected(self):
+    def test_test_script_empty_source_rejected(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/test_hog/",
+            f"/v1/environments/{self.team.id}/evaluations/test_script/",
             {"source": ""},
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @patch("insights.insightsql_queries.ai.ai_table_resolver.execute_insightsql_query")
-    def test_test_hog_no_events(self, mock_query):
+    def test_test_script_no_events(self, mock_query):
         mock_query.return_value = self._mock_insightsql_response(0)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/test_hog/",
+            f"/v1/environments/{self.team.id}/evaluations/test_script/",
             {"source": "return true"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1275,11 +1275,11 @@ class TestTestHogEndpoint(APIBaseTest):
         self.assertIn("message", response.json())
 
     @patch("insights.insightsql_queries.ai.ai_table_resolver.execute_insightsql_query")
-    def test_test_hog_handles_runtime_error(self, mock_query):
+    def test_test_script_handles_runtime_error(self, mock_query):
         mock_query.return_value = self._mock_insightsql_response(1)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/test_hog/",
+            f"/v1/environments/{self.team.id}/evaluations/test_script/",
             {"source": "return 42"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1289,11 +1289,11 @@ class TestTestHogEndpoint(APIBaseTest):
         self.assertIn("Must return boolean", results[0]["error"])
 
     @patch("insights.insightsql_queries.ai.ai_table_resolver.execute_insightsql_query")
-    def test_test_hog_uses_null_safe_comparisons(self, mock_query):
+    def test_test_script_uses_null_safe_comparisons(self, mock_query):
         mock_query.return_value = self._mock_insightsql_response(1)
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/test_hog/",
+            f"/v1/environments/{self.team.id}/evaluations/test_script/",
             {"source": "return properties.missing <= 1.0"},
         )
 
@@ -1303,15 +1303,15 @@ class TestTestHogEndpoint(APIBaseTest):
         self.assertFalse(results[0]["result"])
         self.assertIsNone(results[0]["error"])
 
-    @patch("products.ai_observability.backend.api.evaluations.run_hog_eval_over_recent_traces")
+    @patch("products.ai_observability.backend.api.evaluations.run_script_eval_over_recent_traces")
     @patch("insights.insightsql_queries.ai.ai_table_resolver.execute_insightsql_query")
-    def test_test_hog_trace_target_evaluates_whole_traces(self, mock_query, mock_run_over_traces):
+    def test_test_script_trace_target_evaluates_whole_traces(self, mock_query, mock_run_over_traces):
         # A trace-target request must run the trace path (whole-trace globals), not the
         # generation query — the gap this endpoint used to have.
-        from insights.temporal.ai_observability.run_trace_evaluation import TraceHogTestResult
+        from insights.temporal.ai_observability.run_trace_evaluation import TraceScriptTestResult
 
         mock_run_over_traces.return_value = [
-            TraceHogTestResult(
+            TraceScriptTestResult(
                 trace_id="trace-1",
                 verdict=True,
                 reasoning="ok",
@@ -1322,7 +1322,7 @@ class TestTestHogEndpoint(APIBaseTest):
         ]
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/test_hog/",
+            f"/v1/environments/{self.team.id}/evaluations/test_script/",
             {
                 "source": "return target.type == 'trace'",
                 "target": "trace",
@@ -1342,12 +1342,12 @@ class TestTestHogEndpoint(APIBaseTest):
         self.assertEqual(results[0]["trace_id"], "trace-1")
         self.assertTrue(results[0]["result"])
 
-    @patch("products.ai_observability.backend.api.evaluations.run_hog_eval_over_recent_traces")
-    def test_test_hog_trace_target_no_traces(self, mock_run_over_traces):
+    @patch("products.ai_observability.backend.api.evaluations.run_script_eval_over_recent_traces")
+    def test_test_script_trace_target_no_traces(self, mock_run_over_traces):
         mock_run_over_traces.return_value = []
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/test_hog/",
+            f"/v1/environments/{self.team.id}/evaluations/test_script/",
             {"source": "return true", "target": "trace"},
         )
 
@@ -1390,7 +1390,7 @@ class TestEnableBlockingWhenKeyRequired(APIBaseTest):
 
     def _enable(self, eval_obj):
         return self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{eval_obj.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{eval_obj.id}/",
             {"enabled": True},
             format="json",
         )
@@ -1454,7 +1454,7 @@ class TestEnableBlockingWhenKeyRequired(APIBaseTest):
 
     def test_blocks_creating_enabled_keyless_eval_without_key(self):
         response = self.client.post(
-            f"/api/environments/{self.team.id}/evaluations/",
+            f"/v1/environments/{self.team.id}/evaluations/",
             {
                 "name": "Doomed Eval",
                 "enabled": True,
@@ -1472,7 +1472,7 @@ class TestEnableBlockingWhenKeyRequired(APIBaseTest):
         self.assertIn("Add a provider API key", str(response.data))
         self.assertEqual(Evaluation.objects.filter(name="Doomed Eval").count(), 0)
 
-    def test_allows_enabling_hog_eval_without_key(self):
+    def test_allows_enabling_script_eval_without_key(self):
         eval_obj = Evaluation.objects.create(
             team=self.team,
             name="Script Eval",
@@ -1486,7 +1486,7 @@ class TestEnableBlockingWhenKeyRequired(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{eval_obj.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{eval_obj.id}/",
             {"enabled": True},
             format="json",
         )
@@ -1520,7 +1520,7 @@ class TestEnableBlockingWhenKeyRequired(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{eval_obj.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{eval_obj.id}/",
             {"enabled": True},
             format="json",
         )
@@ -1554,7 +1554,7 @@ class TestEnableBlockingWhenKeyRequired(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{eval_obj.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{eval_obj.id}/",
             {"enabled": True},
             format="json",
         )
@@ -1590,7 +1590,7 @@ class TestReEnableValidatesRootCauseResolved(APIBaseTest):
         eval_obj = self._create_errored_eval(status_reason="provider_key_required")
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{eval_obj.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{eval_obj.id}/",
             {"enabled": True},
             format="json",
         )
@@ -1611,7 +1611,7 @@ class TestReEnableValidatesRootCauseResolved(APIBaseTest):
         eval_obj = self._create_errored_eval(status_reason="provider_key_required", provider_key=key)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{eval_obj.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{eval_obj.id}/",
             {"enabled": True},
             format="json",
         )
@@ -1633,7 +1633,7 @@ class TestReEnableValidatesRootCauseResolved(APIBaseTest):
         eval_obj = self._create_errored_eval(status_reason=status_reason)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{eval_obj.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{eval_obj.id}/",
             {"enabled": True},
             format="json",
         )
@@ -1660,7 +1660,7 @@ class TestReEnableValidatesRootCauseResolved(APIBaseTest):
         eval_obj = self._create_errored_eval(status_reason=status_reason, provider_key=key)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{eval_obj.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{eval_obj.id}/",
             {"enabled": True},
             format="json",
         )
@@ -1680,7 +1680,7 @@ class TestReEnableValidatesRootCauseResolved(APIBaseTest):
         eval_obj = self._create_errored_eval(status_reason="model_not_found", provider_key=key)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{eval_obj.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{eval_obj.id}/",
             {"enabled": True},
             format="json",
         )
@@ -1702,7 +1702,7 @@ class TestReEnableValidatesRootCauseResolved(APIBaseTest):
         eval_obj = self._create_errored_eval(status_reason="model_not_found", model="missing-model")
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{eval_obj.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{eval_obj.id}/",
             {
                 "enabled": True,
                 "model_configuration": {
@@ -1731,7 +1731,7 @@ class TestReEnableValidatesRootCauseResolved(APIBaseTest):
         eval_obj = self._create_errored_eval(status_reason="provider_key_deleted", provider_key=key)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.id}/evaluations/{eval_obj.id}/",
+            f"/v1/environments/{self.team.id}/evaluations/{eval_obj.id}/",
             {"enabled": True},
             format="json",
         )

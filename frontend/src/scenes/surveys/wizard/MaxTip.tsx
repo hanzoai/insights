@@ -1,17 +1,13 @@
 import { ComponentType, useState } from 'react'
 
-import * as einsteinPng from '@hanzo/brand/hoggies/png/einstein'
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
-import * as reporterPng from '@hanzo/brand/hoggies/png/reporter'
-
-import { pngHoggie } from 'lib/brand/hoggies'
-import { StarHog } from 'lib/components/mascots'
+import { pngMascot } from 'lib/brand/mascot'
+import { StarScript } from 'lib/components/mascots'
 
 import { WizardStep } from './surveyWizardLogic'
 
-const MascotEinstein = pngHoggie(einsteinPng)
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
-const MascotReporter = pngHoggie(reporterPng)
+const MascotEinstein = pngMascot()
+const MascotMagnifyingGlass = pngMascot()
+const MascotReporter = pngMascot()
 
 interface Tip {
     text: string
@@ -21,7 +17,7 @@ interface Tip {
 // Tips focused on increasing survey completion rates
 const TIPS_BY_STEP: Record<WizardStep, Tip[]> = {
     template: [
-        { text: 'NPS is best for measuring overall loyalty. Use it quarterly for meaningful trends.', Script: StarHog },
+        { text: 'NPS is best for measuring overall loyalty. Use it quarterly for meaningful trends.', Script: StarScript },
         {
             text: 'CSAT works great after specific interactions — support, purchase, feature use.',
             Script: MascotEinstein,
@@ -36,7 +32,7 @@ const TIPS_BY_STEP: Record<WizardStep, Tip[]> = {
             text: 'Shorter surveys get more completions. Every extra question is a chance for someone to drop off.',
             Script: MascotEinstein,
         },
-        { text: 'Lead with your most important question — some users only answer the first one.', Script: StarHog },
+        { text: 'Lead with your most important question — some users only answer the first one.', Script: StarScript },
         {
             text: 'Rating scales are easier to answer than open text. Save open-ended questions for the end.',
             Script: MascotReporter,
@@ -45,11 +41,11 @@ const TIPS_BY_STEP: Record<WizardStep, Tip[]> = {
             text: 'Make your first question dead simple. Save harder questions for engaged respondents.',
             Script: MascotEinstein,
         },
-        { text: 'Be specific: "How was checkout?" beats "How was your experience?"', Script: StarHog },
+        { text: 'Be specific: "How was checkout?" beats "How was your experience?"', Script: StarScript },
         { text: 'Every field is friction. Only ask what you truly need to know.', Script: MascotMagnifyingGlass },
     ],
     where: [
-        { text: 'Surveys work best after someone takes an action — signup, purchase, feature use.', Script: StarHog },
+        { text: 'Surveys work best after someone takes an action — signup, purchase, feature use.', Script: StarScript },
         {
             text: "Landing pages are usually too early. Users haven't formed opinions yet.",
             Script: MascotMagnifyingGlass,
@@ -59,7 +55,7 @@ const TIPS_BY_STEP: Record<WizardStep, Tip[]> = {
             text: 'Exit-intent surveys on pricing pages can capture valuable "why not buy" feedback.',
             Script: MascotMagnifyingGlass,
         },
-        { text: 'Show NPS surveys after users have experienced value, not immediately after signup.', Script: StarHog },
+        { text: 'Show NPS surveys after users have experienced value, not immediately after signup.', Script: StarScript },
         {
             text: 'Dashboard and settings pages catch users who are already engaged with your product.',
             Script: MascotReporter,
@@ -70,7 +66,7 @@ const TIPS_BY_STEP: Record<WizardStep, Tip[]> = {
             text: 'Give users a moment to orient before showing a survey. Immediate popups get dismissed reflexively.',
             Script: MascotEinstein,
         },
-        { text: 'Trigger after success moments — completed tasks, achieved goals, resolved issues.', Script: StarHog },
+        { text: 'Trigger after success moments — completed tasks, achieved goals, resolved issues.', Script: StarScript },
         {
             text: 'Avoid interrupting active workflows. Survey during natural pauses instead.',
             Script: MascotMagnifyingGlass,
@@ -81,7 +77,7 @@ const TIPS_BY_STEP: Record<WizardStep, Tip[]> = {
         },
         {
             text: 'Good trigger moments: after purchase, finishing onboarding, or resolving a support ticket.',
-            Script: StarHog,
+            Script: StarScript,
         },
         {
             text: "Don't survey the same person too often. Quality drops when users feel over-surveyed.",
@@ -91,7 +87,7 @@ const TIPS_BY_STEP: Record<WizardStep, Tip[]> = {
     appearance: [
         {
             text: 'Match your brand colors for a cohesive experience. Surveys that look native get more responses.',
-            Script: StarHog,
+            Script: StarScript,
         },
         {
             text: 'Dark themes work great for developer tools and evening products. Light themes feel friendlier.',

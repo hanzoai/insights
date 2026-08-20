@@ -38,8 +38,8 @@ from insights.api.property_value_metrics import PROPERTY_VALUES_DURATION
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.utils import action
 from insights.auth import PersonalAPIKeyAuthentication
-from insights.datastore.query_tagging import Feature, tag_queries
 from insights.constants import LIMIT, OFFSET
+from insights.datastore.query_tagging import Feature, tag_queries
 from insights.event_usage import get_request_analytics_properties
 from insights.helpers.impersonation import is_impersonated
 from insights.metrics import LABEL_TEAM_ID
@@ -120,13 +120,13 @@ class PersonLimitOffsetPagination(LimitOffsetPagination):
                     "type": "string",
                     "nullable": True,
                     "format": "uri",
-                    "example": "https://app.hanzo.ai/api/projects/{project_id}/accounts/?offset=400&limit=100",
+                    "example": "https://app.hanzo.ai/v1/projects/{project_id}/accounts/?offset=400&limit=100",
                 },
                 "previous": {
                     "type": "string",
                     "nullable": True,
                     "format": "uri",
-                    "example": "https://app.hanzo.ai/api/projects/{project_id}/accounts/?offset=400&limit=100",
+                    "example": "https://app.hanzo.ai/v1/projects/{project_id}/accounts/?offset=400&limit=100",
                 },
                 "count": {"type": "integer", "example": 400},
                 "results": schema,
@@ -1280,7 +1280,9 @@ class PersonViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
         function_ids = {row.function_id for row in data}
         name_by_id = {
             str(pk): (name or "")
-            for pk, name in InsightsFlow.objects.filter(team_id=self.team_id, id__in=function_ids).values_list("id", "name")
+            for pk, name in InsightsFlow.objects.filter(team_id=self.team_id, id__in=function_ids).values_list(
+                "id", "name"
+            )
         }
         enriched = [dataclasses.replace(row, function_name=name_by_id.get(row.function_id, "")) for row in data]
         return response.Response(MessageAssetSerializer(enriched, many=True).data)

@@ -50,6 +50,6 @@ class InsightsFlowBatchJobAdmin(admin.ModelAdmin):
     def insights_flow_link(self, batch_job: InsightsFlowBatchJob):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:workflows_hogflow_change", args=[batch_job.insights_flow.pk]),
+            reverse("admin:workflows_flow_change", args=[batch_job.insights_flow.pk]),
             batch_job.insights_flow.name or batch_job.insights_flow.pk,
         )

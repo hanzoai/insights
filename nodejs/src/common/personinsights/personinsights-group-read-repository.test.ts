@@ -1,11 +1,11 @@
 import { Code, ConnectError, createRouterTransport } from '@connectrpc/connect'
 import { DateTime } from 'luxon'
 
-import { PersonHogService } from '~/common/generated/personinsights/personinsights/service/v1/service_pb'
+import { PersonFnService } from '~/common/generated/personinsights/personinsights/service/v1/service_pb'
 import { TeamId } from '~/types'
 
-import { PersonHogClient } from './client'
-import { PersonHogGroupReadRepository } from './personinsights-group-read-repository'
+import { PersonFnClient } from './client'
+import { PersonFnGroupReadRepository } from './personinsights-group-read-repository'
 
 jest.mock('~/common/utils/logger')
 
@@ -16,20 +16,20 @@ type ServiceHandlers = {
     getGroupTypeMappingsByTeamIds: jest.Mock
 }
 
-function createMockClientAndHandlers(): { client: PersonHogClient; handlers: ServiceHandlers } {
+function createMockClientAndHandlers(): { client: PersonFnClient; handlers: ServiceHandlers } {
     const handlers: ServiceHandlers = {
         getGroupsBatch: jest.fn().mockReturnValue({ results: [] }),
         getGroupTypeMappingsByTeamIds: jest.fn().mockReturnValue({ results: [] }),
     }
 
     const transport = createRouterTransport(({ service }) => {
-        service(PersonHogService, {
+        service(PersonFnService, {
             getGroupsBatch: handlers.getGroupsBatch,
             getGroupTypeMappingsByTeamIds: handlers.getGroupTypeMappingsByTeamIds,
         })
     })
 
-    const client = PersonHogClient.fromTransport(transport)
+    const client = PersonFnClient.fromTransport(transport)
     return { client, handlers }
 }
 
@@ -39,7 +39,7 @@ function jsonBytes(obj: unknown): Uint8Array {
     return textEncoder.encode(JSON.stringify(obj))
 }
 
-describe('PersonHogGroupReadRepository', () => {
+describe('PersonFnGroupReadRepository', () => {
     describe('fetchGroupsByKeys', () => {
         it('returns group properties for matching keys', async () => {
             const { client, handlers } = createMockClientAndHandlers()
@@ -62,7 +62,7 @@ describe('PersonHogGroupReadRepository', () => {
                 ],
             })
 
-            const repo = new PersonHogGroupReadRepository(client)
+            const repo = new PersonFnGroupReadRepository(client)
             const result = await repo.fetchGroupsByKeys([TEAM_ID], [0], ['company-1'])
 
             expect(result).toHaveLength(1)
@@ -78,7 +78,7 @@ describe('PersonHogGroupReadRepository', () => {
 
         it('returns empty array for empty input', async () => {
             const { client, handlers } = createMockClientAndHandlers()
-            const repo = new PersonHogGroupReadRepository(client)
+            const repo = new PersonFnGroupReadRepository(client)
             const result = await repo.fetchGroupsByKeys([], [], [])
 
             expect(result).toEqual([])
@@ -101,7 +101,7 @@ describe('PersonHogGroupReadRepository', () => {
                 ],
             })
 
-            const repo = new PersonHogGroupReadRepository(client)
+            const repo = new PersonFnGroupReadRepository(client)
             const result = await repo.fetchGroupTypesByTeamIds([TEAM_ID])
 
             expect(result).toEqual({
@@ -114,7 +114,7 @@ describe('PersonHogGroupReadRepository', () => {
 
         it('returns empty record for empty input', async () => {
             const { client, handlers } = createMockClientAndHandlers()
-            const repo = new PersonHogGroupReadRepository(client)
+            const repo = new PersonFnGroupReadRepository(client)
             const result = await repo.fetchGroupTypesByTeamIds([])
 
             expect(result).toEqual({})
@@ -141,7 +141,7 @@ describe('PersonHogGroupReadRepository', () => {
                 return { results: [] }
             })
 
-            const repo = new PersonHogGroupReadRepository(client)
+            const repo = new PersonFnGroupReadRepository(client)
             const result = await repo.fetchGroupsByKeys([TEAM_ID], [0], ['key'])
 
             expect(result).toEqual([])
@@ -160,7 +160,7 @@ describe('PersonHogGroupReadRepository', () => {
                 throw new ConnectError('non-retryable', code)
             })
 
-            const repo = new PersonHogGroupReadRepository(client)
+            const repo = new PersonFnGroupReadRepository(client)
             await expect(repo.fetchGroupsByKeys([TEAM_ID], [0], ['key'])).rejects.toThrow(ConnectError)
 
             expect(handlers.getGroupsBatch).toHaveBeenCalledTimes(1)
@@ -172,7 +172,7 @@ describe('PersonHogGroupReadRepository', () => {
                 throw new ConnectError('unavailable', Code.Unavailable)
             })
 
-            const repo = new PersonHogGroupReadRepository(client)
+            const repo = new PersonFnGroupReadRepository(client)
             await expect(repo.fetchGroupsByKeys([TEAM_ID], [0], ['key'])).rejects.toThrow(ConnectError)
 
             // 1 initial + 2 retries = 3 total

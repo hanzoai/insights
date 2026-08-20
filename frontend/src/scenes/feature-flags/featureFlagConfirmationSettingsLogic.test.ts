@@ -21,7 +21,7 @@ describe('featureFlagConfirmationSettingsLogic', () => {
         lastCapturedPayload = null
         useMocks({
             patch: {
-                '/api/environments/:id': async ({ request }) => {
+                '/v1/environments/:id': async ({ request }) => {
                     lastCapturedPayload = await request.json()
                     const updatedTeam = { ...MOCK_DEFAULT_TEAM, ...lastCapturedPayload }
                     return [200, updatedTeam]
@@ -100,7 +100,7 @@ describe('featureFlagConfirmationSettingsLogic', () => {
             // Override mock to return an error response
             useMocks({
                 patch: {
-                    '/api/environments/:id': async () => {
+                    '/v1/environments/:id': async () => {
                         return [500, { type: 'server_error', detail: 'Internal server error' }]
                     },
                 },

@@ -16,13 +16,13 @@ describe('supportSettingsLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                'api/conversations/v1/email/status': { configs: [] },
+                'v1/conversations/v1/email/status': { configs: [] },
             },
             post: {
-                'api/environments/:team_id/': async ({ request }) => [200, await request.json()],
-                'api/conversations/v1/teams/select-channel': { ok: true, teams_channels: [] },
-                'api/conversations/v1/teams/install': { ok: true, status: 'installed' },
-                'api/conversations/v1/teams/channels': { channels: [] },
+                'v1/environments/:team_id/': async ({ request }) => [200, await request.json()],
+                'v1/conversations/v1/teams/select-channel': { ok: true, teams_channels: [] },
+                'v1/conversations/v1/teams/install': { ok: true, status: 'installed' },
+                'v1/conversations/v1/teams/channels': { channels: [] },
             },
         })
         initKeaTests()
@@ -301,13 +301,13 @@ describe('supportSettingsLogic', () => {
 
             useMocks({
                 get: {
-                    'api/conversations/v1/email/status': { configs: [] },
+                    'v1/conversations/v1/email/status': { configs: [] },
                 },
                 post: {
-                    'api/environments/:team_id/': async ({ request }) => [200, await request.json()],
-                    'api/conversations/v1/teams/select-channel': { ok: true, teams_channels: updatedChannels },
-                    'api/conversations/v1/teams/install': { ok: true, status: 'installed' },
-                    'api/conversations/v1/teams/channels': { channels: [] },
+                    'v1/environments/:team_id/': async ({ request }) => [200, await request.json()],
+                    'v1/conversations/v1/teams/select-channel': { ok: true, teams_channels: updatedChannels },
+                    'v1/conversations/v1/teams/install': { ok: true, status: 'installed' },
+                    'v1/conversations/v1/teams/channels': { channels: [] },
                 },
             })
 

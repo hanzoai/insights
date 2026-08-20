@@ -396,7 +396,7 @@ class TestNotebookSharingConfiguration(APIBaseTest):
 
     def _sharing_url(self, short_id: str | None = None) -> str:
         short_id = short_id or self.notebook.short_id
-        return f"/api/projects/{self.team.id}/notebooks/{short_id}/sharing/"
+        return f"/v1/projects/{self.team.id}/notebooks/{short_id}/sharing/"
 
     def test_get_sharing_returns_disabled_by_default(self) -> None:
         response = self.client.get(self._sharing_url())
@@ -612,7 +612,7 @@ class TestNotebookSharingGrantsInsightAccess(APIBaseTest):
             created_by=self.user,
         )
         self.client.patch(
-            f"/api/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sharing/",
+            f"/v1/projects/{self.team.id}/notebooks/{self.notebook.short_id}/sharing/",
             {"enabled": True},
             format="json",
         )
@@ -654,7 +654,7 @@ class TestNotebookSharingGrantsInsightAccess(APIBaseTest):
     def test_anonymous_request_with_share_token_can_load_referenced_insight(self) -> None:
         self.client.logout()
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/?short_id={self.referenced_insight.short_id}"
+            f"/v1/projects/{self.team.id}/insights/?short_id={self.referenced_insight.short_id}"
             f"&sharing_access_token={self.config.access_token}"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
@@ -776,7 +776,7 @@ class TestNotebookSharingGrantsInsightAccess(APIBaseTest):
     def test_anonymous_request_with_share_token_cannot_load_unreferenced_insight(self) -> None:
         self.client.logout()
         response = self.client.get(
-            f"/api/projects/{self.team.id}/insights/?short_id={self.unreferenced_insight.short_id}"
+            f"/v1/projects/{self.team.id}/insights/?short_id={self.unreferenced_insight.short_id}"
             f"&sharing_access_token={self.config.access_token}"
         )
         # Either filtered out (200 with empty results) or 404 — both are acceptable proof of denial

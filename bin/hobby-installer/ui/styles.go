@@ -3,13 +3,14 @@ package ui
 import "github.com/charmbracelet/lipgloss"
 
 var (
-	// Colors - Insights brand colors
-	ColorPrimary   = lipgloss.Color("#F54E00") // Insights orange
-	ColorSecondary = lipgloss.Color("#1D4AFF") // Insights blue
-	ColorSuccess   = lipgloss.Color("#77B96C") // Green
-	ColorWarning   = lipgloss.Color("#F1A82C") // Yellow/orange
-	ColorError     = lipgloss.Color("#F54E00") // Red/orange
-	ColorMuted     = lipgloss.Color("#6B7280") // Gray
+	// The mark is monochrome: accents are ink, and ink flips with the
+	// terminal background so it stays legible on light and dark alike.
+	ColorPrimary   = lipgloss.AdaptiveColor{Light: "#333333", Dark: "#CCCCCC"} // Ink: titles, borders, selection
+	ColorSecondary = lipgloss.Color("#8F8F8F")                                 // Mid grey, legible on either background
+	ColorSuccess   = lipgloss.Color("#77B96C")                                 // Green
+	ColorWarning   = lipgloss.Color("#F1A82C")                                 // Yellow/orange
+	ColorError     = lipgloss.AdaptiveColor{Light: "#D32F2F", Dark: "#EF5350"} // Red, darker on light backgrounds
+	ColorMuted     = lipgloss.Color("#6B7280")                                 // Gray
 	ColorWhite     = lipgloss.Color("#FFFFFF")
 	ColorBlack     = lipgloss.Color("#000000")
 

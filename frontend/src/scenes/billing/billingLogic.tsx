@@ -754,7 +754,7 @@ export const billingLogic = kea<billingLogicType>([
                     // of splitting the billing and forecasting data.
                     const skipForecasting = values.featureFlags[FEATURE_FLAGS.BILLING_SKIP_FORECASTING]
                     const response = await api.get(
-                        'api/billing' + (skipForecasting ? '?include_forecasting=false' : '')
+                        'v1/billing' + (skipForecasting ? '?include_forecasting=false' : '')
                     )
 
                     return parseBillingResponse(response)
@@ -762,7 +762,7 @@ export const billingLogic = kea<billingLogicType>([
 
                 updateBillingLimits: async (limits: { [key: string]: number | null }) => {
                     try {
-                        const response = await api.update('api/billing', { custom_limits_usd: limits })
+                        const response = await api.update('v1/billing', { custom_limits_usd: limits })
                         toast.success('Billing limits updated')
                         actions.loadBilling()
                         return parseBillingResponse(response)
@@ -784,7 +784,7 @@ export const billingLogic = kea<billingLogicType>([
 
                     actions.resetUnsubscribeError()
                     try {
-                        const response = await api.createResponse('api/billing/deactivate', { products: key })
+                        const response = await api.createResponse('v1/billing/deactivate', { products: key })
                         const jsonRes = await getJSONOrNull(response)
 
                         toast.success(
@@ -839,7 +839,7 @@ export const billingLogic = kea<billingLogicType>([
                 },
                 switchFlatrateSubscriptionPlan: async (data: SwitchPlanPayload, breakpoint) => {
                     try {
-                        await api.create('api/billing/subscription/switch-plan', data)
+                        await api.create('v1/billing/subscription/switch-plan', data)
 
                         const productDisplayName = capitalizeFirstLetter(data.to_product_key)
                         toast.success(`You're now on ${productDisplayName}`)
@@ -871,7 +871,7 @@ export const billingLogic = kea<billingLogicType>([
                 loadInvoices: async () => {
                     // First check to see if there are open invoices
                     try {
-                        const res = await api.getResponse('api/billing/get_invoices?status=open')
+                        const res = await api.getResponse('v1/billing/get_invoices?status=open')
                         const jsonRes = await getJSONOrNull(res)
                         const numOpenInvoices = jsonRes['count']
                         if (numOpenInvoices > 0) {
@@ -915,7 +915,7 @@ export const billingLogic = kea<billingLogicType>([
                 loadCreditOverview: async () => {
                     // Check if the user is subscribed
                     if (values.billing?.has_active_subscription) {
-                        const response = await api.get('api/billing/credits/overview')
+                        const response = await api.get('v1/billing/credits/overview')
 
                         if (!values.creditForm.creditInput) {
                             let spend = DEFAULT_ESTIMATED_MONTHLY_CREDIT_AMOUNT_USD
@@ -952,7 +952,7 @@ export const billingLogic = kea<billingLogicType>([
             [] as BillingProductV2Type[],
             {
                 loadProducts: async () => {
-                    const response = await api.get('api/billing/available_products')
+                    const response = await api.get('v1/billing/available_products')
                     return response
                 },
             },
@@ -1151,7 +1151,7 @@ export const billingLogic = kea<billingLogicType>([
             submit: async ({ license }, breakpoint) => {
                 await breakpoint(500)
                 try {
-                    await api.update('api/billing/license', {
+                    await api.update('v1/billing/license', {
                         license,
                     })
 
@@ -1176,7 +1176,7 @@ export const billingLogic = kea<billingLogicType>([
                 collectionMethod: 'charge_automatically',
             },
             submit: async ({ creditInput, collectionMethod }) => {
-                await api.create('api/billing/credits/purchase', {
+                await api.create('v1/billing/credits/purchase', {
                     annual_credit_amount_usd: +creditInput,
                     collection_method: collectionMethod,
                 })

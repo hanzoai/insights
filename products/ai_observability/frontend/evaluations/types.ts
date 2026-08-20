@@ -23,7 +23,7 @@ export type EvaluationStatusReason =
     | 'provider_key_quota_exceeded'
     | 'provider_key_rate_limited'
     | 'model_not_found'
-    | 'hog_error'
+    | 'script_error'
 
 export interface ModelConfiguration {
     provider: LLMProvider
@@ -54,7 +54,7 @@ export interface LLMJudgeEvaluationConfig {
     prompt: string
 }
 
-export interface HogEvaluationConfig {
+export interface ScriptEvaluationConfig {
     source: string
     bytecode?: unknown[]
 }
@@ -94,10 +94,10 @@ export interface LLMJudgeEvaluation extends BaseEvaluationConfig {
     evaluation_config: LLMJudgeEvaluationConfig
 }
 
-export interface HogEvaluation extends BaseEvaluationConfig {
+export interface ScriptEvaluation extends BaseEvaluationConfig {
     evaluation_type: 'script'
     output_type: 'boolean'
-    evaluation_config: HogEvaluationConfig
+    evaluation_config: ScriptEvaluationConfig
 }
 
 export interface SentimentEvaluation extends BaseEvaluationConfig {
@@ -107,7 +107,7 @@ export interface SentimentEvaluation extends BaseEvaluationConfig {
     model_configuration: null
 }
 
-export type EvaluationConfig = LLMJudgeEvaluation | HogEvaluation | SentimentEvaluation
+export type EvaluationConfig = LLMJudgeEvaluation | ScriptEvaluation | SentimentEvaluation
 
 export interface EvaluationConditionSet {
     id: string

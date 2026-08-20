@@ -635,7 +635,7 @@ export const runningTimeLogic = kea<runningTimeLogicType>([
             // experiment goes silently stale on results load and later scalar saves 409.
             try {
                 const response: Experiment = await api.update(
-                    `api/projects/${currentProjectId}/experiments/${props.experiment.id}`,
+                    `v1/projects/${currentProjectId}/experiments/${props.experiment.id}`,
                     {
                         ...toConcurrencyPayload(values.unmodifiedExperiment),
                         running_time_calculation: updatedRunningTimeCalculation,
@@ -654,7 +654,7 @@ export const runningTimeLogic = kea<runningTimeLogicType>([
                 // re-persisting the same values against fresh server state).
                 try {
                     const fresh: Experiment = await api.get(
-                        `api/projects/${currentProjectId}/experiments/${props.experiment.id}`
+                        `v1/projects/${currentProjectId}/experiments/${props.experiment.id}`
                     )
                     actions.setUnmodifiedExperiment(structuredClone(initializeMetricOrdering(fresh)))
                     actions.setExperiment({ running_time_calculation: fresh.running_time_calculation })

@@ -6,11 +6,11 @@ import { Button, Dialog, Input, Label, toast } from '@hanzo/elements'
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 import { Field } from 'lib/elements/Field/Field'
 
-import { hogFlowEditorLogic } from '../hogFlowEditorLogic'
+import { flowEditorLogic } from '../flowEditorLogic'
 
 export function InsightsFlowEditorPanelVariables(): JSX.Element | null {
-    const { workflow } = useValues(hogFlowEditorLogic)
-    const { setWorkflowInfo } = useActions(hogFlowEditorLogic)
+    const { workflow } = useValues(flowEditorLogic)
+    const { setWorkflowInfo } = useActions(flowEditorLogic)
 
     const addNewVariable = (): void => {
         const newVariableName = `VARIABLE_${(workflow?.variables?.length || 0) + 1}`

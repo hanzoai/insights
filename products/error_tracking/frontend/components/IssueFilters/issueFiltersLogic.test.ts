@@ -37,7 +37,7 @@ describe('issueFiltersLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:team_id/quick_filters/': { results: [mockEnvFilter] },
+                '/v1/environments/:team_id/quick_filters/': { results: [mockEnvFilter] },
             },
         })
         initKeaTests()

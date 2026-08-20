@@ -1238,7 +1238,7 @@ class TestHyperCacheRemoveExpiryTracking(BaseTest):
             ("team_id_based", False, lambda self: self.team, lambda self: str(self.team.id)),
             ("team_token_based", True, lambda self: self.team, lambda self: str(self.team.api_token)),
             ("int_id_based", False, lambda self: 42, lambda self: "42"),
-            ("str_token_based", True, lambda self: "phc_test_token", lambda self: "phc_test_token"),
+            ("str_token_based", True, lambda self: "pk-test_token", lambda self: "pk-test_token"),
         ]
     )
     @patch("insights.storage.hypercache.get_client")

@@ -121,8 +121,8 @@ export function IconBranch(props: IconProps): JSX.Element {
     )
 }
 
-// Stamphog product glyph: a robot head peeking out from behind a check-circle badge
-export function IconStamphog(props: IconProps): JSX.Element {
+// Stamp product glyph: a robot head peeking out from behind a check-circle badge
+export function IconStamp(props: IconProps): JSX.Element {
     return (
         <IconBase stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
             <path d="M13.5 7.7 V7.5 A2.5 2.5 0 0 0 11 5 H5.5 A2.5 2.5 0 0 0 3 7.5 V11.5 A2.5 2.5 0 0 0 5.5 14 H8.39" />
@@ -437,7 +437,7 @@ export function IconTableChart(props: IconProps): JSX.Element {
  * presentation attributes can't resolve `var()`). Structural parts (SQL brackets,
  * lifecycle axis) follow `currentColor` like regular icons.
  */
-const INSIGHT_BLUE = 'var(--insight-icon-blue)'
+const INSIGHT_INK = 'var(--insight-icon-ink)'
 const INSIGHT_PURPLE = 'var(--insight-icon-purple)'
 const INSIGHT_GREEN = 'var(--insight-icon-green)'
 const LIFECYCLE_RETURNING = 'var(--insight-icon-lifecycle-returning)'
@@ -456,7 +456,7 @@ export function IconBracketsChart(props: IconProps): JSX.Element {
             />
             <rect x="6.75" y="13.5" width="3" height="4" rx="0.5" style={{ fill: INSIGHT_GREEN }} />
             <rect x="10.5" y="10.5" width="3" height="7" rx="0.5" style={{ fill: INSIGHT_PURPLE }} />
-            <rect x="14.25" y="7.5" width="3" height="10" rx="0.5" style={{ fill: INSIGHT_BLUE }} />
+            <rect x="14.25" y="7.5" width="3" height="10" rx="0.5" style={{ fill: INSIGHT_INK }} />
         </IconBase>
     )
 }
@@ -465,7 +465,7 @@ export function IconBracketsChart(props: IconProps): JSX.Element {
 export function IconInsightTrends(props: IconProps): JSX.Element {
     return (
         <IconBase strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...props}>
-            <path d="M3.75 17 8.75 10.75l4.25 3 7.25-7.75" style={{ stroke: INSIGHT_BLUE }} />
+            <path d="M3.75 17 8.75 10.75l4.25 3 7.25-7.75" style={{ stroke: INSIGHT_INK }} />
         </IconBase>
     )
 }
@@ -474,7 +474,7 @@ export function IconInsightTrends(props: IconProps): JSX.Element {
 export function IconInsightFunnels(props: IconProps): JSX.Element {
     return (
         <IconBase {...props}>
-            <rect x="3.75" y="4.25" width="16.5" height="4.25" rx="0.75" style={{ fill: INSIGHT_BLUE }} />
+            <rect x="3.75" y="4.25" width="16.5" height="4.25" rx="0.75" style={{ fill: INSIGHT_INK }} />
             <rect x="3.75" y="9.9" width="11" height="4.25" rx="0.75" style={{ fill: INSIGHT_PURPLE }} />
             <rect x="3.75" y="15.55" width="5.75" height="4.25" rx="0.75" style={{ fill: INSIGHT_GREEN }} />
         </IconBase>
@@ -488,9 +488,9 @@ export function IconInsightRetention(props: IconProps): JSX.Element {
             <rect x="3.75" y="3.75" width="4.4" height="4.4" rx="1" style={{ fill: INSIGHT_PURPLE }} />
             <rect x="9.3" y="3.75" width="4.4" height="4.4" rx="1" style={{ fill: INSIGHT_PURPLE }} />
             <rect x="14.85" y="3.75" width="4.4" height="4.4" rx="1" style={{ fill: INSIGHT_PURPLE }} />
-            <rect x="3.75" y="9.3" width="4.4" height="4.4" rx="1" style={{ fill: INSIGHT_BLUE }} />
-            <rect x="9.3" y="9.3" width="4.4" height="4.4" rx="1" style={{ fill: INSIGHT_BLUE }} />
-            <rect x="3.75" y="14.85" width="4.4" height="4.4" rx="1" style={{ fill: INSIGHT_BLUE }} />
+            <rect x="3.75" y="9.3" width="4.4" height="4.4" rx="1" style={{ fill: INSIGHT_INK }} />
+            <rect x="9.3" y="9.3" width="4.4" height="4.4" rx="1" style={{ fill: INSIGHT_INK }} />
+            <rect x="3.75" y="14.85" width="4.4" height="4.4" rx="1" style={{ fill: INSIGHT_INK }} />
         </IconBase>
     )
 }
@@ -503,17 +503,17 @@ export function IconInsightUserPaths(props: IconProps): JSX.Element {
                 d="M6.6 8.25 C10.5 8.25 12 7.6 17.4 7.6"
                 strokeWidth="4.5"
                 opacity="0.4"
-                style={{ stroke: INSIGHT_BLUE }}
+                style={{ stroke: INSIGHT_INK }}
             />
             <path
                 d="M6.6 15 C10.5 15 12.5 16.4 17.4 16.4"
                 strokeWidth="3.25"
                 opacity="0.25"
-                style={{ stroke: INSIGHT_BLUE }}
+                style={{ stroke: INSIGHT_INK }}
             />
-            <rect x="3.75" y="4.5" width="2.9" height="15" rx="0.7" style={{ fill: INSIGHT_BLUE }} />
-            <rect x="17.35" y="4.5" width="2.9" height="6.25" rx="0.7" style={{ fill: INSIGHT_BLUE }} />
-            <rect x="17.35" y="13.25" width="2.9" height="6.25" rx="0.7" style={{ fill: INSIGHT_BLUE }} />
+            <rect x="3.75" y="4.5" width="2.9" height="15" rx="0.7" style={{ fill: INSIGHT_INK }} />
+            <rect x="17.35" y="4.5" width="2.9" height="6.25" rx="0.7" style={{ fill: INSIGHT_INK }} />
+            <rect x="17.35" y="13.25" width="2.9" height="6.25" rx="0.7" style={{ fill: INSIGHT_INK }} />
         </IconBase>
     )
 }
@@ -522,10 +522,10 @@ export function IconInsightUserPaths(props: IconProps): JSX.Element {
 export function IconInsightStickiness(props: IconProps): JSX.Element {
     return (
         <IconBase {...props}>
-            <rect x="3.75" y="4.5" width="2.9" height="15" rx="0.7" style={{ fill: INSIGHT_BLUE }} />
-            <rect x="8.4" y="9" width="2.9" height="10.5" rx="0.7" style={{ fill: INSIGHT_BLUE }} />
-            <rect x="13.05" y="12.5" width="2.9" height="7" rx="0.7" style={{ fill: INSIGHT_BLUE }} />
-            <rect x="17.7" y="15.5" width="2.9" height="4" rx="0.7" style={{ fill: INSIGHT_BLUE }} />
+            <rect x="3.75" y="4.5" width="2.9" height="15" rx="0.7" style={{ fill: INSIGHT_INK }} />
+            <rect x="8.4" y="9" width="2.9" height="10.5" rx="0.7" style={{ fill: INSIGHT_INK }} />
+            <rect x="13.05" y="12.5" width="2.9" height="7" rx="0.7" style={{ fill: INSIGHT_INK }} />
+            <rect x="17.7" y="15.5" width="2.9" height="4" rx="0.7" style={{ fill: INSIGHT_INK }} />
         </IconBase>
     )
 }
@@ -535,7 +535,7 @@ export function IconInsightLifecycle(props: IconProps): JSX.Element {
     return (
         <IconBase {...props}>
             <path d="M3.75 12.1h16.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            <rect x="3.9" y="5" width="2.6" height="6.25" rx="0.65" style={{ fill: INSIGHT_BLUE }} />
+            <rect x="3.9" y="5" width="2.6" height="6.25" rx="0.65" style={{ fill: INSIGHT_INK }} />
             <rect x="8.3" y="6.75" width="2.6" height="4.5" rx="0.65" style={{ fill: LIFECYCLE_RETURNING }} />
             <rect x="12.7" y="13" width="2.6" height="4.5" rx="0.65" style={{ fill: LIFECYCLE_DORMANT }} />
             <rect x="17.1" y="5.75" width="2.6" height="5.5" rx="0.65" style={{ fill: LIFECYCLE_RESURRECTING }} />
@@ -549,13 +549,13 @@ export function IconInsightCalendarHeatmap(props: IconProps): JSX.Element {
         <IconBase {...props}>
             <rect x="3.55" y="5.35" width="3.4" height="3.4" rx="0.9" style={{ fill: INSIGHT_GREEN }} />
             <rect x="8.05" y="5.35" width="3.4" height="3.4" rx="0.9" style={{ fill: INSIGHT_PURPLE }} />
-            <rect x="12.55" y="5.35" width="3.4" height="3.4" rx="0.9" style={{ fill: INSIGHT_BLUE }} />
+            <rect x="12.55" y="5.35" width="3.4" height="3.4" rx="0.9" style={{ fill: INSIGHT_INK }} />
             <rect x="17.05" y="5.35" width="3.4" height="3.4" rx="0.9" style={{ fill: INSIGHT_PURPLE }} />
             <rect x="3.55" y="9.85" width="3.4" height="3.4" rx="0.9" style={{ fill: INSIGHT_PURPLE }} />
-            <rect x="8.05" y="9.85" width="3.4" height="3.4" rx="0.9" style={{ fill: INSIGHT_BLUE }} />
+            <rect x="8.05" y="9.85" width="3.4" height="3.4" rx="0.9" style={{ fill: INSIGHT_INK }} />
             <rect x="12.55" y="9.85" width="3.4" height="3.4" rx="0.9" style={{ fill: INSIGHT_PURPLE }} />
             <rect x="17.05" y="9.85" width="3.4" height="3.4" rx="0.9" style={{ fill: INSIGHT_GREEN }} />
-            <rect x="3.55" y="14.35" width="3.4" height="3.4" rx="0.9" style={{ fill: INSIGHT_BLUE }} />
+            <rect x="3.55" y="14.35" width="3.4" height="3.4" rx="0.9" style={{ fill: INSIGHT_INK }} />
             <rect x="8.05" y="14.35" width="3.4" height="3.4" rx="0.9" style={{ fill: INSIGHT_PURPLE }} />
             <rect x="12.55" y="14.35" width="3.4" height="3.4" rx="0.9" style={{ fill: INSIGHT_GREEN }} />
             <rect x="17.05" y="14.35" width="3.4" height="3.4" rx="0.9" style={{ fill: INSIGHT_PURPLE }} />
@@ -570,7 +570,7 @@ export function IconInsightNumber(props: IconProps): JSX.Element {
             <path
                 d="M7,15H5.5v-4.5H4V9h3V15z M13.5,13.5h-3v-1h2c0.55,0,1-0.45,1-1V10c0-0.55-0.45-1-1-1H9v1.5h3v1h-2c-0.55,0-1,0.45-1,1V15 h4.5V13.5z M19.5,14v-4c0-0.55-0.45-1-1-1H15v1.5h3v1h-2v1h2v1h-3V15h3.5C19.05,15,19.5,14.55,19.5,14z"
                 transform="translate(12 12) scale(1.3) translate(-12 -12)"
-                style={{ fill: INSIGHT_BLUE }}
+                style={{ fill: INSIGHT_INK }}
             />
         </IconBase>
     )
@@ -580,7 +580,7 @@ export function IconInsightNumber(props: IconProps): JSX.Element {
 export function IconInsightTable(props: IconProps): JSX.Element {
     return (
         <IconBase {...props}>
-            <rect x="3.75" y="4.5" width="16.5" height="3.6" rx="0.75" style={{ fill: INSIGHT_BLUE }} />
+            <rect x="3.75" y="4.5" width="16.5" height="3.6" rx="0.75" style={{ fill: INSIGHT_INK }} />
             <rect x="3.75" y="10" width="5" height="3.6" rx="0.75" style={{ fill: INSIGHT_PURPLE }} />
             <rect x="10.25" y="10" width="10" height="3.6" rx="0.75" style={{ fill: INSIGHT_PURPLE }} />
             <rect x="3.75" y="15.5" width="5" height="3.6" rx="0.75" style={{ fill: INSIGHT_GREEN }} />
@@ -593,7 +593,7 @@ export function IconInsightTable(props: IconProps): JSX.Element {
 export function IconInsightPie(props: IconProps): JSX.Element {
     return (
         <IconBase {...props}>
-            <path d="M12 12 L12 3.75 A8.25 8.25 0 0 1 12 20.25 Z" style={{ fill: INSIGHT_BLUE }} />
+            <path d="M12 12 L12 3.75 A8.25 8.25 0 0 1 12 20.25 Z" style={{ fill: INSIGHT_INK }} />
             <path d="M12 12 L12 20.25 A8.25 8.25 0 0 1 4.16 9.44 Z" style={{ fill: INSIGHT_PURPLE }} />
             <path d="M12 12 L4.16 9.44 A8.25 8.25 0 0 1 12 3.75 Z" style={{ fill: INSIGHT_GREEN }} />
         </IconBase>
@@ -604,9 +604,9 @@ export function IconInsightPie(props: IconProps): JSX.Element {
 export function IconInsightWorldMap(props: IconProps): JSX.Element {
     return (
         <IconBase strokeWidth="1.5" strokeLinecap="round" {...props}>
-            <circle cx="12" cy="12" r="8.25" strokeWidth="1.75" style={{ stroke: INSIGHT_BLUE }} />
-            <ellipse cx="12" cy="12" rx="3.9" ry="8.25" style={{ stroke: INSIGHT_BLUE }} />
-            <path d="M3.75 12h16.5" style={{ stroke: INSIGHT_BLUE }} />
+            <circle cx="12" cy="12" r="8.25" strokeWidth="1.75" style={{ stroke: INSIGHT_INK }} />
+            <ellipse cx="12" cy="12" rx="3.9" ry="8.25" style={{ stroke: INSIGHT_INK }} />
+            <path d="M3.75 12h16.5" style={{ stroke: INSIGHT_INK }} />
         </IconBase>
     )
 }

@@ -75,7 +75,7 @@ const fetchViaApp: typeof fetch = async (input, init) => {
 const harness = (): ProtocolTestHarness => ({
     baseUrl: new URL('http://hono.test'),
     fetch: fetchViaApp,
-    token: 'phx_integration_test_token',
+    token: 'sk-integration_test_token',
     stateless: true,
     gracefulUnknown: true,
     publicRoutes: true,

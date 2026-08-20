@@ -4,7 +4,7 @@ import { cleanup, render, waitFor } from '@testing-library/react'
 
 import {
     createDefaultTooltipAccessor,
-    getHogChart,
+    getScriptChart,
     hoverUntilTooltip,
     setupJsdom,
     setupSyncRaf,
@@ -87,7 +87,7 @@ describe('Sparkline', () => {
         },
     ])('normalizes $shape into $seriesCount quill series', ({ data, seriesCount }) => {
         renderSparkline({ data, labels: LABELS })
-        expect(getHogChart().seriesCount).toBe(seriesCount)
+        expect(getScriptChart().seriesCount).toBe(seriesCount)
     })
 
     it('wires tooltip formatting and zero-row filtering through to the quill tooltip', async () => {
@@ -104,7 +104,7 @@ describe('Sparkline', () => {
             renderLabel: (label) => `Day: ${label}`,
             renderTooltipValue: (value) => `$${value.toFixed(2)}`,
         })
-        const chart = getHogChart()
+        const chart = getScriptChart()
 
         const tooltip = createDefaultTooltipAccessor(await hoverUntilTooltip(chart.element, 2, LABELS.length))
         // The portal mounts before its content commits, so poll until the header lands.

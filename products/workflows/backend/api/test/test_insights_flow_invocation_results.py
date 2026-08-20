@@ -10,14 +10,14 @@ from parameterized import parameterized
 from rest_framework import status
 
 from insights.datastore.client.execute import sync_execute
-from insights.models.hog_invocation_results.sql import INSERT_FN_INVOCATION_RESULT_SQL
+from insights.models.invocations.sql import INSERT_FN_INVOCATION_RESULT_SQL
 from insights.models.personal_api_key import PersonalAPIKey
 from insights.models.utils import generate_random_token_personal, hash_key_value
 
 from products.workflows.backend.models.insights_flow.insights_flow import InsightsFlow
 
 
-def create_hog_invocation_result(
+def create_script_invocation_result(
     team_id: int,
     function_id: str,
     invocation_id: str,
@@ -72,15 +72,17 @@ class TestInsightsFlowInvocationResults(DatastoreTestMixin, APIBaseTest):
         self.insights_flow = InsightsFlow.objects.create(team=self.team, name="Test Flow")
 
     def _list(self, params=None):
-        return self.client.get(f"/api/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/", params)
+        return self.client.get(
+            f"/v1/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/", params
+        )
 
     def _detail(self, invocation_id: str):
         return self.client.get(
-            f"/api/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/{invocation_id}/"
+            f"/v1/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/{invocation_id}/"
         )
 
     def _seed(self, invocation_id: str, **kwargs):
-        create_hog_invocation_result(
+        create_script_invocation_result(
             team_id=self.team.pk, function_id=str(self.insights_flow.pk), invocation_id=invocation_id, **kwargs
         )
 
@@ -185,13 +187,13 @@ class TestInsightsFlowInvocationResults(DatastoreTestMixin, APIBaseTest):
     def test_isolated_from_other_flow_and_function_kind(self):
         self._seed("inv-mine", invocation_status="success")
         # Same team, but a insights_function invocation and a different flow id must not leak in.
-        create_hog_invocation_result(
+        create_script_invocation_result(
             team_id=self.team.pk,
             function_id=str(self.insights_flow.pk),
             invocation_id="inv-fn",
             function_kind="insights_function",
         )
-        create_hog_invocation_result(team_id=self.team.pk, function_id="some-other-flow", invocation_id="inv-other")
+        create_script_invocation_result(team_id=self.team.pk, function_id="some-other-flow", invocation_id="inv-other")
         results = self._list().json()
         assert {r["invocation_id"] for r in results} == {"inv-mine"}
 
@@ -237,12 +239,13 @@ class TestInsightsFlowInvocationResults(DatastoreTestMixin, APIBaseTest):
         )
         headers = {"authorization": f"Bearer {key}"}
         list_res = self.client.get(
-            f"/api/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/", headers=headers
+            f"/v1/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/", headers=headers
         )
         assert list_res.status_code == 403, list_res.json()
         assert "person:read" in list_res.json().get("detail", "")
         detail_res = self.client.get(
-            f"/api/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/inv-1/", headers=headers
+            f"/v1/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/inv-1/",
+            headers=headers,
         )
         assert detail_res.status_code == 403, detail_res.json()
         assert "person:read" in detail_res.json().get("detail", "")
@@ -258,12 +261,13 @@ class TestInsightsFlowInvocationResults(DatastoreTestMixin, APIBaseTest):
         )
         headers = {"authorization": f"Bearer {key}"}
         list_res = self.client.get(
-            f"/api/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/", headers=headers
+            f"/v1/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/", headers=headers
         )
         assert list_res.status_code == 200, list_res.json()
         assert {r["invocation_id"] for r in list_res.json()} == {"inv-1"}
         detail_res = self.client.get(
-            f"/api/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/inv-1/", headers=headers
+            f"/v1/projects/{self.team.id}/insights_flows/{self.insights_flow.id}/invocation_results/inv-1/",
+            headers=headers,
         )
         assert detail_res.status_code == 200, detail_res.json()
         assert detail_res.json()["invocation_id"] == "inv-1"

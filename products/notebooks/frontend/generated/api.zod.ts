@@ -208,19 +208,19 @@ export const NotebooksCollabSaveCreateBody = /* @__PURE__ */ zod.object({
 /**
  * The API for interacting with Notebooks. This feature is in early access and the API can have breaking changes without announcement.
  */
-export const notebooksHogqlExecuteCreateBodyTitleMax = 256
+export const notebooksInsightsqlExecuteCreateBodyTitleMax = 256
 
-export const notebooksHogqlExecuteCreateBodyVersionMin = -2147483648
-export const notebooksHogqlExecuteCreateBodyVersionMax = 2147483647
+export const notebooksInsightsqlExecuteCreateBodyVersionMin = -2147483648
+export const notebooksInsightsqlExecuteCreateBodyVersionMax = 2147483647
 
-export const NotebooksHogqlExecuteCreateBody = /* @__PURE__ */ zod.object({
-    title: zod.string().max(notebooksHogqlExecuteCreateBodyTitleMax).nullish().describe('Title of the notebook.'),
+export const NotebooksInsightsqlExecuteCreateBody = /* @__PURE__ */ zod.object({
+    title: zod.string().max(notebooksInsightsqlExecuteCreateBodyTitleMax).nullish().describe('Title of the notebook.'),
     content: zod.unknown().optional().describe('Notebook content as a ProseMirror JSON document structure.'),
     text_content: zod.string().nullish().describe('Plain text representation of the notebook content for search.'),
     version: zod
         .number()
-        .min(notebooksHogqlExecuteCreateBodyVersionMin)
-        .max(notebooksHogqlExecuteCreateBodyVersionMax)
+        .min(notebooksInsightsqlExecuteCreateBodyVersionMin)
+        .max(notebooksInsightsqlExecuteCreateBodyVersionMax)
         .optional()
         .describe(
             'Version number for optimistic concurrency control. Must match the current version when updating content.'

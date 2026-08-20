@@ -11,7 +11,7 @@ from urllib.parse import parse_qs, urlparse
 
 from django.apps import apps
 from django.conf import settings
-from django.contrib.auth.backends import BaseBackend
+from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
@@ -25,12 +25,9 @@ from prometheus_client import Counter
 from rest_framework import authentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.request import Request
-from webauthn.helpers import base64url_to_bytes
-from zxcvbn import zxcvbn
 
-from insights.datastore.query_tagging import AccessMethod, tag_authentication
 from insights.constants import AvailableFeature
-from insights.helpers.two_factor_session import enforce_two_factor
+from insights.datastore.query_tagging import AccessMethod, tag_authentication
 from insights.helpers.verified_domain_enforcement import enforce_verified_domain
 from insights.internal_api_secret import usable_internal_api_secrets
 from insights.jwt import InsightsJwtAudience, decode_jwt, get_oidc_verification_keys
@@ -47,14 +44,7 @@ from insights.models.project_secret_api_key import ProjectSecretAPIKey, find_pro
 from insights.models.sharing_configuration import SharingConfiguration
 from insights.models.team import Team
 from insights.models.user import User
-from insights.models.utils import (
-    OAUTH_ACCESS_TOKEN_PREFIX,
-    PERSONAL_API_KEY_PREFIX,
-    SECRET_API_TOKEN_PREFIX,
-    hash_key_value,
-)
-from insights.models.webauthn_credential import WebauthnCredential
-from insights.passkey import verify_passkey_authentication_response
+from insights.models.utils import KeyKind, hash_key_value, key_kind
 from insights.rbac.user_access_control import UserAccessControl
 from insights.shared_link_user import SharedLinkUser
 from insights.synthetic_user import SyntheticUser
@@ -76,8 +66,6 @@ logger = logging.getLogger(__name__)
 structlog_logger = structlog.get_logger(__name__)
 
 tracer = trace.get_tracer(__name__)
-
-_SECRET_API_KEY_RE = re.compile(r"^phs_[a-zA-Z0-9]+$")
 
 PERSONAL_API_KEY_QUERY_PARAM_COUNTER = Counter(
     "api_auth_personal_api_key_query_param",
@@ -135,24 +123,20 @@ def apply_auth_brand_cookie(request: HttpRequest, response: JsonResponse | HttpR
     return response
 
 
-class ZxcvbnValidator:
+class Permissions(ModelBackend):
+    """Django's permission lookups without its credential check.
+
+    The admin reads `user.has_perm` and `user.groups`, which live on
+    `ModelBackend`, so the backend has to stay in `AUTHENTICATION_BACKENDS`.
+    Its `authenticate()` is then the last code path in the process that would
+    exchange a password for a session, and rows still carry usable password
+    hashes -- seeded before IAM, or written by a test factory. Abstaining here
+    makes that exchange impossible rather than merely uncalled, so the property
+    holds without depending on nobody ever calling `authenticate()` again.
     """
-    Validate that the password satisfies zxcvbn
-    """
 
-    def __init__(self, min_length=8):
-        self.min_length = min_length
-
-    def validate(self, password, user=None):
-        result = zxcvbn(password)
-
-        if result["score"] < 3:
-            joined_feedback = " ".join(result["feedback"]["suggestions"])
-
-            raise ValidationError(
-                joined_feedback or "This password is too weak.",
-                code="password_too_weak",
-            )
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        return None
 
 
 class SessionAuthentication(authentication.SessionAuthentication):
@@ -165,7 +149,7 @@ class SessionAuthentication(authentication.SessionAuthentication):
     We do set authenticate_header function in SessionAuthentication, so that a value for the WWW-Authenticate
     header can be retrieved and the response code is automatically set to 401 in case of unauthenticated requests.
 
-    This class is also used to enforce Two-Factor Authentication for session-based authentication.
+    Sessions are established only by the Hanzo IAM OIDC handshake.
     """
 
     def authenticate(self, request):
@@ -176,7 +160,6 @@ class SessionAuthentication(authentication.SessionAuthentication):
                 return None
 
             user, auth = auth_result
-            enforce_two_factor(request, user)
             enforce_verified_domain(request, user)
 
             return (user, auth)
@@ -223,9 +206,11 @@ class PersonalAPIKeyAuthentication(authentication.BaseAuthentication):
             if authorization_match:
                 token = authorization_match.group(1).strip()
 
-                if token.startswith(
-                    OAUTH_ACCESS_TOKEN_PREFIX
-                ):  # TRICKY: This returns None to allow the next authentication method to have a go. This should be `if not token.startswith("phx_")`, but we need to support legacy personal api keys that may not have been prefixed with phx_.
+                # An OAuth access token belongs to the OAuth backend, so hand it on by
+                # returning None. Everything else is a candidate: personal keys minted
+                # before the marks existed carry no mark at all, so the store decides
+                # whether this is a key, not the shape.
+                if key_kind(token) is KeyKind.OAUTH_ACCESS:
                     return None
                 return token, cls.SOURCE_HEADER
         data = request.data if request_data is None and isinstance(request, Request) else request_data
@@ -343,17 +328,22 @@ class PersonalAPIKeyAuthentication(authentication.BaseAuthentication):
         return cls.keyword
 
 
-def _extract_phs_token(request: Union[HttpRequest, Request]) -> Optional[str]:
+def _extract_secret_key(request: Union[HttpRequest, Request]) -> Optional[str]:
     """
-    Find a `phs_` secret token in the request Authorization header (Bearer scheme).
-    Used by both TeamSecretTokenAuthentication (legacy Team.secret_api_token) and
-    ProjectSecretAPIKeyAuthentication (PSAK model).
+    Find a secret key in the request Authorization header (Bearer scheme).
+
+    A personal key and a project secret key carry the same mark, so the mark says
+    only that this is a secret and not which store holds it. Both
+    TeamSecretTokenAuthentication (legacy Team.secret_api_token) and
+    ProjectSecretAPIKeyAuthentication read the key from here and then ask their own
+    store; whichever holds it answers, and the others return None so the next
+    authenticator gets its turn.
     """
     if "authorization" in request.headers:
         authorization_match = re.match(r"^Bearer\s+(.+)$", request.headers["authorization"])
         if authorization_match:
             token = authorization_match.group(1).strip()
-            if _SECRET_API_KEY_RE.match(token):
+            if key_kind(token) is KeyKind.SECRET:
                 return token
 
     return None
@@ -374,7 +364,7 @@ class TeamSecretTokenAuthentication(authentication.BaseAuthentication):
     Authenticates using the legacy team-level Team.secret_api_token field.
 
     This is not a ProjectSecretAPIKey (PSAK) model authenticator — it validates the
-    `phs_*` token against the legacy per-team secret stored on the Team row. It's
+    `sk-*` token against the legacy per-team secret stored on the Team row. It's
     intended for endpoints that were gated before PSAK existed.
 
     When authenticated, returns a synthetic TeamSecretTokenUser with the team
@@ -387,7 +377,7 @@ class TeamSecretTokenAuthentication(authentication.BaseAuthentication):
     keyword = "Bearer"
 
     def authenticate(self, request: Union[HttpRequest, Request]) -> Optional[tuple[Any, None]]:
-        secret_api_token = _extract_phs_token(request)
+        secret_api_token = _extract_secret_key(request)
 
         if not secret_api_token:
             return None
@@ -445,7 +435,7 @@ class ProjectSecretAPIKeyAuthentication(authentication.BaseAuthentication):
     keyword = "Bearer"
 
     def authenticate(self, request: Union[HttpRequest, Request]) -> Optional[tuple[Any, None]]:
-        token = _extract_phs_token(request)
+        token = _extract_secret_key(request)
         if not token:
             return None
 
@@ -561,7 +551,8 @@ class IDJagAccessTokenAuthentication(authentication.BaseAuthentication):
     @classmethod
     def _is_id_jag_token(cls, token: str) -> bool:
         # Personal/OAuth API key prefixes are reserved for those auth backends.
-        if token.startswith((PERSONAL_API_KEY_PREFIX, OAUTH_ACCESS_TOKEN_PREFIX, SECRET_API_TOKEN_PREFIX)):
+        # Every marked key belongs to a key backend, so none of them is a JWT.
+        if key_kind(token) is not None:
             return False
 
         if token.count(".") != 2:
@@ -900,7 +891,7 @@ class OAuthAccessTokenAuthentication(authentication.BaseAuthentication):
             if authorization_match:
                 token = authorization_match.group(1).strip()
 
-                if token.startswith("pha_"):
+                if key_kind(token) is KeyKind.OAUTH_ACCESS:
                     return token
                 return None
         return None
@@ -1099,110 +1090,6 @@ def session_auth_required(endpoint):
         return endpoint(request)
 
     return wrapper
-
-
-class WebauthnBackend(BaseBackend):
-    """
-    Custom authentication backend for WebAuthn/passkey login.
-
-    Handles the complete WebAuthn authentication flow:
-    1. Extracts challenge from session
-    2. Extracts userHandle and credential_id from request data
-    3. Looks up user and credential
-    4. Verifies the authentication response
-    5. Updates credential sign count
-    """
-
-    name = "webauthn"
-
-    def authenticate(
-        self,
-        request: Optional[Union[HttpRequest, Request]],
-        credential_id: Optional[str] = None,
-        challenge: Optional[str] = None,
-        response: Optional[WebAuthnAuthenticationResponse] = None,
-        **kwargs: Any,
-    ) -> Optional[User]:
-        """
-        Authenticate a user via WebAuthn.
-
-        Verifies the WebAuthn assertion and returns the authenticated user.
-
-        Args:
-            request: The HTTP request object
-            credential_id: The base64url-encoded credential ID (rawId)
-            challenge: The base64url-encoded challenge
-            response: The WebAuthn authentication response containing userHandle, authenticatorData, clientDataJSON, and signature
-        """
-        if challenge is None or credential_id is None or response is None:
-            structlog_logger.warning(
-                "no request, response, or credential id while authenticating webauthn credential",
-                credential_id=credential_id,
-                challenge=challenge,
-                response=response,
-            )
-            return None
-
-        try:
-            # Decode credential ID
-            credential_id_bytes = base64url_to_bytes(credential_id)
-
-            # Find the credential
-            credential = (
-                WebauthnCredential.objects.filter(credential_id=credential_id_bytes, verified=True)
-                .select_related("user")
-                .first()
-            )
-
-            if not credential:
-                structlog_logger.warning("webauthn_login_credential_not_found", credential_id=credential_id)
-                return None
-
-            user = credential.user
-            # Check if user is active
-            if not user.is_active:
-                structlog_logger.warning("webauthn_login_user_inactive", user_id=user.pk)
-                return None
-
-            # Construct credential dict for webauthn library
-            # The library expects both 'id' and 'rawId' to be present
-            credential_dict = {
-                "id": credential_id,
-                "rawId": credential_id,
-                "response": response,
-                "type": "public-key",
-            }
-
-            # Verify the authentication response
-            expected_challenge = base64url_to_bytes(challenge)
-            verification = verify_passkey_authentication_response(
-                credential=credential_dict,
-                expected_challenge=expected_challenge,
-                credential_public_key=credential.public_key,
-                credential_current_sign_count=credential.counter,
-            )
-
-            # Update sign count
-            credential.counter = verification.new_sign_count
-            credential.save()
-
-            structlog_logger.info("webauthn_login_success", user_id=user.pk, credential_id=credential.pk)
-
-            return user
-
-        except Exception as e:
-            structlog_logger.exception("webauthn_login_error", error=str(e))
-            return None
-
-    def get_user(self, user_id: int) -> Optional[User]:
-        """Get a user by their primary key.
-
-        Required by Django's authentication system to load the user on subsequent requests.
-        """
-        try:
-            return User.objects.get(pk=user_id)
-        except User.DoesNotExist:
-            return None
 
 
 class WebhookSignatureAuthentication(authentication.BaseAuthentication):

@@ -3,10 +3,9 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import * as experimentPng from '@hanzo/brand/hoggies/png/experiment'
 import { Input, Select, Tag, Tooltip, toast } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { MemberMultiSelect } from 'lib/components/MemberMultiSelect'
@@ -67,7 +66,7 @@ import { StatusTag } from './ExperimentView/StatusTag'
 import { Holdouts } from './Holdouts'
 import { SharedMetrics } from './SharedMetrics/SharedMetrics'
 
-const MascotExperiment = pngHoggie(experimentPng)
+const MascotExperiment = pngMascot()
 
 export const scene: SceneExport = {
     component: Experiments,
@@ -514,7 +513,7 @@ const ExperimentsTable = ({
                         docsURL="https://hanzo.ai/docs/experiments"
                         action={() => router.actions.push(urls.experiment('new'))}
                         isEmpty={shouldShowEmptyState}
-                        customHog={MascotExperiment}
+                        customScript={MascotExperiment}
                         className="my-0"
                         mcpSurfaceKey="experiments.create"
                     />

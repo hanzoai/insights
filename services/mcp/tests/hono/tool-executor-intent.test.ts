@@ -17,7 +17,7 @@ vi.mock('@/resources', () => ({
 // not a stub.
 vi.mock('@/lib/insights', async () => {
     const { InsightsMCP } = await import('@hanzo/mcp-analytics')
-    const client = new InsightsMCP('phc_test', { disabled: true })
+    const client = new InsightsMCP('pk-test', { disabled: true })
     return { getInsightsClient: () => client }
 })
 

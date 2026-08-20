@@ -1,8 +1,8 @@
 use tonic::{Code, Request};
 
 use personinsights_identity::lifecycle::validation::MAX_DELETE_BATCH_SIZE;
-use personinsights_identity::lifecycle::PersonHogLifecycleService;
-use personinsights_proto::personinsights::lifecycle::v1::person_hog_lifecycle_server::PersonHogLifecycle;
+use personinsights_identity::lifecycle::PersonLifecycleService;
+use personinsights_proto::personinsights::lifecycle::v1::person_lifecycle_server::PersonLifecycle;
 use personinsights_proto::personinsights::lifecycle::v1::DeletePersonsRequest;
 
 fn valid_request() -> DeletePersonsRequest {
@@ -14,7 +14,7 @@ fn valid_request() -> DeletePersonsRequest {
 }
 
 async fn delete_status(request: DeletePersonsRequest) -> Code {
-    let service = PersonHogLifecycleService::new();
+    let service = PersonLifecycleService::new();
     service
         .delete_persons(Request::new(request))
         .await

@@ -1,6 +1,6 @@
-import { HogTransformer } from '~/common/script-transformations/script-transformer.interface'
+import { ScriptTransformer } from '~/common/script-transformations/script-transformer.interface'
 import { KafkaProducerRegistry } from '~/common/outputs/kafka-producer-registry'
-import { PersonHogConfig } from '~/common/personinsights'
+import { PersonFnConfig } from '~/common/personinsights'
 import { PostgresRouter } from '~/common/utils/db/postgres'
 import { TeamManagerComponent } from '~/common/utils/team-manager'
 import { CookielessManager } from '~/ingestion/common/cookieless/cookieless-manager'
@@ -52,7 +52,7 @@ describe('createAiConsumer', () => {
                 | 'EVENT_OVERFLOW_BUCKET_REPLENISH_RATE'
             >),
             ...({} as IngestionOutputsConfig),
-            ...({} as PersonHogConfig),
+            ...({} as PersonFnConfig),
         }
     }
 
@@ -78,8 +78,8 @@ describe('createAiConsumer', () => {
                             stop: () => Promise.resolve(),
                         }),
                 })
-                .add('hogTransformer', {
-                    start: () => Promise.resolve({ value: {} as HogTransformer, stop: () => Promise.resolve() }),
+                .add('scriptTransformer', {
+                    start: () => Promise.resolve({ value: {} as ScriptTransformer, stop: () => Promise.resolve() }),
                 })
                 .add('outputs', {
                     start: () => Promise.resolve({ value: {} as AiOutputs, stop: () => Promise.resolve() }),

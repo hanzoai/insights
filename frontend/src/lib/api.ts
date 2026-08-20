@@ -58,7 +58,7 @@ import {
     FileSystemViewLogEntry,
     GroupsQuery,
     GroupsQueryResponse,
-    HogCompileResponse,
+    ScriptCompileResponse,
     InsightsQLQuery,
     InsightsQLQueryResponse,
     InsightsQLVariable,
@@ -229,6 +229,7 @@ import type {
 import type { SymbolSetOrder } from 'products/error_tracking/frontend/scenes/ErrorTrackingConfigurationScene/symbol_sets/symbolSetLogic'
 import type { ErrorTrackingRecommendation } from 'products/error_tracking/frontend/scenes/ErrorTrackingScene/tabs/recommendations/types'
 import type { CopyFlagsResponseApi } from 'products/feature_flags/frontend/generated/api.schemas'
+import type { Task, TaskListParams, TaskRun, TaskUpsertProps } from 'products/insights_ai/frontend/types/taskTypes'
 import type {
     GitHubBranchesResponseApi,
     GitHubReposResponseApi,
@@ -236,7 +237,6 @@ import type {
 import type { LogExplanation } from 'products/logs/frontend/components/LogsViewer/LogDetailsModal/Tabs/ExploreWithAI/types'
 import type { BulkAddOptOutsResultApi, BulkOptOutEntryApi } from 'products/messaging/frontend/generated/api.schemas'
 import type { NotebookCollabCursorApi } from 'products/notebooks/frontend/generated/api.schemas'
-import type { Task, TaskListParams, TaskRun, TaskUpsertProps } from 'products/insights_ai/frontend/types/taskTypes'
 import type {
     ColumnConfigurationApi,
     PaginatedColumnConfigurationListApi,
@@ -253,7 +253,7 @@ import type {
 import type { BlastRadiusApi } from 'products/workflows/frontend/generated/api.schemas'
 import type { OptOutEntry } from 'products/workflows/frontend/OptOuts/types'
 import type { MessageTemplate } from 'products/workflows/frontend/TemplateLibrary/types'
-import type { HogflowTestResult } from 'products/workflows/frontend/Workflows/insightsflows/steps/types'
+import type { FlowTestResult } from 'products/workflows/frontend/Workflows/insightsflows/steps/types'
 import type {
     InsightsFlow,
     InsightsFlowAction,
@@ -482,7 +482,7 @@ export class ApiRequest {
     }
 
     public assembleFullUrl(includeLeadingSlash = false): string {
-        return (includeLeadingSlash ? '/api/' : 'api/') + this.assembleEndpointUrl()
+        return (includeLeadingSlash ? '/v1/' : 'v1/') + this.assembleEndpointUrl()
     }
 
     // Generic endpoint composition
@@ -2009,20 +2009,20 @@ export class ApiRequest {
             .addPathComponent('bulk_add_opt_outs')
     }
 
-    public hogFlows(): ApiRequest {
-        return this.environments().current().addPathComponent('hog_flows')
+    public flows(): ApiRequest {
+        return this.environments().current().addPathComponent('script_flows')
     }
 
-    public hogFlow(hogFlowId: InsightsFlow['id']): ApiRequest {
-        return this.hogFlows().addPathComponent(hogFlowId)
+    public flow(flowId: InsightsFlow['id']): ApiRequest {
+        return this.flows().addPathComponent(flowId)
     }
 
-    public hogFlowTemplates(): ApiRequest {
-        return this.environments().current().addPathComponent('hog_flow_templates')
+    public flowTemplates(): ApiRequest {
+        return this.environments().current().addPathComponent('script_flow_templates')
     }
 
-    public hogFlowTemplate(hogFlowTemplateId: InsightsFlowTemplate['id']): ApiRequest {
-        return this.hogFlowTemplates().addPathComponent(hogFlowTemplateId)
+    public flowTemplate(flowTemplateId: InsightsFlowTemplate['id']): ApiRequest {
+        return this.flowTemplates().addPathComponent(flowTemplateId)
     }
 
     public wizard(): ApiRequest {
@@ -2085,11 +2085,11 @@ const normalizeUrl = (url: string): string => {
 const prepareUrl = (url: string): string => {
     let output = normalizeUrl(url)
 
-    // OAuth mode: route the data API to the selected region's host. Only `/api/*` is rewritten —
+    // OAuth mode: route the data API to the selected region's host. Only `/v1/*` is rewritten —
     // it's what the cloud CORS allowlist covers. Other endpoints (e.g. `/_preflight/`) aren't
     // cross-origin accessible, so they stay same-origin on the local instance.
     const backendHost = getBackendHost()
-    if (backendHost && output.startsWith('/api/')) {
+    if (backendHost && output.startsWith('/v1/')) {
         output = backendHost + output
     }
 
@@ -2136,7 +2136,7 @@ function tracingHeaders({ includeDistinctId = false } = {}): Record<string, stri
     }
 }
 
-const PROJECT_ID_REGEX = /\/api\/(project|environment)s\/(\w+)(?:$|[/?#])/
+const PROJECT_ID_REGEX = /\/v1\/(project|environment)s\/(\w+)(?:$|[/?#])/
 
 const ensureProjectIdNotInvalid = (url: string): void => {
     const projectIdMatch = PROJECT_ID_REGEX.exec(url)
@@ -2169,13 +2169,9 @@ function getDistinctId(): string | undefined {
 }
 
 /**
- * The assistant's threads, at `/v1/`.
- *
- * Built here rather than through `ApiRequest`, whose `assembleFullUrl` prefixes
- * `api/` by design — that prefix is where this fork's inherited endpoints live,
- * and new surfaces are versioned at the root instead. The project id is a path
- * segment because it names which project is being asked for; the server
- * authorizes it against the caller rather than trusting it.
+ * The assistant's threads. The project id is a path segment because it names
+ * which project is being asked for; the server authorizes it against the caller
+ * rather than trusting it.
  */
 function assistantConversationsUrl(): string {
     return `/v1/projects/${ApiConfig.getCurrentTeamId()}/assistant/conversations`
@@ -3432,7 +3428,7 @@ const api = {
             return new ApiRequest().cohorts().assembleEndpointUrl()
         },
         determineListUrl(cohortId: number | 'new', params: PersonListParams): string {
-            return `/api/cohort/${cohortId}/persons?${toParams(params)}`
+            return `/v1/cohort/${cohortId}/persons?${toParams(params)}`
         },
         async listPaginated(
             params: {
@@ -3996,7 +3992,7 @@ const api = {
         },
     },
     script: {
-        async create(script: string, locals?: any[], inRepl?: boolean): Promise<HogCompileResponse> {
+        async create(script: string, locals?: any[], inRepl?: boolean): Promise<ScriptCompileResponse> {
             return await new ApiRequest().script().create({ data: { script, locals, in_repl: inRepl || false } })
         },
     },
@@ -6731,7 +6727,7 @@ const api = {
             })
         },
     },
-    hogFlows: {
+    flows: {
         async getInsightsFlows(params?: {
             search?: string
             status?: InsightsFlow['status']
@@ -6739,30 +6735,30 @@ const api = {
             limit?: number
             offset?: number
         }): Promise<CountedPaginatedResponse<InsightsFlow>> {
-            return await new ApiRequest().hogFlows().withQueryString(params).get()
+            return await new ApiRequest().flows().withQueryString(params).get()
         },
-        async getInsightsFlow(hogFlowId: InsightsFlow['id']): Promise<InsightsFlow> {
-            return await new ApiRequest().hogFlow(hogFlowId).get()
+        async getInsightsFlow(flowId: InsightsFlow['id']): Promise<InsightsFlow> {
+            return await new ApiRequest().flow(flowId).get()
         },
         async createInsightsFlow(data: Partial<InsightsFlow>): Promise<InsightsFlow> {
-            return await new ApiRequest().hogFlows().create({ data })
+            return await new ApiRequest().flows().create({ data })
         },
         async updateInsightsFlow(
-            hogFlowId: InsightsFlow['id'],
+            flowId: InsightsFlow['id'],
             // `base_updated_at` is the updated_at the client loaded; the server rejects the write with a
             // 409 if the stored copy is newer (optimistic concurrency). Omit it for last-writer-wins.
             data: Partial<InsightsFlow> & { base_updated_at?: string | null }
         ): Promise<InsightsFlow> {
-            return await new ApiRequest().hogFlow(hogFlowId).update({ data })
+            return await new ApiRequest().flow(flowId).update({ data })
         },
-        async deleteInsightsFlow(hogFlowId: InsightsFlow['id']): Promise<void> {
-            return await new ApiRequest().hogFlow(hogFlowId).delete()
+        async deleteInsightsFlow(flowId: InsightsFlow['id']): Promise<void> {
+            return await new ApiRequest().flow(flowId).delete()
         },
         async bulkDeleteInsightsFlows(ids: string[]): Promise<{ deleted: number }> {
-            return await new ApiRequest().hogFlows().withAction('bulk_delete').create({ data: { ids } })
+            return await new ApiRequest().flows().withAction('bulk_delete').create({ data: { ids } })
         },
         async createTestInvocation(
-            hogFlowId: InsightsFlow['id'],
+            flowId: InsightsFlow['id'],
             data: {
                 configuration: Record<string, any>
                 mock_async_functions: boolean
@@ -6771,41 +6767,41 @@ const api = {
                 invocation_id?: string
                 current_action_id?: string
             }
-        ): Promise<HogflowTestResult> {
-            return await new ApiRequest().hogFlow(hogFlowId).withAction('invocations').create({ data })
+        ): Promise<FlowTestResult> {
+            return await new ApiRequest().flow(flowId).withAction('invocations').create({ data })
         },
         async getBatchTriggerBlastRadius(
             filters: Extract<InsightsFlowAction['config'], { type: 'batch' }>['filters'],
             dedupeKey?: 'email'
         ): Promise<BlastRadiusApi> {
             return await new ApiRequest()
-                .hogFlows()
+                .flows()
                 .withAction('user_blast_radius')
                 .create({ data: { filters, dedupe_key: dedupeKey ?? null } })
         },
         async createInsightsFlowBatchJob(
-            hogFlowId: InsightsFlow['id'],
+            flowId: InsightsFlow['id'],
             data: {
                 variables: Record<string, InsightsQLVariable>
                 filters: Extract<InsightsFlowAction['config'], { type: 'batch' }>['filters']
             }
         ): Promise<void> {
-            return await new ApiRequest().hogFlow(hogFlowId).withAction('batch_jobs').create({ data })
+            return await new ApiRequest().flow(flowId).withAction('batch_jobs').create({ data })
         },
-        async getInsightsFlowBatchJobs(hogFlowId: InsightsFlow['id']): Promise<InsightsFlowBatchJob[]> {
-            return await new ApiRequest().hogFlow(hogFlowId).withAction('batch_jobs').get()
+        async getInsightsFlowBatchJobs(flowId: InsightsFlow['id']): Promise<InsightsFlowBatchJob[]> {
+            return await new ApiRequest().flow(flowId).withAction('batch_jobs').get()
         },
-        async getInsightsFlowSchedules(hogFlowId: InsightsFlow['id']): Promise<InsightsFlowSchedule[]> {
-            return await new ApiRequest().hogFlow(hogFlowId).withAction('schedules').get()
+        async getInsightsFlowSchedules(flowId: InsightsFlow['id']): Promise<InsightsFlowSchedule[]> {
+            return await new ApiRequest().flow(flowId).withAction('schedules').get()
         },
         async createInsightsFlowSchedule(
-            hogFlowId: InsightsFlow['id'],
+            flowId: InsightsFlow['id'],
             data: { rrule: string; starts_at: string; timezone?: string }
         ): Promise<InsightsFlowSchedule> {
-            return await new ApiRequest().hogFlow(hogFlowId).withAction('schedules').create({ data })
+            return await new ApiRequest().flow(flowId).withAction('schedules').create({ data })
         },
         async updateInsightsFlowSchedule(
-            hogFlowId: InsightsFlow['id'],
+            flowId: InsightsFlow['id'],
             scheduleId: string,
             data: Partial<{
                 rrule: string
@@ -6814,33 +6810,33 @@ const api = {
             }>
         ): Promise<InsightsFlowSchedule> {
             return await new ApiRequest()
-                .hogFlow(hogFlowId)
+                .flow(flowId)
                 .withAction('schedules')
                 .withAction(scheduleId)
                 .update({ data })
         },
-        async deleteInsightsFlowSchedule(hogFlowId: InsightsFlow['id'], scheduleId: string): Promise<void> {
-            return await new ApiRequest().hogFlow(hogFlowId).withAction('schedules').withAction(scheduleId).delete()
+        async deleteInsightsFlowSchedule(flowId: InsightsFlow['id'], scheduleId: string): Promise<void> {
+            return await new ApiRequest().flow(flowId).withAction('schedules').withAction(scheduleId).delete()
         },
     },
-    hogFlowTemplates: {
+    flowTemplates: {
         async getInsightsFlowTemplates(): Promise<PaginatedResponse<InsightsFlowTemplate>> {
-            return await new ApiRequest().hogFlowTemplates().get()
+            return await new ApiRequest().flowTemplates().get()
         },
-        async getInsightsFlowTemplate(hogFlowTemplateId: InsightsFlowTemplate['id']): Promise<InsightsFlowTemplate> {
-            return await new ApiRequest().hogFlowTemplate(hogFlowTemplateId).get()
+        async getInsightsFlowTemplate(flowTemplateId: InsightsFlowTemplate['id']): Promise<InsightsFlowTemplate> {
+            return await new ApiRequest().flowTemplate(flowTemplateId).get()
         },
         async createInsightsFlowTemplate(data: Partial<InsightsFlowTemplate>): Promise<InsightsFlowTemplate> {
-            return await new ApiRequest().hogFlowTemplates().create({ data })
+            return await new ApiRequest().flowTemplates().create({ data })
         },
         async updateInsightsFlowTemplate(
-            hogFlowTemplateId: InsightsFlowTemplate['id'],
+            flowTemplateId: InsightsFlowTemplate['id'],
             data: Partial<InsightsFlowTemplate>
         ): Promise<InsightsFlowTemplate> {
-            return await new ApiRequest().hogFlowTemplate(hogFlowTemplateId).update({ data })
+            return await new ApiRequest().flowTemplate(flowTemplateId).update({ data })
         },
-        async deleteInsightsFlowTemplate(hogFlowTemplateId: InsightsFlowTemplate['id']): Promise<void> {
-            return await new ApiRequest().hogFlowTemplate(hogFlowTemplateId).delete()
+        async deleteInsightsFlowTemplate(flowTemplateId: InsightsFlowTemplate['id']): Promise<void> {
+            return await new ApiRequest().flowTemplate(flowTemplateId).delete()
         },
     },
 
@@ -6922,22 +6918,22 @@ const api = {
             queryKind?: string
         }
     ): Promise<InsightsQLQueryResponse<T>> {
-        const hogQLQuery: InsightsQLQuery = setLatestVersionsOnQuery({
+        const insightsQLQuery: InsightsQLQuery = setLatestVersionsOnQuery({
             ...queryOptions?.queryParams,
             kind: NodeKind.InsightsQLQuery,
             query,
             tags,
         })
-        if (queryOptions?.queryKind && queryOptions.queryKind !== hogQLQuery.kind) {
+        if (queryOptions?.queryKind && queryOptions.queryKind !== insightsQLQuery.kind) {
             throw new Error(
-                `Query kind mismatch: path kind "${queryOptions.queryKind}" does not match body kind "${hogQLQuery.kind}".`
+                `Query kind mismatch: path kind "${queryOptions.queryKind}" does not match body kind "${insightsQLQuery.kind}".`
             )
         }
 
-        return await new ApiRequest().query(undefined, hogQLQuery.kind).create({
+        return await new ApiRequest().query(undefined, insightsQLQuery.kind).create({
             ...queryOptions?.requestOptions,
             data: {
-                query: hogQLQuery,
+                query: insightsQLQuery,
                 client_query_id: queryOptions?.clientQueryId,
                 refresh: queryOptions?.refresh,
                 filters_override: queryOptions?.filtersOverride,

@@ -6,9 +6,9 @@ import { Server } from 'http'
 import supertest from 'supertest'
 import express from 'ultimate-express'
 
-import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/hogflow.builder'
+import { FixtureFlowBuilder } from '~/cdp/_tests/builders/flow.builder'
 import { insertInsightsFunction } from '~/cdp/_tests/fixtures'
-import { insertInsightsFlow } from '~/cdp/_tests/fixtures-insightsflows'
+import { insertFlow } from '~/cdp/_tests/fixtures-flows'
 import { CdpApi } from '~/cdp/cdp-api'
 import { CyclotronJobInvocationInsightsFunction, InsightsFunctionType } from '~/cdp/types'
 import { setupExpressApp } from '~/common/api/router'
@@ -181,8 +181,8 @@ describe('EmailTrackingService', () => {
 
         beforeEach(async () => {
             api = new CdpApi(hub, createCdpConsumerDeps(hub), {
-                hogQueue: createMockJobQueue(),
-                hogflowQueue: createMockJobQueue(),
+                scriptQueue: createMockJobQueue(),
+                flowQueue: createMockJobQueue(),
             })
             app = setupExpressApp()
             app.use('/', api.router())
@@ -330,13 +330,13 @@ describe('EmailTrackingService', () => {
                     .send(JSON.stringify(envelope))
             }
 
-            it('writes a hog_flow log entry for a bounce that resolves to a flow', async () => {
-                const hogFlow = await insertInsightsFlow(
+            it('writes a flow log entry for a bounce that resolves to a flow', async () => {
+                const flow = await insertFlow(
                     hub.postgres,
-                    new FixtureInsightsFlowBuilder().withTeamId(team.id).build()
+                    new FixtureFlowBuilder().withTeamId(team.id).build()
                 )
 
-                const res = await postBounce({ functionId: hogFlow.id })
+                const res = await postBounce({ functionId: flow.id })
                 expect(res.status).toBe(200)
 
                 await waitForExpect(() => {
@@ -344,8 +344,8 @@ describe('EmailTrackingService', () => {
                     expect(logs).toHaveLength(1)
                     expect(logs[0].value).toMatchObject({
                         team_id: team.id,
-                        log_source: 'hog_flow',
-                        log_source_id: hogFlow.id,
+                        log_source: 'flow',
+                        log_source_id: flow.id,
                         instance_id: invocationId,
                         level: 'error',
                     })
@@ -384,42 +384,42 @@ describe('EmailTrackingService', () => {
                 // The workflow has been republished since the send. Reading the version off the flow
                 // manager here would blame v5 for v2's bounce — which is precisely the comparison
                 // ("did the new version bounce more?") the versioned series exists to answer.
-                const hogFlow = await insertInsightsFlow(hub.postgres, {
-                    ...new FixtureInsightsFlowBuilder().withTeamId(team.id).build(),
+                const flow = await insertFlow(hub.postgres, {
+                    ...new FixtureFlowBuilder().withTeamId(team.id).build(),
                     version: 5,
                 })
 
-                const res = await postBounce({ functionId: hogFlow.id, workflowVersion: 2 })
+                const res = await postBounce({ functionId: flow.id, workflowVersion: 2 })
                 expect(res.status).toBe(200)
 
                 await waitForExpect(() => {
                     const metrics = mockProducerObserver.getProducedKafkaMessagesForTopic(KAFKA_APP_METRICS_2)
-                    const versioned = metrics.filter((m) => m.value.app_source === 'hog_flow_version')
+                    const versioned = metrics.filter((m) => m.value.app_source === 'flow_version')
                     // Permanent bounces emit the rollup plus the hard-only sub-metric, so both mirror.
-                    expect(versioned.map((m) => m.value.app_source_id)).toEqual([`${hogFlow.id}/2`, `${hogFlow.id}/2`])
+                    expect(versioned.map((m) => m.value.app_source_id)).toEqual([`${flow.id}/2`, `${flow.id}/2`])
                     // Mirrored, not moved — the version-agnostic series every existing reader uses
                     // still carries the same two rows.
                     expect(
-                        metrics.filter((m) => m.value.app_source === 'hog_flow').map((m) => m.value.metric_name)
+                        metrics.filter((m) => m.value.app_source === 'flow').map((m) => m.value.metric_name)
                     ).toEqual(['email_bounced', 'email_bounced_hard'])
                 })
             })
 
             it('keys the log entry under parentRunId for batch-triggered runs', async () => {
-                const hogFlow = await insertInsightsFlow(
+                const flow = await insertFlow(
                     hub.postgres,
-                    new FixtureInsightsFlowBuilder().withTeamId(team.id).build()
+                    new FixtureFlowBuilder().withTeamId(team.id).build()
                 )
                 const parentRunId = 'batch-run-id'
 
-                const res = await postBounce({ functionId: hogFlow.id, parentRunId })
+                const res = await postBounce({ functionId: flow.id, parentRunId })
                 expect(res.status).toBe(200)
 
                 await waitForExpect(() => {
                     const logs = mockProducerObserver.getProducedKafkaMessagesForTopic(KAFKA_LOG_ENTRIES)
                     expect(logs).toHaveLength(1)
                     expect(logs[0].value).toMatchObject({
-                        log_source: 'hog_flow',
+                        log_source: 'flow',
                         log_source_id: parentRunId,
                         instance_id: invocationId,
                     })
@@ -443,8 +443,8 @@ describe('EmailTrackingService', () => {
             hub.EMAIL_SUPPRESSION_TRANSIENT_BOUNCE_THRESHOLD = 1
 
             api = new CdpApi(hub, createCdpConsumerDeps(hub), {
-                hogQueue: createMockJobQueue(),
-                hogflowQueue: createMockJobQueue(),
+                scriptQueue: createMockJobQueue(),
+                flowQueue: createMockJobQueue(),
             })
             app = setupExpressApp()
             app.use('/', api.router())
@@ -529,10 +529,10 @@ describe('EmailTrackingService', () => {
         }
 
         it('inserts a suppression row and marks it suppressed after a Transient bounce webhook', async () => {
-            const hogFlow = await insertInsightsFlow(hub.postgres, new FixtureInsightsFlowBuilder().withTeamId(team.id).build())
+            const flow = await insertFlow(hub.postgres, new FixtureFlowBuilder().withTeamId(team.id).build())
             const email = 'transient-bouncer@example.com'
 
-            const res = await postTransientBounce(hogFlow.id, email)
+            const res = await postTransientBounce(flow.id, email)
             expect(res.status).toBe(200)
 
             // handleSesWebhook awaits the suppression write inline, so the row is present
@@ -563,10 +563,10 @@ describe('EmailTrackingService', () => {
         })
 
         it('inserts a suppressed row for a Permanent bounce webhook', async () => {
-            const hogFlow = await insertInsightsFlow(hub.postgres, new FixtureInsightsFlowBuilder().withTeamId(team.id).build())
+            const flow = await insertFlow(hub.postgres, new FixtureFlowBuilder().withTeamId(team.id).build())
             const email = 'hard-bouncer@example.com'
 
-            const res = await postPermanentBounce(hogFlow.id, email)
+            const res = await postPermanentBounce(flow.id, email)
             expect(res.status).toBe(200)
 
             const result = await hub.postgres.query<{

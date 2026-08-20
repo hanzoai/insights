@@ -37,10 +37,10 @@ def _attach_github_login(user: User, login: str, *, uid: str | None = None) -> N
 
 class TestSignalReportArtefactViewSet(APIBaseTest):
     def _list_url(self, report_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/{report_id}/artefacts/"
+        return f"/v1/projects/{self.team.id}/signals/reports/{report_id}/artefacts/"
 
     def _detail_url(self, report_id: str, artefact_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/{report_id}/artefacts/{artefact_id}/"
+        return f"/v1/projects/{self.team.id}/signals/reports/{report_id}/artefacts/{artefact_id}/"
 
     def _create_report(self, team: Team | None = None) -> SignalReport:
         return SignalReport.objects.create(
@@ -477,7 +477,7 @@ class TestSignalReportArtefactViewSet(APIBaseTest):
         report = self._create_report()
         assert self._reviewers_count(report) == 0
 
-        url = f"/api/projects/{self.team.id}/signals/reports/{report.id}/reviewers/"
+        url = f"/v1/projects/{self.team.id}/signals/reports/{report.id}/reviewers/"
         response = self.client.put(
             url,
             data=json.dumps({"content": [{"user_uuid": str(member.uuid)}]}),
@@ -774,7 +774,7 @@ class TestSignalReportArtefactViewSet(APIBaseTest):
         )
         assert put_response.status_code == status.HTTP_200_OK
 
-        list_url = f"/api/projects/{self.team.id}/signals/reports/?suggested_reviewers={member.uuid}"
+        list_url = f"/v1/projects/{self.team.id}/signals/reports/?suggested_reviewers={member.uuid}"
         list_response = self.client.get(list_url)
         assert list_response.status_code == status.HTTP_200_OK
         ids = {r["id"] for r in list_response.json()["results"]}
@@ -809,10 +809,10 @@ class TestSignalReportArtefactLogWriteViewSet(APIBaseTest):
     """
 
     def _list_url(self, report_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/{report_id}/artefacts/"
+        return f"/v1/projects/{self.team.id}/signals/reports/{report_id}/artefacts/"
 
     def _detail_url(self, report_id: str, artefact_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/{report_id}/artefacts/{artefact_id}/"
+        return f"/v1/projects/{self.team.id}/signals/reports/{report_id}/artefacts/{artefact_id}/"
 
     def _create_report(self, team: Team | None = None) -> SignalReport:
         return SignalReport.objects.create(
@@ -945,7 +945,7 @@ class TestSignalReportArtefactLogWriteViewSet(APIBaseTest):
             report=report, type=SignalReportArtefact.ArtefactType.PRIORITY_JUDGMENT
         )
         assert rows.count() == 2
-        report_response = self.client.get(f"/api/projects/{self.team.id}/signals/reports/{report.id}/")
+        report_response = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/{report.id}/")
         assert report_response.status_code == status.HTTP_200_OK
         assert report_response.json()["priority"] == "P1"
 
@@ -981,7 +981,7 @@ class TestSignalReportArtefactLogWriteViewSet(APIBaseTest):
         assert not SignalReportArtefact.objects.filter(report=report).exists()
 
     def test_post_rejects_system_generated_code_review_type(self):
-        # code_review receipts are written only by the ReviewHog workflow; accepting them through the
+        # code_review receipts are written only by the Review workflow; accepting them through the
         # API would let a caller fabricate review receipts for reviews that never ran. The payload is
         # schema-valid on purpose — the rejection must be type-based, not a validation accident.
         report = self._create_report()
@@ -1105,7 +1105,7 @@ class TestSignalReportArtefactLogWriteViewSet(APIBaseTest):
             content_type="application/json",
         )
         assert response.status_code == status.HTTP_200_OK, response.json()
-        report_response = self.client.get(f"/api/projects/{self.team.id}/signals/reports/{report.id}/")
+        report_response = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/{report.id}/")
         assert report_response.json()["priority"] == "P0"
 
     def test_patch_task_run_cannot_drift_task_id_from_the_fk(self):
@@ -1191,7 +1191,7 @@ class TestSignalReportArtefactLogWriteViewSet(APIBaseTest):
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not SignalReportArtefact.objects.filter(id=latest.id).exists()
 
-        report_response = self.client.get(f"/api/projects/{self.team.id}/signals/reports/{report.id}/")
+        report_response = self.client.get(f"/v1/projects/{self.team.id}/signals/reports/{report.id}/")
         assert report_response.status_code == status.HTTP_200_OK
         assert report_response.json()["priority"] == "P3"
 
@@ -1223,7 +1223,7 @@ class TestSignalReportArtefactAttribution(APIBaseTest):
     """Attribution of API writes: X-Insights-Task-Id header → task, otherwise the requesting user."""
 
     def _list_url(self, report_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/{report_id}/artefacts/"
+        return f"/v1/projects/{self.team.id}/signals/reports/{report_id}/artefacts/"
 
     def _create_report(self, team: Team | None = None) -> SignalReport:
         return SignalReport.objects.create(
@@ -1308,7 +1308,7 @@ class TestSignalReportArtefactAttribution(APIBaseTest):
     def test_dismissal_via_state_action_is_attributed(self):
         report = self._create_report()
         response = self.client.post(
-            f"/api/projects/{self.team.id}/signals/reports/{report.id}/state/",
+            f"/v1/projects/{self.team.id}/signals/reports/{report.id}/state/",
             data=json.dumps({"state": "suppressed", "dismissal_reason": "analysis_wrong"}),
             content_type="application/json",
         )
@@ -1355,7 +1355,7 @@ class TestSignalReportCommitDiff(APIBaseTest):
     """The commit artefact `diff` action — status-code contract the UI relies on."""
 
     def _diff_url(self, report_id: str, artefact_id: str) -> str:
-        return f"/api/projects/{self.team.id}/signals/reports/{report_id}/artefacts/{artefact_id}/diff/"
+        return f"/v1/projects/{self.team.id}/signals/reports/{report_id}/artefacts/{artefact_id}/diff/"
 
     def _create_report(self) -> SignalReport:
         return SignalReport.objects.create(

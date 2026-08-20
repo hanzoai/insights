@@ -127,7 +127,7 @@ def _fail(message: str) -> NoReturn:
 
 def get_coder_url() -> str:
     """Resolve the configured Coder deployment URL."""
-    if url := os.environ.get("HOGLI_DEVBOX_CODER_URL"):
+    if url := os.environ.get("INSIGHTSCLI_DEVBOX_CODER_URL"):
         return url
 
     if url := os.environ.get("CODER_URL"):
@@ -181,7 +181,7 @@ def server_supports_user_secrets() -> bool:
 
 def get_server_version() -> str:
     """Query the Coder deployment for its running version."""
-    if version := os.environ.get("HOGLI_DEVBOX_CODER_VERSION"):
+    if version := os.environ.get("INSIGHTSCLI_DEVBOX_CODER_VERSION"):
         return version
 
     coder_url = get_coder_url()
@@ -896,7 +896,9 @@ def print_setup_summary() -> None:
     click.echo("Clear saved settings:     insightscli devbox:config:rm --help")
     click.echo()
     click.echo("Other workspace secrets (GH_TOKEN, AWS creds, etc):")
-    click.echo("  insightscli devbox:secret:list / insightscli devbox:secret:set NAME / insightscli devbox:secret:rm NAME")
+    click.echo(
+        "  insightscli devbox:secret:list / insightscli devbox:secret:set NAME / insightscli devbox:secret:rm NAME"
+    )
 
 
 def _first_non_empty_string(*values: Any) -> str | None:

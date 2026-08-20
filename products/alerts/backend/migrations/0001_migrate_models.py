@@ -8,6 +8,7 @@ from django.db import migrations, models
 import insights.schema
 
 import insights.models.utils
+from insights.migration_helpers import AddColumnIfNotExists, CreateTableIfNotExists
 
 
 class Migration(migrations.Migration):
@@ -390,5 +391,35 @@ class Migration(migrations.Migration):
                 ),
             ],
             database_operations=[],
+        ),
+        # Absent on a fresh install, where no `insights` migration ever created them.
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                CreateTableIfNotExists(model_name="alert"),
+                CreateTableIfNotExists(model_name="alertconfiguration"),
+                CreateTableIfNotExists(model_name="alertcheck"),
+                CreateTableIfNotExists(model_name="alertsubscription"),
+                CreateTableIfNotExists(model_name="threshold"),
+                # The table came from `insights.0001_initial`, whose shape predates these
+                # fields: the move declares them but nothing ever adds the columns, so a
+                # fresh install is left without them. No-ops where the table was built above.
+                AddColumnIfNotExists(model_name="alertcheck", name="anomaly_scores"),
+                AddColumnIfNotExists(model_name="alertcheck", name="interval"),
+                AddColumnIfNotExists(model_name="alertcheck", name="investigation_error"),
+                AddColumnIfNotExists(model_name="alertcheck", name="investigation_notebook"),
+                AddColumnIfNotExists(model_name="alertcheck", name="investigation_status"),
+                AddColumnIfNotExists(model_name="alertcheck", name="investigation_summary"),
+                AddColumnIfNotExists(model_name="alertcheck", name="investigation_verdict"),
+                AddColumnIfNotExists(model_name="alertcheck", name="notification_sent_at"),
+                AddColumnIfNotExists(model_name="alertcheck", name="notification_suppressed_by_agent"),
+                AddColumnIfNotExists(model_name="alertcheck", name="triggered_dates"),
+                AddColumnIfNotExists(model_name="alertcheck", name="triggered_metadata"),
+                AddColumnIfNotExists(model_name="alertcheck", name="triggered_points"),
+                AddColumnIfNotExists(model_name="alertconfiguration", name="detector_config"),
+                AddColumnIfNotExists(model_name="alertconfiguration", name="investigation_agent_enabled"),
+                AddColumnIfNotExists(model_name="alertconfiguration", name="investigation_gates_notifications"),
+                AddColumnIfNotExists(model_name="alertconfiguration", name="investigation_inconclusive_action"),
+                AddColumnIfNotExists(model_name="alertconfiguration", name="schedule_restriction"),
+            ],
         ),
     ]

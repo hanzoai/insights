@@ -3,7 +3,6 @@ import { useActions, useValues } from 'kea'
 import { Button, Dialog, Table, Tooltip } from '@hanzo/elements'
 
 import { humanFriendlyDetailedTime } from 'lib/utils/datetime'
-import { type PasskeyCredential, passkeySettingsLogic } from 'scenes/settings/user/passkeySettingsLogic'
 import { personalAPIKeysLogic } from 'scenes/settings/user/personalAPIKeysLogic'
 
 import { PersonalAPIKeyType } from '~/types'
@@ -37,27 +36,11 @@ function teamScopeSummary(key: PersonalAPIKeyType): string {
     return parts.join(', ')
 }
 
-function passkeyTypeLabel(passkey: PasskeyCredential): string {
-    switch (passkey.authenticator_type) {
-        case 'platform':
-            return 'This device'
-        case 'hardware':
-            return 'Hardware key'
-        case 'hybrid':
-            return 'Cross-device'
-        default:
-            return 'Unknown'
-    }
-}
-
 export function CredentialsReviewList(): JSX.Element {
     const { keys, keysLoading } = useValues(personalAPIKeysLogic)
     const { deleteKey } = useActions(personalAPIKeysLogic)
-    const { passkeys, passkeysLoading } = useValues(passkeySettingsLogic)
-    const { deletePasskey } = useActions(passkeySettingsLogic)
 
     const showKeys = keysLoading || keys.length > 0
-    const showPasskeys = passkeysLoading || passkeys.length > 0
 
     return (
         <div className="flex flex-col gap-6">
@@ -111,57 +94,6 @@ export function CredentialsReviewList(): JSX.Element {
                                         }
                                     >
                                         Revoke
-                                    </Button>
-                                ),
-                            },
-                        ]}
-                    />
-                </section>
-            )}
-            {showPasskeys && (
-                <section>
-                    <h3 className="text-base font-semibold mb-2">Passkeys</h3>
-                    <Table
-                        dataSource={passkeys}
-                        loading={passkeysLoading}
-                        rowKey={(passkey) => passkey.id}
-                        columns={[
-                            {
-                                title: 'Label',
-                                dataIndex: 'label',
-                                render: (_, passkey) => <span className="font-semibold">{passkey.label}</span>,
-                            },
-                            {
-                                title: 'Type',
-                                render: (_, passkey) => passkeyTypeLabel(passkey),
-                            },
-                            {
-                                title: 'Created',
-                                dataIndex: 'created_at',
-                                render: (value) => humanFriendlyDetailedTime(value as string),
-                            },
-                            {
-                                title: '',
-                                width: 0,
-                                render: (_, passkey) => (
-                                    <Button
-                                        type="secondary"
-                                        status="danger"
-                                        size="small"
-                                        onClick={() =>
-                                            Dialog.open({
-                                                title: `Remove "${passkey.label}"?`,
-                                                description:
-                                                    'Anyone signed in with this passkey will need a new one to log in again.',
-                                                primaryButton: {
-                                                    status: 'danger',
-                                                    children: 'Remove',
-                                                    onClick: () => deletePasskey(passkey.id),
-                                                },
-                                            })
-                                        }
-                                    >
-                                        Remove
                                     </Button>
                                 ),
                             },

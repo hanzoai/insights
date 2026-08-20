@@ -35,9 +35,7 @@ const CLOUD_PREFLIGHT = {
     cloud: true,
     realm: 'cloud',
     available_social_auth_providers: {
-        github: true,
-        gitlab: false,
-        'google-oauth2': true,
+        oidc: true,
         saml: false,
     },
 }
@@ -49,7 +47,7 @@ const VERIFIED_DOMAIN_WITH_SAML_SCIM: OrganizationDomainType = {
     verified_at: '2024-01-01T00:00:00Z',
     verification_challenge: 'abc',
     jit_provisioning_enabled: true,
-    sso_enforcement: 'google-oauth2',
+    sso_enforcement: 'oidc',
     has_saml: true,
     has_scim: true,
     scim_base_url: 'https://hanzo.ai/scim/v2',
@@ -104,13 +102,13 @@ const meta: Meta<typeof App> = {
         mswDecorator({
             get: {
                 '/_preflight': CLOUD_PREFLIGHT,
-                '/api/projects/:id/integrations': { results: [] },
-                '/api/organizations/:id/integrations': { results: [] },
-                '/api/environments/:team_id/conversations/': { results: [] },
-                '/api/user_home_settings/@me/': {},
+                '/v1/projects/:id/integrations': { results: [] },
+                '/v1/organizations/:id/integrations': { results: [] },
+                '/v1/environments/:team_id/conversations/': { results: [] },
+                '/v1/user_home_settings/@me/': {},
             },
             patch: {
-                '/api/projects/:id': async ({ request }) => {
+                '/v1/projects/:id': async ({ request }) => {
                     const newTeamSettings = { ...MOCK_DEFAULT_TEAM, ...((await request.json()) as object) }
                     return [200, newTeamSettings]
                 },
@@ -130,8 +128,8 @@ export const NoDomains: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/users/@me': () => [200, mockUserWithFeatures(...ALL_FEATURES)],
-                '/api/organizations/:id/domains': domainsResponse([]),
+                '/v1/users/@me': () => [200, mockUserWithFeatures(...ALL_FEATURES)],
+                '/v1/organizations/:id/domains': domainsResponse([]),
             },
         }),
     ],
@@ -141,8 +139,8 @@ export const OneUnverifiedDomain: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/users/@me': () => [200, mockUserWithFeatures(...ALL_FEATURES)],
-                '/api/organizations/:id/domains': domainsResponse([UNVERIFIED_DOMAIN]),
+                '/v1/users/@me': () => [200, mockUserWithFeatures(...ALL_FEATURES)],
+                '/v1/organizations/:id/domains': domainsResponse([UNVERIFIED_DOMAIN]),
             },
         }),
     ],
@@ -152,11 +150,11 @@ export const BoostNeedsUpgrade: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/users/@me': () => [
+                '/v1/users/@me': () => [
                     200,
                     mockUserWithFeatures(AvailableFeature.AUTOMATIC_PROVISIONING, AvailableFeature.SSO_ENFORCEMENT),
                 ],
-                '/api/organizations/:id/domains': domainsResponse([VERIFIED_DOMAIN_NO_SAML_SCIM]),
+                '/v1/organizations/:id/domains': domainsResponse([VERIFIED_DOMAIN_NO_SAML_SCIM]),
             },
         }),
     ],
@@ -166,8 +164,8 @@ export const EnterpriseMixed: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/users/@me': () => [200, mockUserWithFeatures(...ALL_FEATURES)],
-                '/api/organizations/:id/domains': domainsResponse([
+                '/v1/users/@me': () => [200, mockUserWithFeatures(...ALL_FEATURES)],
+                '/v1/organizations/:id/domains': domainsResponse([
                     VERIFIED_DOMAIN_WITH_SAML_SCIM,
                     VERIFIED_DOMAIN_NO_SAML_SCIM,
                     UNVERIFIED_DOMAIN,

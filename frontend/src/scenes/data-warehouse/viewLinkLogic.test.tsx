@@ -16,11 +16,11 @@ describe('viewLinkLogic', () => {
         validateHandler = jest.fn(() => [200, { is_valid: true, msg: null, insightsql: null, results: [] }])
         useMocks({
             get: {
-                '/api/environments/:team_id/warehouse_view_link': { results: [] },
+                '/v1/environments/:team_id/warehouse_view_link': { results: [] },
             },
             post: {
-                '/api/environments/:team_id/query/InsightsQLQuery': { results: [], columns: [] },
-                '/api/environments/:team_id/warehouse_view_link/validate': () => validateHandler(),
+                '/v1/environments/:team_id/query/InsightsQLQuery': { results: [], columns: [] },
+                '/v1/environments/:team_id/warehouse_view_link/validate': () => validateHandler(),
             },
         })
         initKeaTests()

@@ -50,7 +50,7 @@ To move from legacy log-only to full enforcement:
 The `FLAGS_TOKEN_RATE_LIMIT_OVERRIDES` env var accepts a JSON map of token → rate string for per-token custom rate limits:
 
 ```json
-{ "phc_abc123": "1200/minute", "phc_xyz789": "2400/hour" }
+{ "pk-abc123": "1200/minute", "pk-xyz789": "2400/hour" }
 ```
 
 These create dedicated enforce-only limiters that take precedence over the default token limiter for matching tokens. Maximum 100 overrides. Token values are redacted in logs (prefix + suffix only).

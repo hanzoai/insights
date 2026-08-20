@@ -202,7 +202,7 @@ export const systemStatusLogic = kea<systemStatusLogicType>([
                         return null
                     }
 
-                    return (await api.get('api/instance_status')).results ?? null
+                    return (await api.get('v1/instance_status')).results ?? null
                 },
             },
         ],
@@ -210,14 +210,14 @@ export const systemStatusLogic = kea<systemStatusLogicType>([
             [] as InstanceSetting[],
             {
                 loadInstanceSettings: async () => {
-                    return (await api.get('api/instance_settings')).results ?? []
+                    return (await api.get('v1/instance_settings')).results ?? []
                 },
             },
         ],
         queries: [
             null as SystemStatusQueriesResult | null,
             {
-                loadQueries: async () => (await api.get('api/instance_status/queries')).results,
+                loadQueries: async () => (await api.get('v1/instance_status/queries')).results,
             },
         ],
     })),
@@ -299,7 +299,7 @@ export const systemStatusLogic = kea<systemStatusLogicType>([
             actions.setUpdatedInstanceConfigCount(0)
             await Promise.all(
                 Object.entries(values.instanceConfigEditingState).map(async ([key, value]) => {
-                    await api.update(`api/instance_settings/${key}`, {
+                    await api.update(`v1/instance_settings/${key}`, {
                         value,
                     })
                     eventUsageLogic.actions.reportInstanceSettingChange(key, value)

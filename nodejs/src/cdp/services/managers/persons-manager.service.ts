@@ -90,7 +90,7 @@ export class PersonsManagerService {
 
         const personRows = await this.personRepository.fetchPersonsByDistinctIds(
             teamPersons.map(({ teamId, id }) => ({ teamId, distinctId: id })),
-            'cdp/hogflow-person-enrichment'
+            'cdp/flow-person-enrichment'
         )
 
         // Map results back to the original keys
@@ -117,7 +117,7 @@ export class PersonsManagerService {
 
         const personRows = await this.personRepository.fetchPersonsByPersonIds(
             teamPersons.map(({ teamId, id }) => ({ teamId, personId: id })),
-            'cdp/hogflow-person-enrichment'
+            'cdp/flow-person-enrichment'
         )
 
         // Fetch one distinct_id per person so callers that need to identify the user
@@ -136,7 +136,7 @@ export class PersonsManagerService {
                     teamId,
                     intIds,
                     { limitPerPerson: 1 },
-                    'cdp/hogflow-person-enrichment'
+                    'cdp/flow-person-enrichment'
                 )
                 return { teamId, map }
             })

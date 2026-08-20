@@ -7,9 +7,9 @@ import { IDisposable, editor, editor as importedEditor } from 'monaco-editor'
 import { useEffect, useRef, useState } from 'react'
 
 import 'lib/monaco/monacoEnvironment'
+import { Spinner } from 'lib/elements/Spinner'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
-import { Spinner } from 'lib/elements/Spinner'
 import { themeLogic } from 'lib/logic/themeLogic'
 import { enableClipboardPaste } from 'lib/monaco/clipboardPaste'
 import { codeEditorLogic } from 'lib/monaco/codeEditorLogic'
@@ -17,16 +17,16 @@ import type { codeEditorLogicType } from 'lib/monaco/codeEditorLogic'
 import { findNextFocusableElement, findPreviousFocusableElement } from 'lib/monaco/domUtils'
 import { trackFindWidgetVisibility } from 'lib/monaco/findWidgetBodyClass'
 import { initCodeownersLanguage } from 'lib/monaco/languages/codeowners'
-import { initHogLanguage } from 'lib/monaco/languages/script'
-import { initHogJsonLanguage } from 'lib/monaco/languages/hogJson'
-import { initInsightsQLLanguage } from 'lib/monaco/languages/hogQL'
-import { initHogTemplateLanguage } from 'lib/monaco/languages/hogTemplate'
+import { initScriptJsonLanguage } from 'lib/monaco/languages/scriptJson'
+import { initScriptTemplateLanguage } from 'lib/monaco/languages/scriptTemplate'
+import { initInsightsQLLanguage } from 'lib/monaco/languages/insightsQL'
 import { initLiquidLanguage } from 'lib/monaco/languages/liquid'
+import { initScriptLanguage } from 'lib/monaco/languages/script'
 import { clearLogicReference, initModel } from 'lib/monaco/modelLogicReference'
 import { sharedMonacoOverflowRoot } from 'lib/monaco/sharedMonacoOverflowRoot'
 import { inStorybookTestRunner } from 'lib/utils/dom'
 
-import { AnyDataNode, HogLanguage, InsightsQLMetadataResponse, NodeKind } from '~/queries/schema/schema-general'
+import { AnyDataNode, ScriptLanguage, InsightsQLMetadataResponse, NodeKind } from '~/queries/schema/schema-general'
 
 export interface CodeEditorProps extends Omit<EditorProps, 'loading' | 'theme'> {
     queryKey?: string
@@ -80,16 +80,16 @@ function initEditor(
     }
 
     if (editorProps?.language === 'script') {
-        initHogLanguage(monaco)
+        initScriptLanguage(monaco)
     }
-    if (editorProps?.language === 'hogQL' || editorProps?.language === 'hogQLExpr') {
-        initInsightsQLLanguage(monaco, editorProps.language as HogLanguage)
+    if (editorProps?.language === 'insightsQL' || editorProps?.language === 'insightsQLExpr') {
+        initInsightsQLLanguage(monaco, editorProps.language as ScriptLanguage)
     }
-    if (editorProps?.language === 'hogTemplate') {
-        initHogTemplateLanguage(monaco)
+    if (editorProps?.language === 'scriptTemplate') {
+        initScriptTemplateLanguage(monaco)
     }
-    if (editorProps?.language === 'hogJson') {
-        initHogJsonLanguage(monaco)
+    if (editorProps?.language === 'scriptJson') {
+        initScriptJsonLanguage(monaco)
     }
     if (editorProps?.language === 'liquid') {
         initLiquidLanguage(monaco)
@@ -257,7 +257,7 @@ export function CodeEditor({
             }
             // Null the back-reference only on models we're actually about to
             // dispose. Doing it for shared models would break consumers
-            // (e.g. hogQLAutocompleteProvider, hogQLMetadataProvider) that
+            // (e.g. insightsQLAutocompleteProvider, insightsQLMetadataProvider) that
             // read `model.codeEditorLogic` to look up logic state.
             clearLogicReference(model)
             try {

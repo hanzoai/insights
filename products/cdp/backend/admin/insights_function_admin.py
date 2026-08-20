@@ -36,7 +36,7 @@ class RerunGoogleAdsFailedInvocationsForm(forms.Form):
         help_text="Inclusive lower bound on invocation scheduled_at (UTC). E.g. 2026-07-02 00:00:00.",
     )
     window_end = forms.DateTimeField(
-        help_text="Exclusive upper bound (max 30d window — matches the Datastore TTL on hog_invocation_results).",
+        help_text="Exclusive upper bound (max 30d window — matches the Datastore TTL on invocations).",
     )
     error_kinds = forms.CharField(
         required=False,
@@ -83,7 +83,7 @@ class RerunGoogleAdsFailedInvocationsForm(forms.Form):
                 span_days = (end - start).days
                 raise forms.ValidationError(
                     f"Window cannot exceed {MAX_WINDOW_DAYS} days "
-                    f"(Datastore TTL on hog_invocation_results). Got {span_days} days."
+                    f"(Datastore TTL on invocations). Got {span_days} days."
                 )
         return cleaned
 
@@ -91,7 +91,7 @@ class RerunGoogleAdsFailedInvocationsForm(forms.Form):
 @admin.register(InsightsFunction)
 class InsightsFunctionAdmin(admin.ModelAdmin):
     form = InsightsFunctionAdminForm
-    change_list_template = "admin/cdp/hogfunction/change_list.html"
+    change_list_template = "admin/cdp/insightsfunction/change_list.html"
     list_select_related = ("team",)
     list_display = ("id", "name", "enabled")
     list_filter = (
@@ -194,6 +194,6 @@ class InsightsFunctionAdmin(admin.ModelAdmin):
 
         return render(
             request,
-            "admin/cdp/hogfunction/rerun_google_ads.html",
+            "admin/cdp/insightsfunction/rerun_google_ads.html",
             {"form": form, "output": output, "title": "Rerun Google Ads failed invocations"},
         )

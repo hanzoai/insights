@@ -12,22 +12,22 @@ pub mod validation;
 
 use tonic::{Request, Response, Status};
 
-use personinsights_proto::personinsights::lifecycle::v1::person_hog_lifecycle_server::PersonHogLifecycle;
+use personinsights_proto::personinsights::lifecycle::v1::person_lifecycle_server::PersonLifecycle;
 use personinsights_proto::personinsights::lifecycle::v1::{DeletePersonsRequest, DeletePersonsResponse};
 
 use crate::lifecycle::validation::validate_delete_persons;
 
 #[derive(Default)]
-pub struct PersonHogLifecycleService {}
+pub struct PersonLifecycleService {}
 
-impl PersonHogLifecycleService {
+impl PersonLifecycleService {
     pub fn new() -> Self {
         Self {}
     }
 }
 
 #[tonic::async_trait]
-impl PersonHogLifecycle for PersonHogLifecycleService {
+impl PersonLifecycle for PersonLifecycleService {
     async fn delete_persons(
         &self,
         request: Request<DeletePersonsRequest>,

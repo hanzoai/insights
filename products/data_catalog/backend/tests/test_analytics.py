@@ -96,7 +96,7 @@ class TestDataCatalogAnalyticsAttribution(APIBaseTest):
     @patch(_CAPTURE)
     def test_api_write_carries_transport_attribution(self, capture: MagicMock) -> None:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/data_catalog/metrics/", {"name": "mrr", "description": "d"}
+            f"/v1/projects/{self.team.id}/data_catalog/metrics/", {"name": "mrr", "description": "d"}
         )
         assert response.status_code == status.HTTP_201_CREATED, response.json()
 

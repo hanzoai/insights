@@ -4265,7 +4265,7 @@ export type DataWarehouseManagedWarehouseSourceSchemasRetrieveParams = {
     source_id: string
 }
 
-export type FixHogqlListParams = {
+export type FixInsightsqlListParams = {
     /**
      * Number of results to return per page.
      */

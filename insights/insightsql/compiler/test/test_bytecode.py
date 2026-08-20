@@ -1,7 +1,7 @@
 import pytest
 from insights.test.base import BaseTest
 
-from insights.insightsql.compiler.bytecode import create_bytecode, execute_hog, to_bytecode
+from insights.insightsql.compiler.bytecode import create_bytecode, execute_script, to_bytecode
 from insights.insightsql.errors import QueryError, SyntaxError
 from insights.insightsql.parser import parse_program
 
@@ -551,13 +551,13 @@ class TestBytecode(BaseTest):
         assert "Can't use cohorts in real-time filters." in str(e.exception)
 
         with self.assertRaises(QueryError) as e:
-            execute_hog("globalVar := 1;")
+            execute_script("globalVar := 1;")
         self.assertEqual(
             str(e.exception), 'Variable "globalVar" not declared in this scope. Can not assign to globals.'
         )
 
         with self.assertRaises(QueryError) as e:
-            execute_hog("globalVar.properties.bla := 1;")
+            execute_script("globalVar.properties.bla := 1;")
         self.assertEqual(
             str(e.exception), 'Variable "globalVar" not declared in this scope. Can not assign to globals.'
         )
@@ -565,14 +565,14 @@ class TestBytecode(BaseTest):
     def test_bytecode_bare_throw(self):
         # A bare `throw` is rejected at parse time; `throw <expr>` still compiles.
         with self.assertRaises(SyntaxError):
-            execute_hog("throw", team=self.team)
+            execute_script("throw", team=self.team)
         create_bytecode(parse_program("throw Error('boom')"))
 
     def test_bytecode_execute(self):
         # Test a simple operations. The Script execution itself is tested under common/scriptvm/python/
-        self.assertEqual(execute_hog("1 + 2", team=self.team).result, 3)
+        self.assertEqual(execute_script("1 + 2", team=self.team).result, 3)
         self.assertEqual(
-            execute_hog(
+            execute_script(
                 """
             fun fibonacci(number) {
                 if (number < 2) {
@@ -600,6 +600,6 @@ class TestBytecode(BaseTest):
 
     def test_bytecode_insightsqlx(self):
         self.assertEqual(
-            execute_hog("<Sparkline data={[1,2,3]} />", team=self.team).result,
+            execute_script("<Sparkline data={[1,2,3]} />", team=self.team).result,
             {"__hx_tag": "Sparkline", "data": [1, 2, 3]},
         )

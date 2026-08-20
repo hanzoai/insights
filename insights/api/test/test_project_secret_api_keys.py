@@ -13,7 +13,7 @@ from insights.models.utils import generate_random_token_personal, generate_rando
 class TestProjectSecretAPIKeysAPIMember(APIBaseTest):
     def test_create_forbidden(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "nope", "scopes": ["endpoint:read"]},
         )
         assert response.status_code == 403
@@ -22,7 +22,7 @@ class TestProjectSecretAPIKeysAPIMember(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "admin-created", "scopes": ["endpoint:read"]},
         )
         key_id = create_response.json()["id"]
@@ -30,7 +30,7 @@ class TestProjectSecretAPIKeysAPIMember(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
         self.organization_membership.save()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/project_secret_api_keys/{key_id}",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys/{key_id}",
             {"label": "updated"},
         )
         assert response.status_code == 403
@@ -39,18 +39,18 @@ class TestProjectSecretAPIKeysAPIMember(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "admin-created", "scopes": ["endpoint:read"]},
         )
         key_id = create_response.json()["id"]
 
         self.organization_membership.level = OrganizationMembership.Level.MEMBER
         self.organization_membership.save()
-        response = self.client.delete(f"/api/projects/{self.team.id}/project_secret_api_keys/{key_id}")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/project_secret_api_keys/{key_id}")
         assert response.status_code == 403
 
     def test_list_allowed(self):
-        response = self.client.get(f"/api/projects/{self.team.id}/project_secret_api_keys")
+        response = self.client.get(f"/v1/projects/{self.team.id}/project_secret_api_keys")
         assert response.status_code == 200
 
 
@@ -63,7 +63,7 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
     def test_create_project_secret_api_key(self):
         label = "the key to rule them all"
         response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys", {"label": label, "scopes": ["endpoint:read"]}
+            f"/v1/projects/{self.team.id}/project_secret_api_keys", {"label": label, "scopes": ["endpoint:read"]}
         )
         assert response.status_code == 201
         data = response.json()
@@ -74,11 +74,11 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
         assert data["scopes"] == ["endpoint:read"]
         assert data["last_rolled_at"] is None
         assert data["last_used_at"] is None
-        assert data["value"].startswith("phs_")
+        assert data["value"].startswith("sk-")
 
     def test_create_feature_flag_read_scope(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "local eval key", "scopes": ["feature_flag:read"]},
         )
         assert response.status_code == 201
@@ -87,11 +87,11 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
     def test_create_too_many_api_keys(self):
         for i in range(0, MAX_PROJECT_SECRET_API_KEYS_PER_TEAM):
             self.client.post(
-                f"/api/projects/{self.team.id}/project_secret_api_keys",
+                f"/v1/projects/{self.team.id}/project_secret_api_keys",
                 {"label": i, "scopes": ["endpoint:read"]},
             )
         response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "not the one", "scopes": ["endpoint:read"]},
         )
         assert response.status_code == 400
@@ -99,21 +99,21 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
 
     def test_label_required(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "", "scopes": ["endpoint:read"]},
         )
         assert response.status_code == 400
 
     def test_scopes_required(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "my key"},
         )
         assert response.status_code == 400
 
     def test_wildcard_scope_not_allowed(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "my key", "scopes": ["*"]},
         )
         assert response.status_code == 400
@@ -121,7 +121,7 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
 
     def test_only_allowed_scopes_accepted(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "my key", "scopes": ["insight:read"]},
         )
         assert response.status_code == 400
@@ -129,7 +129,7 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
 
     def test_invalid_scope_format_rejected(self):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "my key", "scopes": ["notavalidscope"]},
         )
         assert response.status_code == 400
@@ -146,7 +146,7 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
         mock_feature_enabled.return_value = flag_enabled
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "my key", "scopes": ["llm_gateway:read"]},
         )
         assert response.status_code == expected_status, response.json()
@@ -169,7 +169,7 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/project_secret_api_keys/{key.id}",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys/{key.id}",
             {"label": "renamed", "scopes": ["llm_gateway:read"]},
         )
         assert response.status_code == 200
@@ -190,7 +190,7 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/project_secret_api_keys/{key.id}",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys/{key.id}",
             {"scopes": ["endpoint:read", "llm_gateway:read"]},
         )
         assert response.status_code == 400
@@ -210,7 +210,7 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/project_secret_api_keys/{key.id}",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys/{key.id}",
             {"scopes": ["llm_gateway:read"]},
         )
         assert response.status_code == 200
@@ -219,7 +219,7 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
     @patch("insights.api.project_secret_api_key.hanzo_insights.feature_enabled")
     def test_non_gateway_scope_unaffected_by_flag(self, mock_feature_enabled):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "my key", "scopes": ["endpoint:read"]},
         )
         assert response.status_code == 201
@@ -228,13 +228,13 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
 
     def test_update_label(self):
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "original", "scopes": ["endpoint:read"]},
         )
         key_id = create_response.json()["id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/project_secret_api_keys/{key_id}",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys/{key_id}",
             {"label": "updated"},
         )
         assert response.status_code == 200
@@ -242,31 +242,31 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
 
     def test_update_scopes_to_empty_rejected(self):
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "my key", "scopes": ["endpoint:read"]},
         )
         key_id = create_response.json()["id"]
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/project_secret_api_keys/{key_id}",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys/{key_id}",
             {"scopes": []},
         )
         assert response.status_code == 400
 
     def test_delete(self):
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "deleteme", "scopes": ["endpoint:read"]},
         )
         key_id = create_response.json()["id"]
 
-        response = self.client.delete(f"/api/projects/{self.team.id}/project_secret_api_keys/{key_id}")
+        response = self.client.delete(f"/v1/projects/{self.team.id}/project_secret_api_keys/{key_id}")
         assert response.status_code == 204
         assert not ProjectSecretAPIKey.objects.filter(id=key_id).exists()
 
     def test_roll(self):
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "rollme", "scopes": ["endpoint:read"]},
         )
         data = create_response.json()
@@ -274,7 +274,7 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
         original_mask = data["mask_value"]
         original_secure_value = ProjectSecretAPIKey.objects.get(id=key_id).secure_value
 
-        response = self.client.post(f"/api/projects/{self.team.id}/project_secret_api_keys/{key_id}/roll")
+        response = self.client.post(f"/v1/projects/{self.team.id}/project_secret_api_keys/{key_id}/roll")
         assert response.status_code == 200
         rolled = response.json()
 
@@ -283,14 +283,14 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
         assert rolled["mask_value"] != original_mask
         assert rolled["last_rolled_at"] is not None
         assert rolled["value"] is not None
-        assert rolled["value"].startswith("phs_")
+        assert rolled["value"].startswith("sk-")
 
         key = ProjectSecretAPIKey.objects.get(id=key_id)
         assert key.secure_value != original_secure_value
 
     def test_list_only_current_team_keys(self):
         self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "team1 key", "scopes": ["endpoint:read"]},
         )
 
@@ -299,11 +299,11 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
             team=other_team,
             label="team2 key",
             secure_value="sha256$abc123",
-            mask_value="phs_...1234",
+            mask_value="sk-...1234",
             scopes=["endpoint:read"],
         )
 
-        response = self.client.get(f"/api/projects/{self.team.id}/project_secret_api_keys")
+        response = self.client.get(f"/v1/projects/{self.team.id}/project_secret_api_keys")
         assert response.status_code == 200
         results = response.json()["results"]
         assert len(results) == 1
@@ -316,20 +316,20 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
             team=other_team,
             label="secret",
             secure_value="sha256$other",
-            mask_value="phs_...5678",
+            mask_value="sk-...5678",
             scopes=["endpoint:read"],
         )
 
-        response = self.client.get(f"/api/projects/{other_team.id}/project_secret_api_keys")
+        response = self.client.get(f"/v1/projects/{other_team.id}/project_secret_api_keys")
         assert response.status_code == 403
 
     def test_duplicate_label_rejected(self):
         self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "unique-name", "scopes": ["endpoint:read"]},
         )
         response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "unique-name", "scopes": ["endpoint:read"]},
         )
         assert response.status_code == 400
@@ -337,20 +337,20 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
 
     def test_value_only_returned_on_create(self):
         create_response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "my key", "scopes": ["endpoint:read"]},
         )
         assert create_response.json()["value"] is not None
 
         key_id = create_response.json()["id"]
-        get_response = self.client.get(f"/api/projects/{self.team.id}/project_secret_api_keys/{key_id}")
+        get_response = self.client.get(f"/v1/projects/{self.team.id}/project_secret_api_keys/{key_id}")
         assert get_response.json()["value"] is None
 
     def test_activity_log_on_create(self):
         from insights.models.activity_logging.activity_log import ActivityLog
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "logged key", "scopes": ["endpoint:read"]},
         )
         key_id = response.json()["id"]
@@ -375,13 +375,13 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
         from insights.models.activity_logging.activity_log import ActivityLog
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "label_before", "scopes": ["endpoint:read"]},
         )
         key_id = response.json()["id"]
 
         self.client.patch(
-            f"/api/projects/{self.team.id}/project_secret_api_keys/{key_id}",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys/{key_id}",
             {"label": "label_after"},
         )
 
@@ -398,12 +398,12 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
         from insights.models.activity_logging.activity_log import ActivityLog
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "roll me", "scopes": ["endpoint:read"]},
         )
         key_id = response.json()["id"]
 
-        self.client.post(f"/api/projects/{self.team.id}/project_secret_api_keys/{key_id}/roll")
+        self.client.post(f"/v1/projects/{self.team.id}/project_secret_api_keys/{key_id}/roll")
 
         logs = ActivityLog.objects.filter(scope="ProjectSecretAPIKey", item_id=str(key_id), activity="updated")
         assert len(logs) == 1
@@ -415,7 +415,7 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
         assert "last_rolled_at" in changes
 
         assert changes["mask_value"]["before"] != changes["mask_value"]["after"]
-        assert changes["mask_value"]["after"].startswith("phs_...")
+        assert changes["mask_value"]["after"].startswith("sk-...")
         assert changes["last_rolled_at"]["before"] is None
         assert changes["last_rolled_at"]["after"] is not None
 
@@ -423,12 +423,12 @@ class TestProjectSecretAPIKeysAPI(APIBaseTest):
         from insights.models.activity_logging.activity_log import ActivityLog
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys",
             {"label": "delete me", "scopes": ["endpoint:read"]},
         )
         key_id = response.json()["id"]
 
-        self.client.delete(f"/api/projects/{self.team.id}/project_secret_api_keys/{key_id}")
+        self.client.delete(f"/v1/projects/{self.team.id}/project_secret_api_keys/{key_id}")
 
         logs = ActivityLog.objects.filter(scope="ProjectSecretAPIKey", item_id=str(key_id), activity="deleted")
         assert len(logs) == 1
@@ -458,7 +458,7 @@ class TestProjectSecretAPIKeysViaPersonalAPIKey(APIBaseTest):
 
     def _create_key(self) -> str:
         response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys/",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys/",
             data={"label": "rollable", "scopes": ["endpoint:read"]},
             content_type="application/json",
             **self._auth(),
@@ -472,14 +472,14 @@ class TestProjectSecretAPIKeysViaPersonalAPIKey(APIBaseTest):
         original_secure_value = original.secure_value
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys/{key_id}/roll/",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys/{key_id}/roll/",
             **self._auth(),
         )
 
         assert response.status_code == 200, response.content
         rolled = response.json()
         assert rolled["value"] is not None
-        assert rolled["value"].startswith("phs_")
+        assert rolled["value"].startswith("sk-")
 
         original.refresh_from_db()
         assert original.secure_value != original_secure_value
@@ -497,7 +497,7 @@ class TestProjectSecretAPIKeysViaPersonalAPIKey(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/project_secret_api_keys/{key_id}/roll/",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys/{key_id}/roll/",
             HTTP_AUTHORIZATION=f"Bearer {readonly_token}",
         )
         assert response.status_code == 403, response.content
@@ -506,7 +506,7 @@ class TestProjectSecretAPIKeysViaPersonalAPIKey(APIBaseTest):
         key_id = self._create_key()
 
         response = self.client.delete(
-            f"/api/projects/{self.team.id}/project_secret_api_keys/{key_id}/",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys/{key_id}/",
             **self._auth(),
         )
         assert response.status_code == 204, response.content
@@ -516,7 +516,7 @@ class TestProjectSecretAPIKeysViaPersonalAPIKey(APIBaseTest):
         key_id = self._create_key()
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/project_secret_api_keys/{key_id}/",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys/{key_id}/",
             data={"label": "renamed"},
             content_type="application/json",
             **self._auth(),
@@ -536,7 +536,7 @@ class TestProjectSecretAPIKeysViaPersonalAPIKey(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/project_secret_api_keys/{key_id}/",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys/{key_id}/",
             data={"label": "should-fail"},
             content_type="application/json",
             HTTP_AUTHORIZATION=f"Bearer {readonly_token}",
@@ -548,7 +548,7 @@ class TestProjectSecretAPIKeysViaPersonalAPIKey(APIBaseTest):
         key_id = self._create_key()
 
         response = self.client.put(
-            f"/api/projects/{self.team.id}/project_secret_api_keys/{key_id}/",
+            f"/v1/projects/{self.team.id}/project_secret_api_keys/{key_id}/",
             data={"label": "via-put", "scopes": ["endpoint:read"]},
             content_type="application/json",
             **self._auth(),

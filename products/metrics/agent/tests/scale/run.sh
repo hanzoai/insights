@@ -27,7 +27,7 @@ fi
 
 # The sharded render must be valid for the real collector, not just goldens.
 docker run --rm --entrypoint /bin/sh \
-    -e INSIGHTS_API_KEY=phc_test -e SCRAPE_TARGETS=app:9090 \
+    -e INSIGHTS_API_KEY=pk-test -e SCRAPE_TARGETS=app:9090 \
     -e SHARD_COUNT=4 -e SHARD_INDEX=1 \
     insights-metrics-agent:test \
     -c 'RENDER_ONLY=1 /entrypoint.sh > /tmp/validate.yaml && /usr/local/bin/otelcol-contrib validate --config /tmp/validate.yaml' \

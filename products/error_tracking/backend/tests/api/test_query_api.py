@@ -10,8 +10,8 @@ from django.utils.timezone import now
 
 from dateutil.relativedelta import relativedelta
 
-from insights.datastore.query_tagging import Feature, Product, get_query_tags
 from insights.constants import AvailableFeature
+from insights.datastore.query_tagging import Feature, Product, get_query_tags
 from insights.models import PropertyDefinition
 
 from products.access_control.backend.models.property_access_control import PropertyAccessControl
@@ -132,7 +132,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
         flush_persons_and_events()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/query/issues",
+            f"/v1/environments/{self.team.id}/error_tracking/query/issues",
             data={
                 "status": "all",
                 "dateRange": {"date_from": "-1d", "date_to": "2026-04-25T00:00:00Z"},
@@ -149,7 +149,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
         assert [row["id"] for row in response.json()["results"]] == [self.issue_id]
 
         project_response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/query/issues",
+            f"/v1/environments/{self.team.id}/error_tracking/query/issues",
             data={
                 "status": "all",
                 "dateRange": {"date_from": "-1d", "date_to": "2026-04-25T00:00:00Z"},
@@ -163,7 +163,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
 
     def test_rejects_insightsql_property_filters(self) -> None:
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/query/issues",
+            f"/v1/environments/{self.team.id}/error_tracking/query/issues",
             data={"filterGroup": [{"key": "1 = 1", "type": "insightsql", "value": "1"}]},
             format="json",
         )
@@ -173,7 +173,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
 
     def test_rejects_invalid_person_id(self) -> None:
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/query/issues",
+            f"/v1/environments/{self.team.id}/error_tracking/query/issues",
             data={"personId": "not-a-uuid"},
             format="json",
         )
@@ -182,12 +182,12 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
 
     def test_rejects_large_volume_resolution(self) -> None:
         list_response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/query/issues",
+            f"/v1/environments/{self.team.id}/error_tracking/query/issues",
             data={"volumeResolution": 201},
             format="json",
         )
         detail_response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/query/issue",
+            f"/v1/environments/{self.team.id}/error_tracking/query/issue",
             data={"issueId": self.issue_id, "volumeResolution": 201},
             format="json",
         )
@@ -206,7 +206,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
         flush_persons_and_events()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/query/issues",
+            f"/v1/environments/{self.team.id}/error_tracking/query/issues",
             data={
                 "status": "all",
                 "dateRange": {"date_from": "-1d", "date_to": "2026-04-25T00:00:00Z"},
@@ -228,7 +228,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
 
         with patch("products.error_tracking.backend.facade.queries.ErrorTrackingQueryRunner.calculate", calculate):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/error_tracking/query/issues",
+                f"/v1/environments/{self.team.id}/error_tracking/query/issues",
                 data={"limit": 1},
                 format="json",
             )
@@ -245,7 +245,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
 
         with patch("products.error_tracking.backend.facade.queries.ErrorTrackingQueryRunner.calculate", calculate):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/error_tracking/query/issues",
+                f"/v1/environments/{self.team.id}/error_tracking/query/issues",
                 data={"volumeResolution": 0},
                 format="json",
             )
@@ -283,7 +283,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
             ),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/error_tracking/query/issue",
+                f"/v1/environments/{self.team.id}/error_tracking/query/issue",
                 data={"issueId": self.issue_id},
                 format="json",
             )
@@ -322,7 +322,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
             ),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/error_tracking/query/issue",
+                f"/v1/environments/{self.team.id}/error_tracking/query/issue",
                 data={"issueId": self.issue_id, "volumeResolution": 0},
                 format="json",
             )
@@ -362,7 +362,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
             ),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/error_tracking/query/issue",
+                f"/v1/environments/{self.team.id}/error_tracking/query/issue",
                 data={"issueId": self.issue_id},
                 format="json",
             )
@@ -412,7 +412,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
         flush_persons_and_events()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/query/issue",
+            f"/v1/environments/{self.team.id}/error_tracking/query/issue",
             data={"issueId": self.issue_id, "dateRange": {"date_from": "-1d", "date_to": "2026-04-25T00:00:00Z"}},
             format="json",
         )
@@ -440,7 +440,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
         with patch("products.error_tracking.backend.presentation.views.query.EventsQueryRunner") as events_query_runner:
             events_query_runner.side_effect = RuntimeError("boom")
             response = self.client.post(
-                f"/api/environments/{self.team.id}/error_tracking/query/issue",
+                f"/v1/environments/{self.team.id}/error_tracking/query/issue",
                 data={"issueId": self.issue_id, "dateRange": {"date_from": "-1d", "date_to": "2026-04-25T00:00:00Z"}},
                 format="json",
             )
@@ -454,7 +454,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
         self.create_issue()
 
         empty_range_response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/query/issue",
+            f"/v1/environments/{self.team.id}/error_tracking/query/issue",
             data={
                 "issueId": self.issue_id,
                 "dateRange": {"date_from": "2026-04-23T00:00:00Z", "date_to": "2026-04-23T01:00:00Z"},
@@ -462,7 +462,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
             format="json",
         )
         missing_response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/query/issue",
+            f"/v1/environments/{self.team.id}/error_tracking/query/issue",
             data={"issueId": "00000000-0000-0000-0000-000000000000"},
             format="json",
         )
@@ -478,7 +478,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/query/issue_events",
+            f"/v1/environments/{self.team.id}/error_tracking/query/issue_events",
             data={"issueId": str(other_issue.id)},
             format="json",
         )
@@ -496,7 +496,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
 
         with patch("products.error_tracking.backend.presentation.views.query.EventsQueryRunner.calculate", calculate):
             response = self.client.post(
-                f"/api/environments/{self.team.id}/error_tracking/query/issue_events",
+                f"/v1/environments/{self.team.id}/error_tracking/query/issue_events",
                 data={"issueId": self.issue_id},
                 format="json",
             )
@@ -514,7 +514,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
         flush_persons_and_events()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/query/issue_events",
+            f"/v1/environments/{self.team.id}/error_tracking/query/issue_events",
             data={"issueId": self.issue_id, "dateRange": {"date_from": "-1d", "date_to": "2026-04-25T00:00:00Z"}},
             format="json",
         )
@@ -529,7 +529,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
         flush_persons_and_events()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/query/issue_events",
+            f"/v1/environments/{self.team.id}/error_tracking/query/issue_events",
             data={"issueId": self.issue_id, "dateRange": {"date_from": "-1d", "date_to": "2026-04-25T00:00:00Z"}},
             format="json",
         )
@@ -542,7 +542,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
         ErrorTrackingIssue.objects.create(id=self.issue_id, team=self.team, name="TypeError")
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/query/issue_events",
+            f"/v1/environments/{self.team.id}/error_tracking/query/issue_events",
             data={"issueId": self.issue_id, "dateRange": {"date_from": "-1d", "date_to": "2026-04-25T00:00:00Z"}},
             format="json",
         )
@@ -569,7 +569,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
         self.create_issue()
 
         response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/query/issue_events",
+            f"/v1/environments/{self.team.id}/error_tracking/query/issue_events",
             data={"issueId": self.issue_id, "include": ["navigation"]},
             format="json",
         )
@@ -591,7 +591,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
         flush_persons_and_events()
 
         summary_response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/query/issue_events",
+            f"/v1/environments/{self.team.id}/error_tracking/query/issue_events",
             data={"issueId": self.issue_id, "dateRange": {"date_from": "-1d", "date_to": "2026-04-25T00:00:00Z"}},
             format="json",
         )
@@ -639,7 +639,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
         flush_persons_and_events()
 
         stack_response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/query/issue_events",
+            f"/v1/environments/{self.team.id}/error_tracking/query/issue_events",
             data={
                 "issueId": self.issue_id,
                 "dateRange": {"date_from": "-1d", "date_to": "2026-04-25T00:00:00Z"},
@@ -648,7 +648,7 @@ class TestErrorTrackingQueryAPI(DatastoreTestMixin, APIBaseTest):
             format="json",
         )
         variables_response = self.client.post(
-            f"/api/environments/{self.team.id}/error_tracking/query/issue_events",
+            f"/v1/environments/{self.team.id}/error_tracking/query/issue_events",
             data={
                 "issueId": self.issue_id,
                 "dateRange": {"date_from": "-1d", "date_to": "2026-04-25T00:00:00Z"},

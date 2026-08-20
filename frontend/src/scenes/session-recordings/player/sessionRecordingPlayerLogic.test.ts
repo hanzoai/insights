@@ -1,7 +1,7 @@
 import { router } from 'kea-router'
 import { expectLogic } from 'kea-test-utils'
 import insights from 'insights-js'
-import { EventType, IncrementalSource, eventWithTime } from 'insights-js/rrweb-types'
+import { EventType, IncrementalSource, eventWithTime } from '@hanzo/insights-rrweb-types'
 
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { playerSettingsLogic } from 'scenes/session-recordings/player/playerSettingsLogic'
@@ -350,8 +350,8 @@ describe('sessionRecordingPlayerLogic', () => {
             logic.unmount()
             overrideSessionRecordingMocks({
                 getMocks: {
-                    '/api/environments/:team_id/session_recordings/:id/snapshots': () => [500, { status: 0 }],
-                    '/api/projects/:team_id/session_recordings/:id/snapshots': () => [500, { status: 0 }],
+                    '/v1/environments/:team_id/session_recordings/:id/snapshots': () => [500, { status: 0 }],
+                    '/v1/projects/:team_id/session_recordings/:id/snapshots': () => [500, { status: 0 }],
                 },
             })
             logic = sessionRecordingPlayerLogic({

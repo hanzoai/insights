@@ -63,14 +63,14 @@ describe('replayScannersLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/projects/:team/vision/scanners/': { results: [], count: 0 },
-                '/api/projects/:team/vision/scanners/creators/': { creators: [] },
+                '/v1/projects/:team/vision/scanners/': { results: [], count: 0 },
+                '/v1/projects/:team/vision/scanners/creators/': { creators: [] },
             },
             patch: {
-                '/api/projects/:team/vision/scanners/:id/': () => [200, {}],
+                '/v1/projects/:team/vision/scanners/:id/': () => [200, {}],
             },
             delete: {
-                '/api/projects/:team/vision/scanners/:id/': () => [204, null],
+                '/v1/projects/:team/vision/scanners/:id/': () => [204, null],
             },
         })
         initKeaTests()
@@ -355,8 +355,8 @@ describe('replayScannersLogic', () => {
         it('a failed delete reverts the optimistic projection shift', async () => {
             useMocks({
                 // The quota GET must be mocked: `toFinishAllListeners` waits out the quota loader too.
-                get: { '/api/projects/:team/vision/quota/': quotaFixture },
-                delete: { '/api/projects/:team/vision/scanners/:id/': () => [500, {}] },
+                get: { '/v1/projects/:team/vision/quota/': quotaFixture },
+                delete: { '/v1/projects/:team/vision/scanners/:id/': () => [500, {}] },
             })
             const quotaLogic = visionQuotaLogic()
             quotaLogic.mount()
@@ -384,7 +384,7 @@ describe('replayScannersLogic', () => {
         // e.g. the last scanner on page 2 was just deleted: offset=50 is now empty while count says one page.
         useMocks({
             get: {
-                '/api/projects/:team/vision/scanners/': ({ request }: { request: Request }) => {
+                '/v1/projects/:team/vision/scanners/': ({ request }: { request: Request }) => {
                     const offset = Number(new URL(request.url).searchParams.get('offset') ?? 0)
                     return offset > 0
                         ? [200, { results: [], count: 50 }]

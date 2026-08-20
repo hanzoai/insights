@@ -12,7 +12,7 @@ insights/models/activity_logging/model_activity.py
 insights/models/activity_logging/signal_handlers.py
 insights/models/activity_logging/utils.py
 insights/models/feature_flag/flags_cache.py
-insights/models/hog_flow/hog_flow.py
+insights/models/script_flow/script_flow.py
 insights/models/insights_functions/insights_function.py
 insights/models/instance_setting.py
 insights/models/organization.py
@@ -32,7 +32,7 @@ insights/product_db_router.py
 insights/redis.py
 insights/storage/team_access_cache_signal_handlers.py
 insights/tasks/activity_log.py
-insights/tasks/hog_flows.py
+insights/tasks/script_flows.py
 insights/tasks/insights_functions.py
 insights/tasks/team_metadata.py
 insights/utils.py

@@ -91,7 +91,7 @@ describe('mcpAnalyticsNotificationsLogic', () => {
         const notifications = [makeNotification('a'), makeNotification('b')]
         listSpy.mockReset().mockResolvedValue({
             count: 501,
-            next: 'http://localhost/api/projects/1/insights_functions/?limit=500&offset=500',
+            next: 'http://localhost/v1/projects/1/insights_functions/?limit=500&offset=500',
             previous: null,
             results: notifications,
         })

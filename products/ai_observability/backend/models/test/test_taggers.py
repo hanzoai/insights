@@ -4,7 +4,7 @@ from unittest.mock import patch
 from django.core.exceptions import ValidationError
 
 from insights.models.utils import UUIDTModel
-from insights.temporal.ai_observability.run_tagger import run_hog_tagger
+from insights.temporal.ai_observability.run_tagger import run_script_tagger
 
 from products.ai_observability.backend.models.taggers import LLMTaggerConfig, TagDefinition, Tagger
 
@@ -83,8 +83,8 @@ class TestLLMTaggerConfig(BaseTest):
         assert config.max_tags is None
 
 
-class TestHogTaggerCompilation:
-    def test_hog_tagger_compiles_null_safe_comparisons(self):
+class TestScriptTaggerCompilation:
+    def test_script_tagger_compiles_null_safe_comparisons(self):
         tagger = Tagger(
             team_id=1,
             name="Script Tagger",
@@ -100,7 +100,7 @@ class TestHogTaggerCompilation:
         with patch.object(UUIDTModel, "save", return_value=None):
             tagger.save()
 
-        result = run_hog_tagger(
+        result = run_script_tagger(
             tagger.tagger_config["bytecode"],
             {
                 "uuid": "event-id",

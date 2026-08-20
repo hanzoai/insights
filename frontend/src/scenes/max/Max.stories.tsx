@@ -38,7 +38,7 @@ export const Welcome: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/organizations/@current/': () => [
+                '/v1/organizations/@current/': () => [
                     200,
                     {
                         ...MOCK_DEFAULT_ORGANIZATION,
@@ -95,7 +95,7 @@ export const EmptyThreadLoading: Story = {
     render: () => {
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': async () => {
+                '/v1/environments/:team_id/conversations/': async () => {
                     await delay('infinite')
                     return new HttpResponse()
                 },
@@ -133,7 +133,7 @@ export const GenerationFailureThread: Story = {
     render: () => {
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () => new HttpResponse(generationFailureChunk),
+                '/v1/environments/:team_id/conversations/': () => new HttpResponse(generationFailureChunk),
             },
         })
 
@@ -169,7 +169,7 @@ export const ThreadWithFailedGeneration: Story = {
     render: () => {
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () => new HttpResponse(failureChunk),
+                '/v1/environments/:team_id/conversations/': () => new HttpResponse(failureChunk),
             },
         })
 
@@ -200,7 +200,7 @@ export const ThreadWithRateLimit: Story = {
         useStorybookMocks({
             post: {
                 // Retry-After header is present so we should be showing its value in the UI
-                '/api/environments/:team_id/conversations/': () =>
+                '/v1/environments/:team_id/conversations/': () =>
                     new HttpResponse(chatResponseChunk, { status: 429, headers: { 'Retry-After': '3899' } }),
             },
         })
@@ -232,7 +232,7 @@ export const ThreadWithRateLimitNoRetryAfter: Story = {
         useStorybookMocks({
             post: {
                 // Testing rate limit error when the Retry-After header is MISSING
-                '/api/environments/:team_id/conversations/': () => new HttpResponse(chatResponseChunk, { status: 429 }),
+                '/v1/environments/:team_id/conversations/': () => new HttpResponse(chatResponseChunk, { status: 429 }),
             },
         })
 
@@ -263,7 +263,7 @@ export const ThreadWithBillingLimitExceeded: Story = {
         useStorybookMocks({
             post: {
                 // Testing billing limit exceeded error (402 Payment Required)
-                '/api/environments/:team_id/conversations/': () => [
+                '/v1/environments/:team_id/conversations/': () => [
                     402,
                     {
                         detail: 'Your organization reached its AI credit usage limit. Increase the limits in [Billing](/organization/billing), or ask an org admin to do so.',
@@ -298,7 +298,7 @@ export const ThreadWithQuickReplies: Story = {
     render: () => {
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () => new HttpResponse(formChunk),
+                '/v1/environments/:team_id/conversations/': () => new HttpResponse(formChunk),
             },
         })
 
@@ -328,7 +328,7 @@ export const ThreadWithConversationLoading: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/conversations/': async () => {
+                '/v1/environments/:team_id/conversations/': async () => {
                     await delay('infinite')
                     return new HttpResponse()
                 },
@@ -354,7 +354,7 @@ export const ThreadWithEmptyConversation: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/conversations/': () => [200, conversationList],
+                '/v1/environments/:team_id/conversations/': () => [200, conversationList],
             },
         })
 
@@ -374,8 +374,8 @@ export const SharedThread: Story = {
 
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/conversations/': () => [200, conversationList],
-                [`/api/environments/:team_id/conversations/${sharedConversationId}/`]: () => [
+                '/v1/environments/:team_id/conversations/': () => [200, conversationList],
+                [`/v1/environments/:team_id/conversations/${sharedConversationId}/`]: () => [
                     200,
                     {
                         id: sharedConversationId,
@@ -430,8 +430,8 @@ export const ThreadWithInProgressConversation: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/conversations/': () => [200, conversationList],
-                '/api/environments/:team_id/conversations/in_progress/': async () => {
+                '/v1/environments/:team_id/conversations/': () => [200, conversationList],
+                '/v1/environments/:team_id/conversations/in_progress/': async () => {
                     await delay('infinite')
                     return new HttpResponse()
                 },
@@ -457,7 +457,7 @@ export const WelcomeWithLatestConversations: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/conversations/': () => [200, conversationList],
+                '/v1/environments/:team_id/conversations/': () => [200, conversationList],
             },
         })
 
@@ -474,7 +474,7 @@ export const ChatHistory: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/conversations/': () => [200, conversationList],
+                '/v1/environments/:team_id/conversations/': () => [200, conversationList],
             },
         })
 
@@ -497,7 +497,7 @@ export const ChatHistoryEmpty: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/conversations/': () => [400],
+                '/v1/environments/:team_id/conversations/': () => [400],
             },
         })
 
@@ -520,7 +520,7 @@ export const ChatHistoryLoading: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/conversations/': async () => {
+                '/v1/environments/:team_id/conversations/': async () => {
                     await delay('infinite')
                     return new HttpResponse()
                 },
@@ -589,7 +589,7 @@ export const ThreadWithMultipleContextObjects: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/conversations/': () => [200, conversationList],
+                '/v1/environments/:team_id/conversations/': () => [200, conversationList],
             },
         })
 
@@ -631,10 +631,10 @@ export const ThreadScrollsToBottomOnNewMessages: Story = {
     render: () => {
         useStorybookMocks({
             get: {
-                '/api/environments/:team_id/conversations/': () => [200, conversationList],
+                '/v1/environments/:team_id/conversations/': () => [200, conversationList],
             },
             post: {
-                '/api/environments/:team_id/conversations/': async () => {
+                '/v1/environments/:team_id/conversations/': async () => {
                     await delay(100)
                     return new HttpResponse(longResponseChunk)
                 },
@@ -675,11 +675,11 @@ export const ChatWithUIContext: Story = {
     render: () => {
         useStorybookMocks({
             post: {
-                '/api/environments/:team_id/conversations/': () => new HttpResponse(chatResponseWithEventContext),
+                '/v1/environments/:team_id/conversations/': () => new HttpResponse(chatResponseWithEventContext),
             },
             get: {
-                '/api/environments/:team_id/conversations/': () => [200, conversationList],
-                [`/api/environments/:team_id/conversations/${CONVERSATION_ID}/`]: () => [
+                '/v1/environments/:team_id/conversations/': () => [200, conversationList],
+                [`/v1/environments/:team_id/conversations/${CONVERSATION_ID}/`]: () => [
                     200,
                     {
                         id: CONVERSATION_ID,

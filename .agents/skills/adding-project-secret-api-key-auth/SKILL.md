@@ -1,6 +1,6 @@
 ---
 name: adding-project-secret-api-key-auth
-description: 'How to gate a Insights API endpoint with project secret API key (PSAK) auth — a project-scoped, user-less service credential. Use when adding PSAK support to a viewset action, allowing a new scope for PSAKs, handling synthetic users (ProjectSecretAPIKeyUser), or choosing PSAK-aware rate throttles. Trigger terms: PSAK, ProjectSecretAPIKey, project secret API key, phs_ token, service auth, programmatic endpoint auth.'
+description: 'How to gate a Insights API endpoint with project secret API key (PSAK) auth — a project-scoped, user-less service credential. Use when adding PSAK support to a viewset action, allowing a new scope for PSAKs, handling synthetic users (ProjectSecretAPIKeyUser), or choosing PSAK-aware rate throttles. Trigger terms: PSAK, ProjectSecretAPIKey, project secret API key, sk- token, service auth, programmatic endpoint auth.'
 ---
 
 # Adding project secret API key (PSAK) auth to an endpoint
@@ -9,11 +9,11 @@ description: 'How to gate a Insights API endpoint with project secret API key (P
 
 A `ProjectSecretAPIKey` is a project-scoped, user-less service credential (`insights/models/project_secret_api_key.py`). It behaves like a personal API key but survives users leaving the project, carries its own scopes, and authenticates as a synthetic user — not a real `User` row.
 
-- Token format: `phs_...` (Bearer header only — no body fallback, unlike the legacy token).
+- Token format: `sk-...` (Bearer header only — no body fallback, unlike the legacy token).
 - Scopes are **project-wide within their resource type** and deliberately ignore object-level access controls (per-resource RBAC).
-- Do not confuse with `TeamSecretTokenAuthentication` — that validates the legacy per-team `Team.secret_api_token` (also `phs_`-prefixed) and is only for feature-flag local evaluation and similar pre-PSAK surfaces. It is pegged for migrating to PSAK at some point.
+- Do not confuse with `TeamSecretTokenAuthentication` — that validates the legacy per-team `Team.secret_api_token` (also `sk-`-prefixed) and is only for feature-flag local evaluation and similar pre-PSAK surfaces. It is pegged for migrating to PSAK at some point.
 
-Keys are managed at `POST /api/environments/:id/project_secret_api_keys` (label + scopes; plaintext value returned once; `roll` action to rotate; max 50 per project; wildcard `*` scope not allowed).
+Keys are managed at `POST /v1/environments/:id/project_secret_api_keys` (label + scopes; plaintext value returned once; `roll` action to rotate; max 50 per project; wildcard `*` scope not allowed).
 
 ## Wiring a viewset action — the checklist
 
@@ -40,7 +40,7 @@ class MyViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
 
 `psak_allowed_actions` is **default-deny**: `APIScopePermission` rejects any PSAK request whose action isn't listed ("This action does not support project secret API key access"). List only the programmatic actions — never CRUD that should stay human-driven.
 
-`APIScopePermission` also enforces team binding automatically: a PSAK only works against `view.team == key.team`, so PSAK auth only makes sense on project-scoped (`/api/environments/:id/...`) routes.
+`APIScopePermission` also enforces team binding automatically: a PSAK only works against `view.team == key.team`, so PSAK auth only makes sense on project-scoped (`/v1/environments/:id/...`) routes.
 
 ### 3. Use PSAK-aware throttles
 
@@ -81,7 +81,7 @@ Helpers in `insights/permissions.py` when you need to branch: `is_authenticated_
 
 ```bash
 curl -s https://us.hanzo.ai/api/environments/<project_id>/<your_action_path>/ \
-  -H "Authorization: Bearer phs_<key>" \
+  -H "Authorization: Bearer sk-<key>" \
   -H "Content-Type: application/json" \
   -d '{...}'
 ```

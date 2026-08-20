@@ -131,11 +131,11 @@ class TestSessionExperimentContext(DatastoreTestMixin, APIBaseTest):
 
     def _get_session_context(self, session_id: Optional[str] = SESSION_ID) -> Any:
         params = {"session_id": session_id} if session_id is not None else {}
-        return self.client.get(f"/api/projects/{self.team.id}/experiments/session_context/", params)
+        return self.client.get(f"/v1/projects/{self.team.id}/experiments/session_context/", params)
 
     def _post_session_contexts(self, session_ids: list[str]) -> Any:
         return self.client.post(
-            f"/api/projects/{self.team.id}/experiments/session_contexts/",
+            f"/v1/projects/{self.team.id}/experiments/session_contexts/",
             {"session_ids": session_ids},
             format="json",
         )
@@ -814,7 +814,7 @@ class TestSessionExperimentContext(DatastoreTestMixin, APIBaseTest):
 
         token = _personal_api_key(["experiment:read"])
         response = self.client.get(
-            f"/api/projects/{self.team.id}/experiments/session_context/",
+            f"/v1/projects/{self.team.id}/experiments/session_context/",
             {"session_id": SESSION_ID},
             headers={"authorization": f"Bearer {token}"},
         )
@@ -822,7 +822,7 @@ class TestSessionExperimentContext(DatastoreTestMixin, APIBaseTest):
 
         token = _personal_api_key(["experiment:read", "session_recording:read"])
         response = self.client.get(
-            f"/api/projects/{self.team.id}/experiments/session_context/",
+            f"/v1/projects/{self.team.id}/experiments/session_context/",
             {"session_id": SESSION_ID},
             headers={"authorization": f"Bearer {token}"},
         )
@@ -1348,7 +1348,7 @@ class TestSessionExperimentContext(DatastoreTestMixin, APIBaseTest):
                 scopes=["experiment:read", "session_recording:read"],
             )
             return self.client.post(
-                f"/api/projects/{self.team.id}/experiments/session_contexts/",
+                f"/v1/projects/{self.team.id}/experiments/session_contexts/",
                 {"session_ids": [SESSION_ID]},
                 format="json",
                 headers={"authorization": f"Bearer {token}"},
@@ -1372,7 +1372,7 @@ class TestSessionExperimentContext(DatastoreTestMixin, APIBaseTest):
 
         token = _personal_api_key(["experiment:read"])
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/session_contexts/",
+            f"/v1/projects/{self.team.id}/experiments/session_contexts/",
             {"session_ids": [SESSION_ID]},
             format="json",
             headers={"authorization": f"Bearer {token}"},
@@ -1381,7 +1381,7 @@ class TestSessionExperimentContext(DatastoreTestMixin, APIBaseTest):
 
         token = _personal_api_key(["experiment:read", "session_recording:read"])
         response = self.client.post(
-            f"/api/projects/{self.team.id}/experiments/session_contexts/",
+            f"/v1/projects/{self.team.id}/experiments/session_contexts/",
             {"session_ids": [SESSION_ID]},
             format="json",
             headers={"authorization": f"Bearer {token}"},

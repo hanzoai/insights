@@ -17,7 +17,7 @@ export function QueryDiffViewer({ original, modified }: QueryDiffViewerProps): J
                 key="diff-viewer"
                 original={original}
                 modified={modified}
-                language="hogQL"
+                language="insightsQL"
                 width={width}
                 options={{
                     renderOverviewRuler: false,

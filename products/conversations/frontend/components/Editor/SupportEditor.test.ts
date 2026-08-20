@@ -68,8 +68,8 @@ describe('SupportEditor serialization and preview schema', () => {
         expect(serializeToMarkdown(doc)).toBe(expected)
     })
 
-    it('preview schema accepts docs authored with the full HogDesk node set', () => {
-        const hogdeskDoc: JSONContent = {
+    it('preview schema accepts docs authored with the full Desk node set', () => {
+        const deskDoc: JSONContent = {
             type: 'doc',
             content: [
                 {
@@ -95,7 +95,7 @@ describe('SupportEditor serialization and preview schema', () => {
             ],
         }
         const schema = getSchema([...SUPPORT_PREVIEW_EXTENSIONS])
-        expect(() => ProseMirrorNode.fromJSON(schema, hogdeskDoc).check()).not.toThrow()
+        expect(() => ProseMirrorNode.fromJSON(schema, deskDoc).check()).not.toThrow()
     })
 
     it('preview schema rejects unknown node types so the plain-content fallback kicks in', () => {

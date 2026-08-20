@@ -10,7 +10,7 @@ class TestCohortBytecodeScenarios(APIBaseTest):
         from products.cohorts.backend.models.cohort import Cohort
 
         resp = self.client.post(
-            f"/api/projects/{self.team.id}/cohorts/",
+            f"/v1/projects/{self.team.id}/cohorts/",
             {"name": name, "filters": filters},
             format="json",
         )
@@ -22,7 +22,7 @@ class TestCohortBytecodeScenarios(APIBaseTest):
         from products.cohorts.backend.models.cohort import Cohort
 
         resp = self.client.patch(
-            f"/api/projects/{self.team.id}/cohorts/{cohort_id}/",
+            f"/v1/projects/{self.team.id}/cohorts/{cohort_id}/",
             {"filters": filters},
             format="json",
         )
@@ -214,7 +214,8 @@ class TestCohortBytecodeScenarios(APIBaseTest):
         values = cohort.filters["properties"]["values"]
         # first OR group's first behavioral bytecode
         self.assertEqual(
-            values[0]["values"][0]["bytecode"], ["_H", INSIGHTSQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11]
+            values[0]["values"][0]["bytecode"],
+            ["_H", INSIGHTSQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11],
         )
         # person property bytecode
         self.assertEqual(
@@ -240,7 +241,8 @@ class TestCohortBytecodeScenarios(APIBaseTest):
         self.assertIsNone(cohort2.cohort_type)
         values2 = cohort2.filters["properties"]["values"]
         self.assertEqual(
-            values2[0]["values"][0]["bytecode"], ["_H", INSIGHTSQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11]
+            values2[0]["values"][0]["bytecode"],
+            ["_H", INSIGHTSQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11],
         )
 
     def test_event_properties_realtime(self):

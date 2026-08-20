@@ -25,7 +25,7 @@ func sgrFallback(color ansi.Color, fallback ansi.Color) ansi.Color {
 // needing explicit light/dark branching.
 var (
 	BrandYellow = lipgloss.Color("#F7A501")
-	BrandBlue   = lipgloss.Color("#1D4AFF")
+	BrandGray   = lipgloss.Color("#8F8F8F")
 	BrandRed    = lipgloss.Color("#F04438")
 	BrandBlack  = lipgloss.Color("#151515")
 

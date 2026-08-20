@@ -1,11 +1,10 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
-import { IconEllipsis } from '@hanzo/icons'
 import { Button, Dialog, Menu, Switch, Link, Tooltip } from '@hanzo/elements'
+import { IconEllipsis } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { TZLabel } from 'lib/components/TZLabel'
 import type { MenuItems } from 'lib/elements/Menu'
@@ -25,7 +24,7 @@ import { alertsLogic } from '../logic/alertsLogic'
 import { AlertType } from '../types'
 import { EditAlertModal } from './EditAlertModal'
 
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
+const MascotMagnifyingGlass = pngMascot()
 
 interface InsightAlertsProps {
     alertId: AlertType['id'] | null
@@ -234,7 +233,7 @@ export function InsightAlerts({ alertId }: InsightAlertsProps): JSX.Element {
                     thingName="alert"
                     description="Alerts enable you to monitor your insight and notify you when certain conditions are met."
                     isEmpty
-                    customHog={MascotMagnifyingGlass}
+                    customScript={MascotMagnifyingGlass}
                     actionElementOverride={
                         <span className="italic">
                             To get started, open a <Link to={urls.insights()}>saved insight</Link>, then select Alerts

@@ -161,12 +161,12 @@ const constructValuesEndpoint = (
     let basePath: string
 
     if (type === PropertyDefinitionType.Session) {
-        basePath = `api/environments/${teamId}/${type}s/values`
+        basePath = `v1/environments/${teamId}/${type}s/values`
     } else if (type === PropertyDefinitionType.FlagValue) {
         // FlagValue is project-scoped, so use the project-scoped endpoint
-        basePath = `api/projects/${teamId}/${type}/values`
+        basePath = `v1/projects/${teamId}/${type}/values`
     } else {
-        basePath = `api/${type}/values`
+        basePath = `v1/${type}/values`
     }
 
     const path = endpoint ? endpoint : basePath + `?key=${encodeURIComponent(propertyKey)}`

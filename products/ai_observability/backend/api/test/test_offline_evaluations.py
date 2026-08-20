@@ -13,7 +13,7 @@ class TestOfflineEvaluationItemsEndpoint(APIBaseTest):
 
     def setUp(self) -> None:
         super().setUp()
-        self.URL = f"/api/environments/{self.team.id}/llm_analytics/offline_evaluations/experiment_items/"
+        self.URL = f"/v1/environments/{self.team.id}/llm_analytics/offline_evaluations/experiment_items/"
 
     def _make_response(self, rows: list[list[Any]]) -> MagicMock:
         response = MagicMock()

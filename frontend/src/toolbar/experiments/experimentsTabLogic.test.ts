@@ -87,16 +87,16 @@ describe('experimentsTabLogic', () => {
         ;(toast.error as jest.Mock).mockClear()
         useMocks({
             get: {
-                '/api/projects/:team/web_experiments/': () => web_experiments,
+                '/v1/projects/:team/web_experiments/': () => web_experiments,
             },
             post: {
-                '/api/projects/@current/web_experiments/': () => ({
+                '/v1/projects/@current/web_experiments/': () => ({
                     id: 3,
                     name: 'New Web Experiment',
                 }),
             },
             patch: {
-                '/api/projects/@current/web_experiments/1': () => ({
+                '/v1/projects/@current/web_experiments/1': () => ({
                     id: 3,
                     name: 'Updated web experiment',
                 }),

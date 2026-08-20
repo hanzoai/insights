@@ -161,14 +161,14 @@ export interface maxContextLogicActions {
     addOrUpdateContextEvaluation: (data: {
         description?: string | null
         evaluation_type: EvaluationRuntime
-        hog_source?: string | null
+        script_source?: string | null
         id: string
         name?: string | null
     }) => {
         data: {
             description?: string | null | undefined
             evaluation_type: EvaluationRuntime
-            hog_source?: string | null | undefined
+            script_source?: string | null | undefined
             id: string
             name?: string | null | undefined
         }
@@ -306,7 +306,7 @@ export const maxContextLogic = kea<maxContextLogicType>([
             name?: string | null
             description?: string | null
             evaluation_type: EvaluationRuntime
-            hog_source?: string | null
+            script_source?: string | null
         }) => ({ data }),
         removeContextInsight: (id: string | number) => ({ id }),
         removeContextDashboard: (id: string | number) => ({ id }),
@@ -421,7 +421,7 @@ export const maxContextLogic = kea<maxContextLogicType>([
                             name?: string | null
                             description?: string | null
                             evaluation_type: EvaluationRuntime
-                            hog_source?: string | null
+                            script_source?: string | null
                         }
                     }
                 ) => addOrUpdateEntity(state, evaluationToMaxContextPayload(data)),

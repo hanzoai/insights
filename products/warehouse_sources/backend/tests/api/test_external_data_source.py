@@ -156,7 +156,7 @@ class TestExternalDataSource(APIBaseTest):
     )
     def test_create_external_data_source(self, _mock_validate):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": "web",
@@ -186,7 +186,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._create_external_data_source()
         original_pin = source.api_version
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}",
             data={"api_version": "2099-01-01", "prefix": source.prefix},
         )
         assert response.status_code == 200, response.json()
@@ -207,7 +207,7 @@ class TestExternalDataSource(APIBaseTest):
                 (VersionDeprecation(version="2024-09-30.acacia", sunset_at=date(2026, 12, 31)),),
             ),
         ):
-            response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/")
+            response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/")
 
         assert response.status_code == 200
         assert response.json()["api_version"] == "2024-09-30.acacia"
@@ -226,7 +226,7 @@ class TestExternalDataSource(APIBaseTest):
         # callers regularly send the label, which used to be persisted verbatim and then fail
         # every sync with a missing-column error at cursor extraction.
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": "web",
@@ -259,7 +259,7 @@ class TestExternalDataSource(APIBaseTest):
         # and then silently sync unfiltered rows (mirrors the PATCH-path
         # test_row_filters_rejected_for_source_without_pushdown in test_external_data_schema.py).
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": "web",
@@ -288,7 +288,7 @@ class TestExternalDataSource(APIBaseTest):
     )
     def test_create_external_data_source_creates_discovery_schedule(self, _mock_validate, mock_sync_discover):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": "web",
@@ -345,7 +345,7 @@ class TestExternalDataSource(APIBaseTest):
         ]
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Postgres",
                 "created_via": "web",
@@ -372,7 +372,7 @@ class TestExternalDataSource(APIBaseTest):
     )
     def test_create_external_data_source_delete_on_missing_schemas(self, _mock_validate):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": "web",
@@ -392,7 +392,7 @@ class TestExternalDataSource(APIBaseTest):
     )
     def test_create_external_data_source_delete_on_bad_schema(self, _mock_validate):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": "web",
@@ -421,7 +421,7 @@ class TestExternalDataSource(APIBaseTest):
     )
     def test_create_external_data_source_persists_created_via(self, created_via, _mock_validate):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": created_via,
@@ -482,7 +482,7 @@ class TestExternalDataSource(APIBaseTest):
         self, user_agent, sent_created_via, expected_created_via, _mock_validate
     ):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": sent_created_via,
@@ -525,7 +525,7 @@ class TestExternalDataSource(APIBaseTest):
         self, _name, mcp_user_agent, expected_created_via, _mock_validate
     ):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": ExternalDataSource.CreatedVia.MCP,
@@ -552,7 +552,7 @@ class TestExternalDataSource(APIBaseTest):
     )
     def test_create_external_data_source_defaults_created_via_to_api_when_missing(self, _mock_validate):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "payload": {
@@ -580,7 +580,7 @@ class TestExternalDataSource(APIBaseTest):
     def test_create_external_data_source_rejects_invalid_created_via(self, _name, created_via):
         # created_via choice validation happens before credentials, so no StripeSource mock is needed here.
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": created_via,
@@ -601,7 +601,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._create_external_data_source(created_via=ExternalDataSource.CreatedVia.WEB)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"created_via": "mcp"},
         )
 
@@ -617,7 +617,7 @@ class TestExternalDataSource(APIBaseTest):
         ExternalDataSource.objects.filter(pk=source.pk).update(created_via=None)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"created_via": None, "description": "edited"},
         )
 
@@ -639,7 +639,7 @@ class TestExternalDataSource(APIBaseTest):
     )
     def test_create_external_data_source_direct_query_enabled(self, _name, body, expected, _mock_validate):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 **body,
@@ -666,7 +666,7 @@ class TestExternalDataSource(APIBaseTest):
         # test fails if the request stops being forwarded or `source` stops landing — the mcp/ui/api
         # attribution this PR exists to deliver.
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": "mcp",
@@ -696,7 +696,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._create_external_data_source(created_via=ExternalDataSource.CreatedVia.WEB)
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"description": "edited"},
             HTTP_X_INSIGHTS_CLIENT="mcp",
         )
@@ -715,7 +715,7 @@ class TestExternalDataSource(APIBaseTest):
         assert source.direct_query_enabled is False
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"direct_query_enabled": True},
         )
 
@@ -755,7 +755,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     "host": "localhost",
@@ -810,7 +810,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
             data={
                 "schemas": [
                     {"id": str(schema_one.id), "should_sync": False},
@@ -850,7 +850,7 @@ class TestExternalDataSource(APIBaseTest):
             "products.warehouse_sources.backend.presentation.views.external_data_schema.sync_external_data_job_workflow"
         ) as mock_sync_external_data_job_workflow:
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
                 data={"schemas": [{"id": str(schema.id), "sync_frequency": "7day"}]},
                 format="json",
             )
@@ -893,7 +893,7 @@ class TestExternalDataSource(APIBaseTest):
 
         with patch.object(ExternalDataSchemaSerializer, "_is_webhook_only_schema", side_effect=record_savepoint_depth):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
                 data={"schemas": [{"id": str(schema.id), "should_sync": True, "sync_type": "full_refresh"}]},
                 format="json",
             )
@@ -965,7 +965,7 @@ class TestExternalDataSource(APIBaseTest):
             ),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
                 data={"schemas": [{"id": str(s.id), "sync_frequency": "7day"} for s in schemas]},
                 format="json",
             )
@@ -1011,7 +1011,7 @@ class TestExternalDataSource(APIBaseTest):
         invalid_original = invalid_schema.sync_frequency_interval
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
             data={
                 "schemas": [
                     {"id": str(valid_schema.id), "sync_frequency": "7day"},
@@ -1055,7 +1055,7 @@ class TestExternalDataSource(APIBaseTest):
         ):
             try:
                 response = self.client.patch(
-                    f"/api/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
+                    f"/v1/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
                     data={"schemas": [{"id": str(schema.id), "sync_frequency": "7day"}]},
                     format="json",
                 )
@@ -1078,7 +1078,9 @@ class TestExternalDataSource(APIBaseTest):
         # Webhook reconcile runs as a deferred post-commit hook in the bulk path, AFTER the
         # atomic block. If it raised there it would 500 the request with the rows already
         # committed. Guard that a raising reconcile is swallowed and the response stays 200.
-        from products.data_warehouse.backend.logic.external_data_source.webhooks import WebhookInsightsFunctionCreateResult
+        from products.data_warehouse.backend.logic.external_data_source.webhooks import (
+            WebhookInsightsFunctionCreateResult,
+        )
         from products.warehouse_sources.backend.temporal.data_imports.sources.common.base import WebhookCreationResult
         from products.warehouse_sources.backend.temporal.data_imports.sources.common.schema import (
             SourceSchema as _SourceSchema,
@@ -1096,7 +1098,7 @@ class TestExternalDataSource(APIBaseTest):
         mock_insights_function = MagicMock()
         mock_insights_function.id = uuid.uuid4()
         mock_insights_function.inputs = {"schema_mapping": {"value": {}}, "source_id": {"value": "test-source-id"}}
-        mock_hog_fn_result = WebhookInsightsFunctionCreateResult(
+        mock_script_fn_result = WebhookInsightsFunctionCreateResult(
             insights_function=mock_insights_function,
             webhook_url="https://test.com/webhook",
             insights_function_created=False,
@@ -1108,7 +1110,7 @@ class TestExternalDataSource(APIBaseTest):
         with (
             patch(
                 "products.warehouse_sources.backend.presentation.views.external_data_schema.get_or_create_webhook_insights_function",
-                return_value=mock_hog_fn_result,
+                return_value=mock_script_fn_result,
             ),
             patch(
                 "products.warehouse_sources.backend.temporal.data_imports.sources.stripe.source.StripeSource.sync_webhook_events",
@@ -1124,7 +1126,7 @@ class TestExternalDataSource(APIBaseTest):
             ),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
                 data={
                     "schemas": [
                         {
@@ -1192,7 +1194,7 @@ class TestExternalDataSource(APIBaseTest):
             ) as mock_sync_workflow,
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
                 data={"schemas": [{"id": str(schema.id), "should_sync": True, "apply_sync_defaults": True}]},
                 format="json",
             )
@@ -1255,7 +1257,7 @@ class TestExternalDataSource(APIBaseTest):
             ),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
                 data={
                     "schemas": [
                         {"id": str(webhook_only_schema.id), "should_sync": True, "apply_sync_defaults": True},
@@ -1306,7 +1308,7 @@ class TestExternalDataSource(APIBaseTest):
             ) as mock_unpause,
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
                 data={
                     "schemas": [
                         {"id": str(unconfigured_schema.id), "should_sync": True, "apply_sync_defaults": True},
@@ -1376,7 +1378,7 @@ class TestExternalDataSource(APIBaseTest):
             side_effect=raised_exception,
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
                 data={"schemas": [{"id": str(schema.id), "should_sync": True, "apply_sync_defaults": True}]},
                 format="json",
             )
@@ -1414,7 +1416,7 @@ class TestExternalDataSource(APIBaseTest):
             ),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.id}/bulk_update_schemas",
                 data={"schemas": [{"id": str(schema.id), "should_sync": True, "apply_sync_defaults": True}]},
                 format="json",
             )
@@ -1433,7 +1435,7 @@ class TestExternalDataSource(APIBaseTest):
         # Create no prefix
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": "web",
@@ -1465,7 +1467,7 @@ class TestExternalDataSource(APIBaseTest):
         # Try to create same type without prefix again
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": "web",
@@ -1503,7 +1505,7 @@ class TestExternalDataSource(APIBaseTest):
 
         # Create with prefix
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": "web",
@@ -1536,7 +1538,7 @@ class TestExternalDataSource(APIBaseTest):
 
         # Try to create same type with same prefix again
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": "web",
@@ -1664,7 +1666,7 @@ class TestExternalDataSource(APIBaseTest):
             self._make_external_data_source(source_type="Postgres", prefix=prefix, deleted=deleted)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/source_prefix/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/source_prefix/",
             data={"source_type": "Postgres", "prefix": requested_prefix},
         )
 
@@ -1683,7 +1685,7 @@ class TestExternalDataSource(APIBaseTest):
         self._make_external_data_source(source_type="Stripe", prefix="foo_")
 
         create_response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": "web",
@@ -1698,11 +1700,11 @@ class TestExternalDataSource(APIBaseTest):
         self.assertEqual(create_response.status_code, 201, create_response.json())
         source_id = create_response.json()["id"]
 
-        delete_response = self.client.delete(f"/api/environments/{self.team.pk}/external_data_sources/{source_id}")
+        delete_response = self.client.delete(f"/v1/environments/{self.team.pk}/external_data_sources/{source_id}")
         self.assertEqual(delete_response.status_code, 204)
 
         recreate_response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": "web",
@@ -1722,7 +1724,7 @@ class TestExternalDataSource(APIBaseTest):
     )
     def test_create_external_data_source_incremental(self, _mock_validate):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": "web",
@@ -1790,7 +1792,7 @@ class TestExternalDataSource(APIBaseTest):
     )
     def test_create_external_data_source_incremental_missing_field(self, _mock_validate):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": "web",
@@ -1852,7 +1854,7 @@ class TestExternalDataSource(APIBaseTest):
     )
     def test_create_external_data_source_incremental_missing_type(self, _mock_validate):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": "web",
@@ -1925,7 +1927,7 @@ class TestExternalDataSource(APIBaseTest):
         self, _name: str, lookback_value: object, _mock_validate: MagicMock
     ):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": "web",
@@ -1963,7 +1965,7 @@ class TestExternalDataSource(APIBaseTest):
         self, _name: str, lookback_value: object, _mock_validate: MagicMock
     ):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": "web",
@@ -2004,7 +2006,7 @@ class TestExternalDataSource(APIBaseTest):
             ),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/",
                 data={
                     "source_type": "BigQuery",
                     "created_via": "web",
@@ -2043,7 +2045,7 @@ class TestExternalDataSource(APIBaseTest):
     def test_create_external_data_source_missing_required_bigquery_job_input(self):
         """Test we fail source creation when missing inputs."""
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "BigQuery",
                 "created_via": "web",
@@ -2092,7 +2094,7 @@ class TestExternalDataSource(APIBaseTest):
             ),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/",
                 data={
                     "source_type": "BigQuery",
                     "created_via": "web",
@@ -2125,17 +2127,17 @@ class TestExternalDataSource(APIBaseTest):
         # number. A warm-up request first primes any per-process caches so the two measurements match.
         self._create_external_data_source()
         self._create_external_data_source()
-        self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/")
+        self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/")
 
         with CaptureQueriesContext(connection) as two_sources:
-            response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/")
+            response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()["results"]), 2)
 
         self._create_external_data_source()
         self._create_external_data_source()
         with CaptureQueriesContext(connection) as four_sources:
-            response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/")
+            response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/")
         self.assertEqual(len(response.json()["results"]), 4)
 
         self.assertEqual(
@@ -2174,13 +2176,13 @@ class TestExternalDataSource(APIBaseTest):
 
         # The list view never reads schemas[].table.columns, so it skips the expensive
         # InsightsQL field serialization and returns an empty column list.
-        list_payload = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/").json()
+        list_payload = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/").json()
         list_table = list_payload["results"][0]["schemas"][0]["table"]
         self.assertEqual(list_table["name"], "Accounts")
         self.assertEqual(list_table["columns"], [])
 
         # The single-source read still populates columns for the schema detail page.
-        retrieve_payload = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}").json()
+        retrieve_payload = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}").json()
         retrieve_columns = retrieve_payload["schemas"][0]["table"]["columns"]
         self.assertTrue(any(column["key"] == "id" for column in retrieve_columns))
 
@@ -2217,7 +2219,7 @@ class TestExternalDataSource(APIBaseTest):
         if term is self.SEARCH_BY_INTERNAL_SOURCE_ID:
             term = sources["analytics"].source_id
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/?search={term}")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/?search={term}")
 
         assert response.status_code == 200
         returned_prefixes = sorted(r["prefix"] for r in response.json()["results"])
@@ -2262,7 +2264,7 @@ class TestExternalDataSource(APIBaseTest):
             connection_metadata={"engine": "snowflake", "database": "TPCH_SF1"},
         )
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/connections/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/connections/")
 
         self.assertEqual(response.status_code, 200)
         payload = sorted(response.json(), key=lambda item: item["prefix"])
@@ -2338,7 +2340,7 @@ class TestExternalDataSource(APIBaseTest):
             direct_query_enabled=True,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/connections/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/connections/")
 
         self.assertEqual(response.status_code, 200)
         payload = response.json()
@@ -2348,7 +2350,7 @@ class TestExternalDataSource(APIBaseTest):
         self.assertEqual(payload[0]["supports_insightsql"], True)
 
     def test_direct_connection_options_lists_every_direct_capable_source_type(self):
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/direct_connection_options/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/direct_connection_options/")
 
         self.assertEqual(response.status_code, 200)
         payload = response.json()
@@ -2373,7 +2375,7 @@ class TestExternalDataSource(APIBaseTest):
     def test_dont_expose_job_inputs(self):
         self._create_external_data_source()
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/")
         payload = response.json()
         results = payload["results"]
 
@@ -2391,14 +2393,14 @@ class TestExternalDataSource(APIBaseTest):
         source = self._create_external_data_source()
 
         # GET strips stripe_secret_key from auth_method
-        get_response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}")
+        get_response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}")
         assert get_response.status_code == 200
         get_data = get_response.json()
         assert "stripe_secret_key" not in get_data["job_inputs"]["auth_method"]
 
         # PATCH with the sanitized data from GET (simulating user saving without changes)
         patch_response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": get_data["job_inputs"]},
         )
         assert patch_response.status_code == 200
@@ -2438,7 +2440,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         # GET strips private_key and passphrase from auth_type
-        get_response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}")
+        get_response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}")
         assert get_response.status_code == 200
         get_data = get_response.json()
         assert "private_key" not in get_data["job_inputs"]["auth_type"]
@@ -2447,7 +2449,7 @@ class TestExternalDataSource(APIBaseTest):
 
         # PATCH with the redacted data (simulating a save without re-pasting credentials)
         patch_response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": get_data["job_inputs"]},
         )
         assert patch_response.status_code == 200, patch_response.json()
@@ -2468,7 +2470,7 @@ class TestExternalDataSource(APIBaseTest):
 
         # Switch from api_key to oauth — old stripe_secret_key should NOT carry over
         patch_response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": {"auth_method": {"selection": "oauth", "stripe_integration_id": "42"}}},
         )
         assert patch_response.status_code == 200
@@ -2494,7 +2496,7 @@ class TestExternalDataSource(APIBaseTest):
             },
         )
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}")
         assert response.status_code == 200
         auth_method = response.json()["job_inputs"]["auth_method"]
         assert auth_method == {"selection": "oauth", "github_integration_id": "99"}
@@ -2514,7 +2516,7 @@ class TestExternalDataSource(APIBaseTest):
             },
         )
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}")
         assert response.status_code == 200
         auth_method = response.json()["job_inputs"]["auth_method"]
         assert auth_method == {"selection": "pat"}
@@ -2534,7 +2536,7 @@ class TestExternalDataSource(APIBaseTest):
             },
         )
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}")
         assert response.status_code == 200
         auth_method = response.json()["job_inputs"]["auth_method"]
         assert auth_method == {"selection": "oauth", "stripe_integration_id": "42"}
@@ -2558,12 +2560,12 @@ class TestExternalDataSource(APIBaseTest):
             },
         )
 
-        get_response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}")
+        get_response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}")
         assert get_response.status_code == 200
         assert "personal_access_token" not in get_response.json()["job_inputs"]["auth_method"]
 
         patch_response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": get_response.json()["job_inputs"]},
         )
         assert patch_response.status_code == 200
@@ -2575,7 +2577,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._create_external_data_source()
 
         patch_response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": {"auth_method": "invalid"}},
         )
         assert patch_response.status_code == 400
@@ -2584,7 +2586,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._create_external_data_source()
         schema = self._create_external_data_schema(source.pk)
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}")
         payload = response.json()
 
         self.assertEqual(response.status_code, 200)
@@ -2704,7 +2706,7 @@ class TestExternalDataSource(APIBaseTest):
             status=enabled_schema_status,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}")
 
         assert response.status_code == 200
         assert response.json()["status"] == expected_source_status
@@ -2713,7 +2715,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._create_external_data_source()
         schema = self._create_external_data_schema(source.pk)
 
-        response = self.client.delete(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}")
+        response = self.client.delete(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}")
 
         assert response.status_code == 204
 
@@ -2727,7 +2729,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._create_external_data_source()
         self._create_external_data_schema(source.pk)
 
-        response = self.client.delete(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}")
+        response = self.client.delete(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}")
 
         assert response.status_code == 204
         mock_delete_discover.assert_called_once_with(str(source.pk))
@@ -2756,7 +2758,7 @@ class TestExternalDataSource(APIBaseTest):
             name="Customers", team_id=self.team.pk, source_id=source.pk, table=table
         )
 
-        response = self.client.delete(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}")
+        response = self.client.delete(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}")
 
         assert response.status_code == 204
         assert ExternalDataSource.objects.filter(pk=source.pk, deleted=True).exists()
@@ -2771,7 +2773,7 @@ class TestExternalDataSource(APIBaseTest):
     def test_reload_external_data_source(self, mock_trigger):
         source = self._create_external_data_source()
 
-        response = self.client.post(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/reload/")
+        response = self.client.post(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/reload/")
 
         source.refresh_from_db()
 
@@ -2798,7 +2800,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._create_external_data_source()
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(response.status_code, 200)
@@ -2824,7 +2826,7 @@ class TestExternalDataSource(APIBaseTest):
         source.save(update_fields=["connection_metadata"])
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -2842,7 +2844,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_schemas/{schema.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_schemas/{schema.pk}/",
             data={"should_sync": True},
         )
 
@@ -2876,7 +2878,7 @@ class TestExternalDataSource(APIBaseTest):
         source.save()
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(response.status_code, 200)
@@ -2895,7 +2897,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._create_external_data_source()
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"auto_sync_new_schemas": True, "auto_sync_schema_patterns": ["raw_*", "billing_?"]},
         )
 
@@ -2925,7 +2927,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"auto_sync_new_schemas": True},
         )
 
@@ -2944,7 +2946,7 @@ class TestExternalDataSource(APIBaseTest):
         ExternalDataSchema.objects.create(name="existing", team_id=self.team.pk, source_id=source.pk, should_sync=False)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(response.status_code, 200)
@@ -2975,7 +2977,7 @@ class TestExternalDataSource(APIBaseTest):
         ExternalDataSchema.objects.create(name="existing", team_id=self.team.pk, source_id=source.pk, should_sync=False)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(response.status_code, 200)
@@ -2999,9 +3001,9 @@ class TestExternalDataSource(APIBaseTest):
         ]
         source = self._create_external_data_source()
 
-        self.client.post(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/")
+        self.client.post(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/")
         response2 = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(response2.status_code, 200)
@@ -3037,7 +3039,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(response.status_code, 200)
@@ -3072,7 +3074,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(response.status_code, 200)
@@ -3091,7 +3093,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(response.status_code, 200)
@@ -3107,7 +3109,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._create_external_data_source()
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(response.status_code, 200)
@@ -3126,7 +3128,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(response.status_code, 200)
@@ -3140,7 +3142,7 @@ class TestExternalDataSource(APIBaseTest):
         source.save()
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(response.status_code, 400)
@@ -3154,7 +3156,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._create_external_data_source()
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(response.status_code, 400)
@@ -3167,7 +3169,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._create_external_data_source()
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(response.status_code, 200)
@@ -3187,7 +3189,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._create_external_data_source()
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(response.status_code, 400)
@@ -3207,7 +3209,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._create_external_data_source()
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(response.status_code, 400)
@@ -3249,7 +3251,7 @@ class TestExternalDataSource(APIBaseTest):
             job_inputs={"host": "localhost", "port": 5432},
         )
 
-        response = self.client.post(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/reload/")
+        response = self.client.post(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/reload/")
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(mock_trigger.call_count, 0)
@@ -3306,7 +3308,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -3355,7 +3357,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -3389,7 +3391,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -3421,7 +3423,7 @@ class TestExternalDataSource(APIBaseTest):
         mock_get_source.return_value.parse_config.return_value = None
         mock_get_source.return_value.get_schemas.return_value = []
         first_response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(first_response.status_code, status.HTTP_200_OK)
@@ -3438,7 +3440,7 @@ class TestExternalDataSource(APIBaseTest):
             )
         ]
         second_response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(second_response.status_code, status.HTTP_200_OK)
@@ -3481,7 +3483,7 @@ class TestExternalDataSource(APIBaseTest):
         ]
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -3526,7 +3528,7 @@ class TestExternalDataSource(APIBaseTest):
         ]
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -3570,7 +3572,7 @@ class TestExternalDataSource(APIBaseTest):
         ]
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Postgres",
                 "created_via": "web",
@@ -3605,7 +3607,7 @@ class TestExternalDataSource(APIBaseTest):
 
     def test_create_direct_postgres_requires_name(self):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Postgres",
                 "created_via": "web",
@@ -3620,7 +3622,7 @@ class TestExternalDataSource(APIBaseTest):
 
     def test_create_direct_postgres_rejects_the_managed_warehouse_name(self):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Postgres",
                 "created_via": "web",
@@ -3671,7 +3673,7 @@ class TestExternalDataSource(APIBaseTest):
         ]
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Postgres",
                 "created_via": "web",
@@ -3725,7 +3727,7 @@ class TestExternalDataSource(APIBaseTest):
         ]
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Postgres",
                 "created_via": "web",
@@ -3796,7 +3798,7 @@ class TestExternalDataSource(APIBaseTest):
         ]
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Postgres",
                 "created_via": "web",
@@ -3865,7 +3867,7 @@ class TestExternalDataSource(APIBaseTest):
         ]
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Postgres",
                 "created_via": "web",
@@ -3975,7 +3977,7 @@ class TestExternalDataSource(APIBaseTest):
         mock_setup_cdc_resources.side_effect = setup_cdc_slot
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Postgres",
                 "created_via": "web",
@@ -4089,7 +4091,7 @@ class TestExternalDataSource(APIBaseTest):
         mock_setup_cdc_resources.side_effect = setup_cdc_resources
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Postgres",
                 "created_via": "web",
@@ -4188,7 +4190,7 @@ class TestExternalDataSource(APIBaseTest):
         mock_get_primary_key_columns.return_value = {}
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Postgres",
                 "created_via": "web",
@@ -4275,7 +4277,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Postgres",
                 "created_via": "web",
@@ -4351,7 +4353,7 @@ class TestExternalDataSource(APIBaseTest):
         ]
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Postgres",
                 "created_via": "web",
@@ -4434,7 +4436,7 @@ class TestExternalDataSource(APIBaseTest):
         ]
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Postgres",
                 "payload": {
@@ -4517,7 +4519,7 @@ class TestExternalDataSource(APIBaseTest):
             schema_payload["enabled_columns"] = payload_value
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Postgres",
                 "payload": {
@@ -4581,7 +4583,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/refresh_schemas/"
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -4592,7 +4594,7 @@ class TestExternalDataSource(APIBaseTest):
 
     def test_create_direct_unsupported_source_type_is_rejected(self):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": "web",
@@ -4612,7 +4614,7 @@ class TestExternalDataSource(APIBaseTest):
 
     def test_source_prefix_rejects_direct_unsupported_source_type(self):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/source_prefix/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/source_prefix/",
             data={
                 "source_type": "Stripe",
                 "access_method": "direct",
@@ -4630,7 +4632,7 @@ class TestExternalDataSource(APIBaseTest):
 
     def test_source_prefix_accepts_direct_mysql(self):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/source_prefix/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/source_prefix/",
             data={
                 "source_type": "MySQL",
                 "access_method": "direct",
@@ -4662,7 +4664,7 @@ class TestExternalDataSource(APIBaseTest):
             ),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/database_schema/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/database_schema/",
                 data={
                     "source_type": "Postgres",
                     "access_method": "direct",
@@ -4713,7 +4715,7 @@ class TestExternalDataSource(APIBaseTest):
             patch.object(source, "get_schemas", return_value=[fake_schema]),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/database_schema/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/database_schema/",
                 data={
                     "source_type": source_type,
                     "host": "localhost",
@@ -4750,7 +4752,7 @@ class TestExternalDataSource(APIBaseTest):
             postgres_connection.commit()
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/database_schema/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/database_schema/",
             data={
                 "source_type": "Postgres",
                 "host": settings.PG_HOST,
@@ -4780,7 +4782,7 @@ class TestExternalDataSource(APIBaseTest):
 
     def test_database_schema_unknown_source_type(self):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/database_schema/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/database_schema/",
             data={"source_type": "GoogleAds-"},
         )
 
@@ -4800,7 +4802,7 @@ class TestExternalDataSource(APIBaseTest):
             check_perms_mock.return_value = {}
 
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/database_schema/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/database_schema/",
                 data={
                     "source_type": "Stripe",
                     "auth_method": {"selection": "api_key", "stripe_secret_key": "blah"},
@@ -4821,7 +4823,7 @@ class TestExternalDataSource(APIBaseTest):
             validate_credentials_mock.side_effect = Exception("Invalid API key")
 
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/database_schema/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/database_schema/",
                 data={
                     "source_type": "Stripe",
                     "auth_method": {"selection": "api_key", "stripe_secret_key": "invalid_key"},
@@ -4843,7 +4845,7 @@ class TestExternalDataSource(APIBaseTest):
             validate_credentials_mock.side_effect = StripePermissionError(missing_permissions)
 
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/database_schema/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/database_schema/",
                 data={
                     "source_type": "Stripe",
                     "auth_method": {"selection": "api_key", "stripe_secret_key": "invalid_key"},
@@ -4885,7 +4887,7 @@ class TestExternalDataSource(APIBaseTest):
             patch.object(source, "get_schemas", side_effect=error),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/database_schema/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/database_schema/",
                 data={"source_type": "BigQuery"},
             )
 
@@ -4915,7 +4917,7 @@ class TestExternalDataSource(APIBaseTest):
             patch.object(source, "validate_credentials", return_value=(True, None)),
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/database_schema/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/database_schema/",
                 data={"source_type": "AmazonS3"},
             )
 
@@ -4939,7 +4941,7 @@ class TestExternalDataSource(APIBaseTest):
             check_perms_mock.return_value = {"Charge": "Missing rak_charge_read"}
 
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/database_schema/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/database_schema/",
                 data={
                     "source_type": "Stripe",
                     "auth_method": {"selection": "api_key", "stripe_secret_key": "blah"},
@@ -4959,7 +4961,7 @@ class TestExternalDataSource(APIBaseTest):
             validate_credentials_mock.return_value = True
 
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/database_schema/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/database_schema/",
                 data={
                     "source_type": "Zendesk",
                     "subdomain": "blah",
@@ -4977,7 +4979,7 @@ class TestExternalDataSource(APIBaseTest):
             validate_credentials_mock.return_value = False
 
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/database_schema/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/database_schema/",
                 data={
                     "source_type": "Zendesk",
                     "subdomain": "blah",
@@ -4994,7 +4996,7 @@ class TestExternalDataSource(APIBaseTest):
         ) as validate_credentials_mock:
             validate_credentials_mock.return_value = True
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/database_schema/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/database_schema/",
                 data={
                     "source_type": "Stripe",
                     "auth_method": {"selection": "api_key", "stripe_secret_key": "sk_test_123"},
@@ -5022,7 +5024,7 @@ class TestExternalDataSource(APIBaseTest):
         mock_source.get_endpoint_permissions.return_value = {}
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/database_schema/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/database_schema/",
             data={
                 "source_type": "Stripe",
                 "api_key": "test",
@@ -5072,7 +5074,7 @@ class TestExternalDataSource(APIBaseTest):
         with override_settings(CLOUD_DEPLOYMENT="US"):
             team_2 = Team.objects.create(id=2, organization=self.team.organization)
             response = self.client.post(
-                f"/api/environments/{team_2.id}/external_data_sources/database_schema/",
+                f"/v1/environments/{team_2.id}/external_data_sources/database_schema/",
                 data={
                     "source_type": "Postgres",
                     "host": "172.16.0.0",
@@ -5124,7 +5126,7 @@ class TestExternalDataSource(APIBaseTest):
             new_team = Team.objects.create(id=984961485, name="new_team", organization=self.team.organization)
 
             response = self.client.post(
-                f"/api/environments/{new_team.pk}/external_data_sources/database_schema/",
+                f"/v1/environments/{new_team.pk}/external_data_sources/database_schema/",
                 data={
                     "source_type": "Postgres",
                     "host": "172.16.0.0",
@@ -5148,7 +5150,7 @@ class TestExternalDataSource(APIBaseTest):
         with override_settings(CLOUD_DEPLOYMENT="EU"):
             team_1 = Team.objects.create(id=1, organization=self.team.organization)
             response = self.client.post(
-                f"/api/environments/{team_1.id}/external_data_sources/database_schema/",
+                f"/v1/environments/{team_1.id}/external_data_sources/database_schema/",
                 data={
                     "source_type": "Postgres",
                     "host": "172.16.0.0",
@@ -5202,7 +5204,7 @@ class TestExternalDataSource(APIBaseTest):
             new_team = Team.objects.create(id=984961486, name="new_team", organization=self.team.organization)
 
             response = self.client.post(
-                f"/api/environments/{new_team.pk}/external_data_sources/database_schema/",
+                f"/v1/environments/{new_team.pk}/external_data_sources/database_schema/",
                 data={
                     "source_type": "Postgres",
                     "host": "172.16.0.0",
@@ -5246,7 +5248,7 @@ class TestExternalDataSource(APIBaseTest):
         },
     )
     def test_blocks_internal_host(self, host, _patch_schemas):
-        database_schema_url = f"/api/environments/{self.team.pk}/external_data_sources/database_schema/"
+        database_schema_url = f"/v1/environments/{self.team.pk}/external_data_sources/database_schema/"
         database_schema_data = {
             "source_type": "Postgres",
             "host": host,
@@ -5256,7 +5258,7 @@ class TestExternalDataSource(APIBaseTest):
             "password": settings.PG_PASSWORD,
             "schema": "public",
         }
-        create_url = f"/api/environments/{self.team.pk}/external_data_sources/"
+        create_url = f"/v1/environments/{self.team.pk}/external_data_sources/"
         create_data = {
             "source_type": "Postgres",
             "created_via": "web",
@@ -5301,7 +5303,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/jobs",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/jobs",
         )
 
         data = response.json()
@@ -5332,7 +5334,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/jobs",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/jobs",
         )
 
         data = response.json()
@@ -5357,7 +5359,7 @@ class TestExternalDataSource(APIBaseTest):
             )
 
             response = self.client.get(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/jobs",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/jobs",
             )
 
             data = response.json()
@@ -5379,7 +5381,7 @@ class TestExternalDataSource(APIBaseTest):
             )
 
             response = self.client.get(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/jobs?after=2024-07-01T12:00:00.000Z",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/jobs?after=2024-07-01T12:00:00.000Z",
             )
 
             data = response.json()
@@ -5401,7 +5403,7 @@ class TestExternalDataSource(APIBaseTest):
             )
 
             response = self.client.get(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/jobs?before=2024-07-01T12:00:00.000Z",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/jobs?before=2024-07-01T12:00:00.000Z",
             )
 
             data = response.json()
@@ -5443,7 +5445,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.get(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/jobs{query_string}",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/jobs{query_string}",
         )
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()) == expected_count
@@ -5454,7 +5456,7 @@ class TestExternalDataSource(APIBaseTest):
     )
     def test_trimming_payload(self, _mock_validate):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "created_via": "web",
@@ -5507,7 +5509,7 @@ class TestExternalDataSource(APIBaseTest):
             return_value=(True, None),
         ) as mock_validate_credentials:
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_sources/{str(source.pk)}/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{str(source.pk)}/",
                 data={
                     "job_inputs": {
                         # Adding an SSH tunnel requires re-supplying the database password.
@@ -5543,7 +5545,7 @@ class TestExternalDataSource(APIBaseTest):
         assert source.job_inputs["ssh_tunnel"]["auth"]["private_key"] == "testkey"
 
         # Test the to_representation from flattened to nested structure
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}")
 
         assert response.status_code == 200
         data = response.json()
@@ -5609,7 +5611,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         # Step 1: GET the source (simulating user opening the config page)
-        get_response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}")
+        get_response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}")
         assert get_response.status_code == 200
         get_data = get_response.json()
 
@@ -5619,7 +5621,7 @@ class TestExternalDataSource(APIBaseTest):
             return_value=(True, None),
         ) as mock_validate_credentials:
             patch_response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
                 data={"job_inputs": get_data["job_inputs"]},
             )
 
@@ -5661,7 +5663,7 @@ class TestExternalDataSource(APIBaseTest):
 
         # Send update with password explicitly set to null (simulating frontend behavior)
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     "database": "other_db",
@@ -5709,7 +5711,7 @@ class TestExternalDataSource(APIBaseTest):
 
         # Send update with password as empty string (simulating frontend form behavior)
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     "database": "other_db",
@@ -5753,7 +5755,7 @@ class TestExternalDataSource(APIBaseTest):
 
         # Send update with a new password value
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     "password": "new_password",
@@ -5793,7 +5795,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     "host": "new-host.example.com",
@@ -5832,7 +5834,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     "host": "new-host.example.com",
@@ -5878,7 +5880,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": {"host": "new-host.example.com", **extra_creds}},
         )
 
@@ -5917,7 +5919,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": {"subdomain": "attacker"}},
         )
 
@@ -5945,7 +5947,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": {"subdomain": "newco", "api_key": "new_key"}},
         )
 
@@ -5980,7 +5982,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._servicenow_source()
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": {"instance_url": "https://attacker.example.com"}},
         )
 
@@ -5999,7 +6001,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._servicenow_source()
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     "instance_url": "https://new-instance.service-now.com",
@@ -6052,7 +6054,7 @@ class TestExternalDataSource(APIBaseTest):
         }
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": {"manifest_json": json.dumps(new_manifest), **extra_creds}},
         )
 
@@ -6107,7 +6109,7 @@ class TestExternalDataSource(APIBaseTest):
         }
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": {"manifest_json": json.dumps(new_manifest), **extra_creds}},
         )
 
@@ -6177,7 +6179,7 @@ class TestExternalDataSource(APIBaseTest):
         }
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": {"manifest_json": json.dumps(new_manifest), **extra_inputs}},
         )
 
@@ -6210,7 +6212,7 @@ class TestExternalDataSource(APIBaseTest):
         }
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": {"manifest_json": json.dumps(new_manifest), "auth_oauth2_integration_id": ""}},
         )
 
@@ -6260,7 +6262,7 @@ class TestExternalDataSource(APIBaseTest):
         self._mock_oauth2_network(mock_token_session, mock_probe_session)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Custom",
                 "prefix": "customoauth_",
@@ -6301,7 +6303,7 @@ class TestExternalDataSource(APIBaseTest):
         self._mock_oauth2_network(mock_token_session, mock_probe_session)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/setup/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/setup/",
             data={
                 "source_type": "Custom",
                 "prefix": "customoauthsetup_",
@@ -6351,7 +6353,7 @@ class TestExternalDataSource(APIBaseTest):
         source.save(update_fields=["job_inputs"])
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     "manifest_json": json.dumps(manifest),
@@ -6382,7 +6384,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._custom_oauth2_integration_source()
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {"auth_oauth2_integration_id": "33333333-3333-3333-3333-333333333333"},
             },
@@ -6409,7 +6411,7 @@ class TestExternalDataSource(APIBaseTest):
         }
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": {"manifest_json": json.dumps(new_manifest)}},
         )
 
@@ -6434,7 +6436,7 @@ class TestExternalDataSource(APIBaseTest):
         }
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": {"manifest_json": json.dumps(new_manifest)}},
         )
 
@@ -6465,7 +6467,7 @@ class TestExternalDataSource(APIBaseTest):
         }
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": {"manifest_json": json.dumps(new_manifest)}},
         )
 
@@ -6493,7 +6495,7 @@ class TestExternalDataSource(APIBaseTest):
         }
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": {"manifest_json": json.dumps(new_manifest)}},
         )
 
@@ -6518,7 +6520,7 @@ class TestExternalDataSource(APIBaseTest):
         }
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": {"manifest_json": json.dumps(new_manifest)}},
         )
 
@@ -6552,7 +6554,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._okta_source()
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": {"okta_domain": "attacker.example.com", **extra_creds}},
         )
 
@@ -6574,7 +6576,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._okta_source()
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": {"okta_domain": "company.okta.com"}},
         )
 
@@ -6608,7 +6610,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     "database": "renamed_db",
@@ -6647,7 +6649,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "description": "after",
             },
@@ -6686,7 +6688,7 @@ class TestExternalDataSource(APIBaseTest):
 
         # Update without providing ssh_tunnel — include password since host is changing
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     "host": "new-host.example.com",
@@ -6725,7 +6727,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     "host": "localhost",
@@ -6762,7 +6764,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     "host": "localhost",
@@ -6802,7 +6804,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{str(source.pk)}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{str(source.pk)}/",
             data={"prefix": " Updated name "},
         )
 
@@ -6871,7 +6873,7 @@ class TestExternalDataSource(APIBaseTest):
         ]
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     "schema": "analytics",
@@ -6986,7 +6988,7 @@ class TestExternalDataSource(APIBaseTest):
         ]
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     "schema": "insights",
@@ -7037,7 +7039,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{str(source.pk)}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{str(source.pk)}/",
             data={"prefix": " Updated name ", "access_method": ExternalDataSource.AccessMethod.WAREHOUSE},
         )
 
@@ -7090,7 +7092,7 @@ class TestExternalDataSource(APIBaseTest):
             return_value=(True, None),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
                 data={
                     "job_inputs": {
                         # Disabling the SSH tunnel is an SSH tunnel change — DB password must be re-supplied.
@@ -7145,7 +7147,7 @@ class TestExternalDataSource(APIBaseTest):
             return_value=(False, "Mocked credentials failure"),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
                 data={
                     "job_inputs": {
                         # Re-supply DB password so the failure comes from the mocked credential check below.
@@ -7202,7 +7204,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     # DB password is re-supplied; SSH auth is missing so SSH credential check fails.
@@ -7256,7 +7258,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     # Changing the SSH tunnel forces re-entry of the database password.
@@ -7316,7 +7318,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     # Changing any SSH tunnel field forces re-entry of the database password.
@@ -7377,7 +7379,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         # Step 1: GET the source - should properly read auth_type and return as auth
-        get_response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}")
+        get_response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}")
         assert get_response.status_code == 200
         get_data = get_response.json()
 
@@ -7391,7 +7393,7 @@ class TestExternalDataSource(APIBaseTest):
             return_value=(True, None),
         ):
             patch_response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
                 data={"job_inputs": get_data["job_inputs"]},
             )
 
@@ -7440,7 +7442,7 @@ class TestExternalDataSource(APIBaseTest):
 
         # Editor swaps the SSH tunnel for an attacker-controlled one without re-entering the DB password.
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     "ssh_tunnel": {
@@ -7504,7 +7506,7 @@ class TestExternalDataSource(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     "database": "renamed_db",
@@ -7559,12 +7561,12 @@ class TestExternalDataSource(APIBaseTest):
             },
         )
 
-        get_response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}")
+        get_response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}")
         assert get_response.status_code == 200
         ssh_tunnel_from_get = get_response.json()["job_inputs"]["ssh_tunnel"]
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={"job_inputs": {"ssh_tunnel": ssh_tunnel_from_get, "database": "renamed_db"}},
         )
 
@@ -7601,7 +7603,7 @@ class TestExternalDataSource(APIBaseTest):
             mocked_connect.return_value.__enter__.return_value = MagicMock()
             # Create a Snowflake source with password auth
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/",
                 data={
                     "prefix": "",
                     "created_via": "web",
@@ -7657,7 +7659,7 @@ class TestExternalDataSource(APIBaseTest):
             return_value=(True, None),
         ) as mock_validate_credentials:
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source_model.pk}/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source_model.pk}/",
                 data={
                     "job_inputs": {
                         "role": "my_role",
@@ -7714,7 +7716,7 @@ class TestExternalDataSource(APIBaseTest):
         ):
             # Create a BigQuery source
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/",
                 data={
                     "prefix": "",
                     "created_via": "web",
@@ -7780,7 +7782,7 @@ class TestExternalDataSource(APIBaseTest):
             return_value=(True, None),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source_model.pk}/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source_model.pk}/",
                 data={
                     "job_inputs": {
                         "token_uri": "https://oauth2.googleapis.com/token",
@@ -7832,7 +7834,7 @@ class TestExternalDataSource(APIBaseTest):
             return_value=(True, None),
         ):
             response = self.client.patch(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source_model.pk}/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source_model.pk}/",
                 data={
                     "job_inputs": {
                         "token_uri": "https://oauth2.googleapis.com/token",
@@ -7881,7 +7883,7 @@ class TestExternalDataSource(APIBaseTest):
         assert bq_config.dataset_project.dataset_project_id == "other_project_id"
 
     def test_get_wizard_sources(self):
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/wizard")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/wizard")
         payload = response.json()
         assert response.status_code == 200
         assert payload is not None
@@ -7899,7 +7901,7 @@ class TestExternalDataSource(APIBaseTest):
         ]
     )
     def test_get_wizard_sources_filtered_by_source_type(self, _name, query, expected_keys):
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/wizard{query}")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/wizard{query}")
         assert response.status_code == 200
         if expected_keys is None:
             assert len(response.json()) > 2  # sanity: unfiltered returns the full catalog
@@ -7908,7 +7910,7 @@ class TestExternalDataSource(APIBaseTest):
 
     def test_get_wizard_sources_unknown_source_type_returns_400(self):
         response = self.client.get(
-            f"/api/environments/{self.team.pk}/external_data_sources/wizard?source_type=NotARealSource"
+            f"/v1/environments/{self.team.pk}/external_data_sources/wizard?source_type=NotARealSource"
         )
         assert response.status_code == 400
         assert "NotARealSource" in response.json()["message"]
@@ -7927,7 +7929,7 @@ class TestExternalDataSource(APIBaseTest):
     )
     def test_unresolved_secret_ref_rejected(self, _name, suffix, body):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{suffix}",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{suffix}",
             data=body,
             format="json",
         )
@@ -7960,7 +7962,7 @@ class TestExternalDataSource(APIBaseTest):
             )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Custom",
                 "prefix": "custom_new_",
@@ -8006,7 +8008,7 @@ class TestExternalDataSource(APIBaseTest):
         """Test that revenue analytics config is included in API responses."""
         source = self._create_external_data_source()
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}")
         payload = response.json()
 
         assert response.status_code == 200
@@ -8020,7 +8022,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._create_external_data_source()
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/revenue_analytics_config/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/revenue_analytics_config/",
             data={
                 "enabled": False,
                 "include_invoiceless_charges": False,
@@ -8047,7 +8049,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._create_external_data_source()
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/revenue_analytics_config/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/revenue_analytics_config/",
             data={"enabled": False},
         )
 
@@ -8077,7 +8079,7 @@ class TestExternalDataSource(APIBaseTest):
         source.revenue_analytics_config_safe.save()
 
         self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/revenue_analytics_config/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/revenue_analytics_config/",
             data={"enabled": True},
         )
 
@@ -8094,7 +8096,7 @@ class TestExternalDataSource(APIBaseTest):
         source = self._create_external_data_source()
 
         self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/revenue_analytics_config/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/revenue_analytics_config/",
             data={"enabled": True},
         )
 
@@ -8102,7 +8104,7 @@ class TestExternalDataSource(APIBaseTest):
         assert DataWarehouseJoin.objects.filter(team=self.team, source_table_name=view_name, deleted=False).exists()
 
         self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/revenue_analytics_config/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/revenue_analytics_config/",
             data={"enabled": False},
         )
 
@@ -8124,7 +8126,7 @@ class TestExternalDataSource(APIBaseTest):
         for prefix, reason in invalid_prefixes:
             with self.subTest(prefix=prefix, reason=reason):
                 response = self.client.post(
-                    f"/api/environments/{self.team.pk}/external_data_sources/",
+                    f"/v1/environments/{self.team.pk}/external_data_sources/",
                     data={
                         "source_type": "Stripe",
                         "created_via": "web",
@@ -8171,7 +8173,7 @@ class TestExternalDataSource(APIBaseTest):
         for prefix in valid_prefixes:
             with self.subTest(prefix=prefix):
                 response = self.client.post(
-                    f"/api/environments/{self.team.pk}/external_data_sources/",
+                    f"/v1/environments/{self.team.pk}/external_data_sources/",
                     data={
                         "source_type": "Stripe",
                         "created_via": "web",
@@ -8292,7 +8294,7 @@ class TestCreateWebhook(APIBaseTest):
         schema = self._create_webhook_schema(source, STRIPE_CUSTOMER_RESOURCE_NAME)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -8323,7 +8325,7 @@ class TestCreateWebhook(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/"
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -8339,7 +8341,7 @@ class TestCreateWebhook(APIBaseTest):
         self._create_webhook_schema(source, STRIPE_CUSTOMER_RESOURCE_NAME)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -8359,7 +8361,7 @@ class TestCreateWebhook(APIBaseTest):
         self._create_webhook_schema(source, STRIPE_CUSTOMER_RESOURCE_NAME)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -8374,7 +8376,7 @@ class TestCreateWebhook(APIBaseTest):
         self._create_webhook_schema(source, STRIPE_CUSTOMER_RESOURCE_NAME)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -8394,14 +8396,14 @@ class TestCreateWebhook(APIBaseTest):
 
         # First call: creates InsightsFunction with Charge schema
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/"
         )
         assert response.status_code == status.HTTP_200_OK
 
         # Now add a Customer schema and call again
         self._create_webhook_schema(source, STRIPE_CUSTOMER_RESOURCE_NAME)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/"
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -8423,7 +8425,7 @@ class TestCreateWebhook(APIBaseTest):
         self._create_webhook_schema(source, STRIPE_CUSTOMER_RESOURCE_NAME)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/"
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -8440,7 +8442,7 @@ class TestCreateWebhook(APIBaseTest):
         self._create_webhook_schema(source, STRIPE_CUSTOMER_RESOURCE_NAME)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -8466,11 +8468,11 @@ class TestCreateWebhook(APIBaseTest):
         self._create_webhook_schema(source, STRIPE_CUSTOMER_RESOURCE_NAME)
 
         # First create the webhook to set up the InsightsFunction
-        self.client.post(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/")
+        self.client.post(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/")
 
         # Now update the inputs manually
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/update_webhook_inputs/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/update_webhook_inputs/",
             data={"inputs": {"signing_secret": "whsec_manual123"}},
             format="json",
         )
@@ -8505,10 +8507,10 @@ class TestCreateWebhook(APIBaseTest):
         self._create_insights_function_template()
         source = self._create_stripe_source()
         self._create_webhook_schema(source, STRIPE_CUSTOMER_RESOURCE_NAME)
-        self.client.post(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/")
+        self.client.post(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/")
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/update_webhook_inputs/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/update_webhook_inputs/",
             data={"inputs": {"signing_secret": "whsec_bad"}},
             format="json",
         )
@@ -8528,7 +8530,7 @@ class TestCreateWebhook(APIBaseTest):
         self._create_webhook_schema(source, STRIPE_CUSTOMER_RESOURCE_NAME)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/update_webhook_inputs/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/update_webhook_inputs/",
             data={"inputs": {"signing_secret": "whsec_test"}},
             format="json",
         )
@@ -8545,7 +8547,7 @@ class TestCreateWebhook(APIBaseTest):
         self._create_webhook_schema(source, STRIPE_CUSTOMER_RESOURCE_NAME)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/update_webhook_inputs/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/update_webhook_inputs/",
             data={"inputs": {"nonexistent_key": "value"}},
             format="json",
         )
@@ -8562,7 +8564,7 @@ class TestCreateWebhook(APIBaseTest):
         self._create_webhook_schema(source, STRIPE_CUSTOMER_RESOURCE_NAME)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/update_webhook_inputs/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/update_webhook_inputs/",
             data={"inputs": {"signing_secret": "whsec_test"}},
             format="json",
         )
@@ -8577,10 +8579,10 @@ class TestCreateWebhook(APIBaseTest):
         self._create_insights_function_template()
         source = self._create_stripe_source()
         self._create_webhook_schema(source, STRIPE_CUSTOMER_RESOURCE_NAME)
-        self.client.post(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/")
+        self.client.post(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/")
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/update_webhook_inputs/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/update_webhook_inputs/",
             data={"inputs": {"signing_secret": ""}},
             format="json",
         )
@@ -8598,7 +8600,7 @@ class TestCreateWebhook(APIBaseTest):
         self._create_insights_function_template()
         source = self._create_stripe_source()
         self._create_webhook_schema(source, STRIPE_CUSTOMER_RESOURCE_NAME)
-        self.client.post(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/")
+        self.client.post(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/")
 
         # Inject a second required webhook field into the source config so we can test
         # that a partial update which omits one required field is accepted while still
@@ -8626,7 +8628,7 @@ class TestCreateWebhook(APIBaseTest):
             return_value=patched_config,
         ):
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/update_webhook_inputs/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/update_webhook_inputs/",
                 data={"inputs": {"signing_secret": "whsec_rotated"}},
                 format="json",
             )
@@ -8650,7 +8652,7 @@ class TestCreateWebhook(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/update_webhook_inputs/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/update_webhook_inputs/",
             data={"inputs": {"signing_secret": "whsec_test"}},
             format="json",
         )
@@ -8662,7 +8664,7 @@ class TestCreateWebhook(APIBaseTest):
         source = self._create_stripe_source()
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/update_webhook_inputs/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/update_webhook_inputs/",
             data={"inputs": {}},
             format="json",
         )
@@ -8690,13 +8692,13 @@ class TestCreateWebhook(APIBaseTest):
         self._create_insights_function_template()
         source = self._create_stripe_source()
         schema = self._create_webhook_schema(source, STRIPE_CUSTOMER_RESOURCE_NAME)
-        self.client.post(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/")
+        self.client.post(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/")
 
         schema.sync_type = ExternalDataSchema.SyncType.INCREMENTAL
         schema.save(update_fields=["sync_type"])
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/update_webhook_inputs/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/update_webhook_inputs/",
             data={"inputs": {"signing_secret": "whsec_rotated"}},
             format="json",
         )
@@ -8727,7 +8729,7 @@ class TestCreateWebhook(APIBaseTest):
         invoice_schema = self._create_webhook_schema(source, STRIPE_INVOICE_RESOURCE_NAME)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/create_webhook/"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -9100,7 +9102,7 @@ class TestWebhookInfo(APIBaseTest):
     def test_webhook_info_non_webhook_source(self):
         source = self._create_postgres_source()
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -9109,7 +9111,7 @@ class TestWebhookInfo(APIBaseTest):
     def test_webhook_info_no_insights_function(self):
         source = self._create_stripe_source()
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -9133,7 +9135,7 @@ class TestWebhookInfo(APIBaseTest):
         source = self._create_stripe_source()
         insights_function = self._create_insights_function(source)
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -9166,7 +9168,7 @@ class TestWebhookInfo(APIBaseTest):
         source = self._create_stripe_source()
         self._create_insights_function(source)
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -9191,7 +9193,7 @@ class TestWebhookInfo(APIBaseTest):
         source = self._create_stripe_source()
         self._create_insights_function(source)
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["missing_events"] == []
@@ -9211,7 +9213,7 @@ class TestWebhookInfo(APIBaseTest):
         source = self._create_stripe_source()
         self._create_insights_function(source)
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["missing_events"] == []
@@ -9227,7 +9229,7 @@ class TestWebhookInfo(APIBaseTest):
         source = self._create_stripe_source()
         self._create_insights_function(source)
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -9248,7 +9250,7 @@ class TestWebhookInfo(APIBaseTest):
         source = self._create_stripe_source()
         self._create_insights_function(source)
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -9265,7 +9267,7 @@ class TestWebhookInfo(APIBaseTest):
             return_value=None,
         ):
             response = self.client.get(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/"
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/"
             )
 
         assert response.status_code == status.HTTP_200_OK
@@ -9291,10 +9293,11 @@ class TestWebhookInfo(APIBaseTest):
         # Sanity check the model routed the secret correctly.
         insights_function.refresh_from_db()
         assert (
-            InsightsFunction.objects.get(pk=insights_function.pk).encrypted_inputs["signing_secret"]["value"] == "whsec_existing"
+            InsightsFunction.objects.get(pk=insights_function.pk).encrypted_inputs["signing_secret"]["value"]
+            == "whsec_existing"
         )
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -9308,7 +9311,7 @@ class TestWebhookInfo(APIBaseTest):
         source = self._create_stripe_source()
         self._create_insights_function(source)
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/webhook_info/")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -9386,7 +9389,7 @@ class TestDeleteWebhook(APIBaseTest):
         insights_function = self._create_insights_function(source)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/delete_webhook/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/delete_webhook/"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -9405,7 +9408,7 @@ class TestDeleteWebhook(APIBaseTest):
         self._create_insights_function(source)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/delete_webhook/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/delete_webhook/"
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -9423,7 +9426,7 @@ class TestDeleteWebhook(APIBaseTest):
         insights_function = self._create_insights_function(source)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/delete_webhook/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/delete_webhook/"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -9440,7 +9443,7 @@ class TestDeleteWebhook(APIBaseTest):
         source = self._create_stripe_source()
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/delete_webhook/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/delete_webhook/"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -9460,7 +9463,7 @@ class TestDeleteWebhook(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/delete_webhook/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/delete_webhook/"
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -9471,7 +9474,7 @@ class TestDeleteWebhook(APIBaseTest):
         insights_function = self._create_insights_function(source)
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/delete_webhook/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/delete_webhook/"
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -9513,7 +9516,7 @@ class TestDestroySourceCleansUpWebhook(APIBaseTest):
             inputs={"source_id": {"value": str(source.pk)}},
         )
 
-        response = self.client.delete(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}")
+        response = self.client.delete(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}")
 
         assert response.status_code == 204
         assert ExternalDataSource.objects.filter(pk=source.pk, deleted=True).exists()
@@ -9552,7 +9555,7 @@ class TestDestroySourceCleansUpWebhook(APIBaseTest):
             inputs={"source_id": {"value": str(source.pk)}},
         )
 
-        response = self.client.delete(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}")
+        response = self.client.delete(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}")
 
         assert response.status_code == 204
         assert ExternalDataSource.objects.filter(pk=source.pk, deleted=True).exists()
@@ -9612,7 +9615,7 @@ class TestDestroySourceCleansUpCompanionTables(APIBaseTest):
             url_pattern="s3://bucket/other",
         )
 
-        response = self.client.delete(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}")
+        response = self.client.delete(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}")
 
         assert response.status_code == 204
 
@@ -9643,7 +9646,7 @@ class TestExternalDataSourceCreateSerializerValidation(APIBaseTest):
     )
     def test_create_rejects_invalid_input(self, _name: str, data: dict) -> None:
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data,
             format="json",
         )
@@ -9708,7 +9711,7 @@ class TestCheckCDCPrerequisitesForSource(APIBaseTest):
             job_inputs={"stripe_secret_key": "sk_test_123"},
         )
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/check_cdc_prerequisites_for_source/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/check_cdc_prerequisites_for_source/",
             data={"cdc_management_mode": "insights"},
             format="json",
         )
@@ -9718,7 +9721,7 @@ class TestCheckCDCPrerequisitesForSource(APIBaseTest):
     def test_rejects_invalid_management_mode(self) -> None:
         source = _make_postgres_source(self.team.pk, self.user)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/check_cdc_prerequisites_for_source/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/check_cdc_prerequisites_for_source/",
             data={"cdc_management_mode": "nonsense"},
             format="json",
         )
@@ -9734,7 +9737,7 @@ class TestCheckCDCPrerequisitesForSource(APIBaseTest):
         # stripped from API responses), so prereqs must validate against the stored source.
         source = _make_postgres_source(self.team.pk, self.user)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/check_cdc_prerequisites_for_source/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/check_cdc_prerequisites_for_source/",
             data={"cdc_management_mode": "insights"},
             format="json",
         )
@@ -9751,7 +9754,7 @@ class TestCheckCDCPrerequisitesForSource(APIBaseTest):
     def test_returns_errors_when_prereqs_fail(self, _mock_validate) -> None:
         source = _make_postgres_source(self.team.pk, self.user)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/check_cdc_prerequisites_for_source/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/check_cdc_prerequisites_for_source/",
             data={"cdc_management_mode": "insights"},
             format="json",
         )
@@ -9767,7 +9770,7 @@ class TestCheckCDCPrerequisitesForSource(APIBaseTest):
     def test_forwards_self_managed_publication_name(self, mock_validate) -> None:
         source = _make_postgres_source(self.team.pk, self.user)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/check_cdc_prerequisites_for_source/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/check_cdc_prerequisites_for_source/",
             data={"cdc_management_mode": "self_managed", "cdc_publication_name": "customer_pub"},
             format="json",
         )
@@ -9796,7 +9799,7 @@ class TestCheckCDCPrerequisitesForSource(APIBaseTest):
         source = _make_postgres_source(self.team.pk, self.user)
         with patch.object(PostgresCDCAdapter, "validate_prerequisites", side_effect=exc):
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/check_cdc_prerequisites_for_source/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/check_cdc_prerequisites_for_source/",
                 data={"cdc_management_mode": "insights"},
                 format="json",
             )
@@ -9810,7 +9813,7 @@ class TestCheckCDCPrerequisitesForSource(APIBaseTest):
     def test_unexpected_error_is_still_captured(self, _mock_validate, mock_capture) -> None:
         source = _make_postgres_source(self.team.pk, self.user)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/check_cdc_prerequisites_for_source/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/check_cdc_prerequisites_for_source/",
             data={"cdc_management_mode": "insights"},
             format="json",
         )
@@ -9836,7 +9839,7 @@ class TestCheckCDCPrerequisitesWizard(APIBaseTest):
 
     def _post(self, **overrides):
         return self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/check_cdc_prerequisites/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/check_cdc_prerequisites/",
             data={**self.BASE_PAYLOAD, **overrides},
             format="json",
         )
@@ -9909,7 +9912,7 @@ class TestEnableCDC(APIBaseTest):
             job_inputs={"stripe_secret_key": "sk_test_123"},
         )
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
             data={"cdc_management_mode": "insights"},
             format="json",
         )
@@ -9923,7 +9926,7 @@ class TestEnableCDC(APIBaseTest):
     def test_enable_cdc_rejects_when_team_flag_off(self, _flag) -> None:
         source = _make_postgres_source(self.team.pk, self.user)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
             data={"cdc_management_mode": "insights"},
             format="json",
         )
@@ -9936,7 +9939,7 @@ class TestEnableCDC(APIBaseTest):
     def test_enable_cdc_rejects_when_already_enabled(self, _flag) -> None:
         source = _make_postgres_source(self.team.pk, self.user, cdc_enabled=True)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
             data={"cdc_management_mode": "insights"},
             format="json",
         )
@@ -9956,7 +9959,7 @@ class TestEnableCDC(APIBaseTest):
     def test_enable_cdc_rejects_invalid_management_mode(self, _name: str, mode_value, _flag) -> None:
         source = _make_postgres_source(self.team.pk, self.user)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
             data={"cdc_management_mode": mode_value},
             format="json",
         )
@@ -9974,7 +9977,7 @@ class TestEnableCDC(APIBaseTest):
     def test_enable_cdc_returns_400_when_prereqs_fail(self, _check, _flag) -> None:
         source = _make_postgres_source(self.team.pk, self.user)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
             data={"cdc_management_mode": "insights"},
             format="json",
         )
@@ -10010,7 +10013,7 @@ class TestEnableCDC(APIBaseTest):
         source = _make_postgres_source(self.team.pk, self.user)
         with patch.object(PostgresCDCAdapter, "validate_prerequisites", side_effect=exc):
             response = self.client.post(
-                f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
+                f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
                 data={"cdc_management_mode": "insights"},
                 format="json",
             )
@@ -10028,7 +10031,7 @@ class TestEnableCDC(APIBaseTest):
     def test_enable_cdc_unexpected_error_is_still_captured(self, _check, mock_capture, _flag) -> None:
         source = _make_postgres_source(self.team.pk, self.user)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
             data={"cdc_management_mode": "insights"},
             format="json",
         )
@@ -10083,7 +10086,7 @@ class TestEnableCDC(APIBaseTest):
         mock_setup_cdc_resources.side_effect = setup_cdc_slot
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
             data={
                 "cdc_management_mode": "insights",
                 "cdc_auto_drop_slot": False,
@@ -10137,7 +10140,7 @@ class TestEnableCDC(APIBaseTest):
         mock_setup_cdc_resources.return_value = None
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
             data={"cdc_management_mode": "insights"},
             format="json",
         )
@@ -10187,7 +10190,7 @@ class TestEnableCDC(APIBaseTest):
         mock_setup_cdc_resources.side_effect = setup_cdc_slot
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
             data={
                 "cdc_management_mode": "self_managed",
                 "cdc_publication_name": "customer_pub",
@@ -10220,7 +10223,7 @@ class TestEnableCDC(APIBaseTest):
         mock_setup_cdc_resources.return_value = "Failed to create replication slot: connection lost"
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
             data={"cdc_management_mode": "insights"},
             format="json",
         )
@@ -10279,7 +10282,7 @@ class TestEnableCDC(APIBaseTest):
         mock_create_slot.side_effect = RuntimeError("max_replication_slots reached")
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
             data={
                 "cdc_management_mode": "insights",
                 "cdc_slot_name": "leaky_slot",
@@ -10344,7 +10347,7 @@ class TestEnableCDC(APIBaseTest):
         mock_create_slot.side_effect = RuntimeError("replication permission denied")
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/enable_cdc/",
             data={
                 "cdc_management_mode": "self_managed",
                 "cdc_slot_name": "self_slot",
@@ -10379,7 +10382,7 @@ class TestDisableCDC(APIBaseTest):
             job_inputs={"stripe_secret_key": "sk_test_123"},
         )
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/disable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/disable_cdc/",
         )
         assert response.status_code == 400
         assert "CDC is not supported" in response.json()["message"]
@@ -10387,7 +10390,7 @@ class TestDisableCDC(APIBaseTest):
     def test_disable_cdc_noops_when_cdc_not_enabled(self) -> None:
         source = _make_postgres_source(self.team.pk, self.user)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/disable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/disable_cdc/",
         )
         assert response.status_code == 200
         body = response.json()
@@ -10417,7 +10420,7 @@ class TestDisableCDC(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/disable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/disable_cdc/",
         )
         assert response.status_code == 200, response.content
 
@@ -10462,7 +10465,7 @@ class TestDisableCDC(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/disable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/disable_cdc/",
         )
         assert response.status_code == 200, response.content
 
@@ -10498,7 +10501,7 @@ class TestDisableCDC(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/disable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/disable_cdc/",
         )
         assert response.status_code == 200, response.content
         mock_cancel.assert_called_once_with(running_job.workflow_id)
@@ -10528,7 +10531,7 @@ class TestDisableCDC(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/disable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/disable_cdc/",
         )
         assert response.status_code == 200, response.content
         mock_cancel.assert_not_called()
@@ -10549,7 +10552,7 @@ class TestDisableCDC(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/disable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/disable_cdc/",
         )
         assert response.status_code == 200, response.content
         mock_cancel.assert_not_called()
@@ -10569,7 +10572,7 @@ class TestDisableCDC(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/disable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/disable_cdc/",
         )
         # The user's intent to disable CDC must be honored even if the customer's DB
         # is briefly unreachable for the slot drop — we still clear local state.
@@ -10590,7 +10593,7 @@ class TestDisableCDC(APIBaseTest):
     def test_disable_cdc_calls_source_cleanup_helper(self, mock_cleanup) -> None:
         source = _make_postgres_source(self.team.pk, self.user, cdc_enabled=True)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/disable_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/disable_cdc/",
         )
         assert response.status_code == 200, response.content
 
@@ -10606,7 +10609,7 @@ BROKEN_MARKER = {"reason": "slot_missing", "at": "2026-06-29T10:40:00+00:00"}
 class TestRepairCDC(APIBaseTest):
     def _repair(self, source: ExternalDataSource):
         return self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/repair_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/repair_cdc/",
         )
 
     def test_repair_cdc_rejects_when_cdc_not_enabled(self) -> None:
@@ -10906,7 +10909,7 @@ class TestUpdateCDCSettings(APIBaseTest):
             job_inputs={"stripe_secret_key": "sk_test_123"},
         )
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/update_cdc_settings/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/update_cdc_settings/",
             data={"cdc_lag_warning_threshold_mb": 100},
             format="json",
         )
@@ -10916,7 +10919,7 @@ class TestUpdateCDCSettings(APIBaseTest):
     def test_update_cdc_settings_rejects_when_cdc_not_enabled(self) -> None:
         source = _make_postgres_source(self.team.pk, self.user)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/update_cdc_settings/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/update_cdc_settings/",
             data={"cdc_lag_warning_threshold_mb": 100},
             format="json",
         )
@@ -10933,7 +10936,7 @@ class TestUpdateCDCSettings(APIBaseTest):
     def test_update_cdc_settings_rejects_invalid_thresholds(self, _name: str, value) -> None:
         source = _make_postgres_source(self.team.pk, self.user, cdc_enabled=True)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/update_cdc_settings/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/update_cdc_settings/",
             data={"cdc_lag_warning_threshold_mb": value},
             format="json",
         )
@@ -10942,7 +10945,7 @@ class TestUpdateCDCSettings(APIBaseTest):
     def test_update_cdc_settings_rejects_warn_not_less_than_crit(self) -> None:
         source = _make_postgres_source(self.team.pk, self.user, cdc_enabled=True)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/update_cdc_settings/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/update_cdc_settings/",
             data={
                 "cdc_lag_warning_threshold_mb": 5000,
                 "cdc_lag_critical_threshold_mb": 5000,
@@ -10956,7 +10959,7 @@ class TestUpdateCDCSettings(APIBaseTest):
         # If only `warning` is sent, we must still compare against the persisted critical value.
         source = _make_postgres_source(self.team.pk, self.user, cdc_enabled=True)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/update_cdc_settings/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/update_cdc_settings/",
             data={"cdc_lag_warning_threshold_mb": 99999},
             format="json",
         )
@@ -10970,7 +10973,7 @@ class TestUpdateCDCSettings(APIBaseTest):
         original_mode = source.job_inputs["cdc_management_mode"]
 
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/update_cdc_settings/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/update_cdc_settings/",
             data={"cdc_auto_drop_slot": False},
             format="json",
         )
@@ -10991,7 +10994,7 @@ class TestUpdateCDCSettings(APIBaseTest):
     def test_update_cdc_settings_empty_payload_is_unchanged(self) -> None:
         source = _make_postgres_source(self.team.pk, self.user, cdc_enabled=True)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/update_cdc_settings/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/update_cdc_settings/",
             data={},
             format="json",
         )
@@ -11003,7 +11006,7 @@ class TestUpdateCDCSettings(APIBaseTest):
     def test_update_cdc_settings_updates_all_tunable_fields(self) -> None:
         source = _make_postgres_source(self.team.pk, self.user, cdc_enabled=True)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/update_cdc_settings/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/update_cdc_settings/",
             data={
                 "cdc_auto_drop_slot": False,
                 "cdc_lag_warning_threshold_mb": 256,
@@ -11023,7 +11026,7 @@ class TestUpdateCDCSettings(APIBaseTest):
     def test_update_cdc_settings_coerces_bool_truthiness(self) -> None:
         source = _make_postgres_source(self.team.pk, self.user, cdc_enabled=True)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/update_cdc_settings/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/update_cdc_settings/",
             data={"cdc_auto_drop_slot": True},
             format="json",
         )
@@ -11040,7 +11043,7 @@ class TestCDCJobInputsExposure(APIBaseTest):
         # stripped from reads as "unknown" and the Configuration page would never see CDC as on.
         source = _make_postgres_source(self.team.pk, self.user, cdc_enabled=True)
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/")
         assert response.status_code == 200, response.content
 
         job_inputs = response.json()["job_inputs"]
@@ -11055,7 +11058,7 @@ class TestCDCJobInputsExposure(APIBaseTest):
 
     def test_retrieve_omits_cdc_fields_when_not_enabled(self) -> None:
         source = _make_postgres_source(self.team.pk, self.user)
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/")
         assert response.status_code == 200, response.content
         job_inputs = response.json()["job_inputs"]
         assert not any(k.startswith("cdc_") for k in job_inputs)
@@ -11072,13 +11075,13 @@ class TestCDCStatus(APIBaseTest):
             created_by=self.user,
             job_inputs={"stripe_secret_key": "sk_test_123"},
         )
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/cdc_status/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/cdc_status/")
         assert response.status_code == 400
         assert "CDC is not supported" in response.json()["message"]
 
     def test_returns_disabled_when_cdc_off(self) -> None:
         source = _make_postgres_source(self.team.pk, self.user)
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/cdc_status/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/cdc_status/")
         assert response.status_code == 200, response.content
         assert response.json() == {"enabled": False}
 
@@ -11092,7 +11095,7 @@ class TestCDCStatus(APIBaseTest):
     )
     def test_returns_live_status_when_enabled(self, mock_get_status, _mock_paused) -> None:
         source = _make_postgres_source(self.team.pk, self.user, cdc_enabled=True)
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/cdc_status/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/cdc_status/")
         assert response.status_code == 200, response.content
         body = response.json()
         assert body["enabled"] is True
@@ -11116,7 +11119,7 @@ class TestCDCStatus(APIBaseTest):
     )
     def test_surfaces_schedule_paused(self, _mock_get_status, _mock_paused) -> None:
         source = _make_postgres_source(self.team.pk, self.user, cdc_enabled=True)
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/cdc_status/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/cdc_status/")
         assert response.status_code == 200, response.content
         assert response.json()["schedule_paused"] is True
 
@@ -11131,7 +11134,7 @@ class TestCDCStatus(APIBaseTest):
     def test_schedule_paused_lookup_failure_degrades_to_false(self, _mock_get_status, _mock_paused) -> None:
         # A Temporal outage must not 500 this otherwise DB-only status read.
         source = _make_postgres_source(self.team.pk, self.user, cdc_enabled=True)
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/cdc_status/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/cdc_status/")
         assert response.status_code == 200, response.content
         assert response.json()["schedule_paused"] is False
 
@@ -11145,7 +11148,7 @@ class TestCDCStatus(APIBaseTest):
     )
     def test_surfaces_missing_slot(self, _mock_get_status, _mock_paused) -> None:
         source = _make_postgres_source(self.team.pk, self.user, cdc_enabled=True)
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/cdc_status/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/cdc_status/")
         assert response.status_code == 200, response.content
         body = response.json()
         assert body["slot_exists"] is False
@@ -11157,7 +11160,7 @@ class TestCDCStatus(APIBaseTest):
     )
     def test_returns_400_when_source_unreachable(self, _mock_get_status) -> None:
         source = _make_postgres_source(self.team.pk, self.user, cdc_enabled=True)
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/cdc_status/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/cdc_status/")
         assert response.status_code == 400
         assert "Could not connect to source" in response.json()["message"]
 
@@ -11165,7 +11168,7 @@ class TestCDCStatus(APIBaseTest):
 class TestResumeCDC(APIBaseTest):
     def _resume(self, source: ExternalDataSource):
         return self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/resume_cdc/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/resume_cdc/",
         )
 
     def _cdc_schema(self, source: ExternalDataSource, *, broken: bool = False) -> ExternalDataSchema:
@@ -11271,7 +11274,7 @@ class TestResumeCDC(APIBaseTest):
 class TestExternalDataSourceConnectLink(APIBaseTest):
     def _connect_link(self, source_type: str):
         return self.client.get(
-            f"/api/environments/{self.team.pk}/external_data_sources/connect_link?source_type={source_type}"
+            f"/v1/environments/{self.team.pk}/external_data_sources/connect_link?source_type={source_type}"
         )
 
     @parameterized.expand(
@@ -11295,7 +11298,7 @@ class TestExternalDataSourceConnectLink(APIBaseTest):
         assert "credential_id" in data["instructions"]
 
     def test_connect_link_missing_source_type(self):
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/connect_link")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/connect_link")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_connect_link_unknown_source_type(self):
@@ -11316,7 +11319,7 @@ class TestExternalDataSourceSetup(APIBaseTest):
         self, _mock_validate, _mock_sync_views, _mock_person_join
     ):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/setup/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/setup/",
             data={
                 "source_type": "Stripe",
                 "prefix": "stripe_setup_test",
@@ -11345,7 +11348,7 @@ class TestExternalDataSourceSetup(APIBaseTest):
     )
     def test_setup_persists_direct_query_enabled_false(self, _mock_validate, _mock_sync_views, _mock_person_join):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/setup/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/setup/",
             data={
                 "source_type": "Stripe",
                 "direct_query_enabled": False,
@@ -11361,7 +11364,7 @@ class TestExternalDataSourceSetup(APIBaseTest):
     def test_setup_rejects_source_without_schema_discovery(self, mock_capture_exception):
         # AmazonS3 doesn't implement get_schemas, so the base raises NotImplementedError.
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/setup/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/setup/",
             data={"source_type": "AmazonS3", "prefix": "s3_setup_test", "payload": {}},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
@@ -11374,7 +11377,7 @@ class TestExternalDataSourceSetup(APIBaseTest):
         # row behind — otherwise get_schemas raises NotImplementedError as an uncaught 500 after the
         # source row is already persisted, orphaning it.
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={"source_type": "AmazonS3", "prefix": "s3_create_test", "payload": {}},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
@@ -11408,7 +11411,7 @@ class TestExternalDataSourceSetup(APIBaseTest):
 
     def _setup_stripe(self):
         return self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/setup/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/setup/",
             data={
                 "source_type": "Stripe",
                 "prefix": "stripe_webhook_test",
@@ -11488,7 +11491,9 @@ class TestExternalDataSourceSetup(APIBaseTest):
         assert customer.should_sync is True
         assert customer.sync_type in ("incremental", "append", "full_refresh")
         # The orphaned handler is removed so nothing dangles.
-        assert not InsightsFunction.objects.filter(team=self.team, type="warehouse_source_webhook", deleted=False).exists()
+        assert not InsightsFunction.objects.filter(
+            team=self.team, type="warehouse_source_webhook", deleted=False
+        ).exists()
 
     @patch("products.warehouse_sources.backend.presentation.views.external_data_source.ensure_person_join")
     @patch("products.data_modeling.backend.models.datawarehouse_managed_viewset.DataWarehouseManagedViewSet.sync_views")
@@ -11519,7 +11524,7 @@ class TestExternalDataSourceSetup(APIBaseTest):
     )
     def test_setup_returns_credential_error(self, _mock_validate):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/setup/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/setup/",
             data={"source_type": "Stripe", "payload": {"auth_method": {"selection": "api_key"}}},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -11545,7 +11550,7 @@ class TestExternalDataSourceSetup(APIBaseTest):
     def test_setup_with_credential_id_merges_stored_payload(self, mock_validate, _mock_sync_views, _mock_person_join):
         credential = self._store_stripe_credential()
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/setup/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/setup/",
             data={"source_type": "Stripe", "payload": {"credential_id": str(credential.pk)}},
         )
         assert response.status_code == status.HTTP_201_CREATED, response.json()
@@ -11565,7 +11570,7 @@ class TestExternalDataSourceSetup(APIBaseTest):
     def test_setup_failure_keeps_stored_credential(self, _mock_validate):
         credential = self._store_stripe_credential()
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/setup/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/setup/",
             data={"source_type": "Stripe", "payload": {"credential_id": str(credential.pk)}},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -11580,7 +11585,7 @@ class TestExternalDataSourceSetup(APIBaseTest):
     )
     def test_setup_with_unknown_credential_id_returns_400(self, _name, credential_id):
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/setup/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/setup/",
             data={"source_type": "Stripe", "payload": {"credential_id": credential_id}},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -11590,7 +11595,7 @@ class TestExternalDataSourceSetup(APIBaseTest):
     def test_setup_with_expired_credential_returns_400(self):
         credential = self._store_stripe_credential(expires_at=timezone.now() - timedelta(minutes=1))
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/setup/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/setup/",
             data={"source_type": "Stripe", "payload": {"credential_id": str(credential.pk)}},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -11601,7 +11606,7 @@ class TestExternalDataSourceSetup(APIBaseTest):
         other_team = Team.objects.create(organization=self.organization, name="other")
         credential = self._store_stripe_credential(team=other_team)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/setup/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/setup/",
             data={"source_type": "Stripe", "payload": {"credential_id": str(credential.pk)}},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -11610,7 +11615,7 @@ class TestExternalDataSourceSetup(APIBaseTest):
     def test_setup_with_credential_for_other_source_type_returns_400(self):
         credential = self._store_stripe_credential()
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/setup/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/setup/",
             data={"source_type": "Postgres", "payload": {"credential_id": str(credential.pk)}},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -11626,7 +11631,7 @@ class TestExternalDataSourceSetup(APIBaseTest):
         teammate = self._create_user("teammate@hanzo.ai")
         credential = self._store_stripe_credential(created_by=teammate)
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/{endpoint}",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{endpoint}",
             data={"source_type": "Stripe", "payload": {"credential_id": str(credential.pk)}},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -11646,7 +11651,7 @@ class TestExternalDataSourceSetup(APIBaseTest):
     ):
         credential = self._store_stripe_credential()
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "payload": {
@@ -11676,7 +11681,7 @@ class TestExternalDataSourceSetup(APIBaseTest):
     def test_create_with_stored_credential_failure_keeps_it(self, _mock_validate):
         credential = self._store_stripe_credential()
         response = self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "payload": {
@@ -11694,7 +11699,7 @@ class TestExternalDataSourceSetup(APIBaseTest):
 class TestExternalDataSourceStoreCredentials(APIBaseTest):
     def _store(self, source_type: str = "Stripe", payload: dict | None = None):
         return self.client.post(
-            f"/api/environments/{self.team.pk}/external_data_sources/store_credentials/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/store_credentials/",
             data={
                 "source_type": source_type,
                 "payload": payload
@@ -11761,7 +11766,7 @@ class TestExternalDataSourceStoreCredentials(APIBaseTest):
         response = self._store()
         assert response.status_code == status.HTTP_201_CREATED
 
-        list_response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/stored_credentials/")
+        list_response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/stored_credentials/")
         assert list_response.status_code == status.HTTP_200_OK
         results = list_response.json()
         assert len(results) == 1
@@ -11786,7 +11791,7 @@ class TestExternalDataSourceStoreCredentials(APIBaseTest):
         _create(self.team, "Stripe", created_by=self._create_user("teammate@hanzo.ai"))
 
         response = self.client.get(
-            f"/api/environments/{self.team.pk}/external_data_sources/stored_credentials/?source_type=Stripe"
+            f"/v1/environments/{self.team.pk}/external_data_sources/stored_credentials/?source_type=Stripe"
         )
         assert response.status_code == status.HTTP_200_OK
         results = response.json()
@@ -11803,7 +11808,7 @@ class TestExternalDataSourceStoreCredentials(APIBaseTest):
             created_at=timezone.now() - timedelta(hours=1)
         )
 
-        response = self.client.get(f"/api/environments/{self.team.pk}/external_data_sources/stored_credentials/")
+        response = self.client.get(f"/v1/environments/{self.team.pk}/external_data_sources/stored_credentials/")
         assert response.status_code == status.HTTP_200_OK
         assert [result["credential_id"] for result in response.json()] == [str(newer.pk), str(older.pk)]
 
@@ -11920,7 +11925,7 @@ class TestOAuthAccountsEndpoint(APIBaseTest):
 
     def _url(self, source_type: str, integration_id: int) -> str:
         return (
-            f"/api/environments/{self.team.pk}/external_data_sources/oauth_accounts/"
+            f"/v1/environments/{self.team.pk}/external_data_sources/oauth_accounts/"
             f"?source_type={source_type}&integration_id={integration_id}"
         )
 
@@ -11991,7 +11996,7 @@ class TestOAuthAccountsEndpoint(APIBaseTest):
 
     def test_missing_params_returns_400(self):
         response = self.client.get(
-            f"/api/environments/{self.team.pk}/external_data_sources/oauth_accounts/?source_type=BingAds"
+            f"/v1/environments/{self.team.pk}/external_data_sources/oauth_accounts/?source_type=BingAds"
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.content
 
@@ -12778,7 +12783,7 @@ _PREVIEW_MANIFEST = {
 
 class TestExternalDataSourcePreviewAndCustomPayload(APIBaseTest):
     def _url(self, action: str) -> str:
-        return f"/api/environments/{self.team.pk}/external_data_sources/{action}/"
+        return f"/v1/environments/{self.team.pk}/external_data_sources/{action}/"
 
     @patch(
         "products.warehouse_sources.backend.temporal.data_imports.sources.custom.source.CustomSource.preview_resource"
@@ -12988,7 +12993,7 @@ class TestGithubMultiRepoPatch(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     "auth_method": {"selection": "pat"},
@@ -13081,7 +13086,7 @@ class TestGithubMultiRepoPatch(APIBaseTest):
         )
 
         response = self.client.patch(
-            f"/api/environments/{self.team.pk}/external_data_sources/{source.pk}/",
+            f"/v1/environments/{self.team.pk}/external_data_sources/{source.pk}/",
             data={
                 "job_inputs": {
                     "auth_method": {"selection": "pat"},

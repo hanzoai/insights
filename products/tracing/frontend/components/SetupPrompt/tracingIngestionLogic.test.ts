@@ -40,7 +40,7 @@ describe('tracingIngestionLogic', () => {
         ])('loads teamHasSpans as $hasSpans when $label', async ({ hasSpans }) => {
             useMocks({
                 get: {
-                    '/api/environments/:team_id/tracing/spans/has_spans/': () => [200, { hasSpans }],
+                    '/v1/environments/:team_id/tracing/spans/has_spans/': () => [200, { hasSpans }],
                 },
             })
 
@@ -58,7 +58,7 @@ describe('tracingIngestionLogic', () => {
             silenceKeaLoadersErrors()
             useMocks({
                 get: {
-                    '/api/environments/:team_id/tracing/spans/has_spans/': () => [500, { detail: 'Server error' }],
+                    '/v1/environments/:team_id/tracing/spans/has_spans/': () => [500, { detail: 'Server error' }],
                 },
             })
 
@@ -76,7 +76,7 @@ describe('tracingIngestionLogic', () => {
         it('starts with loading state on mount', async () => {
             useMocks({
                 get: {
-                    '/api/environments/:team_id/tracing/spans/has_spans/': () => [200, { hasSpans: true }],
+                    '/v1/environments/:team_id/tracing/spans/has_spans/': () => [200, { hasSpans: true }],
                 },
             })
 
@@ -94,7 +94,7 @@ describe('tracingIngestionLogic', () => {
             let callCount = 0
             useMocks({
                 get: {
-                    '/api/environments/:team_id/tracing/spans/has_spans/': () => {
+                    '/v1/environments/:team_id/tracing/spans/has_spans/': () => {
                         callCount++
                         if (callCount <= 3) {
                             return [500, { detail: 'Server error' }]
@@ -126,7 +126,7 @@ describe('tracingIngestionLogic', () => {
         it('skips API call when cachedTeamHasSpans is true', async () => {
             const mockFn = jest.fn(() => [200, { hasSpans: true }])
             useMocks({
-                get: { '/api/environments/:team_id/tracing/spans/has_spans/': mockFn },
+                get: { '/v1/environments/:team_id/tracing/spans/has_spans/': mockFn },
             })
 
             logic = tracingIngestionLogic()
@@ -149,7 +149,7 @@ describe('tracingIngestionLogic', () => {
         it('makes API call when cachedTeamHasSpans is null', async () => {
             const mockFn = jest.fn(() => [200, { hasSpans: false }])
             useMocks({
-                get: { '/api/environments/:team_id/tracing/spans/has_spans/': mockFn },
+                get: { '/v1/environments/:team_id/tracing/spans/has_spans/': mockFn },
             })
 
             logic = tracingIngestionLogic()
@@ -170,7 +170,7 @@ describe('tracingIngestionLogic', () => {
 
         it('hasSpans selector falls back to cachedTeamHasSpans when teamHasSpans is undefined', async () => {
             useMocks({
-                get: { '/api/environments/:team_id/tracing/spans/has_spans/': () => [200, { hasSpans: true }] },
+                get: { '/v1/environments/:team_id/tracing/spans/has_spans/': () => [200, { hasSpans: true }] },
             })
 
             logic = tracingIngestionLogic()

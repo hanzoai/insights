@@ -77,11 +77,11 @@ for file in "${test_files[@]}"; do
     basename=$(get_basename "$file")
     filename=$(basename "$file")
 
-    # Compile to .hoge
-    ./bin/hoge "$file" "$basename.hoge"
+    # Compile to .scriptc
+    ./bin/scriptc "$file" "$basename.scriptc"
 
     # Always run Node.js test
-    ./bin/script --nodejs "$basename.hoge" > "$basename.stdout.nodejs"
+    ./bin/script --nodejs "$basename.scriptc" > "$basename.stdout.nodejs"
 
     # If this file is in ONLY_NODEJS_FILES, skip python + compiledjs
     if is_in_array "$filename" "${ONLY_NODEJS_FILES[@]}"; then
@@ -91,7 +91,7 @@ for file in "${test_files[@]}"; do
     fi
 
     # Otherwise, run Python
-    ./bin/script --python "$basename.hoge" > "$basename.stdout.python"
+    ./bin/script --python "$basename.scriptc" > "$basename.stdout.python"
 
     # Check if compiledjs is skipped
     if is_in_array "$filename" "${SKIP_COMPILEDJS_FILES[@]}"; then
@@ -109,7 +109,7 @@ for file in "${test_files[@]}"; do
     else
         # Run compiledjs
         set +e
-        ./bin/hoge "$file" "$basename.js"
+        ./bin/scriptc "$file" "$basename.js"
         node "$basename.js" > "$basename.stdout.compiledjs" 2>&1
         set -e
 

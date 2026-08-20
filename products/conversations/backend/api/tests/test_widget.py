@@ -44,12 +44,12 @@ class TestWidgetAPI(BaseTest):
         return {"HTTP_X_CONVERSATIONS_TOKEN": self.widget_token}
 
     def test_authentication_required(self):
-        response = self.client.post("/api/conversations/v1/widget/message", {"message": "Hello"})
+        response = self.client.post("/v1/conversations/v1/widget/message", {"message": "Hello"})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_authentication_invalid_token(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {"message": "Hello"},
             headers={"x-conversations-token": "invalid_token"},
         )
@@ -59,7 +59,7 @@ class TestWidgetAPI(BaseTest):
         self.team.conversations_enabled = False
         self.team.save()
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {"message": "Hello", "widget_session_id": self.widget_session_id, "distinct_id": self.distinct_id},
             **self._get_headers(),
         )
@@ -67,7 +67,7 @@ class TestWidgetAPI(BaseTest):
 
     def test_create_message_creates_ticket(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "message": "Hello, I need help!",
                 "widget_session_id": self.widget_session_id,
@@ -89,7 +89,7 @@ class TestWidgetAPI(BaseTest):
         self.team.conversations_settings = {**self.team.conversations_settings, "widget_enabled": True}
         self.team.save()
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {"message": "Hi", "widget_session_id": self.widget_session_id, "distinct_id": self.distinct_id},
             **self._get_headers(),
         )
@@ -101,7 +101,7 @@ class TestWidgetAPI(BaseTest):
         self.team.conversations_settings = {**self.team.conversations_settings, "widget_enabled": False}
         self.team.save()
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {"message": "Hi", "widget_session_id": str(uuid.uuid4()), "distinct_id": "user-456"},
             **self._get_headers(),
         )
@@ -117,7 +117,7 @@ class TestWidgetAPI(BaseTest):
             channel_source="widget",
         )
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "message": "Follow up message",
                 "widget_session_id": self.widget_session_id,
@@ -141,7 +141,7 @@ class TestWidgetAPI(BaseTest):
             channel_source="widget",
         )
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "message": "Trying to hijack identity",
                 "widget_session_id": self.widget_session_id,
@@ -165,7 +165,7 @@ class TestWidgetAPI(BaseTest):
             session_context={"current_url": "/some-page", "replay_url": "https://app.hanzo.ai/replay/old"},
         )
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "message": "Follow up message",
                 "widget_session_id": self.widget_session_id,
@@ -192,7 +192,7 @@ class TestWidgetAPI(BaseTest):
             channel_source="widget",
         )
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "message": "Trying to access other ticket",
                 "widget_session_id": self.widget_session_id,
@@ -205,7 +205,7 @@ class TestWidgetAPI(BaseTest):
 
     def test_create_message_missing_widget_session_id(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {"message": "Hello", "distinct_id": self.distinct_id},
             **self._get_headers(),
         )
@@ -213,7 +213,7 @@ class TestWidgetAPI(BaseTest):
 
     def test_create_message_missing_distinct_id(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {"message": "Hello", "widget_session_id": self.widget_session_id},
             **self._get_headers(),
         )
@@ -221,7 +221,7 @@ class TestWidgetAPI(BaseTest):
 
     def test_create_message_empty_content(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "message": "",
                 "widget_session_id": self.widget_session_id,
@@ -233,7 +233,7 @@ class TestWidgetAPI(BaseTest):
 
     def test_create_message_with_traits(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "message": "Hello",
                 "widget_session_id": self.widget_session_id,
@@ -270,7 +270,7 @@ class TestWidgetAPI(BaseTest):
         )
 
         response = self.client.get(
-            f"/api/conversations/v1/widget/messages/{ticket.id}?widget_session_id={self.widget_session_id}",
+            f"/v1/conversations/v1/widget/messages/{ticket.id}?widget_session_id={self.widget_session_id}",
             **self._get_headers(),
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -300,7 +300,7 @@ class TestWidgetAPI(BaseTest):
         )
 
         response = self.client.get(
-            f"/api/conversations/v1/widget/messages/{ticket.id}?widget_session_id={self.widget_session_id}",
+            f"/v1/conversations/v1/widget/messages/{ticket.id}?widget_session_id={self.widget_session_id}",
             **self._get_headers(),
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -324,7 +324,7 @@ class TestWidgetAPI(BaseTest):
         )
 
         response = self.client.get(
-            f"/api/conversations/v1/widget/messages/{ticket.id}?widget_session_id={self.widget_session_id}",
+            f"/v1/conversations/v1/widget/messages/{ticket.id}?widget_session_id={self.widget_session_id}",
             **self._get_headers(),
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -340,7 +340,7 @@ class TestWidgetAPI(BaseTest):
             channel_source="widget",
         )
         response = self.client.get(
-            f"/api/conversations/v1/widget/messages/{ticket.id}?widget_session_id={self.widget_session_id}",
+            f"/v1/conversations/v1/widget/messages/{ticket.id}?widget_session_id={self.widget_session_id}",
             **self._get_headers(),
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -348,7 +348,7 @@ class TestWidgetAPI(BaseTest):
     def test_get_messages_ticket_not_found(self):
         fake_ticket_id = str(uuid.uuid4())
         response = self.client.get(
-            f"/api/conversations/v1/widget/messages/{fake_ticket_id}?widget_session_id={self.widget_session_id}",
+            f"/v1/conversations/v1/widget/messages/{fake_ticket_id}?widget_session_id={self.widget_session_id}",
             **self._get_headers(),
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -377,7 +377,7 @@ class TestWidgetAPI(BaseTest):
         )
 
         response = self.client.get(
-            f"/api/conversations/v1/widget/tickets?widget_session_id={self.widget_session_id}",
+            f"/v1/conversations/v1/widget/tickets?widget_session_id={self.widget_session_id}",
             **self._get_headers(),
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -403,7 +403,7 @@ class TestWidgetAPI(BaseTest):
         )
 
         response = self.client.get(
-            f"/api/conversations/v1/widget/tickets?widget_session_id={self.widget_session_id}&status={Status.NEW}",
+            f"/v1/conversations/v1/widget/tickets?widget_session_id={self.widget_session_id}&status={Status.NEW}",
             **self._get_headers(),
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -424,14 +424,14 @@ class TestWidgetAPI(BaseTest):
 
         # Prime the cache with the default page size.
         default_page = self.client.get(
-            f"/api/conversations/v1/widget/tickets?widget_session_id={self.widget_session_id}",
+            f"/v1/conversations/v1/widget/tickets?widget_session_id={self.widget_session_id}",
             **self._get_headers(),
         )
         self.assertEqual(default_page.status_code, status.HTTP_200_OK)
         self.assertEqual(len(default_page.json()["results"]), 3)
 
         limited = self.client.get(
-            f"/api/conversations/v1/widget/tickets?widget_session_id={self.widget_session_id}&limit=2",
+            f"/v1/conversations/v1/widget/tickets?widget_session_id={self.widget_session_id}&limit=2",
             **self._get_headers(),
         )
         self.assertEqual(limited.status_code, status.HTTP_200_OK)
@@ -449,7 +449,7 @@ class TestWidgetAPI(BaseTest):
             status=Status.NEW,
         )
 
-        url = f"/api/conversations/v1/widget/tickets?widget_session_id={self.widget_session_id}"
+        url = f"/v1/conversations/v1/widget/tickets?widget_session_id={self.widget_session_id}"
 
         # First poll populates the cache, second poll is served from it.
         first = self.client.get(url, **self._get_headers())
@@ -474,7 +474,7 @@ class TestWidgetAPI(BaseTest):
 
         with patch("products.conversations.backend.api.widget.get_cached_tickets") as mock_get:
             response = self.client.get(
-                f"/api/conversations/v1/widget/tickets?widget_session_id={self.widget_session_id}&limit=2",
+                f"/v1/conversations/v1/widget/tickets?widget_session_id={self.widget_session_id}&limit=2",
                 **self._get_headers(),
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -490,7 +490,7 @@ class TestWidgetAPI(BaseTest):
         )
 
         response = self.client.post(
-            f"/api/conversations/v1/widget/messages/{ticket.id}/read",
+            f"/v1/conversations/v1/widget/messages/{ticket.id}/read",
             {"widget_session_id": self.widget_session_id},
             **self._get_headers(),
         )
@@ -510,7 +510,7 @@ class TestWidgetAPI(BaseTest):
         )
 
         response = self.client.post(
-            f"/api/conversations/v1/widget/messages/{ticket.id}/read",
+            f"/v1/conversations/v1/widget/messages/{ticket.id}/read",
             {"widget_session_id": self.widget_session_id},
             **self._get_headers(),
         )
@@ -521,7 +521,7 @@ class TestWidgetAPI(BaseTest):
 
     def test_honeypot_rejects_bot(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "message": "I am a bot",
                 "widget_session_id": self.widget_session_id,
@@ -534,7 +534,7 @@ class TestWidgetAPI(BaseTest):
 
     def test_invalid_widget_session_id_format(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "message": "Hello",
                 "widget_session_id": "not-a-uuid",
@@ -546,7 +546,7 @@ class TestWidgetAPI(BaseTest):
 
     def test_message_too_long(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "message": "x" * 10001,
                 "widget_session_id": self.widget_session_id,
@@ -559,7 +559,7 @@ class TestWidgetAPI(BaseTest):
     def test_long_current_url_is_truncated_not_rejected(self):
         long_url = "https://app.example.com/insights?q=" + "x" * 3000
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "message": "Hello",
                 "widget_session_id": self.widget_session_id,
@@ -594,7 +594,7 @@ class TestWidgetCacheInvalidation(BaseTest):
     def test_create_message_new_ticket_invalidates_cache(self):
         with patch("products.conversations.backend.api.widget.invalidate_unread_count_cache") as mock_invalidate:
             response = self.client.post(
-                "/api/conversations/v1/widget/message",
+                "/v1/conversations/v1/widget/message",
                 {
                     "message": "Hello, I need help!",
                     "widget_session_id": self.widget_session_id,
@@ -615,7 +615,7 @@ class TestWidgetCacheInvalidation(BaseTest):
 
         with patch("products.conversations.backend.api.widget.invalidate_unread_count_cache") as mock_invalidate:
             response = self.client.post(
-                "/api/conversations/v1/widget/message",
+                "/v1/conversations/v1/widget/message",
                 {
                     "message": "Follow up message",
                     "widget_session_id": self.widget_session_id,
@@ -662,7 +662,7 @@ class TestWidgetIdentityVerification(BaseTest):
     def test_list_tickets_with_valid_identity(self):
         self._create_ticket()
         response = self.client.get(
-            "/api/conversations/v1/widget/tickets",
+            "/v1/conversations/v1/widget/tickets",
             {
                 "identity_distinct_id": self.distinct_id,
                 "identity_hash": self.identity_hash,
@@ -692,7 +692,7 @@ class TestWidgetIdentityVerification(BaseTest):
         self._create_ticket()
 
         response = self.client.get(
-            "/api/conversations/v1/widget/tickets",
+            "/v1/conversations/v1/widget/tickets",
             {
                 "identity_distinct_id": self.distinct_id,
                 "identity_hash": self.identity_hash,
@@ -714,7 +714,7 @@ class TestWidgetIdentityVerification(BaseTest):
         before_legacy = _verification_counter("verified", "legacy_token")
 
         response = self.client.get(
-            "/api/conversations/v1/widget/tickets",
+            "/v1/conversations/v1/widget/tickets",
             {
                 "identity_distinct_id": self.distinct_id,
                 "identity_hash": self.identity_hash,
@@ -730,7 +730,7 @@ class TestWidgetIdentityVerification(BaseTest):
         # hmac.compare_digest raises TypeError on non-ASCII str, so a 64-character non-hex
         # hash used to reach it and surface as a 500 on a publicly reachable endpoint.
         response = self.client.get(
-            "/api/conversations/v1/widget/tickets",
+            "/v1/conversations/v1/widget/tickets",
             {
                 "identity_distinct_id": self.distinct_id,
                 "identity_hash": "é" * 64,
@@ -751,7 +751,7 @@ class TestWidgetIdentityVerification(BaseTest):
         self._create_ticket()
 
         response = self.client.get(
-            "/api/conversations/v1/widget/tickets",
+            "/v1/conversations/v1/widget/tickets",
             {
                 "identity_distinct_id": self.distinct_id,
                 "identity_hash": self.identity_hash,
@@ -764,7 +764,7 @@ class TestWidgetIdentityVerification(BaseTest):
     def test_list_tickets_invalid_hash_returns_forbidden(self):
         self._create_ticket()
         response = self.client.get(
-            "/api/conversations/v1/widget/tickets",
+            "/v1/conversations/v1/widget/tickets",
             {
                 "identity_distinct_id": self.distinct_id,
                 "identity_hash": "0" * 64,
@@ -780,7 +780,7 @@ class TestWidgetIdentityVerification(BaseTest):
         self.team.save()
 
         response = self.client.get(
-            "/api/conversations/v1/widget/tickets",
+            "/v1/conversations/v1/widget/tickets",
             {
                 "identity_distinct_id": self.distinct_id,
                 "identity_hash": self.identity_hash,
@@ -800,7 +800,7 @@ class TestWidgetIdentityVerification(BaseTest):
         self._create_ticket()
 
         response = self.client.get(
-            "/api/conversations/v1/widget/tickets",
+            "/v1/conversations/v1/widget/tickets",
             {
                 "identity_distinct_id": self.distinct_id,
                 "identity_hash": old_hash,
@@ -813,7 +813,7 @@ class TestWidgetIdentityVerification(BaseTest):
     def test_list_tickets_missing_identity_fields_uses_session(self):
         self._create_ticket()
         response = self.client.get(
-            "/api/conversations/v1/widget/tickets",
+            "/v1/conversations/v1/widget/tickets",
             {"widget_session_id": self.widget_session_id},
             **self._get_headers(),
         )
@@ -825,7 +825,7 @@ class TestWidgetIdentityVerification(BaseTest):
         self._create_ticket(widget_session_id=other_session)
 
         response = self.client.get(
-            "/api/conversations/v1/widget/tickets",
+            "/v1/conversations/v1/widget/tickets",
             {
                 "identity_distinct_id": self.distinct_id,
                 "identity_hash": self.identity_hash,
@@ -839,7 +839,7 @@ class TestWidgetIdentityVerification(BaseTest):
 
     def test_send_message_creates_ticket_with_identity(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "identity_distinct_id": self.distinct_id,
                 "identity_hash": self.identity_hash,
@@ -855,7 +855,7 @@ class TestWidgetIdentityVerification(BaseTest):
     def test_anonymous_message_creates_unverified_ticket(self):
         # A widget_session_id-only (no HMAC) request is not server-attested.
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "widget_session_id": self.widget_session_id,
                 "distinct_id": self.distinct_id,
@@ -874,7 +874,7 @@ class TestWidgetIdentityVerification(BaseTest):
         self.assertFalse(ticket.identity_verified)
 
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "identity_distinct_id": self.distinct_id,
                 "identity_hash": self.identity_hash,
@@ -898,7 +898,7 @@ class TestWidgetIdentityVerification(BaseTest):
         )
 
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "identity_distinct_id": self.distinct_id,
                 "identity_hash": self.identity_hash,
@@ -911,7 +911,7 @@ class TestWidgetIdentityVerification(BaseTest):
 
     def test_send_message_invalid_hash_no_session_returns_forbidden(self):
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "identity_distinct_id": self.distinct_id,
                 "identity_hash": "0" * 64,
@@ -927,7 +927,7 @@ class TestWidgetIdentityVerification(BaseTest):
         other_hash = compute_identity_hash(other_id, self.secret)
 
         response = self.client.post(
-            "/api/conversations/v1/widget/message",
+            "/v1/conversations/v1/widget/message",
             {
                 "identity_distinct_id": other_id,
                 "identity_hash": other_hash,
@@ -951,7 +951,7 @@ class TestWidgetIdentityVerification(BaseTest):
         )
 
         response = self.client.get(
-            f"/api/conversations/v1/widget/messages/{ticket.id}",
+            f"/v1/conversations/v1/widget/messages/{ticket.id}",
             {
                 "identity_distinct_id": self.distinct_id,
                 "identity_hash": self.identity_hash,
@@ -964,7 +964,7 @@ class TestWidgetIdentityVerification(BaseTest):
     def test_get_messages_invalid_hash_no_session_returns_forbidden(self):
         ticket = self._create_ticket()
         response = self.client.get(
-            f"/api/conversations/v1/widget/messages/{ticket.id}",
+            f"/v1/conversations/v1/widget/messages/{ticket.id}",
             {
                 "identity_distinct_id": self.distinct_id,
                 "identity_hash": "0" * 64,
@@ -979,7 +979,7 @@ class TestWidgetIdentityVerification(BaseTest):
         other_hash = compute_identity_hash(other_id, self.secret)
 
         response = self.client.get(
-            f"/api/conversations/v1/widget/messages/{ticket.id}",
+            f"/v1/conversations/v1/widget/messages/{ticket.id}",
             {
                 "identity_distinct_id": other_id,
                 "identity_hash": other_hash,
@@ -996,7 +996,7 @@ class TestWidgetIdentityVerification(BaseTest):
         ticket.save()
 
         response = self.client.post(
-            f"/api/conversations/v1/widget/messages/{ticket.id}/read",
+            f"/v1/conversations/v1/widget/messages/{ticket.id}/read",
             {
                 "identity_distinct_id": self.distinct_id,
                 "identity_hash": self.identity_hash,
@@ -1010,7 +1010,7 @@ class TestWidgetIdentityVerification(BaseTest):
     def test_mark_read_invalid_hash_no_session_returns_forbidden(self):
         ticket = self._create_ticket()
         response = self.client.post(
-            f"/api/conversations/v1/widget/messages/{ticket.id}/read",
+            f"/v1/conversations/v1/widget/messages/{ticket.id}/read",
             {
                 "identity_distinct_id": self.distinct_id,
                 "identity_hash": "0" * 64,
@@ -1025,7 +1025,7 @@ class TestWidgetIdentityVerification(BaseTest):
         other_hash = compute_identity_hash(other_id, self.secret)
 
         response = self.client.post(
-            f"/api/conversations/v1/widget/messages/{ticket.id}/read",
+            f"/v1/conversations/v1/widget/messages/{ticket.id}/read",
             {
                 "identity_distinct_id": other_id,
                 "identity_hash": other_hash,

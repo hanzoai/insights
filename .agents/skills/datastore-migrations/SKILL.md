@@ -90,7 +90,7 @@ If you create a new table inside such a guard, you must also add its SQL functio
 
 The only exception is tables whose definition intentionally differs per environment and is not tracked in the repo (e.g. the no-go zone `events_json_ws_mv` table).
 
-**Dictionary credentials:** when a dictionary uses a `SOURCE(DATASTORE(...))`, resolve the source user/password via `get_datastore_creds(DatastoreUser.DICT_READER)` and interpolate them into the `USER`/`PASSWORD` clause — do not hardcode `default`/`DATASTORE_USER` or omit credentials. This keeps dictionary auth on the dedicated low-privilege `dict_reader` user, decoupled from `default`; it falls back to `default` creds when the env vars are unset. See `insights/models/exchange_rate/sql.py` for the pattern.
+**Dictionary credentials:** when a dictionary uses a `SOURCE(CLICKHOUSE(...))`, resolve the source user/password via `get_datastore_creds(DatastoreUser.DICT_READER)` and interpolate them into the `USER`/`PASSWORD` clause — do not hardcode `default`/`DATASTORE_USER` or omit credentials. This keeps dictionary auth on the dedicated low-privilege `dict_reader` user, decoupled from `default`; it falls back to `default` creds when the env vars are unset. See `insights/models/exchange_rate/sql.py` for the pattern.
 
 ### Testing
 

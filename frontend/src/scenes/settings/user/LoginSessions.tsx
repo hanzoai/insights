@@ -1,17 +1,16 @@
 import { useActions, useValues } from 'kea'
 
-import * as magnifyingGlassPng from '@hanzo/brand/hoggies/png/magnifying-glass-1'
-import { IconLaptop, IconLeave } from '@hanzo/icons'
 import { Button, Dialog, Table, Tag } from '@hanzo/elements'
+import { IconLaptop, IconLeave } from '@hanzo/icons'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { humanFriendlyDetailedTime } from 'lib/utils/datetime'
 
 import { UserAuthSessionApi } from '~/generated/core/api.schemas'
 
 import { loginSessionsLogic } from './loginSessionsLogic'
 
-const MascotMagnifyingGlass = pngHoggie(magnifyingGlassPng)
+const MascotMagnifyingGlass = pngMascot()
 
 export function LoginSessions(): JSX.Element {
     const { loginSessions, loginSessionsLoading } = useValues(loginSessionsLogic)

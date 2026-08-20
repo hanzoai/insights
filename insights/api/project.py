@@ -19,11 +19,12 @@ from rest_framework.permissions import BasePermission, IsAuthenticated
 
 from insights.schema import ProductKey
 
+from insights import ingest
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.api.shared import ProjectBackwardCompatBasicSerializer
 
-# These are imported from team.py for now. They are part of the legacy /api/environments/ surface and are
-# expected to move project-side (or to a neutral module) in a later PR once /api/environments/ is retired —
+# These are imported from team.py for now. They are part of the legacy /v1/environments/ surface and are
+# expected to move project-side (or to a neutral module) in a later PR once /v1/environments/ is retired —
 # project.py must NOT depend on team.py at that point. The parity *logic* (config writes, retention check,
 # and the team-config actions) is defined locally below rather than imported, so it survives that removal.
 from insights.api.team import (
@@ -125,10 +126,10 @@ logger = structlog.get_logger(__name__)
 MAX_ALLOWED_PROJECTS_PER_ORG = 2000
 
 
-# --- Backward-compatibility logic for the /api/projects/ surface ---
-# These mirror the behaviour of the legacy /api/environments/ (TeamViewSet/TeamSerializer) endpoints, operating
-# on a project's passthrough Team. They live here — not imported from team.py — so /api/projects/ keeps working
-# after /api/environments/ is retired. Until then both surfaces intentionally carry equivalent logic; the
+# --- Backward-compatibility logic for the /v1/projects/ surface ---
+# These mirror the behaviour of the legacy /v1/environments/ (TeamViewSet/TeamSerializer) endpoints, operating
+# on a project's passthrough Team. They live here — not imported from team.py — so /v1/projects/ keeps working
+# after /v1/environments/ is retired. Until then both surfaces intentionally carry equivalent logic; the
 # introspection test in test_team_project_parity.py guards against drift.
 def capture_team_config_diff(team: Team, key: str, before: dict, after: dict, *, context: dict) -> None:
     changes = dict_changes_between("Team", {key: before}, {key: after}, use_field_exclusions=True)
@@ -1103,6 +1104,19 @@ class ProjectBackwardCompatSerializer(
         for field_name in validated_data.copy():  # Copy to avoid iterating over a changing dict
             if field_name in self.Meta.team_passthrough_fields:
                 team_fields[field_name] = validated_data.pop(field_name)
+
+        # Cloud mints the ingest key, against the acting user's own IAM identity so
+        # the project lands in their org. The name is settled here rather than left
+        # to `create_with_team` so the project cloud names and the project this
+        # creates are the same one.
+        name = validated_data.setdefault(
+            "name", Project.objects.get_unique_default_name(self.context["view"].organization_id)
+        )
+        try:
+            team_fields["api_token"] = ingest.key(name=name, user=request.user)
+        except ingest.IngestKeyUnavailable as e:
+            raise serializers.ValidationError(str(e)) from e
+
         project, team = Project.objects.create_with_team(
             organization_id=self.context["view"].organization_id,
             initiating_user=self.context["request"].user,
@@ -1571,19 +1585,6 @@ class ProjectViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets
         # Only ADMIN or higher users are allowed to access this project
         permission_classes=[TeamMemberStrictManagementPermission],
     )
-    def reset_token(self, request: request.Request, id: str, **kwargs) -> response.Response:
-        project = self.get_object()
-        project.passthrough_team.reset_token_and_save(
-            user=request.user, is_impersonated_session=is_impersonated(request)
-        )
-        return response.Response(ProjectBackwardCompatSerializer(project, context=self.get_serializer_context()).data)
-
-    @action(
-        methods=["PATCH"],
-        detail=True,
-        # Only ADMIN or higher users are allowed to access this project
-        permission_classes=[TeamMemberStrictManagementPermission],
-    )
     def rotate_secret_token(self, request: request.Request, id: str, **kwargs) -> response.Response:
         project = self.get_object()
         validate_secret_token_generation(project.passthrough_team, cast(User, request.user))
@@ -1635,8 +1636,8 @@ class ProjectViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets
     def logs_config(self, request: request.Request, id: str, **kwargs) -> response.Response:
         """Manage logs product configuration for this project's canonical environment.
         Members can read; writing requires project admin, matching the admin-only
-        settings UI. Mirrors the env-router action so /api/projects/:id/logs_config/
-        resolves alongside the legacy /api/environments/:id/logs_config/ alias."""
+        settings UI. Mirrors the env-router action so /v1/projects/:id/logs_config/
+        resolves alongside the legacy /v1/environments/:id/logs_config/ alias."""
         project = self.get_object()
         return handle_logs_config(request, project.passthrough_team)
 
@@ -1658,7 +1659,7 @@ class ProjectViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets
         return activity_page_response(activity_page, limit, page, request)
 
     # The following actions mirror TeamViewSet, operating on the project's passthrough Team. They delegate to
-    # the shared team_*_view helpers so /api/projects/ and /api/environments/ cannot drift apart.
+    # the shared team_*_view helpers so /v1/projects/ and /v1/environments/ cannot drift apart.
     @action(
         methods=["GET", "PUT"],
         detail=True,

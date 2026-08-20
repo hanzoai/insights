@@ -12,7 +12,7 @@ def create_external_data_source_ok(client: HttpClient, team_id: int) -> int:
         return_value=(True, None),
     ):
         response = client.post(
-            f"/api/environments/{team_id}/external_data_sources/",
+            f"/v1/environments/{team_id}/external_data_sources/",
             data={
                 "source_type": "Stripe",
                 "payload": {

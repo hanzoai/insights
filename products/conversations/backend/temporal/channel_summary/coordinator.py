@@ -34,7 +34,7 @@ logger = structlog.get_logger(__name__)
 
 def _collect_due_channels() -> list[ChannelSummaryInput]:
     """Ask customer_analytics who is due, then gate on what only conversations knows:
-    the team must have the SupportHog bot configured (it reads the channel) and the
+    the team must have the Support bot configured (it reads the channel) and the
     org must have approved AI data processing (messages go to an LLM)."""
     due = customer_analytics.list_accounts_due_for_slack_summary()
     if not due:

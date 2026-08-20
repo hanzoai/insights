@@ -81,8 +81,8 @@ export interface UseTaxonomicFilterOptions {
     maxContextOptions?: MaxContextTaxonomicFilterOption[]
     hideBehavioralCohorts?: boolean
     endpointFilters?: Record<string, any>
-    hogQLGlobals?: Record<string, any>
-    hogQLExpressionShowBreakdownLabelHint?: boolean
+    insightsQLGlobals?: Record<string, any>
+    insightsQLExpressionShowBreakdownLabelHint?: boolean
 
     // forwarded into per-tab useGroupList
     optionsFromProp?: Partial<Record<TaxonomicFilterGroupType, SimpleOption[]>>
@@ -284,8 +284,8 @@ export function useTaxonomicFilter(opts: UseTaxonomicFilterOptions): TaxonomicFi
         maxContextOptions,
         hideBehavioralCohorts,
         endpointFilters,
-        hogQLGlobals,
-        hogQLExpressionShowBreakdownLabelHint,
+        insightsQLGlobals,
+        insightsQLExpressionShowBreakdownLabelHint,
         optionsFromProp,
         showNumericalPropsOnly,
         minSearchQueryLength,
@@ -310,8 +310,8 @@ export function useTaxonomicFilter(opts: UseTaxonomicFilterOptions): TaxonomicFi
         maxContextOptions,
         hideBehavioralCohorts,
         endpointFilters,
-        hogQLGlobals,
-        hogQLExpressionShowBreakdownLabelHint,
+        insightsQLGlobals,
+        insightsQLExpressionShowBreakdownLabelHint,
     })
 
     const allGroups = useMemo(() => buildTaxonomicGroups(ctx), [ctx])

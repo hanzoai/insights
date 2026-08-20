@@ -48,7 +48,7 @@ describe('useMathSelectorOptions – active actor select', () => {
         initKeaTests(true, undefined as any, undefined as any, orgWithGroups)
         useMocks({
             get: {
-                '/api/projects/:team/groups_types': MOCK_GROUP_TYPES,
+                '/v1/projects/:team/groups_types': MOCK_GROUP_TYPES,
             },
         })
         useAvailableFeatures([AvailableFeature.GROUP_ANALYTICS])

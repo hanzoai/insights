@@ -34,6 +34,7 @@ from insights.settings.demo import *
 from insights.settings.dynamic_settings import *
 from insights.settings.ee import *
 from insights.settings.ingestion import *
+from insights.settings.llm import *
 from insights.settings.feature_flags import *
 from insights.settings.geoip import *
 from insights.settings.metrics import *
@@ -58,7 +59,6 @@ from insights.settings.exports import *
 from insights.settings.utils import get_from_env, str_to_bool
 
 from insights.settings.base_variables import DEBUG, TEST
-from insights.settings.web import INSTALLED_APPS
 
 # Instance configuration preferences
 # https://hanzo.ai/docs/self-host/configure/environment-variables
@@ -126,8 +126,6 @@ EVENTS_DATA_RETENTION_ENFORCED: bool | None = get_from_env(
 
 # Support creating multiple organizations in a single instance. Requires a premium license.
 MULTI_ORG_ENABLED: bool = get_from_env("MULTI_ORG_ENABLED", False, type_cast=str_to_bool)
-
-AUTO_LOGIN: bool = get_from_env("AUTO_LOGIN", False, type_cast=str_to_bool)
 
 CONTAINER_HOSTNAME: str = os.getenv("HOSTNAME", "unknown")
 

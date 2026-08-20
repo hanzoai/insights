@@ -18,7 +18,7 @@ from products.growth.backend.constants import github_sdk_versions_key
 
 class TestHealthIssueAPI(APIBaseTest):
     def _url(self, path: str = "", team_id: int | None = None) -> str:
-        return f"/api/environments/{team_id or self.team.id}/health_issues{path}"
+        return f"/v1/environments/{team_id or self.team.id}/health_issues{path}"
 
     def _reset_refresh_throttle(self, team_id: int | None = None) -> None:
         key = f"throttle_health_issue_refresh_team_{team_id or self.team.id}"

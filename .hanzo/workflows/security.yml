@@ -1,0 +1,85 @@
+name: security
+
+# Semgrep over .semgrep/rules/security — the 46 rules this fork wrote for itself.
+#
+# It had stopped running. The forge collects workflows from the FIRST entry of
+# WORKFLOW_DIRS that exists, so the day .hanzo/workflows/ appeared, every file
+# still under .github/workflows/ went dark — ci-security.yaml among them. Nothing
+# went red, because the check that would go red was the one no longer running.
+# The forge's own API is the proof: it listed 7 workflows for this repo while 121
+# files sat in .github/workflows.
+#
+# The rules are the reason this is worth reviving rather than retiring. They are
+# not generic lint — they encode the tenancy model the product sells:
+# idor-team-scoped-models, cross-org-bypass-user-organization, celery-team-scope,
+# datastore-sql-injection, github-actions-shell-injection. They live in-repo, so
+# this needs no rule registry, no account and no network.
+#
+# What did NOT come back, and why:
+#
+#   - The eight-way path filter. It read which files a PR touched from the GitHub
+#     compare API under a GitHub App token (GH_APP_INSIGHTS_PATHS_FILTER_*), and
+#     neither exists here. It bought minutes on a monorepo; the whole tree
+#     measures 146s, so the filter cost more complexity than it saved.
+#   - The `semgrep_checks` rollup, whose job was to collapse nine jobs into one
+#     required check. One job needs no rollup.
+#   - The Docker Hub login. Those credentials are not among this forge's org
+#     secrets, and the step was already conditional on them being non-empty.
+#   - The registry packs (p/owasp-top-ten, p/security-audit, p/trailofbits).
+#     Measured on this tree: 170 rules over 25445 files, 322s, one ERROR finding
+#     — against 146s for the rules above. They are a `--config` away when someone
+#     wants that trade, and they need semgrep.dev at run time, which the in-repo
+#     rules do not.
+#
+# A verbatim move would not have run at all: every job hung off a `changes` job
+# guarded `if: github.repository == 'Insights/insights'`, so on this fork all
+# nine would have skipped and the rollup would then have failed on
+# `needs.changes.result != 'success'` — a red that reports nothing.
+#
+# Severity split is this repo's own convention, taken from the devex job it
+# replaces: ERROR fails the build, WARNING is printed for a human. 32 of the 46
+# rules are ERROR, so the gate has teeth; the WARNING pass keeps the tenancy
+# audit rules visible without wedging main behind a backlog.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  semgrep:
+    # NOT ubuntu-latest. This file lives in .hanzo/workflows, which only
+    # git.hanzo.ai reads, and that fleet advertises no ubuntu-* label at all —
+    # deliberately, so ~1400 mirrored repos cannot claim it. An unmatched label
+    # does not fail, it queues until the timeout: silence, not an error.
+    runs-on: hanzo-build-linux-amd64
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pinned. A scanner that silently changes rules underneath the build turns
+      # an unrelated commit red and teaches people to ignore it.
+      - name: install semgrep
+        run: python3 -m pip install --break-system-packages --quiet semgrep==1.167.0
+
+      # The whole tree, not a named list — an allowlist stops covering whatever
+      # is added after it is written. It is also how the workflows come to be
+      # scanned by github-actions-shell-injection, which is a rule this repo
+      # wrote and had never once pointed at its own pipeline.
+      #
+      # .semgrep/ is excluded because the rules keep their positive test cases
+      # there: those files are deliberately vulnerable, and scanning them means
+      # a permanent two-finding red that says nothing. semgrep walks only
+      # git-tracked files, so node_modules and build output are already out.
+      #
+      # Measured on this tree: 32 ERROR rules over 23819 files in 154s.
+      - name: audit (WARNING — printed, does not fail)
+        run: semgrep --config .semgrep/rules/security --severity=WARNING --severity=INFO --metrics=off --timeout 300 --jobs 4 --exclude .semgrep .
+
+      - name: enforce (ERROR — fails the build)
+        run: semgrep --config .semgrep/rules/security --severity=ERROR --error --metrics=off --timeout 300 --jobs 4 --exclude .semgrep .

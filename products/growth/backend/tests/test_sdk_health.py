@@ -629,7 +629,7 @@ class TestUiParityStrings(SimpleTestCase):
 
 
 class TestAssessReleaseParseFailureFallback(SimpleTestCase):
-    """Parser failure and injection-safety are orthogonal concerns — document both paths."""
+    """Parser failure and injection-safety are ortscriptonal concerns — document both paths."""
 
     def test_unparseable_safe_version_still_gets_sql_and_url(self):
         # "not-a-version" passes the safety allowlist but fails the semver parser.

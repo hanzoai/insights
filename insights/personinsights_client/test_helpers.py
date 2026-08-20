@@ -1,6 +1,6 @@
 """Shared test helpers for personinsights tests.
 
-Provides PersonhogTestMixin with helper methods for tests that exercise
+Provides PersonTestMixin with helper methods for tests that exercise
 personinsights-backed reads.  The global conftest fixture activates the fake for
 every test, so the mixin no longer manages its own client lifecycle.
 """
@@ -10,10 +10,10 @@ from __future__ import annotations
 from typing import Any
 
 from insights.models.person import Person
-from insights.personinsights_client.fake_client import FakePersonHogClient
+from insights.personinsights_client.fake_client import FakePersonClient
 
 
-class PersonhogTestMixin:
+class PersonTestMixin:
     """Mixin providing convenience helpers for tests that exercise personinsights reads.
 
     The global ``_activate_personinsights_fake`` conftest fixture activates the fake
@@ -21,7 +21,7 @@ class PersonhogTestMixin:
     fake, plus ``_seed_person``, ``_assert_personinsights_called``, etc.
     """
 
-    _fake_client: FakePersonHogClient | None = None
+    _fake_client: FakePersonClient | None = None
 
     def setUp(self) -> None:
         super().setUp()  # type: ignore[misc]

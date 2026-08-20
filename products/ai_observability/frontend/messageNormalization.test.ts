@@ -77,7 +77,7 @@ describe('messageNormalization', () => {
                 .flatMap((part) => (typeof part === 'object' && 'image' in part ? [part.image] : []))
 
             expect(images).toHaveLength(1)
-            expect(resolveAiBlobUrl(images[0], 1)).toBe(`/api/projects/1/ai_blob/v1/sha256/${HASH}`)
+            expect(resolveAiBlobUrl(images[0], 1)).toBe(`/v1/projects/1/ai_blob/v1/sha256/${HASH}`)
         })
     })
 

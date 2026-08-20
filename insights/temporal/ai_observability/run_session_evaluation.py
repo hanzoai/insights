@@ -27,11 +27,11 @@ from insights.insightsql_queries.ai.session_query_runner import SessionQueryRunn
 from insights.models.team import Team
 from insights.sync import database_sync_to_async
 from insights.temporal.ai_observability.evaluation_event_io import extract_event_io
-from insights.temporal.ai_observability.evaluation_hog import (
-    build_hog_event_global,
-    execute_hog_eval_bytecode,
-    finalize_hog_eval_result,
-    hog_bytecode_references_global,
+from insights.temporal.ai_observability.evaluation_script import (
+    build_script_event_global,
+    execute_script_eval_bytecode,
+    finalize_script_eval_result,
+    script_bytecode_references_global,
 )
 from insights.temporal.ai_observability.evaluation_llm_judge import call_llm_judge, get_output_type_config
 from insights.temporal.ai_observability.evaluation_payload import (
@@ -284,7 +284,7 @@ def fetch_session_for_evaluation(team_id: int, session_id: str, window_start: da
     return SessionFetchOutcome(traces=traces, skip_reason=None, event_count=event_count)
 
 
-def build_session_hog_globals(
+def build_session_script_globals(
     traces: list[LLMTrace], session_id: str, *, bytecode: list[Any] | None = None
 ) -> dict[str, Any]:
     """Build Script globals for a session-level eval.
@@ -294,7 +294,7 @@ def build_session_hog_globals(
     and no such source can exist for a session target.
     """
     globals_dict: dict[str, Any] = {}
-    if bytecode is None or hog_bytecode_references_global(bytecode, "target"):
+    if bytecode is None or script_bytecode_references_global(bytecode, "target"):
         globals_dict["target"] = {
             "type": "session",
             "id": session_id,
@@ -304,9 +304,9 @@ def build_session_hog_globals(
             "total_cost_usd": sum(trace.totalCost or 0 for trace in traces),
             "total_latency_seconds": sum(trace.totalLatency or 0 for trace in traces),
         }
-    if bytecode is None or hog_bytecode_references_global(bytecode, "evaluation_events"):
+    if bytecode is None or script_bytecode_references_global(bytecode, "evaluation_events"):
         globals_dict["evaluation_events"] = [
-            build_hog_event_global(
+            build_script_event_global(
                 event.event,
                 event.properties,
                 event_uuid=event.id,
@@ -449,7 +449,7 @@ def execute_session_llm_judge_activity(inputs: ExecuteSessionEvaluationInputs) -
 
 
 @temporalio.activity.defn
-async def execute_session_hog_eval_activity(inputs: ExecuteSessionEvaluationInputs) -> EvaluationActivityResult:
+async def execute_session_script_eval_activity(inputs: ExecuteSessionEvaluationInputs) -> EvaluationActivityResult:
     """Fetch the whole session and run Script bytecode against session-level globals."""
     evaluation = inputs.evaluation
 
@@ -473,20 +473,20 @@ async def execute_session_hog_eval_activity(inputs: ExecuteSessionEvaluationInpu
         )
         if outcome.skip_reason or outcome.traces is None:
             return None, outcome.skip_reason or "session_not_found"
-        globals_dict = build_session_hog_globals(outcome.traces, inputs.session_id, bytecode=bytecode)
-        return execute_hog_eval_bytecode(bytecode, globals_dict, allows_na=allows_na), None
+        globals_dict = build_session_script_globals(outcome.traces, inputs.session_id, bytecode=bytecode)
+        return execute_script_eval_bytecode(bytecode, globals_dict, allows_na=allows_na), None
 
     result, skip_reason = await database_sync_to_async(_execute, thread_sensitive=False)()
 
     if skip_reason or result is None:
         return build_session_skip_result(allows_na, skip_reason or "session_not_found")
 
-    return finalize_hog_eval_result(result, allows_na=allows_na, unit_label="session")
+    return finalize_script_eval_result(result, allows_na=allows_na, unit_label="session")
 
 
 @dataclass
-class SessionHogTestResult:
-    """One session's outcome from `run_hog_eval_over_recent_sessions`, shaped for the editor test
+class SessionScriptTestResult:
+    """One session's outcome from `run_script_eval_over_recent_sessions`, shaped for the editor test
     endpoint rather than for online emission."""
 
     session_id: str
@@ -553,7 +553,7 @@ def _sample_quiet_sessions(
                 "condition_filter": condition_filter if condition_filter is not None else ast.Constant(value=True),
             },
             team=team,
-            query_type="EvaluationTestHogSessionSample",
+            query_type="EvaluationTestScriptSessionSample",
             fall_back_to_events=True,
         )
     return [str(row[0]) for row in (response.results or [])]
@@ -575,7 +575,7 @@ def _session_io_preview(traces: list[LLMTrace]) -> tuple[str, str]:
     return input_preview, output_preview
 
 
-def run_hog_eval_over_recent_sessions(
+def run_script_eval_over_recent_sessions(
     *,
     team: Team,
     bytecode: list[Any],
@@ -584,10 +584,10 @@ def run_hog_eval_over_recent_sessions(
     allows_na: bool,
     quiet_period_seconds: int,
     lookback_days: int = EVALUATION_TEST_LOOKBACK_DAYS,
-) -> list[SessionHogTestResult]:
+) -> list[SessionScriptTestResult]:
     """Sample sessions that have gone quiet and run session-level Script bytecode against each.
 
-    The session mirror of `run_hog_eval_over_recent_traces`, so the editor preview matches how a
+    The session mirror of `run_script_eval_over_recent_traces`, so the editor preview matches how a
     session evaluation runs online — whole session, session globals — rather than against one
     generation or one trace. Each sampled session is fetched in full; `sample_count` is lower than
     the trace path's because a session fetch is a whole conversation rather than a single trace.
@@ -597,12 +597,12 @@ def run_hog_eval_over_recent_sessions(
     date_from = now - timedelta(days=lookback_days)
     session_ids = _sample_quiet_sessions(team, condition_filter, sample_count, date_from, now, quiet_cutoff)
 
-    results: list[SessionHogTestResult] = []
+    results: list[SessionScriptTestResult] = []
     for session_id in session_ids:
         outcome = fetch_session_for_evaluation(team.pk, session_id, now)
         if outcome.skip_reason or outcome.traces is None:
             results.append(
-                SessionHogTestResult(
+                SessionScriptTestResult(
                     session_id=session_id,
                     verdict=None,
                     reasoning="",
@@ -615,15 +615,15 @@ def run_hog_eval_over_recent_sessions(
             )
             continue
 
-        globals_dict = build_session_hog_globals(outcome.traces, session_id, bytecode=bytecode)
-        hog_result = execute_hog_eval_bytecode(bytecode, globals_dict, allows_na=allows_na)
+        globals_dict = build_session_script_globals(outcome.traces, session_id, bytecode=bytecode)
+        script_result = execute_script_eval_bytecode(bytecode, globals_dict, allows_na=allows_na)
         input_preview, output_preview = _session_io_preview(outcome.traces)
         results.append(
-            SessionHogTestResult(
+            SessionScriptTestResult(
                 session_id=session_id,
-                verdict=hog_result.get("verdict"),
-                reasoning=hog_result.get("reasoning") or "",
-                error=hog_result.get("error"),
+                verdict=script_result.get("verdict"),
+                reasoning=script_result.get("reasoning") or "",
+                error=script_result.get("error"),
                 input_preview=input_preview,
                 output_preview=output_preview,
             )

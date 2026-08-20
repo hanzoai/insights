@@ -48,7 +48,7 @@ def _patch(monkeypatch, *, acquired=True, archive="l1\nl2\nl3"):
 
     monkeypatch.setattr(activity_module, "acquire_github_installation", _acquire)
     monkeypatch.setattr(
-        activity_module, "_resolve_credentials", lambda _team_id, _integration_id: ("tok", "inst-99", "phc_dest")
+        activity_module, "_resolve_credentials", lambda _team_id, _integration_id: ("tok", "inst-99", "pk-dest")
     )
     monkeypatch.setattr(activity_module, "fetch_job_log", lambda _repo, _job_id, _token: archive)
     monkeypatch.setattr(activity_module, "JobLogsEmitter", _FakeEmitter)

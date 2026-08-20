@@ -21,7 +21,7 @@ const meta: Meta = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/comments/': commentsJson,
+                '/v1/projects/:team_id/comments/': commentsJson,
             },
         }),
     ],
@@ -35,7 +35,7 @@ export const LongContent: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/comments/': commentsLongJson,
+                '/v1/projects/:team_id/comments/': commentsLongJson,
             },
         }),
     ],
@@ -45,7 +45,7 @@ export const Tasks: Story = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/comments/': commentsTasksJson,
+                '/v1/projects/:team_id/comments/': commentsTasksJson,
             },
         }),
     ],

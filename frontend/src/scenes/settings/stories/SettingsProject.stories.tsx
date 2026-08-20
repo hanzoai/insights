@@ -33,10 +33,10 @@ const meta: Meta<(props: StoryProps) => JSX.Element> = {
                     cloud: true,
                     realm: 'cloud',
                 },
-                '/api/projects/:id/integrations': { results: [] },
+                '/v1/projects/:id/integrations': { results: [] },
             },
             patch: {
-                '/api/projects/:id': async ({ request }) => {
+                '/v1/projects/:id': async ({ request }) => {
                     // bounce the setting back as is
                     const newTeamSettings = { ...MOCK_DEFAULT_TEAM, ...((await request.json()) as object) }
                     return [200, newTeamSettings]

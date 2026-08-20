@@ -230,7 +230,7 @@
             "type": "replay_vision",
             "intents": ["replay_vision"]
         },
-        { "path": "Code review", "category": "Unreleased", "iconType": null, "type": null, "intents": ["review_hog"] },
+        { "path": "Code review", "category": "Unreleased", "iconType": null, "type": null, "intents": ["review"] },
         { "path": "Skills", "category": "Tools", "iconType": null, "type": "llm_skills", "intents": ["skills"] },
         {
             "path": "Apps",

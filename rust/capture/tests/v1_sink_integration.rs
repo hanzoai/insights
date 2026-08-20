@@ -51,7 +51,7 @@ fn v1_kafka_config(topic: &str) -> capture::v1::sinks::kafka::config::Config {
 
 fn v1_test_context() -> RequestContext {
     let mut ctx = test_utils::test_context();
-    ctx.api_token = "phc_integration_test_token".to_string();
+    ctx.api_token = "pk-integration_test_token".to_string();
     ctx
 }
 
@@ -114,7 +114,7 @@ async fn v1_single_pageview_round_trip() -> Result<()> {
     assert_eq!(captured.uuid, wrapped.uuid);
     assert_eq!(captured.distinct_id, "integ-user-1");
     assert_eq!(captured.event, "$pageview");
-    assert_eq!(captured.token, "phc_integration_test_token");
+    assert_eq!(captured.token, "pk-integration_test_token");
 
     let data: RawEvent = serde_json::from_str(&captured.data)?;
     assert_eq!(data.event, "$pageview");
@@ -157,7 +157,7 @@ async fn v1_batch_round_trip() -> Result<()> {
         let captured: CapturedEvent = serde_json::from_value(json)?;
         let data: RawEvent = serde_json::from_str(&captured.data)?;
         assert_eq!(captured.distinct_id, "user-42");
-        assert_eq!(captured.token, "phc_integration_test_token");
+        assert_eq!(captured.token, "pk-integration_test_token");
         event_names.push(data.event.clone());
     }
 
@@ -192,7 +192,7 @@ async fn v1_kafka_headers_round_trip() -> Result<()> {
 
     assert_eq!(
         headers.get("token").map(|s| s.as_str()),
-        Some("phc_integration_test_token")
+        Some("pk-integration_test_token")
     );
     assert_eq!(
         headers.get("distinct_id").map(|s| s.as_str()),
@@ -225,7 +225,7 @@ async fn v1_partition_key_round_trip() -> Result<()> {
     let key = topic.next_message_key()?;
     assert_eq!(
         key.as_deref(),
-        Some("phc_integration_test_token:integ-user-pkey")
+        Some("pk-integration_test_token:integ-user-pkey")
     );
 
     Ok(())
@@ -313,7 +313,7 @@ async fn v1_cookieless_mode_partition_key() -> Result<()> {
     let key = topic.next_message_key()?;
     assert_eq!(
         key.as_deref(),
-        Some("phc_integration_test_token:198.51.100.7"),
+        Some("pk-integration_test_token:198.51.100.7"),
         "cookieless mode should use token:IP as partition key"
     );
 

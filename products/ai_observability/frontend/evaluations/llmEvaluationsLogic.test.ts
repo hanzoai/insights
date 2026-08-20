@@ -8,7 +8,7 @@ import { initKeaTests } from '~/test/init'
 
 import { LLMProviderKey, llmProviderKeysLogic } from '../settings/llmProviderKeysLogic'
 import { llmEvaluationsLogic } from './llmEvaluationsLogic'
-import { HogEvaluation, LLMJudgeEvaluation, SentimentEvaluation } from './types'
+import { ScriptEvaluation, LLMJudgeEvaluation, SentimentEvaluation } from './types'
 
 const mockProviderKeys: LLMProviderKey[] = [
     {
@@ -84,7 +84,7 @@ const evaluationWithKey = (
     updated_at: '2024-01-01T00:00:00Z',
 })
 
-const hogEvaluation = (id: string): HogEvaluation => ({
+const scriptEvaluation = (id: string): ScriptEvaluation => ({
     ...evaluationWithKey(id, null),
     evaluation_type: 'script',
     evaluation_config: { source: 'return true' },
@@ -107,13 +107,13 @@ describe('llmEvaluationsLogic', () => {
     beforeEach(() => {
         useMocks({
             get: {
-                '/api/environments/:teamId/llm_analytics/provider_keys/': { results: mockProviderKeys },
-                '/api/environments/:teamId/llm_analytics/evaluation_config/': {
+                '/v1/environments/:teamId/llm_analytics/provider_keys/': { results: mockProviderKeys },
+                '/v1/environments/:teamId/llm_analytics/evaluation_config/': {
                     active_provider_key: null,
                     created_at: '2024-01-01T00:00:00Z',
                     updated_at: '2024-01-01T00:00:00Z',
                 },
-                '/api/projects/:teamId/evaluations/': {
+                '/v1/projects/:teamId/evaluations/': {
                     results: [
                         evaluationWithKey('eval-ok', 'key-ok'),
                         evaluationWithKey('eval-invalid', 'key-invalid'),
@@ -122,7 +122,7 @@ describe('llmEvaluationsLogic', () => {
                         evaluationWithKey('eval-default', null),
                     ],
                 },
-                '/api/projects/:teamId/evaluation_directories/': [
+                '/v1/projects/:teamId/evaluation_directories/': [
                     {
                         id: 'directory-a',
                         name: 'Directory A',
@@ -157,7 +157,7 @@ describe('llmEvaluationsLogic', () => {
                 updated_at: '2024-01-01T00:00:00Z',
             })
 
-            expect(logic.values.canEnableEvaluation(hogEvaluation('script'))).toBe(true)
+            expect(logic.values.canEnableEvaluation(scriptEvaluation('script'))).toBe(true)
             expect(logic.values.canEnableEvaluation(sentimentEvaluation('sentiment'))).toBe(true)
             expect(logic.values.canEnableEvaluation(evaluationWithKey('llm-default', null))).toBe(false)
         })
@@ -238,7 +238,7 @@ describe('llmEvaluationsLogic', () => {
         it('dispatches toggleEvaluationEnabledFailure when the API rejects the toggle', async () => {
             useMocks({
                 patch: {
-                    '/api/projects/:teamId/evaluations/:id/': () => [
+                    '/v1/projects/:teamId/evaluations/:id/': () => [
                         400,
                         {
                             enabled: ['Add a provider API key to enable this evaluation.'],

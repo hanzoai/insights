@@ -1,6 +1,6 @@
 import { Message } from 'node-rdkafka'
 
-import { AppMetricsOutput, DlqOutput, IngestionWarningsOutput, TophogOutput } from '~/common/outputs'
+import { AppMetricsOutput, DlqOutput, IngestionWarningsOutput, TopFnOutput } from '~/common/outputs'
 import { IngestionOutputs } from '~/common/outputs/ingestion-outputs'
 import { EventIngestionRestrictionManager } from '~/common/utils/event-ingestion-restrictions'
 import { PromiseScheduler } from '~/common/utils/promise-scheduler'
@@ -22,10 +22,10 @@ import { createApplyBasicEventRestrictionsStep } from '~/ingestion/common/steps/
 import { createDropOldEventsStep } from '~/ingestion/common/steps/event-processing/drop-old-events-step'
 import { createHandleClientIngestionWarningStep } from '~/ingestion/common/steps/event-processing/handle-client-ingestion-warning-step'
 import { createRecordIngestionLagStep } from '~/ingestion/common/steps/record-ingestion-lag'
-import { TopHogRegistry } from '~/ingestion/framework/extensions/tophog'
+import { TopFnRegistry } from '~/ingestion/framework/extensions/topfn'
 
 export interface ClientWarningsPipelineConfig {
-    outputs: IngestionOutputs<IngestionWarningsOutput | DlqOutput | AppMetricsOutput | TophogOutput>
+    outputs: IngestionOutputs<IngestionWarningsOutput | DlqOutput | AppMetricsOutput | TopFnOutput>
     teamManager: TeamManager
     // The managers come from a started `Lifecycle`'s service map, where
     // `start` and `stop` are stripped from the type — the pipeline only
@@ -33,7 +33,7 @@ export interface ClientWarningsPipelineConfig {
     eventIngestionRestrictionManager: EventIngestionRestrictionManager
     eventFilterManager: EventFilterManager
     promiseScheduler: PromiseScheduler
-    topHog: TopHogRegistry
+    topFn: TopFnRegistry
 }
 
 interface ClientWarningsPipelineInput {
@@ -48,7 +48,7 @@ export function createClientWarningsPipeline<
     TInput extends ClientWarningsPipelineInput,
     TContext extends ClientWarningsPipelineContext,
 >(config: ClientWarningsPipelineConfig) {
-    const { outputs, teamManager, eventIngestionRestrictionManager, eventFilterManager, promiseScheduler, topHog } =
+    const { outputs, teamManager, eventIngestionRestrictionManager, eventFilterManager, promiseScheduler, topFn } =
         config
 
     return newCommonIngestionPipeline<TInput, TContext>({
@@ -56,7 +56,7 @@ export function createClientWarningsPipeline<
         outputs,
         promiseScheduler,
         concurrentBatches: 1,
-        topHog,
+        topFn,
     })
         .beforeBatch((b) => b.pipe(createEventFiltersBatchAppMetricsBeforeBatchStep(outputs)))
         .parseHeaders()

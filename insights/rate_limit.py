@@ -13,7 +13,8 @@ from django.utils import timezone
 
 from prometheus_client import Counter
 from rest_framework.throttling import SimpleRateThrottle, UserRateThrottle
-from statshog.defaults.django import statsd
+
+from insights.statsd import statsd
 
 if TYPE_CHECKING:
     # This module is imported by DRF's DEFAULT_THROTTLE_CLASSES setting while rest_framework.views
@@ -70,9 +71,9 @@ def is_rate_limit_enabled(_ttl: int) -> bool:
     return get_instance_setting("RATE_LIMIT_ENABLED")
 
 
-path_by_env_pattern = re.compile(r"^/api/environments/(\d+)/")
-path_by_team_pattern = re.compile(r"^/api/projects/(\d+)/")
-path_by_org_pattern = re.compile(r"^/api/organizations/(.+?)/")  # .+? is non-greedy match, bit faster here
+path_by_env_pattern = re.compile(r"^/v1/environments/(\d+)/")
+path_by_team_pattern = re.compile(r"^/v1/projects/(\d+)/")
+path_by_org_pattern = re.compile(r"^/v1/organizations/(.+?)/")  # .+? is non-greedy match, bit faster here
 
 
 @patchable
@@ -110,7 +111,7 @@ def replace_with_param_names(route_pattern):
     route_id = route_param_pattern.sub(lambda m: "/" + extract_param_name(m) + "/", route_pattern)
     if route_id.startswith("^"):
         route_id = route_id[1:]
-    if route_id.startswith("api/"):
+    if route_id.startswith("v1/"):
         route_id = "/" + route_id
     if route_id.endswith("$"):
         route_id = route_id[:-1]
@@ -134,9 +135,9 @@ def get_route_from_path(path: str | None) -> str:
         if route_pattern:
             return replace_with_param_names(route_pattern)
 
-    route_id = path_by_env_pattern.sub("/api/environments/TEAM_ID/", path)
-    route_id = path_by_team_pattern.sub("/api/projects/TEAM_ID/", route_id)
-    return path_by_org_pattern.sub("/api/organizations/ORG_ID/", route_id)
+    route_id = path_by_env_pattern.sub("/v1/environments/TEAM_ID/", path)
+    route_id = path_by_team_pattern.sub("/v1/projects/TEAM_ID/", route_id)
+    return path_by_org_pattern.sub("/v1/organizations/ORG_ID/", route_id)
 
 
 class PersonalApiKeyRateThrottle(SimpleRateThrottle):
@@ -353,29 +354,6 @@ class SignupEmailPrecheckThrottle(IPThrottle):
 
     scope = "signup_email_precheck"
     rate = "30/minute"
-
-
-class LoginPrecheckThrottle(IPThrottle):
-    """
-    Rate limit login precheck requests by IP.
-
-    The response reveals which sign-in methods a passwordless account has, so cap it per-IP to make
-    bulk enumeration expensive. Per-email throttling would be useless here — enumeration uses a
-    different email on every request.
-    """
-
-    scope = "login_precheck"
-    rate = "30/minute"
-
-    def allow_request(self, request, view):
-        # The time-sensitive re-auth modal prechecks the logged-in user's *own* email, and that tells
-        # them nothing they don't already have — so exempt exactly that. The endpoint is `AllowAny`
-        # with no ownership check, so a broader exemption would let anyone with a throwaway account
-        # enumerate other people's sign-in methods for free.
-        email = request.data.get("email", "") if isinstance(request.data, dict) else ""
-        if request.user.is_authenticated and email and email.casefold() == (request.user.email or "").casefold():
-            return True
-        return super().allow_request(request, view)
 
 
 class SignupResendInviteThrottle(UserOrEmailRateThrottle):
@@ -845,63 +823,6 @@ class EventValuesBurstThrottle(PersonalApiKeyRateThrottle):
 class EventValuesSustainedThrottle(PersonalApiKeyRateThrottle):
     scope = "event_values_sustained"
     rate = "300/hour"
-
-
-class UserPasswordResetThrottle(UserOrEmailRateThrottle):
-    scope = "user_password_reset"
-    rate = "6/day"
-
-
-class CodeBasedVerificationThrottle(UserOrEmailRateThrottle):
-    scope = "code_based_verification"
-    rate = "6/20minutes"
-
-    def get_cache_key(self, request, view):
-        # Key on the pending login's user id (from the session), not on request data. The base class
-        # would fall back to a request-body "email" field, which the code-verification request never
-        # legitimately carries - letting an attacker mint a fresh throttle bucket per guess by varying
-        # it. The session is the source of truth for who is being verified.
-        from insights.helpers.two_factor_session import code_based_verifier
-
-        user_id = code_based_verifier.get_pending_code_based_verification_user_id(request)
-        if user_id:
-            ident = hashlib.sha256(str(user_id).encode()).hexdigest()
-            return self.cache_format % {"scope": self.scope, "ident": ident}
-
-        return super().get_cache_key(request, view)
-
-
-class CodeBasedVerificationResendThrottle(UserOrEmailRateThrottle):
-    scope = "code_based_verification_resend"
-    rate = "1/minute"
-
-    def get_cache_key(self, request, view):
-        from insights.helpers.two_factor_session import code_based_verifier
-
-        user_id = code_based_verifier.get_pending_code_based_verification_user_id(request)
-        if user_id:
-            ident = hashlib.sha256(str(user_id).encode()).hexdigest()
-            return self.cache_format % {"scope": self.scope, "ident": ident}
-
-        return super().get_cache_key(request, view)
-
-
-class TwoFactorThrottle(UserOrEmailRateThrottle):
-    """
-    Rate limiting for TOTP/backup code verification during 2FA login.
-    Uses the pending 2FA user ID from session to throttle per-user.
-    """
-
-    scope = "two_factor"
-    rate = "6/20minutes"
-
-    def get_cache_key(self, request, view):
-        user_id = request.session.get("user_authenticated_but_no_2fa")
-        if user_id:
-            ident = hashlib.sha256(str(user_id).encode()).hexdigest()
-            return self.cache_format % {"scope": self.scope, "ident": ident}
-
-        return super().get_cache_key(request, view)
 
 
 class UserAuthenticationThrottle(UserOrEmailRateThrottle):

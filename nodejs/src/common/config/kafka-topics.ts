@@ -58,7 +58,7 @@ export const KAFKA_DATASTORE_AI_EVENTS_JSON = `${prefix}datastore_ai_events_json
 export const KAFKA_LOG_ENTRIES = `${prefix}log_entries${suffix}`
 
 // per-invocation result rows for script functions and script flows
-export const KAFKA_FN_INVOCATION_RESULTS = `${prefix}datastore_hog_invocation_results${suffix}`
+export const KAFKA_FN_INVOCATION_RESULTS = `${prefix}datastore_invocations${suffix}`
 
 // metadata rows for sent message assets (rendered emails stored in object storage)
 export const KAFKA_MESSAGE_ASSETS = `${prefix}datastore_message_assets${suffix}`
@@ -100,5 +100,5 @@ export const KAFKA_METRICS_INGESTION_DLQ = `${prefix}metrics_ingestion_dlq${suff
 export const KAFKA_METRICS_INGESTION_OVERFLOW = `${prefix}metrics_ingestion_overflow${suffix}`
 export const KAFKA_METRICS_DATASTORE = `${prefix}datastore_metrics${suffix}`
 
-// TopHog metrics
-export const KAFKA_DATASTORE_TOPHOG = `${prefix}datastore_tophog${suffix}`
+// TopFn metrics
+export const KAFKA_DATASTORE_TOPFN = `${prefix}datastore_topfn${suffix}`

@@ -63,7 +63,7 @@ export class RerunJobManager {
         request: RerunRequest
     ): Promise<string> {
         // Both bounds are required. Window can't exceed the Datastore TTL on
-        // hog_invocation_results — older data is already gone via part drop.
+        // invocations — older data is already gone via part drop.
         const start = new Date(request.filter.window_start)
         const end = new Date(request.filter.window_end)
         if (isNaN(start.getTime()) || isNaN(end.getTime())) {
@@ -74,7 +74,7 @@ export class RerunJobManager {
         }
         const maxWindowMs = RERUN_MAX_WINDOW_DAYS * 24 * 60 * 60 * 1000
         if (end.getTime() - start.getTime() > maxWindowMs) {
-            throw new Error(`rerun window cannot exceed ${RERUN_MAX_WINDOW_DAYS} days (TTL on hog_invocation_results)`)
+            throw new Error(`rerun window cannot exceed ${RERUN_MAX_WINDOW_DAYS} days (TTL on invocations)`)
         }
 
         const trimmedIds = request.filter.invocation_ids?.slice(0, this.config.maxCount)

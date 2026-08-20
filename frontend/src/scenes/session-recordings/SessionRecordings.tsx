@@ -2,20 +2,20 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import { IconDocument, IconGear, IconHeadset, IconOpenSidebar } from '@hanzo/icons'
 import { Badge, Button, Link } from '@hanzo/elements'
-import { PostHogCaptureOnViewed as InsightsCaptureOnViewed } from '@hanzo/react'
+import { IconDocument, IconGear, IconHeadset, IconOpenSidebar } from '@hanzo/icons'
+import { InsightsCaptureOnViewed } from '@hanzo/react'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
-import { WarningHog } from 'lib/components/mascots'
 import { LiveRecordingsCount } from 'lib/components/LiveUserCount'
+import { WarningScript } from 'lib/components/mascots'
 import { Shortcut } from 'lib/components/Shortcuts/Shortcut'
 import { keyBinds } from 'lib/components/Shortcuts/shortcuts'
-import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Banner } from 'lib/elements/Banner'
 import { bannerLogic } from 'lib/elements/Banner/bannerLogic'
-import { Tab, Tabs } from 'lib/elements/Tabs'
 import { Spinner } from 'lib/elements/Spinner/Spinner'
+import { Tab, Tabs } from 'lib/elements/Tabs'
+import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { cn } from 'lib/utils/css-classes'
 import { sceneConfigurations } from 'scenes/scenes'
@@ -164,7 +164,7 @@ function Warnings(): JSX.Element {
                 <Banner type="info" hideIcon={true}>
                     <div className="flex gap-8 p-8 md:flex-row justify-center flex-wrap">
                         <div className="flex justify-center items-center w-full md:w-50">
-                            <WarningHog className="w-full h-auto md:h-[200px] md:w-[200px] max-w-50" />
+                            <WarningScript className="w-full h-auto md:h-[200px] md:w-[200px] max-w-50" />
                         </div>
                         <div className="flex flex-col gap-2 flex-shrink max-w-180">
                             <h2 className="text-lg font-semibold">

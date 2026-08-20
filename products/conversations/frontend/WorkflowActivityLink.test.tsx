@@ -11,7 +11,7 @@ describe('WorkflowActivityLink', () => {
 
     beforeEach(() => {
         initKeaTests()
-        getInsightsFlow = jest.spyOn(api.hogFlows, 'getInsightsFlow')
+        getInsightsFlow = jest.spyOn(api.flows, 'getInsightsFlow')
     })
 
     afterEach(() => {

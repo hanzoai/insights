@@ -53,7 +53,7 @@ describe('Insights', { concurrent: false }, () => {
             name: string
         }>({
             method: 'POST',
-            path: `/api/projects/${projectId}/insights/`,
+            path: `/v1/projects/${projectId}/insights/`,
             body: {
                 name,
                 query: SAMPLE_INSIGHTSQL_QUERIES.pageviews,
@@ -72,7 +72,7 @@ describe('Insights', { concurrent: false }, () => {
             name: string
         }>({
             method: 'POST',
-            path: `/api/projects/${projectId}/insights/`,
+            path: `/v1/projects/${projectId}/insights/`,
             body: {
                 name,
                 query: SAMPLE_TREND_QUERIES.basicPageviews,

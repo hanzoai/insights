@@ -4,11 +4,17 @@ import { gunzip, gzip } from 'zlib'
 
 import { parseJSON } from '~/common/utils/json-parse'
 import { sanitizeForUTF8 } from '~/common/utils/strings'
-import { UUIDT, castTimestampOrNow, clickHouseTimestampToISO } from '~/common/utils/utils'
+import { UUIDT, castTimestampOrNow, datastoreTimestampToISO } from '~/common/utils/utils'
 
 import { RawDatastoreEvent, Team, TimestampFormat } from '../types'
 import { CdpInternalEvent } from './schema'
-import { InsightsFunctionInvocationGlobals, InsightsFunctionType, LogEntry, LogEntrySerialized, MinimalLogEntry } from './types'
+import {
+    InsightsFunctionInvocationGlobals,
+    InsightsFunctionType,
+    LogEntry,
+    LogEntrySerialized,
+    MinimalLogEntry,
+} from './types'
 
 // ID of functions that are hidden from normal users and used by us for special testing
 // For example, transformations use this to only run if in comparison mode
@@ -57,12 +63,12 @@ export function convertToInsightsFunctionInvocationGlobals(
     // so we need to handle that case
     const eventTimestamp = DateTime.fromISO(event.timestamp).isValid
         ? event.timestamp
-        : clickHouseTimestampToISO(event.timestamp)
+        : datastoreTimestampToISO(event.timestamp)
 
     const eventCapturedAt = event.captured_at
         ? DateTime.fromISO(event.captured_at).isValid
             ? event.captured_at
-            : clickHouseTimestampToISO(event.captured_at)
+            : datastoreTimestampToISO(event.captured_at)
         : null
 
     const context: InsightsFunctionInvocationGlobals = {
@@ -87,7 +93,7 @@ export function convertToInsightsFunctionInvocationGlobals(
     return context
 }
 
-export function convertBatchInsightsFlowRequestToInsightsFunctionInvocationGlobals({
+export function convertBatchFlowRequestToInsightsFunctionInvocationGlobals({
     team,
     personId,
     siteUrl,
@@ -112,7 +118,7 @@ export function convertBatchInsightsFlowRequestToInsightsFunctionInvocationGloba
             url: projectUrl,
         },
         event: {
-            event: '$batch_hog_flow_invocation',
+            event: '$batch_flow_invocation',
             properties: {},
             uuid: new UUIDT().toString(),
             distinct_id: '', // Not applicable for batch processing but left here for compatibility
@@ -126,7 +132,7 @@ export function convertBatchInsightsFlowRequestToInsightsFunctionInvocationGloba
     return context
 }
 
-export function convertAccountBatchInsightsFlowRequestToInsightsFunctionInvocationGlobals({
+export function convertAccountBatchFlowRequestToInsightsFunctionInvocationGlobals({
     team,
     externalId,
     groupType,
@@ -146,14 +152,14 @@ export function convertAccountBatchInsightsFlowRequestToInsightsFunctionInvocati
             url: projectUrl,
         },
         event: {
-            event: '$batch_hog_flow_invocation',
+            event: '$batch_flow_invocation',
             // $groups drives the worker's group hydration, so account actions defaulting to
             // {groups.<type>.id} resolve without any account-specific plumbing.
             properties: { $groups: { [groupType]: externalId } },
             uuid: new UUIDT().toString(),
             // The account's group key doubles as the invocation's distinct_id so
             // invocation_results are filterable per account. Account runs carry no person;
-            // the hogflow worker skips person resolution for account audiences.
+            // the flow worker skips person resolution for account audiences.
             distinct_id: externalId,
             elements_chain: '',
             timestamp: DateTime.now().toISO(),

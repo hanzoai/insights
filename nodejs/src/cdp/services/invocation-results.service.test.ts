@@ -3,12 +3,12 @@ import { CapturedEventsService } from './captured-events/captured-events.service
 import { InvocationResultsService } from './invocation-results.service'
 import { MessageAssetsService } from './messaging/message-assets.service'
 import { InsightsFunctionMonitoringService } from './monitoring/script-function-monitoring.service'
-import { HogInvocationResultsService } from './monitoring/script-invocation-results.service'
+import { ScriptInvocationResultsService } from './monitoring/script-invocation-results.service'
 import { WarehouseWebhooksService } from './warehouse/warehouse-webhooks.service'
 
 describe('InvocationResultsService', () => {
     let monitoringService: jest.Mocked<InsightsFunctionMonitoringService>
-    let invocationResultsRowsService: jest.Mocked<HogInvocationResultsService>
+    let invocationResultsRowsService: jest.Mocked<ScriptInvocationResultsService>
     let warehouseWebhooksService: jest.Mocked<WarehouseWebhooksService>
     let capturedEventsService: jest.Mocked<CapturedEventsService>
     let messageAssetsService: jest.Mocked<MessageAssetsService>
@@ -28,7 +28,7 @@ describe('InvocationResultsService', () => {
         invocationResultsRowsService = {
             queueInvocationResults: jest.fn(),
             flush: jest.fn().mockResolvedValue(undefined),
-        } as unknown as jest.Mocked<HogInvocationResultsService>
+        } as unknown as jest.Mocked<ScriptInvocationResultsService>
 
         warehouseWebhooksService = {
             queueInvocationResults: jest.fn(),

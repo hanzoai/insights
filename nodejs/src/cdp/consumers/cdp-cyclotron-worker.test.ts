@@ -13,11 +13,11 @@ import { Hub, Team } from '../../types'
 import { INSIGHTS_EXAMPLES, INSIGHTS_FILTERS_EXAMPLES, INSIGHTS_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
     createExampleInvocation,
-    createHogExecutionGlobals,
+    createScriptExecutionGlobals,
     createInsightsFunction,
     insertInsightsFunction,
 } from '../_tests/fixtures'
-import { compileHog } from '../templates/compiler'
+import { compileScript } from '../templates/compiler'
 import { CyclotronJobInvocationInsightsFunction, InsightsFunctionInvocationGlobalsWithInputs, InsightsFunctionType } from '../types'
 import { destinationE2eLagMsSummary } from '../utils'
 import { CdpCyclotronWorker } from './cdp-cyclotron-worker.consumer'
@@ -53,7 +53,7 @@ describe('CdpCyclotronWorker', () => {
         )
 
         globals = {
-            ...createHogExecutionGlobals({}),
+            ...createScriptExecutionGlobals({}),
             inputs: {
                 url: 'https://hanzo.ai',
             },
@@ -139,7 +139,7 @@ describe('CdpCyclotronWorker', () => {
             const nativeExecutorSpy = jest.spyOn(processor['nativeDestinationExecutorService'], 'execute')
             const pluginExecutorSpy = jest.spyOn(processor['pluginDestinationExecutorService'], 'execute')
             const segmentExecutorSpy = jest.spyOn(processor['segmentDestinationExecutorService'], 'execute')
-            const hogExecutorSpy = jest.spyOn(processor['hogExecutorAsync'], 'executeWithAsyncFunctions')
+            const scriptExecutorSpy = jest.spyOn(processor['scriptExecutorAsync'], 'executeWithAsyncFunctions')
 
             const invocations = [
                 createExampleInvocation(nativeFn, globals),
@@ -171,8 +171,8 @@ describe('CdpCyclotronWorker', () => {
                 })
             )
 
-            expect(hogExecutorSpy).toHaveBeenCalledTimes(1)
-            expect(hogExecutorSpy).toHaveBeenCalledWith(
+            expect(scriptExecutorSpy).toHaveBeenCalledTimes(1)
+            expect(scriptExecutorSpy).toHaveBeenCalledWith(
                 expect.objectContaining({
                     insightsFunction: expect.objectContaining({ template_id: 'template-webhook' }),
                 })
@@ -400,7 +400,7 @@ describe('CdpCyclotronWorker', () => {
                 const capturedAt = new Date(fixedTime.toMillis() - 1000).toISOString()
                 const observeSpy = jest.spyOn(destinationE2eLagMsSummary, 'observe')
 
-                const hogFn = await insertInsightsFunction(
+                const scriptFn = await insertInsightsFunction(
                     hub.postgres,
                     team.id,
                     createInsightsFunction({
@@ -410,7 +410,7 @@ describe('CdpCyclotronWorker', () => {
                     })
                 )
 
-                const hogInvocation = createExampleInvocation(hogFn, {
+                const scriptInvocation = createExampleInvocation(scriptFn, {
                     ...globals,
                     event: {
                         ...globals.event,
@@ -418,7 +418,7 @@ describe('CdpCyclotronWorker', () => {
                     },
                 })
 
-                await processor.processInvocations([hogInvocation])
+                await processor.processInvocations([scriptInvocation])
 
                 expect(observeSpy).toHaveBeenCalledTimes(1)
                 expect(observeSpy).toHaveBeenCalledWith(1000)
@@ -470,11 +470,11 @@ describe('CdpCyclotronWorker', () => {
                     createInsightsFunction({
                         ...INSIGHTS_FILTERS_EXAMPLES.no_filters,
                         script: evilFunctionCode,
-                        bytecode: await compileHog(evilFunctionCode),
+                        bytecode: await compileScript(evilFunctionCode),
                     })
                 )
 
-                processor.hogExecutorAsync.hogExecutor['config'].executionTimeoutMs = blockTime
+                processor.scriptExecutorAsync.scriptExecutor['config'].executionTimeoutMs = blockTime
 
                 const numberToTest = 5
                 const invocations = Array.from({ length: numberToTest }, () =>

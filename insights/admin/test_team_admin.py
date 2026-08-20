@@ -40,7 +40,7 @@ class TestTeamAdminSetApiTokenView(BaseTest):
         super().setUp()
         self.user.is_staff = True
         self.user.save()
-        self.team.api_token = "phc_admin_test_old"
+        self.team.api_token = "pk-admin_test_old"
         self.team.save()
         self.factory = RequestFactory()
         self.admin = TeamAdmin(Team, AdminSite())
@@ -67,13 +67,12 @@ class TestTeamAdminSetApiTokenView(BaseTest):
         template = mock_render.call_args.args[1]
         context = mock_render.call_args.args[2]
         assert template == "admin/insights/team/set_api_token_form.html"
-        assert context["team"].api_token == "phc_admin_test_old"
+        assert context["team"].api_token == "pk-admin_test_old"
         assert context["title"] == f"Set API token - {self.team.name}"
 
-    @patch("insights.tasks.integrations.push_vercel_secrets.delay")
     @patch("insights.models.team.team.set_team_in_cache")
-    def test_post_with_valid_token_invokes_model_method_and_redirects(self, _mock_set_cache, _mock_push_vercel) -> None:
-        http_request = self.factory.post(self.set_api_token_url, {"new_token": "phc_admin_test_new"})
+    def test_post_with_valid_token_invokes_model_method_and_redirects(self, _mock_set_cache) -> None:
+        http_request = self.factory.post(self.set_api_token_url, {"new_token": "pk-admin_test_new"})
         http_request.user = self.user
         _attach_messages(http_request)
 
@@ -83,18 +82,18 @@ class TestTeamAdminSetApiTokenView(BaseTest):
         assert response["Location"] == self.team_change_url
 
         self.team.refresh_from_db()
-        assert self.team.api_token == "phc_admin_test_new"
+        assert self.team.api_token == "pk-admin_test_new"
 
     @parameterized.expand(
         [
             ("empty_token", "   "),
-            ("identical_token", "phc_admin_test_old"),
-            ("duplicate_token", "phc_duplicate"),
+            ("identical_token", "pk-admin_test_old"),
+            ("duplicate_token", "pk-duplicate"),
         ]
     )
     def test_post_rejected_inputs_show_error_and_do_not_change_token(self, _name: str, new_token: str) -> None:
-        if new_token == "phc_duplicate":
-            Team.objects.create(organization=self.organization, api_token="phc_duplicate")
+        if new_token == "pk-duplicate":
+            Team.objects.create(organization=self.organization, api_token="pk-duplicate")
 
         http_request = self.factory.post(self.set_api_token_url, {"new_token": new_token})
         http_request.user = self.user
@@ -105,12 +104,12 @@ class TestTeamAdminSetApiTokenView(BaseTest):
         assert response.status_code == 302
         assert response["Location"] == self.set_api_token_url
         self.team.refresh_from_db()
-        assert self.team.api_token == "phc_admin_test_old"
+        assert self.team.api_token == "pk-admin_test_old"
 
     @parameterized.expand([("get",), ("post",)])
     def test_returns_403_when_user_lacks_change_permission(self, method: str) -> None:
         if method == "post":
-            http_request = self.factory.post(self.set_api_token_url, {"new_token": "phc_admin_test_new"})
+            http_request = self.factory.post(self.set_api_token_url, {"new_token": "pk-admin_test_new"})
         else:
             http_request = self.factory.get(self.set_api_token_url)
         http_request.user = self.user
@@ -121,7 +120,7 @@ class TestTeamAdminSetApiTokenView(BaseTest):
                 self.admin.set_api_token_view(http_request, str(self.team.pk))
 
         self.team.refresh_from_db()
-        assert self.team.api_token == "phc_admin_test_old"
+        assert self.team.api_token == "pk-admin_test_old"
 
 
 @freeze_time("2026-01-01T00:00:00Z")
@@ -247,7 +246,9 @@ class TestTeamAdminLLMGateway(BaseTest):
             setattr(self.team, field, timezone.now() - timedelta(days=1))
             self.team.save()
 
-        with patch("insights.storage.team_llm_gateway_policy_cache.update_team_llm_gateway_policy_cache") as mock_update:
+        with patch(
+            "insights.storage.team_llm_gateway_policy_cache.update_team_llm_gateway_policy_cache"
+        ) as mock_update:
             response = getattr(self.admin, view_name)(self._post(), str(self.team.pk))
 
         assert response.status_code == 302

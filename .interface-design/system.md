@@ -37,22 +37,22 @@ Do not add shadows for general UI. Reserve for modals, dropdowns, and hover-elev
 
 ### Accent
 
-| Token                     | Light                     | Dark                     |
-| ------------------------- | ------------------------- | ------------------------ |
-| `--color-accent`          | HSL(19, 100%, 48%) orange | HSL(43, 94%, 57%) yellow |
-| `--color-accent-hover`    | +10% lightness            | +10% lightness           |
-| `--color-accent-active`   | +15% lightness            | +15% lightness           |
-| `--color-accent-inverted` | Yellow                    | Orange                   |
+| Token                     | Light           | Dark            |
+| ------------------------- | --------------- | --------------- |
+| `--color-accent`          | HSL(0, 0%, 20%) | HSL(0, 0%, 80%) |
+| `--color-accent-hover`    | +10% lightness  | +10% lightness  |
+| `--color-accent-active`   | +15% lightness  | +15% lightness  |
+| `--color-accent-inverted` | HSL(0, 0%, 80%) | HSL(0, 0%, 80%) |
 
 ### Backgrounds
 
-| Token                  | Light            | Dark             |
-| ---------------------- | ---------------- | ---------------- |
+| Token                  | Light             | Dark             |
+| ---------------------- | ----------------- | ---------------- |
 | `bg-primary`           | insights-3000-50  | neutral-cool-950 |
-| `bg-surface-primary`   | white            | neutral-cool-850 |
+| `bg-surface-primary`   | white             | neutral-cool-850 |
 | `bg-surface-secondary` | insights-3000-100 | neutral-cool-900 |
 | `bg-surface-tertiary`  | insights-3000-150 | neutral-cool-950 |
-| `bg-fill-primary`      | white            | neutral-cool-900 |
+| `bg-fill-primary`      | white             | neutral-cool-900 |
 | `bg-fill-secondary`    | insights-3000-25  | neutral-cool-850 |
 | `bg-fill-tertiary`     | insights-3000-50  | neutral-cool-800 |
 
@@ -85,12 +85,24 @@ Use `bg-fill-highlight-{50,100,150,200}` for subtle black overlays (light mode) 
 
 ### Brand
 
+The mark is monochrome. The three brand slots are kept, but their saturation is
+0%, so they read as a dark/mid/light grey ramp.
+
 | Token            | Value                      |
 | ---------------- | -------------------------- |
-| `--brand-blue`   | #1d4aff                    |
-| `--brand-red`    | #f54e00                    |
-| `--brand-yellow` | #f9bd2b                    |
+| `--brand-red`    | #333                       |
+| `--brand-blue`   | #555                       |
+| `--brand-yellow` | #888888                    |
 | `--brand-key`    | #000 (light) / #fff (dark) |
+
+The accents derive from the same slots, split into hue, saturation and lightness
+so the whole ramp moves from one place:
+
+| Token                                   | Hue | Saturation | Lightness |
+| --------------------------------------- | --- | ---------- | --------- |
+| `--color-insights-brand-orange-{h,s,l}` | 0   | 0%         | 20%       |
+| `--color-insights-brand-blue-{h,s,l}`   | 0   | 0%         | 56%       |
+| `--color-insights-brand-yellow-{h,s,l}` | 0   | 0%         | 80%       |
 
 ## Typography
 
@@ -98,8 +110,8 @@ Use `bg-fill-highlight-{50,100,150,200}` for subtle black overlays (light mode) 
 | ------------- | ------------------------------------------------- |
 | Base size     | 14px                                              |
 | Line height   | 1.5715                                            |
-| Font sans     | RoundHog, -apple-system, Inter, ...               |
-| Font title    | RoundHog, -apple-system, Inter, ...               |
+| Font sans     | Geist, -apple-system, Inter, ...                  |
+| Font title    | Geist, -apple-system, Inter, ...                  |
 | Font mono     | ui-monospace, SFMono-Regular, SF Mono, Menlo, ... |
 | Font medium   | 500                                               |
 | Font semibold | 600                                               |
@@ -211,7 +223,7 @@ Use `bg-fill-highlight-{50,100,150,200}` for subtle black overlays (light mode) 
 | `--z-tooltip`         | 1300  |
 | `--z-popover`         | 1200  |
 | `--z-modal`           | 1100  |
-| `--z-mascot-buddy`  | 1050  |
+| `--z-mascot-buddy`    | 1050  |
 | `--z-drawer`          | 900   |
 | `--z-main-nav`        | 750   |
 | `--z-lemon-sidebar`   | 700   |

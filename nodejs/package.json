@@ -4,7 +4,7 @@
     "description": "Insights Node.js services",
     "license": "MIT",
     "author": "Insights <hey@hanzo.ai>",
-    "repository": "https://github.com/PostHog/posthog",
+    "repository": "https://github.com/hanzoai/insights",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {

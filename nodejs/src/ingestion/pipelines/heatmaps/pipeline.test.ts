@@ -14,7 +14,7 @@ import { EventFilterManager } from '~/ingestion/common/event-filters'
 import { createOkContext } from '~/ingestion/framework/helpers'
 import { drop, ok } from '~/ingestion/framework/results'
 import { createTestTeam } from '~/tests/helpers/team'
-import { createNoopTopHog } from '~/tests/helpers/tophog'
+import { createNoopTopFn } from '~/tests/helpers/topfn'
 
 import { HEATMAPS_OUTPUT } from './outputs'
 import { HeatmapsPipelineConfig, createHeatmapsPipeline } from './pipeline'
@@ -146,9 +146,9 @@ describe('HeatmapsPipeline', () => {
                     mockKafkaProducer,
                     'test'
                 ),
-                [TOPFN_OUTPUT]: new SingleIngestionOutput(TOPFN_OUTPUT, 'tophog_test', mockKafkaProducer, 'test'),
+                [TOPFN_OUTPUT]: new SingleIngestionOutput(TOPFN_OUTPUT, 'topfn_test', mockKafkaProducer, 'test'),
             }),
-            topHog: createNoopTopHog(),
+            topFn: createNoopTopFn(),
             teamManager: mockTeamManager,
             eventIngestionRestrictionManager: mockEventIngestionRestrictionManager,
             eventFilterManager: mockEventFilterManager,

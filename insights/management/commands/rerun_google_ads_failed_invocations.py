@@ -21,15 +21,15 @@ from typing import Any
 
 from django.core.management.base import BaseCommand, CommandError
 
-from insights.plugins.plugin_server_api import rerun_hog_invocations
+from insights.plugins.plugin_server_api import rerun_script_invocations
 
 from products.cdp.backend.models.insights_functions.insights_function import InsightsFunction
 
 GOOGLE_ADS_TEMPLATE_ID = "template-google-ads"
 DEFAULT_ERROR_KIND = "http_4xx"
 
-# Matches RERUN_MAX_WINDOW_DAYS in insights/api/hog_invocation_rerun.py, which
-# is the Datastore TTL on hog_invocation_results. Anything past this either
+# Matches RERUN_MAX_WINDOW_DAYS in insights/api/script_invocation_rerun.py, which
+# is the Datastore TTL on invocations. Anything past this either
 # 400s downstream or silently under-replays because the partitions are gone.
 MAX_WINDOW_DAYS = 30
 
@@ -50,7 +50,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--window-end",
             required=True,
-            help="Exclusive ISO-8601 UTC upper bound. Max 30d window (Datastore TTL on hog_invocation_results).",
+            help="Exclusive ISO-8601 UTC upper bound. Max 30d window (Datastore TTL on invocations).",
         )
         parser.add_argument(
             "--error-kind",
@@ -91,7 +91,7 @@ class Command(BaseCommand):
         if window_end - window_start > timedelta(days=MAX_WINDOW_DAYS):
             span_days = (window_end - window_start).days
             raise CommandError(
-                f"Window cannot exceed {MAX_WINDOW_DAYS} days (Datastore TTL on hog_invocation_results). "
+                f"Window cannot exceed {MAX_WINDOW_DAYS} days (Datastore TTL on invocations). "
                 f"Got {span_days} days."
             )
 
@@ -152,7 +152,7 @@ class Command(BaseCommand):
                 continue
 
             try:
-                res = rerun_hog_invocations(
+                res = rerun_script_invocations(
                     team_id=team_id,
                     function_kind="insights_function",
                     function_id=fn_id,

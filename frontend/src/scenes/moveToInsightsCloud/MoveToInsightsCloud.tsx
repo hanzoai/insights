@@ -1,4 +1,4 @@
-import * as experimentPng from '@hanzo/brand/hoggies/png/experiment'
+import { Button, Link } from '@hanzo/elements'
 import {
     IconBolt,
     IconDatabase,
@@ -11,12 +11,11 @@ import {
     IconTrending,
     IconUpload,
 } from '@hanzo/icons'
-import { Button, Link } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { SceneExport } from 'scenes/sceneTypes'
 
-const MascotExperiment = pngHoggie(experimentPng)
+const MascotExperiment = pngMascot()
 
 export const scene: SceneExport = {
     component: MoveToInsightsCloud,

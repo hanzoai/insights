@@ -9,7 +9,7 @@ import { forSnapshot } from '~/tests/helpers/snapshots'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { Hub, Team } from '../../types'
-import { createHogExecutionGlobals } from '../_tests/fixtures'
+import { createScriptExecutionGlobals } from '../_tests/fixtures'
 import { DESTINATION_PLUGINS_BY_ID } from '../legacy-plugins'
 import { LegacyPluginExecutorService } from '../services/legacy-plugin-executor.service'
 import { InsightsFunctionInvocationGlobals } from '../types'
@@ -137,7 +137,7 @@ describe('CdpLegacyEventsConsumer', () => {
             })
         )
 
-        invocation = createHogExecutionGlobals({
+        invocation = createScriptExecutionGlobals({
             project: {
                 id: team.id,
                 name: team.name,

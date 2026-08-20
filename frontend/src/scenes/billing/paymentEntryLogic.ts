@@ -160,7 +160,7 @@ export const paymentEntryLogic = kea<paymentEntryLogicType>([
                     if (product?.type) {
                         body.intent_product = product.type
                     }
-                    const response = await api.create('api/billing/activate', body)
+                    const response = await api.create('v1/billing/activate', body)
 
                     if (response.success) {
                         await billingLogic.asyncActions.loadBilling()
@@ -206,7 +206,7 @@ export const paymentEntryLogic = kea<paymentEntryLogicType>([
             actions.setLoading(true)
             actions.clearErrors()
             try {
-                const response = await api.create('api/billing/activate/authorize')
+                const response = await api.create('v1/billing/activate/authorize')
                 actions.setClientSecret(response.clientSecret)
                 actions.setLoading(false)
             } catch (error) {
@@ -227,7 +227,7 @@ export const paymentEntryLogic = kea<paymentEntryLogicType>([
                 try {
                     const urlParams = new URLSearchParams(window.location.search)
                     const searchPaymentIntentId = urlParams.get('payment_intent')
-                    const response = await api.create('api/billing/activate/authorize/status', {
+                    const response = await api.create('v1/billing/activate/authorize/status', {
                         payment_intent_id: paymentIntentId || searchPaymentIntentId,
                     })
                     const status = response.status

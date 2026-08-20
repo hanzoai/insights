@@ -208,7 +208,7 @@ If the first consumer (say the auto-assigner) is ever replaced, the resolver, sc
 Nothing in the resolver is Insights-specific — `owners.yaml` is a repo-agnostic format, and the library needs only pyyaml and a way to load files.
 That is why it ships as the standalone, installable `tools/owners` package (`insights-owners`), which any repo can run without vendoring: `uvx --from "git+https://github.com/Insights/insights#subdirectory=tools/owners" owners lint`.
 That last part is the seam: resolution walks an abstract file map, not the filesystem (the `owners:fmt` equivalence proof already runs the real resolver over an in-memory layout).
-So when a consumer like stamphog becomes a hosted app that other repos enable without adding any code, the model is: **the repo contributes only ownership data; the resolver ships inside the app.**
+So when a consumer like stamp becomes a hosted app that other repos enable without adding any code, the model is: **the repo contributes only ownership data; the resolver ships inside the app.**
 A hosted reviewer fetches the default-branch tree (one API call), pulls just the ownership files (a few dozen blobs, cacheable per commit SHA), and resolves in-process.
 Repos without `owners.yaml` fall back to a `CODEOWNERS` loader behind the same resolver interface — the glob semantics here are CODEOWNERS semantics already — and a repo with neither is simply unowned.
 

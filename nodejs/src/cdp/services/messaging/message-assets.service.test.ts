@@ -77,7 +77,7 @@ describe('MessageAssetsService', () => {
             expect(row!.function_id).toBe('flow-1')
             expect(row!.invocation_id).toBe(invocation.id)
             expect(row!.action_id).toBe('email-step')
-            expect(row!.function_kind).toBe('hog_flow')
+            expect(row!.function_kind).toBe('flow')
             expect(row!.kind).toBe('email')
             expect(row!.status).toBe('sent')
             expect(row!.recipient).toBe('recipient@example.com')

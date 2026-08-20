@@ -72,7 +72,7 @@ class AnnouncementDeliverySerializer(DataclassSerializer):
 class AnnouncementChannelSerializer(serializers.Serializer):
     id = serializers.CharField(help_text="Slack channel ID (e.g. C0123ABCD).")
     name = serializers.CharField(help_text="Slack channel display name (without the leading #).")
-    is_member = serializers.BooleanField(help_text="Whether the SupportHog bot is a member of this channel.")
+    is_member = serializers.BooleanField(help_text="Whether the Support bot is a member of this channel.")
     customer_name = serializers.CharField(
         allow_null=True,
         help_text="Name of the customer account whose slack_channel_id points at this channel, or null if unmapped.",
@@ -106,7 +106,7 @@ class AnnouncementSerializer(DataclassSerializer):
     channels = serializers.ListField(
         child=serializers.CharField(),
         write_only=True,
-        help_text="Slack channel IDs to send to. Each must be a channel the SupportHog bot is a member of; "
+        help_text="Slack channel IDs to send to. Each must be a channel the Support bot is a member of; "
         "names are resolved server-side.",
     )
 
@@ -192,6 +192,6 @@ class AnnouncementViewSet(
     @extend_schema(responses=AnnouncementChannelSerializer(many=True))
     @action(detail=False, methods=["get"], pagination_class=None)
     def channels(self, request: Request, **kwargs: Any) -> Response:
-        """Slack channels the SupportHog bot can post to, labeled by customer account name."""
+        """Slack channels the Support bot can post to, labeled by customer account name."""
         member_channels = api.list_announcement_channels(self.team_id)
         return Response(AnnouncementChannelSerializer(member_channels, many=True).data)

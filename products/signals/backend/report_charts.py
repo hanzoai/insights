@@ -59,11 +59,11 @@ _MAX_CHART_QUERY_CHARS = 20_000
 _MAX_CHART_QUERY_DEPTH = 100
 
 # Query kinds whose payload is a program rather than a description of data. The renderer hands a
-# node's nested source straight to the query service, and `HogQuery` is the branch there that runs
-# its `code` through `execute_hog`. `SuggestedQuestionsQuery` is not an interpreter but bills like
+# node's nested source straight to the query service, and `ScriptQuery` is the branch there that runs
+# its `code` through `execute_script`. `SuggestedQuestionsQuery` is not an interpreter but bills like
 # one: its runner calls `hit_openai`, so a report carrying it spends money on the reader's behalf
 # every time someone opens it, times the chart cap.
-_EXECUTABLE_QUERY_KINDS = frozenset({"HogQuery", "SuggestedQuestionsQuery"})
+_EXECUTABLE_QUERY_KINDS = frozenset({"ScriptQuery", "SuggestedQuestionsQuery"})
 
 
 def _nests_too_deeply(value: Any) -> bool:
@@ -122,11 +122,11 @@ def _executable_payload(value: Any) -> str | None:
     underneath it, each on a different reader's behalf:
 
     - `bytecode`: a `DataVisualizationNode` can hold `tableSettings.conditionalFormatting[*].bytecode`,
-      which the table renderer feeds to `execHog` once per rendered cell, synchronously, on the
+      which the table renderer feeds to `execScript` once per rendered cell, synchronously, on the
       reader's main thread. ScriptVM bounds one call at five seconds, but the cost multiplies by cell
       count, so a chart carrying expensive bytecode freezes the tab of whoever opens the report.
-    - a nested `HogQuery`: the renderer posts a node's source to the query service as its data node,
-      where `process_query_model` runs `code` through `execute_hog` (staff-only on cloud, but any
+    - a nested `ScriptQuery`: the renderer posts a node's source to the query service as its data node,
+      where `process_query_model` runs `code` through `execute_script` (staff-only on cloud, but any
       reader on a self-hosted deployment).
     - `sendRawQuery`: with a `connectionId`, `InsightsQLQueryRunner` skips the InsightsQL printer and sends the
       query text verbatim to the external engine, under the session of whoever opened the report. A

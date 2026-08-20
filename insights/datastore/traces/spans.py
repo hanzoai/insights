@@ -115,9 +115,12 @@ SETTINGS
     index_granularity_bytes = 104857600,
     index_granularity = 8192,
     ttl_only_drop_parts = 1,
-    allow_part_offset_column_in_projections = 1,
-    map_serialization_version = 'with_buckets'
+    allow_part_offset_column_in_projections = 1
 """
+# map_serialization_version = 'with_buckets' is not a setting this server has —
+# it rejects the whole CREATE with `Unknown setting`, so the table never exists.
+# It only picks a storage layout for Map columns; the default reads and writes
+# the same data.
 
 
 def TRACE_SPANS_DISTRIBUTED_TABLE_SQL():

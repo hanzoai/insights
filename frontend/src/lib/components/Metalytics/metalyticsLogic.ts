@@ -180,7 +180,7 @@ export const metalyticsLogic = kea<metalyticsLogicType>([
                 actions.loadViewCount()
                 actions.loadUsersLast30days()
 
-                void api.create(`/api/projects/${values.currentProjectId}/metalytics/`, {
+                void api.create(`/v1/projects/${values.currentProjectId}/metalytics/`, {
                     metric_name: 'viewed',
                     instance_id: instanceId,
                 })

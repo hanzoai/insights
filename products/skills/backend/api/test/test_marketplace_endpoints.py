@@ -16,11 +16,10 @@ from rest_framework import serializers, status
 
 from insights.constants import AvailableFeature
 from insights.models import PersonalAPIKey, User
+from insights.models.ee_models import AccessControl
 from insights.models.organization import Organization, OrganizationMembership
 from insights.models.team import Team
 from insights.models.utils import hash_key_value
-
-from insights.models.ee_models import AccessControl
 
 from ...api.skill_serializers import validate_skill_file_path
 from ...api.skill_services import archive_skill
@@ -30,7 +29,7 @@ from ...marketplace.credentials import issue_marketplace_credential
 from ...marketplace.packaging import SkillExport, build_skill_zip
 from ...models.skills import LLMSkill, LLMSkillFile
 
-_PAK_TOKEN = "phx_marketplacetoken123"
+_PAK_TOKEN = "sk-marketplacetoken123"
 
 
 def _basic_header(token: str) -> str:
@@ -53,7 +52,7 @@ def _mint_pak(
 
 class TestSkillZipExport(APIBaseTest):
     def _url(self, name: str) -> str:
-        return f"/api/environments/{self.team.id}/llm_skills/name/{name}/export"
+        return f"/v1/environments/{self.team.id}/llm_skills/name/{name}/export"
 
     def _create_skill(self) -> LLMSkill:
         skill = LLMSkill.objects.create(
@@ -113,7 +112,7 @@ class TestSkillZipExport(APIBaseTest):
 
         upload = SimpleUploadedFile("round-trip.zip", zip_bytes, content_type="application/zip")
         imported = self.client.post(
-            f"/api/environments/{self.team.id}/llm_skills/import", {"file": upload}, format="multipart"
+            f"/v1/environments/{self.team.id}/llm_skills/import", {"file": upload}, format="multipart"
         )
         assert imported.status_code == status.HTTP_201_CREATED, imported.content
         data = imported.json()
@@ -124,7 +123,7 @@ class TestSkillZipExport(APIBaseTest):
         assert any(f["path"] == "scripts/x.py" for f in data["files"])
 
     def test_import_missing_file_is_400(self):
-        response = self.client.post(f"/api/environments/{self.team.id}/llm_skills/import", {}, format="multipart")
+        response = self.client.post(f"/v1/environments/{self.team.id}/llm_skills/import", {}, format="multipart")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_import_duplicate_name_is_400(self):
@@ -134,7 +133,7 @@ class TestSkillZipExport(APIBaseTest):
         export = SkillExport(name="dupe", description="A dupe.", body="# dupe\n", version=1)
         upload = SimpleUploadedFile("dupe.zip", build_skill_zip(export), content_type="application/zip")
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_skills/import", {"file": upload}, format="multipart"
+            f"/v1/environments/{self.team.id}/llm_skills/import", {"file": upload}, format="multipart"
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -166,10 +165,10 @@ class TestSkillMarketplaceGit(APIBaseTest):
         cache.clear()
 
     def _info_refs_url(self) -> str:
-        return f"/api/projects/{self.team.id}/llm_skills/marketplace.git/info/refs"
+        return f"/v1/projects/{self.team.id}/llm_skills/marketplace.git/info/refs"
 
     def _upload_pack_url(self) -> str:
-        return f"/api/projects/{self.team.id}/llm_skills/marketplace.git/git-upload-pack"
+        return f"/v1/projects/{self.team.id}/llm_skills/marketplace.git/git-upload-pack"
 
     def _create_skill(self) -> LLMSkill:
         return LLMSkill.objects.create(
@@ -353,7 +352,7 @@ class TestMarketplaceVersion(APIBaseTest):
 
 class TestMarketplaceInstallCommand(APIBaseTest):
     def _url(self) -> str:
-        return f"/api/environments/{self.team.id}/llm_skills/marketplace/install-command"
+        return f"/v1/environments/{self.team.id}/llm_skills/marketplace/install-command"
 
     def _label(self) -> str:
         return f"Skill store · team {self.team.id}"
@@ -383,10 +382,10 @@ class TestMarketplaceInstallCommand(APIBaseTest):
         body = response.json()
         assert body["status"] == "created"
         assert body["connected"] is True
-        assert body["token"].startswith("phx_")
+        assert body["token"].startswith("sk-")
         assert body["token"] in body["command"]
         assert "x-access-token:" in body["command"]
-        assert f"/api/projects/{self.team.id}/llm_skills/marketplace.git" in body["command"]
+        assert f"/v1/projects/{self.team.id}/llm_skills/marketplace.git" in body["command"]
         # Claude Code command is two lines: marketplace add, then plugin install.
         assert "/plugin marketplace add" in body["command"]
         assert f"/plugin install insights-skill-store@{body['marketplace_name']}" in body["command"]
@@ -431,7 +430,7 @@ class TestMarketplaceInstallCommand(APIBaseTest):
         response = self.client.post(self._url(), {"rotate": True}, format="json")
         body = response.json()
         assert body["status"] == "rotated"
-        assert body["token"].startswith("phx_")
+        assert body["token"].startswith("sk-")
 
         # Same record (no sprawl), new secret, rotation timestamp set, and crucially the returned
         # token matches the stored hash (the rotate is atomic — no lost update).
@@ -498,7 +497,7 @@ class TestMarketplaceInstallCommand(APIBaseTest):
 
 class TestImportAndCreateValidation(APIBaseTest):
     def _import_url(self) -> str:
-        return f"/api/environments/{self.team.id}/llm_skills/import"
+        return f"/v1/environments/{self.team.id}/llm_skills/import"
 
     def test_import_rejects_oversized_body(self):
         # A spec-valid zip (short description) must still be rejected when its SKILL.md body exceeds
@@ -512,7 +511,7 @@ class TestImportAndCreateValidation(APIBaseTest):
     def test_create_rejects_whitespace_allowed_tool(self):
         # A tool name with a space would fracture the spec's space-delimited allowed-tools string.
         response = self.client.post(
-            f"/api/environments/{self.team.id}/llm_skills/",
+            f"/v1/environments/{self.team.id}/llm_skills/",
             {"name": "ws-tool-skill", "description": "d", "body": "b", "allowed_tools": ["Bash Write"]},
             format="json",
         )
@@ -568,7 +567,7 @@ class TestSkillMarketplaceRBAC(APIBaseTest):
 
     def _clone_status(self) -> int:
         return self.client.get(
-            f"/api/projects/{self.team.id}/llm_skills/marketplace.git/info/refs",
+            f"/v1/projects/{self.team.id}/llm_skills/marketplace.git/info/refs",
             {"service": "git-upload-pack"},
             HTTP_AUTHORIZATION=_basic_header(_PAK_TOKEN),
         ).status_code

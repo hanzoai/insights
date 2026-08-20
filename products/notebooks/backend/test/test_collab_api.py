@@ -28,7 +28,7 @@ class TestNotebookCollabSaveAPI(APIBaseTest):
         data = {}
         if content:
             data["content"] = content
-        response = self.client.post(f"/api/projects/{self.team.id}/notebooks/", data=data, format="json")
+        response = self.client.post(f"/v1/projects/{self.team.id}/notebooks/", data=data, format="json")
         assert response.status_code == status.HTTP_201_CREATED
         return response.json()
 
@@ -46,7 +46,7 @@ class TestNotebookCollabSaveAPI(APIBaseTest):
         if title is not None:
             payload["title"] = title
         return self.client.post(
-            f"/api/projects/{self.team.id}/notebooks/{notebook['short_id']}/collab/save/",
+            f"/v1/projects/{self.team.id}/notebooks/{notebook['short_id']}/collab/save/",
             data=payload,
             format="json",
         )
@@ -95,7 +95,7 @@ class TestNotebookCollabSaveAPI(APIBaseTest):
         )
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/notebooks/{notebook['short_id']}/collab/save/",
+            f"/v1/projects/{self.team.id}/notebooks/{notebook['short_id']}/collab/save/",
             data={
                 "client_id": "test-client",
                 "version": version + 1,
@@ -177,7 +177,7 @@ class TestNotebookCollabSaveAPI(APIBaseTest):
         notebook = self._create_notebook(SAMPLE_DOC)
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/notebooks/{notebook['short_id']}/collab/save/",
+            f"/v1/projects/{self.team.id}/notebooks/{notebook['short_id']}/collab/save/",
             data={},
             format="json",
         )
@@ -314,12 +314,12 @@ class TestNotebookCollabStreamAPI(APIBaseTest):
         self.addCleanup(redis_module.TEST_clear_clients)
 
     def _create_notebook(self):
-        response = self.client.post(f"/api/projects/{self.team.id}/notebooks/", data={}, format="json")
+        response = self.client.post(f"/v1/projects/{self.team.id}/notebooks/", data={}, format="json")
         assert response.status_code == status.HTTP_201_CREATED
         return response.json()
 
     def _stream_url(self, short_id: str, team_id: int | None = None) -> str:
-        return f"/api/projects/{team_id or self.team.id}/notebooks/{short_id}/collab/stream/"
+        return f"/v1/projects/{team_id or self.team.id}/notebooks/{short_id}/collab/stream/"
 
     def _consume_stream(self, response) -> str:
         return b"".join(response.streaming_content).decode("utf-8")
@@ -402,7 +402,7 @@ class TestNotebookCollabStreamAPI(APIBaseTest):
     def test_stream_delivers_update_event_after_full_doc_patch(self, _mock_on_commit):
         notebook = self._create_notebook()
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/notebooks/{notebook['short_id']}/",
+            f"/v1/projects/{self.team.id}/notebooks/{notebook['short_id']}/",
             data={"content": UPDATED_DOC, "version": notebook["version"]},
             format="json",
         )
@@ -474,7 +474,7 @@ class TestNotebookCollabStreamAPI(APIBaseTest):
         self._consume_stream(response)
 
     def _presence_url(self, short_id: str) -> str:
-        return f"/api/projects/{self.team.id}/notebooks/{short_id}/collab/presence/"
+        return f"/v1/projects/{self.team.id}/notebooks/{short_id}/collab/presence/"
 
     def test_presence_endpoint_broadcasts_on_stream(self):
         notebook = self._create_notebook()
@@ -576,7 +576,7 @@ def _markdown_doc(markdown: str) -> dict:
 class TestNotebookMarkdownSaveAPI(APIBaseTest):
     def _create_markdown_notebook(self, markdown: str = "# Title\n\nHello"):
         response = self.client.post(
-            f"/api/projects/{self.team.id}/notebooks/",
+            f"/v1/projects/{self.team.id}/notebooks/",
             data={"content": _markdown_doc(markdown)},
             format="json",
         )
@@ -593,7 +593,7 @@ class TestNotebookMarkdownSaveAPI(APIBaseTest):
         if title is not None:
             payload["title"] = title
         return self.client.post(
-            f"/api/projects/{self.team.id}/notebooks/{notebook['short_id']}/collab/markdown_save/",
+            f"/v1/projects/{self.team.id}/notebooks/{notebook['short_id']}/collab/markdown_save/",
             data=payload,
             format="json",
         )
@@ -667,7 +667,7 @@ class TestNotebookMarkdownSaveAPI(APIBaseTest):
         version = notebook["version"]
 
         patch_response = self.client.patch(
-            f"/api/projects/{self.team.id}/notebooks/{notebook['short_id']}/",
+            f"/v1/projects/{self.team.id}/notebooks/{notebook['short_id']}/",
             data={"content": _markdown_doc("base text via patch"), "version": version},
             format="json",
         )
@@ -695,7 +695,7 @@ class TestNotebookMarkdownSaveAPI(APIBaseTest):
 
         notebook = self._create_markdown_notebook("# Title\n\nHello")
         response = self.client.post(
-            f"/api/projects/{self.team.id}/notebooks/{notebook['short_id']}/collab/markdown_save/",
+            f"/v1/projects/{self.team.id}/notebooks/{notebook['short_id']}/collab/markdown_save/",
             data={
                 "client_id": "md-client",
                 "version": notebook["version"],
@@ -717,7 +717,7 @@ class TestNotebookMarkdownSaveAPI(APIBaseTest):
         notebook = self._create_markdown_notebook()
 
         response = self.client.post(
-            f"/api/projects/{self.team.id}/notebooks/{notebook['short_id']}/collab/markdown_save/",
+            f"/v1/projects/{self.team.id}/notebooks/{notebook['short_id']}/collab/markdown_save/",
             data={
                 "client_id": "md-client",
                 "version": notebook["version"],
@@ -730,7 +730,7 @@ class TestNotebookMarkdownSaveAPI(APIBaseTest):
     def test_markdown_save_preserves_title_when_omitted_and_clears_when_blank(self):
         notebook = self._create_markdown_notebook()
         rename = self.client.patch(
-            f"/api/projects/{self.team.id}/notebooks/{notebook['short_id']}/",
+            f"/v1/projects/{self.team.id}/notebooks/{notebook['short_id']}/",
             data={"title": "Keep me"},
             format="json",
         )

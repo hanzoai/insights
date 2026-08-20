@@ -241,7 +241,7 @@ class DeltaMaintenance:
     ) -> int | None:
         """Single threshold-maintenance step: compact if fragmented, else vacuum on commit cadence.
 
-        The two triggers are orthogonal — fragmentation (active file count) vs. commit cadence (tombstone
+        The two triggers are ortscriptonal — fragmentation (active file count) vs. commit cadence (tombstone
         accrual) — but they share one outcome, the vacuum watermark. `compact_if_fragmented` already
         vacuums as part of compaction, so when it runs it supersedes the cadence vacuum (no double vacuum
         in one run) and the watermark advances to the post-compaction version. When nothing was fragmented,

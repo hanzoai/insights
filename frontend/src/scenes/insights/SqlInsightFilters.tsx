@@ -14,7 +14,7 @@ import { ItemMode } from '~/types'
 
 const FILTERS_PLACEHOLDER = /\{\s*filters\b/
 
-function hogQLSource(query: Node | null): InsightsQLQuery | null {
+function insightsQLSource(query: Node | null): InsightsQLQuery | null {
     const source = isDataVisualizationNode(query) || isDataTableNode(query) ? query.source : query
     return isInsightsQLQuery(source) ? source : null
 }
@@ -34,7 +34,7 @@ interface SqlInsightFiltersProps {
 export function SqlInsightFilters({ query, setQuery, children }: SqlInsightFiltersProps): JSX.Element {
     const { insightMode } = useValues(insightSceneLogic)
 
-    const source = hogQLSource(query)
+    const source = insightsQLSource(query)
     if (insightMode !== ItemMode.View || !query || !source || !FILTERS_PLACEHOLDER.test(source.query)) {
         return <>{children}</>
     }

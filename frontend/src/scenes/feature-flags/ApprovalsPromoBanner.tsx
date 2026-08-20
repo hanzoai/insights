@@ -1,12 +1,11 @@
-import { useActions, useValues } from 'kea'
 import insights from 'insights-js'
+import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import * as judgePng from '@hanzo/brand/hoggies/png/judge'
 import { Banner } from '@hanzo/elements'
 
 import { approvalsGateLogic } from 'lib/approvals/approvalsGateLogic'
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { bannerLogic } from 'lib/elements/Banner/bannerLogic'
 import { Button } from 'lib/elements/Button'
 import { organizationLogic } from 'scenes/organizationLogic'
@@ -15,7 +14,7 @@ import { userLogic } from 'scenes/userLogic'
 
 import { AvailableFeature } from '~/types'
 
-const MascotJudge = pngHoggie(judgePng)
+const MascotJudge = pngMascot()
 
 const DISMISS_KEY = 'feature-flags-approvals-promo'
 

@@ -10,7 +10,7 @@ import { Button } from 'lib/elements/Button'
 import { Menu } from 'lib/elements/Menu'
 
 import { workflowLogic } from '../../../workflowLogic'
-import { hogFlowEditorLogic } from '../../hogFlowEditorLogic'
+import { flowEditorLogic } from '../../flowEditorLogic'
 import { NODE_HEIGHT, NODE_WIDTH } from '../../react_flow_utils/constants'
 import { InsightsFlowAction } from '../../types'
 import { useInsightsFlowStep } from '../InsightsFlowSteps'
@@ -28,8 +28,8 @@ export function StepView({ action }: { action: InsightsFlowAction }): JSX.Elemen
         selectedNodeCanBeCopiedOrMoved,
         animatingEdgePair,
         workflow,
-    } = useValues(hogFlowEditorLogic)
-    const { setSelectedNodeId, startCopyingNode, startMovingNode } = useActions(hogFlowEditorLogic)
+    } = useValues(flowEditorLogic)
+    const { setSelectedNodeId, startCopyingNode, startMovingNode } = useActions(flowEditorLogic)
     const { actionValidationErrorsById, logicProps, scheduleState, scheduleStartsAt, isScheduleRepeating } =
         useValues(workflowLogic)
     const { deleteElements } = useReactFlow()

@@ -1,10 +1,9 @@
 import insights from 'insights-js'
 import { useState } from 'react'
 
-import * as experimentPng from '@hanzo/brand/hoggies/png/experiment'
 import { Divider, Skeleton } from '@hanzo/elements'
 
-import { pngHoggie } from 'lib/brand/hoggies'
+import { pngMascot } from 'lib/brand/mascot'
 import { Banner } from 'lib/elements/Banner'
 import { Button } from 'lib/elements/Button'
 import { Link } from 'lib/elements/Link'
@@ -21,7 +20,7 @@ import { ExperimentPickerSelect } from './ExperimentPickerSelect'
 import { patchExperimentResultsWidgetConfig } from './experimentsWidgetConfigValidation'
 import { NotebookCompactTable } from './LazyNotebookCompactTable'
 
-const MascotExperiment = pngHoggie(experimentPng)
+const MascotExperiment = pngMascot()
 
 export type ExperimentResultsWidgetMetricEntry = {
     uuid: string | null

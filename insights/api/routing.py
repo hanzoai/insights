@@ -117,7 +117,7 @@ class RouterRegistry:
 
     @property
     def root(self) -> "DefaultRouterPlusPlus":
-        """The top-level (non-nested) router, for endpoints registered at /api/ root."""
+        """The top-level (non-nested) router, for endpoints registered at /v1/ root."""
         if self._root is None:
             raise KeyError("Root router not registered — call routers.set_root(router) first")
         return self._root
@@ -563,7 +563,7 @@ class TeamAndOrgViewSetMixin(_GenericViewSet):
                 return {"team_id": current_team.id}
 
         result = {}
-        # process URL parameters (here called kwargs), such as organization_id in /api/organizations/:organization_id/
+        # process URL parameters (here called kwargs), such as organization_id in /v1/organizations/:organization_id/
         for query_lookup, query_value in self.parent_query_kwargs.items():
             if query_value == "@current":
                 if not self.request.user.is_authenticated:

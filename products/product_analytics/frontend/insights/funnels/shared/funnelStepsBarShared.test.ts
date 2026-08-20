@@ -26,7 +26,7 @@ describe('funnelStepsBarShared', () => {
             { name: 'Signed up', count: 400 },
             { name: 'Activated', count: 100 },
         ]
-        const variants: FunnelStepsBarVariant[] = [{ key: 'a', label: 'A', color: '#1d4aff', data: [100, 40, 10] }]
+        const variants: FunnelStepsBarVariant[] = [{ key: 'a', label: 'A', color: '#3d3d3d', data: [100, 40, 10] }]
 
         it('labels the band by 1-based step index, not the step name', () => {
             expect(buildFunnelStepsBars(steps, variants).labels).toEqual(['1', '2', '3'])
@@ -80,7 +80,7 @@ describe('funnelStepsBarShared', () => {
     })
 
     describe('buildSingleSeriesFunnelStepsBars', () => {
-        const OPTS = { color: '#1d4aff' }
+        const OPTS = { color: '#3d3d3d' }
         const steps = [
             { name: 'Pageview', count: 1000 },
             { name: 'Signed up', count: 400 },
@@ -91,7 +91,7 @@ describe('funnelStepsBarShared', () => {
             const { series } = buildSingleSeriesFunnelStepsBars(steps, OPTS)
 
             expect(series).toHaveLength(1)
-            expect(series[0]).toMatchObject({ key: FUNNEL_STEPS_BAR_SERIES_KEY, color: '#1d4aff', data: [100, 40, 10] })
+            expect(series[0]).toMatchObject({ key: FUNNEL_STEPS_BAR_SERIES_KEY, color: '#3d3d3d', data: [100, 40, 10] })
         })
 
         it('guards divide-by-zero when the first step has no entries', () => {

@@ -141,7 +141,7 @@ def test_production_exporter_bypasses_egress_proxy():
     # an in-memory exporter), which is exactly how the 407 shipped unnoticed.
     otlp = "products.engineering_analytics.backend.logic.job_logs.emitter.OTLPLogExporter"
     with patch(otlp) as mock_otlp:
-        with JobLogsEmitter(endpoint="http://capture-logs.insights.svc.cluster.local:4318/i/v1/logs", token="phc_x"):
+        with JobLogsEmitter(endpoint="http://capture-logs.insights.svc.cluster.local:4318/i/v1/logs", token="pk-x"):
             pass
     assert mock_otlp.call_args.kwargs["session"].trust_env is False
 

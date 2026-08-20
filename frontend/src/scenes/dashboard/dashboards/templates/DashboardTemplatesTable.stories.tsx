@@ -40,7 +40,7 @@ const meta: Meta<typeof DashboardTemplatesTable> = {
     decorators: [
         mswDecorator({
             get: {
-                '/api/projects/:team_id/dashboard_templates/json_schema/': __dashboard_template_schema as any,
+                '/v1/projects/:team_id/dashboard_templates/json_schema/': __dashboard_template_schema as any,
             },
         }),
         (Story) => (
@@ -176,7 +176,7 @@ const sampleTemplates: DashboardTemplateType[] = [
 
 const tableListMocks = {
     get: {
-        '/api/projects/:team_id/dashboard_templates/': toPaginatedResponse(sampleTemplates),
+        '/v1/projects/:team_id/dashboard_templates/': toPaginatedResponse(sampleTemplates),
     },
 }
 
@@ -248,7 +248,7 @@ const withViewerModeMsw: Decorator = (Story, context) => {
     const mocks = {
         get: {
             ...tableListMocks.get,
-            '/api/users/@me/': (): [number, UserType] => [200, storyUserForViewerMode(viewerMode)],
+            '/v1/users/@me/': (): [number, UserType] => [200, storyUserForViewerMode(viewerMode)],
         },
     }
     return mswDecorator(mocks)(Story, context)

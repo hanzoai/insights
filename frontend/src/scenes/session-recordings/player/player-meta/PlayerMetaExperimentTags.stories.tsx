@@ -63,8 +63,8 @@ export function Default(): JSX.Element {
 Default.decorators = [
     mswDecorator({
         get: {
-            '/api/environments/:team_id/session_recordings/:id': recordingMetaJson,
-            '/api/projects/:team_id/experiments/session_context/': {
+            '/v1/environments/:team_id/session_recordings/:id': recordingMetaJson,
+            '/v1/projects/:team_id/experiments/session_context/': {
                 session_id: 'experiment-tags-default',
                 results: [makeExperimentSessionContextItem(), secondExperiment],
             },
@@ -79,8 +79,8 @@ export function Overflow(): JSX.Element {
 Overflow.decorators = [
     mswDecorator({
         get: {
-            '/api/environments/:team_id/session_recordings/:id': recordingMetaJson,
-            '/api/projects/:team_id/experiments/session_context/': {
+            '/v1/environments/:team_id/session_recordings/:id': recordingMetaJson,
+            '/v1/projects/:team_id/experiments/session_context/': {
                 session_id: 'experiment-tags-overflow',
                 results: [
                     makeExperimentSessionContextItem(),
@@ -107,8 +107,8 @@ export function MultipleVariantsWarning(): JSX.Element {
 MultipleVariantsWarning.decorators = [
     mswDecorator({
         get: {
-            '/api/environments/:team_id/session_recordings/:id': recordingMetaJson,
-            '/api/projects/:team_id/experiments/session_context/': {
+            '/v1/environments/:team_id/session_recordings/:id': recordingMetaJson,
+            '/v1/projects/:team_id/experiments/session_context/': {
                 session_id: 'experiment-tags-warning',
                 results: [
                     makeExperimentSessionContextItem({

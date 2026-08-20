@@ -17,7 +17,7 @@ const meta: Meta<typeof BulkUpdateTagsButton> = {
         function MocksDecorator(Story) {
             useStorybookMocks({
                 get: {
-                    '/api/projects/:team_id/tags': ['production', 'staging', 'beta', 'internal'],
+                    '/v1/projects/:team_id/tags': ['production', 'staging', 'beta', 'internal'],
                 },
             })
             // Reserve enough viewport for the popover (placement: 'bottom-end') to render

@@ -75,7 +75,7 @@ describe('variantsPanelLogic', () => {
     beforeEach(async () => {
         useMocks({
             get: {
-                [`/api/projects/${MOCK_TEAM_ID}/feature_flags/`]: ({ request }) => {
+                [`/v1/projects/${MOCK_TEAM_ID}/feature_flags/`]: ({ request }) => {
                     const url = new URL(request.url)
                     const search = url.searchParams.get('search')
 
@@ -88,7 +88,7 @@ describe('variantsPanelLogic', () => {
 
                     return [200, { results: mockFeatureFlags, count: mockFeatureFlags.length }]
                 },
-                [`/api/projects/${MOCK_TEAM_ID}/experiments`]: () => [
+                [`/v1/projects/${MOCK_TEAM_ID}/experiments`]: () => [
                     200,
                     {
                         results: [
@@ -298,7 +298,7 @@ describe('variantsPanelLogic', () => {
         it('handles validation errors gracefully', async () => {
             useMocks({
                 get: {
-                    [`/api/projects/${MOCK_TEAM_ID}/feature_flags/`]: () => [500, { error: 'Server error' }],
+                    [`/v1/projects/${MOCK_TEAM_ID}/feature_flags/`]: () => [500, { error: 'Server error' }],
                 },
             })
 

@@ -35,9 +35,9 @@ class TestTeamsHtmlToContentAndRichContent(SimpleTestCase):
         assert rich["content"][0]["content"][0]["text"] == "Hello world"
 
     def test_at_mention_stripped(self):
-        html = '<at id="28:bot-id">SupportHog</at> help me with this'
+        html = '<at id="28:bot-id">Support</at> help me with this'
         text, rich = teams_html_to_content_and_rich_content(html)
-        assert "SupportHog" not in text
+        assert "Support" not in text
         assert "help me with this" in text
 
     def test_multiple_at_mentions_stripped(self):
@@ -271,7 +271,7 @@ class TestRichContentToTeamsHtml(SimpleTestCase):
 class TestAppendTeamsAttribution(SimpleTestCase):
     def test_appends_italic_footer(self):
         assert append_teams_attribution("<p>Hello</p>", "Max Mascot") == (
-            "<p>Hello</p><p><i>Max Mascot via SupportHog</i></p>"
+            "<p>Hello</p><p><i>Max Mascot via Support</i></p>"
         )
 
     def test_no_author_leaves_reply_untouched(self):
@@ -290,10 +290,10 @@ class TestBuildTeamsReplyHtml(SimpleTestCase):
             "content": [{"type": "paragraph", "content": [{"type": "text", "text": "All fixed now."}]}],
         }
         assert build_teams_reply_html(rich, "All fixed now.", "Max Mascot") == (
-            "<p>All fixed now.</p><p><i>Max Mascot via SupportHog</i></p>"
+            "<p>All fixed now.</p><p><i>Max Mascot via Support</i></p>"
         )
 
     def test_falls_back_to_plain_content_with_footer(self):
         assert build_teams_reply_html(None, "All fixed now.", "Max Mascot") == (
-            "All fixed now.<p><i>Max Mascot via SupportHog</i></p>"
+            "All fixed now.<p><i>Max Mascot via Support</i></p>"
         )

@@ -129,9 +129,9 @@ def test_unresolved_review_threads_reach_the_prompt_and_resolved_are_dropped(mon
         # A drive-by external commenter must not reach the prompt: a fake maintainer hold is both
         # griefable and forgeable — the same trust gate as reviews and discussion.
         pytest.param("outsider", "NONE", False, False, id="untrusted-external-dropped"),
-        # Stamphog's own prior inline comments feed back as third-party claims about a stale
+        # Stamp's own prior inline comments feed back as third-party claims about a stale
         # snapshot — later runs suspect impersonation and refuse forever.
-        pytest.param("stamphog[bot]", "NONE", True, False, id="own-comment-dropped"),
+        pytest.param("stamp[bot]", "NONE", True, False, id="own-comment-dropped"),
     ],
 )
 def test_review_thread_comments_pass_the_author_trust_gate(
@@ -187,10 +187,10 @@ def test_multi_comment_thread_counts_as_one_unresolved_thread(monkeypatch) -> No
 
 
 def test_filtered_root_thread_counts_zero_unresolved_threads(monkeypatch) -> None:
-    # Parity with the Action: when the true thread root is filtered (untrusted author, or stamphog's
+    # Parity with the Action: when the true thread root is filtered (untrusted author, or stamp's
     # own inline finding), the survivors are replies — the thread contributes 0 to unresolved_threads,
     # exactly as the Action's real replyTo ids make it. Treating the first survivor as a root would
-    # make hosted stricter than the Action on every maintainer reply to a stamphog finding.
+    # make hosted stricter than the Action on every maintainer reply to a stamp finding.
     monkeypatch.setattr(review_local, "_git_diff_files", lambda *a, **k: [])
     context = _thread_context(
         [
@@ -236,7 +236,7 @@ def test_absent_review_threads_key_is_a_clean_no_op(monkeypatch) -> None:
 def test_fresh_trusted_bot_eyes_reach_pr_data_and_flag_in_flight(monkeypatch) -> None:
     # The hosted context now carries raw PR reactions; a fresh 👀 from an allowlisted reviewer bot
     # must reach PRData so the offline WAIT check can fire — hard-coding pr_reactions=[] meant
-    # stamphog could approve while another required reviewer was still mid-review. Untrusted
+    # stamp could approve while another required reviewer was still mid-review. Untrusted
     # reactors must be dropped (anyone can react on a public PR).
     monkeypatch.setattr(review_local, "_git_diff_files", lambda *a, **k: [])
     now_iso = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")

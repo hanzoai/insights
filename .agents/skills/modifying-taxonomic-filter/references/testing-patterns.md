@@ -21,7 +21,7 @@ jest.mock('lib/components/AutoSizer', () => ({
 bugs. Always read the `search` param:
 
 ```tsx
-'/api/projects/:team_id/event_definitions': (req) => {
+'/v1/projects/:team_id/event_definitions': (req) => {
     const search = req.url.searchParams.get('search')
     const filtered = search ? mockEventDefinitions.filter(e => e.name.includes(search)) : mockEventDefinitions
     return [200, { results: filtered, count: filtered.length }]
@@ -29,9 +29,9 @@ bugs. Always read the `search` param:
 ```
 
 **Persons properties — match what the frontend actually calls.** Today persons
-URLs are constructed against `/api/environments/:team_id/persons/properties` in
+URLs are constructed against `/v1/environments/:team_id/persons/properties` in
 the calling kea logic, so mock at that path. (The backend exposes both
-`/api/projects/` and `/api/environments/` for persons; `/api/projects/` is the
+`/v1/projects/` and `/v1/environments/` for persons; `/v1/projects/` is the
 canonical path but the persons frontend hasn't been migrated.)
 
 Mount shared models in `beforeEach`:
