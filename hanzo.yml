@@ -41,7 +41,7 @@ test:
       run: |
           set -e
           [ -d .github/workflows ] && {
-            echo "::error::.github/workflows is back — this forge reads .hanzo/workflows, so those files run nowhere and go green by not running"; exit 1; } || true
+            echo "::error::.github/workflows is back — Hanzo Git reads .hanzo/workflows, so those files run nowhere and go green by not running"; exit 1; } || true
           echo "OK: one plane ($(ls .hanzo/workflows | wc -l) workflows, all of them live)"
     - name: fork inventory
       run: python3 scripts/fork-inventory.py
