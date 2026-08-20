@@ -86,8 +86,16 @@ jobs:
     # bug, because it was reimplementing scope analysis badly. The compiler already
     # does this correctly.
     #
-    # Only those two codes. The tree carries ~87 other type errors; gating on all of
-    # them would need a baseline that goes stale, while these two are zero today and
+    # TS1117 is the same class through a different door, and it recurred because this
+    # gate did not name it. A duplicate key in an object literal: the later one wins
+    # silently, so `tabs: [(s) => [s.tabs], ...]` declared twice leaves a selector
+    # that depends on itself and dies with "Maximum call stack size exceeded".
+    # personsManagementSceneLogic did exactly that and took users and cohorts down
+    # twice -- 22024b13c7c fixed it, an upstream rebase put it back, and it shipped
+    # again because only the TS2448 half of that commit was ever gated.
+    #
+    # Only those three codes. The tree carries ~87 other type errors; gating on all of
+    # them would need a baseline that goes stale, while these three are zero today and
     # mean exactly one thing. Separate job so it fails in minutes rather than behind
     # an hour of image build.
     typecheck:
@@ -121,11 +129,11 @@ jobs:
                     echo "::error::the typecheck ran out of memory, so this gate checked nothing — raise the heap rather than trusting the silence"
                     exit 1
                   fi
-                  if grep -E 'error TS(2448|7022)' /tmp/tsc.out; then
-                    echo "::error::a declaration initialises itself from the import it shadows — it throws when its scene renders"
+                  if grep -E 'error TS(2448|7022|1117)' /tmp/tsc.out; then
+                    echo "::error::a name initialises itself — either a declaration shadowing the import it calls, or a duplicate key whose surviving selector depends on itself. Both throw when the scene renders."
                     exit 1
                   fi
-                  echo "no self-shadowed declarations (TS2448/TS7022 clean)"
+                  echo "no self-referencing names (TS2448/TS7022/TS1117 clean)"
 
     build:
         # The live runner fleet advertises `hanzo-build-linux-amd64`. The old
