@@ -2,7 +2,6 @@ import { MakeLogicType, connect, kea, path, selectors } from 'kea'
 
 import { CAPABILITIES } from 'lib/capabilities'
 import { FEATURE_FLAGS } from 'lib/constants'
-import { Tab } from 'lib/elements/Tabs'
 import { GroupsAccessStatus } from 'lib/introductions/groupsAccessLogic'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { capitalizeFirstLetter } from 'lib/utils/strings'
@@ -119,17 +118,6 @@ export const personsManagementSceneLogic = kea<personsManagementSceneLogicType>(
 
                 return groupTabs
             },
-        ],
-
-        tabs: [
-            (s) => [s.tabs],
-            (tabs: PersonsManagementTab[]): Tab<string>[] =>
-                tabs.map((tab) => ({
-                    key: tab.key,
-                    label: <span data-attr={`persons-management-${tab.key}-tab`}>{tab.label}</span>,
-                    tooltipDocLink: tab.tooltipDocLink,
-                    link: tab.url,
-                })),
         ],
     }),
 ])

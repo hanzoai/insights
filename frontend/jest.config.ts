@@ -18,6 +18,14 @@ const esmModules = [
     '@toon-format',
     'monaco-editor',
     '@hanzo/mascot-mode',
+    // @hanzo/appearance (and the @hanzo/design tokens it reads) are ESM-only. The
+    // appearance settings pull them into every scene graph that reaches SettingsMap,
+    // which is most of them -- settingsLogic is imported by the error tracking and
+    // session replay scenes as well as by SettingsScene itself. Left out, the scene
+    // smoke test cannot even LOAD five scenes, so the gate that exists to catch a
+    // scene crash reported a parse error instead.
+    '@hanzo/appearance',
+    '@hanzo/design',
     // @marsidev/react-turnstile ships ESM-only; the auth flow variant registry pulls it
     // into test module graphs (including Exporter via the shared login ERROR_MESSAGES export).
     '@marsidev/react-turnstile',
